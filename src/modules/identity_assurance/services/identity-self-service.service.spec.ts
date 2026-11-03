@@ -6,6 +6,7 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  CONCEPTS,
 } from '../../../common';
 import { DIR } from '../../directory/directory.concepts';
 import { IDA } from '../identity_assurance.concepts';
@@ -25,7 +26,11 @@ describe('IdentitySelfServiceService', () => {
    * @returns Resultado de build.
    */
   function build() {
-    const tx = { flush: fn().mockResolvedValue(undefined) };
+    const tx = {
+      flush: fn().mockResolvedValue(undefined),
+      find: fn().mockResolvedValue([{ externalSubject: 'test@example.com' }]),
+      findOne: fn().mockResolvedValue(null),
+    };
     const em = {
       transactional: fn((cb: (tx: unknown) => unknown) => cb(tx)),
       fork: fn(() => tx),
@@ -39,6 +44,7 @@ describe('IdentitySelfServiceService', () => {
     const evidenceRepo = {
       create: fn(() => ({ id: 'ev-1' })),
       findLatestByCase: fn().mockResolvedValue(null),
+      findByCase: fn().mockResolvedValue([]),
     };
     const checksRepo = {
       create: fn(() => ({ id: 'check-1' })),
@@ -63,6 +69,16 @@ describe('IdentitySelfServiceService', () => {
     const checkResultsRepo = {
       findLatestByCheck: fn().mockResolvedValue(null),
     };
+    const filesRepo = {
+      findById: fn().mockImplementation(async (_em: unknown, id: string) => ({
+        id,
+        createdByUserId: actor.id,
+        sensitivityConceptId: CONCEPTS.SENSITIVITY_PHI,
+      })),
+    };
+    const notificationsService = {
+      createRequest: fn().mockResolvedValue({ id: 'notif-1' }),
+    };
     const service = new IdentitySelfServiceService(
       em as never,
       casesRepo as never,
@@ -74,6 +90,8 @@ describe('IdentitySelfServiceService', () => {
       membershipsRepo as never,
       manualReviewRepo as never,
       checkResultsRepo as never,
+      filesRepo as never,
+      notificationsService as never,
       logger as never,
     );
     return {
@@ -88,6 +106,8 @@ describe('IdentitySelfServiceService', () => {
       membershipsRepo,
       manualReviewRepo,
       checkResultsRepo,
+      filesRepo,
+      notificationsService,
     };
   }
 
@@ -133,6 +153,59 @@ describe('IdentitySelfServiceService', () => {
       );
     });
 
+    it('stores the five typed evidences of the new contract in order', async () => {
+      const d = build();
+      const ids = ['f1', 'b1', 'c1', 'l1', 'r1'];
+
+      await d.service.requestPatientIdentity(
+        {
+          documentFrontFileId: ids[0],
+          documentBackFileId: ids[1],
+          livenessCenterFileId: ids[2],
+          livenessTurnLeftFileId: ids[3],
+          livenessTurnRightFileId: ids[4],
+        } as never,
+        actor,
+      );
+
+      const calls = d.evidenceRepo.create.mock.calls.map(
+        (c: unknown[]) =>
+          (c[1] as { evidenceTypeConceptId: string }).evidenceTypeConceptId,
+      );
+      expect(calls).toEqual([
+        IDA.EVIDENCE_TYPE_IDENTITY_DOCUMENT_FRONT,
+        IDA.EVIDENCE_TYPE_IDENTITY_DOCUMENT_BACK,
+        IDA.EVIDENCE_TYPE_LIVENESS_CENTER,
+        IDA.EVIDENCE_TYPE_LIVENESS_TURN_LEFT,
+        IDA.EVIDENCE_TYPE_LIVENESS_TURN_RIGHT,
+      ]);
+    });
+
+    it('rejects a partial set of evidences, mixed contracts and foreign files', async () => {
+      const d = build();
+      await expect(
+        d.service.requestPatientIdentity(
+          { documentFrontFileId: 'f1' } as never,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      await expect(
+        d.service.requestPatientIdentity(
+          { evidenceFileId: 'x', documentFrontFileId: 'f1' } as never,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      d.filesRepo.findById.mockResolvedValue({
+        id: 'x',
+        createdByUserId: 'someone-else',
+        sensitivityConceptId: CONCEPTS.SENSITIVITY_PHI,
+      });
+      await expect(
+        d.service.requestPatientIdentity(dto, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.casesRepo.create).not.toHaveBeenCalled();
+    });
+
     it('refuses a second verification while one is already running', async () => {
       const d = build();
       d.casesRepo.countLiveForSubject.mockResolvedValue(1);
@@ -150,6 +223,23 @@ describe('IdentitySelfServiceService', () => {
       await expect(
         d.service.requestPatientIdentity(dto, actor),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('enqueues a confirmation email to the user when requested', async () => {
+      const d = build();
+
+      await d.service.requestPatientIdentity(dto, actor);
+
+      expect(d.notificationsService.createRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          recipientUserId: actor.id,
+          recipientAddress: 'test@example.com',
+          payloadJson: expect.objectContaining({
+            subject: 'Confirmación de solicitud de verificación - AloVida',
+          }),
+        }),
+        actor,
+      );
     });
   });
 
@@ -273,9 +363,14 @@ describe('IdentitySelfServiceService', () => {
         id: 'auth-1',
         practitionerProfileId: 'person-1',
       });
-      d.evidenceRepo.findLatestByCase.mockResolvedValue({
-        evidenceFileId: 'file-9',
-      });
+      d.evidenceRepo.findByCase.mockResolvedValue([
+        {
+          id: 'ev-9',
+          evidenceTypeConceptId: IDA.EVIDENCE_TYPE_LICENSE_DOCUMENT,
+          evidenceFileId: 'file-9',
+          createdAt: new Date('2026-10-13T00:00:00Z'),
+        },
+      ]);
       d.manualReviewRepo.findLatestDecidedByCase.mockResolvedValue({
         decisionReason: 'El documento no coincide con la matrícula declarada',
       });

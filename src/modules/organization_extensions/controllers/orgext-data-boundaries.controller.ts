@@ -1,6 +1,11 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { OrgextDataBoundariesService } from '../services';
 import { CreateDataBoundaryDto, DataBoundaryResponseDto } from '../dto';
 
@@ -22,6 +27,11 @@ export class OrgextDataBoundariesController {
   ) {}
 
   /** UC-22-08. */
+  @Audited({
+    action: 'ORGANIZATION_DATA_BOUNDARY_DEFINED',
+    entity: 'organization_data_boundary',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

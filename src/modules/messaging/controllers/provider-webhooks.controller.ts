@@ -7,7 +7,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Public } from '../../../common';
+import { NotAudited, Public } from '../../../common';
 import { NotificationsService } from '../services';
 import { ProviderReceiptDto, ProviderReceiptResponseDto } from '../dto';
 
@@ -30,6 +30,9 @@ export class ProviderWebhooksController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
   /** UC-35-12. */
+  @NotAudited(
+    'Acuse del proveedor en messaging (createReceipt) en NotificationsService.recordProviderReceipt.',
+  )
   @Post(':providerCode/receipts')
   @Public()
   @HttpCode(HttpStatus.OK)

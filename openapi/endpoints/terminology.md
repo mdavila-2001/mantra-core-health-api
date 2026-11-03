@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `terminology`
 
-Referencia exhaustiva de 24 operación(es) del módulo `terminology`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 25 operación(es) del módulo `terminology`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `terminology`
 - **Controladores:** `TerminologyCodeSystemsController`, `TerminologyConceptsController`, `TerminologyFhirController`, `TerminologyImportTemplateController`, `TerminologyTenantCatalogController`, `TerminologyValueSetsController`, `TerminologyVersionsController`
@@ -21,20 +21,21 @@ Referencia exhaustiva de 24 operación(es) del módulo `terminology`, derivada d
 8. [GET /terminology/concepts/{conceptId}](#8-get-terminology-concepts-conceptid) — Lee la ficha de un concepto: textos en el idioma pedido, conjuntos de valores a los que pertenece y denominaciones alternativas
 9. [POST /terminology/concepts/{conceptId}/$deprecate](#9-post-terminology-concepts-conceptid-deprecate) — UC-03-10: retira el concepto y lo excluye de las expansiones
 10. [POST /terminology/concepts/{conceptId}/designations](#10-post-terminology-concepts-conceptid-designations) — UC-03-05: añade una designación (y opcionalmente propiedades)
-11. [GET /terminology/concepts/{conceptId}/glossary-neighborhood](#11-get-terminology-concepts-conceptid-glossary-neighborhood) — Lee el vecindario de un término del glosario: relaciones salientes y entrantes agrupadas por tipo
-12. [POST /terminology/concepts/{conceptId}/properties](#12-post-terminology-concepts-conceptid-properties) — UC-03-05: alta o actualización de propiedades del concepto
-13. [POST /terminology/concepts/{conceptId}/relationships](#13-post-terminology-concepts-conceptid-relationships) — UC-03-06: crea una relación dirigida entre conceptos
-14. [GET /terminology/concepts/glossary-graph](#14-get-terminology-concepts-glossary-graph) — Lee el grafo de términos publicados del glosario médico
-15. [GET /terminology/import-template](#15-get-terminology-import-template) — UC-03-03: descarga la plantilla de importación de un perfil
-16. [PUT /terminology/tenants/{tenantId}/catalog-policies](#16-put-terminology-tenants-tenantid-catalog-policies) — UC-03-12: define la política de catálogo del tenant
-17. [GET /terminology/value-sets](#17-get-terminology-value-sets) — Listar conjuntos de valores por código interno o texto
-18. [POST /terminology/value-sets](#18-post-terminology-value-sets) — UC-03-07: crea un conjunto de valores con versión y reglas
-19. [GET /terminology/value-sets/{id}/$expand](#19-get-terminology-value-sets-id-expand) — UC-03-08: lee la expansión vigente de un conjunto de valores
-20. [GET /terminology/value-sets/$glossary-facets](#20-get-terminology-value-sets-glossary-facets) — Facetas del glosario: conteo por categoría y etiqueta
-21. [POST /terminology/ValueSet/{id}/$expand](#21-post-terminology-valueset-id-expand) — UC-03-08: materializa los miembros de la expansión
-22. [POST /terminology/versions/{versionId}/import](#22-post-terminology-versions-versionid-import) — UC-03-03: importa conceptos en una versión en borrador
-23. [POST /terminology/versions/{versionId}/import-file](#23-post-terminology-versions-versionid-import-file) — UC-03-03: importa filas desde un archivo, o las valida sin escribir
-24. [POST /terminology/versions/{versionId}/publish](#24-post-terminology-versions-versionid-publish) — UC-03-04: publica una versión (borrador → activa)
+11. [GET /terminology/concepts/{conceptId}/glossary-article](#11-get-terminology-concepts-conceptid-glossary-article) — Lee el artículo enciclopédico de un término del glosario
+12. [GET /terminology/concepts/{conceptId}/glossary-neighborhood](#12-get-terminology-concepts-conceptid-glossary-neighborhood) — Lee el vecindario de un término del glosario: relaciones salientes y entrantes agrupadas por tipo
+13. [POST /terminology/concepts/{conceptId}/properties](#13-post-terminology-concepts-conceptid-properties) — UC-03-05: alta o actualización de propiedades del concepto
+14. [POST /terminology/concepts/{conceptId}/relationships](#14-post-terminology-concepts-conceptid-relationships) — UC-03-06: crea una relación dirigida entre conceptos
+15. [GET /terminology/concepts/glossary-graph](#15-get-terminology-concepts-glossary-graph) — Lee el grafo de términos publicados del glosario médico
+16. [GET /terminology/import-template](#16-get-terminology-import-template) — UC-03-03: descarga la plantilla de importación de un perfil
+17. [PUT /terminology/tenants/{tenantId}/catalog-policies](#17-put-terminology-tenants-tenantid-catalog-policies) — UC-03-12: define la política de catálogo del tenant
+18. [GET /terminology/value-sets](#18-get-terminology-value-sets) — Listar conjuntos de valores por código interno o texto
+19. [POST /terminology/value-sets](#19-post-terminology-value-sets) — UC-03-07: crea un conjunto de valores con versión y reglas
+20. [GET /terminology/value-sets/{id}/$expand](#20-get-terminology-value-sets-id-expand) — UC-03-08: lee la expansión vigente de un conjunto de valores
+21. [GET /terminology/value-sets/$glossary-facets](#21-get-terminology-value-sets-glossary-facets) — Facetas del glosario: conteo por categoría y etiqueta
+22. [POST /terminology/ValueSet/{id}/$expand](#22-post-terminology-valueset-id-expand) — UC-03-08: materializa los miembros de la expansión
+23. [POST /terminology/versions/{versionId}/import](#23-post-terminology-versions-versionid-import) — UC-03-03: importa conceptos en una versión en borrador
+24. [POST /terminology/versions/{versionId}/import-file](#24-post-terminology-versions-versionid-import-file) — UC-03-03: importa filas desde un archivo, o las valida sin escribir
+25. [POST /terminology/versions/{versionId}/publish](#25-post-terminology-versions-versionid-publish) — UC-03-04: publica una versión (borrador → activa)
 
 ---
 
@@ -100,6 +101,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<ListCodeSystemsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ListCodeSystemsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ListCodeSystemsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListCodeSystemsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListCodeSystemsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -241,6 +243,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CodeSystemResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CodeSystemResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CodeSystemResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CodeSystemResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CodeSystemResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -354,6 +357,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<ListCodeSystemVersionsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ListCodeSystemVersionsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ListCodeSystemVersionsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListCodeSystemVersionsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListCodeSystemVersionsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -494,6 +498,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CodeSystemVersionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CodeSystemVersionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CodeSystemVersionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CodeSystemVersionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CodeSystemVersionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -606,6 +611,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<LookupResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<LookupResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<LookupResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<LookupResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LookupResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -630,6 +636,11 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "dataType": "valor-ejemplo",
       "valueJson": {
         "clave": "valor"
+      },
+      "sourceAge": {
+        "known": true,
+        "sourceDate": "valor-ejemplo",
+        "retrievedAt": "2026-07-31T12:00:00.000Z"
       }
     }
   ]
@@ -650,10 +661,14 @@ Campos de la respuesta:
 | `designations[].value` | Sí | `string` | Sin restricción adicional declarada | Texto de la designación | `valor-ejemplo` |
 | `designations[].languageConceptId` | No | `string` | Sin restricción adicional declarada | Idioma (concepto) | `es-BO` |
 | `designations[].preferred` | No | `boolean` | Sin restricción adicional declarada | Si es la designación preferida de su idioma | `true` |
-| `properties` | Sí | `array<LookupPropertyDto>` | Sin restricción adicional declarada | Propiedades del concepto | `[{"propertyCode":"CODIGO_EJEMPLO","dataType":"valor-ejemplo","valueJson":{"clave":"valor"}}]` |
+| `properties` | Sí | `array<LookupPropertyDto>` | Sin restricción adicional declarada | Propiedades del concepto | `[{"propertyCode":"CODIGO_EJEMPLO","dataType":"valor-ejemplo","valueJson":{"clave":"valor"},"sourceAge":{"known":true,"sourceDate":"valor-ejemplo","retrievedAt":"2026-07-31T12:00:00.000Z"}}]` |
 | `properties[].propertyCode` | Sí | `string` | Sin restricción adicional declarada | Código de la propiedad | `CODIGO_EJEMPLO` |
 | `properties[].dataType` | No | `string` | Sin restricción adicional declarada | Tipo de dato técnico | `valor-ejemplo` |
 | `properties[].valueJson` | Sí | `object` | Sin restricción adicional declarada | Valor de la propiedad | `{"clave":"valor"}` |
+| `properties[].sourceAge` | No | `PropertySourceAgeDto` | Sin restricción adicional declarada | Antigüedad del dato (estado S7). Solo en las secciones de farmacología clínica. known=false: antigüedad desconocida | `{"known":true,"sourceDate":"valor-ejemplo","retrievedAt":"2026-07-31T12:00:00.000Z"}` |
+| `properties[].sourceAge.known` | No | `boolean` | Sin restricción adicional declarada | Falso si la fuente no publica la fecha de la versión (p. ej. fichas de CIMA de autorización centralizada): la antigüedad es desconocida y la fecha que vale es la de consulta | `true` |
+| `properties[].sourceAge.sourceDate` | No | `string` | Sin restricción adicional declarada | Fecha de la versión de la fuente tal como se cargó (ISO, o mm/aaaa en las fichas de CIMA que solo la traen en el texto). Solo si known es verdadero | `valor-ejemplo` |
+| `properties[].sourceAge.retrievedAt` | No | `string` | formato `date-time` | Cuándo se consultó la fuente | `2026-07-31T12:00:00.000Z` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -769,6 +784,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TranslateResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TranslateResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TranslateResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TranslateResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TranslateResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -810,6 +826,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Curar un mapeo exige un rol de terminología | Excepción explícita en src/modules/terminology/services/concept-maps.service.ts |
 | 404 | `NOT_FOUND` | Concepto origen no encontrado | Excepción explícita en src/modules/terminology/services/concept-maps.service.ts |
 | 404 | `NOT_FOUND` | Concepto destino no encontrado | Excepción explícita en src/modules/terminology/services/concept-maps.service.ts |
 | 404 | `NOT_FOUND` | El mapeo dejó de existir durante el curado | Excepción explícita en src/modules/terminology/services/concept-maps.service.ts |
@@ -905,6 +922,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<SearchConceptsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<SearchConceptsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<SearchConceptsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<SearchConceptsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SearchConceptsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1071,6 +1089,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<ConceptDetailDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ConceptDetailDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ConceptDetailDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ConceptDetailDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ConceptDetailDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1297,6 +1316,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DeprecateConceptResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DeprecateConceptResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DeprecateConceptResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DeprecateConceptResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DeprecateConceptResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1450,6 +1470,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DesignationResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DesignationResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DesignationResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DesignationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DesignationResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1505,7 +1526,103 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. GET /terminology/concepts/{conceptId}/glossary-neighborhood
+## 11. GET /terminology/concepts/{conceptId}/glossary-article
+
+- **Módulo:** `terminology`
+- **Etiqueta OpenAPI:** `terminology`
+- **Nombre:** Lee el artículo enciclopédico de un término del glosario
+- **Operation ID:** `TerminologyConceptsController_readGlossaryArticle`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TerminologyConceptsController.readGlossaryArticle](../../src/modules/terminology/controllers/terminology-concepts.controller.ts)
+
+### Descripción de negocio
+
+Lee el artículo enciclopédico de un término del glosario. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Devuelve el documento enciclopédico guardado como propiedad del concepto.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /terminology/concepts/{conceptId}/glossary-article` en `TerminologyConceptsController_readGlossaryArticle`. El controlador delega en `ConceptsService.readGlossaryArticle`. No recibe body. El tipo de retorno estático es `Promise<unknown>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `conceptId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /terminology/concepts/00000000-0000-4000-8000-000000000001/glossary-article HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `conceptId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /terminology/concepts/00000000-0000-4000-8000-000000000001/glossary-article HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<unknown>` | No |
+| 400 | Consulta completada correctamente. | `Promise<unknown>` | No |
+| 401 | Consulta completada correctamente. | `Promise<unknown>` | No |
+| 403 | Consulta completada correctamente. | `Promise<unknown>` | No |
+| 404 | Consulta completada correctamente. | `Promise<unknown>` | No |
+| 429 | Consulta completada correctamente. | `Promise<unknown>` | No |
+| 500 | Consulta completada correctamente. | `Promise<unknown>` | No |
+| 504 | Consulta completada correctamente. | `Promise<unknown>` | No |
+
+El controlador declara `unknown`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Artículo del glosario no encontrado | Excepción explícita en src/modules/terminology/services/concepts.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/terminology/concepts/{conceptId}/glossary-article"
+}
+```
+
+---
+
+## 12. GET /terminology/concepts/{conceptId}/glossary-neighborhood
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -1531,7 +1648,7 @@ NestJS resuelve `GET /terminology/concepts/{conceptId}/glossary-neighborhood` en
 | `conceptId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `lang` | query | No | `string` | valores: `ES`, `EN` | Sin descripción específica en OpenAPI. | `ES` |
 | `perGroup` | query | No | `number` | mínimo 1; máximo 50 | Sin descripción específica en OpenAPI. | `8` |
-| `type` | query | No | `string` | valores: `RELATED_TERM`, `DISEASE`, `PROCEDURE`, `TREATMENT`, `ANATOMY`, `DIAGNOSTIC_TEST`, `SYMPTOM`, `SPECIALTY` | Sin descripción específica en OpenAPI. | `RELATED_TERM` |
+| `type` | query | No | `string` | valores: `RELATED_TERM`, `DISEASE`, `PROCEDURE`, `TREATMENT`, `ANATOMY`, `DIAGNOSTIC_TEST`, `SYMPTOM`, `SPECIALTY`, `DIAGNOSTIC_CRITERION`, `REQUIRED_TEST`, `COMPLICATION`, `RISK_FACTOR`, `REFERRAL_CRITERION` | Sin descripción específica en OpenAPI. | `RELATED_TERM` |
 | `direction` | query | No | `string` | valores: `outgoing`, `incoming` | Sin descripción específica en OpenAPI. | `outgoing` |
 | `offset` | query | No | `number` | mínimo 0 | Sin descripción específica en OpenAPI. | `0` |
 | `limit` | query | No | `number` | mínimo 1; máximo 200 | Sin descripción específica en OpenAPI. | `50` |
@@ -1576,6 +1693,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<GlossaryNeighborhoodDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<GlossaryNeighborhoodDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<GlossaryNeighborhoodDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<GlossaryNeighborhoodDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GlossaryNeighborhoodDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1604,6 +1722,20 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
           "category": {
             "internalCode": "glossary-category-anatomy",
             "name": "Anatomía"
+          },
+          "strength": 1,
+          "frequency": {},
+          "evidenceTier": {},
+          "sourceCodes": [
+            "CODIGO_EJEMPLO"
+          ],
+          "qualifiers": {
+            "sex": "valor-ejemplo",
+            "ageMinDays": 1,
+            "ageMaxDays": 1,
+            "pregnancy": "valor-ejemplo",
+            "careLevel": "valor-ejemplo",
+            "lineOfTherapy": "valor-ejemplo"
           }
         }
       ]
@@ -1624,17 +1756,28 @@ Campos de la respuesta:
 | `focus.category.internalCode` | Sí | `string` | Sin restricción adicional declarada | Código interno estable, como `glossary-category-anatomy`. | `glossary-category-anatomy` |
 | `focus.category.name` | Sí | `string` | Sin restricción adicional declarada | Nombre legible de la categoría. | `Anatomía` |
 | `focus.shortDefinition` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
-| `groups` | Sí | `array<GlossaryNeighborGroupDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"type":{},"direction":"outgoing","total":1,"items":[{"conceptId":"00000000-0000-4000-8000-000000000001","slug":"valor-ejemplo","display":"valor-ejemplo","category":{"internalCode":"glossary-category-anatomy","name":"Anatomía"}}]}]` |
-| `groups[].type` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido:  \| 'RELATED_TERM' \| 'DISEASE' \| 'PROCEDURE' \| 'TREATMENT' \| 'ANATOMY' \| 'DIAGNOSTIC_TEST' \| 'SYMPTOM' \| 'SPECIALTY' | `{}` |
+| `groups` | Sí | `array<GlossaryNeighborGroupDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"type":{},"direction":"outgoing","total":1,"items":[{"conceptId":"00000000-0000-4000-8000-000000000001","slug":"valor-ejemplo","display":"valor-ejemplo","category":{"internalCode":"glossary-category-anatomy","name":"Anatomía"},"strength":1,"frequency":{},"evidenceTier":{},"sourceCodes":["CODIGO_EJEMPLO"],"qualifiers":{"sex":"valor-ejemplo","ageMinDays":1,"ageMaxDays":1,"pregnancy":"valor-ejemplo","careLevel":"valor-ejemplo","lineOfTherapy":"valor-ejemplo"}}]}]` |
+| `groups[].type` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido:  \| 'RELATED_TERM' \| 'DISEASE' \| 'PROCEDURE' \| 'TREATMENT' \| 'ANATOMY' \| 'DIAGNOSTIC_TEST' \| 'SYMPTOM' \| 'SPECIALTY' \| 'DIAGNOSTIC_CRITERION' \| 'REQUIRED_TEST' \| 'COMPLICATION' \| 'RISK_FACTOR' \| 'REFERRAL_CRITERION' | `{}` |
 | `groups[].direction` | Sí | `string` | valores: `outgoing`, `incoming` | Sin descripción específica en el contrato OpenAPI. | `outgoing` |
 | `groups[].total` | Sí | `number` | Sin restricción adicional declarada | Tamaño real del grupo, no lo que vino en `items`. | `1` |
-| `groups[].items` | Sí | `array<GlossaryNeighborDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"conceptId":"00000000-0000-4000-8000-000000000001","slug":"valor-ejemplo","display":"valor-ejemplo","category":{"internalCode":"glossary-category-anatomy","name":"Anatomía"}}]` |
+| `groups[].items` | Sí | `array<GlossaryNeighborDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"conceptId":"00000000-0000-4000-8000-000000000001","slug":"valor-ejemplo","display":"valor-ejemplo","category":{"internalCode":"glossary-category-anatomy","name":"Anatomía"},"strength":1,"frequency":{},"evidenceTier":{},"sourceCodes":["CODIGO_EJEMPLO"],"qualifiers":{"sex":"valor-ejemplo","ageMinDays":1,"ageMaxDays":1,"pregnancy":"valor-ejemplo","careLevel":"valor-ejemplo","lineOfTherapy":"valor-ejemplo"}}]` |
 | `groups[].items[].conceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `groups[].items[].slug` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `groups[].items[].display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `groups[].items[].category` | Sí | `ConceptTaxonomyRefDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"internalCode":"glossary-category-anatomy","name":"Anatomía"}` |
 | `groups[].items[].category.internalCode` | Sí | `string` | Sin restricción adicional declarada | Código interno estable, como `glossary-category-anatomy`. | `glossary-category-anatomy` |
 | `groups[].items[].category.name` | Sí | `string` | Sin restricción adicional declarada | Nombre legible de la categoría. | `Anatomía` |
+| `groups[].items[].strength` | No | `number` | Sin restricción adicional declarada | Fuerza de la relación, de 0 a 1 (`strength_score`). Ordena el grupo. | `1` |
+| `groups[].items[].frequency` | No | `object` | Sin restricción adicional declarada | Frecuencia del hallazgo según la mejor evidencia. `EXCLUDED` significa que la fuente lo descarta: no es una relación positiva. | `{}` |
+| `groups[].items[].evidenceTier` | No | `object` | Sin restricción adicional declarada | Mejor nivel de evidencia de la relación. | `{}` |
+| `groups[].items[].sourceCodes` | No | `array<string>` | Sin restricción adicional declarada | Ids de origen de cada evidencia (`source_reference`), sin repetir. | `["CODIGO_EJEMPLO"]` |
+| `groups[].items[].qualifiers` | No | `GlossaryNeighborQualifiersDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"sex":"valor-ejemplo","ageMinDays":1,"ageMaxDays":1,"pregnancy":"valor-ejemplo","careLevel":"valor-ejemplo","lineOfTherapy":"valor-ejemplo"}` |
+| `groups[].items[].qualifiers.sex` | No | `string` | Sin restricción adicional declarada | Código del sexo al que aplica (`sex_concept_id`). | `valor-ejemplo` |
+| `groups[].items[].qualifiers.ageMinDays` | No | `number` | Sin restricción adicional declarada | Edad mínima en días: la menor entre las evidencias. | `1` |
+| `groups[].items[].qualifiers.ageMaxDays` | No | `number` | Sin restricción adicional declarada | Edad máxima en días: la mayor entre las evidencias. | `1` |
+| `groups[].items[].qualifiers.pregnancy` | No | `string` | Sin restricción adicional declarada | Código de aplicabilidad en el embarazo. | `valor-ejemplo` |
+| `groups[].items[].qualifiers.careLevel` | No | `string` | Sin restricción adicional declarada | Código del nivel de atención (`FIRST_LEVEL`, `SECOND_LEVEL`, `THIRD_LEVEL`). | `valor-ejemplo` |
+| `groups[].items[].qualifiers.lineOfTherapy` | No | `string` | Sin restricción adicional declarada | Código de la línea de tratamiento (`FIRST_LINE`, `SECOND_LINE`). | `valor-ejemplo` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -1662,7 +1805,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /terminology/concepts/{conceptId}/properties
+## 13. POST /terminology/concepts/{conceptId}/properties
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -1758,6 +1901,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ConceptPropertiesResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ConceptPropertiesResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ConceptPropertiesResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ConceptPropertiesResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ConceptPropertiesResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1805,7 +1949,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /terminology/concepts/{conceptId}/relationships
+## 14. POST /terminology/concepts/{conceptId}/relationships
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -1892,6 +2036,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RelationshipResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RelationshipResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RelationshipResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RelationshipResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RelationshipResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1946,7 +2091,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. GET /terminology/concepts/glossary-graph
+## 15. GET /terminology/concepts/glossary-graph
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2010,6 +2155,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<GlossaryGraphDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<GlossaryGraphDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<GlossaryGraphDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<GlossaryGraphDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GlossaryGraphDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2055,7 +2201,7 @@ Campos de la respuesta:
 | `edges` | Sí | `array<GlossaryGraphEdgeDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"sourceConceptId":"00000000-0000-4000-8000-000000000001","targetConceptId":"00000000-0000-4000-8000-000000000001","type":{}}]` |
 | `edges[].sourceConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `edges[].targetConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `edges[].type` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido:  \| 'RELATED_TERM' \| 'DISEASE' \| 'PROCEDURE' \| 'TREATMENT' \| 'ANATOMY' \| 'DIAGNOSTIC_TEST' \| 'SYMPTOM' \| 'SPECIALTY' | `{}` |
+| `edges[].type` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido:  \| 'RELATED_TERM' \| 'DISEASE' \| 'PROCEDURE' \| 'TREATMENT' \| 'ANATOMY' \| 'DIAGNOSTIC_TEST' \| 'SYMPTOM' \| 'SPECIALTY' \| 'DIAGNOSTIC_CRITERION' \| 'REQUIRED_TEST' \| 'COMPLICATION' \| 'RISK_FACTOR' \| 'REFERRAL_CRITERION' | `{}` |
 | `count` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `limit` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `possiblyTruncated` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
@@ -2088,7 +2234,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. GET /terminology/import-template
+## 16. GET /terminology/import-template
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2105,7 +2251,7 @@ Contexto declarado en el controlador: Descarga la plantilla del perfil pedido.
 
 ### Descripción del sistema
 
-NestJS resuelve `GET /terminology/import-template` en `TerminologyImportTemplateController_descargarPlantilla`. El controlador delega en `ImportTemplateService.generar`. No recibe body. El tipo de retorno estático es `StreamableFile`.
+NestJS resuelve `GET /terminology/import-template` en `TerminologyImportTemplateController_descargarPlantilla`. El controlador delega en `ImportTemplateService.generate`. No recibe body. El tipo de retorno estático es `StreamableFile`.
 
 ### Parámetros
 
@@ -2153,6 +2299,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `StreamableFile` | No |
 | 429 | Consulta completada correctamente. | `StreamableFile` | No |
 | 500 | Consulta completada correctamente. | `StreamableFile` | No |
+| 504 | Consulta completada correctamente. | `StreamableFile` | No |
 
 El controlador declara `StreamableFile`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -2182,7 +2329,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. PUT /terminology/tenants/{tenantId}/catalog-policies
+## 17. PUT /terminology/tenants/{tenantId}/catalog-policies
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2291,6 +2438,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TenantCatalogPolicyResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TenantCatalogPolicyResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TenantCatalogPolicyResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TenantCatalogPolicyResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TenantCatalogPolicyResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2349,7 +2497,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. GET /terminology/value-sets
+## 18. GET /terminology/value-sets
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2415,6 +2563,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<SearchValueSetsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<SearchValueSetsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<SearchValueSetsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<SearchValueSetsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SearchValueSetsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2481,7 +2630,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /terminology/value-sets
+## 19. POST /terminology/value-sets
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2580,6 +2729,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ValueSetResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ValueSetResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ValueSetResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ValueSetResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ValueSetResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2627,7 +2777,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. GET /terminology/value-sets/{id}/$expand
+## 20. GET /terminology/value-sets/{id}/$expand
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2696,6 +2846,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<ReadValueSetExpansionResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ReadValueSetExpansionResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ReadValueSetExpansionResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ReadValueSetExpansionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReadValueSetExpansionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2773,7 +2924,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. GET /terminology/value-sets/$glossary-facets
+## 21. GET /terminology/value-sets/$glossary-facets
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2834,6 +2985,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<GlossaryFacetsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<GlossaryFacetsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<GlossaryFacetsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<GlossaryFacetsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GlossaryFacetsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2917,7 +3069,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /terminology/ValueSet/{id}/$expand
+## 22. POST /terminology/ValueSet/{id}/$expand
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -3003,6 +3155,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ExpandValueSetResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ExpandValueSetResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ExpandValueSetResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ExpandValueSetResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ExpandValueSetResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3059,7 +3212,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /terminology/versions/{versionId}/import
+## 23. POST /terminology/versions/{versionId}/import
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -3155,6 +3308,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ImportConceptsResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ImportConceptsResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ImportConceptsResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ImportConceptsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ImportConceptsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3203,7 +3357,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. POST /terminology/versions/{versionId}/import-file
+## 24. POST /terminology/versions/{versionId}/import-file
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -3290,6 +3444,7 @@ Content-Type: multipart/form-data
 | 422 | Operación completada correctamente. | `Promise<ImportConceptsFileResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ImportConceptsFileResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ImportConceptsFileResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ImportConceptsFileResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ImportConceptsFileResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3369,7 +3524,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /terminology/versions/{versionId}/publish
+## 25. POST /terminology/versions/{versionId}/publish
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -3437,6 +3592,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<PublishVersionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PublishVersionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PublishVersionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PublishVersionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PublishVersionResponseDto`. Ejemplo completo derivado de ese DTO:
 

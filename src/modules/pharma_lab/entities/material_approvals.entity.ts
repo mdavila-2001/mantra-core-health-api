@@ -17,7 +17,7 @@ export class MaterialApprovals {
   /**
    * Material revisado.
    */
-  @Property({ fieldName: 'informational_material_id', type: 'uuid' }) // FK → pharma_lab.informational_materials
+  @Property({ fieldName: 'informational_material_id', type: 'uuid' }) // FK → pharma_lab.informational_materials (inferida)
   informationalMaterialId!: string;
 
   /**
@@ -29,13 +29,13 @@ export class MaterialApprovals {
   /**
    * Decisión: aprobado o rechazado.
    */
-  @Property({ fieldName: 'decision_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'decision_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts (inferida)
   decisionConceptId!: string;
 
   /**
    * Ficha de personal que decide.
    */
-  @Property({ fieldName: 'reviewer_staff_id', type: 'uuid', nullable: true }) // FK → pharma_lab.pharma_lab_staff
+  @Property({ fieldName: 'reviewer_staff_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
   reviewerStaffId?: string;
 
   /**
@@ -59,6 +59,6 @@ export class MaterialApprovals {
   /**
    * Identificador asociado a created by user.
    */
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   createdByUserId?: string;
 }

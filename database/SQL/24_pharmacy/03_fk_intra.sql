@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 24 · schema pharmacy
+-- SALUD v4.2.83 · módulo 24 · schema pharmacy
 -- Generado de diagram_24_pharmacy.puml — NO editar a mano.
 
 
@@ -6,6 +6,12 @@ DO $$ BEGIN
     ALTER TABLE "pharmacy"."pharmacy_sites"
         ADD CONSTRAINT "fk_pharmacy_sites_pharmacy_id" FOREIGN KEY ("pharmacy_id")
         REFERENCES "pharmacy"."pharmacies" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "pharmacy"."pharmacy_on_call_shifts"
+        ADD CONSTRAINT "fk_pharmacy_on_call_shifts_pharmacy_site_id" FOREIGN KEY ("pharmacy_site_id")
+        REFERENCES "pharmacy"."pharmacy_sites" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -24,6 +30,18 @@ DO $$ BEGIN
     ALTER TABLE "pharmacy"."pharmacy_products"
         ADD CONSTRAINT "fk_pharmacy_products_pharmacy_id" FOREIGN KEY ("pharmacy_id")
         REFERENCES "pharmacy"."pharmacies" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "pharmacy"."pharmacy_product_categories"
+        ADD CONSTRAINT "fk_pharmacy_product_categories_pharmacy_id" FOREIGN KEY ("pharmacy_id")
+        REFERENCES "pharmacy"."pharmacies" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "pharmacy"."pharmacy_product_images"
+        ADD CONSTRAINT "fk_pharmacy_product_images_pharmacy_product_id" FOREIGN KEY ("pharmacy_product_id")
+        REFERENCES "pharmacy"."pharmacy_products" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -66,12 +84,6 @@ DO $$ BEGIN
     ALTER TABLE "pharmacy"."pharmacy_integration_connections"
         ADD CONSTRAINT "fk_pharmacy_integration_connections_pharmacy_site_id" FOREIGN KEY ("pharmacy_site_id")
         REFERENCES "pharmacy"."pharmacy_sites" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;
-
-DO $$ BEGIN
-    ALTER TABLE "pharmacy"."pharmacy_integration_connections"
-        ADD CONSTRAINT "fk_pharmacy_integration_connections_connection_id" FOREIGN KEY ("connection_id")
-        REFERENCES "pharmacy"."pharmacy_integration_connections" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN

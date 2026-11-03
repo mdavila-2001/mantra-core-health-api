@@ -29,7 +29,12 @@ function reflector(isPublic = false): any {
 
 const handler = (value: unknown) => ({ handle: () => of(value) });
 
-const em = { transactional: jest.fn(), execute: jest.fn() } as any;
+const em = {
+  getTransactionContext: () => undefined,
+  isInTransaction: () => false,
+  transactional: jest.fn(),
+  execute: jest.fn(),
+} as any;
 
 /** Interceptor con el RLS de base desactivado (el default de desarrollo). */
 function build(isPublic = false): TenantContextInterceptor {
@@ -105,14 +110,14 @@ describe('TenantContextInterceptor', () => {
 
     it('SUPERADMIN sin cabecera opera en modo sistema, sin acotar a un tenant', async () => {
       const ctx = httpContext({}, { id: 'admin', roles: ['SUPERADMIN'] });
-      let visto: string | undefined = 'sin-fijar';
-      const spy = { handle: () => of((visto = getCurrentTenantId())) };
+      let seen: string | undefined = 'sin-fijar';
+      const spy = { handle: () => of((seen = getCurrentTenantId())) };
 
       const res = await lastValueFrom(
         build().intercept(ctx, spy as any) as any,
       );
       expect(res).toBeUndefined();
-      expect(visto).toBeUndefined();
+      expect(seen).toBeUndefined();
     });
 
     it('SUPERADMIN en modo sistema puede declarar cualquier tenant en el cuerpo', async () => {
@@ -292,11 +297,18 @@ describe('TenantContextInterceptor', () => {
       const execute = jest
         .fn<() => Promise<void>>()
         .mockResolvedValue(undefined);
-      const transactional = jest.fn(async (callback: () => Promise<unknown>) =>
-        callback(),
+      const tx = { getTransactionContext: () => undefined };
+      const transactional = jest.fn(
+        async (callback: (value: typeof tx) => Promise<unknown>) =>
+          callback(tx),
       );
       const interceptor = new TenantContextInterceptor(
-        { execute, transactional } as any,
+        {
+          execute,
+          transactional,
+          getTransactionContext: () => undefined,
+          isInTransaction: () => false,
+        } as any,
         reflector(),
       );
       if (previous === undefined) delete process.env.RLS_ENFORCE;

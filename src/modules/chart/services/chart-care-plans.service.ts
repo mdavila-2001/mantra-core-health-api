@@ -27,6 +27,7 @@ import {
 } from '../../clinical/services';
 // P43: el plan puede declarar de qué formulario médico cerrado sale.
 import { FormInstanceOriginValidator } from '../../forms/services/form-instance-origin.validator';
+import { ChartEncounterScopeService } from './chart-encounter-scope.service';
 
 /** Mapa estado (DTO) → concepto de estado de actividad. */
 const ACTIVITY_STATUS_CONCEPT: Record<ActivityStatus, string> = {
@@ -53,6 +54,7 @@ export class ChartCarePlansService {
    * @param clinicalRead - Política de escritura sobre la historia (MCH-007).
    * @param encounterSealGuard - Rechaza la escritura si el encuentro está sellado (BR-14/CL-07).
    * @param formOrigin - Valida la instancia de formulario de origen (P43).
+   * @param encounterScope - Acota encuentro y diagnóstico del cuerpo al paciente del plan (CHART-01).
    */
   constructor(
     private readonly em: EntityManager,
@@ -61,6 +63,7 @@ export class ChartCarePlansService {
     private readonly clinicalRead: ClinicalReadService,
     private readonly encounterSealGuard: EncounterSealGuardService,
     private readonly formOrigin: FormInstanceOriginValidator,
+    private readonly encounterScope: ChartEncounterScopeService,
   ) {
     this.logger.setContext(ChartCarePlansService.name);
   }
@@ -113,6 +116,22 @@ export class ChartCarePlansService {
     // CL-29 (BR-13): el autor del plan sale de la sesión, nunca del cuerpo.
     const authorProfileId = this.resolveAuthor(dto.authorProfileId, actor);
     return this.em.transactional(async (tx) => {
+      // CHART-01: encuentro y diagnóstico tienen que ser de ESTE paciente; uno
+      // ajeno o inexistente responde igual y no deja plan ni actividades.
+      if (dto.encounterId) {
+        await this.encounterScope.assertEncounterBelongsToPatientAndWritable(
+          tx,
+          dto.encounterId,
+          dto.patientProfileId,
+        );
+      }
+      if (dto.conditionId) {
+        await this.encounterScope.assertConditionBelongsToPatient(
+          tx,
+          dto.conditionId,
+          dto.patientProfileId,
+        );
+      }
       // BR-14 (CL-07): un plan no puede nacer contra un encuentro ya sellado.
       if (dto.encounterId) {
         await this.encounterSealGuard.assertEncounterWritable(

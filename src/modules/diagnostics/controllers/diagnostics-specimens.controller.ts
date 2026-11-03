@@ -11,10 +11,11 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   requireTenantId,
-  type AuthenticatedUser,
   AccessLogged,
+  type AuthenticatedUser,
 } from '../../../common';
 import { LabStaffGuard } from '../guards';
 import { DiagnosticsSpecimensService } from '../services';
@@ -53,6 +54,11 @@ export class DiagnosticsSpecimensController {
   constructor(private readonly service: DiagnosticsSpecimensService) {}
 
   /** Soporte: alta de espécimen. */
+  @Audited({
+    action: 'SPECIMEN_CREATED',
+    entity: 'specimen',
+    entityId: 'result.id',
+  })
   @Post('specimens')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Registrar un espécimen (soporte para acesión)' })
@@ -95,6 +101,11 @@ export class DiagnosticsSpecimensController {
   }
 
   /** UC-20-01. */
+  @Audited({
+    action: 'SPECIMEN_ACCESSIONED',
+    entity: 'laboratory_accession',
+    entityId: 'result.id',
+  })
   @Post('accessions')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Acesionar especímenes recibidos en laboratorio' })
@@ -106,6 +117,11 @@ export class DiagnosticsSpecimensController {
   }
 
   /** UC-20-02. */
+  @Audited({
+    action: 'SPECIMEN_REJECTED',
+    entity: 'specimen',
+    entityId: 'param:id',
+  })
   @Post('specimens/:id/rejection')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Rechazar espécimen y solicitar recolección' })
@@ -118,6 +134,11 @@ export class DiagnosticsSpecimensController {
   }
 
   /** Soporte: alta de contenedor. */
+  @Audited({
+    action: 'SPECIMEN_CONTAINER_CREATED',
+    entity: 'specimen_container',
+    entityId: 'result.id',
+  })
   @Post('specimens/:id/containers')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -132,6 +153,11 @@ export class DiagnosticsSpecimensController {
   }
 
   /** UC-20-03. */
+  @Audited({
+    action: 'SPECIMEN_CUSTODY_EVENT_RECORDED',
+    entity: 'specimen_container',
+    entityId: 'param:id',
+  })
   @Post('containers/:id/custody-events')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({

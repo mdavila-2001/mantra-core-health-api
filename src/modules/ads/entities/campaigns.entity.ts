@@ -154,4 +154,10 @@ export class Campaigns {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  /**
+   * Valor de version number mantenido por la instancia.
+   */
+  @Property({ fieldName: 'version_number', columnType: 'int', nullable: true })
+  versionNumber?: number;
 }

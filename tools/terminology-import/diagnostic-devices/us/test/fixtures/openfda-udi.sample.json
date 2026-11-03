@@ -1,0 +1,97 @@
+{
+ "results": [
+  {
+   "has_donation_id_number": "false",
+   "mri_safety": "Labeling does not contain MRI Safety Information",
+   "record_status": "Published",
+   "is_labeled_as_nrl": "false",
+   "is_rx": "true",
+   "commercial_distribution_status": "In Commercial Distribution",
+   "device_description": "HEARTLINE MINI COOLEY SCISSORS CURVED BLUNT BLADE SQUEEZE HANDLE",
+   "public_device_record_key": "704448f1-ee61-4c2f-9036-6e455ed112b5",
+   "has_serial_number": "false",
+   "public_version_date": "2018-12-21",
+   "sterilization": {
+    "is_sterile": "false",
+    "is_sterilization_prior_use": "true",
+    "sterilization_methods": [
+     "Moist Heat or Steam Sterilization",
+     "Dry Heat Sterilization"
+    ]
+   },
+   "is_direct_marking_exempt": "false",
+   "public_version_number": "2",
+   "labeler_duns_number": "040729840",
+   "is_labeled_as_no_nrl": "false",
+   "identifiers": [
+    {
+     "id": "B09928002360",
+     "type": "Previous",
+     "issuing_agency": "HIBCC"
+    },
+    {
+     "id": "00192896007024",
+     "type": "Primary",
+     "issuing_agency": "GS1"
+    }
+   ],
+   "is_single_use": "false",
+   "is_otc": "false",
+   "version_or_model_number": "2800-236",
+   "has_manufacturing_date": "false",
+   "brand_name": "HEARTLINE MINI COOLEY SCISSORS",
+   "is_combination_product": "false",
+   "is_kit": "false",
+   "product_codes": [
+    {
+     "code": "GCJ",
+     "name": "Laparoscope, General & Plastic Surgery",
+     "openfda": {
+      "device_name": "Laparoscope, General & Plastic Surgery",
+      "medical_specialty_description": "Gastroenterology, Urology",
+      "regulation_number": "876.1500",
+      "device_class": "2"
+     }
+    }
+   ],
+   "premarket_submissions": [
+    {
+     "submission_number": "K152400",
+     "supplement_number": "000"
+    }
+   ],
+   "device_count_in_base_package": "1",
+   "is_pm_exempt": "false",
+   "has_lot_or_batch_number": "true",
+   "company_name": "SONTEC INSTRUMENTS, INC.",
+   "public_version_status": "Update",
+   "has_expiration_date": "false",
+   "is_hct_p": "false",
+   "gmdn_terms": [
+    {
+     "code": "44354",
+     "name": "Vascular scissors",
+     "definition": "A hand-held, manual surgical instrument designed to cut a blood vessel (i.e., to cut over a blood vessel or cut longitudinally to split it open) during open vascular surgery; it is not intended for endoscopic use. Often referred to as micro-scissors, it is a metallic device with two small pivoted blades which cut with a shearing action. The blades are often pointed to penetrate the vessel wall, may be straight, curved sideways, or acutely angled, and may include carbide inserts along the cutting edges. This is a reusable device intended to be sterilized prior to use.",
+     "implantable": "false",
+     "code_status": "Active"
+    }
+   ],
+   "publish_date": "2018-08-22",
+   "device_sizes": [
+    {
+     "type": "Length",
+     "value": "24.4",
+     "unit": "Centimeter"
+    },
+    {
+     "type": "Device Size Text, specify",
+     "text": "3mm Diameter Shaft"
+    },
+    {
+     "type": "Device Size Text, specify",
+     "text": "30° Blade"
+    }
+   ]
+  }
+ ]
+}

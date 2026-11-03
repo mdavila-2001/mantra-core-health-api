@@ -13,6 +13,8 @@ import {
   SalesOrders,
   LeaseValuations,
 } from '../entities';
+import { Practices } from '../../practice/entities';
+import { Bills } from '../../billing/entities';
 import { createdBy } from '../../../common';
 
 /**
@@ -147,6 +149,33 @@ export class ErpOperationsRepository {
     return em.findOne(Employees, { id });
   }
 
+  /** Práctica por id: su `tenantId` es el que acota al empleado y a la factura. */
+  findPracticeById(em: EntityManager, id: string): Promise<Practices | null> {
+    return em.findOne(Practices, { id });
+  }
+
+  /** Factura por id: su tenant lo da su práctica, que el llamador comprueba. */
+  findBillById(em: EntityManager, id: string): Promise<Bills | null> {
+    return em.findOne(Bills, { id });
+  }
+
+  /**
+   * Líneas de la orden entre las indicadas: solo devuelve las que son hijas de
+   * esa orden, así que una línea ajena, repetida o inexistente falta del
+   * resultado.
+   */
+  findItemsInPurchaseOrder(
+    em: EntityManager,
+    purchaseOrderId: string,
+    ids: readonly string[],
+  ): Promise<PurchaseOrderItems[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(PurchaseOrderItems, {
+      purchaseOrderId,
+      id: { $in: [...ids] },
+    });
+  }
+
   /**
    * Crea create time off request.
    *
@@ -211,16 +240,18 @@ export class ErpOperationsRepository {
    * Obtiene find time off for update.
    *
    * @param em - Contexto de persistencia o transacción activa.
-   * @param id - Identificador de id.
+   * @param id - Identificador de la solicitud.
+   * @param employeeId - Empleado de la ruta: la solicitud debe ser suya.
    * @returns Resultado de find time off for update conforme al contrato `Promise<TimeOffRequests | null>`.
    */
   findTimeOffForUpdate(
     em: EntityManager,
     id: string,
+    employeeId: string,
   ): Promise<TimeOffRequests | null> {
     return em.findOne(
       TimeOffRequests,
-      { id },
+      { id, employeeId },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
   }
@@ -278,15 +309,17 @@ export class ErpOperationsRepository {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param id - Identificador de id.
+   * @param tenantId - Tenant activo: el bloqueo recae solo en una orden propia.
    * @returns Resultado de find purchase order for update conforme al contrato `Promise<PurchaseOrders | null>`.
    */
   findPurchaseOrderForUpdate(
     em: EntityManager,
     id: string,
+    tenantId: string,
   ): Promise<PurchaseOrders | null> {
     return em.findOne(
       PurchaseOrders,
-      { id },
+      { id, tenantId },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
   }

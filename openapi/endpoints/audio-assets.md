@@ -31,7 +31,7 @@ Referencia exhaustiva de 10 operación(es) del módulo `audio_assets`, derivada 
 - **Nombre:** Entrega bytes de un asset READY desde storage propio
 - **Operation ID:** `AudioAssetsController_contentById`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AudioAssetsController.contentById](../../src/modules/audio_assets/controllers/audio-assets.controller.ts)
+- **Implementación:** [AudioAssetsController.contentById](../../src/modules/audio_assets/presentation/controllers/audio-assets.controller.ts)
 
 ### Descripción de negocio
 
@@ -88,6 +88,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<StreamableFile>` | No |
 | 429 | Consulta completada correctamente. | `Promise<StreamableFile>` | No |
 | 500 | Consulta completada correctamente. | `Promise<StreamableFile>` | No |
+| 504 | Consulta completada correctamente. | `Promise<StreamableFile>` | No |
 
 El controlador declara `StreamableFile`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -100,7 +101,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Asset de audio listo no encontrado | Excepción explícita en src/modules/audio_assets/audio-content.service.ts |
+| 404 | `NOT_FOUND` | Asset de audio listo no encontrado | Excepción explícita en src/modules/audio_assets/application/audio-content.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -125,7 +126,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Resuelve un asset TTS desde caché o agenda su generación
 - **Operation ID:** `AudioAssetsController_resolve`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AudioAssetsController.resolve](../../src/modules/audio_assets/controllers/audio-assets.controller.ts)
+- **Implementación:** [AudioAssetsController.resolve](../../src/modules/audio_assets/presentation/controllers/audio-assets.controller.ts)
 
 ### Descripción de negocio
 
@@ -202,6 +203,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `no declarado` | No |
 | 429 | Operación completada correctamente. | `no declarado` | No |
 | 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -215,10 +217,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Plantilla de audio no encontrada | Excepción explícita en src/modules/audio_assets/application/resolve-audio-asset.use-case.ts |
-| 404 | `NOT_FOUND` | Cola no encontrada | Excepción explícita en src/modules/messaging/services/queues.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La cola no está activa | Excepción explícita en src/modules/messaging/services/queues.service.ts |
-| 422 | `PRECONDITION_FAILED` | Storage intent requires its lifecycle coordinator | Excepción explícita en src/modules/messaging/services/queues.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -243,7 +242,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Depreca un asset no-fallback sin eliminarlo inmediatamente
 - **Operation ID:** `AudioAssetsInternalController_deprecate`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AudioAssetsInternalController.deprecate](../../src/modules/audio_assets/controllers/audio-assets-internal.controller.ts)
+- **Implementación:** [AudioAssetsInternalController.deprecate](../../src/modules/audio_assets/presentation/controllers/audio-assets-internal.controller.ts)
 
 ### Descripción de negocio
 
@@ -303,6 +302,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `no declarado` | No |
 | 429 | Operación completada correctamente. | `no declarado` | No |
 | 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -339,7 +339,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Registra un asset de audio generado
 - **Operation ID:** `AudioAssetsInternalController_generated`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AudioAssetsInternalController.generated](../../src/modules/audio_assets/controllers/audio-assets-internal.controller.ts)
+- **Implementación:** [AudioAssetsInternalController.generated](../../src/modules/audio_assets/presentation/controllers/audio-assets-internal.controller.ts)
 
 ### Descripción de negocio
 
@@ -425,6 +425,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `no declarado` | No |
 | 429 | Operación completada correctamente. | `no declarado` | No |
 | 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -462,7 +463,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Registra un fallo de generación de audio
 - **Operation ID:** `AudioAssetsInternalController_failed`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AudioAssetsInternalController.failed](../../src/modules/audio_assets/controllers/audio-assets-internal.controller.ts)
+- **Implementación:** [AudioAssetsInternalController.failed](../../src/modules/audio_assets/presentation/controllers/audio-assets-internal.controller.ts)
 
 ### Descripción de negocio
 
@@ -541,6 +542,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `no declarado` | No |
 | 429 | Operación completada correctamente. | `no declarado` | No |
 | 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -579,7 +581,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Prepara un asset de audio para generación
 - **Operation ID:** `AudioAssetsInternalController_prepare`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AudioAssetsInternalController.prepare](../../src/modules/audio_assets/controllers/audio-assets-internal.controller.ts)
+- **Implementación:** [AudioAssetsInternalController.prepare](../../src/modules/audio_assets/presentation/controllers/audio-assets-internal.controller.ts)
 
 ### Descripción de negocio
 
@@ -639,6 +641,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `no declarado` | No |
 | 429 | Operación completada correctamente. | `no declarado` | No |
 | 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -676,7 +679,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Elimina conservadoramente objetos de assets deprecados/permanentes
 - **Operation ID:** `AudioAssetsInternalController_garbageCollect`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AudioAssetsInternalController.garbageCollect](../../src/modules/audio_assets/controllers/audio-assets-internal.controller.ts)
+- **Implementación:** [AudioAssetsInternalController.garbageCollect](../../src/modules/audio_assets/presentation/controllers/audio-assets-internal.controller.ts)
 
 ### Descripción de negocio
 
@@ -744,6 +747,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `no declarado` | No |
 | 429 | Operación completada correctamente. | `no declarado` | No |
 | 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -781,7 +785,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Pre-genera STATIC, ENUMERATED y fallbacks de forma idempotente
 - **Operation ID:** `AudioAssetsInternalController_pregenerateAssets`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AudioAssetsInternalController.pregenerateAssets](../../src/modules/audio_assets/controllers/audio-assets-internal.controller.ts)
+- **Implementación:** [AudioAssetsInternalController.pregenerateAssets](../../src/modules/audio_assets/presentation/controllers/audio-assets-internal.controller.ts)
 
 ### Descripción de negocio
 
@@ -851,6 +855,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `no declarado` | No |
 | 429 | Operación completada correctamente. | `no declarado` | No |
 | 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -864,10 +869,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Plantilla de audio no encontrada | Excepción explícita en src/modules/audio_assets/application/resolve-audio-asset.use-case.ts |
-| 404 | `NOT_FOUND` | Cola no encontrada | Excepción explícita en src/modules/messaging/services/queues.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La cola no está activa | Excepción explícita en src/modules/messaging/services/queues.service.ts |
-| 422 | `PRECONDITION_FAILED` | Storage intent requires its lifecycle coordinator | Excepción explícita en src/modules/messaging/services/queues.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -892,7 +894,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Diagnóstico de audio sin convertir TTS en dependencia de readiness
 - **Operation ID:** `AudioAssetsInternalController_status`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AudioAssetsInternalController.status](../../src/modules/audio_assets/controllers/audio-assets-internal.controller.ts)
+- **Implementación:** [AudioAssetsInternalController.status](../../src/modules/audio_assets/presentation/controllers/audio-assets-internal.controller.ts)
 
 ### Descripción de negocio
 
@@ -946,6 +948,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -981,7 +984,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Verifica existencia y checksum de assets READY
 - **Operation ID:** `AudioAssetsInternalController_verify`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AudioAssetsInternalController.verify](../../src/modules/audio_assets/controllers/audio-assets-internal.controller.ts)
+- **Implementación:** [AudioAssetsInternalController.verify](../../src/modules/audio_assets/presentation/controllers/audio-assets-internal.controller.ts)
 
 ### Descripción de negocio
 
@@ -1049,6 +1052,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `no declarado` | No |
 | 429 | Operación completada correctamente. | `no declarado` | No |
 | 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 

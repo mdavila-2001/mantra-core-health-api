@@ -25,6 +25,8 @@ export {
   CreateTrackedLinkDto,
   TrackedLinkResponseDto,
   TrackedLinkClickResponseDto,
+  IssueTrackedLinkTokenDto,
+  TrackedLinkTokenResponseDto,
   RecordTouchpointDto,
   TouchpointResponseDto,
   ComputeAttributionDto,
@@ -44,3 +46,6 @@ export type {
   ConversionRefType,
   AttributionModel,
 } from './marketing.dto';
+export { InsightsFactsQueryDto, INSIGHTS_CHANNELS } from './insights-query.dto';
+export * from './insights-workspace.dto';
+export type { InsightsChannel } from './insights-query.dto';

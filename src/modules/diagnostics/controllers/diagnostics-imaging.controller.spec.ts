@@ -7,6 +7,7 @@ import { jest } from '@jest/globals';
  * @returns Resultado de mock fn conforme al contrato `any`.
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
+import { runWithTenant } from '../../../common';
 import { DiagnosticsImagingController } from './diagnostics-imaging.controller';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
@@ -20,6 +21,7 @@ function build() {
     createEndpoint: mockFn(),
     storeStudy: mockFn(),
     recordDoseEvent: mockFn(),
+    listStudiesByPatient: mockFn(),
   };
   const mediaQuality = {
     attachMedia: mockFn(),
@@ -42,6 +44,20 @@ describe('DiagnosticsImagingController', () => {
     expect(d.imaging.createEndpoint).toHaveBeenCalledWith(
       { baseUri: 'http://x' },
       actor,
+    );
+  });
+
+  it('listStudies (DIAG-02) pasa tenant del contexto, paciente y actor al servicio', async () => {
+    const d = build();
+    await runWithTenant('t-activo', () =>
+      d.controller.listStudies('p1', 50, 0, actor),
+    );
+    expect(d.imaging.listStudiesByPatient).toHaveBeenCalledWith(
+      't-activo',
+      'p1',
+      actor,
+      50,
+      0,
     );
   });
 

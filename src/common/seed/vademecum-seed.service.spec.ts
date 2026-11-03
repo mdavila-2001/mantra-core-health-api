@@ -263,7 +263,7 @@ describe('vademécum: la LINAME 2022-2024', () => {
   });
 
   it('ningún nombre de los 17 de desarrollo queda en inglés', () => {
-    const ingles = [
+    const english = [
       'Omeprazole',
       'Albuterol',
       'Amoxicillin',
@@ -273,7 +273,7 @@ describe('vademécum: la LINAME 2022-2024', () => {
       'Acetaminophen',
     ];
     expect(
-      vademecumDataset.concepts.filter((c) => ingles.includes(c.display)),
+      vademecumDataset.concepts.filter((c) => english.includes(c.display)),
     ).toEqual([]);
   });
 });

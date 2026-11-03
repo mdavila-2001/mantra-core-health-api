@@ -62,8 +62,8 @@ confirmar; excepción de disponibilidad no afecta slots ya `held`/`confirmed`.
 [`docs/modules/scheduling.md`](../modules/scheduling.md).
 
 **Eventos producidos/consumidos:** recordatorios despachados vía
-`POST /scheduling/internal/dispatch-reminders` (worker) — mecanismo de entrega documentado en
-eventos (Fase 11 — pendiente al momento de escribir este flujo).
+`POST /scheduling/internal/dispatch-reminders` (worker) — mecanismo de entrega en el
+[catálogo de eventos](../events/event-catalog.md).
 
 **Permisos:** `SCHEDULING_ADMIN` (configuración), `SCHEDULING_AGENT`/`PATIENT` (holds,
 confirmación, reprogramación, cancelación, lista de espera), `PRACTITIONER` (sus propias
@@ -73,11 +73,11 @@ excepciones), `SYSTEM_WORKER` (endpoints internos).
 holds activos por paciente excedido (409).
 
 **Evidencia en pruebas:** suite unitaria del módulo `scheduling` — ver
-la documentación de pruebas unitarias (Fase 15 — pendiente al momento de escribir este flujo).
+[pruebas unitarias](../testing/unit-tests.md).
 
-**Métricas operativas:** no instrumentadas de forma dedicada en esta fase — ver
-observabilidad (Fase 14 — pendiente al momento de escribir este flujo) para métricas de negocio críticas
-pendientes de definir (tasa de no-show, tiempo de espera promedio en lista de espera).
+**Métricas operativas:** sin instrumentación dedicada; métricas de negocio como la tasa de no-show
+o el tiempo de espera promedio en lista de espera no están definidas (ver
+[métricas](../observability/metrics.md)).
 
 ---
 
@@ -141,8 +141,8 @@ correcto; el rango de la acción debe estar cubierto por el nivel del grant
 (`EvaluateDecisionDto` → `DecisionResponseDto`).
 
 **Eventos producidos/consumidos:** evento `granted` al capturar consentimiento; invalidación de
-caché de decisión del PDP tras revocación (`InvalidateCacheDto`) — ver
-eventos (Fase 11 — pendiente al momento de escribir este flujo).
+caché de decisión del PDP tras revocación (`InvalidateCacheDto`) — ver el
+[catálogo de eventos](../events/event-catalog.md).
 
 **Permisos:** captura y retiro por el propio `PATIENT` o su representante legal; evaluación de
 decisión y break-the-glass restringidos a roles clínicos con alcance verificado.

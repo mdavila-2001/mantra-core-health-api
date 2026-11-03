@@ -74,11 +74,18 @@ export const ARTEFACTO_CONSUMIDOR: ArtefactoFijado = {
  * A diferencia del consumidor, éste **sí vive en el repo**, así que su hash se
  * recalcula en cada corrida y la suite falla si alguien lo movió sin avisar.
  * Eso es exactamente lo que «fijado» tiene que significar.
+ *
+ * El `sha256` es el del archivo HOY, no el del commit de origen: desde
+ * `cd1889bf` el laboratorio cambió una sola línea —la ruta del import del
+ * puerto, `scheduling/ports/agenda-notice.port` →
+ * `scheduling/application/ports/agenda-notice.port`, por la reorganización en
+ * capas del módulo (`cef876905`)—, y el hash se volvió a fijar con ese cambio
+ * revisado. Cualquier otro movimiento vuelve a romper la suite, que es su fin.
  */
 export const DOBLE_PROVEEDOR: ArtefactoFijado = {
   nombre: 'agenda-notice-capability.lab',
   version: 'cd1889bfee085b3aef6052e58c83844bfd80597f',
-  sha256: '81b641f52dc4c46fd9499f8b44f87e320676e9c178405a843e6a42a340d9d09f',
+  sha256: '9e26d04197d8fb8ff9ba87005b0bdad60164efa652e4e90611130c96c8154a06',
   commitDeOrigen: 'cd1889bfee085b3aef6052e58c83844bfd80597f',
   procedencia:
     'mantra-core-health-api@dev · test/lab/agenda-notice-capability.lab.ts (PR #444)',

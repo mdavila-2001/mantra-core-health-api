@@ -5,6 +5,7 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  MaxLength,
   ValidateNested,
 } from 'class-validator';
 
@@ -31,9 +32,10 @@ export class AllergyReactionInput {
   /**
    * Valor de description mantenido por la instancia.
    */
-  @ApiPropertyOptional({ description: 'Descripción libre' })
+  @ApiPropertyOptional({ description: 'Descripción libre', maxLength: 1000 })
   @IsOptional()
   @IsString()
+  @MaxLength(1000)
   description?: string;
 }
 

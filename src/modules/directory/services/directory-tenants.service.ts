@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
+import { Pharmacies } from '../../pharmacy/entities/pharmacies.entity';
+import { PHARM } from '../../pharmacy/pharmacy.concepts';
 import { PinoLogger } from 'nestjs-pino';
 import { TenantTypeProfileService } from './tenant-type-profile.service';
+import { PharmacyOperatingRequirementsService } from './pharmacy-operating-requirements.service';
 import {
   CONCEPTS,
   ConflictException,
@@ -21,7 +24,7 @@ import {
   TenantMembershipsRepository,
   TenantsRepository,
 } from '../repositories';
-import { CatalogRepository } from '../../insurance/repositories';
+import { CatalogRepository } from '../../insurance/infrastructure/repositories';
 import type { Tenants } from '../entities';
 import {
   CreateChildTenantDto,
@@ -93,14 +96,25 @@ export class DirectoryTenantsService {
     private readonly publicProfiles: PublicProfileProjectionService,
     private readonly catalogRepo: CatalogRepository,
     private readonly logger: PinoLogger,
+    // P50: los requisitos de operación de una farmacia, que la verificación exige.
+    private readonly pharmacyRequirements: PharmacyOperatingRequirementsService,
   ) {
     this.logger.setContext(DirectoryTenantsService.name);
   }
 
-  /** UC-04-01: aprovisiona un tenant raíz (pending/unverified) con su membership owner. */
+  /**
+   * UC-04-01: aprovisiona un tenant raíz (pending/unverified) con su membership owner.
+   *
+   * @param dto - Datos del alta.
+   * @param actor - Quién la hace.
+   * @param fixedIds - Ids fijos para el tenant y su membresía owner. Solo los
+   *   pasa un proceso interno (los seeds), para que la organización tenga el
+   *   mismo id en todos los entornos; el endpoint nunca los recibe del cliente.
+   */
   async provision(
     dto: CreateTenantDto,
     actor: AuthenticatedUser,
+    fixedIds: { tenantId?: string; ownerMembershipId?: string } = {},
   ): Promise<TenantResponseDto> {
     this.logger.info(
       { operation: 'directory.tenant.provision', actorId: actor.id },
@@ -130,6 +144,7 @@ export class DirectoryTenantsService {
       });
 
       const tenant = this.tenantsRepo.create(tx, {
+        id: fixedIds.tenantId,
         code: dto.code,
         legalName: dto.legalName,
         tradeName: dto.tradeName,
@@ -168,6 +183,7 @@ export class DirectoryTenantsService {
       );
 
       this.membershipsRepo.create(tx, {
+        id: fixedIds.ownerMembershipId,
         userId: dto.ownerUserId,
         tenantId: tenant.id,
         tenantRoleConceptId: DIR.ROLE_OWNER,
@@ -231,7 +247,7 @@ export class DirectoryTenantsService {
       // El sujeto de la vitrina de una organización es su propio tenant: es lo
       // que escribe `verify()` (`targetId: tenant.id`) y lo que lee la ficha
       // pública. Si eso cambiara, cambia en los dos lados o en ninguno.
-      await this.publicProfiles.updateOrganizationVitrina(tx, {
+      await this.publicProfiles.updateOrganizationShowcase(tx, {
         targetId: tenant.id,
         displayName: dto.displayName,
         headline: dto.headline,
@@ -271,6 +287,38 @@ export class DirectoryTenantsService {
         );
       }
 
+      // P50 y P51: una farmacia o un laboratorio sólo operan —y verificarlos
+      // es lo que los deja operar— con sus papeles presentados (y, la
+      // farmacia, con el punto de su casa central). El alta pública los deja
+      // opcionales (D2); acá se exigen, y se rechaza nombrando lo que falta,
+      // antes de tocar nada. Otros tipos no tienen requisitos.
+      const operating = await this.pharmacyRequirements.evaluateForTenant(
+        tx,
+        tenant,
+      );
+      if (operating && !operating.readiness.ready) {
+        this.logger.warn(
+          {
+            operation: 'directory.tenant.verify',
+            tenantId,
+            reason:
+              operating.kind === 'PHARMACY'
+                ? 'pharmacy-not-ready'
+                : 'laboratory-not-ready',
+            missing: operating.readiness.missing,
+          },
+          'Rejected verification: operating requirements missing',
+        );
+        throw new PreconditionFailedException(
+          operating.kind === 'PHARMACY'
+            ? 'La farmacia todavía no puede operar: faltan papeles o el punto de su casa central'
+            : 'El laboratorio todavía no puede operar: faltan la matrícula del SEPREC, la licencia de funcionamiento o el certificado del SEDES',
+          { tenantId, missing: operating.readiness.missing },
+        );
+      }
+      const pharmacyReadiness =
+        operating?.kind === 'PHARMACY' ? operating.readiness : undefined;
+
       tenant.verificationStatusConceptId = CONCEPTS.TENANT_VERIFIED;
       tenant.statusConceptId = CONCEPTS.TENANT_ACTIVE;
       if (dto.countryConceptId) tenant.countryConceptId = dto.countryConceptId;
@@ -290,18 +338,62 @@ export class DirectoryTenantsService {
       // El slug lleva el identificador y no el nombre a propósito: dos clínicas
       // pueden llamarse igual y el slug es único; el nombre bonito es el
       // `displayName`, que sí se puede repetir.
-      await this.publicProfiles.projectOrganization(tx, {
-        tenantId: tenant.id,
-        targetId: tenant.id,
-        slug: `organization-${tenant.id}`,
-        displayName: tenant.tradeName ?? tenant.legalName,
-        actorUserId: actor.id,
-        // Una farmacia verificada tiene que aparecer en la vertical de
-        // farmacias, no en la de organizaciones. Proyectarlas todas como
-        // organización dejaba `/public/search/pharmacies` en cero para siempre,
-        // y el buscador público con una vertical muerta.
-        targetTypeConceptId: showcaseByKind(tenant.tenantTypeConceptId),
-      });
+      const publicProfileId = await this.publicProfiles.projectOrganization(
+        tx,
+        {
+          tenantId: tenant.id,
+          targetId: tenant.id,
+          slug: `organization-${tenant.id}`,
+          displayName: tenant.tradeName ?? tenant.legalName,
+          actorUserId: actor.id,
+          // Una farmacia verificada tiene que aparecer en la vertical de
+          // farmacias, no en la de organizaciones. Proyectarlas todas como
+          // organización dejaba `/public/search/pharmacies` en cero para siempre,
+          // y el buscador público con una vertical muerta.
+          targetTypeConceptId: showcaseByKind(tenant.tenantTypeConceptId),
+        },
+      );
+
+      // Una farmacia verificada pasa a operar: su fila de `pharmacy.pharmacies`
+      // (nacida en borrador al registrarse) se activa, se marca verificada y se
+      // enlaza a la vitrina. Sin esto el portal de la farmacia decía «todavía no
+      // tiene una farmacia publicada» para siempre (P50).
+      //
+      // También se enlaza la que ya opera sin vitrina: la que se aprobó por la
+      // verificación de su licencia antes de que la organización tuviera
+      // vitrina. Activa y verificada, sin el enlace no aparecía en el buscador.
+      if (tenant.tenantTypeConceptId === CONCEPTS.TENANT_TYPE_PHARMACY) {
+        const pharmacies = await tx.find(Pharmacies, {
+          tenantId: tenant.id,
+          $or: [
+            { statusConceptId: PHARM.PHARMACY_DRAFT },
+            { statusConceptId: PHARM.PHARMACY_ACTIVE, publicProfileId: null },
+          ],
+        });
+        for (const pharmacy of pharmacies) {
+          if (pharmacy.statusConceptId === PHARM.PHARMACY_DRAFT) {
+            pharmacy.statusConceptId = PHARM.PHARMACY_ACTIVE;
+            pharmacy.verificationStatusConceptId = PHARM.VERIFICATION_VERIFIED;
+          }
+          pharmacy.publicProfileId = publicProfileId;
+          touch(pharmacy, actor.id);
+        }
+        // La plataforma atestigua los papeles al verificar: quedan VERIFICADO
+        // con quién y cuándo, en vez de PENDIENTE para siempre.
+        await this.pharmacyRequirements.markDocumentsVerified(
+          tx,
+          pharmacyReadiness?.documentIds ?? [],
+          actor.id,
+        );
+      }
+      // P51: lo mismo con los tres papeles del laboratorio.
+      if (operating?.kind === 'LABORATORY') {
+        await this.pharmacyRequirements.markDocumentsVerified(
+          tx,
+          operating.readiness.documentIds,
+          actor.id,
+        );
+      }
 
       this.logger.info(
         { operation: 'directory.tenant.verify', tenantId },

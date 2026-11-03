@@ -21,7 +21,11 @@ describe('DiagnosticsReceptionController', () => {
         Promise.resolve({ items: [], count: 0, limit: 25, nextCursor: null }),
       ),
     };
-    const controller = new DiagnosticsReceptionController(service as any);
+    const worklist = { list: mockFn(), getById: mockFn() };
+    const controller = new DiagnosticsReceptionController(
+      service as any,
+      worklist as any,
+    );
     const body = { limit: 10, patientQuery: 'ana' };
     await runWithTenant('lab-1', () => controller.listInbox(body));
     expect(service.listInbox).toHaveBeenCalledWith('lab-1', body);
@@ -29,11 +33,47 @@ describe('DiagnosticsReceptionController', () => {
 
   it('inválido: sin tenant en el contexto no llega al servicio', async () => {
     const service = { listInbox: mockFn() };
-    const controller = new DiagnosticsReceptionController(service as any);
+    const worklist = { list: mockFn(), getById: mockFn() };
+    const controller = new DiagnosticsReceptionController(
+      service as any,
+      worklist as any,
+    );
     await expect(async () => controller.listInbox({})).rejects.toThrow(
       /tenant/i,
     );
     expect(service.listInbox).not.toHaveBeenCalled();
+  });
+
+  it('C6: el worklist y el detalle delegan con el tenant del contexto', async () => {
+    const service = { listInbox: mockFn() };
+    const worklist = { list: mockFn(), getById: mockFn() };
+    const controller = new DiagnosticsReceptionController(
+      service as any,
+      worklist as any,
+    );
+    const body = { scope: 'IMAGING' } as any;
+    await runWithTenant('img-1', async () => {
+      await controller.listWorklist(body);
+      await controller.getServiceRequest('sr-1');
+    });
+    expect(worklist.list).toHaveBeenCalledWith('img-1', body);
+    expect(worklist.getById).toHaveBeenCalledWith('img-1', 'sr-1');
+  });
+
+  it('C6: sin tenant en el contexto ni el worklist ni el detalle llegan al servicio', async () => {
+    const worklist = { list: mockFn(), getById: mockFn() };
+    const controller = new DiagnosticsReceptionController(
+      { listInbox: mockFn() } as any,
+      worklist as any,
+    );
+    await expect(async () =>
+      controller.listWorklist({ scope: 'LAB' } as any),
+    ).rejects.toThrow(/tenant/i);
+    await expect(async () =>
+      controller.getServiceRequest('sr-1'),
+    ).rejects.toThrow(/tenant/i);
+    expect(worklist.list).not.toHaveBeenCalled();
+    expect(worklist.getById).not.toHaveBeenCalled();
   });
 
   it('la bandeja y el circuito de especímenes los autoriza LabStaffGuard, no @Roles', () => {

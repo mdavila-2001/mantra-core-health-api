@@ -184,4 +184,48 @@ for migration in "${migraciones[@]}"; do
     "${PSQL[@]}" -f "$migration"
 done
 
+# HZ-05 · rol de RUNTIME de la API y los workers.
+#
+# El patch `2026-08-05_tenant_rls.sql` (aplicado arriba) crea `mantra_app` como
+# NOLOGIN, sin SUPERUSER ni BYPASSRLS, con DML sobre los schemas del modelo y
+# RLS forzada. Un rol NOLOGIN no sirve para conectar: acá se le habilita LOGIN
+# con la contraseña del entorno. Sin `DB_APP_PASSWORD` el paso no hace nada y la
+# API sigue conectando con el rol dueño — que el arranque en producción rechaza
+# (`SYSTEM_DB_ROLE_PRIVILEGED`) salvo excepción explícita.
+#
+# El rol dueño (POSTGRES_USER) queda reservado para este script, `api-migrate`
+# y el seed. La contraseña nunca va en la línea de comandos ni en el log: viaja
+# por stdin y se apaga el log de sentencias de la sesión antes de usarla.
+if [ -n "${DB_APP_PASSWORD:-}" ]; then
+    APP_ROLE="${DB_APP_USER:-mantra_app}"
+    if [ "$APP_ROLE" != "mantra_app" ]; then
+        echo "!!! DB_APP_USER='$APP_ROLE': el patch 2026-08-05_tenant_rls.sql otorga"
+        echo "!!! privilegios solo a 'mantra_app'. Usá ese nombre o aprovisioná el rol"
+        echo "!!! a mano con scripts/postgres/provision-roles.sql."
+        exit 5
+    fi
+    if ! pg_true "SELECT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'mantra_app')"; then
+        echo "!!! El rol mantra_app no existe: falta aplicar 2026-08-05_tenant_rls.sql."
+        exit 6
+    fi
+    echo ">>> Rol de runtime mantra_app: habilitando LOGIN con la contraseña del entorno"
+    app_password_sql="${DB_APP_PASSWORD//\'/\'\'}"
+    "${PSQL[@]}" -q -f - <<SQL
+SET log_statement = 'none';
+SET log_min_duration_statement = -1;
+SET log_min_error_statement = 'panic';
+ALTER ROLE mantra_app LOGIN PASSWORD '${app_password_sql}'
+  NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;
+SQL
+    unset app_password_sql
+    # Se verifica el atributo que importa, no la intención.
+    if ! pg_true "SELECT rolcanlogin AND NOT rolsuper AND NOT rolbypassrls FROM pg_roles WHERE rolname = 'mantra_app'"; then
+        echo "!!! mantra_app no quedó como LOGIN sin SUPERUSER ni BYPASSRLS."
+        exit 7
+    fi
+    echo "=== mantra_app: LOGIN, NOSUPERUSER, NOBYPASSRLS"
+else
+    echo "=== DB_APP_PASSWORD vacío: la API conectará con el rol dueño (ver HZ-05)."
+fi
+
 echo "=== postgres-init completado"

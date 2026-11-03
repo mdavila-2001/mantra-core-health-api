@@ -3,13 +3,13 @@
   Fuente real: src/modules/geo/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `geo`
 
 **Fuente:** [`src/modules/geo/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/geo/README.md)
-· 4 controllers · 4 services · 6 repositories · 6 entidades · 14 DTO
+· 5 controllers · 5 services · 6 repositories · 6 entidades · 14 DTO
 
 ---
 
@@ -130,7 +130,5 @@ eventos de entrada/salida. Las rutas se reservan al rol `SECURITY_ADMIN`.
 corepack yarn test src/modules/geo --runInBand --silent
 ```
 
-La revisión de octubre de 2026 encontró que el rol global no sustituye una
-comprobación por tenant, sujeto y consentimiento. El detalle y la matriz de
-pruebas están en
-[`docs/revision-backend-2026-10-04/modulos/geo.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/geo.md).
+El acceso se decide por rol global, sin comprobación por tenant, sujeto ni
+consentimiento.

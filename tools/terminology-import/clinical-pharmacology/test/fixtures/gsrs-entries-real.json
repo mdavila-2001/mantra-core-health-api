@@ -1,0 +1,254 @@
+[
+{
+"unii": "1WNS1NP35X",
+"moiety": "98PI200987",
+"atc": [],
+"rxcui": [],
+"name": "LIDOCAINE MALEATE",
+"substanceClass": "chemical"
+},
+{
+"unii": "2DO9G6G1JY",
+"moiety": "98PI200987",
+"atc": [],
+"rxcui": [],
+"name": "LIDOCAINE BICARBONATE",
+"substanceClass": "chemical"
+},
+{
+"unii": "362O9ITL9D",
+"moiety": "362O9ITL9D",
+"atc": [
+"N02AJ01",
+"N02AJ06",
+"N02AJ13",
+"N02AJ17",
+"N02BE01",
+"N02BE51",
+"N02BE71"
+],
+"rxcui": [
+"161"
+],
+"name": "Acetaminophen",
+"substanceClass": "chemical"
+},
+{
+"unii": "39J1LGJ30J",
+"moiety": "39J1LGJ30J",
+"atc": [
+"N02AJ13",
+"N02AJ14",
+"N02AJ15",
+"N02AX02",
+"N02AX52"
+],
+"rxcui": [
+"10689"
+],
+"name": "TRAMADOL",
+"substanceClass": "chemical"
+},
+{
+"unii": "4VOT84VUZG",
+"moiety": "362O9ITL9D",
+"atc": [],
+"rxcui": [],
+"name": "ACETAMINOPHEN NICOTINATE",
+"substanceClass": "chemical"
+},
+{
+"unii": "544Y3D6MYH",
+"moiety": "9EM05410Q9",
+"atc": [],
+"rxcui": [
+"267360"
+],
+"name": "Amoxicillin sodium",
+"substanceClass": "chemical"
+},
+{
+"unii": "69PN84IO1A",
+"moiety": "Q508Q118JM",
+"atc": [
+"C09AA02",
+"C09BA02",
+"C09BB02",
+"C09BB06"
+],
+"rxcui": [
+"3827"
+],
+"name": "ENALAPRIL",
+"substanceClass": "chemical"
+},
+{
+"unii": "804826J2HU",
+"moiety": "9EM05410Q9",
+"atc": [
+"A02BD01",
+"A02BD03",
+"A02BD04",
+"A02BD05",
+"A02BD06",
+"A02BD07",
+"A02BD10",
+"A02BD11",
+"J01CA04",
+"J01CR02"
+],
+"rxcui": [
+"133008",
+"723"
+],
+"name": "Amoxicillin",
+"substanceClass": "chemical"
+},
+{
+"unii": "80FJ28572U",
+"moiety": "39J1LGJ30J",
+"atc": [],
+"rxcui": [],
+"name": "CELECOXIB TRAMADOL HYDROCHLORIDE CO-CRYSTAL",
+"substanceClass": "chemical"
+},
+{
+"unii": "98PI200987",
+"moiety": "98PI200987",
+"atc": [
+"C01BB01",
+"C05AD01",
+"D04AB01",
+"N01BB02",
+"N01BB52",
+"R02AD02",
+"S01HA07",
+"S02DA01"
+],
+"rxcui": [
+"6387"
+],
+"name": "LIDOCAINE",
+"substanceClass": "chemical"
+},
+{
+"unii": "9EM05410Q9",
+"moiety": "9EM05410Q9",
+"atc": [
+"J01CA04"
+],
+"rxcui": [
+"1297882"
+],
+"name": "Amoxicillin anhydrous",
+"substanceClass": "chemical"
+},
+{
+"unii": "9N7R477WCK",
+"moiety": "39J1LGJ30J",
+"atc": [],
+"rxcui": [
+"82110"
+],
+"name": "TRAMADOL HYDROCHLORIDE",
+"substanceClass": "chemical"
+},
+{
+"unii": "9O25354EPJ",
+"moiety": "Q508Q118JM",
+"atc": [],
+"rxcui": [
+"203123"
+],
+"name": "ENALAPRIL MALEATE",
+"substanceClass": "chemical"
+},
+{
+"unii": "EC2CNF7XFP",
+"moiety": "98PI200987",
+"atc": [],
+"rxcui": [
+"1299236"
+],
+"name": "LIDOCAINE HYDROCHLORIDE ANHYDROUS",
+"substanceClass": "chemical"
+},
+{
+"unii": "EYR84TH492",
+"moiety": "98PI200987",
+"atc": [],
+"rxcui": [],
+"name": "LIDOCAINE SULFATE",
+"substanceClass": "chemical"
+},
+{
+"unii": "F0783GVP2Z",
+"moiety": "98PI200987",
+"atc": [],
+"rxcui": [],
+"name": "LIDOCAINE CARBONATE",
+"substanceClass": "chemical"
+},
+{
+"unii": "FAO4HZ1165",
+"moiety": "98PI200987",
+"atc": [],
+"rxcui": [],
+"name": "LIDOCAINE IMINODIACETIC ACID",
+"substanceClass": "chemical"
+},
+{
+"unii": "GV0O7ES0R3",
+"moiety": "Q508Q118JM",
+"atc": [],
+"rxcui": [
+"3829"
+],
+"name": "ENALAPRILAT DIHYDRATE",
+"substanceClass": "chemical"
+},
+{
+"unii": "M0335SFO80",
+"moiety": "98PI200987",
+"atc": [],
+"rxcui": [],
+"name": "LIDOCAINE TOSYLATE",
+"substanceClass": "chemical"
+},
+{
+"unii": "Q508Q118JM",
+"moiety": "Q508Q118JM",
+"atc": [],
+"rxcui": [
+"1545989"
+],
+"name": "ENALAPRILAT ANHYDROUS",
+"substanceClass": "chemical"
+},
+{
+"unii": "V13007Z41A",
+"moiety": "98PI200987",
+"atc": [],
+"rxcui": [
+"142440"
+],
+"name": "LIDOCAINE HYDROCHLORIDE",
+"substanceClass": "chemical"
+},
+{
+"unii": "V9E6HW6ZAG",
+"moiety": "362O9ITL9D",
+"atc": [],
+"rxcui": [],
+"name": "4-HYDROXYACETANILIDE SODIUM",
+"substanceClass": "chemical"
+},
+{
+"unii": "WVH4R62LA6",
+"moiety": "362O9ITL9D",
+"atc": [],
+"rxcui": [],
+"name": "POTASSIUM 4-ACETAMIDOPHENOLATE",
+"substanceClass": "chemical"
+}
+]

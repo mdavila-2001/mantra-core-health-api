@@ -4,13 +4,14 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
 import { ACCT } from '../accounting.concepts';
+import { AccountingErrorReason } from '../accounting.error-reasons';
 import { SubledgerRepository } from '../repositories';
 import { PostingHelper } from './posting.helper';
+import { AccountingScopeService } from './accounting-scope.service';
 import { toCents, fromCents } from './money';
 import {
   CreateOpenItemDto,
@@ -32,12 +33,14 @@ export class SubledgerService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param subledgerRepo - Valor de subledger repo requerido por la operación.
    * @param posting - Valor de posting requerido por la operación.
+   * @param scope - Política de alcance de tenant (ACC-01).
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly subledgerRepo: SubledgerRepository,
     private readonly posting: PostingHelper,
+    private readonly scope: AccountingScopeService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(SubledgerService.name);
@@ -56,18 +59,14 @@ export class SubledgerService {
       'Creating open item',
     );
     return this.em.transactional(async (tx) => {
-      const subledger = await this.subledgerRepo.findSubledgerById(
-        tx,
-        dto.subledgerAccountId,
-      );
-      if (!subledger) {
-        throw new ResourceNotFoundException('Subledger no encontrado', {
-          subledgerAccountId: dto.subledgerAccountId,
-        });
-      }
+      // ACC-01: el subledger y la línea del mayor son del tenant activo, y la
+      // partida hereda el tenant del subledger verificado, no el del cuerpo.
+      this.scope.activeTenantFor(dto.tenantId, 'subledger');
+      const subledger = await this.scope.subledger(tx, dto.subledgerAccountId);
+      await this.scope.ledgerEntry(tx, dto.ledgerEntryId);
 
       const item = this.subledgerRepo.createOpenItem(tx, {
-        tenantId: dto.tenantId,
+        tenantId: subledger.tenantId,
         subledgerAccountId: dto.subledgerAccountId,
         ledgerEntryId: dto.ledgerEntryId,
         documentTypeConceptId:
@@ -102,33 +101,46 @@ export class SubledgerService {
       'Clearing open items',
     );
     return this.em.transactional(async (tx) => {
+      // ACC-01: la organización del documento es la de la sesión, y la práctica
+      // del asiento, las partidas, el subledger y la cuenta bancaria son suyas.
+      // Lo ajeno responde 404 idéntico a lo inexistente.
+      const tenantId = await this.scope.practice(dto.practiceId);
+      this.scope.activeTenantFor(dto.tenantId, 'practice');
+      if (dto.companyBankAccountId) {
+        await this.scope.companyBankAccount(tx, dto.companyBankAccountId);
+      }
       // Cargar y validar cada partida; todas deben pertenecer al mismo subledger.
       const loaded = [];
       let subledgerAccountId: string | null = null;
+      // Un mismo `openItemId` puede venir repetido: cada línea se valida contra lo
+      // que la partida ya acumuló en esta petición, no solo contra su pendiente.
+      const clearedByItem = new Map<string, number>();
       for (const it of dto.items) {
-        const openItem = await this.subledgerRepo.findOpenItemById(
-          tx,
-          it.openItemId,
-        );
-        if (!openItem) {
-          throw new ResourceNotFoundException('Partida abierta no encontrada', {
-            openItemId: it.openItemId,
-          });
-        }
+        const openItem = await this.scope.openItem(tx, it.openItemId);
         if (openItem.statusConceptId === ACCT.OPEN_ITEM_CLEARED) {
-          throw new ConflictException('La partida ya está compensada', {
-            openItemId: it.openItemId,
-          });
+          throw new ConflictException(
+            'La partida ya está compensada',
+            {
+              openItemId: it.openItemId,
+            },
+            AccountingErrorReason.OPEN_ITEM_ALREADY_CLEARED,
+          );
         }
         const cleared = toCents(it.clearedAmount);
         const outstanding = toCents(openItem.outstandingAmount ?? '0');
-        if (cleared <= 0 || cleared > outstanding) {
-          throw new PreconditionFailedException('Importe compensado inválido', {
-            openItemId: it.openItemId,
-            clearedAmount: it.clearedAmount,
-            outstanding: fromCents(outstanding),
-          });
+        const alreadyCleared = clearedByItem.get(it.openItemId) ?? 0;
+        if (cleared <= 0 || alreadyCleared + cleared > outstanding) {
+          throw new PreconditionFailedException(
+            'Importe compensado inválido',
+            {
+              openItemId: it.openItemId,
+              clearedAmount: it.clearedAmount,
+              outstanding: fromCents(outstanding),
+            },
+            AccountingErrorReason.OPEN_ITEM_INVALID_CLEARED_AMOUNT,
+          );
         }
+        clearedByItem.set(it.openItemId, alreadyCleared + cleared);
         subledgerAccountId = subledgerAccountId ?? openItem.subledgerAccountId;
         if (openItem.subledgerAccountId !== subledgerAccountId) {
           throw new PreconditionFailedException(
@@ -136,6 +148,7 @@ export class SubledgerService {
             {
               openItemId: it.openItemId,
             },
+            AccountingErrorReason.OPEN_ITEM_SUBLEDGER_MISMATCH,
           );
         }
         loaded.push({
@@ -146,21 +159,16 @@ export class SubledgerService {
         });
       }
 
-      const subledger = await this.subledgerRepo.findSubledgerById(
+      const subledger = await this.scope.subledger(
         tx,
         subledgerAccountId as string,
       );
-      if (!subledger) {
-        throw new ResourceNotFoundException('Subledger no encontrado', {
-          subledgerAccountId,
-        });
-      }
 
       const totalCleared = loaded.reduce((acc, l) => acc + l.clearedCents, 0);
       const number = dto.clearingNumber ?? this.posting.generateNumber('CLR');
       const clash = await this.subledgerRepo.findClearingByNumber(
         tx,
-        dto.tenantId,
+        tenantId,
         number,
       );
       if (clash) {
@@ -169,6 +177,7 @@ export class SubledgerService {
           {
             clearingNumber: number,
           },
+          AccountingErrorReason.CLEARING_NUMBER_ALREADY_EXISTS,
         );
       }
 
@@ -197,7 +206,7 @@ export class SubledgerService {
       });
 
       const clearingDoc = this.subledgerRepo.createClearingDocument(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         clearingNumber: number,
         transactionId: posted.transactionId,
         statusConceptId: ACCT.CLEARING_COMPLETED,

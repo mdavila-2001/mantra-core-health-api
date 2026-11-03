@@ -95,9 +95,7 @@ function build(
 }
 
 /** Las especialidades distintas que declara el catálogo. */
-const SPECIALTIES = new Set(
-  STANDARD_FORMS.map((form) => form.specialty.code),
-);
+const SPECIALTIES = new Set(STANDARD_FORMS.map((form) => form.specialty.code));
 
 /**
  * Lo que publicaría `VS_MEDICAL_SPECIALTY`: todas las del catálogo menos
@@ -168,8 +166,8 @@ describe('ClinicalFormsSeedService', () => {
     );
     expect(reserved).toHaveLength(STANDARD_FORMS.length);
 
-    for (const campo of reserved) {
-      const record = campo.defaultValueJson;
+    for (const field of reserved) {
+      const record = field.defaultValueJson;
       expect(typeof record.organization).toBe('string');
       expect(record.organization).not.toBe('');
       expect(record.url).toMatch(/^https:\/\//);
@@ -208,7 +206,7 @@ describe('ClinicalFormsSeedService', () => {
   });
 
   it('flushea la sección antes de crear la plantilla que la referencia', async () => {
-    const { service, bitacora } = build();
+    const { service, bitacora: createdEntities } = build();
 
     await service.run();
 
@@ -217,13 +215,67 @@ describe('ClinicalFormsSeedService', () => {
     // flush intermedio la plantilla entra antes que su sección y la base rechaza
     // el lote entero — el seed queda «omitido» y el catálogo, vacío. Pasó de
     // verdad al correrlo contra postgres; esta prueba es la que lo fija.
-    const log = bitacora();
+    const log = createdEntities();
     const section = log.indexOf('DynamicFieldSections');
     const template = log.indexOf('SpecialtyChartTemplates');
 
     expect(section).toBeGreaterThanOrEqual(0);
     expect(template).toBeGreaterThan(section);
     expect(log.slice(section, template)).toContain('<flush>');
+  });
+
+  it('escribe el catálogo por niveles, con un flush por nivel y no uno por fila', async () => {
+    const { service, bitacora } = build();
+
+    await service.run();
+
+    // api#1245: un flush por campo y por asignación llevaba la siembra de una
+    // base nueva a más de un cuarto de hora. Con el catálogo entero de una vez
+    // quedan, como mucho, los flush de especialidades, value set (3), política
+    // (2), secciones, plantillas, definiciones y asignaciones.
+    const log = bitacora();
+    const flushes = log.filter((entity) => entity === '<flush>').length;
+    expect(flushes).toBeLessThanOrEqual(10);
+
+    // Y el orden entre niveles es el que piden las FK planas.
+    const lastOf = (entity: string) => log.lastIndexOf(entity);
+    const firstOf = (entity: string) => log.indexOf(entity);
+    expect(lastOf('DynamicFieldSections')).toBeLessThan(
+      firstOf('SpecialtyChartTemplates'),
+    );
+    expect(lastOf('SpecialtyChartTemplates')).toBeLessThan(
+      firstOf('DynamicFieldDefinitions'),
+    );
+    expect(lastOf('DynamicFieldDefinitions')).toBeLessThan(
+      firstOf('FieldAssignments'),
+    );
+  });
+
+  it('una corrida cortada entre niveles se completa sin reescribir lo que ya entró', async () => {
+    const first = build();
+    await first.service.run();
+
+    // Una base a medio sembrar: secciones y la mitad de las definiciones de
+    // campo, sin plantillas —lo que deja cortada la versión anterior, que
+    // escribía formulario por formulario—.
+    const definitions = first.rowsOf('DynamicFieldDefinitions');
+    const half = definitions.slice(0, Math.floor(definitions.length / 2));
+    const alreadyPresent = new Set<string>([
+      ...first.rowsOf('DynamicFieldSections').map((row) => row.id),
+      ...half.map((row) => row.id),
+    ]);
+    const second = build(alreadyPresent);
+
+    const result = await second.service.run();
+
+    expect(result.templates).toBe(STANDARD_FORMS.length);
+    expect(second.rowsOf('DynamicFieldSections')).toHaveLength(0);
+    const written = second.rowsOf('DynamicFieldDefinitions').map((r) => r.id);
+    expect(written).toHaveLength(definitions.length - half.length);
+    expect(written.some((id) => alreadyPresent.has(id))).toBe(false);
+    expect(second.rowsOf('FieldAssignments')).toHaveLength(
+      first.rowsOf('FieldAssignments').length,
+    );
   });
 
   it('corrido dos veces no duplica nada', async () => {
@@ -246,6 +298,25 @@ describe('ClinicalFormsSeedService', () => {
     expect(result.specialties).toBe(0);
     expect(second.rowsOf('SpecialtyChartTemplates')).toHaveLength(0);
     expect(second.rowsOf('DynamicFieldDefinitions')).toHaveLength(0);
+  });
+
+  it('retoma una corrida cortada: reusa la sección que quedó sin plantilla', async () => {
+    const form = STANDARD_FORMS[0];
+    const sectionId = deterministicId(`clinical-forms:section:${form.code}`);
+    const { service, rowsOf } = build(new Set([sectionId]));
+
+    const result = await service.run();
+
+    // La plantilla que faltaba se crea y cuelga de la sección existente; la
+    // sección NO se vuelve a insertar (eso violaba `pk_dynamic_field_sections`).
+    expect(result.templates).toBe(STANDARD_FORMS.length);
+    expect(rowsOf('DynamicFieldSections').map((row) => row.id)).not.toContain(
+      sectionId,
+    );
+    const template = rowsOf('SpecialtyChartTemplates').find(
+      (row) => row.code === form.code,
+    );
+    expect(template?.sectionId).toBe(sectionId);
   });
 
   it('no pisa una plantilla que la organización ya editó', async () => {
@@ -295,7 +366,7 @@ describe('ClinicalFormsSeedService — v2 del catálogo', () => {
   it('al subir de versión actualiza la ficha de catálogo y retira lo que ya no se pregunta', async () => {
     const form = STANDARD_FORMS.find((f) => f.code === 'MEDGEN_CONSULTA_BASE')!;
     const templateId = deterministicId(`clinical-forms:template:${form.code}`);
-    const { service, actualizaciones } = build();
+    const { service, actualizaciones: updates } = build();
     // La plantilla ya sembrada, en la v1.
     const em = (service as any).orm.em.fork();
     em.findOne.mockImplementation((_entity: any, where: any) =>
@@ -308,7 +379,7 @@ describe('ClinicalFormsSeedService — v2 del catálogo', () => {
 
     await service.run();
 
-    const catalog = actualizaciones().find(
+    const catalog = updates().find(
       (u) =>
         u.where.id ===
         deterministicId(
@@ -317,7 +388,7 @@ describe('ClinicalFormsSeedService — v2 del catálogo', () => {
     );
     expect(catalog?.data.defaultValueJson.fieldPresentation).toBeDefined();
 
-    const withdrawal = actualizaciones().find((u) => u.where.fieldId?.$nin);
+    const withdrawal = updates().find((u) => u.where.fieldId?.$nin);
     expect(withdrawal?.where).toMatchObject({
       sectionId: 'sec-medgen',
       tenantId: null,
@@ -394,8 +465,8 @@ describe('catálogo de formularios estándar', () => {
       MODEL_SPECIALTIES.get('ODONTOLOGIA'),
     );
     // Y no acuña las que el modelo ya declara.
-    const acunados = rowsOf('CatalogConcepts').map((row: any) => row.code);
-    expect(acunados).not.toContain('clinical-forms:specialty:ODONTOLOGIA');
+    const minted = rowsOf('CatalogConcepts').map((row: any) => row.code);
+    expect(minted).not.toContain('clinical-forms:specialty:ODONTOLOGIA');
   });
 
   it('sin value set del modelo, sigue acuñando sus propios conceptos', async () => {
@@ -409,8 +480,8 @@ describe('catálogo de formularios estándar', () => {
     expect(odonto.specialtyConceptId).toBe(
       deterministicId('clinical-forms:specialty:ODONTOLOGIA'),
     );
-    const acunados = rowsOf('CatalogConcepts').map((row: any) => row.code);
-    expect(acunados).toContain('clinical-forms:specialty:ODONTOLOGIA');
+    const minted = rowsOf('CatalogConcepts').map((row: any) => row.code);
+    expect(minted).toContain('clinical-forms:specialty:ODONTOLOGIA');
   });
 
   it('TRANSVERSAL se acuña siempre: no es una especialidad médica', async () => {
@@ -418,19 +489,19 @@ describe('catálogo de formularios estándar', () => {
 
     await service.run();
 
-    const acunados = rowsOf('CatalogConcepts').map((row: any) => row.code);
-    expect(acunados).toContain('clinical-forms:specialty:TRANSVERSAL');
+    const minted = rowsOf('CatalogConcepts').map((row: any) => row.code);
+    expect(minted).toContain('clinical-forms:specialty:TRANSVERSAL');
   });
 
   it('re-apunta al modelo las plantillas colgadas de un concepto acuñado', async () => {
-    const { service, actualizaciones } = build(
+    const { service, actualizaciones: updates } = build(
       new Set(),
       MODEL_SPECIALTIES,
     );
 
     await service.run();
 
-    const repair = actualizaciones().find(
+    const repair = updates().find(
       (row) =>
         row.where?.specialtyConceptId ===
         deterministicId('clinical-forms:specialty:ODONTOLOGIA'),
@@ -442,11 +513,11 @@ describe('catálogo de formularios estándar', () => {
   });
 
   it('sin value set no intenta reparar nada', async () => {
-    const { service, actualizaciones } = build();
+    const { service, actualizaciones: updates } = build();
 
     await service.run();
 
-    const repairs = actualizaciones().filter(
+    const repairs = updates().filter(
       (row) => row.data?.specialtyConceptId !== undefined,
     );
     expect(repairs).toHaveLength(0);

@@ -46,7 +46,7 @@ describe('loadBuildInfo', () => {
 
 describe('describeBuild', () => {
   it('acorta el commit como lo hace git log --oneline', () => {
-    const linea = describeBuild({
+    const line = describeBuild({
       version: '1.2.3',
       commit: '57d283ea4d9228b8f243d70fe3fe43589930f434',
       builtAt: '2026-08-15T18:00:00Z',
@@ -54,19 +54,19 @@ describe('describeBuild', () => {
     });
 
     // Acortado para poder compararlo de un vistazo contra la salida de git.
-    expect(linea).toContain('commit 57d283ea');
-    expect(linea).not.toContain('4d9228b8');
-    expect(linea).toContain('v1.2.3');
-    expect(linea).toContain('entorno production');
+    expect(line).toContain('commit 57d283ea');
+    expect(line).not.toContain('4d9228b8');
+    expect(line).toContain('v1.2.3');
+    expect(line).toContain('entorno production');
   });
 
   it('no acorta el marcador de dato ausente', () => {
-    const linea = describeBuild({
+    const line = describeBuild({
       version: 'desconocido',
       commit: 'desconocido',
       builtAt: 'desconocido',
       nodeEnv: 'development',
     });
-    expect(linea).toContain('commit desconocido');
+    expect(line).toContain('commit desconocido');
   });
 });

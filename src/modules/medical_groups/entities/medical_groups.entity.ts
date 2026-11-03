@@ -16,6 +16,9 @@ export const MEDICAL_GROUP_STATUS = Object.freeze({
   CLOSED: 'CLOSED',
 } as const);
 
+/**
+ * Define el tipo de dominio medical group status.
+ */
 export type MedicalGroupStatus =
   (typeof MEDICAL_GROUP_STATUS)[keyof typeof MEDICAL_GROUP_STATUS];
 
@@ -26,15 +29,27 @@ export type MedicalGroupStatus =
  */
 @Entity({ schema: 'medical_groups', tableName: 'groups' })
 export class MedicalGroups {
+  /**
+   * Identificador único de la instancia.
+   */
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
+  /**
+   * Identificador asociado a tenant.
+   */
   @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants
   tenantId!: string;
 
+  /**
+   * Identificador asociado a practice.
+   */
   @Property({ fieldName: 'practice_id', type: 'uuid' }) // FK → practice.practices
   practiceId!: string;
 
+  /**
+   * Identificador asociado a service catalog.
+   */
   @Property({ fieldName: 'service_catalog_id', type: 'uuid' }) // FK → billing.service_catalog
   serviceCatalogId!: string;
 
@@ -42,6 +57,9 @@ export class MedicalGroups {
   @Property({ fieldName: 'requesting_practitioner_id', type: 'uuid' }) // FK → profiles.health_practitioner_profiles
   requestingPractitionerId!: string;
 
+  /**
+   * Identificador asociado a patient profile.
+   */
   @Property({ fieldName: 'patient_profile_id', type: 'uuid', nullable: true }) // FK → profiles.patient_profiles
   patientProfileId?: string;
 
@@ -49,9 +67,15 @@ export class MedicalGroups {
   @Property({ fieldName: 'condition_id', type: 'uuid', nullable: true }) // FK → clinical.conditions
   conditionId?: string;
 
+  /**
+   * Valor de scheduled at mantenido por la instancia.
+   */
   @Property({ fieldName: 'scheduled_at', columnType: 'timestamptz' })
   scheduledAt!: Date;
 
+  /**
+   * Valor de location text mantenido por la instancia.
+   */
   @Property({ fieldName: 'location_text', columnType: 'varchar' })
   locationText!: string;
 
@@ -67,6 +91,9 @@ export class MedicalGroups {
   @Property({ fieldName: 'terms_text', columnType: 'text' })
   termsText!: string;
 
+  /**
+   * Valor de status mantenido por la instancia.
+   */
   @Property({ columnType: 'varchar' })
   status!: MedicalGroupStatus;
 
@@ -78,6 +105,9 @@ export class MedicalGroups {
   })
   exerciseNotesText?: string;
 
+  /**
+   * Valor de exercise notes updated at mantenido por la instancia.
+   */
   @Property({
     fieldName: 'exercise_notes_updated_at',
     columnType: 'timestamptz',
@@ -85,6 +115,9 @@ export class MedicalGroups {
   })
   exerciseNotesUpdatedAt?: Date;
 
+  /**
+   * Valor de proposed reschedule at mantenido por la instancia.
+   */
   @Property({
     fieldName: 'proposed_reschedule_at',
     columnType: 'timestamptz',
@@ -92,6 +125,9 @@ export class MedicalGroups {
   })
   proposedRescheduleAt?: Date;
 
+  /**
+   * Identificador asociado a proposed by practitioner.
+   */
   @Property({
     fieldName: 'proposed_by_practitioner_id',
     type: 'uuid',
@@ -107,18 +143,33 @@ export class MedicalGroups {
   })
   closedAt?: Date;
 
+  /**
+   * Fecha y hora en que se creó el registro.
+   */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
   createdAt!: Date;
 
+  /**
+   * Fecha y hora de la última actualización.
+   */
   @Property({ fieldName: 'updated_at', columnType: 'timestamptz' })
   updatedAt!: Date;
 
+  /**
+   * Identificador asociado a created by user.
+   */
   @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   createdByUserId?: string;
 
+  /**
+   * Identificador asociado a updated by user.
+   */
   @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   updatedByUserId?: string;
 
+  /**
+   * Versión usada para controlar actualizaciones concurrentes.
+   */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
 }

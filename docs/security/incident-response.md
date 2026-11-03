@@ -25,12 +25,12 @@ no una omisión de esta página.
 [actores y roles](../business/actors-and-roles.md)) — roles que existen en el RBAC, sin un
 runbook formal de "quién hace qué en las primeras 24 horas" verificado en esta fase.
 
-## Qué falta para un proceso de respuesta a incidentes completo
+## Alcance de este documento
 
-- Runbook operativo paso a paso (Fase 14) — este documento describe el mecanismo de *registro*,
-  no el *procedimiento* de respuesta.
-- Definición de severidad y tiempos de escalamiento.
-- Simulacro o ejercicio documentado (no verificado en esta fase).
+Describe el mecanismo de *registro* de incidentes, no el *procedimiento* de respuesta: el
+procedimiento operativo está en el [manual de incidentes](../resilience/07-manual-de-incidentes.md),
+con roles y niveles de severidad en [recuperación y continuidad](../resilience/05-recuperacion-y-continuidad.md).
+No hay un simulacro documentado.
 
 ## Ver también
 

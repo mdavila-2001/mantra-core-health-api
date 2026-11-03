@@ -3,6 +3,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   CONCEPTS,
+  PreconditionFailedException,
   ResourceNotFoundException,
   getCurrentTenantId,
   touch,
@@ -11,6 +12,7 @@ import {
 import { ChartTemplatesRepository } from '../repositories';
 import { CHART } from '../chart.concepts';
 import { FORMS } from '../../forms/forms.concepts';
+import { choiceOptionsOf } from '../../forms/entities/dynamic_field_definitions.types';
 import {
   AssignmentResponseDto,
   AssignTemplateDto,
@@ -58,6 +60,77 @@ export class ChartTemplatesService {
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ChartTemplatesService.name);
+  }
+
+  /**
+   * Las reglas de un campo de elección (`dataType: 'code'`) declarado inline
+   * al crear una plantilla. Misma regla que `FormsFieldsService.
+   * validateChoiceField` —son dos superficies de alta del mismo tipo de
+   * campo, `forms.dynamic_field_definitions`— duplicada a propósito: viven en
+   * módulos distintos (`chart` no depende de `forms` más que por las
+   * entidades) y la alternativa, un servicio compartido para una validación
+   * de una decena de líneas, es más acoplamiento del que vale.
+   */
+  private validateChoiceField(input: {
+    code: string;
+    dataType: string;
+    valueSetId?: string;
+    options?: string[];
+    allowOther?: boolean;
+  }): void {
+    if (input.dataType !== 'code') {
+      if (input.options !== undefined || input.allowOther) {
+        throw new PreconditionFailedException(
+          '`options`/`allowOther` sólo aplican a dataType "code"',
+          { code: input.code },
+        );
+      }
+      return;
+    }
+    if (input.valueSetId !== undefined && input.options !== undefined) {
+      throw new PreconditionFailedException(
+        'Un campo "code" declara valueSetId u options, no los dos',
+        { code: input.code },
+      );
+    }
+    if (input.valueSetId !== undefined) {
+      if (input.allowOther) {
+        throw new PreconditionFailedException(
+          '`allowOther` no aplica sobre un valueSetId',
+          { code: input.code },
+        );
+      }
+      return;
+    }
+    const opciones = input.options ?? [];
+    if (opciones.length < 2) {
+      throw new PreconditionFailedException(
+        'Un campo "code" sin valueSetId necesita al menos dos opciones',
+        { code: input.code, count: opciones.length },
+      );
+    }
+    const vistas = new Set<string>();
+    for (const opcionCruda of opciones) {
+      const opcion = opcionCruda.trim();
+      if (opcion === '') {
+        throw new PreconditionFailedException(
+          'Una opción no puede estar vacía',
+          {
+            code: input.code,
+          },
+        );
+      }
+      if (vistas.has(opcion)) {
+        throw new PreconditionFailedException(
+          'Las opciones no pueden repetirse',
+          {
+            code: input.code,
+            opcion,
+          },
+        );
+      }
+      vistas.add(opcion);
+    }
   }
 
   /** UC-15-12: asigna una plantilla a una práctica/profesional respetando un-solo-default. */
@@ -151,11 +224,25 @@ export class ChartTemplatesService {
 
       const fields: ChartTemplateFieldDto[] = [];
       for (const [i, input] of dto.fields.entries()) {
+        this.validateChoiceField({
+          code: input.code,
+          dataType: input.dataType,
+          valueSetId: input.valueSetId,
+          options: input.options,
+          allowOther: input.allowOther,
+        });
+
         const field = this.templatesRepo.createTemplateField(tx, {
           code: input.code,
           name: input.name,
           dataType: input.dataType,
           valueSetId: input.valueSetId,
+          options: input.options,
+          multiple: input.multiple,
+          allowOther: input.allowOther,
+          description: input.description,
+          cardinalityMin: input.cardinalityMin,
+          cardinalityMax: input.cardinalityMax,
           stateConceptId: FORMS.FIELD_ACTIVE,
           actorUserId: actor.id,
         });
@@ -182,6 +269,12 @@ export class ChartTemplatesService {
           name: field.name,
           dataType: input.dataType,
           valueSetId: field.valueSetId,
+          options: choiceOptionsOf(field.options),
+          multiple: field.multiple,
+          allowOther: field.allowOther,
+          description: field.description,
+          cardinalityMin: field.cardinalityMin,
+          cardinalityMax: field.cardinalityMax,
           required: assignment.required,
           ordinal: assignment.ordinal,
           // Recién creada por un administrador: propia si nació con tenant.
@@ -298,6 +391,12 @@ export class ChartTemplatesService {
         name: field.name,
         dataType: field.dataType as ChartTemplateFieldDto['dataType'],
         valueSetId: field.valueSetId,
+        options: choiceOptionsOf(field.options),
+        multiple: field.multiple,
+        allowOther: field.allowOther,
+        description: field.description,
+        cardinalityMin: field.cardinalityMin,
+        cardinalityMax: field.cardinalityMax,
         required: assignment.required,
         ordinal: assignment.ordinal,
         // Los del estándar son globales; los que agregó la organización llevan
@@ -435,9 +534,7 @@ function applyPresentation(
   presentation: Presentations,
 ): ChartTemplateFieldDto[] {
   if (presentation.size === 0) return fields;
-  const idByCode = new Map(
-    fields.map((f) => [bareCode(f.code), f.fieldId]),
-  );
+  const idByCode = new Map(fields.map((f) => [bareCode(f.code), f.fieldId]));
 
   return fields.map((field) => {
     const p = presentation.get(bareCode(field.code));
@@ -457,13 +554,13 @@ function applyPresentation(
 
     const condition = p.showWhen as
       { field?: unknown; equals?: unknown } | undefined;
-    const padre =
+    const parent =
       typeof condition?.field === 'string'
         ? idByCode.get(condition.field)
         : undefined;
-    if (padre !== undefined && condition?.equals !== undefined) {
+    if (parent !== undefined && condition?.equals !== undefined) {
       extra.showWhen = {
-        fieldId: padre,
+        fieldId: parent,
         equals: condition.equals as ChartTemplateShowWhenDto['equals'],
       };
     }

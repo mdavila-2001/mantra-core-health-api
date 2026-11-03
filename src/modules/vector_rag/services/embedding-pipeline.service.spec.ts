@@ -1,4 +1,10 @@
 import { jest } from '@jest/globals';
+import {
+  PreconditionFailedException,
+  ResourceNotFoundException,
+  runWithTenant,
+} from '../../../common';
+import { VectorErrorReason } from '../vector_rag.error-reasons';
 
 /**
  * Ejecuta la operación mock fn.
@@ -78,7 +84,30 @@ function build() {
     outbox as any,
     logger as any,
   );
-  return { service, em, tx, catalogRepo, corpusRepo, outbox, logger };
+  // Las operaciones exigen el tenant activo: estas pruebas actúan dentro de
+  // TENANT_ID. `raw` conserva la operación sin contexto para probar otro tenant.
+  const raw = service;
+  const scoped = Object.create(raw) as typeof service;
+  for (const name of [
+    'queueEmbeddingJob',
+    'runEmbeddingJob',
+    'reEmbedCollection',
+    'listQueuedJobs',
+  ] as const) {
+    (scoped as any)[name] = (...args: unknown[]) =>
+      runWithTenant(TENANT_ID, () => (raw as any)[name](...args));
+  }
+
+  return {
+    service: scoped,
+    raw,
+    em,
+    tx,
+    catalogRepo,
+    corpusRepo,
+    outbox,
+    logger,
+  };
 }
 
 /**
@@ -109,6 +138,7 @@ function collection(overrides: any = {}) {
 function job(overrides: any = {}) {
   return {
     id: JOB_ID,
+    tenantId: TENANT_ID,
     vectorCollectionId: COLLECTION_ID,
     status: 'queued',
     completedChunks: 0,
@@ -346,6 +376,7 @@ describe('EmbeddingPipelineService', () => {
         d.em,
         'queued',
         10,
+        undefined,
       );
       expect(res.jobs).toEqual([
         { id: JOB_ID, vectorCollectionId: COLLECTION_ID, jobType: 'backfill' },
@@ -361,6 +392,7 @@ describe('EmbeddingPipelineService', () => {
         d.em,
         'queued',
         50,
+        undefined,
       );
     });
   });
@@ -467,6 +499,196 @@ describe('EmbeddingPipelineService', () => {
       await expect(
         d.service.reEmbedCollection(COLLECTION_ID, DTO, actor),
       ).rejects.toThrow(/no está aprobado para datos de paciente/);
+    });
+  });
+
+  describe('alcance de tenant (VEC-01)', () => {
+    const OTHER_TENANT = '99999999-9999-9999-9999-999999999999';
+    const DTO = { jobType: 'backfill', sourceScope: { docs: [DOC_ID] } } as any;
+
+    /** Falla esperada: devuelve la excepción o lanza si no hubo. */
+    async function failure(promise: Promise<unknown>) {
+      try {
+        await promise;
+      } catch (error) {
+        return error as ResourceNotFoundException;
+      }
+      throw new Error('debía rechazar');
+    }
+
+    it('Correcto: el administrador de A encola y re-embebe una colección de A', async () => {
+      const d = build();
+
+      const queued = await d.service.queueEmbeddingJob(
+        COLLECTION_ID,
+        DTO,
+        actor,
+      );
+      const reEmbedded = await d.service.reEmbedCollection(
+        COLLECTION_ID,
+        { embeddingModelVersionId: NEW_MODEL_ID } as any,
+        actor,
+      );
+
+      expect(queued.status).toBe('queued');
+      expect(reEmbedded.vectorCollectionId).toBe(COLLECTION_ID);
+      expect(d.catalogRepo.findCollectionById).toHaveBeenCalledWith(
+        d.tx,
+        COLLECTION_ID,
+        TENANT_ID,
+      );
+      expect(d.catalogRepo.findCollectionForUpdate).toHaveBeenCalledWith(
+        d.tx,
+        COLLECTION_ID,
+        TENANT_ID,
+      );
+      for (const [, data] of d.catalogRepo.createJob.mock.calls) {
+        expect(data.tenantId).toBe(TENANT_ID);
+      }
+    });
+
+    it('Límite: el worker de A que ejecuta un job de B recibe 404 y no escribe documentos ni vectores', async () => {
+      const d = build();
+      // El repositorio filtra por id + tenant: el job de B no se encuentra.
+      d.catalogRepo.findJobForUpdate.mockResolvedValue(null);
+
+      const error = await failure(
+        d.service.runEmbeddingJob(JOB_ID, RUN_DTO, {
+          id: 'worker-a',
+          roles: ['EMBEDDING_WORKER'],
+        } as any),
+      );
+
+      expect(error).toBeInstanceOf(ResourceNotFoundException);
+      expect(error.reason).toBe(VectorErrorReason.RESOURCE_OUT_OF_SCOPE);
+      expect(d.catalogRepo.findJobForUpdate).toHaveBeenCalledWith(
+        d.tx,
+        JOB_ID,
+        TENANT_ID,
+      );
+      expect(d.corpusRepo.createDocument).not.toHaveBeenCalled();
+      expect(d.corpusRepo.createChunk).not.toHaveBeenCalled();
+      expect(d.corpusRepo.createEmbedding).not.toHaveBeenCalled();
+    });
+
+    it('un job de otro tenant que el repositorio devolviera igual se rechaza (defensa en profundidad)', async () => {
+      const d = build();
+      d.catalogRepo.findJobForUpdate.mockResolvedValue(
+        job({ tenantId: OTHER_TENANT }),
+      );
+
+      const error = await failure(
+        d.service.runEmbeddingJob(JOB_ID, RUN_DTO, actor),
+      );
+
+      expect(error.reason).toBe(VectorErrorReason.RESOURCE_OUT_OF_SCOPE);
+      expect(d.corpusRepo.createDocument).not.toHaveBeenCalled();
+    });
+
+    it('Falla catalogada: la colección de B y un UUID inexistente responden exactamente igual', async () => {
+      const ajena = build();
+      ajena.catalogRepo.findCollectionById.mockResolvedValue(
+        collection({ tenantId: OTHER_TENANT }),
+      );
+      const inexistente = build();
+      inexistente.catalogRepo.findCollectionById.mockResolvedValue(null);
+
+      const a = await failure(
+        ajena.service.queueEmbeddingJob(COLLECTION_ID, DTO, actor),
+      );
+      const b = await failure(
+        inexistente.service.queueEmbeddingJob(COLLECTION_ID, DTO, actor),
+      );
+
+      expect(a.getStatus()).toBe(404);
+      expect(a.reason).toBe(VectorErrorReason.RESOURCE_OUT_OF_SCOPE);
+      expect(a.details).toBeUndefined();
+      expect(a.getResponse()).toEqual(b.getResponse());
+      expect(ajena.catalogRepo.createJob).not.toHaveBeenCalled();
+      expect(ajena.outbox.publishDomainEvent).not.toHaveBeenCalled();
+    });
+
+    it('re-embeber la colección de otro tenant responde 404 y no la toca', async () => {
+      const d = build();
+      const foreign = collection({ tenantId: OTHER_TENANT });
+      d.catalogRepo.findCollectionForUpdate.mockResolvedValue(foreign);
+
+      const error = await failure(
+        d.service.reEmbedCollection(
+          COLLECTION_ID,
+          { embeddingModelVersionId: NEW_MODEL_ID } as any,
+          actor,
+        ),
+      );
+
+      expect(error.reason).toBe(VectorErrorReason.RESOURCE_OUT_OF_SCOPE);
+      expect(foreign.embeddingModelVersionId).toBe(MODEL_ID);
+      expect(d.catalogRepo.createJob).not.toHaveBeenCalled();
+    });
+
+    it('SYSTEM sin tenant ejecuta el job de cualquier tenant y escribe con el tenant del job', async () => {
+      const d = build();
+      d.catalogRepo.findJobForUpdate.mockResolvedValue(
+        job({ tenantId: OTHER_TENANT }),
+      );
+      d.catalogRepo.findCollectionById.mockResolvedValue(
+        collection({ tenantId: OTHER_TENANT }),
+      );
+
+      const result = await d.raw.runEmbeddingJob(JOB_ID, RUN_DTO, {
+        id: 'svc',
+        roles: ['SYSTEM'],
+      } as any);
+
+      expect(result.embeddingsCreated).toBe(1);
+      // Sin tenant de petición no se filtra el job, pero la colección sí se
+      // busca en el tenant del job.
+      expect(d.catalogRepo.findJobForUpdate).toHaveBeenCalledWith(
+        d.tx,
+        JOB_ID,
+        undefined,
+      );
+      expect(d.catalogRepo.findCollectionById).toHaveBeenCalledWith(
+        d.tx,
+        COLLECTION_ID,
+        OTHER_TENANT,
+      );
+    });
+
+    it('un actor que no es SYSTEM y no tiene tenant activo falla cerrado (412)', async () => {
+      const d = build();
+
+      const error = await d.raw
+        .runEmbeddingJob(JOB_ID, RUN_DTO, {
+          id: 'worker-a',
+          roles: ['EMBEDDING_WORKER'],
+        } as any)
+        .catch((e) => e);
+
+      expect(error).toBeInstanceOf(PreconditionFailedException);
+      expect(d.catalogRepo.findJobForUpdate).not.toHaveBeenCalled();
+    });
+
+    it('la cola de un actor con tenant se limita a ese tenant; la de SYSTEM cruza todos', async () => {
+      const d = build();
+
+      await d.service.listQueuedJobs(10, actor);
+      await d.raw.listQueuedJobs(10, { id: 'svc', roles: ['SYSTEM'] } as any);
+
+      expect(d.catalogRepo.findQueuedJobs).toHaveBeenNthCalledWith(
+        1,
+        d.em,
+        'queued',
+        10,
+        TENANT_ID,
+      );
+      expect(d.catalogRepo.findQueuedJobs).toHaveBeenNthCalledWith(
+        2,
+        d.em,
+        'queued',
+        10,
+        undefined,
+      );
     });
   });
 });

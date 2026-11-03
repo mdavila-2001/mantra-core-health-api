@@ -134,4 +134,66 @@ describe('RedisRuntimeService', () => {
       false,
     );
   });
+
+  it('dos verificaciones simultáneas del mismo OTP: exactamente una valida', async () => {
+    const { service } = makeService();
+    await service.putChallenge(TENANT, 'otp:user1', '123456', 300);
+
+    const results = await Promise.all([
+      service.verifyChallenge(TENANT, 'otp:user1', '123456'),
+      service.verifyChallenge(TENANT, 'otp:user1', '123456'),
+      service.verifyChallenge(TENANT, 'otp:user1', '123456'),
+    ]);
+
+    expect(results.filter(Boolean)).toHaveLength(1);
+    expect(await service.verifyChallenge(TENANT, 'otp:user1', '123456')).toBe(
+      false,
+    );
+  });
+
+  it('un OTP incorrecto concurrente con el correcto no consume el challenge por error', async () => {
+    const { service } = makeService();
+    await service.putChallenge(TENANT, 'otp:user1', '123456', 300);
+
+    const [bad, good] = await Promise.all([
+      service.verifyChallenge(TENANT, 'otp:user1', '000000'),
+      service.verifyChallenge(TENANT, 'otp:user1', '123456'),
+    ]);
+
+    expect(bad).toBe(false);
+    expect(good).toBe(true);
+  });
+
+  it('un challenge de otro tenant no se verifica ni se consume', async () => {
+    const { service } = makeService();
+    await service.putChallenge('tenant-a', 'otp:user1', '123456', 300);
+
+    expect(
+      await service.verifyChallenge('tenant-b', 'otp:user1', '123456'),
+    ).toBe(false);
+    expect(
+      await service.verifyChallenge('tenant-a', 'otp:user1', '123456'),
+    ).toBe(true);
+  });
+
+  it('un challenge reemplazado entre la lectura y el borrado no se consume con el digest viejo', async () => {
+    const { redis, service } = makeService();
+    await service.putChallenge(TENANT, 'otp:user1', '123456', 300);
+    const originalGet = redis.get.getMockImplementation() as (
+      key: string,
+    ) => Promise<string | null>;
+    redis.get.mockImplementationOnce(async (key: string) => {
+      const value = await originalGet(key);
+      // Otro emisor rota el OTP justo después de la lectura.
+      await service.putChallenge(TENANT, 'otp:user1', '654321', 300);
+      return value;
+    });
+
+    expect(await service.verifyChallenge(TENANT, 'otp:user1', '123456')).toBe(
+      false,
+    );
+    expect(await service.verifyChallenge(TENANT, 'otp:user1', '654321')).toBe(
+      true,
+    );
+  });
 });

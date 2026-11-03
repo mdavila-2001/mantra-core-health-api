@@ -1,15 +1,19 @@
 ---
 name: work-report-md
-description: Cómo se escribe el REPORTE.md que cierra un trabajo — qué gana el derecho a entrar en COMPLETADO, cómo redactar A MEDIAS con sus cuatro respuestas obligatorias (qué anda, qué no anda, qué falta exactamente, dónde quedó), cómo pegar evidencia recortada sin parafrasear y enmascarando datos sensibles, y por qué "No cubierto" no es lo mismo que "Pendiente". Usar al cerrar cualquier trabajo, al terminar una sesión con algo incompleto, o al retomar trabajo ajeno.
+description: Cómo se escribe el reporte que cierra un trabajo en la descripción del PR — qué gana el derecho a entrar en COMPLETADO, cómo convertir lo que quedó A MEDIAS o sin hacer en issues con sus cuatro respuestas obligatorias (qué anda, qué no anda, qué falta exactamente, dónde quedó), cómo pegar evidencia recortada sin parafrasear y enmascarando datos sensibles, y por qué "No cubierto" no es lo mismo que "no se hizo". Usar al cerrar cualquier trabajo, al terminar una sesión con algo incompleto, o al retomar trabajo ajeno.
 effort: high
 ---
 
-# Reporte de trabajo en `.md`
+# Reporte de trabajo en el PR
 
-La regla `40-reporte-obligatorio` fija que **ningún trabajo se cierra sin `REPORTE.md` en disco**.
+La regla `40-reporte-obligatorio` fija que **ningún trabajo se cierra sin reporte**, y que ese
+reporte va en la **descripción del PR** (secciones *Resumen* y *Verificación* de la plantilla del
+repo). Lo que quedó sin terminar no se anota como «pendiente» ni en el PR ni en el repo: es un
+**issue**, y el PR lo enlaza. El repo describe lo que existe; nunca guarda el estado del trabajo.
+
 Esta skill enseña a escribirlo para lo único que importa: que alguien que no estuvo pueda retomar
 el trabajo sin preguntarte nada. No es un resumen de lo que hiciste, es el **estado verificado del
-sistema** más el mapa exacto de lo que quedó sin terminar.
+sistema** más los issues exactos de lo que quedó sin terminar.
 
 ## Cuándo aplica
 
@@ -30,7 +34,8 @@ Ubicá cada microtarea del plan en una sola sección. La pregunta que decide es 
 |---|---|
 | DoD ejecutado, salida pegada, CA cumplido | COMPLETADO |
 | Código escrito sin correr el DoD, DoD en rojo, o parte anda y parte no | A MEDIAS |
-| No se empezó, está trabado por algo externo, o se decidió no hacerlo | PENDIENTE (`TODO` / `BLOQUEADO` / `DESCARTADO`) |
+| No se empezó o está trabado por algo externo | ISSUES ABIERTOS (`TODO` / `BLOQUEADO`): un issue por cosa |
+| Se decidió no hacerlo | `DESCARTADO`, declarado en el PR con su razón y quién lo decidió |
 
 "Está escrito pero no lo probé" **nunca** es COMPLETADO. Es la trampa más común y la que destruye
 la confianza en el reporte entero: basta un ítem falso para que nadie crea en los otros.
@@ -42,16 +47,17 @@ Una fila por microtarea, con el comando y su resultado. Si no podés pegar la sa
 ```markdown
 | ID | Qué se logró | Comando | Resultado |
 |---|---|---|---|
-| H1.S1.M1 | La base rechaza turnos solapados del mismo profesional | inserción solapada manual | PASS — `evidencia/m1-constraint.txt` |
-| H1.S2.M1 | El conflicto devuelve 409 `APPOINTMENT_OVERLAP` | test de API del conflicto | PASS — `evidencia/m4-api.txt` |
+| H1.S1.M1 | La base rechaza turnos solapados del mismo profesional | inserción solapada manual | PASS — salida abajo, en *Verificación* |
+| H1.S2.M1 | El conflicto devuelve 409 `APPOINTMENT_OVERLAP` | test de API del conflicto | PASS — `Tests: 4 passed, 4 total` |
 ```
 
 Escribí el "qué se logró" en términos **observables**: "la base rechaza turnos solapados", no
 "agregué el constraint".
 
-## 3. A MEDIAS: las cuatro respuestas
+## 3. A MEDIAS: un issue con las cuatro respuestas
 
-La sección que más importa. Falta una de las cuatro y el ítem no está reportado.
+La sección que más importa. En el PR se nombra el ítem y se enlaza su issue; en el issue van las
+cuatro respuestas. Falta una y el ítem no está reportado.
 
 ❌ Inútil — no permite retomar nada:
 ```markdown
@@ -59,11 +65,11 @@ La sección que más importa. Falta una de las cuatro y el ítem no está report
 Casi listo, falta pulir el front.
 ```
 
-✅ Accionable — otra persona lo retoma sin preguntar:
+✅ Accionable — otra persona lo retoma sin preguntar (cuerpo del issue):
 ```markdown
-### H1.S3.M1 — Mapear el conflicto al mensaje de la UI
+### Mapear el conflicto de turno al mensaje de la UI
 - Qué anda: el front recibe el 409 y el interceptor lo captura; el test de API
-  del backend está en verde (`evidencia/m4-api.txt`).
+  del backend está en verde (salida en el PR #<n>).
 - Qué no anda: la pantalla muestra el mensaje genérico "Ocurrió un error" en vez
   del texto de conflicto de horario.
 - Qué falta exactamente: agregar la entrada `APPOINTMENT_OVERLAP` al mapa de códigos
@@ -80,17 +86,19 @@ Casi listo, falta pulir el front.
 - **Dónde quedó** — rama, archivos tocados, y **si compila o no**: eso decide si quien retoma
   puede correr algo o tiene que arreglar primero.
 
-## 4. PENDIENTE
+## 4. ISSUES ABIERTOS
 
-Lo que no se empezó, con su estado. En los bloqueados, qué los destraba y de quién depende — un
-bloqueo sin dueño no se resuelve nunca.
+Lo que no se empezó o está bloqueado es un issue, abierto en el repo donde vive el cambio y
+enlazado desde el PR. En los bloqueados, el issue dice qué los destraba y de quién depende — un
+bloqueo sin dueño no se resuelve nunca. Un hallazgo de seguridad lleva la etiqueta `seguridad`.
 
 ```markdown
-| ID | Estado | Qué lo destraba |
-|---|---|---|
-| H2.S1.M1 | TODO | — |
-| H2.S2.M1 | BLOQUEADO | La extensión de índices por rango no está habilitada en pruebas; depende de infraestructura |
-| H1.S3.M3 | DESCARTADO | Producto confirmó que los turnos contiguos no son conflicto |
+Issues abiertos por este trabajo:
+- #231 — índice por rango para solapamientos (BLOQUEADO: la extensión no está habilitada en
+  pruebas; depende de infraestructura)
+- #232 — bloqueo de franjas desde la agenda del profesional (TODO)
+
+Descartado: H1.S3.M3 — producto confirmó que los turnos contiguos no son conflicto.
 ```
 
 ## 5. Evidencia: recortar sin parafrasear
@@ -101,18 +109,19 @@ tu resumen. Importa la línea del veredicto, el conteo, y el error **completo** 
 
 **Datos sensibles.** Ninguna salida puede llevar datos reales de pacientes, secretos ni tokens.
 Enmascaralos y **declará que enmascaraste**: si no lo aclarás, quien lee no sabe si el sistema no
-los emitió o si vos los sacaste. Los archivos completos van en `evidencia/`, referenciados por ruta.
+los emitió o si vos los sacaste. Las salidas largas, capturas y traces van como adjunto o
+comentario del PR, nunca a una carpeta del repo.
 
 ```text
 409 APPOINTMENT_OVERLAP profesional=<ID-ENMASCARADO> franja=10:00-10:30
 (paciente y documento enmascarados manualmente para este reporte)
 ```
 
-## 6. "No cubierto" no es "Pendiente"
+## 6. "No cubierto" no es "no se hizo"
 
 | | Qué es | Ejemplo |
 |---|---|---|
-| **Pendiente** | No se hizo | "No se implementó el bloqueo de franjas" |
+| **No se hizo** | Va a un issue | "No se implementó el bloqueo de franjas" → #232 |
 | **No cubierto** | Se hizo, **no se verificó** | "Se probó con dos escrituras simultáneas, no con diez; no se ejercitó en móvil" |
 
 "No cubierto" declara los límites de tu propia verificación: caminos no ejercitados, dispositivos
@@ -124,7 +133,7 @@ que lee — un overclaim aunque cada frase sea cierta por separado.
 Sin maquillaje y sin dramatismo. Si QA está en rojo va en la **primera línea**:
 
 ```markdown
-# Reporte — Impedir doble reserva de turno
+## Resumen
 **Estado: no entregable.** El E2E de conflicto está en rojo; la invariante de base funciona
 pero el flujo completo todavía deja pasar la segunda reserva desde la UI.
 - Avance: 3 / 7 microtareas HECHO (43 %)
@@ -140,7 +149,7 @@ tenés que preguntar algo, falta información.
 
 ## 9. Retomar un trabajo ajeno
 
-El orden de lectura de un reporte previo (estado → A MEDIAS → dónde quedó → No cubierto) está en
+El orden de lectura de un PR previo (estado → A MEDIAS → dónde quedó → No cubierto → issues) está en
 [references/retomar-trabajo.md](references/retomar-trabajo.md). Si no te alcanza para arrancar,
 eso es un defecto del reporte: anotalo.
 
@@ -152,6 +161,7 @@ eso es un defecto del reporte: anotalo.
 | Escrito pero no probado en COMPLETADO | Overclaim | Va a A MEDIAS |
 | Porcentaje inventado | Oculta el estado | `HECHO / total` |
 | Borrar lo que falló | Miente por omisión | Se declara con su estado |
+| Lista de pendientes en un `.md` del repo | El repo pasa a declarar trabajo por hacer | Un issue por cosa, enlazado desde el PR |
 | Resumen optimista con QA en rojo | Engaña al que decide | El rojo va primero |
 | Salida parafraseada o secciones vacías borradas | No es evidencia / se lee como "no había nada" | Pegar literal; escribir "ninguna" |
 | Sin "No cubierto" | PASS parcial leído como total | Declarar los límites |
@@ -160,11 +170,13 @@ eso es un defecto del reporte: anotalo.
 
 El reporte está terminado cuando podés mostrar todo esto:
 
-- [ ] `REPORTE.md` existe en disco junto al `PLAN.md` — pegá la salida del listado que lo muestra.
+- [ ] La descripción del PR tiene *Resumen* y *Verificación* completas.
 - [ ] Toda microtarea del plan está en exactamente una sección y los conteos cuadran:
-      `COMPLETADO + A MEDIAS + PENDIENTE == total del plan`.
-- [ ] Cada ítem de COMPLETADO tiene comando y salida literal referenciada en `evidencia/`.
-- [ ] Cada ítem de A MEDIAS tiene las cuatro respuestas, con "dónde quedó" indicando si compila.
+      `COMPLETADO + A MEDIAS + ISSUES ABIERTOS + DESCARTADO == total del plan`.
+- [ ] Cada ítem de COMPLETADO tiene comando y salida literal en el PR.
+- [ ] Cada ítem de A MEDIAS tiene su issue con las cuatro respuestas, con "dónde quedó"
+      indicando si compila.
+- [ ] El diff no agrega planes, reportes, secciones de pendientes ni `TODO`/`FIXME` al repo.
 - [ ] El porcentaje coincide con `HECHO / total` calculado, y el peldaño declarado no es más
       fuerte que lo demostrado (ver `evidence-and-verification`).
 - [ ] Ninguna salida pegada tiene datos de pacientes, secretos ni tokens; lo enmascarado, declarado.
@@ -176,5 +188,5 @@ El reporte está terminado cuando podés mostrar todo esto:
 - [ ] Se escribió aunque el trabajo no haya terminado.
 - [ ] Si algo está en rojo, se dice en la primera línea.
 - [ ] Los bloqueos nombran qué los destraba y de quién dependen; se lee sin contexto de la sesión.
-- [ ] El estado coincide con el del `PLAN.md` (ver `milestone-planning`).
+- [ ] El estado coincide con el del plan del issue o del PR (ver `milestone-planning`).
 - [ ] Antes de cerrar el turno se pasó por `finish-your-turn`.

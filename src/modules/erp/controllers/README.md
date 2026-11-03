@@ -42,7 +42,7 @@ Los casos de uso escriben algunas rutas con dos puntos (`/employees:onboard`,
 `/bank-accounts/:accId/verify`) para mantener el estilo del resto del proyecto y evitar el
 tratamiento especial que Nest da a los `:` dentro de un path.
 
-## Pruebas
+## Tests
 
 `erp.controller.spec.ts` con ambos servicios mockeados: delegación, argumentos (incluido el actor y
 los ids de ruta) y propagación de errores.

@@ -7,6 +7,7 @@ import { GenerateSlotsUseCase } from './generate-slots.use-case';
 import { GetResourceAgendaUseCase } from './get-resource-agenda.use-case';
 import { ListCatalogLookupsUseCase } from './list-catalog-lookups.use-case';
 import { ListExceptionsUseCase } from './list-exceptions.use-case';
+import { ListTemplateLiveBookingsUseCase } from './list-template-live-bookings.use-case';
 import { ListTemplatesUseCase } from './list-templates.use-case';
 import { ReactivateTemplateUseCase } from './reactivate-template.use-case';
 import { RemoveExceptionUseCase } from './remove-exception.use-case';
@@ -26,6 +27,7 @@ export const catalogUseCases = [
   GetResourceAgendaUseCase,
   ListCatalogLookupsUseCase,
   ListExceptionsUseCase,
+  ListTemplateLiveBookingsUseCase,
   ListTemplatesUseCase,
   ReactivateTemplateUseCase,
   RemoveExceptionUseCase,

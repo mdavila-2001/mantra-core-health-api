@@ -44,28 +44,28 @@ describe('AppointmentsRepository', () => {
 
   it('el canal de la atención llega a la fila', () => {
     // El que se perdía: el servicio lo mandaba y la columna quedaba NULL.
-    const { em, llamadas } = rememberingEm();
+    const { em, llamadas: calls } = rememberingEm();
 
     new AppointmentsRepository().create(em, {
       ...base,
       channelConceptId: 'concepto-teleconsulta',
     });
 
-    expect(llamadas[0]['channelConceptId']).toBe('concepto-teleconsulta');
+    expect(calls[0]['channelConceptId']).toBe('concepto-teleconsulta');
   });
 
   it('sin canal la columna queda sin valor: ausente no es presencial explícito', () => {
-    const { em, llamadas } = rememberingEm();
+    const { em, llamadas: calls } = rememberingEm();
 
     new AppointmentsRepository().create(em, base);
 
-    expect(llamadas[0]['channelConceptId']).toBeUndefined();
+    expect(calls[0]['channelConceptId']).toBeUndefined();
   });
 
   it('ningún campo del contrato se pierde en el traspaso', () => {
     // La red que atrapa al PRÓXIMO campo que alguien agregue al contrato y
     // olvide nombrar en `create()`. Si esta prueba falla, el mensaje dice cuál.
-    const { em, llamadas } = rememberingEm();
+    const { em, llamadas: calls } = rememberingEm();
     const entry = {
       ...base,
       practitionerProfileId: 'hp-1',
@@ -76,21 +76,24 @@ describe('AppointmentsRepository', () => {
 
     new AppointmentsRepository().create(em, entry);
 
-    const row = llamadas[0];
+    const row = calls[0];
     // `actorUserId` se traduce a dos columnas de auditoría y por eso se
     // comprueba aparte, no por su propio nombre.
-    for (const [campo, valor] of Object.entries(entry)) {
-      expect({ campo, valor: row[campo] }).toEqual({ campo, valor });
+    for (const [field, value] of Object.entries(entry)) {
+      expect({ campo: field, valor: row[field] }).toEqual({
+        campo: field,
+        valor: value,
+      });
     }
   });
 
   it('el actor queda como autor y como último editor', () => {
-    const { em, llamadas } = rememberingEm();
+    const { em, llamadas: calls } = rememberingEm();
 
     new AppointmentsRepository().create(em, { ...base, actorUserId: 'user-9' });
 
-    expect(llamadas[0]['createdByUserId']).toBe('user-9');
-    expect(llamadas[0]['updatedByUserId']).toBe('user-9');
+    expect(calls[0]['createdByUserId']).toBe('user-9');
+    expect(calls[0]['updatedByUserId']).toBe('user-9');
   });
 
   it('crea la entidad de citas y no otra', () => {

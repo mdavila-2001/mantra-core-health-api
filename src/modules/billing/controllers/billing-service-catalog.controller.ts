@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Header,
   HttpCode,
   HttpStatus,
   Param,
@@ -9,7 +10,9 @@ import {
   Patch,
   Post,
   Query,
+  Res,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -17,6 +20,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   ParseOptionalLimitPipe,
   Roles,
@@ -24,10 +28,14 @@ import {
 } from '../../../common';
 import {
   BillingServiceCatalogService,
+  ProcedureImportService,
   ProcedureNomenclatureService,
 } from '../services';
 import {
   CreateServiceCatalogItemDto,
+  ImportProceduresDto,
+  ImportProceduresResponseDto,
+  MyProcedureSpecialtiesResponseDto,
   ProcedureNomenclatureResponseDto,
   ProcedureSpecialtiesResponseDto,
   SearchServiceCatalogResponseDto,
@@ -57,6 +65,7 @@ export class BillingServiceCatalogController {
   constructor(
     private readonly serviceCatalogService: BillingServiceCatalogService,
     private readonly nomenclature: ProcedureNomenclatureService,
+    private readonly procedureImport: ProcedureImportService,
   ) {}
 
   /**
@@ -116,12 +125,43 @@ export class BillingServiceCatalogController {
   }
 
   /**
+   * Imagen de un servicio del catálogo (decisión P-22-8, opción 1).
+   *
+   * Sesión autenticada y nada más: la autorización es por contexto, en el
+   * servicio (servicio activo de una práctica del tenant activo). Un servicio
+   * ajeno, inactivo, sin imagen o inexistente responde el mismo 404.
+   *
+   * `no-store` y `nosniff`, como en el resto de descargas autenticadas.
+   */
+  @Get(':id/image')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({
+    summary: 'Descargar la imagen de un servicio que el actor puede ver',
+    description:
+      'Autoriza por contexto: servicio activo de una práctica del tenant activo. 404 uniforme en cualquier otro caso.',
+  })
+  async getImage(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Res() res: Response,
+  ): Promise<void> {
+    const content = await this.serviceCatalogService.getImageContent(id);
+    res.setHeader('Content-Type', content.mimeType);
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.send(content.buffer);
+  }
+
+  /**
    * Crea un servicio nuevo en el catálogo maestro.
    *
    * @param dto - Datos validados de la operación.
    * @param actor - Usuario autenticado que ejecuta la operación.
    * @returns Servicio recién creado.
    */
+  @Audited({
+    action: 'BILLING_SERVICE_CREATED',
+    entity: 'service_catalog',
+    entityId: 'result.id',
+  })
   @Post()
   // El alta es de la administración de la organización. Un profesional entra también,
   // pero sólo sobre su consultorio propio: el servicio lo comprueba y responde 404 en
@@ -141,6 +181,38 @@ export class BillingServiceCatalogController {
   }
 
   /**
+   * Importa en lote al catálogo de una práctica los procedimientos del arancel.
+   *
+   * Mismo `@Roles` y mismo alcance que el alta individual: la administración en
+   * cualquier práctica de su organización, un profesional sólo en su consultorio
+   * propio, y 404 en cualquier otra. Declarada antes de `:id` junto con el resto
+   * de las rutas estáticas.
+   *
+   * @param dto - Práctica y filtro (especialidades, códigos y/o texto).
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Cuántos se crearon, cuántos se saltaron y cuántos coincidían.
+   */
+  @Audited({
+    action: 'BILLING_SERVICE_IMPORTED',
+    entity: 'service_catalog',
+    entityId: 'body.practiceId',
+  })
+  @Post('import-procedures')
+  @Roles('SECURITY_ADMIN', 'PRACTITIONER', 'CLINICIAN')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Importar en lote procedimientos del arancel al catálogo',
+    description:
+      'Crea en el catálogo de la práctica todos los procedimientos del arancel que cumplan el filtro (especialidades, códigos y/o texto, combinados con Y; al menos uno). Idempotente: salta los códigos que la práctica ya tiene. Tope de 5000 coincidencias (400 si lo excede).',
+  })
+  importProcedures(
+    @Body() dto: ImportProceduresDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ImportProceduresResponseDto> {
+    return this.procedureImport.importProcedures(dto, actor);
+  }
+
+  /**
    * Corrige un servicio del catálogo de una práctica propia.
    *
    * Los roles son más anchos que los del alta a propósito: quien atiende pone el
@@ -154,6 +226,11 @@ export class BillingServiceCatalogController {
    * @param actor - Usuario autenticado que ejecuta la operación.
    * @returns El servicio ya corregido.
    */
+  @Audited({
+    action: 'BILLING_SERVICE_UPDATED',
+    entity: 'service_catalog',
+    entityId: 'param:id',
+  })
   @Patch(':id')
   @Roles('PRACTITIONER', 'CLINICIAN', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -190,6 +267,27 @@ export class BillingServiceCatalogController {
   }
 
   /**
+   * Las especialidades del arancel que corresponden al médico autenticado.
+   *
+   * Sale de las especialidades que el profesional cargó en su perfil, cruzadas
+   * con las del arancel sin tildes ni mayúsculas. Vacío si no tiene ninguna
+   * cargada o el usuario no es profesional. Declarada antes de `:id`.
+   *
+   * @param actor - Usuario autenticado.
+   * @returns Las especialidades del arancel con su recuento.
+   */
+  @Get('procedure-specialties/mine')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Listar las especialidades del arancel que corresponden al médico',
+  })
+  listMyProcedureSpecialties(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<MyProcedureSpecialtiesResponseDto> {
+    return this.procedureImport.listMySpecialties(actor);
+  }
+
+  /**
    * El nomenclador de procedimientos, por cursor.
    *
    * @param specialty - Especialidad exacta del arancel.
@@ -211,7 +309,8 @@ export class BillingServiceCatalogController {
   @ApiQuery({
     name: 'q',
     required: false,
-    description: 'Texto a buscar en el nombre del procedimiento',
+    description:
+      'Palabras a buscar (todas deben aparecer), sin distinguir tildes ni mayúsculas, en el nombre, el código, el grupo o la especialidad',
   })
   @ApiQuery({
     name: 'cursor',

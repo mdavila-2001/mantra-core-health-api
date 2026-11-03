@@ -1,0 +1,85 @@
+{
+  "layer": "hl7-tho",
+  "builtAt": "2026-10-24T17:56:43.581Z",
+  "records": 479,
+  "source": {
+    "name": "hl7.terminology.r4",
+    "version": "7.0.1"
+  },
+  "codeSystems": [
+    {
+      "internalCode": "hl7-v2-0487",
+      "name": "HL7 v2 tabla 0487 — Tipo de espécimen (specimenType)",
+      "canonicalUrl": "http://terminology.hl7.org/CodeSystem/v2-0487",
+      "version": "3.0.0",
+      "sourceKey": "hl7-tho",
+      "records": 315
+    },
+    {
+      "internalCode": "hl7-v2-0371",
+      "name": "HL7 v2 tabla 0371 — Aditivo/conservante (additivePreservative)",
+      "canonicalUrl": "http://terminology.hl7.org/CodeSystem/v2-0371",
+      "version": "3.0.0",
+      "sourceKey": "hl7-tho",
+      "records": 57
+    },
+    {
+      "internalCode": "hl7-v2-0488",
+      "name": "HL7 v2 tabla 0488 — Método de recolección (specimenCollectionMethod)",
+      "canonicalUrl": "http://terminology.hl7.org/CodeSystem/v2-0488",
+      "version": "3.0.0",
+      "sourceKey": "hl7-tho",
+      "records": 42
+    },
+    {
+      "internalCode": "hl7-v2-0493",
+      "name": "HL7 v2 tabla 0493 — Condición del espécimen (specimenCondition)",
+      "canonicalUrl": "http://terminology.hl7.org/CodeSystem/v2-0493",
+      "version": "3.0.0",
+      "sourceKey": "hl7-tho",
+      "records": 10
+    },
+    {
+      "internalCode": "hl7-v2-0074",
+      "name": "HL7 v2 tabla 0074 — Sección del servicio diagnóstico (diagnosticServiceSectionId)",
+      "canonicalUrl": "http://terminology.hl7.org/CodeSystem/v2-0074",
+      "version": "3.0.0",
+      "sourceKey": "hl7-tho",
+      "records": 45
+    },
+    {
+      "internalCode": "hl7-observation-category",
+      "name": "HL7 FHIR — Categoría de la observación (Observation Category Codes)",
+      "canonicalUrl": "http://terminology.hl7.org/CodeSystem/observation-category",
+      "version": "2.0.0",
+      "sourceKey": "hl7-tho",
+      "records": 10
+    }
+  ],
+  "files": {
+    "CodeSystem-v2-0487.json": {
+      "file": "lab-tests-sources/hl7-terminology-r4/package/CodeSystem-v2-0487.json",
+      "sha256": "cf2fd47cbf3ce08abed4080486f4d22e689fd913d622c00dfe6f524d8258bfc9"
+    },
+    "CodeSystem-v2-0371.json": {
+      "file": "lab-tests-sources/hl7-terminology-r4/package/CodeSystem-v2-0371.json",
+      "sha256": "b031a741aafe9a2452b6d768d5661ff2022b2f0c872b4528c607306cf6b5b739"
+    },
+    "CodeSystem-v2-0488.json": {
+      "file": "lab-tests-sources/hl7-terminology-r4/package/CodeSystem-v2-0488.json",
+      "sha256": "0304f1cb7f1c69d605e40b8001feefbf0477e4194f68d96fae345e3697e22555"
+    },
+    "CodeSystem-v2-0493.json": {
+      "file": "lab-tests-sources/hl7-terminology-r4/package/CodeSystem-v2-0493.json",
+      "sha256": "3c41b488aa95246ce9450c02d1f15c705f7fb1515460a07618f5a9f40d304f94"
+    },
+    "CodeSystem-v2-0074.json": {
+      "file": "lab-tests-sources/hl7-terminology-r4/package/CodeSystem-v2-0074.json",
+      "sha256": "013feb8ffaf645fea3eefd710af53ba38bf64885731e852550584a6bdbacd1f2"
+    },
+    "CodeSystem-observation-category.json": {
+      "file": "lab-tests-sources/hl7-terminology-r4/package/CodeSystem-observation-category.json",
+      "sha256": "4f48664efb2f9e8a63589861d3a1ebd537dcb3ff732ffa83369b597cb78d986e"
+    }
+  }
+}

@@ -6,6 +6,7 @@ import {
   type TestContext,
   camposObligatoriosDePaciente,
 } from './harness';
+import { TokenService } from '../../src/common';
 import { IDA } from '../../src/modules/identity_assurance/identity_assurance.concepts';
 import { IDENTITY_CARD_VERTICAL } from '../../src/modules/identity_assurance/identity_assurance.seed';
 
@@ -51,6 +52,20 @@ describe('Verificación de identidad — el titular se verifica solo (integraci�
   let patientToken: string;
   let caseId: string;
   let checkId: string;
+
+  /**
+   * El token del worker (`DispatchIdentityChecksJob` firma como `SYSTEM`).
+   * Desde d05500f22 (checks de identidad por tenant) sólo `SYSTEM` opera entre
+   * tenants sin cabecera; el SUPERADMIN/SECURITY_ADMIN del arnés sin
+   * `X-Tenant-Id` recibe 422 TENANT_REQUIRED. Reusa la sesión del admin.
+   */
+  function worker(): { Authorization: string } {
+    return bearer(
+      ctx.app
+        .get(TokenService)
+        .signAccessToken(ctx.adminUserId, 'test-session', ['SYSTEM']),
+    );
+  }
 
   beforeAll(async () => {
     ctx = await bootstrapTestApp();
@@ -103,7 +118,9 @@ describe('Verificación de identidad — el titular se verifica solo (integraci�
       .send({
         originalName: 'documento.jpg',
         category: 'DOCUMENT',
-        sensitivity: 'NORMAL',
+        // Desde 76e1499af (evidencias tipadas) una evidencia de identidad tiene
+        // que estar protegida como PHI: un archivo NORMAL responde 422.
+        sensitivity: 'PHI',
         mimeType: 'image/jpeg',
         sizeBytes: 4096,
         contentHash: `h01-hash-${randomUUID().slice(0, 8)}`,
@@ -126,7 +143,7 @@ describe('Verificación de identidad — el titular se verifica solo (integraci�
   it('el worker despacha el check y la autoridad encola la solicitud', async () => {
     const intento = await http()
       .post(`/internal/identity/checks/${checkId}/attempts`)
-      .set(bearer(ctx.adminToken))
+      .set(worker())
       // PENDIENTE, no éxito: la autoridad aceptó la solicitud pero todavía no
       // resolvió. Es exactamente lo que manda `DispatchIdentityChecksJob`.
       .send({
@@ -145,7 +162,7 @@ describe('Verificación de identidad — el titular se verifica solo (integraci�
     // registrar resultado») en cada tick, para siempre.
     const resultado = await http()
       .post(`/internal/identity/checks/${checkId}/results`)
-      .set(bearer(ctx.adminToken))
+      .set(worker())
       .send({ result: 'MATCH' })
       .expect(201);
 

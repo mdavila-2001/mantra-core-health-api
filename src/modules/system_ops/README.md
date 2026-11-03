@@ -14,7 +14,7 @@ remediación y publicación de drafts genéricos.
   find src/modules/system_ops -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **8 controllers, 24 rutas HTTP, 30 entidades y 8 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **9 controllers, 27 rutas HTTP, 30 entidades y 9 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
@@ -34,6 +34,11 @@ Entidades (`tableName`, 30 de 30 archivos `*.entity.ts`): `accepted_risks`, `ano
 | `POST /admin/ops/backup-policies` | SECURITY_ADMIN | `backup` |
 | `POST /admin/governance/drafts` | SECURITY_ADMIN | `draft` |
 | `POST /admin/governance/drafts/:id/publish` | SECURITY_ADMIN | `draft` |
+| `GET /admin/governance/policies` | ...GOVERNANCE_VIEW_ROLES | `governance-read` |
+| `GET /admin/governance/policies/:policyType/:id` | ...GOVERNANCE_VIEW_ROLES | `governance-read` |
+| `GET /admin/governance/change-log` | ...GOVERNANCE_VIEW_ROLES | `governance-read` |
+| `GET /admin/governance/entity-registry` | ...GOVERNANCE_VIEW_ROLES | `governance-read` |
+| `GET /admin/governance/entity-registry/:id/fields` | ...GOVERNANCE_VIEW_ROLES | `governance-read` |
 | `POST /admin/governance/entity-registry` | SECURITY_ADMIN | `governance-catalog` |
 | `POST /admin/governance/write-policies` | SECURITY_ADMIN | `governance-catalog` |
 | `PATCH /admin/governance/entity-registry/:id/write-policy` | SECURITY_ADMIN | `governance-catalog` |
@@ -96,7 +101,7 @@ Entidades (`tableName`, 30 de 30 archivos `*.entity.ts`): `accepted_risks`, `ano
 
 - **UPSERT por code** en dominios/clasificaciones/políticas (unicidad).
 - **Legal hold ACTIVE excluye** objetivos del barrido de retención (UC-11-05 ⊃ UC-11-08).
-- **Transferencias:** `transfer_reference` se comprueba antes de insertar. La publicación de draft tiene control optimista (`row_version`) y estado `DRAFT`, pero necesita una prueba de concurrencia para confirmar el manejo HTTP del conflicto.
+- **Transferencias:** `transfer_reference` se comprueba antes de insertar. La publicación de draft tiene control optimista (`row_version`) y estado `DRAFT`; no hay prueba de concurrencia del manejo HTTP del conflicto.
 - **Segregación de funciones**: el verificador de una acción no puede ser el asignado.
 - **Cierre condicional**: un hallazgo se cierra y un plan se completa solo cuando
   todas las acciones asociadas están VERIFIED.
@@ -106,11 +111,10 @@ Entidades (`tableName`, 30 de 30 archivos `*.entity.ts`): `accepted_risks`, `ano
   (`MET`/`BREACHED`/`NOT_MEASURED` — sin medición no se afirma cumplimiento).
 - Cada cambio de gobierno deja rastro en `governance_change_log`; los barridos y
   publicaciones dejan `record_revisions` (append-only).
-- **Limitaciones abiertas de la revisión:** el barrido genérico registra éxito con
-  contadores en cero sin disponer filas de negocio; las asociaciones de assurance
-  no validan aún que control, resultado y hallazgo pertenezcan a la misma
-  evaluación; y la creación de bindings de residencia deja referencias inválidas
-  al manejo de FK. Véase el [informe de revisión](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/system_ops.md).
+- **Limitaciones conocidas:** el barrido genérico registra éxito con contadores
+  en cero sin disponer filas de negocio; las asociaciones de assurance no validan
+  que control, resultado y hallazgo pertenezcan a la misma evaluación; y la
+  creación de bindings de residencia deja referencias inválidas al manejo de FK.
 
 ## Permisos y auth
 

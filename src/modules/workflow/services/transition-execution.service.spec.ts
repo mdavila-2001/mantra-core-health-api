@@ -98,7 +98,150 @@ const TRANSITION = {
 
 const DTO = { machineCode: 'encounter-lifecycle' } as any;
 
+const PURPOSE_TREATMENT = 'cccccccc-cccc-cccc-cccc-cccccccccccc';
+const PURPOSE_PAYMENT = 'dddddddd-dddd-dddd-dddd-dddddddddddd';
+
 describe('TransitionExecutionService', () => {
+  describe('triggerTransition: propósito de uso (WF-02)', () => {
+    const WITH_PURPOSE = {
+      ...TRANSITION,
+      purposeOfUseConceptId: PURPOSE_TREATMENT,
+    };
+    const NOT_ALLOWED = {
+      status: 403,
+      code: 'FORBIDDEN',
+      reason: 'WORKFLOW_PURPOSE_NOT_ALLOWED',
+    };
+
+    /** Nada del agregado ni de sus efectos se tocó. */
+    function expectUntouched(d: ReturnType<typeof build>): void {
+      expect(d.aggregateRepo.updateState).not.toHaveBeenCalled();
+      expect(d.runtimeRepo.createTransitionEvent).not.toHaveBeenCalled();
+      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+    }
+
+    it('correcto: el propósito declarado coincide => transición, evento y efectos', async () => {
+      const d = build();
+      d.machinesRepo.findTransitionByCommand.mockResolvedValue(WITH_PURPOSE);
+
+      const result = await d.service.triggerTransition(
+        AGGREGATE_ID,
+        'CLOSE',
+        { ...DTO, purposeOfUseConceptId: PURPOSE_TREATMENT },
+        actor,
+      );
+
+      expect(result.duplicate).toBe(false);
+      expect(d.aggregateRepo.updateState).toHaveBeenCalledTimes(1);
+      expect(d.runtimeRepo.createTransitionEvent).toHaveBeenCalledTimes(1);
+    });
+
+    it('la comparación ignora mayúsculas del UUID', async () => {
+      const d = build();
+      d.machinesRepo.findTransitionByCommand.mockResolvedValue(WITH_PURPOSE);
+
+      await expect(
+        d.service.triggerTransition(
+          AGGREGATE_ID,
+          'CLOSE',
+          { ...DTO, purposeOfUseConceptId: PURPOSE_TREATMENT.toUpperCase() },
+          actor,
+        ),
+      ).resolves.toMatchObject({ duplicate: false });
+    });
+
+    it('límite: transición sin propósito configurado conserva el flujo actual', async () => {
+      const d = build();
+      d.machinesRepo.findTransitionByCommand.mockResolvedValue({
+        ...TRANSITION,
+        purposeOfUseConceptId: undefined,
+      });
+
+      await expect(
+        d.service.triggerTransition(AGGREGATE_ID, 'CLOSE', DTO, actor),
+      ).resolves.toMatchObject({ duplicate: false });
+    });
+
+    it('error: rol válido con un propósito distinto => 403, sin cambiar el agregado ni crear evento', async () => {
+      const d = build();
+      d.machinesRepo.findTransitionByCommand.mockResolvedValue(WITH_PURPOSE);
+
+      await expect(
+        d.service.triggerTransition(
+          AGGREGATE_ID,
+          'CLOSE',
+          { ...DTO, purposeOfUseConceptId: PURPOSE_PAYMENT },
+          actor,
+        ),
+      ).rejects.toMatchObject(NOT_ALLOWED);
+
+      expectUntouched(d);
+    });
+
+    it('falla catalogada: propósito ausente => 403 WORKFLOW_PURPOSE_NOT_ALLOWED', async () => {
+      const d = build();
+      d.machinesRepo.findTransitionByCommand.mockResolvedValue(WITH_PURPOSE);
+
+      await expect(
+        d.service.triggerTransition(AGGREGATE_ID, 'CLOSE', DTO, actor),
+      ).rejects.toMatchObject(NOT_ALLOWED);
+
+      expectUntouched(d);
+    });
+
+    it('ausente y distinto responden igual y no revelan el propósito requerido ni las guardas', async () => {
+      const d = build();
+      d.machinesRepo.findTransitionByCommand.mockResolvedValue(WITH_PURPOSE);
+      d.machinesRepo.findGuardsByTransition.mockResolvedValue([
+        { guardCode: 'g', failureMessageKey: 'secreto' },
+      ]);
+
+      const missing = await d.service
+        .triggerTransition(AGGREGATE_ID, 'CLOSE', DTO, actor)
+        .catch((e: any) => e);
+      const other = await d.service
+        .triggerTransition(
+          AGGREGATE_ID,
+          'CLOSE',
+          { ...DTO, purposeOfUseConceptId: PURPOSE_PAYMENT },
+          actor,
+        )
+        .catch((e: any) => e);
+
+      expect(missing.getResponse()).toEqual(other.getResponse());
+      expect(missing.details).toBeUndefined();
+      const body = JSON.stringify(missing.getResponse());
+      expect(body).not.toContain(PURPOSE_TREATMENT);
+      expect(body).not.toContain('secreto');
+      expect(d.machinesRepo.findGuardsByTransition).not.toHaveBeenCalled();
+    });
+
+    it('se rechaza antes de la idempotencia: un reenvío con propósito ajeno no devuelve el evento previo', async () => {
+      const d = build();
+      d.machinesRepo.findTransitionByCommand.mockResolvedValue({
+        ...WITH_PURPOSE,
+        idempotencyRequired: true,
+      });
+      d.runtimeRepo.findTransitionEventByIdempotencyKey.mockResolvedValue({
+        id: 'previo',
+      });
+
+      await expect(
+        d.service.triggerTransition(
+          AGGREGATE_ID,
+          'CLOSE',
+          { ...DTO, purposeOfUseConceptId: PURPOSE_PAYMENT },
+          actor,
+          'clave-1',
+        ),
+      ).rejects.toMatchObject(NOT_ALLOWED);
+
+      expect(
+        d.runtimeRepo.findTransitionEventByIdempotencyKey,
+      ).not.toHaveBeenCalled();
+    });
+  });
+
   describe('triggerTransition (UC-32-05)', () => {
     it('bloquea el agregado antes de resolver la transición', async () => {
       const d = build();

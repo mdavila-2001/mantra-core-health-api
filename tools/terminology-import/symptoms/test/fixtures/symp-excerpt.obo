@@ -1,0 +1,45 @@
+format-version: 1.2
+data-version: releases/2026-07-30/symp.obo
+date: 30:07:2026 20:10
+saved-by: lschriml
+default-namespace: symptoms
+idspace: dc http://purl.org/dc/elements/1.1/ 
+idspace: oboInOwl http://www.geneontology.org/formats/oboInOwl# 
+idspace: terms http://purl.org/dc/terms/ 
+ontology: symp
+property_value: dc:description "The Symptom Ontology has been developed as a standardized ontology for symptoms of human diseases." xsd:string
+property_value: dc:title "Symptom Ontology" xsd:string
+property_value: IAO:0000700 SYMP:0000462
+[Term]
+id: SYMP:0000462
+name: symptom
+def: "A symptom is a perceived change in function, sensation, loss, disturbance or appearance reported by a patient indicative of a disease." [url:https\://link.springer.com/chapter/10.1007/978-1-4615-4789-1_5, url:https\://www.merriam-webster.com/dictionary/symptom, url:https\://www.nature.com/subjects/signs-and-symptoms]
+
+[Term]
+id: SYMP:0000567
+name: general symptom
+xref: ICD9CM_2005:780
+xref: UMLS_CUI:C0159028
+xref: UMLS_ICD9CM_2005_AUI:A0284119
+is_a: SYMP:0000462 ! symptom
+
+[Term]
+id: SYMP:0000410
+name: neurological and physiological symptom
+is_a: SYMP:0000462 ! symptom
+
+[Term]
+id: SYMP:0000613
+name: fever
+def: "A neurological and physiological symptom that is characterized by a rise of body temperature above the normal, whether as a natural response (as to infection) or artificially induced for therapeutic reasons." [url:http\://www2.merriam-webster.com/cgi-bin/mwmednlm?book=Medical&va=fever]
+synonym: "pyrexia" EXACT []
+xref: ICD9CM_2005:780.6
+xref: UMLS_CUI:C0015967
+xref: UMLS_ICD9CM_2005_AUI:A0058972
+is_a: SYMP:0000410 ! neurological and physiological symptom
+
+[Term]
+id: SYMP:0000003
+name: obsolete acute enteritis in newborns
+is_obsolete: true
+

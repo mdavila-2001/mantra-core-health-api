@@ -14,7 +14,12 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { PromotionsDiscountsService, PromotionsReadService } from '../services';
 import {
   CreatePromotionDto,
@@ -69,6 +74,11 @@ export class PromotionsController {
   }
 
   /** UC-51-07. */
+  @Audited({
+    action: 'PROMOTION_CREATED',
+    entity: 'promotion',
+    entityId: 'result.id',
+  })
   @Post('promotions')
   @Roles('PROMOTIONS_ADMIN', 'MARKETING_MANAGER')
   @HttpCode(HttpStatus.CREATED)
@@ -81,6 +91,11 @@ export class PromotionsController {
   }
 
   /** UC-51-08. */
+  @Audited({
+    action: 'COUPONS_ISSUED',
+    entity: 'coupon',
+    entityId: 'param:id',
+  })
   @Post('promotions/:id/coupons/batch')
   @Roles('PROMOTIONS_ADMIN', 'MARKETING_MANAGER')
   @HttpCode(HttpStatus.CREATED)
@@ -98,6 +113,10 @@ export class PromotionsController {
   }
 
   /** UC-51-09. */
+  @Audited({
+    action: 'COUPON_VALIDATED',
+    entity: 'coupon',
+  })
   @Post('coupons/validate')
   @Roles('CASHIER', 'PROMOTIONS_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -112,6 +131,11 @@ export class PromotionsController {
   }
 
   /** UC-51-09. */
+  @Audited({
+    action: 'COUPON_REDEEMED',
+    entity: 'redemption',
+    entityId: 'result.id',
+  })
   @Post('redemptions')
   @Roles('CASHIER', 'PROMOTIONS_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -124,6 +148,10 @@ export class PromotionsController {
   }
 
   /** UC-51-10. */
+  @Audited({
+    action: 'PROMOTION_DISCOUNT_APPLIED',
+    entity: 'redemption',
+  })
   @Post('checkout/:orderId/apply-discount')
   @Roles('CASHIER', 'PROMOTIONS_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -140,6 +168,11 @@ export class PromotionsController {
   }
 
   /** UC-51-11. */
+  @Audited({
+    action: 'REDEMPTION_REVERSED',
+    entity: 'redemption',
+    entityId: 'param:id',
+  })
   @Post('redemptions/:id/reverse')
   @Roles('CASHIER', 'PROMOTIONS_ADMIN')
   @HttpCode(HttpStatus.OK)

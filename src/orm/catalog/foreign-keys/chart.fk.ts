@@ -2,24 +2,25 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `chart`.
- * 70 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 71 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const chartForeignKeys: readonly ForeignKeyTuple[] = [
   // [tablaOrigen, columnaOrigen, schemaDestino, tablaDestino, columnaDestino]
-  ['care_plans', 'author_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
-  ['care_plans', 'condition_id', 'clinical', 'conditions', 'id'],
-  ['care_plans', 'created_by_user_id', 'iam', 'users', 'id'],
-  ['care_plans', 'encounter_id', 'clinical', 'encounters', 'id'],
-  ['care_plans', 'intent_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['care_plans', 'patient_profile_id', 'profiles', 'patient_profiles', 'profile_id'],
-  ['care_plans', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['care_plans', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['care_plan_activities', 'activity_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['care_plan_activities', 'care_plan_id', 'chart', 'care_plans', 'id'],
   ['care_plan_activities', 'created_by_user_id', 'iam', 'users', 'id'],
   ['care_plan_activities', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['care_plan_activities', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['care_plans', 'author_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
+  ['care_plans', 'condition_id', 'clinical', 'conditions', 'id'],
+  ['care_plans', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['care_plans', 'encounter_id', 'clinical', 'encounters', 'id'],
+  ['care_plans', 'form_instance_id', 'forms', 'form_instances', 'id'],
+  ['care_plans', 'intent_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['care_plans', 'patient_profile_id', 'profiles', 'patient_profiles', 'profile_id'],
+  ['care_plans', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['care_plans', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['chart_template_assignments', 'created_by_user_id', 'iam', 'users', 'id'],
   ['chart_template_assignments', 'practice_id', 'practice', 'practices', 'id'],
   ['chart_template_assignments', 'practitioner_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
@@ -47,6 +48,10 @@ export const chartForeignKeys: readonly ForeignKeyTuple[] = [
   ['clinical_note_versions', 'signed_by_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
   ['clinical_note_versions', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['clinical_note_versions', 'supersedes_version_id', 'chart', 'clinical_note_versions', 'id'],
+  ['document_record_files', 'content_role_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['document_record_files', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['document_record_files', 'document_record_id', 'chart', 'document_records', 'id'],
+  ['document_record_files', 'file_id', 'common', 'files', 'id'],
   ['document_records', 'category_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['document_records', 'confidentiality_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['document_records', 'created_by_user_id', 'iam', 'users', 'id'],
@@ -57,10 +62,6 @@ export const chartForeignKeys: readonly ForeignKeyTuple[] = [
   ['document_records', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['document_records', 'tenant_id', 'directory', 'tenants', 'id'],
   ['document_records', 'updated_by_user_id', 'iam', 'users', 'id'],
-  ['document_record_files', 'content_role_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['document_record_files', 'created_by_user_id', 'iam', 'users', 'id'],
-  ['document_record_files', 'document_record_id', 'chart', 'document_records', 'id'],
-  ['document_record_files', 'file_id', 'common', 'files', 'id'],
   ['note_release_events', 'action_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['note_release_events', 'clinical_note_version_id', 'chart', 'clinical_note_versions', 'id'],
   ['note_release_events', 'patient_profile_id', 'profiles', 'patient_profiles', 'profile_id'],

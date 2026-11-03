@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsIn, IsISO8601, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsIn, IsISO8601, IsOptional, IsUUID } from 'class-validator';
 
 /** Acción permitida/denegada por una provisión granular. */
 export type ProvisionAction = 'PERMIT' | 'DENY';
@@ -95,8 +95,9 @@ export class ConsentProvisionInputDto {
    */
   @ApiPropertyOptional({
     description: 'Tipo de provisión (concept id); por defecto la base',
+    format: 'uuid',
   })
   @IsOptional()
-  @IsString()
+  @IsUUID()
   provisionTypeConceptId?: string;
 }

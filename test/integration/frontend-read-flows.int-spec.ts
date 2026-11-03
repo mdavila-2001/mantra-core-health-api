@@ -269,6 +269,7 @@ describe('Flujos de lectura del frontend (integración)', () => {
       const listed = await http()
         .get(`/scheduling/bookings?patientProfileId=${patientProfileId}`)
         .set(auth())
+        .set('X-Tenant-Id', SEED.tenantId)
         .expect(200);
 
       expect(listed.body.count).toBe(1);
@@ -355,6 +356,7 @@ describe('Flujos de lectura del frontend (integración)', () => {
       const active = await http()
         .get(`/scheduling/bookings?patientProfileId=${patientProfileId}`)
         .set(auth())
+        .set('X-Tenant-Id', SEED.tenantId)
         .expect(200);
       expect(active.body.count).toBe(0);
 
@@ -363,6 +365,7 @@ describe('Flujos de lectura del frontend (integración)', () => {
           `/scheduling/bookings?patientProfileId=${patientProfileId}&includeCancelled=true`,
         )
         .set(auth())
+        .set('X-Tenant-Id', SEED.tenantId)
         .expect(200);
       expect(all.body.count).toBe(1);
       expect(all.body.items[0].id).toBe(booking.body.id);
@@ -403,6 +406,7 @@ describe('Flujos de lectura del frontend (integración)', () => {
           `/scheduling/bookings?patientProfileId=${patientProfileId}&from=${from}&to=${to}`,
         )
         .set(auth())
+        .set('X-Tenant-Id', SEED.tenantId)
         .expect(200);
       expect(inWindow.body.items.map((i: { id: string }) => i.id)).toContain(
         booking.body.id,
@@ -415,6 +419,7 @@ describe('Flujos de lectura del frontend (integración)', () => {
           `/scheduling/bookings?patientProfileId=${patientProfileId}&from=${from}&to=${before.toISOString()}`,
         )
         .set(auth())
+        .set('X-Tenant-Id', SEED.tenantId)
         .expect(200);
       expect(
         outOfWindow.body.items.map((i: { id: string }) => i.id),
@@ -424,7 +429,11 @@ describe('Flujos de lectura del frontend (integración)', () => {
     it('listar citas sin acotar por paciente ni recurso se rechaza', async () => {
       // Sin este corte la consulta devolvería las citas de todos los pacientes
       // de todos los tenants.
-      await http().get('/scheduling/bookings').set(auth()).expect(422);
+      await http()
+        .get('/scheduling/bookings')
+        .set(auth())
+        .set('X-Tenant-Id', SEED.tenantId)
+        .expect(422);
     });
 
     it('una ventana invertida se rechaza en vez de devolver una agenda vacía', async () => {

@@ -49,8 +49,8 @@ describe('DiagnosticOrdersRepository · findPreparationByStudyConcepts', () => {
 
     await repo.findPreparationByStudyConcepts(em as any, [CONCEPT]);
 
-    const [, , opciones] = em.find.mock.calls[0];
-    expect(opciones?.orderBy).toBeDefined();
+    const [, , options] = em.find.mock.calls[0];
+    expect(options?.orderBy).toBeDefined();
   });
 
   it('sigue exigiendo que haya texto', async () => {

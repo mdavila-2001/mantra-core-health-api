@@ -26,6 +26,7 @@ import { PHL } from '../pharma_lab.concepts';
 import { PharmaLabAccessService } from './pharma-lab-access.service';
 import { PharmaLabNotificationsService } from './pharma-lab-notifications.service';
 import { PharmaLabOrganizationService } from './pharma-lab-organization.service';
+import { PharmaLabErrorReason } from '../pharma_lab.error-reasons';
 
 /**
  * Transiciones admitidas del estado de un reporte de farmacovigilancia
@@ -111,6 +112,7 @@ export class PharmacovigilanceService {
         throw new ResourceNotFoundException(
           'Producto no encontrado en el catálogo del laboratorio',
           { pharmaLabId, pharmaProductId: dto.pharmaProductId },
+          PharmaLabErrorReason.PRODUCT_NOT_FOUND,
         );
       }
 
@@ -212,6 +214,7 @@ export class PharmacovigilanceService {
         throw new ConflictException(
           'La transición de estado del reporte no está permitida',
           { reportId, current: previous },
+          PharmaLabErrorReason.ADVERSE_EVENT_REPORT_STATUS_TRANSITION_NOT_ALLOWED,
         );
       }
 
@@ -300,9 +303,11 @@ export class PharmacovigilanceService {
       );
       if (!clash) return candidate;
     }
-    throw new ConflictException('No se pudo asignar un código de caso libre', {
-      pharmaLabId,
-    });
+    throw new ConflictException(
+      'No se pudo asignar un código de caso libre',
+      { pharmaLabId },
+      PharmaLabErrorReason.ADVERSE_EVENT_CASE_CODE_EXHAUSTED,
+    );
   }
 
   private async requireReport(
@@ -315,6 +320,7 @@ export class PharmacovigilanceService {
       throw new ResourceNotFoundException(
         'Reporte de farmacovigilancia no encontrado en el laboratorio',
         { pharmaLabId, reportId },
+        PharmaLabErrorReason.ADVERSE_EVENT_REPORT_NOT_FOUND,
       );
     }
     return report;

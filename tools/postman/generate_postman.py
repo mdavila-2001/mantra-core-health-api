@@ -630,6 +630,7 @@ TERRITORIAL_ORG_TYPES = [
     ('UNIVERSITY', 'UNI', 'Universidad', 'universidad'),
     ('PHARMACY', 'FAR', 'Farmacia', 'farmacia'),
     ('HOSPITAL', 'HOS', 'Hospital', 'hospital'),
+    ('CLINIC', 'CLI', 'Clínica', 'clínica'),
     ('MEDICAL_OFFICE', 'CON', 'Consultorio', 'consultorio'),
     ('NURSING', 'ENF', 'Enfermería', 'enfermería'),
     ('HEALTH_OTHER', 'OTR', 'Otra institución de salud', 'institución de salud'),
@@ -671,8 +672,8 @@ SIGNUP_FLOW = [
                  'pero el owner puede iniciar sesión de inmediato.\n\n'
                  '`tenantType` es obligatorio y cada tipo exige lo suyo: PAYER el bloque `payer` '
                  '(que crea la aseguradora) y BROKER el bloque `broker` (que crea el corredor); '
-                 'los territoriales —PROVIDER, UNIVERSITY, PHARMACY, HOSPITAL, MEDICAL_OFFICE, '
-                 'NURSING, HEALTH_OTHER y HEALTH_BUSINESS— país y jurisdicción.'),
+                 'los territoriales —PROVIDER, UNIVERSITY, PHARMACY, HOSPITAL, CLINIC, '
+                 'MEDICAL_OFFICE, NURSING, HEALTH_OTHER y HEALTH_BUSINESS— país y jurisdicción.'),
         'patch': {'organization': {'code': 'ORG-{{$timestamp}}',
                                    'legalName': 'Organización de prueba {{$timestamp}}',
                                    'tenantType': 'PROVIDER',

@@ -3,8 +3,10 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   PreconditionFailedException,
+  ResourceNotFoundException,
   type AuthenticatedUser,
 } from '../../../common';
+import { Tenants } from '../../directory/entities';
 import { OutboxService } from '../../messaging/services';
 import { SeriesIngestRepository, TimescaleRepository } from '../repositories';
 import {
@@ -158,6 +160,34 @@ export class TimescaleAdminService {
   }
 
   /**
+   * El tenant al que se atribuyen las métricas y los eventos de una operación
+   * administrativa tiene que existir (WJ-01).
+   *
+   * `tenantId` llega en el cuerpo —el worker lo toma de `TS_ADMIN_TENANT_ID`—, y la
+   * métrica de pipeline y el evento de dominio se escriben con él sin que ninguna FK
+   * lo respalde en estas tablas de series. Un UUID cualquiera, o un tenant
+   * eliminado, dejaba métricas y eventos huérfanos que ningún tenant alcanza. Se
+   * responde 404 antes de tocar el motor, como ante cualquier recurso inexistente.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Tenant declarado en el cuerpo.
+   * @throws ResourceNotFoundException si no existe.
+   */
+  private async assertTenantExists(
+    em: EntityManager,
+    tenantId: string,
+  ): Promise<void> {
+    const tenant = await em.findOne(
+      Tenants,
+      { id: tenantId },
+      { fields: ['id'] },
+    );
+    if (!tenant) {
+      throw new ResourceNotFoundException('Tenant no encontrado', { tenantId });
+    }
+  }
+
+  /**
    * UC-58-05: comprimir los chunks antiguos.
    *
    * Se comprime **un chunk cada vez** y con tope por pasada. Comprimir es una
@@ -174,6 +204,7 @@ export class TimescaleAdminService {
     actor: AuthenticatedUser,
   ): Promise<CompressionResponseDto> {
     return this.em.transactional(async (tx) => {
+      await this.assertTenantExists(tx, dto.tenantId);
       const segmentBy = COMPRESSION_SEGMENTS[dto.table as TimeseriesTable];
       if (!segmentBy) {
         throw new PreconditionFailedException(
@@ -258,6 +289,7 @@ export class TimescaleAdminService {
     actor: AuthenticatedUser,
   ): Promise<RetentionResponseDto> {
     return this.em.transactional(async (tx) => {
+      await this.assertTenantExists(tx, dto.tenantId);
       const dropped = await this.timescaleRepo.dropChunksOlderThan(
         tx,
         dto.table,
@@ -340,6 +372,9 @@ export class TimescaleAdminService {
         { from: dto.from, to: dto.to },
       );
     }
+
+    // Antes de tocar el motor: el refresco corre fuera de transacción y no se deshace.
+    await this.assertTenantExists(this.em.fork(), dto.tenantId);
 
     await this.timescaleRepo.ensureContinuousAggregate(this.em, name);
     await this.timescaleRepo.refreshContinuousAggregate(

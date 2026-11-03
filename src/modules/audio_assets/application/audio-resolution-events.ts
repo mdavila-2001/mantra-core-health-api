@@ -1,5 +1,5 @@
 import type { AudioAssets } from '../entities';
-import type { AudioAssetsRepository } from '../repositories/audio-assets.repository';
+import type { AudioAssetsRepository } from '../infrastructure/repositories/audio-assets.repository';
 
 export async function recordAudioResolutionEvent(
   repository: AudioAssetsRepository,

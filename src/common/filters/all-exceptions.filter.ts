@@ -16,15 +16,27 @@ import {
 } from '@mikro-orm/core';
 import type { Request, Response } from 'express';
 import { ErrorCode } from '../errors/error-codes';
+import { SystemErrorReason } from '../errors/system-error-reasons';
+import { SecretCipherError } from '../errors/secret-cipher.error';
+import { redactShareTokenInUrl } from '../../logging/share-token-redaction';
+import { exclusionReasonOf } from './exclusion-constraint-reasons';
 import {
   APP_ATTR,
   TracingService,
   applyTraceHeader,
 } from '../../observability';
+import { errorSink } from '../../observability/capture/error-sink';
+import {
+  currentRequestContext,
+  requestIdOf,
+  routeTemplateOfRequest,
+} from '../../observability/capture/request-context';
+import { currentTraceContext } from '../../observability/trace-context.service';
 import {
   describeForDiagnostics,
   errorDiagnosticsEnabled,
   violationsForLog,
+  safeErrorForLog,
   type ErrorDiagnostics,
 } from './error-diagnostics';
 
@@ -49,6 +61,18 @@ const EXPOSABLE_5XX_CODES: ReadonlySet<string> = new Set<string>([
   ErrorCode.CONCURRENCY_LIMIT,
 ]);
 
+/**
+ * `reason` que sobreviven a la censura de un 5xx `INTERNAL`.
+ *
+ * Un 500 opaco no dice nada a propósito, pero una causa estable y sin datos
+ * le permite a soporte y al front separar «el servidor se rompió» de «un
+ * secreto guardado no se puede leer» sin abrir el log. Lista cerrada: un
+ * `reason` nuevo no se filtra al cliente por llegar en una excepción.
+ */
+const EXPOSABLE_5XX_REASONS: ReadonlySet<string> = new Set<string>([
+  SystemErrorReason.SECRET_CIPHER_INVALID,
+]);
+
 /** Forma estable del cuerpo de error que ve el cliente. */
 interface ErrorResponseBody {
   /**
@@ -67,6 +91,14 @@ interface ErrorResponseBody {
    * Valor de details mantenido por la instancia.
    */
   details?: unknown;
+  /**
+   * Sub-código de negocio estable del catálogo del módulo que lanzó el error
+   * (ej. `ACCOUNTING_PERIOD_NOT_OPEN`), cuando la excepción lo declara. `code`
+   * agrupa el tipo HTTP; `reason` dice cuál error concreto de ese tipo fue, y es
+   * lo que un front debe usar para mostrar un mensaje o acción específica en
+   * vez de ramificar sobre el texto de `message`.
+   */
+  reason?: string;
   /**
    * Valor de timestamp mantenido por la instancia.
    */
@@ -106,6 +138,32 @@ function toCorrelationId(value: unknown): string | undefined {
   return typeof single === 'number' && Number.isFinite(single)
     ? String(single)
     : undefined;
+}
+
+/**
+ * Ruta de la petición sin el *query string*.
+ *
+ * El cuerpo de error y el log hacían eco de `request.url` completo, y en el
+ * query viajan identificadores, correos y tokens de un solo uso: terminaban
+ * escritos en los logs y devueltos al cliente (y a cualquier proxy).
+ */
+function pathOf(request: { url?: string }): string {
+  // El token de un enlace compartido de receta viaja en la ruta (S-6): sale
+  // del log y del cuerpo como `[token]`.
+  return redactShareTokenInUrl((request.url ?? '').split('?')[0]);
+}
+
+/**
+ * El mismo registro con `message` redactado si lleva el token de un enlace
+ * compartido de receta. Lo usan el diagnóstico (`API_ERROR_DIAGNOSTICS`) y el
+ * `err` del log de un 5xx, que copian el mensaje de la excepción original.
+ */
+function withShareTokenSafeMessage<T extends { message?: unknown }>(
+  record: T,
+): T {
+  if (typeof record.message !== 'string') return record;
+  const message = redactShareTokenInUrl(record.message);
+  return message === record.message ? record : { ...record, message };
 }
 
 /**
@@ -184,17 +242,39 @@ export class AllExceptionsFilter implements ExceptionFilter {
       request.id ?? request.headers['x-request-id'],
     );
 
-    const { status, code, message, details, internals } =
-      this.normalize(exception);
+    const {
+      status,
+      code,
+      message: rawMessage,
+      details,
+      reason,
+      internals,
+    } = this.normalize(exception);
+    // El 404 de una ruta no declarada dice `Cannot GET <ruta>`: si la ruta
+    // lleva el token de un enlace compartido de receta, sale como `[token]`.
+    const message = redactShareTokenInUrl(rawMessage);
 
     const body: ErrorResponseBody = {
       code,
       message,
       correlationId,
       details,
+      reason,
       timestamp: new Date().toISOString(),
-      path: request.url,
+      path: pathOf(request),
     };
+
+    this.captureForObservability(request, {
+      status,
+      code,
+      reason,
+      exception,
+      message,
+      details,
+      internals,
+      correlationId,
+      userId,
+    });
 
     // La traza se marca ANTES de escribir la respuesta, mientras el span HTTP
     // sigue activo. Y la cabecera `x-trace-id` se aplica también aquí: un fallo
@@ -207,9 +287,13 @@ export class AllExceptionsFilter implements ExceptionFilter {
       // Error no anticipado: log completo (con stack), respuesta genérica.
       this.logger.error(
         {
-          err: exception,
+          // Nunca `err: exception`: pino volcaría `detail`, parámetros y el SQL
+          // con valores. Ver `safeErrorForLog`.
+          err: withShareTokenSafeMessage(safeErrorForLog(exception, internals)),
+          code,
+          reason,
           correlationId,
-          path: request.url,
+          path: pathOf(request),
           method: request.method,
           userId,
         },
@@ -219,13 +303,18 @@ export class AllExceptionsFilter implements ExceptionFilter {
         body.message = 'Error interno del servidor';
         body.code = ErrorCode.INTERNAL;
         body.details = undefined;
+        body.reason =
+          reason !== undefined && EXPOSABLE_5XX_REASONS.has(reason)
+            ? reason
+            : undefined;
       }
     } else {
       this.logger.warn(
         {
           correlationId,
           code,
-          path: request.url,
+          reason,
+          path: pathOf(request),
           method: request.method,
           status,
           userId,
@@ -247,10 +336,62 @@ export class AllExceptionsFilter implements ExceptionFilter {
     // Después de la censura de los 5xx a propósito: el diagnóstico es para
     // quien depura, y sólo existe con el interruptor encendido.
     if (errorDiagnosticsEnabled()) {
-      body.diagnostics = describeForDiagnostics(exception, internals);
+      body.diagnostics = withShareTokenSafeMessage(
+        describeForDiagnostics(exception, internals),
+      );
     }
 
     response.status(status).json(body);
+  }
+
+  /**
+   * Entrega el error al sink del portal «Sistema» (`observability.error_*`).
+   *
+   * Corre ANTES de armar la respuesta pero no la toca: ni el cuerpo ni el log
+   * cambian. Todo lo que pueda fallar queda dentro del `try`: medir un error
+   * no puede producir otro.
+   */
+  private captureForObservability(
+    request: Request & {
+      id?: string | number;
+      resolvedTenantId?: string;
+    },
+    captured: {
+      status: number;
+      code: string;
+      reason?: string;
+      exception: unknown;
+      message: string;
+      details?: unknown;
+      internals?: unknown;
+      correlationId?: string;
+      userId?: string;
+    },
+  ): void {
+    if (!errorSink.isEnabled) return;
+    try {
+      const context = currentRequestContext();
+      errorSink.record({
+        status: captured.status,
+        code: captured.code,
+        reason: captured.reason,
+        exception: captured.exception,
+        clientMessage: captured.message,
+        method: request.method,
+        routeTemplate: routeTemplateOfRequest(request),
+        requestId: captured.correlationId ?? requestIdOf(request),
+        traceId: currentTraceContext().trace_id,
+        userId: captured.userId,
+        actorTenantId: request.resolvedTenantId,
+        durationMs: context
+          ? Number(process.hrtime.bigint() - context.startedAtNs) / 1e6
+          : undefined,
+        internals: captured.internals,
+        details: captured.details,
+      });
+    } catch {
+      // Medir no puede romper la respuesta de error.
+    }
   }
 
   /**
@@ -272,13 +413,50 @@ export class AllExceptionsFilter implements ExceptionFilter {
   ): void {
     if (status >= HttpStatus.INTERNAL_SERVER_ERROR) {
       this.tracing.setAttribute(APP_ATTR.ERROR_CODE, code);
-      this.tracing.recordException(exception);
+      // Una `HttpException` lleva un mensaje escrito para el cliente. Cualquier
+      // otra —un error del driver, un `TypeError`— puede traer el SQL con
+      // valores o datos del request en `message`, y OpenTelemetry lo copia al
+      // span: se adjunta sólo su tipo y sus marcos.
+      this.tracing.recordException(
+        exception instanceof HttpException
+          ? this.withoutShareToken(exception)
+          : this.scrubbedForTrace(exception),
+      );
       return;
     }
     this.tracing.addEvent('http.business_error', {
       [APP_ATTR.ERROR_CODE]: code,
       'http.response.status_code': status,
     });
+  }
+
+  /**
+   * La excepción tal cual, o una copia con el token de un enlace compartido de
+   * receta cambiado por `[token]` en el mensaje y el stack, si lo trae.
+   */
+  private withoutShareToken(exception: HttpException): Error {
+    const message = redactShareTokenInUrl(exception.message);
+    const stack = exception.stack && redactShareTokenInUrl(exception.stack);
+    if (message === exception.message && stack === exception.stack) {
+      return exception;
+    }
+    const copy = new Error(message);
+    copy.name = exception.name;
+    copy.stack = stack;
+    return copy;
+  }
+
+  /** Copia de una excepción sin su mensaje: tipo y marcos del stack. */
+  private scrubbedForTrace(exception: unknown): Error {
+    const safe = safeErrorForLog(exception);
+    const type = typeof safe.type === 'string' ? safe.type : 'Error';
+    const scrubbed = new Error(type);
+    scrubbed.name = type;
+    scrubbed.stack = [
+      type,
+      ...(Array.isArray(safe.stack) ? (safe.stack as string[]) : []),
+    ].join('\n');
+    return scrubbed;
   }
 
   /** Traduce cualquier excepción a la tupla estable (status, code, message, details). */
@@ -300,6 +478,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
      */
     details?: unknown;
     /**
+     * Sub-código de negocio estable propio del módulo que lanzó la excepción.
+     */
+    reason?: string;
+    /**
      * Contexto interno del error del driver (restricción, tabla, columna).
      * Se registra en el log y **nunca** viaja en la respuesta.
      */
@@ -315,9 +497,27 @@ export class AllExceptionsFilter implements ExceptionFilter {
           code: (obj.code as string) ?? this.defaultCode(status),
           message: this.extractMessage(obj) ?? exception.message,
           details: obj.details ?? this.extractValidationDetails(obj),
+          reason:
+            typeof obj.reason === 'string'
+              ? obj.reason
+              : (this.reasonFromDetails(obj.details) ??
+                (Array.isArray(obj.message)
+                  ? SystemErrorReason.VALIDATION_PIPE_REJECTED
+                  : undefined)),
         };
       }
       return { status, code: this.defaultCode(status), message: String(res) };
+    }
+
+    // Un secreto cifrado ilegible es un 500 (dato o configuración dañados), pero
+    // con causa estable: ver `EXPOSABLE_5XX_REASONS`.
+    if (exception instanceof SecretCipherError) {
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        code: ErrorCode.INTERNAL,
+        message: 'Error interno del servidor',
+        reason: exception.reason,
+      };
     }
 
     // Colisión de versión optimista de MikroORM: se mapea a 409 estable.
@@ -326,6 +526,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         status: HttpStatus.CONFLICT,
         code: ErrorCode.CONCURRENCY_CONFLICT,
         message: 'El recurso fue modificado por otra operación; reintente',
+        reason: SystemErrorReason.OPTIMISTIC_LOCK_CONFLICT,
       };
     }
 
@@ -338,6 +539,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         status: HttpStatus.CONFLICT,
         code: ErrorCode.CONFLICT,
         message: 'El valor ya está en uso por otro registro',
+        reason: SystemErrorReason.UNIQUE_CONSTRAINT_VIOLATION,
         internals: this.constraintInternals(exception),
       };
     }
@@ -372,6 +574,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
         status: httpish,
         code: this.defaultCode(httpish),
         message: this.messageForHttpish(httpish),
+        reason:
+          httpish === HttpStatus.PAYLOAD_TOO_LARGE
+            ? SystemErrorReason.REQUEST_BODY_TOO_LARGE
+            : SystemErrorReason.REQUEST_BODY_MALFORMED,
       };
     }
 
@@ -426,6 +632,22 @@ export class AllExceptionsFilter implements ExceptionFilter {
       return 'El cuerpo de la petición no es un JSON válido';
     }
     return 'La petición no pudo procesarse';
+  }
+
+  /**
+   * `details.reason` declarado por el módulo que lanzó la excepción, si lo es.
+   *
+   * Hay catálogos que lo escribieron ahí antes de existir el `reason` de primer
+   * nivel (p. ej. `TENANT_REQUIRED`). Se promueve **tal cual está declarado**:
+   * el filtro no infiere nada desde el texto del mensaje, y `details` queda
+   * intacto para los clientes que ya lo leían.
+   */
+  private reasonFromDetails(details: unknown): string | undefined {
+    if (typeof details !== 'object' || details === null) return undefined;
+    const declared = (details as { reason?: unknown }).reason;
+    return typeof declared === 'string' && declared !== ''
+      ? declared
+      : undefined;
   }
 
   /** El ValidationPipe de Nest emite `message: string[]`; se preserva como detalle. */
@@ -497,6 +719,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         status: HttpStatus;
         code: string;
         message: string;
+        reason?: string;
         internals?: unknown;
       }
     | undefined {
@@ -510,18 +733,27 @@ export class AllExceptionsFilter implements ExceptionFilter {
         message:
           'La petición referencia un recurso que no existe: ' +
           'verifique los identificadores enviados',
+        reason: SystemErrorReason.FOREIGN_KEY_VIOLATION,
         internals: this.constraintInternals(exception),
       };
     }
 
-    if (
-      exception instanceof NotNullConstraintViolationException ||
-      exception instanceof CheckConstraintViolationException
-    ) {
+    if (exception instanceof NotNullConstraintViolationException) {
       return {
         status: HttpStatus.BAD_REQUEST,
         code: ErrorCode.VALIDATION_FAILED,
         message: 'La petición trae un valor ausente o inválido para el modelo',
+        reason: SystemErrorReason.REQUIRED_FIELD_VIOLATION,
+        internals: this.constraintInternals(exception),
+      };
+    }
+
+    if (exception instanceof CheckConstraintViolationException) {
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        code: ErrorCode.VALIDATION_FAILED,
+        message: 'La petición trae un valor ausente o inválido para el modelo',
+        reason: SystemErrorReason.MALFORMED_VALUE,
         internals: this.constraintInternals(exception),
       };
     }
@@ -536,6 +768,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         code: ErrorCode.CONCURRENCY_CONFLICT,
         message:
           'La operación entró en conflicto con otra concurrente; reintente',
+        reason: SystemErrorReason.DEADLOCK_DETECTED,
       };
     }
 
@@ -548,6 +781,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         code: ErrorCode.DEPENDENCY_UNAVAILABLE,
         message:
           'La base de datos no está disponible; reintente en unos segundos',
+        reason: SystemErrorReason.DATABASE_CONNECTION_UNAVAILABLE,
       };
     }
 
@@ -578,6 +812,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
         code: string;
         /** Mensaje legible para el cliente. */
         message: string;
+        /** Sub-código de sistema del catálogo `SystemErrorReason`. */
+        reason?: string;
         /** Restricción, tabla y columna implicadas: sólo para el log. */
         internals?: unknown;
       }
@@ -587,11 +823,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
       return undefined;
     }
 
+    // Sin `detail`: PostgreSQL escribe ahí el valor de la clave que falló.
     const internals = {
+      sqlstate: cause.sqlstate,
       constraint: cause.constraint,
       table: cause.table,
       column: cause.column,
-      detail: cause.detail,
     };
 
     switch (cause.sqlstate) {
@@ -606,6 +843,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
           message:
             'La petición referencia un recurso que no existe: ' +
             'verifique los identificadores enviados',
+          reason: SystemErrorReason.FOREIGN_KEY_VIOLATION,
           internals,
         };
       case '23505':
@@ -613,6 +851,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
           status: HttpStatus.CONFLICT,
           code: ErrorCode.CONFLICT,
           message: 'Ya existe un recurso con esa clave',
+          reason: SystemErrorReason.UNIQUE_CONSTRAINT_VIOLATION,
           internals,
         };
       // Restricción EXCLUDE (`ex_appointments_practitioner_time`, carril 12
@@ -620,14 +859,30 @@ export class AllExceptionsFilter implements ExceptionFilter {
       // este caso caía al 500 genérico del `default`, y quien movía un horario
       // veía "Ocurrió un error inesperado" en vez de que hubo un choque —el
       // pedido explícito era mostrar el conflicto, no esconderlo.
-      case '23P01':
+      case '23P01': {
+        // CONTRATO-F2-F5 §0.2: la restricción conocida responde con su
+        // `reason` de contrato (la misma que la pre-validación de la API).
+        const mapped = exclusionReasonOf(
+          typeof cause.constraint === 'string' ? cause.constraint : undefined,
+        );
+        if (mapped) {
+          return {
+            status: HttpStatus.CONFLICT,
+            code: ErrorCode.CONFLICT,
+            message: mapped.message,
+            reason: mapped.reason,
+            internals,
+          };
+        }
         return {
           status: HttpStatus.CONFLICT,
           code: ErrorCode.CONFLICT,
           message:
             'Ese horario se pisa con otra cita ya confirmada del mismo profesional',
+          reason: SystemErrorReason.EXCLUSION_CONSTRAINT_VIOLATION,
           internals,
         };
+      }
       // Valor ausente, fuera de restricción o con sintaxis inválida: es un
       // defecto de forma del cuerpo, así que 400 + `VALIDATION_FAILED`, igual
       // que cuando lo detecta el `ValidationPipe`. Antes salía 422 con ese
@@ -640,6 +895,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
           code: ErrorCode.VALIDATION_FAILED,
           message:
             'La petición trae un valor ausente o inválido para el modelo',
+          reason:
+            cause.sqlstate === '22P02'
+              ? SystemErrorReason.MALFORMED_VALUE
+              : SystemErrorReason.REQUIRED_FIELD_VIOLATION,
           internals,
         };
       // Contención: la operación es válida y reintentarla funciona.
@@ -653,6 +912,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
           code: ErrorCode.CONCURRENCY_CONFLICT,
           message:
             'La operación entró en conflicto con otra concurrente; reintente',
+          reason:
+            cause.sqlstate === '40P01'
+              ? SystemErrorReason.DEADLOCK_DETECTED
+              : cause.sqlstate === '55P03'
+                ? SystemErrorReason.ROW_LOCKED
+                : SystemErrorReason.SERIALIZATION_FAILURE,
         };
       // `57014` consulta cancelada por `statement_timeout`. Es un plazo
       // agotado, no un error de la petición ni un fallo del servidor: el
@@ -662,6 +927,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
           status: HttpStatus.GATEWAY_TIMEOUT,
           code: ErrorCode.TIMEOUT,
           message: 'La consulta excedió el tiempo máximo de ejecución',
+          reason: SystemErrorReason.QUERY_TIMEOUT,
         };
       // `53300` sin conexiones libres, `53200` sin memoria, `57P03` arrancando.
       // La base está viva pero saturada: 503 y reintento, nunca 500.
@@ -673,6 +939,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
           code: ErrorCode.DEPENDENCY_UNAVAILABLE,
           message:
             'La base de datos no admite más trabajo ahora mismo; reintente',
+          reason: SystemErrorReason.DATABASE_SATURATED,
         };
       default:
         return undefined;
@@ -693,7 +960,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
         constraint?: unknown;
         table?: unknown;
         column?: unknown;
-        detail?: unknown;
       }
     | undefined {
     let current: unknown = exception;
@@ -704,7 +970,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
         constraint?: unknown;
         table?: unknown;
         column?: unknown;
-        detail?: unknown;
         cause?: unknown;
       };
 
@@ -720,7 +985,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
           constraint: candidate.constraint,
           table: candidate.table,
           column: candidate.column,
-          detail: candidate.detail,
         };
       }
 
@@ -731,19 +995,20 @@ export class AllExceptionsFilter implements ExceptionFilter {
   }
 
   /**
-   * Columna, tabla y restricción que reporta el driver, si las trae.
+   * SQLSTATE, columna, tabla y restricción que reporta el driver, si las trae.
    *
-   * Va al log, nunca a la respuesta: el `detail` de PostgreSQL incluye el valor
-   * de la clave que falló, y el nombre de la restricción describe el esquema.
+   * Va al log, nunca a la respuesta: el nombre de la restricción describe el
+   * esquema. El `detail` del driver —que incluye el valor de la clave que
+   * falló— no se copia en ningún caso: ni al log ni a la respuesta.
    */
   private constraintInternals(exception: unknown): unknown {
     const found = this.findSqlState(exception);
     if (!found) return undefined;
     return {
+      sqlstate: found.sqlstate,
       constraint: found.constraint,
       table: found.table,
       column: found.column,
-      detail: found.detail,
     };
   }
 }

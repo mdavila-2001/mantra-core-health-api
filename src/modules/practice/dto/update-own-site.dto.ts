@@ -3,13 +3,17 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  Matches,
   MaxLength,
   MinLength,
   ValidateIf,
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { OwnSiteAddressDto } from './create-own-site.dto';
+import {
+  OwnSiteAddressDto,
+  SITE_CONTACT_PHONE_PATTERN,
+} from './create-own-site.dto';
 
 /**
  * Cuerpo de `PATCH /practitioners/me/sites/:siteId` (P32-b).
@@ -23,10 +27,8 @@ import { OwnSiteAddressDto } from './create-own-site.dto';
  * desde acá: es de ella, y lo que el profesional tiene con ella es una
  * vinculación, no la sede.
  *
- * No incluye teléfono: `common.contact_points` identifica a su dueño por
- * `owner_type_concept_id`, y el value set no declara ningún miembro para una
- * sede. Agregarlo es un cambio de modelo (nota de value set + `VS_OWNER` +
- * binding del generador), no un campo más en este DTO.
+ * El teléfono del profesional en esta sede se cambia por una ruta propia:
+ * también se puede declarar en una sede ajena sin editar sus datos compartidos.
  */
 export class UpdateOwnSiteDto {
   /** Nombre del consultorio, tal como lo va a ver el paciente. */
@@ -85,4 +87,38 @@ export class SetSiteBankQrDto {
   @ValidateIf((dto: SetSiteBankQrDto) => dto.fileId !== null)
   @IsUUID()
   fileId!: string | null;
+}
+
+/**
+ * Cuerpo de `PUT /practitioners/me/sites/:siteId/logo`.
+ *
+ * El logo del consultorio, el que sale en el membrete de sus PDF. Mismo
+ * criterio que {@link SetSiteBankQrDto}: el archivo ya entró por
+ * `POST /common/files/upload` y acá viaja sólo su identificador.
+ */
+export class SetSiteLogoDto {
+  /** El archivo ya subido, o `null` para dejar la sede sin logo. */
+  @ApiProperty({
+    format: 'uuid',
+    nullable: true,
+    description: 'Imagen del logo ya subida, o null para quitarlo',
+  })
+  @ValidateIf((dto: SetSiteLogoDto) => dto.fileId !== null)
+  @IsUUID()
+  fileId!: string | null;
+}
+
+/** Teléfono del profesional en una sede vinculada; `null` lo elimina. */
+export class SetSiteContactPhoneDto {
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    maxLength: 40,
+    example: '+591 72123456',
+  })
+  @ValidateIf((dto: SetSiteContactPhoneDto) => dto.contactPhone !== null)
+  @IsString()
+  @Matches(SITE_CONTACT_PHONE_PATTERN)
+  @MaxLength(40)
+  contactPhone!: string | null;
 }

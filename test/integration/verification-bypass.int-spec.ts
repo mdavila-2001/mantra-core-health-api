@@ -38,7 +38,11 @@ describe('Bypass de verificación (integración)', () => {
     return res.body.profileId as string;
   }
 
-  it('con el bypass apagado, un profesional recién dado de alta no aparece en la guía', async () => {
+  // Desde 34e788b7b (03/09/2026, «la guía publica el padrón y MUESTRA la
+  // verificación») la guía ya no excluye a quien no verificó: lo publica con
+  // `verified: false`, y es la tarjeta la que dibuja el sello. Con el bypass
+  // apagado el profesional pendiente aparece, pero NUNCA como verificado.
+  it('con el bypass apagado, un profesional recién dado de alta aparece en la guía como NO verificado', async () => {
     delete process.env.DEV_VERIFICATION_BYPASS;
     const ctx = await bootstrapTestApp();
     try {
@@ -50,10 +54,11 @@ describe('Bypass de verificación (integración)', () => {
         .query({ limit: 200 })
         .expect(200);
 
-      const ids = (guia.body.items as Array<{ profileId: string }>).map(
-        (item) => item.profileId,
-      );
-      expect(ids).not.toContain(profileId);
+      const fila = (
+        guia.body.items as Array<{ profileId: string; verified: boolean }>
+      ).find((item) => item.profileId === profileId);
+      expect(fila).toBeDefined();
+      expect(fila?.verified).toBe(false);
     } finally {
       await ctx.app.close();
     }

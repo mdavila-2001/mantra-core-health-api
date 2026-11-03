@@ -1,0 +1,5 @@
+doid_id	drugbank_id	disease	drug	category	n_curators	n_resources
+DOID:10652	DB00843	Alzheimer's disease	Donepezil	DM	2	1
+DOID:10652	DB00674	Alzheimer's disease	Galantamine	DM	1	4
+DOID:10652	DB00245	Alzheimer's disease	Benzatropine	SYM	3	1
+DOID:10652	DB00810	Alzheimer's disease	Biperiden	NOT	2	1

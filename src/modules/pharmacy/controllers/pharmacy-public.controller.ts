@@ -1,4 +1,11 @@
-import { Controller, Get, Param, ParseUUIDPipe, Query } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Query,
+} from '@nestjs/common';
 import {
   ApiOkResponse,
   ApiOperation,
@@ -7,10 +14,16 @@ import {
 } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { Public } from '../../../common';
-import { PharmacyMarketplaceService } from '../services';
 import {
+  PharmacyMarketplaceService,
+  PharmacyOpeningHoursService,
+} from '../services';
+import {
+  OPEN_NOW_MODES,
   PublicMedicationAvailabilityDto,
   PublicMedicationPageDto,
+  PublicOpenNowPageDto,
+  type OpenNowMode,
 } from '../dto';
 
 /**
@@ -58,7 +71,79 @@ export class PharmacyPublicController {
    *
    * @param service - La vitrina pública.
    */
-  constructor(private readonly service: PharmacyMarketplaceService) {}
+  constructor(
+    private readonly service: PharmacyMarketplaceService,
+    private readonly openingHours: PharmacyOpeningHoursService,
+  ) {}
+
+  /**
+   * P34: qué farmacias están abiertas **ahora** — 24 h declaradas o de turno
+   * vigente —, sin sesión.
+   *
+   * Un turno vencido o cancelado nunca aparece (lo filtra la consulta, no el
+   * cliente). `asOf`/`asOfLocal` dicen con qué instante se decidió, en UTC y en
+   * la hora de Bolivia (`America/La_Paz`, UTC−4 todo el año).
+   */
+  @Public()
+  @Get('public/pharmacies/open-now')
+  @ApiOperation({
+    summary: 'Farmacias abiertas ahora: 24 h o de turno vigente',
+  })
+  @ApiQuery({
+    name: 'mode',
+    required: false,
+    enum: OPEN_NOW_MODES,
+    description:
+      '`any` (por defecto): 24 h o de turno · `24h`: sólo 24 h · `on-call`: sólo de turno',
+  })
+  @ApiQuery({
+    name: 'city',
+    required: false,
+    description: 'Ciudad de la sede (sin distinguir mayúsculas)',
+  })
+  @ApiQuery({
+    name: 'lat',
+    required: false,
+    description: 'Latitud WGS84 para ordenar por distancia (va con lng)',
+  })
+  @ApiQuery({
+    name: 'lng',
+    required: false,
+    description: 'Longitud WGS84 para ordenar por distancia (va con lat)',
+  })
+  @ApiQuery({ name: 'cursor', required: false })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Tamaño de página (por defecto 20, máx. 50)',
+  })
+  @ApiOkResponse({ type: PublicOpenNowPageDto })
+  openNow(
+    @Query('mode') mode?: string,
+    @Query('city') city?: string,
+    @Query('lat') lat?: string,
+    @Query('lng') lng?: string,
+    @Query('cursor') cursor?: string,
+    @Query('limit') limit?: string,
+  ): Promise<PublicOpenNowPageDto> {
+    if (mode !== undefined && !OPEN_NOW_MODES.includes(mode as OpenNowMode)) {
+      throw new BadRequestException(
+        `mode debe ser uno de: ${OPEN_NOW_MODES.join(', ')}`,
+      );
+    }
+    if ((lat === undefined) !== (lng === undefined)) {
+      throw new BadRequestException(
+        'lat y lng van juntos: mande ambos para ordenar por distancia, o ninguno',
+      );
+    }
+    return this.openingHours.openNow({
+      mode: mode as OpenNowMode | undefined,
+      city,
+      origin: originOf(lat, lng),
+      cursor,
+      limit: toInteger(limit),
+    });
+  }
 
   /** La vitrina: un medicamento por tarjeta. */
   @Public()
@@ -109,7 +194,7 @@ export class PharmacyPublicController {
     return this.service.listMedications({
       q,
       group,
-      origin: origenDe(lat, lng),
+      origin: originOf(lat, lng),
       radiusKm: toDecimal(radiusKm),
       limit: toInteger(limit),
     });
@@ -140,7 +225,7 @@ export class PharmacyPublicController {
     @Query('radiusKm') radiusKm?: string,
   ): Promise<PublicMedicationAvailabilityDto> {
     return this.service.getAvailability(conceptId, {
-      origin: origenDe(lat, lng),
+      origin: originOf(lat, lng),
       radiusKm: toDecimal(radiusKm),
     });
   }
@@ -153,26 +238,26 @@ export class PharmacyPublicController {
  * la superficie pública recorta lo que no entiende en vez de fallar, y media
  * coordenada no dice desde dónde medir nada.
  */
-function origenDe(
+function originOf(
   lat?: string,
   lng?: string,
 ): { lat: number; lng: number } | undefined {
   const latitude = toDecimal(lat);
-  const longitud = toDecimal(lng);
-  if (latitude === undefined || longitud === undefined) return undefined;
-  return { lat: latitude, lng: longitud };
+  const longitude = toDecimal(lng);
+  if (latitude === undefined || longitude === undefined) return undefined;
+  return { lat: latitude, lng: longitude };
 }
 
 /** Decimal de un parámetro de consulta, o `undefined`. */
-function toDecimal(valor?: string): number | undefined {
-  if (valor === undefined) return undefined;
-  const numero = Number.parseFloat(valor);
-  return Number.isFinite(numero) ? numero : undefined;
+function toDecimal(value?: string): number | undefined {
+  if (value === undefined) return undefined;
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
 }
 
 /** Entero de un parámetro de consulta, o `undefined`. */
-function toInteger(valor?: string): number | undefined {
-  if (valor === undefined) return undefined;
-  const numero = Number.parseInt(valor, 10);
-  return Number.isFinite(numero) ? numero : undefined;
+function toInteger(value?: string): number | undefined {
+  if (value === undefined) return undefined;
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) ? parsed : undefined;
 }

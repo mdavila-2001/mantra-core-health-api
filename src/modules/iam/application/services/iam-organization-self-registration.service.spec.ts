@@ -1,0 +1,1153 @@
+import { jest } from '@jest/globals';
+// Alias con tipado laxo: evita el 'never' que @jest/globals infiere para jest.fn() en ESM.
+const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
+import { IamOrganizationSelfRegistrationService } from './iam-organization-self-registration.service';
+import { TracingService } from '../../../../observability';
+import { MessagingEmailNoticeAdapter } from '../../infrastructure/adapters/messaging-email-notice.adapter';
+import { directoryRegistration } from './iam-registration.testing';
+import {
+  CONCEPTS,
+  ConflictException,
+  PreconditionFailedException,
+} from '../../../../common';
+import { DIR } from '../../../directory/directory.concepts';
+import type { RegisterOrganizationDto } from '../../presentation/dto';
+import { IamErrorReason } from '../../iam.error-reasons';
+
+const dto: RegisterOrganizationDto = {
+  organization: {
+    code: 'CLINICA_SAN_RAFAEL',
+    legalName: 'Clínica San Rafael S.A.',
+    tradeName: 'Clínica San Rafael',
+    tenantType: 'PROVIDER',
+    countryConceptId: '00000000-0000-0000-0000-0000000000c1',
+    jurisdictionConceptId: '00000000-0000-0000-0000-0000000000j1',
+    timeZone: 'America/La_Paz',
+  },
+  owner: {
+    email: 'admin@sanrafael.bo',
+    password: 'password123',
+    name: 'Ana',
+    lastName: 'Rojas',
+  },
+};
+
+describe('IamOrganizationSelfRegistrationService', () => {
+  const logger = { setContext: fn(), info: fn(), warn: fn(), error: fn() };
+
+  /**
+   * Construye el sistema bajo prueba con dependencias controladas.
+   * @returns Resultado de build.
+   */
+  function build() {
+    const tx = {
+      flush: fn().mockResolvedValue(undefined),
+      execute: fn().mockResolvedValue(undefined),
+    };
+    const em = {
+      transactional: fn((cb: (tx: unknown) => unknown) => cb(tx)),
+    };
+    const tokenService = {
+      issueRefreshToken: fn(() => ({ raw: 'raw-token', hash: 'hashed' })),
+    };
+    const usersRepo = { create: fn(() => ({ id: 'user-1' })) };
+    const credentialsRepo = {
+      lockEmailForRegistration: fn().mockResolvedValue(undefined),
+      findLivePasswordByEmail: fn().mockResolvedValue(null),
+      createPassword: fn(),
+    };
+    const rolesRepo = { create: fn() };
+    const eventsRepo = { record: fn() };
+    const emailVerificationsRepo = { create: fn() };
+    const tenantsRepo = {
+      findByCode: fn().mockResolvedValue(null),
+      create: fn(() => ({
+        id: 'tenant-1',
+        code: dto.organization.code,
+        statusConceptId: DIR.TENANT_PENDING,
+      })),
+    };
+    const membershipsRepo = { create: fn(() => ({ id: 'membership-1' })) };
+    const notificationsService = {
+      createRequest: fn().mockResolvedValue({ id: 'notif-1' }),
+    };
+    const typeProfile = {
+      assertProfileMatchesType: fn(),
+      declaredConcepts: fn(() => ({})),
+      assertConceptsExist: fn().mockResolvedValue(undefined),
+      materializeProfile: fn().mockResolvedValue(undefined),
+    };
+    const affiliationDocuments = {
+      attachRegistrationDocuments: fn().mockResolvedValue([
+        'doc-1',
+        'doc-2',
+        'doc-3',
+        'doc-4',
+        'doc-5',
+      ]),
+    };
+    // Subtarea 1.4: por defecto el alta no declara representante ni gerencias.
+    const representatives = {
+      register: fn(async () => ({ representativesRegistered: 4 })),
+    };
+    // P50: doble del puerto de farmacia (el adaptador real delega en
+    // `PharmacyProvisioningService`, que tiene su propio spec).
+    const pharmacies = {
+      provision: fn().mockResolvedValue({ pharmacyId: 'pharmacy-1' }),
+    };
+    const branches = { create: fn(() => undefined) };
+
+    const service = new IamOrganizationSelfRegistrationService(
+      em as never,
+      tokenService as never,
+      usersRepo as never,
+      credentialsRepo as never,
+      rolesRepo as never,
+      eventsRepo as never,
+      emailVerificationsRepo as never,
+      directoryRegistration({
+        tenants: tenantsRepo,
+        memberships: membershipsRepo,
+        branches,
+        typeProfile,
+        affiliationDocuments,
+      }),
+      new MessagingEmailNoticeAdapter(notificationsService as never),
+      pharmacies as never,
+      representatives as never,
+      logger as never,
+      new TracingService(),
+    );
+    return {
+      service,
+      tx,
+      usersRepo,
+      credentialsRepo,
+      rolesRepo,
+      eventsRepo,
+      emailVerificationsRepo,
+      tenantsRepo,
+      membershipsRepo,
+      notificationsService,
+      typeProfile,
+      affiliationDocuments,
+      representatives,
+      pharmacies,
+      branches,
+    };
+  }
+
+  describe('PHARMACY (P50)', () => {
+    const pharmacyDto: RegisterOrganizationDto = {
+      ...dto,
+      organization: {
+        ...dto.organization,
+        code: 'FARM-1023456029',
+        legalName: 'Farmacia Central S.R.L.',
+        tenantType: 'PHARMACY',
+        legalEntityType: 'SRL',
+        taxIdentifier: '1023456029',
+        pharmacy: {
+          address: 'Av. Cristo Redentor 1234',
+          latitude: -17.78,
+          longitude: -63.18,
+          branches: [
+            {
+              name: 'Sucursal Equipetrol',
+              latitude: -17.76,
+              longitude: -63.19,
+            },
+          ],
+        },
+      },
+    };
+
+    it('provisiona la farmacia con su casa central y sus sucursales y devuelve pharmacyId', async () => {
+      const d = build();
+
+      const result = await d.service.registerOrganization(pharmacyDto);
+
+      expect(result.pharmacyId).toBe('pharmacy-1');
+      expect(d.pharmacies.provision).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          tenantId: 'tenant-1',
+          code: 'FARM-1023456029',
+          legalName: 'Farmacia Central S.R.L.',
+          ownerUserId: 'user-1',
+        }),
+        {
+          headquarters: {
+            name: 'Casa central',
+            addressLines: 'Av. Cristo Redentor 1234',
+            latitude: -17.78,
+            longitude: -63.18,
+          },
+          branches: [
+            {
+              name: 'Sucursal Equipetrol',
+              latitude: -17.76,
+              longitude: -63.19,
+            },
+          ],
+        },
+        'user-1',
+      );
+      // La central (con punto) y la sucursal siguen en `directory.branches`,
+      // que es lo que lista el portal de la organización.
+      expect(d.branches.create).toHaveBeenCalledTimes(2);
+    });
+
+    it('sin bloque pharmacy, la central nace igual (sin dirección ni punto)', async () => {
+      const d = build();
+      const { pharmacy: _omit, ...organization } = pharmacyDto.organization;
+
+      await d.service.registerOrganization({ ...pharmacyDto, organization });
+
+      expect(d.pharmacies.provision).toHaveBeenCalledWith(
+        d.tx,
+        expect.anything(),
+        {
+          headquarters: {
+            name: 'Casa central',
+            addressLines: undefined,
+            latitude: undefined,
+            longitude: undefined,
+          },
+          branches: [],
+        },
+        'user-1',
+      );
+      expect(d.branches.create).not.toHaveBeenCalled();
+    });
+
+    it('una SRL de farmacia con representante sin poder se registra: el poder se exige para operar', async () => {
+      const d = build();
+
+      const result = await d.service.registerOrganization({
+        ...pharmacyDto,
+        organization: {
+          ...pharmacyDto.organization,
+          legalRepresentative: {
+            fullName: 'Mariana Siles Justiniano',
+            idNumber: '4872190 SC',
+            email: 'legal@farmacia.bo',
+          },
+        },
+      });
+
+      expect(result.pharmacyId).toBe('pharmacy-1');
+      expect(d.representatives.register).toHaveBeenCalled();
+    });
+
+    it('copia el NIT declarado como número del documento tributario', async () => {
+      const d = build();
+
+      await d.service.registerOrganization({
+        ...pharmacyDto,
+        organization: {
+          ...pharmacyDto.organization,
+          legalDocuments: {
+            constitutionFileId: '00000000-0000-4000-8000-000000000001',
+            taxIdentifierFileId: '00000000-0000-4000-8000-000000000002',
+            commerceRegistryFileId: '00000000-0000-4000-8000-000000000003',
+            operatingLicenseFileId: '00000000-0000-4000-8000-000000000004',
+            healthAuthorityCertificateFileId:
+              '00000000-0000-4000-8000-000000000005',
+          },
+        },
+      });
+
+      expect(
+        d.affiliationDocuments.attachRegistrationDocuments,
+      ).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ taxIdentifier: '1023456029' }),
+      );
+    });
+
+    it('no provisiona farmacia para otro tipo de organización', async () => {
+      const d = build();
+
+      const result = await d.service.registerOrganization(dto);
+
+      expect(d.pharmacies.provision).not.toHaveBeenCalled();
+      expect(result.pharmacyId).toBeUndefined();
+    });
+  });
+
+  it('creates the organization and its owner account in one call', async () => {
+    const d = build();
+
+    const result = await d.service.registerOrganization(dto);
+
+    expect(result).toMatchObject({
+      tenantId: 'tenant-1',
+      code: 'CLINICA_SAN_RAFAEL',
+      ownerUserId: 'user-1',
+      membershipId: 'membership-1',
+      emailVerificationSent: true,
+    });
+  });
+
+  it('leaves the organization PENDING and UNVERIFIED: nobody self-verifies', async () => {
+    const d = build();
+
+    await d.service.registerOrganization(dto);
+
+    // Verificar una organización es un acto de la plataforma, que es quien
+    // contrasta licencia y personería. Si esto se relajara, cualquiera podría
+    // aparecer como prestador verificado rellenando un formulario.
+    expect(d.tenantsRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        statusConceptId: DIR.TENANT_PENDING,
+        verificationStatusConceptId: DIR.TENANT_UNVERIFIED,
+      }),
+    );
+  });
+
+  it('defaults the organization type to PROVIDER and honours PAYER / BROKER', async () => {
+    const provider = build();
+    await provider.service.registerOrganization(dto);
+    expect(provider.tenantsRepo.create).toHaveBeenCalledWith(
+      provider.tx,
+      expect.objectContaining({
+        tenantTypeConceptId: CONCEPTS.TENANT_TYPE_PROVIDER,
+      }),
+    );
+
+    const payer = build();
+    await payer.service.registerOrganization({
+      ...dto,
+      organization: { ...dto.organization, tenantType: 'PAYER' },
+    });
+    expect(payer.tenantsRepo.create).toHaveBeenCalledWith(
+      payer.tx,
+      expect.objectContaining({
+        tenantTypeConceptId: CONCEPTS.TENANT_TYPE_PAYER,
+      }),
+    );
+
+    const broker = build();
+    await broker.service.registerOrganization({
+      ...dto,
+      organization: { ...dto.organization, tenantType: 'BROKER' },
+    });
+    expect(broker.tenantsRepo.create).toHaveBeenCalledWith(
+      broker.tx,
+      expect.objectContaining({
+        tenantTypeConceptId: CONCEPTS.TENANT_TYPE_BROKER,
+      }),
+    );
+  });
+
+  // Organización médica: las cinco institucionales de salud. CLINIC es el
+  // código de «Clínica», que no existía y se rechazaba con 400 en el DTO.
+  it.each([
+    ['HOSPITAL', CONCEPTS.TENANT_TYPE_HOSPITAL],
+    ['CLINIC', CONCEPTS.TENANT_TYPE_CLINIC],
+    ['MEDICAL_OFFICE', CONCEPTS.TENANT_TYPE_MEDICAL_OFFICE],
+    ['NURSING', CONCEPTS.TENANT_TYPE_NURSING],
+    ['HEALTH_OTHER', CONCEPTS.TENANT_TYPE_HEALTH_OTHER],
+  ] as const)(
+    'registra la organización médica %s con su concepto de tipo, pendiente y sin verificar',
+    async (tenantType, conceptId) => {
+      const d = build();
+
+      await d.service.registerOrganization({
+        ...dto,
+        organization: { ...dto.organization, tenantType },
+      });
+
+      expect(d.typeProfile.assertProfileMatchesType).toHaveBeenCalledWith(
+        expect.objectContaining({ tenantType }),
+      );
+      expect(d.tenantsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          tenantTypeConceptId: conceptId,
+          statusConceptId: DIR.TENANT_PENDING,
+          verificationStatusConceptId: DIR.TENANT_UNVERIFIED,
+        }),
+      );
+    },
+  );
+
+  describe('DIAGNOSTIC_CENTER (subtarea 1.5)', () => {
+    it('devuelve diagnosticUnitId cuando el tipo es DIAGNOSTIC_CENTER', async () => {
+      const d = build();
+      d.typeProfile.materializeProfile.mockResolvedValueOnce(
+        'diagnostic-unit-1',
+      );
+
+      const result = await d.service.registerOrganization({
+        ...dto,
+        organization: {
+          ...dto.organization,
+          tenantType: 'DIAGNOSTIC_CENTER',
+          diagnosticUnit: { modalityConceptIds: [] },
+        },
+      });
+
+      expect(result).toMatchObject({
+        tenantId: 'tenant-1',
+        ownerUserId: 'user-1',
+        membershipId: 'membership-1',
+        diagnosticUnitId: 'diagnostic-unit-1',
+      });
+      expect(d.eventsRepo.record).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          detailJson: expect.objectContaining({
+            flow: 'organization-self-registration',
+          }),
+        }),
+      );
+    });
+
+    it('no lleva diagnosticUnitId cuando el tipo no es DIAGNOSTIC_CENTER', async () => {
+      const d = build();
+      // Aunque el doble de materializeProfile devolviera algo (no debería para
+      // PROVIDER), la respuesta no lo expone: el campo es propio del tipo.
+      d.typeProfile.materializeProfile.mockResolvedValueOnce('carrier-1');
+
+      const result = await d.service.registerOrganization(dto);
+
+      expect(result.diagnosticUnitId).toBeUndefined();
+    });
+
+    it('rechaza con PreconditionFailedException sin crear nada, si el perfil no coincide con el tipo', async () => {
+      const d = build();
+      d.typeProfile.assertProfileMatchesType.mockImplementation(() => {
+        throw new PreconditionFailedException(
+          'El bloque `diagnosticUnit` sólo corresponde a un tenant de tipo DIAGNOSTIC_CENTER',
+        );
+      });
+
+      await expect(d.service.registerOrganization(dto)).rejects.toBeInstanceOf(
+        PreconditionFailedException,
+      );
+
+      // La validación se adelantó a ANTES de crear la cuenta: un tipo mal
+      // formado no debe dejar ni el usuario ni el tenant a medio hacer.
+      expect(d.usersRepo.create).not.toHaveBeenCalled();
+      expect(d.tenantsRepo.create).not.toHaveBeenCalled();
+    });
+  });
+
+  it('makes the owner an OWNER member with the directory active status', async () => {
+    const d = build();
+
+    await d.service.registerOrganization(dto);
+
+    // El status DEBE ser el de directory: es el que `loadActiveTenantIds` mira
+    // para poblar el claim `tenants` del JWT. Con otro concepto, el owner
+    // recibiría 403 "no pertenece a ningún tenant" en todo request posterior y
+    // la organización nacería inutilizable.
+    expect(d.membershipsRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        userId: 'user-1',
+        tenantId: 'tenant-1',
+        tenantRoleConceptId: DIR.ROLE_OWNER,
+        statusConceptId: DIR.MEMBERSHIP_ACTIVE,
+        accessScopeConceptId: DIR.SCOPE_ALL_TENANT,
+      }),
+    );
+  });
+
+  it('grants only the USER global role: platform roles are not self-service', async () => {
+    const d = build();
+
+    await d.service.registerOrganization(dto);
+
+    expect(d.rolesRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({ roleConceptId: CONCEPTS.ROLE_USER }),
+    );
+    expect(d.usersRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({ statusConceptId: CONCEPTS.USER_ACTIVE }),
+    );
+  });
+
+  it('composes the owner account name from its parts', async () => {
+    const d = build();
+
+    await d.service.registerOrganization(dto);
+
+    expect(d.usersRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({ displayName: 'Ana Rojas' }),
+    );
+  });
+
+  it('keeps honouring displayName for clients that still send it', async () => {
+    const d = build();
+
+    await d.service.registerOrganization({
+      ...dto,
+      owner: {
+        email: dto.owner.email,
+        password: dto.owner.password,
+        displayName: 'Dra. Ana Rojas',
+      },
+    });
+
+    // Quien mandó la forma anterior tiene que ver exactamente lo que mandó.
+    expect(d.usersRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({ displayName: 'Dra. Ana Rojas' }),
+    );
+  });
+
+  it('logs the owner in by email: the credential subject is the email', async () => {
+    const d = build();
+
+    await d.service.registerOrganization(dto);
+
+    expect(d.credentialsRepo.createPassword).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({ externalSubject: dto.owner.email }),
+    );
+  });
+
+  it('rejects a duplicate organization code with 409 before writing anything', async () => {
+    const d = build();
+    d.tenantsRepo.findByCode.mockResolvedValue({ id: 'existing' });
+
+    await expect(d.service.registerOrganization(dto)).rejects.toBeInstanceOf(
+      ConflictException,
+    );
+    expect(d.usersRepo.create).not.toHaveBeenCalled();
+    expect(d.tenantsRepo.create).not.toHaveBeenCalled();
+  });
+
+  it('rejects an owner email that already has a live credential', async () => {
+    const d = build();
+    d.credentialsRepo.findLivePasswordByEmail.mockResolvedValue({
+      id: 'cred-1',
+    });
+
+    await expect(d.service.registerOrganization(dto)).rejects.toBeInstanceOf(
+      ConflictException,
+    );
+    expect(d.tenantsRepo.create).not.toHaveBeenCalled();
+  });
+
+  // Sin el cerrojo, dos altas simultáneas con el mismo correo pasarían las dos
+  // la comprobación.
+  it('locks the owner email inside the transaction before checking for a live credential', async () => {
+    const d = build();
+
+    await d.service.registerOrganization(dto);
+
+    const lock = d.credentialsRepo.lockEmailForRegistration;
+    const check = d.credentialsRepo.findLivePasswordByEmail;
+    expect(lock).toHaveBeenCalledWith(d.tx, dto.owner.email);
+    expect(lock.mock.invocationCallOrder[0]).toBeLessThan(
+      check.mock.invocationCallOrder[0],
+    );
+  });
+
+  // #1000: el mismo buzón con otras mayúsculas es la misma cuenta.
+  it('rejects the same owner mailbox written with different case with EMAIL_ALREADY_REGISTERED', async () => {
+    const d = build();
+    d.credentialsRepo.findLivePasswordByEmail.mockResolvedValue({
+      id: 'cred-1',
+    });
+    const upper = {
+      ...dto,
+      owner: { ...dto.owner, email: dto.owner.email.toUpperCase() },
+    };
+
+    await expect(d.service.registerOrganization(upper)).rejects.toMatchObject({
+      reason: IamErrorReason.EMAIL_ALREADY_REGISTERED,
+    });
+    expect(d.credentialsRepo.findLivePasswordByEmail).toHaveBeenCalledWith(
+      d.tx,
+      upper.owner.email,
+    );
+    expect(d.usersRepo.create).not.toHaveBeenCalled();
+  });
+
+  it('keeps the organization when the verification email cannot be queued', async () => {
+    const d = build();
+    d.notificationsService.createRequest.mockRejectedValue(
+      new Error('messaging down'),
+    );
+
+    const result = await d.service.registerOrganization(dto);
+
+    // El correo se encola fuera de la transacción justamente para esto: una
+    // mensajería caída no puede deshacer un alta que ya es válida.
+    expect(result.tenantId).toBe('tenant-1');
+    expect(result.emailVerificationSent).toBe(false);
+  });
+
+  describe('legalEntityType (subtarea 1.1)', () => {
+    it('resuelve el concepto del tipo societario elegido', async () => {
+      const d = build();
+
+      await d.service.registerOrganization({
+        ...dto,
+        organization: { ...dto.organization, legalEntityType: 'SRL' },
+      });
+
+      expect(d.tenantsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          legalEntityTypeConceptId: CONCEPTS.LEGAL_ENTITY_SRL,
+        }),
+      );
+    });
+
+    it('sin el campo, cae a la forma legada COMPANY', async () => {
+      const d = build();
+
+      await d.service.registerOrganization(dto);
+
+      expect(d.tenantsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          legalEntityTypeConceptId: CONCEPTS.LEGAL_ENTITY_COMPANY,
+        }),
+      );
+    });
+
+    it('deriva el país de constitución cuando el tipo lo declara y el cliente no manda país', async () => {
+      const d = build();
+
+      await d.service.registerOrganization({
+        ...dto,
+        organization: {
+          ...dto.organization,
+          legalEntityType: 'US_LLC',
+          countryConceptId: undefined,
+        },
+      });
+
+      expect(d.tenantsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          legalEntityTypeConceptId: CONCEPTS.LEGAL_ENTITY_US_LLC,
+          countryConceptId: CONCEPTS.COUNTRY_US,
+        }),
+      );
+    });
+
+    it('no pisa el país declarado explícitamente por el cliente', async () => {
+      const d = build();
+
+      await d.service.registerOrganization({
+        ...dto,
+        organization: {
+          ...dto.organization,
+          legalEntityType: 'US_LLC',
+          countryConceptId: 'country-explicito',
+        },
+      });
+
+      expect(d.tenantsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ countryConceptId: 'country-explicito' }),
+      );
+    });
+  });
+
+  describe('documentos legales de afiliación (subtarea 1.2)', () => {
+    const legalDocuments = {
+      constitutionFileId: 'file-constitution',
+      taxIdentifierFileId: 'file-tax',
+      commerceRegistryFileId: 'file-commerce',
+      operatingLicenseFileId: 'file-license',
+      healthAuthorityCertificateFileId: 'file-sedes',
+    };
+
+    it('los vincula dentro de la misma transacción cuando el alta los declara', async () => {
+      const d = build();
+
+      const result = await d.service.registerOrganization({
+        ...dto,
+        organization: {
+          ...dto.organization,
+          tenantType: 'PAYER',
+          payer: {
+            carrierCode: 'CARRIER_1',
+            sigla: 'CX',
+            address: 'Av. Siempre Viva 123',
+            regulatorIdentifier: 'NIT-12345',
+          },
+          legalDocuments,
+        },
+      });
+
+      expect(
+        d.affiliationDocuments.attachRegistrationDocuments,
+      ).toHaveBeenCalledWith(d.tx, {
+        tenantId: 'tenant-1',
+        ownerUserId: 'user-1',
+        legalEntityType: undefined,
+        taxIdentifier: 'NIT-12345',
+        documents: {
+          CONSTITUTION_DOC: 'file-constitution',
+          TAX_IDENTIFIER_DOC: 'file-tax',
+          COMMERCE_REGISTRY_DOC: 'file-commerce',
+          OPERATING_LICENSE_DOC: 'file-license',
+          HEALTH_AUTHORITY_CERT_DOC: 'file-sedes',
+        },
+      });
+      expect(result.legalDocumentsRegistered).toBe(5);
+    });
+
+    it('no los toca si el alta no declara el bloque', async () => {
+      const d = build();
+
+      const result = await d.service.registerOrganization(dto);
+
+      expect(
+        d.affiliationDocuments.attachRegistrationDocuments,
+      ).not.toHaveBeenCalled();
+      expect(result.legalDocumentsRegistered).toBeUndefined();
+    });
+
+    it('un rechazo 422 al vincularlos revienta toda el alta', async () => {
+      const d = build();
+      d.affiliationDocuments.attachRegistrationDocuments.mockRejectedValueOnce(
+        new PreconditionFailedException(
+          'El documento el NIT ya está vinculado a una organización',
+        ),
+      );
+
+      await expect(
+        d.service.registerOrganization({
+          ...dto,
+          organization: {
+            ...dto.organization,
+            tenantType: 'PAYER',
+            payer: {
+              carrierCode: 'CARRIER_1',
+              sigla: 'CX',
+              address: 'Av. Siempre Viva 123',
+              regulatorIdentifier: 'NIT-12345',
+            },
+            legalDocuments,
+          },
+        }),
+      ).rejects.toThrow(PreconditionFailedException);
+
+      // Nada de correo: la transacción entera se descarta con el rechazo.
+      expect(d.emailVerificationsRepo.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('documentos exigidos por el tipo societario (CL-43)', () => {
+    const withoutConstitution = {
+      taxIdentifierFileId: 'file-tax',
+      commerceRegistryFileId: 'file-commerce',
+      operatingLicenseFileId: 'file-license',
+      healthAuthorityCertificateFileId: 'file-sedes',
+    };
+    const representative = {
+      firstName: 'Ana',
+      lastName: 'Rojas',
+      idNumber: '4821993',
+      email: 'legal@lab.example.test',
+    };
+
+    it('una UNIPERSONAL sin constitución ni poder se registra y ve los cuatro documentos', async () => {
+      const d = build();
+
+      await d.service.registerOrganization({
+        ...dto,
+        organization: {
+          ...dto.organization,
+          legalEntityType: 'UNIPERSONAL',
+          legalDocuments: withoutConstitution,
+          legalRepresentative: representative,
+        },
+      } as never);
+
+      expect(
+        d.affiliationDocuments.attachRegistrationDocuments,
+      ).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          documents: {
+            CONSTITUTION_DOC: undefined,
+            TAX_IDENTIFIER_DOC: 'file-tax',
+            COMMERCE_REGISTRY_DOC: 'file-commerce',
+            OPERATING_LICENSE_DOC: 'file-license',
+            HEALTH_AUTHORITY_CERT_DOC: 'file-sedes',
+          },
+        }),
+      );
+      expect(d.representatives.register).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          legalDocumentFileIds: [
+            'file-tax',
+            'file-commerce',
+            'file-license',
+            'file-sedes',
+          ],
+        }),
+      );
+    });
+
+    it('una SRL sin constitución responde 422 y no crea ninguna cuenta', async () => {
+      const d = build();
+
+      await expect(
+        d.service.registerOrganization({
+          ...dto,
+          organization: {
+            ...dto.organization,
+            legalEntityType: 'SRL',
+            legalDocuments: withoutConstitution,
+          },
+        } as never),
+      ).rejects.toThrow(PreconditionFailedException);
+
+      expect(d.usersRepo.create).not.toHaveBeenCalled();
+      expect(d.tenantsRepo.create).not.toHaveBeenCalled();
+      expect(
+        d.affiliationDocuments.attachRegistrationDocuments,
+      ).not.toHaveBeenCalled();
+    });
+
+    it('una SRL con representante pero sin poder responde 422 antes de escribir', async () => {
+      const d = build();
+
+      await expect(
+        d.service.registerOrganization({
+          ...dto,
+          organization: {
+            ...dto.organization,
+            legalEntityType: 'SRL',
+            legalDocuments: {
+              ...withoutConstitution,
+              constitutionFileId: 'file-constitution',
+            },
+            legalRepresentative: representative,
+          },
+        } as never),
+      ).rejects.toThrow(PreconditionFailedException);
+
+      expect(d.usersRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('un PROFESIONAL_INDEPENDIENTE sin constitución ni matrícula se registra con los tres restantes', async () => {
+      const d = build();
+      const { commerceRegistryFileId, ...withoutCommerce } =
+        withoutConstitution;
+      void commerceRegistryFileId;
+
+      await d.service.registerOrganization({
+        ...dto,
+        organization: {
+          ...dto.organization,
+          legalEntityType: 'PROFESIONAL_INDEPENDIENTE',
+          legalDocuments: withoutCommerce,
+        },
+      } as never);
+
+      expect(
+        d.affiliationDocuments.attachRegistrationDocuments,
+      ).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          documents: {
+            CONSTITUTION_DOC: undefined,
+            TAX_IDENTIFIER_DOC: 'file-tax',
+            COMMERCE_REGISTRY_DOC: undefined,
+            OPERATING_LICENSE_DOC: 'file-license',
+            HEALTH_AUTHORITY_CERT_DOC: 'file-sedes',
+          },
+        }),
+      );
+    });
+
+    it.each(['UNIPERSONAL', 'SRL'])(
+      'una %s sin matrícula de comercio responde 422 nombrándola y no crea ninguna cuenta',
+      async (legalEntityType) => {
+        const d = build();
+        const { commerceRegistryFileId, ...withoutCommerce } =
+          withoutConstitution;
+        void commerceRegistryFileId;
+
+        const intento = d.service.registerOrganization({
+          ...dto,
+          organization: {
+            ...dto.organization,
+            legalEntityType,
+            legalDocuments: {
+              ...withoutCommerce,
+              constitutionFileId: 'file-constitution',
+            },
+          },
+        } as never);
+
+        await expect(intento).rejects.toThrow(PreconditionFailedException);
+        await expect(intento).rejects.toThrow(/matrícula de comercio/);
+        expect(d.usersRepo.create).not.toHaveBeenCalled();
+        expect(d.tenantsRepo.create).not.toHaveBeenCalled();
+      },
+    );
+
+    it('la aseguradora sin tipo societario sigue exigiendo la constitución', async () => {
+      const d = build();
+
+      await expect(
+        d.service.registerOrganization({
+          ...dto,
+          organization: {
+            ...dto.organization,
+            tenantType: 'PAYER',
+            legalDocuments: withoutConstitution,
+          },
+        } as never),
+      ).rejects.toThrow(PreconditionFailedException);
+    });
+  });
+
+  describe('establecimiento médico (medicalFacility)', () => {
+    const medicalFacility = {
+      taxIdentifierNumber: '1023456789',
+      healthFacilityRegistrationNumber: 'SEDES-SC-2020-0412',
+      medicalDirector: {
+        name: 'Ana',
+        lastName: 'Rojas',
+        professionalLicenseNumber: 'MAT-12345',
+        email: 'dir@clinica.bo',
+      },
+      headquarters: { addressLines: ['Av. San Martín 123'] },
+    };
+    const legalDocuments = {
+      constitutionFileId: 'file-constitution',
+      taxIdentifierFileId: 'file-tax',
+      commerceRegistryFileId: 'file-commerce',
+      operatingLicenseFileId: 'file-license',
+      healthAuthorityCertificateFileId: 'file-sedes',
+    };
+    const medicalDto = (
+      tenantType: RegisterOrganizationDto['organization']['tenantType'],
+      withBlock = true,
+    ): RegisterOrganizationDto => ({
+      ...dto,
+      organization: {
+        ...dto.organization,
+        tenantType,
+        legalEntityType: 'SRL',
+        ...(withBlock ? { medicalFacility } : {}),
+      },
+    });
+
+    it.each([
+      'HOSPITAL',
+      'CLINIC',
+      'MEDICAL_OFFICE',
+      'NURSING',
+      'HEALTH_OTHER',
+    ] as const)(
+      '%s con el bloque: lo persiste en la misma transacción y responde medicalFacilityRegistered=true',
+      async (tenantType) => {
+        const d = build();
+        d.typeProfile.materializeProfile.mockResolvedValueOnce('facility-1');
+
+        const result = await d.service.registerOrganization(
+          medicalDto(tenantType),
+        );
+
+        expect(d.typeProfile.materializeProfile).toHaveBeenCalledWith(
+          d.tx,
+          'tenant-1',
+          expect.objectContaining({ tenantType, medicalFacility }),
+          'user-1',
+        );
+        expect(result.medicalFacilityRegistered).toBe(true);
+        // El id de la fila del establecimiento no se expone como unidad
+        // diagnóstica ni como farmacia.
+        expect(result.diagnosticUnitId).toBeUndefined();
+        expect(result.pharmacyId).toBeUndefined();
+      },
+    );
+
+    it('valida el bloque contra el tipo antes de crear la cuenta', async () => {
+      const d = build();
+
+      await d.service.registerOrganization(medicalDto('CLINIC'));
+
+      expect(d.typeProfile.assertProfileMatchesType).toHaveBeenCalledWith(
+        expect.objectContaining({ medicalFacility }),
+      );
+      expect(
+        d.typeProfile.assertProfileMatchesType.mock.invocationCallOrder[0],
+      ).toBeLessThan(d.usersRepo.create.mock.invocationCallOrder[0]);
+    });
+
+    it('un tipo no médico con el bloque responde 422 y no crea cuenta, tenant ni correo', async () => {
+      const d = build();
+      d.typeProfile.assertProfileMatchesType.mockImplementation(() => {
+        throw new PreconditionFailedException(
+          'El bloque `medicalFacility` sólo corresponde a un tenant de tipo HOSPITAL, CLINIC, MEDICAL_OFFICE, NURSING, HEALTH_OTHER',
+        );
+      });
+
+      await expect(
+        d.service.registerOrganization(medicalDto('PHARMACY')),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+      expect(d.usersRepo.create).not.toHaveBeenCalled();
+      expect(d.tenantsRepo.create).not.toHaveBeenCalled();
+      expect(d.emailVerificationsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('un tipo médico sin el bloque se registra igual y responde medicalFacilityRegistered=false', async () => {
+      const d = build();
+
+      const result = await d.service.registerOrganization(
+        medicalDto('HOSPITAL', false),
+      );
+
+      expect(result.medicalFacilityRegistered).toBe(false);
+    });
+
+    it('un tipo no médico no lleva medicalFacilityRegistered', async () => {
+      const d = build();
+
+      const result = await d.service.registerOrganization(dto);
+
+      expect(result).not.toHaveProperty('medicalFacilityRegistered', true);
+      expect(result.medicalFacilityRegistered).toBeUndefined();
+    });
+
+    it('un fallo al persistir el establecimiento revienta toda el alta', async () => {
+      const d = build();
+      d.typeProfile.materializeProfile.mockRejectedValueOnce(
+        new Error('fallo de base'),
+      );
+
+      await expect(
+        d.service.registerOrganization(medicalDto('CLINIC')),
+      ).rejects.toThrow('fallo de base');
+
+      expect(d.emailVerificationsRepo.create).not.toHaveBeenCalled();
+      expect(d.membershipsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('copia el NIT del bloque como número del documento tributario', async () => {
+      const d = build();
+
+      await d.service.registerOrganization({
+        ...medicalDto('CLINIC'),
+        organization: { ...medicalDto('CLINIC').organization, legalDocuments },
+      });
+
+      expect(
+        d.affiliationDocuments.attachRegistrationDocuments,
+      ).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ taxIdentifier: '1023456789' }),
+      );
+    });
+
+    it('el NIT de organization.taxIdentifier manda sobre el del bloque', async () => {
+      const d = build();
+      const base = medicalDto('CLINIC');
+
+      await d.service.registerOrganization({
+        ...base,
+        organization: {
+          ...base.organization,
+          taxIdentifier: '999888777',
+          legalDocuments,
+        },
+      });
+
+      expect(
+        d.affiliationDocuments.attachRegistrationDocuments,
+      ).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ taxIdentifier: '999888777' }),
+      );
+    });
+
+    it('el representante legal y las tres gerencias se registran también para un tipo médico', async () => {
+      const d = build();
+      const base = medicalDto('HOSPITAL');
+      const manager = {
+        name: 'Carlos',
+        lastName: 'Mendoza',
+        phone: '+591 70012345',
+        email: 'gerente@clinica.bo',
+      };
+      const legalRepresentative = {
+        name: 'Mariana',
+        lastName: 'Siles',
+        idNumber: '4872190 SC',
+        email: 'legal@clinica.bo',
+        powerOfAttorneyFileId: 'file-power',
+      };
+      const executives = {
+        generalManager: manager,
+        commercialManager: manager,
+        marketingManager: manager,
+      };
+
+      const result = await d.service.registerOrganization({
+        ...base,
+        organization: {
+          ...base.organization,
+          legalDocuments,
+          legalRepresentative,
+          executives,
+        },
+      });
+
+      expect(d.representatives.register).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          tenantId: 'tenant-1',
+          legalRepresentative,
+          executives,
+        }),
+      );
+      expect(result.representativesRegistered).toBe(4);
+    });
+
+    it('un tipo médico con representante sin poder responde 422: el poder se exige fuera de la farmacia', async () => {
+      const d = build();
+      const base = medicalDto('CLINIC');
+
+      await expect(
+        d.service.registerOrganization({
+          ...base,
+          organization: {
+            ...base.organization,
+            legalDocuments,
+            legalRepresentative: {
+              name: 'Mariana',
+              lastName: 'Siles',
+              idNumber: '4872190 SC',
+              email: 'legal@clinica.bo',
+            },
+          },
+        }),
+      ).rejects.toThrow(/poder notariado/);
+      expect(d.usersRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('anota en el evento de seguridad que el alta trajo el establecimiento, sin datos personales', async () => {
+      const d = build();
+
+      await d.service.registerOrganization(medicalDto('CLINIC'));
+
+      const detail = d.eventsRepo.record.mock.calls[0][1].detailJson;
+      expect(detail).toMatchObject({ medicalFacility: true });
+      expect(JSON.stringify(detail)).not.toContain('MAT-12345');
+      expect(JSON.stringify(detail)).not.toContain('dir@clinica.bo');
+    });
+  });
+});

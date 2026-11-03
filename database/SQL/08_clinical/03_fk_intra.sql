@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 08 · schema clinical
+-- SALUD v4.2.83 · módulo 08 · schema clinical
 -- Generado de diagram_08_clinical.puml — NO editar a mano.
 
 
@@ -39,6 +39,12 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
+    ALTER TABLE "clinical"."allergy_intolerances"
+        ADD CONSTRAINT "fk_allergy_intolerances_encounter_id" FOREIGN KEY ("encounter_id")
+        REFERENCES "clinical"."encounters" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
     ALTER TABLE "clinical"."allergy_reactions"
         ADD CONSTRAINT "fk_allergy_reactions_allergy_id" FOREIGN KEY ("allergy_id")
         REFERENCES "clinical"."allergy_intolerances" ("id");
@@ -66,6 +72,18 @@ DO $$ BEGIN
     ALTER TABLE "clinical"."diagnostic_reports"
         ADD CONSTRAINT "fk_diagnostic_reports_encounter_id" FOREIGN KEY ("encounter_id")
         REFERENCES "clinical"."encounters" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "clinical"."service_request_notes"
+        ADD CONSTRAINT "fk_service_request_notes_service_request_id" FOREIGN KEY ("service_request_id")
+        REFERENCES "clinical"."service_requests" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "clinical"."service_request_components"
+        ADD CONSTRAINT "fk_service_request_components_service_request_id" FOREIGN KEY ("service_request_id")
+        REFERENCES "clinical"."service_requests" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -123,6 +141,24 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
+    ALTER TABLE "clinical"."received_services"
+        ADD CONSTRAINT "fk_received_services_encounter_id" FOREIGN KEY ("encounter_id")
+        REFERENCES "clinical"."encounters" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "clinical"."received_services"
+        ADD CONSTRAINT "fk_received_services_source_procedure_id" FOREIGN KEY ("source_procedure_id")
+        REFERENCES "clinical"."procedures" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "clinical"."received_services"
+        ADD CONSTRAINT "fk_received_services_source_immunization_id" FOREIGN KEY ("source_immunization_id")
+        REFERENCES "clinical"."immunizations" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
     ALTER TABLE "clinical"."encounter_participants"
         ADD CONSTRAINT "fk_encounter_participants_encounter_id" FOREIGN KEY ("encounter_id")
         REFERENCES "clinical"."encounters" ("id");
@@ -132,6 +168,54 @@ DO $$ BEGIN
     ALTER TABLE "clinical"."encounter_locations"
         ADD CONSTRAINT "fk_encounter_locations_encounter_id" FOREIGN KEY ("encounter_id")
         REFERENCES "clinical"."encounters" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "clinical"."encounter_locations"
+        ADD CONSTRAINT "fk_encounter_locations_previous_encounter_location_id" FOREIGN KEY ("previous_encounter_location_id")
+        REFERENCES "clinical"."encounter_locations" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "clinical"."encounter_locations"
+        ADD CONSTRAINT "fk_encounter_locations_placement_incident_id" FOREIGN KEY ("placement_incident_id")
+        REFERENCES "clinical"."placement_incidents" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "clinical"."placement_incidents"
+        ADD CONSTRAINT "fk_placement_incidents_encounter_id" FOREIGN KEY ("encounter_id")
+        REFERENCES "clinical"."encounters" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "clinical"."placement_incidents"
+        ADD CONSTRAINT "fk_placement_incidents_encounter_location_id" FOREIGN KEY ("encounter_location_id")
+        REFERENCES "clinical"."encounter_locations" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "clinical"."patient_admission_footprints"
+        ADD CONSTRAINT "fk_patient_admission_footprints_encounter_id" FOREIGN KEY ("encounter_id")
+        REFERENCES "clinical"."encounters" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "clinical"."inpatient_census_entries"
+        ADD CONSTRAINT "fk_inpatient_census_entries_census_day_id" FOREIGN KEY ("census_day_id")
+        REFERENCES "clinical"."inpatient_census_days" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "clinical"."inpatient_census_entries"
+        ADD CONSTRAINT "fk_inpatient_census_entries_encounter_id" FOREIGN KEY ("encounter_id")
+        REFERENCES "clinical"."encounters" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "clinical"."inpatient_census_adjustments"
+        ADD CONSTRAINT "fk_inpatient_census_adjustments_census_day_id" FOREIGN KEY ("census_day_id")
+        REFERENCES "clinical"."inpatient_census_days" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN

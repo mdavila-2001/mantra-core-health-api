@@ -37,6 +37,13 @@ export interface CreateAddressData {
    */
   administrativeAreaConceptId?: string;
   /**
+   * Nivel 2 —provincia, condado— de cualquier país (ADR-0028): concepto de
+   * `VS_ADMIN_DIVISION`. Se deduce del municipio, no se recibe del cliente.
+   */
+  administrativeArea2ConceptId?: string;
+  /** Distrito o zona, como texto (ADR-0028). */
+  districtText?: string;
+  /**
    * Identificador asociado a use concept.
    */
   useConceptId?: string;
@@ -52,6 +59,10 @@ export interface CreateAddressData {
   latitude?: string;
   /** Longitud del punto, si se conoce. */
   longitude?: string;
+  /** Nombre que le pone la persona (libreta de direcciones, v4.2.61). */
+  label?: string;
+  /** La que se ofrece primero; una sola vigente por dueño (índice único). */
+  isPreferred?: boolean;
 }
 
 /**
@@ -75,18 +86,18 @@ export class AddressesRepository {
    * @param useConceptId - Uso de la dirección (`CONCEPTS.ADDR_USE_HOME`…).
    * @returns La dirección vigente, o `null` si no tiene ninguna.
    */
-  async findVigenteByOwnerAndUse(
+  async findCurrentByOwnerAndUse(
     em: EntityManager,
     ownerId: string,
     useConceptId: string,
   ): Promise<Addresses | null> {
-    const ahora = new Date();
+    const now = new Date();
     return em.findOne(
       Addresses,
       {
         ownerId,
         useConceptId,
-        $or: [{ validTo: null }, { validTo: { $gt: ahora } }],
+        $or: [{ validTo: null }, { validTo: { $gt: now } }],
       },
       { orderBy: { createdAt: 'desc' } },
     );
@@ -99,18 +110,43 @@ export class AddressesRepository {
    * antes. `valid_to` es una columna `date`, así que con la fecha de hoy la
    * dirección deja de ser vigente en la misma petición.
    *
-   * @param direccion - La dirección a cerrar.
+   * @param address - La dirección a cerrar.
    * @param validTo - Fecha de fin de vigencia (normalmente hoy).
    * @param actorUserId - Quién la cierra, para la auditoría.
    * @returns La misma dirección, ya cerrada.
    */
-  closeVigente(
-    direccion: Addresses,
+  /**
+   * Las direcciones vigentes de un dueño con alguno de los usos pedidos.
+   *
+   * Es la lectura de la libreta del paciente: domicilio, trabajo y las que
+   * guardó. Vigente con el mismo criterio que {@link findCurrentByOwnerAndUse}.
+   * Acotada por dueño y por uso, así que no crece sin límite: el alta escribe
+   * una de cada tipo y la libreta tiene tope.
+   */
+  async findCurrentByOwnerAndUses(
+    em: EntityManager,
+    ownerId: string,
+    useConceptIds: readonly string[],
+  ): Promise<Addresses[]> {
+    const now = new Date();
+    return em.find(
+      Addresses,
+      {
+        ownerId,
+        useConceptId: { $in: [...useConceptIds] },
+        $or: [{ validTo: null }, { validTo: { $gt: now } }],
+      },
+      { orderBy: { createdAt: 'asc', id: 'asc' } },
+    );
+  }
+
+  closeCurrent(
+    address: Addresses,
     validTo: Date,
     actorUserId?: string,
   ): Addresses {
-    direccion.validTo = validTo;
-    return touch(direccion, actorUserId);
+    address.validTo = validTo;
+    return touch(address, actorUserId);
   }
 
   /** Construye la entidad en la unidad de trabajo (sin flush). */
@@ -126,10 +162,14 @@ export class AddressesRepository {
         countryConceptId: data.countryConceptId,
         municipalityConceptId: data.municipalityConceptId,
         administrativeAreaConceptId: data.administrativeAreaConceptId,
+        administrativeArea2ConceptId: data.administrativeArea2ConceptId,
+        districtText: data.districtText,
         useConceptId: data.useConceptId,
         typeConceptId: data.typeConceptId,
         latitude: data.latitude,
         longitude: data.longitude,
+        label: data.label,
+        isPreferred: data.isPreferred ?? false,
         ...createdBy(data.actorUserId),
         // `partial: true`: la columna `row_version` (version: true) tiene DEFAULT en
         // BD y la gestiona MikroORM; el tipo la exigiría sin este relajo.

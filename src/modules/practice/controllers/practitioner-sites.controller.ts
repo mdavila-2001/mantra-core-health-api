@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   Roles,
   requireTenantId,
@@ -25,6 +26,8 @@ import {
 import {
   CreateOwnSiteDto,
   SetSiteBankQrDto,
+  SetSiteContactPhoneDto,
+  SetSiteLogoDto,
   UpdateOwnSiteDto,
   PractitionerSiteDto,
   PractitionerSitesResponseDto,
@@ -129,6 +132,11 @@ export class PractitionerSitesController {
    * ALV-005/006 — autoservicio: el profesional da de alta su propio
    * consultorio, sin depender de que una organización lo afilie primero.
    */
+  @Audited({
+    action: 'PRACTITIONER_OWN_SITE_CREATED',
+    entity: 'practice_site',
+    entityId: 'result.id',
+  })
   @Post('me/sites')
   @Roles('PRACTITIONER', 'CLINICIAN')
   @HttpCode(HttpStatus.CREATED)
@@ -151,6 +159,11 @@ export class PractitionerSitesController {
    * Sólo alcanza al consultorio propio: una sede de otra organización es de
    * ella, y lo que el profesional tiene con ella es una vinculación.
    */
+  @Audited({
+    action: 'PRACTITIONER_OWN_SITE_UPDATED',
+    entity: 'practice_site',
+    entityId: 'param:siteId',
+  })
   @Patch('me/sites/:siteId')
   @Roles('PRACTITIONER', 'CLINICIAN')
   @ApiOperation({
@@ -173,6 +186,11 @@ export class PractitionerSitesController {
    * donde tiene vinculación vigente: lo que se guarda no es la sede, es con
    * qué cobra él ahí. El archivo ya entró por `POST /common/files/upload`.
    */
+  @Audited({
+    action: 'PRACTICE_SITE_BANK_QR_SET',
+    entity: 'practice_site',
+    entityId: 'param:siteId',
+  })
   @Put('me/sites/:siteId/bank-qr')
   @Roles('PRACTITIONER', 'CLINICIAN')
   @ApiOperation({
@@ -189,9 +207,62 @@ export class PractitionerSitesController {
   }
 
   /**
+   * El logo del consultorio propio, el que sale en el membrete de sus PDF.
+   *
+   * A diferencia del QR, sólo alcanza al consultorio **propio**: una sede de
+   * otra organización responde 404. El archivo ya entró por
+   * `POST /common/files/upload` y se valida como el logo de una organización.
+   */
+  @Audited({
+    action: 'PRACTICE_SITE_LOGO_SET',
+    entity: 'practice_site',
+    entityId: 'param:siteId',
+  })
+  @Put('me/sites/:siteId/logo')
+  @Roles('PRACTITIONER', 'CLINICIAN')
+  @ApiOperation({
+    summary: 'Fijar o quitar el logo del consultorio propio',
+    description:
+      'Asocia una imagen ya subida (png, jpeg o webp, NORMAL, hasta 2 MB) como logo del consultorio. `fileId: null` lo quita. 404 si la sede no es un consultorio propio; 422 si el archivo no sirve como logo.',
+  })
+  setSiteLogo(
+    @Param('siteId', ParseUUIDPipe) siteId: string,
+    @Body() dto: SetSiteLogoDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PractitionerSiteDto> {
+    return this.sitesService.setSiteLogo(actor, siteId, dto.fileId);
+  }
+
+  /** El contacto del profesional en una sede con vinculación activa. */
+  @Audited({
+    action: 'PRACTITIONER_SITE_CONTACT_PHONE_SET',
+    entity: 'practitioner_role_assignment',
+    entityId: 'param:siteId',
+  })
+  @Put('me/sites/:siteId/contact-phone')
+  @Roles('PRACTITIONER', 'CLINICIAN')
+  @ApiOperation({ summary: 'Guardar o quitar mi teléfono en una sede' })
+  setSiteContactPhone(
+    @Param('siteId', ParseUUIDPipe) siteId: string,
+    @Body() dto: SetSiteContactPhoneDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PractitionerSiteDto> {
+    return this.sitesService.setSiteContactPhone(
+      actor,
+      siteId,
+      dto.contactPhone,
+    );
+  }
+
+  /**
    * ALV-005 — retira un consultorio propio (no lo borra: cierra la
    * vinculación vigente con esa sede).
    */
+  @Audited({
+    action: 'PRACTITIONER_OWN_SITE_DELETED',
+    entity: 'practice_site',
+    entityId: 'param:siteId',
+  })
   @Delete('me/sites/:siteId')
   @Roles('PRACTITIONER', 'CLINICIAN')
   @HttpCode(HttpStatus.NO_CONTENT)

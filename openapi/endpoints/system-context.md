@@ -128,6 +128,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<SystemContextResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<SystemContextResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<SystemContextResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SystemContextResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SystemContextResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -275,6 +276,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ContextBindingResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ContextBindingResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ContextBindingResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ContextBindingResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ContextBindingResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -385,7 +387,7 @@ Content-Type: application/json
 | `contextJson` | Sí | `object` | Sin restricción adicional declarada | Contenido regenerado del contexto | `{}` |
 | `schemaVersion` | No | `string` | longitud máxima 50 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `generatedByAgentId` | No | `string` | formato `uuid` | Agente que generó el contenido | `00000000-0000-4000-8000-000000000001` |
-| `inputs` | No | `array<ContextInputDto>` | Sin restricción adicional declarada | Procedencia de lo recogido | `[{"sourceTypeConceptId":"00000000-0000-4000-8000-000000000001","sourceSchemaName":"Nombre de ejemplo","sourceEntityName":"Nombre de ejemplo","sourceRecordId":"00000000-0000-4000-8000-000000000001","sourceVersionId":"00000000-0000-4000-8000-000000000001","sourceContentHash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","sourceFreshnessAt":"2026-07-31T12:00:00.000Z","precedence":1,"required":false,"missing":true}]` |
+| `inputs` | No | `array<ContextInputDto>` | máximo 500 elemento(s) | Procedencia de lo recogido | `[{"sourceTypeConceptId":"00000000-0000-4000-8000-000000000001","sourceSchemaName":"Nombre de ejemplo","sourceEntityName":"Nombre de ejemplo","sourceRecordId":"00000000-0000-4000-8000-000000000001","sourceVersionId":"00000000-0000-4000-8000-000000000001","sourceContentHash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","sourceFreshnessAt":"2026-07-31T12:00:00.000Z","precedence":1,"required":false,"missing":true}]` |
 | `inputs[].sourceTypeConceptId` | No | `string` | formato `uuid` | Naturaleza de la fuente (catálogo abierto) | `00000000-0000-4000-8000-000000000001` |
 | `inputs[].sourceSchemaName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `inputs[].sourceEntityName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
@@ -444,6 +446,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RefreshRunResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RefreshRunResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RefreshRunResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RefreshRunResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RefreshRunResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -588,6 +591,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RollbackContextResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RollbackContextResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RollbackContextResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RollbackContextResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RollbackContextResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -721,6 +725,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ActivateContextVersionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ActivateContextVersionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ActivateContextVersionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ActivateContextVersionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ActivateContextVersionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -839,6 +844,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<ReadDynamicEnumResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ReadDynamicEnumResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ReadDynamicEnumResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ReadDynamicEnumResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReadDynamicEnumResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -859,6 +865,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "conceptId": "00000000-0000-4000-8000-000000000001",
       "code": "CODIGO_EJEMPLO",
       "display": "valor-ejemplo",
+      "displayEs": "valor-ejemplo",
       "ordinal": 1,
       "isDefault": true
     }
@@ -880,10 +887,11 @@ Campos de la respuesta:
 | `schemaVersion` | Sí | `string` | Sin restricción adicional declarada | Versión de esquema que la versión vigente declara. Se repite al redactar. | `valor-ejemplo` |
 | `cacheToken` | No | `string` | Sin restricción adicional declarada | Testigo de caché de la versión publicada. | `valor-ejemplo` |
 | `allowCustomValue` | Sí | `boolean` | Sin restricción adicional declarada | Si el campo admite un valor fuera del conjunto. | `true` |
-| `options` | Sí | `array<DynamicEnumOptionItemDto>` | Sin restricción adicional declarada | Opciones habilitadas, en el orden en que se ofrecen. | `[{"conceptId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","display":"valor-ejemplo","ordinal":1,"isDefault":true}]` |
+| `options` | Sí | `array<DynamicEnumOptionItemDto>` | Sin restricción adicional declarada | Opciones habilitadas, en el orden en que se ofrecen. | `[{"conceptId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","display":"valor-ejemplo","displayEs":"valor-ejemplo","ordinal":1,"isDefault":true}]` |
 | `options[].conceptId` | Sí | `string` | formato `uuid` | Concepto que respalda la opción; es el valor que se envía al escribir. | `00000000-0000-4000-8000-000000000001` |
 | `options[].code` | Sí | `string` | Sin restricción adicional declarada | Código estable del concepto. | `CODIGO_EJEMPLO` |
 | `options[].display` | Sí | `string` | Sin restricción adicional declarada | Rótulo legible de la opción. | `valor-ejemplo` |
+| `options[].displayEs` | No | `string` | Sin restricción adicional declarada | Nombre en castellano (designación `ES` preferida del concepto), si existe. `display` es el rótulo del sistema de codificación y está en inglés («Complete blood count»); el selector prefiere éste cuando viene. | `valor-ejemplo` |
 | `options[].ordinal` | No | `number` | Sin restricción adicional declarada | Posición en la que se ofrece, empezando en cero. | `1` |
 | `options[].isDefault` | Sí | `boolean` | Sin restricción adicional declarada | Si la opción viene preseleccionada. | `true` |
 
@@ -982,6 +990,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<ListDynamicEnumBindingsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ListDynamicEnumBindingsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ListDynamicEnumBindingsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListDynamicEnumBindingsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListDynamicEnumBindingsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1147,6 +1156,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<EnumDefinitionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<EnumDefinitionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<EnumDefinitionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<EnumDefinitionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `EnumDefinitionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1290,6 +1300,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<EnumBindingResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<EnumBindingResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<EnumBindingResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<EnumBindingResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `EnumBindingResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1421,6 +1432,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RetireEnumDefinitionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RetireEnumDefinitionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RetireEnumDefinitionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RetireEnumDefinitionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RetireEnumDefinitionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1580,6 +1592,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<EnumVersionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<EnumVersionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<EnumVersionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<EnumVersionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `EnumVersionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1704,6 +1717,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<PublishEnumVersionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PublishEnumVersionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PublishEnumVersionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PublishEnumVersionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PublishEnumVersionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1845,6 +1859,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ResolveEnumValueResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ResolveEnumValueResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ResolveEnumValueResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ResolveEnumValueResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResolveEnumValueResponseDto`. Ejemplo completo derivado de ese DTO:
 

@@ -51,7 +51,7 @@ test('5.1 publica solo la línea «Grupo farmacoterapéutico», no el resto de l
   assert.match(c.locator, /^5\.1 .*\(grupo farmacoterapéutico\)$/);
 });
 
-test('4.4 se publica como special_populations con el título oficial en locator (decisión pendiente en GAPS)', () => {
+test('4.4 se publica como special_populations con el título oficial en locator', () => {
   const resp = [{ seccion: '4.4', titulo: 'Advertencias y precauciones especiales de empleo', contenido: '<p>Antes de iniciar el tratamiento se debe interrogar al paciente.</p>' }];
   const { section } = buildCimaSection({ seedRow, code: '4.4', response: resp, nregistro: '50239', fichaDate: FICHA, retrievedAt: '2026-10-08' });
   assert.equal(section.kind, 'special_populations');

@@ -21,13 +21,13 @@ export class VisitorPostSubmissions {
   /**
    * Laboratorio que autoriza.
    */
-  @Property({ fieldName: 'pharma_lab_id', type: 'uuid' }) // FK → pharma_lab.pharma_labs
+  @Property({ fieldName: 'pharma_lab_id', type: 'uuid' }) // FK → pharma_lab.pharma_labs (inferida)
   pharmaLabId!: string;
 
   /**
    * Visitador autor.
    */
-  @Property({ fieldName: 'medical_visitor_id', type: 'uuid' }) // FK → pharma_lab.medical_visitors
+  @Property({ fieldName: 'medical_visitor_id', type: 'uuid' }) // FK → pharma_lab.medical_visitors (inferida)
   medicalVisitorId!: string;
 
   /**
@@ -43,13 +43,13 @@ export class VisitorPostSubmissions {
     fieldName: 'informational_material_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → pharma_lab.informational_materials
+  }) // FK → pharma_lab.informational_materials (inferida)
   informationalMaterialId?: string;
 
   /**
    * Estado del trámite.
    */
-  @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts (inferida)
   statusConceptId!: string;
 
   /**
@@ -65,7 +65,7 @@ export class VisitorPostSubmissions {
   /**
    * Quién decidió.
    */
-  @Property({ fieldName: 'decided_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'decided_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   decidedByUserId?: string;
 
   /**
@@ -81,7 +81,7 @@ export class VisitorPostSubmissions {
   /**
    * Publicación creada al aprobarse.
    */
-  @Property({ fieldName: 'social_post_id', type: 'uuid', nullable: true }) // FK → community.social_posts
+  @Property({ fieldName: 'social_post_id', type: 'uuid', nullable: true }) // FK → community.social_posts (inferida)
   socialPostId?: string;
 
   /**
@@ -99,13 +99,13 @@ export class VisitorPostSubmissions {
   /**
    * Identificador asociado a created by user.
    */
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   createdByUserId?: string;
 
   /**
    * Identificador asociado a updated by user.
    */
-  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   updatedByUserId?: string;
 
   /**

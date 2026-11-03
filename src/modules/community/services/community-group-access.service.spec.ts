@@ -9,10 +9,19 @@ import { ForbiddenException } from '@nestjs/common';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { CommunityGroupAccessService } from './community-group-access.service';
+import { CommunityVisibilityService } from './community-visibility.service';
 import { CONCEPTS, ResourceNotFoundException } from '../../../common';
+import { InsufficientRoleException } from '../../../common/errors/domain.exception';
+import { CommunityErrorReason } from '../community.error-reasons';
 import { COMM } from '../community.concepts';
 
 const actor = { id: 'user-1', roles: ['USER'] } as any;
+
+const AUDIENCE_IDS = [
+  COMM.GROUP_VISIBILITY_VERIFIED_DOCTORS,
+  COMM.GROUP_VISIBILITY_ORGANIZATION_STAFF,
+  COMM.GROUP_VISIBILITY_ATTENDED_PATIENTS,
+];
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -23,16 +32,24 @@ function build() {
   const groupsRepo = {
     findById: mockFn().mockResolvedValue(null),
     findMember: mockFn().mockResolvedValue(null),
+    findTenantTypeConceptId: mockFn().mockResolvedValue(null),
   };
   const visibility = {
     resolveActorProfileId: mockFn().mockResolvedValue('p1'),
     isPlatform: mockFn().mockReturnValue(false),
   };
+  // API#837: por defecto ningún foro restringe su público; las pruebas del
+  // público autorizado lo declaran.
+  const audience = {
+    isRestricted: mockFn((id: string) => AUDIENCE_IDS.includes(id)),
+    isEligible: mockFn().mockResolvedValue(true),
+  };
   const service = new CommunityGroupAccessService(
     groupsRepo as any,
     visibility as any,
+    audience as any,
   );
-  return { service, groupsRepo, visibility };
+  return { service, groupsRepo, visibility, audience };
 }
 
 /** Un grupo con la visibilidad pedida. */
@@ -169,6 +186,190 @@ describe('CommunityGroupAccessService (P7)', () => {
     });
   });
 
+  describe('público autorizado (API#837)', () => {
+    it.each(AUDIENCE_IDS)(
+      '%s: quien no es del público recibe el mismo 404 que un id inexistente',
+      async (visibility) => {
+        const d = build();
+        d.audience.isEligible.mockResolvedValue(false);
+        d.groupsRepo.findById.mockResolvedValue(group(visibility));
+
+        const error = await d.service
+          .resolve({} as any, 'g1', actor)
+          .catch((e: unknown) => e);
+        const missing = await build()
+          .service.resolve({} as any, 'g1', actor)
+          .catch((e: unknown) => e);
+
+        expect(error).toBeInstanceOf(ResourceNotFoundException);
+        expect((error as any).message).toBe((missing as any).message);
+        expect((error as any).reason).toBe(
+          CommunityErrorReason.GROUP_NOT_FOUND,
+        );
+        expect((error as any).reason).toBe((missing as any).reason);
+      },
+    );
+
+    it('el público lo lee, y publica sólo si es integrante', async () => {
+      const d = build();
+      d.groupsRepo.findById.mockResolvedValue(
+        group(COMM.GROUP_VISIBILITY_VERIFIED_DOCTORS),
+      );
+
+      const access = await d.service.resolve({} as any, 'g1', actor);
+
+      expect(access.canRead).toBe(true);
+      expect(access.canPost).toBe(false);
+      expect(d.audience.isEligible).toHaveBeenCalledWith(
+        expect.anything(),
+        COMM.GROUP_VISIBILITY_VERIFIED_DOCTORS,
+        't1',
+        actor,
+      );
+    });
+
+    it('un integrante que dejó de pertenecer al público pierde el acceso', async () => {
+      const d = build();
+      d.audience.isEligible.mockResolvedValue(false);
+      d.groupsRepo.findById.mockResolvedValue(
+        group(COMM.GROUP_VISIBILITY_ORGANIZATION_STAFF),
+      );
+      d.groupsRepo.findMember.mockResolvedValue(
+        membership(COMM.GROUP_ROLE_OWNER),
+      );
+
+      await expect(
+        d.service.resolve({} as any, 'g1', actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('la plataforma lo alcanza para poder moderarlo, sin evaluar el público', async () => {
+      const d = build();
+      d.visibility.isPlatform.mockReturnValue(true);
+      d.audience.isEligible.mockResolvedValue(false);
+      d.groupsRepo.findById.mockResolvedValue(
+        group(COMM.GROUP_VISIBILITY_ATTENDED_PATIENTS),
+      );
+
+      const access = await d.service.resolve({} as any, 'g1', actor);
+
+      expect(access.canRead).toBe(true);
+      expect(d.audience.isEligible).not.toHaveBeenCalled();
+    });
+
+    it('los grupos sin público declarado no consultan nada', async () => {
+      const d = build();
+      d.groupsRepo.findById.mockResolvedValue(
+        group(COMM.GROUP_VISIBILITY_PUBLIC),
+      );
+
+      await d.service.resolve({} as any, 'g1', actor);
+
+      expect(d.audience.isEligible).not.toHaveBeenCalled();
+    });
+
+    it('quien abre un foro de público autorizado debe pertenecer a él', async () => {
+      const d = build();
+      d.audience.isEligible.mockResolvedValue(false);
+
+      const error = await d.service
+        .assertActorBelongsToAudience(
+          {} as any,
+          COMM.GROUP_VISIBILITY_VERIFIED_DOCTORS,
+          't1',
+          actor,
+        )
+        .catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(InsufficientRoleException);
+      expect((error as any).reason).toBe(
+        CommunityErrorReason.GROUP_AUDIENCE_OWNER_NOT_ELIGIBLE,
+      );
+    });
+
+    it('abrir un foro público no exige pertenecer a ningún público', async () => {
+      const d = build();
+      d.audience.isEligible.mockResolvedValue(false);
+
+      await expect(
+        d.service.assertActorBelongsToAudience(
+          {} as any,
+          COMM.GROUP_VISIBILITY_PUBLIC,
+          't1',
+          actor,
+        ),
+      ).resolves.toBeUndefined();
+    });
+  });
+
+  describe('la aseguradora no abre foros ni inicia debates (API#837)', () => {
+    it('una organización aseguradora no puede crear un foro', async () => {
+      const d = build();
+      d.groupsRepo.findTenantTypeConceptId.mockResolvedValue(
+        CONCEPTS.TENANT_TYPE_PAYER,
+      );
+
+      const error = await d.service
+        .assertOrganizationMayStartForums({} as any, 't-aseg', 'CREATE_GROUP')
+        .catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(InsufficientRoleException);
+      expect((error as any).reason).toBe(
+        CommunityErrorReason.INSURER_CANNOT_CREATE_GROUP,
+      );
+      expect(d.groupsRepo.findTenantTypeConceptId).toHaveBeenCalledWith(
+        expect.anything(),
+        't-aseg',
+      );
+    });
+
+    it('ni iniciar un debate, con su propio código', async () => {
+      const d = build();
+      d.groupsRepo.findTenantTypeConceptId.mockResolvedValue(
+        CONCEPTS.TENANT_TYPE_PAYER,
+      );
+
+      const error = await d.service
+        .assertOrganizationMayStartForums({} as any, 't-aseg', 'START_DEBATE')
+        .catch((e: unknown) => e);
+
+      expect((error as any).reason).toBe(
+        CommunityErrorReason.INSURER_CANNOT_START_DEBATE,
+      );
+    });
+
+    it.each([
+      CONCEPTS.TENANT_TYPE_PROVIDER,
+      CONCEPTS.TENANT_TYPE_HOSPITAL,
+      CONCEPTS.TENANT_TYPE_CLINIC,
+      CONCEPTS.TENANT_TYPE_MEDICAL_OFFICE,
+    ])('la organización médica (%s) sí puede', async (type) => {
+      const d = build();
+      d.groupsRepo.findTenantTypeConceptId.mockResolvedValue(type);
+
+      await expect(
+        d.service.assertOrganizationMayStartForums(
+          {} as any,
+          't1',
+          'CREATE_GROUP',
+        ),
+      ).resolves.toBeUndefined();
+    });
+
+    it('sin organización activa no hay tipo contra el cual negar', async () => {
+      const d = build();
+
+      await expect(
+        d.service.assertOrganizationMayStartForums(
+          {} as any,
+          undefined,
+          'CREATE_GROUP',
+        ),
+      ).resolves.toBeUndefined();
+      expect(d.groupsRepo.findTenantTypeConceptId).not.toHaveBeenCalled();
+    });
+  });
+
   describe('roles', () => {
     it.each([
       [COMM.GROUP_ROLE_OWNER, true, true],
@@ -234,6 +435,92 @@ describe('CommunityGroupAccessService (P7)', () => {
       const access = await d.service.resolve({} as any, 'g1', actor);
 
       expect(access.canModerate).toBe(true);
+    });
+  });
+
+  /**
+   * Rol de plataforma acotado a un tenant: con la regla real de
+   * `CommunityVisibilityService.isPlatform`, un `SECURITY_ADMIN`/`SUPERADMIN`/
+   * `SYSTEM` concedido sólo en A no es plataforma sobre lo de B.
+   */
+  describe('rol de plataforma acotado a un tenant', () => {
+    const PLATFORM = ['SECURITY_ADMIN', 'SUPERADMIN', 'SYSTEM'];
+    const scopedTo = (role: string, tenantId: string) =>
+      ({
+        id: 'admin-a',
+        roles: [role],
+        scopedRoles: { [tenantId]: [role] },
+      }) as any;
+    const realIsPlatform = (a: any, t: any) =>
+      CommunityVisibilityService.prototype.isPlatform.call(undefined, a, t);
+
+    const secretOf = (tenantId: string) => ({
+      ...group(COMM.GROUP_VISIBILITY_SECRET),
+      tenantId,
+    });
+
+    it('acotado a A no modera ni lee un grupo secreto de B', async () => {
+      for (const role of PLATFORM) {
+        const d = build();
+        d.visibility.isPlatform.mockImplementation(realIsPlatform);
+        d.groupsRepo.findById.mockResolvedValue(secretOf('t-b'));
+        await expect(
+          d.service.resolve({} as any, 'g1', scopedTo(role, 't-a')),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      }
+    });
+
+    it('acotado a A no alcanza un foro de público autorizado de B', async () => {
+      const d = build();
+      d.visibility.isPlatform.mockImplementation(realIsPlatform);
+      d.audience.isEligible.mockResolvedValue(false);
+      d.groupsRepo.findById.mockResolvedValue({
+        ...group(AUDIENCE_IDS[0]),
+        tenantId: 't-b',
+      });
+      await expect(
+        d.service.resolve({} as any, 'g1', scopedTo('SECURITY_ADMIN', 't-a')),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('acotado a A sí modera el grupo secreto de A', async () => {
+      for (const role of PLATFORM) {
+        const d = build();
+        d.visibility.isPlatform.mockImplementation(realIsPlatform);
+        d.groupsRepo.findById.mockResolvedValue(secretOf('t-a'));
+        const access = await d.service.resolve(
+          {} as any,
+          'g1',
+          scopedTo(role, 't-a'),
+        );
+        expect(access.canRead).toBe(true);
+        expect(access.canAdminister).toBe(true);
+        expect(access.canModerate).toBe(true);
+      }
+    });
+
+    it('global modera los grupos secretos de A y de B', async () => {
+      for (const role of PLATFORM) {
+        for (const tenantId of ['t-a', 't-b']) {
+          const d = build();
+          d.visibility.isPlatform.mockImplementation(realIsPlatform);
+          d.groupsRepo.findById.mockResolvedValue(secretOf(tenantId));
+          const access = await d.service.resolve({} as any, 'g1', {
+            id: 'admin-g',
+            roles: [role],
+          } as any);
+          expect(access.canAdminister).toBe(true);
+        }
+      }
+    });
+
+    it('un grupo sin tenant sólo lo alcanza la plataforma global', async () => {
+      const d = build();
+      d.visibility.isPlatform.mockImplementation(realIsPlatform);
+      d.groupsRepo.findById.mockResolvedValue(secretOf(undefined as any));
+      await expect(
+        d.service.resolve({} as any, 'g1', scopedTo('SUPERADMIN', 't-a')),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
 });

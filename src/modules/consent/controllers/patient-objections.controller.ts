@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { PatientObjectionsService } from '../services';
 import {
   CreatePatientObjectionDto,
@@ -30,6 +35,11 @@ export class PatientObjectionsController {
   constructor(private readonly objectionsService: PatientObjectionsService) {}
 
   /** UC-07-03. */
+  @Audited({
+    action: 'PATIENT_OBJECTION_RAISED',
+    entity: 'patient_objection',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -44,6 +54,11 @@ export class PatientObjectionsController {
   }
 
   /** UC-07-12. */
+  @Audited({
+    action: 'PATIENT_OBJECTION_RESOLVED',
+    entity: 'patient_objection',
+    entityId: 'param:id',
+  })
   @Post(':id/resolve')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

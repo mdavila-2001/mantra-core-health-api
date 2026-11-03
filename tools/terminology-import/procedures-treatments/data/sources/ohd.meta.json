@@ -1,0 +1,18 @@
+{
+  "source": "ohd",
+  "name": "Oral Health and Disease Ontology (OHD)",
+  "publisher": "OHD project (OBO Foundry)",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+  "homepage": "https://github.com/oral-health-and-disease-ontologies/ohd-ontology",
+  "retrievedAt": "2026-10-24T01:09:41.965Z",
+  "commit": "9cbaa1a172706c5eacc1fd293542c0bd71d09c74",
+  "files": {
+    "ohd.obo": {
+      "url": "https://raw.githubusercontent.com/oral-health-and-disease-ontologies/ohd-ontology/9cbaa1a172706c5eacc1fd293542c0bd71d09c74/ohd.obo",
+      "fileUrl": "https://github.com/oral-health-and-disease-ontologies/ohd-ontology/blob/9cbaa1a172706c5eacc1fd293542c0bd71d09c74/ohd.obo",
+      "sha256": "f8518e5b59e7f5e7d3018849d782f0ae121cfbbd8a1f25fecddcbfec484be51c",
+      "bytes": 1511068
+    }
+  }
+}

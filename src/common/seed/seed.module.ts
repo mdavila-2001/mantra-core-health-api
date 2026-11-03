@@ -52,20 +52,30 @@ import { VademecumSeedService } from './vademecum-seed.service';
 import { MessageQueues } from '../../modules/messaging/entities';
 import { AudioTemplates } from '../../modules/audio_assets/entities';
 import { BootstrapAdminSeedService } from './bootstrap-admin-seed.service';
+import { QaFlowsSeedService } from './qa-flows-seed.service';
 import { ProviderAccountsSeedService } from './provider-accounts-seed.service';
+import { InsurerAccountsSeedService } from './insurer-accounts-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
 import { PatientPortalProxySeedService } from './patient-portal-proxy-seed.service';
+import { TelemetryUxHeatmapSeedService } from './telemetry-ux-heatmap-seed.service';
+import { CatalogDocumentationSeedService } from './catalog/catalog-documentation-seed.service';
+import { MutabilityRegistrySeedService } from './mutability/mutability-registry-seed.service';
+import { FrontendRoutesSeedService } from '../../modules/read_models/seed/frontend-routes-seed.service';
 import { GlossarySeedService } from './glossary-seed.service';
 import { BoGeographySeedService } from './bo-geography-seed.service';
+import { AdminDivisionsSeedService } from './admin-divisions-seed.service';
 import { LegalEntityTypesSeedService } from './legal-entity-types-seed.service';
 import { AffiliationCatalogsSeedService } from './affiliation-catalogs-seed.service';
+import { AdmissionRequirementsSeedService } from './admission-requirements-seed.service';
 import { BoEmployersSeedService } from './bo-employers-seed.service';
 import { BoOccupationsSeedService } from './bo-occupations-seed.service';
+import { BoMedicalSpecialtiesSeedService } from './bo-medical-specialties-seed.service';
 import { BoProfessionsSeedService } from './bo-professions-seed.service';
 import { BoliviaFacilitiesSeedService } from './bolivia-facilities-seed.service';
 import { BoliviaFeeScheduleSeedService } from './bolivia-fee-schedule-seed.service';
 import { BoliviaInsuranceSeedService } from './bolivia-insurance-seed.service';
 import { SeedBootstrapService } from './seed-bootstrap.service';
+import { SeedCoreState } from './seed-core.state';
 import { SpecialtyChartTemplates } from '../../modules/chart/entities';
 import {
   DynamicFieldDefinitions,
@@ -74,6 +84,7 @@ import {
 } from '../../modules/forms/entities';
 import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
 import { PracticeDefaultServicesSeedService } from './practice-default-services-seed.service';
+import { PracticeInfrastructureSeedService } from './practice-infrastructure-seed.service';
 import { PeopleSeedService } from './people-seed.service';
 import { DirectoryNetworksSeedService } from './directory-networks-seed.service';
 import { InsuranceModule } from '../../modules/insurance/insurance.module';
@@ -81,6 +92,15 @@ import { PracticeModule } from '../../modules/practice/practice.module';
 import { ProfilesModule } from '../../modules/profiles/profiles.module';
 import { StickerPackSeedService } from './sticker-pack-seed.service';
 import { Files, FileVersions } from '../../modules/common/entities';
+import { DirectoryModule } from '../../modules/directory/directory.module';
+import { CommonModule } from '../../modules/common/common.module';
+import { CommunityModule } from '../../modules/community/community.module';
+import { PadronOrganizationsSeedService } from './padron-organizations-seed.service';
+import { PadronOrgAdminsSeedService } from './padron-org-admins-seed.service';
+import { PersonalSpaceMembershipsSeedService } from './personal-space-memberships-seed.service';
+import { PractitionerShowcaseSeed } from './practitioner-showcase-seed';
+import { SeedCensusService } from './seed-census.service';
+import { ToolRegistrySeedService } from './tool-registry-seed.service';
 
 /**
  * Módulo de datos estructurales iniciales. Registra los seeds (catálogo de
@@ -138,7 +158,6 @@ import { Files, FileVersions } from '../../modules/common/entities';
       DynamicFieldSections,
       DynamicFieldDefinitions,
       FieldAssignments,
-      AuthzPermissions,
       // Pack de stickers (AG-17): filas de metadatos, sin bytes.
       Files,
       FileVersions,
@@ -150,15 +169,23 @@ import { Files, FileVersions } from '../../modules/common/entities';
     InsuranceModule,
     PracticeModule,
     ProfilesModule,
+    DirectoryModule,
+    CommonModule,
+    CommunityModule,
   ],
   providers: [
     TerminologySeedService,
     DynamicEnumSeedService,
     PatientPortalProxySeedService,
+    TelemetryUxHeatmapSeedService,
+    MutabilityRegistrySeedService,
+    CatalogDocumentationSeedService,
     GlossarySeedService,
     BoGeographySeedService,
+    AdminDivisionsSeedService,
     LegalEntityTypesSeedService,
     AffiliationCatalogsSeedService,
+    AdmissionRequirementsSeedService,
     BoOccupationsSeedService,
     BoProfessionsSeedService,
     BoEmployersSeedService,
@@ -172,23 +199,41 @@ import { Files, FileVersions } from '../../modules/common/entities';
     AuthzClinicalRolesSeedService,
     AuthzPlatformPermissionsSeedService,
     BootstrapAdminSeedService,
+    QaFlowsSeedService,
     ProviderAccountsSeedService,
+    InsurerAccountsSeedService,
     SeedBootstrapService,
+    SeedCoreState,
     ClinicalFormsSeedService,
+    BoMedicalSpecialtiesSeedService,
     PracticeDefaultServicesSeedService,
+    PracticeInfrastructureSeedService,
     PeopleSeedService,
     DirectoryNetworksSeedService,
     StickerPackSeedService,
+    PadronOrganizationsSeedService,
+    PadronOrgAdminsSeedService,
+    PersonalSpaceMembershipsSeedService,
+    PractitionerShowcaseSeed,
+    SeedCensusService,
+    ToolRegistrySeedService,
+    FrontendRoutesSeedService,
   ],
   exports: [
     SeedBootstrapService,
+    SeedCoreState,
     TerminologySeedService,
     DynamicEnumSeedService,
     PatientPortalProxySeedService,
+    TelemetryUxHeatmapSeedService,
+    MutabilityRegistrySeedService,
+    CatalogDocumentationSeedService,
     GlossarySeedService,
     BoGeographySeedService,
+    AdminDivisionsSeedService,
     LegalEntityTypesSeedService,
     AffiliationCatalogsSeedService,
+    AdmissionRequirementsSeedService,
     BoOccupationsSeedService,
     BoProfessionsSeedService,
     BoEmployersSeedService,
@@ -202,12 +247,22 @@ import { Files, FileVersions } from '../../modules/common/entities';
     AuthzClinicalRolesSeedService,
     AuthzPlatformPermissionsSeedService,
     BootstrapAdminSeedService,
+    QaFlowsSeedService,
     ProviderAccountsSeedService,
+    InsurerAccountsSeedService,
     ClinicalFormsSeedService,
+    BoMedicalSpecialtiesSeedService,
     PracticeDefaultServicesSeedService,
+    PracticeInfrastructureSeedService,
     PeopleSeedService,
     DirectoryNetworksSeedService,
     StickerPackSeedService,
+    PadronOrganizationsSeedService,
+    PadronOrgAdminsSeedService,
+    PersonalSpaceMembershipsSeedService,
+    PractitionerShowcaseSeed,
+    SeedCensusService,
+    ToolRegistrySeedService,
   ],
 })
 export class SeedModule {}

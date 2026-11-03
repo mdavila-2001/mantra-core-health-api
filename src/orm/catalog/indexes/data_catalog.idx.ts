@@ -1,33 +1,75 @@
 import type { IndexTuple } from '../catalog.types';
 
 /**
- * Índices del schema `data_catalog` (módulo 67, catálogo de datos del portal
- * administrativo).
- *
- * DESVÍO DECLARADO: este archivo está escrito a mano, no generado desde la
- * bóveda, porque el módulo 67 todavía no tiene su `.puml`. Su espejo SQL es
- * `database/SQL/patches/2026-09-18_v4219_data_catalog.sql`; cuando el modelo
- * lo declare, `yarn orm:catalog` debe reproducir exactamente estas tuplas.
- *
- * Los índices únicos parciales son reglas, no afinado: `ux_..._one_active`
- * impide dos escaneos vivos de la misma fuente aunque dos réplicas acepten la
- * petición a la vez.
+ * Índices secundarios declarados por el modelo oficial para el schema `data_catalog`.
+ * 65 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const dataCatalogIndexes: readonly IndexTuple[] = [
-  // [tabla, nombre, columnas, único, método, predicado]
-  ['catalog_scan_runs', 'ix_data_catalog_scan_runs_status_requested_at', ['status', 'requested_at'], false, 'btree'],
-  ['catalog_scan_runs', 'ux_data_catalog_scan_runs_one_active', ['source_code'], true, 'btree', "status IN ('QUEUED', 'RUNNING')"],
-  ['catalog_scan_runs', 'ux_data_catalog_scan_runs_idempotency', ['requested_by_user_id', 'idempotency_key'], true, 'btree', 'idempotency_key IS NOT NULL'],
-  ['catalog_objects', 'ux_data_catalog_objects_identity', ['source_code', 'schema_name', 'object_name'], true, 'btree'],
-  ['catalog_objects', 'ix_data_catalog_objects_observation_status', ['observation_status'], false, 'btree'],
-  ['catalog_columns', 'ux_data_catalog_columns_identity', ['object_id', 'column_name'], true, 'btree'],
-  ['catalog_change_events', 'ix_data_catalog_change_events_scan_run_id', ['scan_run_id'], false, 'btree'],
-  ['catalog_change_events', 'ix_data_catalog_change_events_object_created', ['object_id', 'created_at'], false, 'btree'],
-  ['catalog_annotations', 'ux_data_catalog_annotations_object', ['object_id'], true, 'btree', "target_kind = 'OBJECT'"],
+  // [tabla, nombre, columnas, único, método]
+  ['catalog_annotation_revisions', 'ux_data_catalog_annotation_revisions_no', ['annotation_id', 'revision_no'], true, 'btree'],
+  ['catalog_annotations', 'ux_data_catalog_annotations_object', ['object_id'], true, 'btree', 'target_kind = \'OBJECT\''],
   ['catalog_annotations', 'ux_data_catalog_annotations_column', ['column_id'], true, 'btree', 'column_id IS NOT NULL'],
   ['catalog_annotations', 'ix_data_catalog_annotations_review_status', ['review_status'], false, 'btree'],
-  ['catalog_annotation_revisions', 'ux_data_catalog_annotation_revisions_no', ['annotation_id', 'revision_no'], true, 'btree'],
-  ['catalog_review_decisions', 'ix_data_catalog_review_decisions_annotation', ['annotation_id', 'revision_no'], false, 'btree'],
+  ['catalog_certifications', 'ix_data_catalog_certifications_status_expires', ['status', 'expires_at'], false, 'btree'],
+  ['catalog_certifications', 'ix_data_catalog_certifications_object_id', ['object_id'], false, 'btree'],
+  ['catalog_certifications', 'ix_data_catalog_certifications_read_model_definition_id', ['read_model_definition_id'], false, 'btree'],
+  ['catalog_certifications', 'ix_data_catalog_certifications_report_definition_id', ['report_definition_id'], false, 'btree'],
+  ['catalog_certifications', 'ix_data_catalog_certifications_requested_by_user_id', ['requested_by_user_id'], false, 'btree'],
+  ['catalog_change_acknowledgements', 'ux_data_catalog_change_acknowledgements_event', ['change_event_id'], true, 'btree'],
+  ['catalog_change_acknowledgements', 'ix_data_catalog_change_acknowledgements_user_id', ['user_id'], false, 'btree'],
+  ['catalog_change_events', 'ix_data_catalog_change_events_scan_run_id', ['scan_run_id'], false, 'btree'],
+  ['catalog_change_events', 'ix_data_catalog_change_events_object_created', ['object_id', 'created_at'], false, 'btree'],
+  ['catalog_columns', 'ux_data_catalog_columns_identity', ['object_id', 'column_name'], true, 'btree'],
   ['catalog_evidence_items', 'ix_data_catalog_evidence_items_object_id', ['object_id'], false, 'btree'],
   ['catalog_evidence_items', 'ix_data_catalog_evidence_items_column_id', ['column_id'], false, 'btree'],
+  ['catalog_glossary_term_links', 'ix_data_catalog_glossary_term_links_column_id', ['column_id'], false, 'btree'],
+  ['catalog_glossary_term_links', 'ix_data_catalog_glossary_term_links_object_id', ['object_id'], false, 'btree'],
+  ['catalog_glossary_term_revisions', 'ux_data_catalog_glossary_term_revisions_no', ['term_id', 'revision_no'], true, 'btree'],
+  ['catalog_glossary_terms', 'ux_data_catalog_glossary_terms_code', ['term_code'], true, 'btree'],
+  ['catalog_glossary_terms', 'ix_data_catalog_glossary_terms_status', ['status'], false, 'btree'],
+  ['catalog_glossary_terms', 'ix_data_catalog_glossary_terms_domain_id', ['domain_id'], false, 'btree'],
+  ['catalog_lineage_edges', 'ux_data_catalog_lineage_edges_identity', ['source_kind', 'source_ref', 'target_kind', 'target_ref', 'edge_kind', 'origin'], true, 'btree'],
+  ['catalog_lineage_edges', 'ix_data_catalog_lineage_edges_source', ['source_kind', 'source_ref'], false, 'btree'],
+  ['catalog_lineage_edges', 'ix_data_catalog_lineage_edges_target', ['target_kind', 'target_ref'], false, 'btree'],
+  ['catalog_lineage_edges', 'ix_data_catalog_lineage_edges_official', ['source_kind', 'source_ref'], false, 'btree', 'is_official'],
+  ['catalog_objects', 'ux_data_catalog_objects_identity', ['source_code', 'schema_name', 'object_name'], true, 'btree'],
+  ['catalog_objects', 'ix_data_catalog_objects_observation_status', ['observation_status'], false, 'btree'],
+  ['catalog_objects', 'ix_data_catalog_objects_domain_id', ['domain_id'], false, 'btree'],
+  ['catalog_operation_impacts', 'ix_data_catalog_operation_impacts_operation_id', ['operation_id'], false, 'btree'],
+  ['catalog_operation_impacts', 'ix_data_catalog_operation_impacts_object_id', ['object_id'], false, 'btree'],
+  ['catalog_operation_impacts', 'ix_data_catalog_operation_impacts_column_id', ['column_id'], false, 'btree'],
+  ['catalog_operations', 'ux_data_catalog_operations_key', ['operation_key'], true, 'btree'],
+  ['catalog_process_step_operations', 'ux_data_catalog_process_step_operations_pair', ['step_id', 'operation_id'], true, 'btree'],
+  ['catalog_process_step_operations', 'ix_data_catalog_process_step_operations_step_id', ['step_id'], false, 'btree'],
+  ['catalog_process_step_operations', 'ix_data_catalog_process_step_operations_operation_id', ['operation_id'], false, 'btree'],
+  ['catalog_process_steps', 'ux_data_catalog_process_steps_ordinal', ['process_id', 'ordinal'], true, 'btree'],
+  ['catalog_processes', 'ux_data_catalog_processes_code', ['process_code'], true, 'btree'],
+  ['catalog_review_decisions', 'ix_data_catalog_review_decisions_annotation', ['annotation_id', 'revision_no'], false, 'btree'],
+  ['catalog_scan_runs', 'ix_data_catalog_scan_runs_status_requested_at', ['status', 'requested_at'], false, 'btree'],
+  ['catalog_scan_runs', 'ux_data_catalog_scan_runs_one_active', ['source_code'], true, 'btree', 'status IN (\'QUEUED\', \'RUNNING\')'],
+  ['catalog_scan_runs', 'ux_data_catalog_scan_runs_idempotency', ['requested_by_user_id', 'idempotency_key'], true, 'btree', 'idempotency_key IS NOT NULL'],
+  ['catalog_stewardships', 'ix_data_catalog_stewardships_user_id', ['user_id'], false, 'btree'],
+  ['catalog_stewardships', 'ix_data_catalog_stewardships_object_id', ['object_id'], false, 'btree'],
+  ['catalog_stewardships', 'ix_data_catalog_stewardships_domain_id', ['domain_id'], false, 'btree'],
+  ['quality_issue_events', 'ix_data_catalog_quality_issue_events_issue_created', ['issue_id', 'created_at'], false, 'btree'],
+  ['quality_issue_events', 'ix_data_catalog_quality_issue_events_run_id', ['run_id'], false, 'btree'],
+  ['quality_issues', 'ux_data_catalog_quality_issues_live', ['fingerprint'], true, 'btree', 'status IN (\'OPEN\', \'ACKNOWLEDGED\')'],
+  ['quality_issues', 'ix_data_catalog_quality_issues_status_severity', ['status', 'severity'], false, 'btree'],
+  ['quality_issues', 'ix_data_catalog_quality_issues_object_id', ['object_id'], false, 'btree'],
+  ['quality_issues', 'ix_data_catalog_quality_issues_rule_id', ['rule_id'], false, 'btree'],
+  ['quality_issues', 'ix_data_catalog_quality_issues_column_id', ['column_id'], false, 'btree'],
+  ['quality_issues', 'ix_data_catalog_quality_issues_first_seen_run_id', ['first_seen_run_id'], false, 'btree'],
+  ['quality_issues', 'ix_data_catalog_quality_issues_last_seen_run_id', ['last_seen_run_id'], false, 'btree'],
+  ['quality_rule_runs', 'ux_data_catalog_quality_rule_runs_one_active', ['rule_id'], true, 'btree', 'status IN (\'QUEUED\', \'RUNNING\')'],
+  ['quality_rule_runs', 'ux_data_catalog_quality_rule_runs_idempotency', ['requested_by_user_id', 'idempotency_key'], true, 'btree', 'idempotency_key IS NOT NULL'],
+  ['quality_rule_runs', 'ix_data_catalog_quality_rule_runs_rule_created', ['rule_id', 'created_at desc'], false, 'btree'],
+  ['quality_rule_runs', 'ix_data_catalog_quality_rule_runs_status_created', ['status', 'created_at'], false, 'btree'],
+  ['quality_rules', 'ux_data_catalog_quality_rules_code', ['rule_code'], true, 'btree'],
+  ['quality_rules', 'ix_data_catalog_quality_rules_object_id', ['object_id'], false, 'btree'],
+  ['quality_rules', 'ix_data_catalog_quality_rules_column_id', ['column_id'], false, 'btree'],
+  ['quality_rules', 'ix_data_catalog_quality_rules_due', ['enabled', 'schedule_minutes'], false, 'btree', 'enabled'],
+  ['quality_rules', 'ix_data_catalog_quality_rules_owner_user_id', ['owner_user_id'], false, 'btree'],
+  ['quality_score_snapshots', 'ix_data_catalog_quality_score_snapshots_object_asof', ['object_id', 'as_of desc'], false, 'btree'],
+  ['quality_score_snapshots', 'ix_data_catalog_quality_score_snapshots_domain_asof', ['domain_id', 'as_of desc'], false, 'btree'],
 ];

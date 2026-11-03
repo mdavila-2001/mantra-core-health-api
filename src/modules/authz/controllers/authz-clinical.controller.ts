@@ -9,7 +9,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { AuthzClinicalService } from '../services';
 import {
   CreateClinicalAccessGrantDto,
@@ -32,6 +37,11 @@ export class AuthzClinicalController {
   constructor(private readonly clinicalService: AuthzClinicalService) {}
 
   /** UC-06-06 (clínico tratante o paciente que autoriza; autenticado). */
+  @Audited({
+    action: 'CLINICAL_ACCESS_GRANTED',
+    entity: 'clinical_access_grant',
+    entityId: 'result.id',
+  })
   @Post('patients/:patientProfileId/clinical-access-grants')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Otorgar acceso clínico con propósito de uso' })
@@ -48,6 +58,11 @@ export class AuthzClinicalController {
   }
 
   /** UC-06-07 (emergencia; el clínico invocante queda registrado). */
+  @Audited({
+    action: 'BREAK_GLASS_ACTIVATED',
+    entity: 'clinical_access_grant',
+    entityId: 'result.id',
+  })
   @Post('patients/:patientProfileId/break-the-glass')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Break-the-glass / anulación de emergencia' })
@@ -60,6 +75,11 @@ export class AuthzClinicalController {
   }
 
   /** UC-06-10. */
+  @Audited({
+    action: 'CLINICAL_ACCESS_REVOKED',
+    entity: 'clinical_access_grant',
+    entityId: 'param:grantId',
+  })
   @Delete('clinical-access-grants/:grantId')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

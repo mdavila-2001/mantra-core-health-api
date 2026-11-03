@@ -58,7 +58,9 @@ describe('computePrescriptionHash', () => {
 
   it('cambiar la dosis cambia el hash', () => {
     const original = computePrescriptionHash(prescription());
-    const modified = computePrescriptionHash(prescription({ doseText: '250 mg' }));
+    const modified = computePrescriptionHash(
+      prescription({ doseText: '250 mg' }),
+    );
 
     expect(modified).not.toBe(original);
   });
@@ -76,8 +78,12 @@ describe('computePrescriptionHash', () => {
   });
 
   it('cambiar la cantidad (string numérico) cambia el hash', () => {
-    const one = computePrescriptionHash(prescription({ quantityDecimal: '21' }));
-    const other = computePrescriptionHash(prescription({ quantityDecimal: '30' }));
+    const one = computePrescriptionHash(
+      prescription({ quantityDecimal: '21' }),
+    );
+    const other = computePrescriptionHash(
+      prescription({ quantityDecimal: '30' }),
+    );
 
     expect(other).not.toBe(one);
   });

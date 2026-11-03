@@ -7,23 +7,28 @@ configuración y scripts.
 ## Principio
 
 La capacidad no se presupone: la disciplina se impone con **artefactos y checkpoints**.
-Cada fase tiene una entrada, una salida y un artefacto en disco. Una fase sin su artefacto
+Cada fase tiene una entrada, una salida y un artefacto escrito. Una fase sin su artefacto
 **no ocurrió**, por más que se haya trabajado.
+
+Los artefactos del trabajo viven en el **issue** y en la **descripción del PR**, nunca en un
+archivo del repo: el repo describe lo que existe, no el estado del trabajo (regla 40).
 
 ## Las diez fases
 
 | # | Fase | Entrada | Salida | Artefacto |
 |---|---|---|---|---|
-| 0 | Encuadre | El pedido | Resultado observable + alcance | `PLAN.md` (encabezado) |
-| 1 | Descubrimiento factual | El encuadre | Hechos, desconocidos e hipótesis separados | `PLAN.md` (hallazgos) |
-| 2 | Plan detallado | Los hechos | Hitos → subtareas → microtareas con CA y DoD | `PLAN.md` (completo) |
+| 0 | Encuadre | El pedido | Resultado observable + alcance | Plan (encabezado) |
+| 1 | Descubrimiento factual | El encuadre | Hechos, desconocidos e hipótesis separados | Plan (hallazgos) |
+| 2 | Plan detallado | Los hechos | Hitos → subtareas → microtareas con CA y DoD | Plan (completo) |
 | 3 | Ejecución | Una microtarea | El cambio mínimo escrito | Diff |
-| 4 | Verificación | El cambio | DoD ejecutado | `evidencia/` + estado en `PLAN.md` |
+| 4 | Verificación | El cambio | DoD ejecutado | Salida en *Verificación* del PR + estado en el plan |
 | 5 | Causa raíz | Un fallo | Causa demostrada | Evidencia del diagnóstico |
-| 6 | Prueba visual | Cambio de UI | Capturas inspeccionadas | `evidencia/` |
+| 6 | Prueba visual | Cambio de UI | Capturas inspeccionadas | Capturas adjuntas al PR |
 | 7 | Regresión y gates | Microtareas cerradas | Suite y gates en verde | Salidas pegadas |
-| 8 | Reporte | Todo lo anterior | Completado / A medias / Pendiente | `REPORTE.md` |
+| 8 | Reporte | Todo lo anterior | Completado / A medias / issues abiertos | Descripción del PR + issues |
 | 9 | Entrega | El reporte | Hechos legibles por quien no vio la sesión | Mensaje de cierre |
+
+El plan se escribe en el issue que origina el trabajo o en la descripción del PR (regla 20).
 
 ## Fase 0 — Encuadre
 
@@ -54,7 +59,7 @@ Descomponé en hitos → subtareas → microtareas, cada nivel con criterio de a
 of Done, según la **regla 20**. Una microtarea que no se verifica con un solo comando u observación
 no es una microtarea: partila.
 
-Prohibido: escribir el primer `Edit`/`Write` de código sin el `PLAN.md` completo en disco.
+Prohibido: escribir el primer `Edit`/`Write` de código sin el plan completo escrito.
 
 ## Fase 3 — Ejecución
 
@@ -68,7 +73,7 @@ Skills: `native-code-patterns`, `scope-discipline`.
 
 ## Fase 4 — Verificación
 
-Ejecutá el DoD de la microtarea y pegá la **salida literal** en `evidencia/`. Recién ahí la
+Ejecutá el DoD de la microtarea y pegá la **salida literal** en la *Verificación* del PR. Recién ahí la
 microtarea pasa a `HECHO`. Si el DoD no se ejecutó, el estado es `A MEDIAS`, sin importar cuánto
 código haya escrito.
 
@@ -109,10 +114,12 @@ Skills: `regression-suite-management`, `security-guardrails`, `data-privacy-phi`
 
 ## Fase 8 — Reporte
 
-Escribí el `REPORTE.md` según la **regla 40**, con sus tres secciones obligatorias: **Completado**,
-**A medias** y **Pendiente**, más evidencia, no cubierto, desvíos, riesgos y decisiones.
+Escribí el reporte en la descripción del PR según la **regla 40**: **Completado**, **A medias**
+y los **issues abiertos** por lo que quedó sin hacer, más evidencia, no cubierto, desvíos, riesgos
+y decisiones.
 
-Prohibido: cerrar sin reporte, aunque el trabajo haya quedado a mitad.
+Prohibido: cerrar sin reporte, aunque el trabajo haya quedado a mitad. Prohibido dejar lo que falta
+anotado en el repo en vez de en un issue.
 
 ## Fase 9 — Entrega
 
@@ -126,7 +133,7 @@ Skills: `finish-your-turn`, `progress-reporting`.
 ## Reglas transversales
 
 1. **Las fases no se saltean.** Se pueden recorrer rápido, no omitir. Si una no aplica, se declara
-   por qué en el `PLAN.md`.
+   por qué en el plan.
 2. **Un cambio posterior reabre la fase 4** para el área tocada: hay que volver a verificar.
 3. **Progreso visible** en cada transición de fase y en cada apertura y cierre de microtarea (regla 50).
 4. **Concurrencia acotada**: la máquina de desarrollo se prioriza sobre la velocidad. Los límites

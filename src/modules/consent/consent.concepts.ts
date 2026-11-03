@@ -69,6 +69,11 @@ export const { seeds: CONSENT_CONCEPT_SEEDS, ids: CONS } = defineModuleConcepts(
       code: 'TREATMENT_CONSENT_SIGNED',
       display: 'Treatment consent signed',
     },
+    // v4266: revocación del consentimiento informado de tratamiento.
+    TREATMENT_WITHDRAWN: {
+      code: 'TREATMENT_CONSENT_WITHDRAWN',
+      display: 'Treatment consent withdrawn',
+    },
     STATUS_NONE: { code: 'STATUS_NONE', display: 'No prior status' },
 
     // --- FT-07: vínculo médico-paciente por consentimiento ---

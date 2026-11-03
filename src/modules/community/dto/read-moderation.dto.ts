@@ -9,7 +9,7 @@ import { IsIn, IsInt, IsOptional, IsUUID, Min } from 'class-validator';
  * Nest ya entiende, porque es la forma en que una pantalla de filtros compone la
  * URL sin librerías de por medio.
  */
-const comoLista = ({ value }: { value: unknown }): unknown => {
+const asList = ({ value }: { value: unknown }): unknown => {
   if (typeof value === 'string') {
     return value
       .split(',')
@@ -31,7 +31,7 @@ export class ModerationQueueQueryDto {
     isArray: true,
   })
   @IsOptional()
-  @Transform(comoLista)
+  @Transform(asList)
   @IsIn(['QUEUED', 'IN_REVIEW', 'RESOLVED'], { each: true })
   status?: ('QUEUED' | 'IN_REVIEW' | 'RESOLVED')[];
 
@@ -44,7 +44,7 @@ export class ModerationQueueQueryDto {
     isArray: true,
   })
   @IsOptional()
-  @Transform(comoLista)
+  @Transform(asList)
   @IsIn(['LOW', 'NORMAL', 'HIGH'], { each: true })
   priority?: ('LOW' | 'NORMAL' | 'HIGH')[];
 
@@ -57,7 +57,7 @@ export class ModerationQueueQueryDto {
     isArray: true,
   })
   @IsOptional()
-  @Transform(comoLista)
+  @Transform(asList)
   @IsIn(['POST', 'COMMENT', 'PROFILE', 'MESSAGE', 'REVIEW'], { each: true })
   contentType?: ('POST' | 'COMMENT' | 'PROFILE' | 'MESSAGE' | 'REVIEW')[];
 
@@ -108,7 +108,7 @@ export class ModerationDecisionsQueryDto {
     isArray: true,
   })
   @IsOptional()
-  @Transform(comoLista)
+  @Transform(asList)
   @IsIn(['REMOVED', 'RESTRICTED', 'WARNED', 'DISMISSED'], { each: true })
   decision?: ('REMOVED' | 'RESTRICTED' | 'WARNED' | 'DISMISSED')[];
 
@@ -137,7 +137,7 @@ export class ModerationAppealsQueryDto {
     isArray: true,
   })
   @IsOptional()
-  @Transform(comoLista)
+  @Transform(asList)
   @IsIn(['OPEN', 'UPHELD', 'OVERTURNED', 'PARTIAL'], { each: true })
   status?: ('OPEN' | 'UPHELD' | 'OVERTURNED' | 'PARTIAL')[];
 

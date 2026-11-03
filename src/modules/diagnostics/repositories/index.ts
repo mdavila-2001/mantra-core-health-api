@@ -5,3 +5,5 @@ export * from './imaging.repository';
 export * from './media-quality.repository';
 export * from './diagnostic-orders.repository';
 export * from './lab-reception.repository';
+export * from './clinical-refs.repository';
+export * from './service-request-worklist.repository';

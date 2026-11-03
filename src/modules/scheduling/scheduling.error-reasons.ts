@@ -1,0 +1,113 @@
+/**
+ * Sub-códigos de negocio estables para los errores de dominio de `scheduling`.
+ *
+ * Van como tercer argumento de `DomainException` (y subclases) además del
+ * `code` genérico de la clase (404/409/422/...): mientras el `code` dice la
+ * forma HTTP del error, `reason` dice CUÁL de las muchas situaciones de negocio
+ * que comparten esa forma ocurrió. El front y cualquier integrador pueden
+ * discriminar sobre esto sin parsear el mensaje en español.
+ */
+export enum SchedulingErrorReason {
+  // R0 (CONTRATO-F2-F5 §F4.3): recurso agendable ligado a un espacio.
+  SPACE_NOT_SCHEDULABLE = 'SPACE_NOT_SCHEDULABLE',
+  SPACE_NOT_ACTIVE = 'SPACE_NOT_ACTIVE',
+  RESOURCE_ALREADY_EXISTS_FOR_SPACE = 'RESOURCE_ALREADY_EXISTS_FOR_SPACE',
+  // Motivo de texto libre (corrección #14): cancelar, rechazar, reprogramar.
+  REASON_REQUIRED = 'REASON_REQUIRED',
+  REASON_PLACEHOLDER = 'REASON_PLACEHOLDER',
+
+  // Ventanas de tiempo (from/to) exigidas por distintas lecturas y mutaciones.
+  AGENDA_WINDOW_REQUIRED = 'AGENDA_WINDOW_REQUIRED',
+  AGENDA_WINDOW_INVALID = 'AGENDA_WINDOW_INVALID',
+  AGENDA_WINDOW_INVERTED = 'AGENDA_WINDOW_INVERTED',
+  AGENDA_WINDOW_TOO_WIDE = 'AGENDA_WINDOW_TOO_WIDE',
+
+  // Reglas de confirmación.
+  CONFIRMATION_RULE_NOT_FOUND = 'CONFIRMATION_RULE_NOT_FOUND',
+
+  // Políticas de reserva.
+  POLICY_CODE_ALREADY_EXISTS = 'POLICY_CODE_ALREADY_EXISTS',
+
+  // Plantillas y sus franjas.
+  TEMPLATE_RULE_TIME_INVERTED = 'TEMPLATE_RULE_TIME_INVERTED',
+  TEMPLATE_RULE_SLOT_TOO_LONG = 'TEMPLATE_RULE_SLOT_TOO_LONG',
+  TEMPLATE_RULE_OVERLAP_SELF = 'TEMPLATE_RULE_OVERLAP_SELF',
+  TEMPLATE_RULE_OVERLAP_OTHER_AGENDA = 'TEMPLATE_RULE_OVERLAP_OTHER_AGENDA',
+  TEMPLATE_NOT_FOUND = 'TEMPLATE_NOT_FOUND',
+  TEMPLATE_RESOURCE_NOT_FOUND = 'TEMPLATE_RESOURCE_NOT_FOUND',
+  TEMPLATE_HAS_ACTIVE_BOOKINGS = 'TEMPLATE_HAS_ACTIVE_BOOKINGS',
+  /**
+   * Cita por TELECONSULTA fuera de una franja con la telemedicina habilitada
+   * (v4.2.61). Por defecto ninguna franja la tiene: la activa el profesional.
+   */
+  TELEMEDICINE_NOT_ENABLED = 'TELEMEDICINE_NOT_ENABLED',
+
+  // Recursos agendables.
+  RESOURCE_NOT_FOUND = 'RESOURCE_NOT_FOUND',
+  /**
+   * Recurso inexistente o de otra organización: se responde igual para los dos
+   * (404 uniforme) porque distinguirlos confirmaría que el UUID existe.
+   */
+  RESOURCE_NOT_AVAILABLE = 'SCHEDULING_RESOURCE_NOT_AVAILABLE',
+
+  // Cupos (slots) de una agenda.
+  SLOT_NOT_FOUND = 'SLOT_NOT_FOUND',
+  SLOTS_NOT_FOUND_FOR_RESOURCE = 'SLOTS_NOT_FOUND_FOR_RESOURCE',
+  SLOTS_HAVE_ACTIVE_BOOKINGS = 'SLOTS_HAVE_ACTIVE_BOOKINGS',
+  SLOT_BLOCKED = 'SLOT_BLOCKED',
+  SLOT_NO_CAPACITY = 'SLOT_NO_CAPACITY',
+  SHIFT_WINDOW_INVERTED = 'SHIFT_WINDOW_INVERTED',
+  SHIFT_MINUTES_ZERO = 'SHIFT_MINUTES_ZERO',
+
+  // Excepciones de disponibilidad (bloqueos/aperturas puntuales).
+  EXCEPTION_REASON_REQUIRED = 'EXCEPTION_REASON_REQUIRED',
+  EXCEPTION_WINDOW_INVERTED = 'EXCEPTION_WINDOW_INVERTED',
+  EXCEPTION_NOT_FOUND = 'EXCEPTION_NOT_FOUND',
+  PRACTITIONER_HAS_CONFIRMED_APPOINTMENT = 'PRACTITIONER_HAS_CONFIRMED_APPOINTMENT',
+
+  // Vínculo profesional-organización.
+  AFFILIATION_NOT_ACTIVE = 'AFFILIATION_NOT_ACTIVE',
+
+  // Turnos (appointment bookings) y su ciclo de vida.
+  APPOINTMENT_SLOT_PAST = 'APPOINTMENT_SLOT_PAST',
+  APPOINTMENT_MIN_NOTICE_NOT_MET = 'APPOINTMENT_MIN_NOTICE_NOT_MET',
+  PATIENT_MAX_ACTIVE_BOOKINGS = 'PATIENT_MAX_ACTIVE_BOOKINGS',
+  HOLD_NOT_FOUND = 'HOLD_NOT_FOUND',
+  HOLD_ALREADY_CONSUMED = 'HOLD_ALREADY_CONSUMED',
+  HOLD_EXPIRED = 'HOLD_EXPIRED',
+  PATIENT_ALREADY_BOOKED_OVERLAPPING = 'PATIENT_ALREADY_BOOKED_OVERLAPPING',
+  PATIENT_NOT_FOUND = 'PATIENT_NOT_FOUND',
+  BOOKING_NOT_FOUND = 'BOOKING_NOT_FOUND',
+  BOOKING_NOT_ACTIVE_FOR_RESCHEDULE = 'BOOKING_NOT_ACTIVE_FOR_RESCHEDULE',
+  RESCHEDULE_SAME_SLOT = 'RESCHEDULE_SAME_SLOT',
+  TARGET_SLOT_NOT_FOUND = 'TARGET_SLOT_NOT_FOUND',
+  TARGET_SLOT_NO_CAPACITY = 'TARGET_SLOT_NO_CAPACITY',
+  BOOKING_ALREADY_CANCELLED = 'BOOKING_ALREADY_CANCELLED',
+  CANCELLATION_WINDOW_NOT_MET = 'CANCELLATION_WINDOW_NOT_MET',
+  PAYMENT_STATE_NOT_APPLICABLE = 'PAYMENT_STATE_NOT_APPLICABLE',
+  /** FAC-01 · el monto recibido no es un importe en Bs mayor que 0 con hasta dos decimales. */
+  PAYMENT_AMOUNT_INVALID = 'PAYMENT_AMOUNT_INVALID',
+  /** FAC-01 · un monto recibido solo va con «Pagada» o «Parcialmente pagada». */
+  PAYMENT_AMOUNT_WITHOUT_PAYMENT = 'PAYMENT_AMOUNT_WITHOUT_PAYMENT',
+  /** FAC-01 · el monto pasa lo que falta pagar de la cita (S-11). */
+  PAYMENT_AMOUNT_EXCEEDS_BALANCE = 'PAYMENT_AMOUNT_EXCEEDS_BALANCE',
+  PROPOSED_SLOT_SAME_AS_CURRENT = 'PROPOSED_SLOT_SAME_AS_CURRENT',
+  PROPOSED_SLOT_NOT_FOUND = 'PROPOSED_SLOT_NOT_FOUND',
+  PROPOSED_SLOT_NO_CAPACITY = 'PROPOSED_SLOT_NO_CAPACITY',
+  BOOKING_NOT_PENDING = 'BOOKING_NOT_PENDING',
+  INVALID_STATE_TRANSITION = 'INVALID_STATE_TRANSITION',
+  SEARCH_FILTER_REQUIRED = 'SEARCH_FILTER_REQUIRED',
+
+  // Demoras (avisos de retraso del profesional).
+  DELAY_WINDOW_INVERTED = 'DELAY_WINDOW_INVERTED',
+  DELAY_TOO_LONG = 'DELAY_TOO_LONG',
+
+  // Tiempo del profesional cruzando todas sus agendas (REGLA MADRE AG-1).
+  PRACTITIONER_NOT_AVAILABLE = 'PRACTITIONER_NOT_AVAILABLE',
+  /** F5d: el consultorio de la plantilla no es un consultorio/sala de procedimiento/imagen agendable (422). */
+  TEMPLATE_CARE_SPACE_INVALID_FUNCTION = 'TEMPLATE_CARE_SPACE_INVALID_FUNCTION',
+  /** F5d: el consultorio es de otra práctica que el recurso de la agenda (422). */
+  TEMPLATE_CARE_SPACE_SITE_MISMATCH = 'TEMPLATE_CARE_SPACE_SITE_MISMATCH',
+  /** F5d: otra plantilla publicada ocupa el mismo consultorio a la misma hora (422). */
+  TEMPLATE_RULE_OVERLAP_CARE_SPACE = 'TEMPLATE_RULE_OVERLAP_CARE_SPACE',
+}

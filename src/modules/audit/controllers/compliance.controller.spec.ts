@@ -31,7 +31,7 @@ describe('PrivacyController (UC-10-08)', () => {
       createDsar: mockFn().mockResolvedValue({ id: 'ds1' }),
       updateDsar: mockFn(),
     };
-    const controller = new PrivacyController(service as any);
+    const controller = new PrivacyController(service as any, {} as any);
     const dto = { type: 'ACCESS' };
     await controller.createDsar(dto, actor);
     expect(service.createDsar).toHaveBeenCalledWith(dto, actor);
@@ -42,7 +42,7 @@ describe('PrivacyController (UC-10-08)', () => {
       createDsar: mockFn(),
       updateDsar: mockFn().mockResolvedValue({ id: 'ds1' }),
     };
-    const controller = new PrivacyController(service as any);
+    const controller = new PrivacyController(service as any, {} as any);
     const dto = { status: 'COMPLETED' };
     await controller.updateDsar('ds1', dto, actor);
     expect(service.updateDsar).toHaveBeenCalledWith('ds1', dto, actor);

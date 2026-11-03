@@ -113,7 +113,7 @@ export class PublicCacheInterceptor implements NestInterceptor {
     if (this.declaresOwnCacheControl(context)) return next.handle();
 
     const res = http.getResponse<Response>();
-    const clave = req.originalUrl ?? req.url;
+    const key = req.originalUrl ?? req.url;
 
     // MCH-028 — si ya hay una representación vigente, ni siquiera se llama a
     // `next.handle()`: eso es todo el controlador, el servicio y la consulta
@@ -121,13 +121,13 @@ export class PublicCacheInterceptor implements NestInterceptor {
     // una sin cabecera (o con una vieja) recibe el mismo cuerpo que ya se le
     // sirvió al primer cliente, dentro de la misma ventana que el propio
     // `Cache-Control` ya prometía.
-    const cached = this.store.get(clave);
+    const cached = this.store.get(key);
     if (cached) {
       res.setHeader('ETag', cached.etag);
       res.setHeader('Cache-Control', cached.cacheControl);
 
       const order = req.headers['if-none-match'];
-      if (order && this.coincide(order, cached.etag)) {
+      if (order && this.matches(order, cached.etag)) {
         res.status(304);
         return of(undefined);
       }
@@ -146,14 +146,14 @@ export class PublicCacheInterceptor implements NestInterceptor {
 
         res.setHeader('ETag', etag);
         res.setHeader('Cache-Control', cacheControl);
-        this.store.set(clave, { etag, body, cacheControl }, maxAge * 1000);
+        this.store.set(key, { etag, body, cacheControl }, maxAge * 1000);
 
         // `If-None-Match` puede traer varios ETags separados por coma, y `*`.
         // Compararlo con `===` contra el encabezado entero fallaría en cuanto
         // el cliente mandara más de uno, que es lo que hace cualquier navegador
         // que ya vio dos versiones de la página.
         const order = req.headers['if-none-match'];
-        if (order && this.coincide(order, etag)) {
+        if (order && this.matches(order, etag)) {
           res.status(304);
           return undefined;
         }
@@ -183,12 +183,12 @@ export class PublicCacheInterceptor implements NestInterceptor {
   }
 
   /** ¿Alguno de los ETags que el cliente declara es el que vamos a servir? */
-  private coincide(header: string | string[], etag: string): boolean {
+  private matches(header: string | string[], etag: string): boolean {
     const raw = Array.isArray(header) ? header : [header];
     return raw
-      .flatMap((valor) => valor.split(','))
-      .map((valor) => valor.trim())
-      .some((valor) => valor === '*' || valor === etag);
+      .flatMap((value) => value.split(','))
+      .map((value) => value.trim())
+      .some((value) => value === '*' || value === etag);
   }
 
   /** Las fichas se cachean más que las búsquedas: cambian menos. */

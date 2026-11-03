@@ -26,8 +26,10 @@ pipeline dejó de ingerir, porque la ausencia de datos y la ausencia de ingesta 
 - `batchIngestMetrics` (UC-58-11) — **no emite métrica cuando el destino es
   `ingestion_pipeline_metric_series`**: se estaría midiendo a sí misma y cada lote generaría una fila
   más que a su vez habría que medir.
-- `batchIngestLocationPings` (UC-58-13) — el `consentId` viaja en el evento publicado, para que quien
-  proyecte pueda comprobar bajo qué permiso llegaron los datos.
+- `batchIngestLocationPings` (UC-58-13) — antes de insertar, `LocationConsentPolicy` contrasta el
+  `consentId` con `consent.consents` (tenant del contexto, vigencia, retiro, propósito de ubicación
+  y titular); si falla, `403 TIME_SERIES_LOCATION_CONSENT_INVALID` y no se persiste nada. El
+  `consentId` además viaja en el evento publicado.
 - `governedBackfill` (UC-58-12) — valida la ventana y que **cada** corrección caiga dentro; inserta
   con `quality_state = backfill` y `source_version` nueva, sin tocar los originales; `warn` en el
   log, porque alterar histórico no debería pasar desapercibido.

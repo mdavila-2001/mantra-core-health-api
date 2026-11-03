@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
+import { LockMode } from '@mikro-orm/core';
+import { OutboxService } from '../../messaging/services/outbox.service';
 import { PinoLogger } from 'nestjs-pino';
 import { randomUUID } from 'node:crypto';
 import {
@@ -11,13 +13,17 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { assertResourceInTenant } from '../../../common/tenant/resource-scope';
+import { BillingErrorReason } from '../billing.error-reasons';
 import {
   InvoicesRepository,
   BillingDocumentLinksRepository,
+  BillingLinkTargetsRepository,
 } from '../repositories';
 import { PracticeTenantLookupService } from '../../practice/services';
 import {
   IssueInvoiceFromEncounterDto,
+  type InvoiceLineInputDto,
   CreditNoteDto,
   CreatePaymentPlanDto,
   InvoiceResponseDto,
@@ -26,8 +32,32 @@ import {
   InvoiceDetailDto,
 } from '../dto';
 import { BILL } from '../billing.concepts';
-import { fromCents, toCents } from '../money.util';
-import type { Invoices } from '../entities';
+import { exactCents, fromCents, toCents } from '../money.util';
+import { validateLineAmounts } from '../billing-lines';
+import {
+  activeTenantId,
+  assertDocumentInTenant,
+  assertPracticeInTenant,
+} from '../billing-scope';
+import { ChargeCaptures, type Invoices } from '../entities';
+
+/** "No existe" del encuentro origen de una factura; el ajeno o de otro paciente responde idéntico. */
+const INVOICE_ENCOUNTER_NOT_FOUND = {
+  message: 'Encuentro no encontrado',
+  reason: BillingErrorReason.INVOICE_ENCOUNTER_NOT_FOUND,
+};
+
+/** "No existe" de la factura original de una nota de crédito; la ajena responde idéntico. */
+const CREDIT_NOTE_ORIGINAL_NOT_FOUND = {
+  message: 'Factura no encontrada',
+  reason: BillingErrorReason.INVOICE_CREDIT_NOTE_ORIGINAL_NOT_FOUND,
+};
+
+/** "No existe" de la factura origen de un plan de pagos; la ajena responde idéntico. */
+const PAYMENT_PLAN_SOURCE_NOT_FOUND = {
+  message: 'Factura origen no encontrada',
+  reason: BillingErrorReason.INVOICE_PAYMENT_PLAN_SOURCE_NOT_FOUND,
+};
 
 /** Tope de facturas por página cuando el cliente no pide uno (CV-12). */
 const DEFAULT_INVOICES_PAGE_SIZE = 50;
@@ -38,6 +68,12 @@ const DEFAULT_INVOICES_PAGE_SIZE = 50;
  * (UC-17-11). El servicio posee la unidad de trabajo: `em.transactional` y flush
  * del padre (factura) antes de crear hijos (líneas, vínculos), porque las FK son
  * columnas uuid planas que MikroORM no ordena.
+ *
+ * Alcance: la factura no tiene `tenant_id`; su tenant es el de su práctica. Toda
+ * operación contrasta la práctica (o la factura cargada por UUID) con el tenant
+ * del contexto antes de leer o escribir, y una ajena responde igual que una
+ * inexistente. El tenant de los vínculos de documento sale del contexto, nunca
+ * del cuerpo. Los importes de las líneas se validan con decimal exacto.
  */
 @Injectable()
 export class InvoicesService {
@@ -47,14 +83,17 @@ export class InvoicesService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param invoicesRepo - Valor de invoices repo requerido por la operación.
    * @param linksRepo - Valor de links repo requerido por la operación.
+   * @param linkTargets - Lectura de los documentos que la factura vincula.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly invoicesRepo: InvoicesRepository,
     private readonly linksRepo: BillingDocumentLinksRepository,
+    private readonly linkTargets: BillingLinkTargetsRepository,
     private readonly practiceTenantLookup: PracticeTenantLookupService,
     private readonly logger: PinoLogger,
+    private readonly outbox?: OutboxService,
   ) {
     this.logger.setContext(InvoicesService.name);
   }
@@ -72,7 +111,46 @@ export class InvoicesService {
       },
       'Issuing invoice from encounter',
     );
+    // Carril 16, REQ-16-029: una factura que declara un reclamo a la
+    // aseguradora (`claimId`) sería el cobro del precio completo de un
+    // servicio que ya se reclamó. Los servicios con seguro se le facturan al
+    // paciente desde la solicitud de seguro, con su parte calculada.
+    if (dto.claimId) {
+      throw new PreconditionFailedException(
+        'Los servicios con seguro se facturan al paciente desde la solicitud de seguro, con su parte calculada',
+        { claimId: dto.claimId },
+        BillingErrorReason.INVOICE_LINE_SERVICE_ALREADY_CLAIMED,
+      );
+    }
+    const tenantId = activeTenantId();
     return this.em.transactional(async (tx) => {
+      await assertPracticeInTenant(
+        this.practiceTenantLookup,
+        dto.practiceId,
+        tenantId,
+      );
+      // El encuentro origen se contrasta antes de escribir: una FK sólo
+      // demuestra que existe, y vincular el de otra organización (o el de otro
+      // paciente) colgaría la factura de un expediente ajeno.
+      if (dto.encounterId) {
+        const encounter = await this.linkTargets.findEncounter(
+          tx,
+          dto.encounterId,
+        );
+        assertResourceInTenant(
+          encounter,
+          encounter?.tenantId,
+          tenantId,
+          INVOICE_ENCOUNTER_NOT_FOUND,
+        );
+        if (encounter?.patientProfileId !== dto.patientProfileId) {
+          throw new ResourceNotFoundException(
+            INVOICE_ENCOUNTER_NOT_FOUND.message,
+            undefined,
+            INVOICE_ENCOUNTER_NOT_FOUND.reason,
+          );
+        }
+      }
       const invoiceNumber = dto.invoiceNumber ?? this.generateNumber('INV');
       const clash = await this.invoicesRepo.findByNumber(
         tx,
@@ -85,23 +163,38 @@ export class InvoicesService {
           {
             invoiceNumber,
           },
+          BillingErrorReason.INVOICE_NUMBER_ALREADY_EXISTS,
         );
       }
+
+      // F5e: cargos devengados a facturar. Del tenant, la práctica, el
+      // paciente y el encuentro de la factura (404 uniforme si no), pendientes
+      // (409) y con precio (422); bloqueados para que dos facturas no tomen el
+      // mismo cargo.
+      const charges = await this.loadCharges(tx, dto, tenantId);
+      const chargeLines: InvoiceLineInputDto[] = charges.map((c) => ({
+        serviceId: c.serviceCatalogId ?? undefined,
+        description: chargeDescription(c),
+        quantity: String(c.quantity),
+        unitPrice: Number(c.unitPrice).toFixed(2),
+        costCenterId: c.costCenterId ?? undefined,
+      }));
+      const allLines = [...(dto.lines ?? []), ...chargeLines];
 
       // Totales derivados de las líneas (base = cantidad*precio - descuento).
       let subtotalCents = 0;
       let taxCents = 0;
       let discountCents = 0;
-      const lineTotals = dto.lines.map((l) => {
-        const baseCents = Math.round(Number(l.quantity) * toCents(l.unitPrice));
-        const discCents = l.discount ? toCents(l.discount) : 0;
-        const taxAmtCents = l.taxAmount ? toCents(l.taxAmount) : 0;
-        const netCents = baseCents - discCents;
-        const lineTotalCents = netCents + taxAmtCents;
-        subtotalCents += netCents;
-        discountCents += discCents;
-        taxCents += taxAmtCents;
-        return fromCents(lineTotalCents);
+      const lineTotals = allLines.map((l) => {
+        const line = validateLineAmounts(l, {
+          amount: BillingErrorReason.INVOICE_LINE_AMOUNT_INVALID,
+          discountExceedsBase:
+            BillingErrorReason.INVOICE_LINE_DISCOUNT_EXCEEDS_BASE,
+        });
+        subtotalCents += line.netCents;
+        discountCents += line.discountCents;
+        taxCents += line.taxCents;
+        return fromCents(line.lineTotalCents);
       });
       const totalCents = subtotalCents + taxCents;
 
@@ -125,7 +218,7 @@ export class InvoicesService {
       // FK planas: persistir la factura antes de las líneas y los vínculos.
       await tx.flush();
 
-      dto.lines.forEach((l, i) => {
+      const createdLines = allLines.map((l, i) =>
         this.invoicesRepo.createLine(tx, {
           invoiceId: invoice.id,
           serviceId: l.serviceId,
@@ -139,12 +232,36 @@ export class InvoicesService {
           incomeAccountId: l.incomeAccountId,
           costCenterId: l.costCenterId,
           actorUserId: actor.id,
-        });
-      });
+        }),
+      );
+      if (charges.length > 0) {
+        await tx.flush();
+        const offset = allLines.length - charges.length;
+        for (const [i, c] of charges.entries()) {
+          c.statusConceptId = BILL.CHG_INVOICED;
+          c.invoiceLineId = createdLines[offset + i].id;
+          c.updatedAt = new Date();
+          c.updatedByUserId = actor.id;
+        }
+        await tx.flush();
+        for (const c of charges)
+          await this.outbox?.publishDomainEvent(tx, {
+            tenantId,
+            eventType: 'billing.charge_capture.invoiced',
+            aggregateType: 'billing.charge_captures',
+            aggregateId: c.id,
+            payloadJson: {
+              chargeCaptureId: c.id,
+              invoiceId: invoice.id,
+              invoiceLineId: c.invoiceLineId,
+            },
+            actorUserId: actor.id,
+          });
+      }
 
-      if (dto.tenantId && (dto.encounterId || dto.claimId)) {
+      if (dto.encounterId || dto.claimId) {
         this.linksRepo.create(tx, {
-          tenantId: dto.tenantId,
+          tenantId,
           relationTypeConceptId: BILL.REL_ENCOUNTER_OF,
           invoiceId: invoice.id,
           encounterId: dto.encounterId,
@@ -157,12 +274,63 @@ export class InvoicesService {
         {
           operation: 'billing.invoice.issue',
           invoiceId: invoice.id,
-          lines: dto.lines.length,
+          lines: allLines.length,
+          chargeCaptures: charges.length,
         },
         'Invoice issued',
       );
-      return this.toResponse(invoice, dto.lines.length);
+      return this.toResponse(invoice, allLines.length);
     });
+  }
+
+  /** F5e: cargos a facturar, validados y bloqueados (ver issueFromEncounter). */
+  private async loadCharges(
+    tx: EntityManager,
+    dto: IssueInvoiceFromEncounterDto,
+    tenantId: string,
+  ): Promise<ChargeCaptures[]> {
+    const ids = dto.chargeCaptureIds ?? [];
+    if (ids.length === 0) return [];
+    const found = await tx.find(
+      ChargeCaptures,
+      { id: { $in: ids } },
+      { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
+    const byId = new Map(found.map((c) => [c.id, c]));
+    const out: ChargeCaptures[] = [];
+    for (const id of ids) {
+      const c = byId.get(id);
+      if (
+        !c ||
+        c.tenantId !== tenantId ||
+        c.practiceId !== dto.practiceId ||
+        c.patientProfileId !== dto.patientProfileId ||
+        (dto.encounterId !== undefined && c.encounterId !== dto.encounterId)
+      )
+        throw new ResourceNotFoundException('Cargo no encontrado', {
+          chargeCaptureId: id,
+        });
+      if (c.statusConceptId === BILL.CHG_INVOICED)
+        throw new ConflictException(
+          'El cargo ya está facturado',
+          { chargeCaptureId: id },
+          BillingErrorReason.CHARGE_ALREADY_INVOICED,
+        );
+      if (c.statusConceptId !== BILL.CHG_PENDING)
+        throw new ConflictException(
+          'El cargo no está pendiente',
+          { chargeCaptureId: id },
+          BillingErrorReason.CHARGE_NOT_PENDING,
+        );
+      if (c.unitPrice === undefined || c.unitPrice === null)
+        throw new PreconditionFailedException(
+          'El cargo no tiene precio (sin tarifa vigente)',
+          { chargeCaptureId: id },
+          BillingErrorReason.CHARGE_WITHOUT_PRICE,
+        );
+      out.push(c);
+    }
+    return out;
   }
 
   /** UC-17-03: emite una nota de crédito (reverso) y ajusta la factura original. */
@@ -179,19 +347,32 @@ export class InvoicesService {
       },
       'Issuing credit note',
     );
+    const tenantId = activeTenantId();
     return this.em.transactional(async (tx) => {
-      const original = await this.invoicesRepo.findById(tx, invoiceId);
-      if (!original)
-        throw new ResourceNotFoundException('Factura no encontrada', {
-          invoiceId,
-        });
+      const original = await assertDocumentInTenant(
+        this.practiceTenantLookup,
+        await this.invoicesRepo.findById(tx, invoiceId),
+        tenantId,
+        CREDIT_NOTE_ORIGINAL_NOT_FOUND,
+      );
 
       // Total del reverso (positivo); se registra en la NC con signo negativo.
-      const reverseCents = dto.lines.reduce((acc, l) => {
-        const baseCents = Math.round(Number(l.quantity) * toCents(l.unitPrice));
-        const taxCents = l.taxAmount ? toCents(l.taxAmount) : 0;
-        return acc + baseCents + taxCents;
-      }, 0);
+      const reverseLines = dto.lines.map((l) =>
+        validateLineAmounts(l, {
+          amount: BillingErrorReason.CREDIT_NOTE_LINE_AMOUNT_INVALID,
+        }),
+      );
+      const reverseCents = reverseLines.reduce(
+        (acc, l) => acc + l.lineTotalCents,
+        0,
+      );
+      if (reverseCents <= 0) {
+        throw new PreconditionFailedException(
+          'La nota de crédito debe revertir un importe positivo',
+          undefined,
+          BillingErrorReason.CREDIT_NOTE_LINE_AMOUNT_INVALID,
+        );
+      }
 
       const originalBalanceCents = toCents(original.balance ?? '0');
       if (reverseCents > originalBalanceCents && !dto.writeOff) {
@@ -202,6 +383,7 @@ export class InvoicesService {
             reverse: fromCents(reverseCents),
             balance: original.balance,
           },
+          BillingErrorReason.INVOICE_CREDIT_NOTE_EXCEEDS_BALANCE,
         );
       }
 
@@ -222,14 +404,13 @@ export class InvoicesService {
       });
       await tx.flush();
 
-      dto.lines.forEach((l) => {
-        const baseCents = Math.round(Number(l.quantity) * toCents(l.unitPrice));
-        const taxCents = l.taxAmount ? toCents(l.taxAmount) : 0;
+      dto.lines.forEach((l, i) => {
+        const { baseCents, taxCents } = reverseLines[i];
         this.invoicesRepo.createLine(tx, {
           invoiceId: credit.id,
           description: l.description ?? dto.reason,
           quantity: l.quantity,
-          unitPrice: fromCents(-toCents(l.unitPrice)),
+          unitPrice: fromCents(-(exactCents(l.unitPrice) ?? 0)),
           taxAmount: l.taxAmount ? fromCents(-taxCents) : undefined,
           lineTotal: fromCents(-(baseCents + taxCents)),
           actorUserId: actor.id,
@@ -243,14 +424,12 @@ export class InvoicesService {
         newBalanceCents === 0 ? BILL.INVOICE_PAID : BILL.INVOICE_ADJUSTED;
       touch(original, actor.id);
 
-      if (dto.tenantId) {
-        this.linksRepo.create(tx, {
-          tenantId: dto.tenantId,
-          relationTypeConceptId: BILL.REL_CREDIT_OF,
-          invoiceId: credit.id,
-          actorUserId: actor.id,
-        });
-      }
+      this.linksRepo.create(tx, {
+        tenantId,
+        relationTypeConceptId: BILL.REL_CREDIT_OF,
+        invoiceId: credit.id,
+        actorUserId: actor.id,
+      });
 
       this.logger.info(
         {
@@ -277,13 +456,14 @@ export class InvoicesService {
       },
       'Creating payment plan',
     );
+    const tenantId = activeTenantId();
     return this.em.transactional(async (tx) => {
-      const source = await this.invoicesRepo.findById(tx, dto.sourceInvoiceId);
-      if (!source) {
-        throw new ResourceNotFoundException('Factura origen no encontrada', {
-          invoiceId: dto.sourceInvoiceId,
-        });
-      }
+      const source = await assertDocumentInTenant(
+        this.practiceTenantLookup,
+        await this.invoicesRepo.findById(tx, dto.sourceInvoiceId),
+        tenantId,
+        PAYMENT_PLAN_SOURCE_NOT_FOUND,
+      );
 
       const balanceCents = toCents(source.balance ?? '0');
       if (balanceCents <= 0) {
@@ -292,13 +472,21 @@ export class InvoicesService {
           {
             invoiceId: source.id,
           },
+          BillingErrorReason.INVOICE_PAYMENT_PLAN_SOURCE_NO_BALANCE,
         );
       }
 
-      const installmentsCents = dto.installments.reduce(
-        (acc, i) => acc + toCents(i.amount),
-        0,
-      );
+      const installmentsCents = dto.installments.reduce((acc, i) => {
+        const cents = exactCents(i.amount);
+        if (cents === null || cents <= 0) {
+          throw new PreconditionFailedException(
+            'Cada cuota del plan debe ser un importe positivo',
+            undefined,
+            BillingErrorReason.INVOICE_PAYMENT_PLAN_INSTALLMENT_AMOUNT_INVALID,
+          );
+        }
+        return acc + cents;
+      }, 0);
       if (installmentsCents !== balanceCents) {
         throw new PreconditionFailedException(
           'La suma de cuotas debe igualar el saldo de la factura',
@@ -306,6 +494,7 @@ export class InvoicesService {
             balance: source.balance,
             installments: fromCents(installmentsCents),
           },
+          BillingErrorReason.INVOICE_PAYMENT_PLAN_INSTALLMENTS_MISMATCH,
         );
       }
 
@@ -328,14 +517,12 @@ export class InvoicesService {
           actorUserId: actor.id,
         });
         await tx.flush();
-        if (dto.tenantId) {
-          this.linksRepo.create(tx, {
-            tenantId: dto.tenantId,
-            relationTypeConceptId: BILL.REL_INSTALLMENT_OF,
-            invoiceId: child.id,
-            actorUserId: actor.id,
-          });
-        }
+        this.linksRepo.create(tx, {
+          tenantId,
+          relationTypeConceptId: BILL.REL_INSTALLMENT_OF,
+          invoiceId: child.id,
+          actorUserId: actor.id,
+        });
         created.push(child);
       }
 
@@ -502,4 +689,14 @@ export class InvoicesService {
       lineCount,
     };
   }
+}
+
+/** Descripción de la línea de un cargo devengado. */
+function chargeDescription(c: ChargeCaptures): string {
+  const day = String(
+    c.serviceDate instanceof Date ? c.serviceDate.toISOString() : c.serviceDate,
+  ).slice(0, 10);
+  return c.sourceKindConceptId === BILL.CHG_SRC_BED_DAY
+    ? `Día-cama ${day}`
+    : `Quirófano por tiempo ${day}`;
 }

@@ -1,0 +1,383 @@
+{
+  "mondo": [
+    {
+      "key": "mondo",
+      "url": "https://github.com/monarch-initiative/mondo/releases/download/v2026-10-06/mondo.obo",
+      "officialUrl": null,
+      "sha256": "2631e8e165d41def1a46749adb1ce0a336c8aba7f6bc0978729592cee8fed60b",
+      "retrievedAt": "2026-10-24T00:33:07.672Z"
+    }
+  ],
+  "orphanet": [
+    {
+      "key": "orphanet-es-product1",
+      "url": "https://media.githubusercontent.com/media/Orphanet/Orphadata_aggregated/master/Rare%20diseases%20and%20classifications/Cross-referencing%20of%20rare%20diseases/XML/es_product1.xml",
+      "officialUrl": null,
+      "sha256": "3eb547bb9aa0429bd8a05e55ea2c539a72b502a969325b1b5adeb601ab448ee0",
+      "retrievedAt": "2026-10-24T00:36:10.496Z"
+    },
+    {
+      "key": "orphanet-en-product1",
+      "url": "https://media.githubusercontent.com/media/Orphanet/Orphadata_aggregated/master/Rare%20diseases%20and%20classifications/Cross-referencing%20of%20rare%20diseases/XML/en_product1.xml",
+      "officialUrl": null,
+      "sha256": "df8d562a0c6011af36a74eb4000ce81ca7d723e8031010819fb71727c0962bbb",
+      "retrievedAt": "2026-10-24T00:36:12.844Z"
+    },
+    {
+      "key": "orphanet-en-product7",
+      "url": "https://media.githubusercontent.com/media/Orphanet/Orphadata_aggregated/master/Rare%20diseases%20and%20classifications/Linearisation%20of%20disorders/en_product7.xml",
+      "officialUrl": null,
+      "sha256": "63d0e31a72141a9efe6746f8fd82c2bae67b4212809a49557a2229fe02cc4a74",
+      "retrievedAt": "2026-10-24T00:35:44.332Z"
+    }
+  ],
+  "doid": [
+    {
+      "key": "doid",
+      "url": "https://raw.githubusercontent.com/DiseaseOntology/HumanDiseaseOntology/v2026-09-30/src/ontology/doid.obo",
+      "officialUrl": null,
+      "sha256": "51e717b6b9f5d391f2793f9e16faf9c8629a661ab8f21c3a024458129f182ad2",
+      "retrievedAt": "2026-10-24T00:33:33.404Z"
+    }
+  ],
+  "ncit-disease": [
+    {
+      "key": "ncit",
+      "url": "https://github.com/ncit-obo-org/ncit-obo-edition/releases/download/v2026-03-19/ncit.obo",
+      "officialUrl": null,
+      "sha256": "8fdc2d29c9ebd91ada8330ed023b0c56ae787a31e6aedff453ee9bfef6fc18f6",
+      "retrievedAt": "2026-10-24T00:57:48.583Z"
+    }
+  ],
+  "icd11-mms": [
+    {
+      "key": "icd11-mms",
+      "url": "https://raw.githubusercontent.com/Wulfgardr/mediflow/3fa8899af07bbf70e802c9f2b01607820bd437c7/assets/reference-data/icd11/catalog.zip",
+      "officialUrl": "https://icdcdn.who.int/static/releasefiles/2026-01/SimpleTabulation-ICD-11-MMS-en.zip",
+      "sha256": "f1356588f40953a83e3af2b662deab47c5e269f944d1ea4ed0cfeb2007c7cd39",
+      "retrievedAt": "2026-10-24T00:57:45.199Z"
+    },
+    {
+      "key": "icd11-to-icd10",
+      "url": "https://raw.githubusercontent.com/drguptavivek/DigitVA/9aeff9688e1a9951a102e03a2768a067fdd22c9b/docs/icd-causegrp-mappings/migration-artifacts/icd11-icd10-mapping-tables-2025-01-base-2026-09-16/11To10MapToOneCategory.txt",
+      "officialUrl": "https://icdcdn.who.int/static/releasefiles/2025-01/mapping.zip",
+      "sha256": "49737c349dd7a831c1c3f8e40d2281dbb26c989a4a880b398b2f93118002b0e9",
+      "retrievedAt": "2026-10-24T00:57:45.823Z"
+    }
+  ],
+  "efo-disease": [
+    {
+      "key": "efo",
+      "url": "https://github.com/EBISPOT/efo/releases/download/v3.95.0/efo.obo",
+      "officialUrl": null,
+      "sha256": "062edb95420a0556affa61e252a4ef316cfba4bc42dd10f01ae8b90e7434ad14",
+      "retrievedAt": "2026-10-24T00:57:50.159Z"
+    }
+  ],
+  "icd10-who": [
+    {
+      "key": "mondo",
+      "url": "https://github.com/monarch-initiative/mondo/releases/download/v2026-10-06/mondo.obo",
+      "officialUrl": null,
+      "sha256": "2631e8e165d41def1a46749adb1ce0a336c8aba7f6bc0978729592cee8fed60b",
+      "retrievedAt": "2026-10-24T00:33:07.672Z"
+    },
+    {
+      "key": "orphanet-es-product1",
+      "url": "https://media.githubusercontent.com/media/Orphanet/Orphadata_aggregated/master/Rare%20diseases%20and%20classifications/Cross-referencing%20of%20rare%20diseases/XML/es_product1.xml",
+      "officialUrl": null,
+      "sha256": "3eb547bb9aa0429bd8a05e55ea2c539a72b502a969325b1b5adeb601ab448ee0",
+      "retrievedAt": "2026-10-24T00:36:10.496Z"
+    },
+    {
+      "key": "doid",
+      "url": "https://raw.githubusercontent.com/DiseaseOntology/HumanDiseaseOntology/v2026-09-30/src/ontology/doid.obo",
+      "officialUrl": null,
+      "sha256": "51e717b6b9f5d391f2793f9e16faf9c8629a661ab8f21c3a024458129f182ad2",
+      "retrievedAt": "2026-10-24T00:33:33.404Z"
+    },
+    {
+      "key": "ncit",
+      "url": "https://github.com/ncit-obo-org/ncit-obo-edition/releases/download/v2026-03-19/ncit.obo",
+      "officialUrl": null,
+      "sha256": "8fdc2d29c9ebd91ada8330ed023b0c56ae787a31e6aedff453ee9bfef6fc18f6",
+      "retrievedAt": "2026-10-24T00:57:48.583Z"
+    },
+    {
+      "key": "hpo-annotations",
+      "url": "https://github.com/obophenotype/human-phenotype-ontology/releases/download/v2026-09-01/phenotype.hpoa",
+      "officialUrl": null,
+      "sha256": "e89aa39c8f97bf5a52c5d160f9250a603681d630ade8ec2679d84ac5aece1f72",
+      "retrievedAt": "2026-10-24T01:08:03.595Z"
+    },
+    {
+      "key": "phenopacket-store",
+      "url": "https://github.com/monarch-initiative/phenopacket-store/releases/download/0.1.27/all_phenopackets.zip",
+      "officialUrl": null,
+      "sha256": "d0c70005bb09b87035087516252b6b539fbc0415be7c664b73c9cde7eedf205a",
+      "retrievedAt": "2026-10-24T01:09:42.959Z"
+    },
+    {
+      "key": "icd10-to-icd11",
+      "url": "https://raw.githubusercontent.com/drguptavivek/DigitVA/9aeff9688e1a9951a102e03a2768a067fdd22c9b/docs/icd-causegrp-mappings/migration-artifacts/icd11-icd10-mapping-tables-2025-01-base-2026-09-16/10To11MapToOneCategory.txt",
+      "officialUrl": "https://icdcdn.who.int/static/releasefiles/2025-01/mapping.zip",
+      "sha256": "1af732d79829d1752457bcc5d254098e576f19ac8f447534ce31744c873224e7",
+      "retrievedAt": "2026-10-24T01:15:48.319Z"
+    }
+  ],
+  "mesh": [
+    {
+      "key": "mondo",
+      "url": "https://github.com/monarch-initiative/mondo/releases/download/v2026-10-06/mondo.obo",
+      "officialUrl": null,
+      "sha256": "2631e8e165d41def1a46749adb1ce0a336c8aba7f6bc0978729592cee8fed60b",
+      "retrievedAt": "2026-10-24T00:33:07.672Z"
+    },
+    {
+      "key": "orphanet-es-product1",
+      "url": "https://media.githubusercontent.com/media/Orphanet/Orphadata_aggregated/master/Rare%20diseases%20and%20classifications/Cross-referencing%20of%20rare%20diseases/XML/es_product1.xml",
+      "officialUrl": null,
+      "sha256": "3eb547bb9aa0429bd8a05e55ea2c539a72b502a969325b1b5adeb601ab448ee0",
+      "retrievedAt": "2026-10-24T00:36:10.496Z"
+    },
+    {
+      "key": "doid",
+      "url": "https://raw.githubusercontent.com/DiseaseOntology/HumanDiseaseOntology/v2026-09-30/src/ontology/doid.obo",
+      "officialUrl": null,
+      "sha256": "51e717b6b9f5d391f2793f9e16faf9c8629a661ab8f21c3a024458129f182ad2",
+      "retrievedAt": "2026-10-24T00:33:33.404Z"
+    },
+    {
+      "key": "ncit",
+      "url": "https://github.com/ncit-obo-org/ncit-obo-edition/releases/download/v2026-03-19/ncit.obo",
+      "officialUrl": null,
+      "sha256": "8fdc2d29c9ebd91ada8330ed023b0c56ae787a31e6aedff453ee9bfef6fc18f6",
+      "retrievedAt": "2026-10-24T00:57:48.583Z"
+    },
+    {
+      "key": "hpo-annotations",
+      "url": "https://github.com/obophenotype/human-phenotype-ontology/releases/download/v2026-09-01/phenotype.hpoa",
+      "officialUrl": null,
+      "sha256": "e89aa39c8f97bf5a52c5d160f9250a603681d630ade8ec2679d84ac5aece1f72",
+      "retrievedAt": "2026-10-24T01:08:03.595Z"
+    },
+    {
+      "key": "phenopacket-store",
+      "url": "https://github.com/monarch-initiative/phenopacket-store/releases/download/0.1.27/all_phenopackets.zip",
+      "officialUrl": null,
+      "sha256": "d0c70005bb09b87035087516252b6b539fbc0415be7c664b73c9cde7eedf205a",
+      "retrievedAt": "2026-10-24T01:09:42.959Z"
+    },
+    {
+      "key": "icd10-to-icd11",
+      "url": "https://raw.githubusercontent.com/drguptavivek/DigitVA/9aeff9688e1a9951a102e03a2768a067fdd22c9b/docs/icd-causegrp-mappings/migration-artifacts/icd11-icd10-mapping-tables-2025-01-base-2026-09-16/10To11MapToOneCategory.txt",
+      "officialUrl": "https://icdcdn.who.int/static/releasefiles/2025-01/mapping.zip",
+      "sha256": "1af732d79829d1752457bcc5d254098e576f19ac8f447534ce31744c873224e7",
+      "retrievedAt": "2026-10-24T01:15:48.319Z"
+    }
+  ],
+  "umls": [
+    {
+      "key": "mondo",
+      "url": "https://github.com/monarch-initiative/mondo/releases/download/v2026-10-06/mondo.obo",
+      "officialUrl": null,
+      "sha256": "2631e8e165d41def1a46749adb1ce0a336c8aba7f6bc0978729592cee8fed60b",
+      "retrievedAt": "2026-10-24T00:33:07.672Z"
+    },
+    {
+      "key": "orphanet-es-product1",
+      "url": "https://media.githubusercontent.com/media/Orphanet/Orphadata_aggregated/master/Rare%20diseases%20and%20classifications/Cross-referencing%20of%20rare%20diseases/XML/es_product1.xml",
+      "officialUrl": null,
+      "sha256": "3eb547bb9aa0429bd8a05e55ea2c539a72b502a969325b1b5adeb601ab448ee0",
+      "retrievedAt": "2026-10-24T00:36:10.496Z"
+    },
+    {
+      "key": "doid",
+      "url": "https://raw.githubusercontent.com/DiseaseOntology/HumanDiseaseOntology/v2026-09-30/src/ontology/doid.obo",
+      "officialUrl": null,
+      "sha256": "51e717b6b9f5d391f2793f9e16faf9c8629a661ab8f21c3a024458129f182ad2",
+      "retrievedAt": "2026-10-24T00:33:33.404Z"
+    },
+    {
+      "key": "ncit",
+      "url": "https://github.com/ncit-obo-org/ncit-obo-edition/releases/download/v2026-03-19/ncit.obo",
+      "officialUrl": null,
+      "sha256": "8fdc2d29c9ebd91ada8330ed023b0c56ae787a31e6aedff453ee9bfef6fc18f6",
+      "retrievedAt": "2026-10-24T00:57:48.583Z"
+    },
+    {
+      "key": "hpo-annotations",
+      "url": "https://github.com/obophenotype/human-phenotype-ontology/releases/download/v2026-09-01/phenotype.hpoa",
+      "officialUrl": null,
+      "sha256": "e89aa39c8f97bf5a52c5d160f9250a603681d630ade8ec2679d84ac5aece1f72",
+      "retrievedAt": "2026-10-24T01:08:03.595Z"
+    },
+    {
+      "key": "phenopacket-store",
+      "url": "https://github.com/monarch-initiative/phenopacket-store/releases/download/0.1.27/all_phenopackets.zip",
+      "officialUrl": null,
+      "sha256": "d0c70005bb09b87035087516252b6b539fbc0415be7c664b73c9cde7eedf205a",
+      "retrievedAt": "2026-10-24T01:09:42.959Z"
+    },
+    {
+      "key": "icd10-to-icd11",
+      "url": "https://raw.githubusercontent.com/drguptavivek/DigitVA/9aeff9688e1a9951a102e03a2768a067fdd22c9b/docs/icd-causegrp-mappings/migration-artifacts/icd11-icd10-mapping-tables-2025-01-base-2026-09-16/10To11MapToOneCategory.txt",
+      "officialUrl": "https://icdcdn.who.int/static/releasefiles/2025-01/mapping.zip",
+      "sha256": "1af732d79829d1752457bcc5d254098e576f19ac8f447534ce31744c873224e7",
+      "retrievedAt": "2026-10-24T01:15:48.319Z"
+    }
+  ],
+  "icd11-foundation": [
+    {
+      "key": "mondo",
+      "url": "https://github.com/monarch-initiative/mondo/releases/download/v2026-10-06/mondo.obo",
+      "officialUrl": null,
+      "sha256": "2631e8e165d41def1a46749adb1ce0a336c8aba7f6bc0978729592cee8fed60b",
+      "retrievedAt": "2026-10-24T00:33:07.672Z"
+    },
+    {
+      "key": "orphanet-es-product1",
+      "url": "https://media.githubusercontent.com/media/Orphanet/Orphadata_aggregated/master/Rare%20diseases%20and%20classifications/Cross-referencing%20of%20rare%20diseases/XML/es_product1.xml",
+      "officialUrl": null,
+      "sha256": "3eb547bb9aa0429bd8a05e55ea2c539a72b502a969325b1b5adeb601ab448ee0",
+      "retrievedAt": "2026-10-24T00:36:10.496Z"
+    },
+    {
+      "key": "doid",
+      "url": "https://raw.githubusercontent.com/DiseaseOntology/HumanDiseaseOntology/v2026-09-30/src/ontology/doid.obo",
+      "officialUrl": null,
+      "sha256": "51e717b6b9f5d391f2793f9e16faf9c8629a661ab8f21c3a024458129f182ad2",
+      "retrievedAt": "2026-10-24T00:33:33.404Z"
+    },
+    {
+      "key": "ncit",
+      "url": "https://github.com/ncit-obo-org/ncit-obo-edition/releases/download/v2026-03-19/ncit.obo",
+      "officialUrl": null,
+      "sha256": "8fdc2d29c9ebd91ada8330ed023b0c56ae787a31e6aedff453ee9bfef6fc18f6",
+      "retrievedAt": "2026-10-24T00:57:48.583Z"
+    },
+    {
+      "key": "hpo-annotations",
+      "url": "https://github.com/obophenotype/human-phenotype-ontology/releases/download/v2026-09-01/phenotype.hpoa",
+      "officialUrl": null,
+      "sha256": "e89aa39c8f97bf5a52c5d160f9250a603681d630ade8ec2679d84ac5aece1f72",
+      "retrievedAt": "2026-10-24T01:08:03.595Z"
+    },
+    {
+      "key": "phenopacket-store",
+      "url": "https://github.com/monarch-initiative/phenopacket-store/releases/download/0.1.27/all_phenopackets.zip",
+      "officialUrl": null,
+      "sha256": "d0c70005bb09b87035087516252b6b539fbc0415be7c664b73c9cde7eedf205a",
+      "retrievedAt": "2026-10-24T01:09:42.959Z"
+    },
+    {
+      "key": "icd10-to-icd11",
+      "url": "https://raw.githubusercontent.com/drguptavivek/DigitVA/9aeff9688e1a9951a102e03a2768a067fdd22c9b/docs/icd-causegrp-mappings/migration-artifacts/icd11-icd10-mapping-tables-2025-01-base-2026-09-16/10To11MapToOneCategory.txt",
+      "officialUrl": "https://icdcdn.who.int/static/releasefiles/2025-01/mapping.zip",
+      "sha256": "1af732d79829d1752457bcc5d254098e576f19ac8f447534ce31744c873224e7",
+      "retrievedAt": "2026-10-24T01:15:48.319Z"
+    }
+  ],
+  "omim": [
+    {
+      "key": "mondo",
+      "url": "https://github.com/monarch-initiative/mondo/releases/download/v2026-10-06/mondo.obo",
+      "officialUrl": null,
+      "sha256": "2631e8e165d41def1a46749adb1ce0a336c8aba7f6bc0978729592cee8fed60b",
+      "retrievedAt": "2026-10-24T00:33:07.672Z"
+    },
+    {
+      "key": "orphanet-es-product1",
+      "url": "https://media.githubusercontent.com/media/Orphanet/Orphadata_aggregated/master/Rare%20diseases%20and%20classifications/Cross-referencing%20of%20rare%20diseases/XML/es_product1.xml",
+      "officialUrl": null,
+      "sha256": "3eb547bb9aa0429bd8a05e55ea2c539a72b502a969325b1b5adeb601ab448ee0",
+      "retrievedAt": "2026-10-24T00:36:10.496Z"
+    },
+    {
+      "key": "doid",
+      "url": "https://raw.githubusercontent.com/DiseaseOntology/HumanDiseaseOntology/v2026-09-30/src/ontology/doid.obo",
+      "officialUrl": null,
+      "sha256": "51e717b6b9f5d391f2793f9e16faf9c8629a661ab8f21c3a024458129f182ad2",
+      "retrievedAt": "2026-10-24T00:33:33.404Z"
+    },
+    {
+      "key": "ncit",
+      "url": "https://github.com/ncit-obo-org/ncit-obo-edition/releases/download/v2026-03-19/ncit.obo",
+      "officialUrl": null,
+      "sha256": "8fdc2d29c9ebd91ada8330ed023b0c56ae787a31e6aedff453ee9bfef6fc18f6",
+      "retrievedAt": "2026-10-24T00:57:48.583Z"
+    },
+    {
+      "key": "hpo-annotations",
+      "url": "https://github.com/obophenotype/human-phenotype-ontology/releases/download/v2026-09-01/phenotype.hpoa",
+      "officialUrl": null,
+      "sha256": "e89aa39c8f97bf5a52c5d160f9250a603681d630ade8ec2679d84ac5aece1f72",
+      "retrievedAt": "2026-10-24T01:08:03.595Z"
+    },
+    {
+      "key": "phenopacket-store",
+      "url": "https://github.com/monarch-initiative/phenopacket-store/releases/download/0.1.27/all_phenopackets.zip",
+      "officialUrl": null,
+      "sha256": "d0c70005bb09b87035087516252b6b539fbc0415be7c664b73c9cde7eedf205a",
+      "retrievedAt": "2026-10-24T01:09:42.959Z"
+    },
+    {
+      "key": "icd10-to-icd11",
+      "url": "https://raw.githubusercontent.com/drguptavivek/DigitVA/9aeff9688e1a9951a102e03a2768a067fdd22c9b/docs/icd-causegrp-mappings/migration-artifacts/icd11-icd10-mapping-tables-2025-01-base-2026-09-16/10To11MapToOneCategory.txt",
+      "officialUrl": "https://icdcdn.who.int/static/releasefiles/2025-01/mapping.zip",
+      "sha256": "1af732d79829d1752457bcc5d254098e576f19ac8f447534ce31744c873224e7",
+      "retrievedAt": "2026-10-24T01:15:48.319Z"
+    }
+  ],
+  "decipher": [
+    {
+      "key": "mondo",
+      "url": "https://github.com/monarch-initiative/mondo/releases/download/v2026-10-06/mondo.obo",
+      "officialUrl": null,
+      "sha256": "2631e8e165d41def1a46749adb1ce0a336c8aba7f6bc0978729592cee8fed60b",
+      "retrievedAt": "2026-10-24T00:33:07.672Z"
+    },
+    {
+      "key": "orphanet-es-product1",
+      "url": "https://media.githubusercontent.com/media/Orphanet/Orphadata_aggregated/master/Rare%20diseases%20and%20classifications/Cross-referencing%20of%20rare%20diseases/XML/es_product1.xml",
+      "officialUrl": null,
+      "sha256": "3eb547bb9aa0429bd8a05e55ea2c539a72b502a969325b1b5adeb601ab448ee0",
+      "retrievedAt": "2026-10-24T00:36:10.496Z"
+    },
+    {
+      "key": "doid",
+      "url": "https://raw.githubusercontent.com/DiseaseOntology/HumanDiseaseOntology/v2026-09-30/src/ontology/doid.obo",
+      "officialUrl": null,
+      "sha256": "51e717b6b9f5d391f2793f9e16faf9c8629a661ab8f21c3a024458129f182ad2",
+      "retrievedAt": "2026-10-24T00:33:33.404Z"
+    },
+    {
+      "key": "ncit",
+      "url": "https://github.com/ncit-obo-org/ncit-obo-edition/releases/download/v2026-03-19/ncit.obo",
+      "officialUrl": null,
+      "sha256": "8fdc2d29c9ebd91ada8330ed023b0c56ae787a31e6aedff453ee9bfef6fc18f6",
+      "retrievedAt": "2026-10-24T00:57:48.583Z"
+    },
+    {
+      "key": "hpo-annotations",
+      "url": "https://github.com/obophenotype/human-phenotype-ontology/releases/download/v2026-09-01/phenotype.hpoa",
+      "officialUrl": null,
+      "sha256": "e89aa39c8f97bf5a52c5d160f9250a603681d630ade8ec2679d84ac5aece1f72",
+      "retrievedAt": "2026-10-24T01:08:03.595Z"
+    },
+    {
+      "key": "phenopacket-store",
+      "url": "https://github.com/monarch-initiative/phenopacket-store/releases/download/0.1.27/all_phenopackets.zip",
+      "officialUrl": null,
+      "sha256": "d0c70005bb09b87035087516252b6b539fbc0415be7c664b73c9cde7eedf205a",
+      "retrievedAt": "2026-10-24T01:09:42.959Z"
+    },
+    {
+      "key": "icd10-to-icd11",
+      "url": "https://raw.githubusercontent.com/drguptavivek/DigitVA/9aeff9688e1a9951a102e03a2768a067fdd22c9b/docs/icd-causegrp-mappings/migration-artifacts/icd11-icd10-mapping-tables-2025-01-base-2026-09-16/10To11MapToOneCategory.txt",
+      "officialUrl": "https://icdcdn.who.int/static/releasefiles/2025-01/mapping.zip",
+      "sha256": "1af732d79829d1752457bcc5d254098e576f19ac8f447534ce31744c873224e7",
+      "retrievedAt": "2026-10-24T01:15:48.319Z"
+    }
+  ]
+}

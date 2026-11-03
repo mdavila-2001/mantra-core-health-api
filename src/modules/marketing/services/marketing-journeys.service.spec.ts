@@ -14,10 +14,15 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  runWithTenant,
 } from '../../../common';
+import { UniqueConstraintViolationException } from '@mikro-orm/core';
+import { MarketingErrorReason } from '../marketing.error-reasons';
+import { issueLinkToken } from '../marketing.link-token';
 
 const actor = { id: 'user-1', roles: ['MARKETING_MANAGER'] };
 const TENANT = '11111111-1111-1111-1111-111111111111';
+const OTHER_TENANT = '99999999-9999-9999-9999-999999999999';
 const JOURNEY = '22222222-2222-2222-2222-222222222222';
 const ENROLLMENT = '33333333-3333-3333-3333-333333333333';
 const MEMBER = '44444444-4444-4444-4444-444444444444';
@@ -31,10 +36,13 @@ const CONVERSION = '77777777-7777-7777-7777-777777777777';
  */
 function build() {
   const tx = { flush: mockFn() };
-  const em = { transactional: mockFn((cb: any) => cb(tx)) };
+  const em = {
+    transactional: mockFn((cb: any) => cb(tx)),
+    fork: mockFn(() => tx),
+  };
   const journeysRepo = {
     createJourney: mockFn(),
-    findJourneyById: mockFn(),
+    findJourneyById: mockFn(async () => ({ id: JOURNEY, tenantId: TENANT })),
     findJourneyForUpdate: mockFn(),
     findJourneyByCode: mockFn(),
     createJourneyStep: mockFn(),
@@ -50,6 +58,13 @@ function build() {
     findTrackedLinkByCodeForUpdate: mockFn(),
     createTouchpoint: mockFn(),
     findTouchpointsInWindow: mockFn(),
+    findTouchpointsByIds: mockFn(async (_tx: any, ids: string[]) =>
+      ids.map((id) => ({ id })),
+    ),
+    keepTouchpointsOfTenant: mockFn(
+      async (_tx: any, _tenantId: string, list: any[]) => list,
+    ),
+    findTrackedLinkById: mockFn(),
     createAttributionTouch: mockFn(),
     findAttributionTouches: mockFn(),
     removeAttributionTouches: mockFn(),
@@ -57,6 +72,14 @@ function build() {
   const campaignsRepo = {
     findSegmentById: mockFn(),
     findPublishedTemplate: mockFn(),
+    findTemplateById: mockFn(),
+    findCampaignByIdOrAdRef: mockFn(
+      async (_tx: any, tenantId: string, id: string) => ({
+        id,
+        tenantId,
+      }),
+    ),
+    findCampaignMemberByRef: mockFn(),
     findCampaignMemberByRefForUpdate: mockFn(),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
@@ -66,7 +89,33 @@ function build() {
     campaignsRepo as any,
     logger as any,
   );
-  return { service, tx, journeysRepo, campaignsRepo };
+  return {
+    service: inTenant(service, TENANT),
+    raw: service,
+    tx,
+    em,
+    journeysRepo,
+    campaignsRepo,
+  };
+}
+
+/**
+ * Ejecuta cada método del servicio con `tenant` como tenant activo del
+ * contexto, igual que lo deja el interceptor en una petición real.
+ *
+ * @param service - Servicio bajo prueba.
+ * @param tenant - Tenant activo.
+ * @returns Proxy que fija el contexto en cada llamada.
+ */
+function inTenant<T extends object>(service: T, tenant: string): T {
+  return new Proxy(service, {
+    get(target, prop, receiver) {
+      const value = Reflect.get(target, prop, receiver);
+      if (typeof value !== 'function') return value;
+      return (...args: unknown[]) =>
+        runWithTenant(tenant, () => value.apply(target, args));
+    },
+  });
 }
 
 /**
@@ -151,7 +200,11 @@ describe('MarketingJourneysService', () => {
      * @returns Resultado de draft journey conforme al contrato `any`.
      */
     function draftJourney(): any {
-      return { id: JOURNEY, stateConceptId: CONCEPTS.JOURNEY_DRAFT };
+      return {
+        id: JOURNEY,
+        tenantId: TENANT,
+        stateConceptId: CONCEPTS.JOURNEY_DRAFT,
+      };
     }
 
     it('chains the steps in the order received', async () => {
@@ -208,6 +261,7 @@ describe('MarketingJourneysService', () => {
       const d = build();
       d.journeysRepo.findJourneyForUpdate.mockResolvedValue({
         id: JOURNEY,
+        tenantId: TENANT,
         stateConceptId: CONCEPTS.JOURNEY_ACTIVE,
       });
 
@@ -277,6 +331,7 @@ describe('MarketingJourneysService', () => {
       const d = build();
       const journey: any = {
         id: JOURNEY,
+        tenantId: TENANT,
         stateConceptId: CONCEPTS.JOURNEY_DRAFT,
       };
       d.journeysRepo.findJourneyForUpdate.mockResolvedValue(journey);
@@ -304,6 +359,7 @@ describe('MarketingJourneysService', () => {
       const d = build();
       d.journeysRepo.findJourneyForUpdate.mockResolvedValue({
         id: JOURNEY,
+        tenantId: TENANT,
         stateConceptId: CONCEPTS.JOURNEY_DRAFT,
       });
       d.journeysRepo.findStepsByJourney.mockResolvedValue([
@@ -323,6 +379,7 @@ describe('MarketingJourneysService', () => {
       const d = build();
       d.journeysRepo.findJourneyForUpdate.mockResolvedValue({
         id: JOURNEY,
+        tenantId: TENANT,
         stateConceptId: CONCEPTS.JOURNEY_DRAFT,
       });
       d.journeysRepo.findStepsByJourney.mockResolvedValue([]);
@@ -336,6 +393,7 @@ describe('MarketingJourneysService', () => {
       const d = build();
       d.journeysRepo.findJourneyForUpdate.mockResolvedValue({
         id: JOURNEY,
+        tenantId: TENANT,
         stateConceptId: CONCEPTS.JOURNEY_ACTIVE,
       });
 
@@ -597,7 +655,7 @@ describe('MarketingJourneysService', () => {
       ).rejects.toBeInstanceOf(ConflictException);
     });
 
-    it('increments the counter and records a click touchpoint for a known member', async () => {
+    it('increments the counter and records a click touchpoint for the recipient of a valid token', async () => {
       const d = build();
       const link: any = {
         id: 'lnk-1',
@@ -609,8 +667,13 @@ describe('MarketingJourneysService', () => {
       };
       d.journeysRepo.findTrackedLinkByCodeForUpdate.mockResolvedValue(link);
       d.journeysRepo.createTouchpoint.mockReturnValue({ id: 'tp-1' });
+      const { token } = issueLinkToken(
+        'lnk-1',
+        { memberType: 'CONTACT', memberRefId: MEMBER },
+        3600,
+      );
 
-      const res = await d.service.registerClick('ABC123', 'CONTACT', MEMBER);
+      const res = await d.service.registerClick('ABC123', token);
 
       expect(res.clickCount).toBe('42');
       expect(link.clickCount).toBe('42');
@@ -631,7 +694,7 @@ describe('MarketingJourneysService', () => {
         stateConceptId: CONCEPTS.STATE_ACTIVE,
       });
 
-      const res = await d.service.registerClick('ABC123', undefined, undefined);
+      const res = await d.service.registerClick('ABC123', undefined);
 
       expect(res.clickCount).toBe('1');
       expect(res.touchpointId).toBeUndefined();
@@ -646,7 +709,7 @@ describe('MarketingJourneysService', () => {
       });
 
       await expect(
-        d.service.registerClick('ABC123', undefined, undefined),
+        d.service.registerClick('ABC123', undefined),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
@@ -655,7 +718,7 @@ describe('MarketingJourneysService', () => {
       d.journeysRepo.findTrackedLinkByCodeForUpdate.mockResolvedValue(null);
 
       await expect(
-        d.service.registerClick('NOPE', undefined, undefined),
+        d.service.registerClick('NOPE', undefined),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
@@ -858,6 +921,532 @@ describe('MarketingJourneysService', () => {
           actor as any,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+  });
+  describe('aislamiento por tenant (MKT-01)', () => {
+    const createDto = {
+      code: 'JRN-X',
+      name: 'X',
+      entryTrigger: 'EVENT' as const,
+    };
+
+    it('crea el journey en el tenant del contexto y rechaza un tenantId ajeno', async () => {
+      const d = build();
+      d.journeysRepo.findJourneyByCode.mockResolvedValue(null);
+      d.journeysRepo.createJourney.mockReturnValue({ id: 'jrn-1' });
+
+      await d.service.createJourney(createDto, actor);
+      expect(d.journeysRepo.createJourney).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ tenantId: TENANT }),
+      );
+
+      d.journeysRepo.createJourney.mockClear();
+      await expect(
+        d.service.createJourney(
+          { ...createDto, tenantId: OTHER_TENANT },
+          actor,
+        ),
+      ).rejects.toMatchObject({ reason: MarketingErrorReason.TENANT_MISMATCH });
+      expect(d.journeysRepo.createJourney).not.toHaveBeenCalled();
+    });
+
+    it('sin tenant activo no se crea nada (TENANT_REQUIRED)', async () => {
+      const d = build();
+      await expect(d.raw.createJourney(createDto, actor)).rejects.toMatchObject(
+        { details: { reason: 'TENANT_REQUIRED' } },
+      );
+      expect(d.journeysRepo.createJourney).not.toHaveBeenCalled();
+    });
+
+    it('rechaza un segmento de entrada de otro tenant con el mismo 404 que uno inexistente', async () => {
+      const d = build();
+      const dto = {
+        ...createDto,
+        entryTrigger: 'SEGMENT' as const,
+        entrySegmentId: JOURNEY,
+      };
+      d.journeysRepo.findJourneyByCode.mockResolvedValue(null);
+      d.campaignsRepo.findSegmentById.mockResolvedValue({
+        id: JOURNEY,
+        tenantId: OTHER_TENANT,
+      });
+      const foreign = await d.service
+        .createJourney(dto, actor)
+        .catch((e: any) => e);
+      d.campaignsRepo.findSegmentById.mockResolvedValue(null);
+      const missing = await d.service
+        .createJourney(dto, actor)
+        .catch((e: any) => e);
+
+      expect(foreign.getStatus()).toBe(404);
+      expect(foreign.getResponse()).toEqual(missing.getResponse());
+      expect(foreign.reason).toBe(MarketingErrorReason.SEGMENT_NOT_AVAILABLE);
+      expect(d.journeysRepo.createJourney).not.toHaveBeenCalled();
+    });
+
+    it('traduce la violación de unicidad de la base a un 409 estable', async () => {
+      const d = build();
+      d.journeysRepo.findJourneyByCode.mockResolvedValue(null);
+      d.em.transactional.mockRejectedValue(
+        new UniqueConstraintViolationException(new Error('duplicate key')),
+      );
+      const attempt = d.service.createJourney(createDto, actor);
+      await expect(attempt).rejects.toBeInstanceOf(ConflictException);
+      await expect(attempt).rejects.toMatchObject({
+        reason: MarketingErrorReason.CODE_ALREADY_EXISTS,
+      });
+    });
+
+    it('un journey de otro tenant no admite pasos ni activación (404 uniforme)', async () => {
+      const d = build();
+      d.journeysRepo.findJourneyForUpdate.mockResolvedValue({
+        id: JOURNEY,
+        tenantId: OTHER_TENANT,
+        stateConceptId: CONCEPTS.JOURNEY_DRAFT,
+      });
+      const steps = await d.service
+        .addSteps(
+          JOURNEY,
+          { steps: [{ stepCode: 'W', stepType: 'EXIT' as const }] },
+          actor,
+        )
+        .catch((e: any) => e);
+      const activate = await d.service
+        .activateJourney(JOURNEY, { cohort: [] }, actor)
+        .catch((e: any) => e);
+      d.journeysRepo.findJourneyForUpdate.mockResolvedValue(null);
+      const missing = await d.service
+        .activateJourney(JOURNEY, { cohort: [] }, actor)
+        .catch((e: any) => e);
+
+      for (const error of [steps, activate]) {
+        expect(error.getStatus()).toBe(404);
+        expect(error.getResponse()).toEqual(missing.getResponse());
+        expect(error.reason).toBe(MarketingErrorReason.JOURNEY_NOT_AVAILABLE);
+      }
+      expect(d.journeysRepo.createJourneyStep).not.toHaveBeenCalled();
+      expect(d.journeysRepo.createEnrollment).not.toHaveBeenCalled();
+      expect(d.journeysRepo.findJourneyForUpdate).toHaveBeenCalledWith(
+        d.tx,
+        TENANT,
+        JOURNEY,
+      );
+    });
+
+    it('una plantilla de otro tenant en un paso SEND responde igual que una inexistente', async () => {
+      const d = build();
+      const dto = {
+        steps: [
+          {
+            stepCode: 'S1',
+            stepType: 'SEND' as const,
+            contentTemplateId: TEMPLATE,
+          },
+        ],
+      };
+      d.journeysRepo.findJourneyForUpdate.mockResolvedValue({
+        id: JOURNEY,
+        tenantId: TENANT,
+        stateConceptId: CONCEPTS.JOURNEY_DRAFT,
+      });
+      d.campaignsRepo.findPublishedTemplate.mockResolvedValue({
+        id: TEMPLATE,
+        tenantId: OTHER_TENANT,
+      });
+      const foreign = await d.service
+        .addSteps(JOURNEY, dto, actor)
+        .catch((e: any) => e);
+      d.campaignsRepo.findPublishedTemplate.mockResolvedValue(null);
+      const missing = await d.service
+        .addSteps(JOURNEY, dto, actor)
+        .catch((e: any) => e);
+
+      expect(foreign).toBeInstanceOf(PreconditionFailedException);
+      expect(foreign.getResponse()).toEqual(missing.getResponse());
+      expect(d.journeysRepo.createJourneyStep).not.toHaveBeenCalled();
+    });
+
+    it('una inscripción cuyo journey es de otro tenant no avanza ni sale (404 uniforme)', async () => {
+      const d = build();
+      const enrollment = activeEnrollment();
+      d.journeysRepo.findEnrollmentForUpdateSkipLocked.mockResolvedValue(
+        enrollment,
+      );
+      d.journeysRepo.findEnrollmentForUpdate.mockResolvedValue(enrollment);
+      // El repositorio acotado por tenant no encuentra el journey ajeno.
+      d.journeysRepo.findJourneyById.mockResolvedValue(null);
+
+      const advance = await d.service
+        .advanceEnrollment(ENROLLMENT, {}, actor)
+        .catch((e: any) => e);
+      const exit = await d.service
+        .exitEnrollment(ENROLLMENT, { reason: 'GOAL' as const }, actor)
+        .catch((e: any) => e);
+      d.journeysRepo.findEnrollmentForUpdate.mockResolvedValue(null);
+      const missing = await d.service
+        .exitEnrollment(ENROLLMENT, { reason: 'GOAL' as const }, actor)
+        .catch((e: any) => e);
+
+      for (const error of [advance, exit]) {
+        expect(error.getStatus()).toBe(404);
+        expect(error.getResponse()).toEqual(missing.getResponse());
+        expect(error.reason).toBe(
+          MarketingErrorReason.ENROLLMENT_NOT_AVAILABLE,
+        );
+      }
+      expect(enrollment.statusConceptId).toBe(CONCEPTS.ENROLLMENT_ACTIVE);
+      expect(d.journeysRepo.findJourneyById).toHaveBeenCalledWith(
+        d.tx,
+        TENANT,
+        JOURNEY,
+      );
+    });
+
+    it('defensa en profundidad: un journey ajeno devuelto por el repositorio también se rechaza', async () => {
+      const d = build();
+      const enrollment = activeEnrollment();
+      d.journeysRepo.findEnrollmentForUpdate.mockResolvedValue(enrollment);
+      d.journeysRepo.findJourneyById.mockResolvedValue({
+        id: JOURNEY,
+        tenantId: OTHER_TENANT,
+      });
+      await expect(
+        d.service.exitEnrollment(
+          ENROLLMENT,
+          { reason: 'GOAL' as const },
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        reason: MarketingErrorReason.ENROLLMENT_NOT_AVAILABLE,
+      });
+      expect(enrollment.statusConceptId).toBe(CONCEPTS.ENROLLMENT_ACTIVE);
+    });
+
+    it('la salida de una inscripción propia no toca la campaña de otro tenant', async () => {
+      const d = build();
+      const enrollment = activeEnrollment();
+      d.journeysRepo.findEnrollmentForUpdate.mockResolvedValue(enrollment);
+      d.campaignsRepo.findCampaignByIdOrAdRef.mockResolvedValue(null);
+
+      await expect(
+        d.service.exitEnrollment(
+          ENROLLMENT,
+          { reason: 'GOAL' as const, campaignId: CAMPAIGN },
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        reason: MarketingErrorReason.CAMPAIGN_NOT_AVAILABLE,
+      });
+      expect(
+        d.campaignsRepo.findCampaignMemberByRefForUpdate,
+      ).not.toHaveBeenCalled();
+      expect(enrollment.statusConceptId).toBe(CONCEPTS.ENROLLMENT_ACTIVE);
+    });
+
+    it('no crea un enlace sobre una campaña de otro tenant', async () => {
+      const d = build();
+      d.journeysRepo.findTrackedLinkByCode.mockResolvedValue(null);
+      d.campaignsRepo.findCampaignByIdOrAdRef.mockResolvedValue(null);
+      await expect(
+        d.service.createTrackedLink(
+          {
+            code: 'LNK',
+            targetUrl: 'https://clinic.example/x',
+            campaignId: CAMPAIGN,
+          },
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        reason: MarketingErrorReason.CAMPAIGN_NOT_AVAILABLE,
+      });
+      expect(d.journeysRepo.createTrackedLink).not.toHaveBeenCalled();
+    });
+
+    describe('touchpoints y atribución', () => {
+      const dto = {
+        memberType: 'CONTACT' as const,
+        memberRefId: MEMBER,
+        touchType: 'CLICK' as const,
+        channel: 'EMAIL' as const,
+      };
+
+      it('rechaza un touchpoint cuya campaña, journey, enlace o plantilla son de otro tenant', async () => {
+        const d = build();
+        d.campaignsRepo.findCampaignByIdOrAdRef.mockResolvedValue(null);
+        await expect(
+          d.service.recordTouchpoint({ ...dto, campaignId: CAMPAIGN }, actor),
+        ).rejects.toMatchObject({
+          reason: MarketingErrorReason.CAMPAIGN_NOT_AVAILABLE,
+        });
+
+        d.journeysRepo.findJourneyById.mockResolvedValue(null);
+        await expect(
+          d.service.recordTouchpoint({ ...dto, journeyId: JOURNEY }, actor),
+        ).rejects.toMatchObject({
+          reason: MarketingErrorReason.JOURNEY_NOT_AVAILABLE,
+        });
+
+        d.journeysRepo.findTrackedLinkById.mockResolvedValue({
+          id: 'lnk-1',
+          campaignId: CAMPAIGN,
+        });
+        d.journeysRepo.findJourneyById.mockResolvedValue({
+          id: JOURNEY,
+          tenantId: TENANT,
+        });
+        await expect(
+          d.service.recordTouchpoint(
+            { ...dto, journeyId: JOURNEY, trackedLinkId: 'lnk-1' },
+            actor,
+          ),
+        ).rejects.toMatchObject({
+          reason: MarketingErrorReason.TRACKED_LINK_NOT_AVAILABLE,
+        });
+
+        d.campaignsRepo.findTemplateById.mockResolvedValue(null);
+        await expect(
+          d.service.recordTouchpoint(
+            { ...dto, journeyId: JOURNEY, contentTemplateId: TEMPLATE },
+            actor,
+          ),
+        ).rejects.toMatchObject({
+          reason: MarketingErrorReason.TEMPLATE_NOT_AVAILABLE,
+        });
+        expect(d.journeysRepo.createTouchpoint).not.toHaveBeenCalled();
+      });
+
+      it('la atribución sólo cuenta touchpoints del tenant', async () => {
+        const d = build();
+        d.journeysRepo.findTouchpointsInWindow.mockResolvedValue([
+          { id: 'tp-own' },
+          { id: 'tp-foreign' },
+        ]);
+        d.journeysRepo.keepTouchpointsOfTenant.mockImplementation(
+          async (_tx: any, _tenant: string, list: any[]) =>
+            list.filter((t) => t.id === 'tp-own'),
+        );
+        d.journeysRepo.findAttributionTouches.mockResolvedValue([]);
+
+        const res = await d.service.computeAttribution(
+          {
+            conversionRefType: 'order' as const,
+            conversionRefId: CONVERSION,
+            memberType: 'CONTACT' as const,
+            memberRefId: MEMBER,
+            windowFrom: '2026-01-01T00:00:00Z',
+            windowTo: '2026-02-01T00:00:00Z',
+            model: 'LINEAR' as const,
+          },
+          actor,
+        );
+
+        expect(res.touches.map((t) => t.touchpointId)).toEqual(['tp-own']);
+        expect(d.journeysRepo.keepTouchpointsOfTenant).toHaveBeenCalledWith(
+          d.tx,
+          TENANT,
+          expect.any(Array),
+        );
+      });
+
+      it('recalcular no borra el reparto que otro tenant calculó para la misma conversión', async () => {
+        const d = build();
+        const own = { id: 'at-own', marketingTouchpointId: 'tp-own' };
+        const foreign = {
+          id: 'at-foreign',
+          marketingTouchpointId: 'tp-foreign',
+        };
+        d.journeysRepo.findTouchpointsInWindow.mockResolvedValue([
+          { id: 'tp-own' },
+        ]);
+        d.journeysRepo.findAttributionTouches.mockResolvedValue([own, foreign]);
+        d.journeysRepo.keepTouchpointsOfTenant.mockImplementation(
+          async (_tx: any, _tenant: string, list: any[]) =>
+            list.filter((t) => t.id === 'tp-own'),
+        );
+
+        const res = await d.service.computeAttribution(
+          {
+            conversionRefType: 'order' as const,
+            conversionRefId: CONVERSION,
+            memberType: 'CONTACT' as const,
+            memberRefId: MEMBER,
+            windowFrom: '2026-01-01T00:00:00Z',
+            windowTo: '2026-02-01T00:00:00Z',
+            model: 'LAST_TOUCH' as const,
+          },
+          actor,
+        );
+
+        expect(res.replaced).toBe(1);
+        expect(d.journeysRepo.removeAttributionTouches).toHaveBeenCalledWith(
+          d.tx,
+          [own],
+        );
+      });
+
+      it('si todos los touchpoints del miembro son de otros tenants no hay atribución', async () => {
+        const d = build();
+        d.journeysRepo.findTouchpointsInWindow.mockResolvedValue([
+          { id: 'tp-foreign' },
+        ]);
+        d.journeysRepo.keepTouchpointsOfTenant.mockResolvedValue([]);
+        await expect(
+          d.service.computeAttribution(
+            {
+              conversionRefType: 'order' as const,
+              conversionRefId: CONVERSION,
+              memberType: 'CONTACT' as const,
+              memberRefId: MEMBER,
+              windowFrom: '2026-01-01T00:00:00Z',
+              windowTo: '2026-02-01T00:00:00Z',
+              model: 'LINEAR' as const,
+            },
+            actor,
+          ),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+        expect(d.journeysRepo.createAttributionTouch).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('token de destinatario del enlace público (MKT-03)', () => {
+    const link: any = {
+      id: 'lnk-1',
+      campaignId: CAMPAIGN,
+      code: 'ABC123',
+      targetUrl: 'https://clinic.example/x',
+      clickCount: '0',
+      stateConceptId: CONCEPTS.STATE_ACTIVE,
+    };
+
+    it('emite un token ligado al destinatario de la campaña y el click lo resuelve en el servidor', async () => {
+      const d = build();
+      d.journeysRepo.findTrackedLinkById.mockResolvedValue(link);
+      d.campaignsRepo.findCampaignMemberByRef.mockResolvedValue({ id: 'cm-1' });
+
+      const issued = await d.service.issueTrackedLinkToken('lnk-1', {
+        memberType: 'PATIENT' as const,
+        memberRefId: MEMBER,
+      });
+      expect(issued.expiresAt.getTime()).toBeGreaterThan(Date.now());
+
+      d.journeysRepo.findTrackedLinkByCodeForUpdate.mockResolvedValue({
+        ...link,
+      });
+      d.journeysRepo.createTouchpoint.mockReturnValue({ id: 'tp-1' });
+      const res = await d.service.registerClick('ABC123', issued.token);
+
+      expect(res.touchpointId).toBe('tp-1');
+      expect(d.journeysRepo.createTouchpoint).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          memberRefId: MEMBER,
+          memberTypeConceptId: CONCEPTS.MEMBER_PATIENT,
+          trackedLinkId: 'lnk-1',
+        }),
+      );
+    });
+
+    it('un destinatario que no es miembro de la campaña no recibe token', async () => {
+      const d = build();
+      d.journeysRepo.findTrackedLinkById.mockResolvedValue(link);
+      d.campaignsRepo.findCampaignMemberByRef.mockResolvedValue(null);
+      await expect(
+        d.service.issueTrackedLinkToken('lnk-1', {
+          memberType: 'CONTACT' as const,
+          memberRefId: MEMBER,
+        }),
+      ).rejects.toMatchObject({
+        reason: MarketingErrorReason.RECIPIENT_NOT_AVAILABLE,
+      });
+    });
+
+    it('un enlace ajeno, inexistente o sin campaña responden igual al emitir', async () => {
+      const d = build();
+      const dto = { memberType: 'CONTACT' as const, memberRefId: MEMBER };
+      d.journeysRepo.findTrackedLinkById.mockResolvedValue(link);
+      d.campaignsRepo.findCampaignByIdOrAdRef.mockResolvedValue(null);
+      const foreign = await d.service
+        .issueTrackedLinkToken('lnk-1', dto)
+        .catch((e: any) => e);
+      d.journeysRepo.findTrackedLinkById.mockResolvedValue(null);
+      const missing = await d.service
+        .issueTrackedLinkToken('lnk-1', dto)
+        .catch((e: any) => e);
+      d.journeysRepo.findTrackedLinkById.mockResolvedValue({
+        ...link,
+        campaignId: undefined,
+      });
+      const orphan = await d.service
+        .issueTrackedLinkToken('lnk-1', dto)
+        .catch((e: any) => e);
+
+      for (const error of [foreign, orphan]) {
+        expect(error.getStatus()).toBe(404);
+        expect(error.getResponse()).toEqual(missing.getResponse());
+      }
+      expect(foreign.reason).toBe(
+        MarketingErrorReason.TRACKED_LINK_NOT_AVAILABLE,
+      );
+      expect(d.campaignsRepo.findCampaignMemberByRef).not.toHaveBeenCalled();
+    });
+
+    it('rechaza un token forjado, manipulado o de otro enlace sin contar el click', async () => {
+      const d = build();
+      const click = { ...link };
+      d.journeysRepo.findTrackedLinkByCodeForUpdate.mockResolvedValue(click);
+      const valid = issueLinkToken(
+        'lnk-1',
+        { memberType: 'CONTACT', memberRefId: MEMBER },
+        3600,
+      ).token;
+      const [payload] = valid.split('.');
+      const forgedPayload = Buffer.from(
+        JSON.stringify({
+          m: 'PATIENT',
+          r: '88888888-8888-8888-8888-888888888888',
+          e: 4102444800,
+        }),
+      ).toString('base64url');
+      const otherLink = issueLinkToken(
+        'lnk-2',
+        { memberType: 'CONTACT', memberRefId: MEMBER },
+        3600,
+      ).token;
+
+      for (const token of [
+        'no-es-un-token',
+        `${forgedPayload}.${valid.split('.')[1]}`,
+        `${payload}.${'0'.repeat(64)}`,
+        otherLink,
+      ]) {
+        await expect(
+          d.service.registerClick('ABC123', token),
+        ).rejects.toMatchObject({
+          reason: MarketingErrorReason.TRACKED_LINK_TOKEN_INVALID,
+        });
+      }
+      expect(click.clickCount).toBe('0');
+      expect(d.journeysRepo.createTouchpoint).not.toHaveBeenCalled();
+    });
+
+    it('rechaza un token vencido', async () => {
+      const d = build();
+      d.journeysRepo.findTrackedLinkByCodeForUpdate.mockResolvedValue({
+        ...link,
+      });
+      const { token } = issueLinkToken(
+        'lnk-1',
+        { memberType: 'CONTACT', memberRefId: MEMBER },
+        60,
+        new Date(Date.now() - 3_600_000),
+      );
+      await expect(
+        d.service.registerClick('ABC123', token),
+      ).rejects.toMatchObject({
+        reason: MarketingErrorReason.TRACKED_LINK_TOKEN_INVALID,
+      });
     });
   });
 });

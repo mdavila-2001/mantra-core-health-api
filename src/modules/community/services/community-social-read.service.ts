@@ -24,11 +24,16 @@ import {
   SOCIAL_OBJECT_CONCEPT_BY_CODE,
 } from '../community.concepts';
 import { CommunityVisibilityService } from './community-visibility.service';
+import {
+  CommunityOrganizationStaffService,
+  ORGANIZATION_PROFILE_TARGET_TYPES,
+} from './community-organization-staff.service';
 import { KIND_BY_TARGET_CONCEPT } from './community-public.service';
 import {
   CommunityEngagementService,
   type PostEngagement,
 } from './community-engagement.service';
+import { CommunityErrorReason } from '../community.error-reasons';
 import { FileUploadService } from '../../common/services';
 import type { FileContentDto } from '../../common/dto';
 import type {
@@ -43,6 +48,7 @@ import type {
   FollowPageDto,
   BookmarkPageDto,
   BlockPageDto,
+  OrganizationShowcasesDto,
 } from '../dto';
 import type { Comments, SocialPosts } from '../entities';
 
@@ -78,6 +84,7 @@ export class CommunitySocialReadService {
    * @param engagement - Recuento de reacciones y comentarios de la página.
    * @param files - Bytes de un adjunto, una vez que este servicio autorizó verlo.
    * @param logger - Logger estructurado.
+   * @param organizationStaff - Quién atiende la vitrina de una organización.
    */
   constructor(
     private readonly em: EntityManager,
@@ -93,8 +100,65 @@ export class CommunitySocialReadService {
     private readonly engagement: CommunityEngagementService,
     private readonly files: FileUploadService,
     private readonly logger: PinoLogger,
+    private readonly organizationStaff: CommunityOrganizationStaffService,
   ) {
     this.logger.setContext(CommunitySocialReadService.name);
+  }
+
+  /**
+   * Las vitrinas de organización con las que la sesión puede atender la
+   * mensajería (`GET /community/profiles/organization-showcases/me`).
+   *
+   * ## Por qué hace falta
+   *
+   * El personal de una farmacia escribe como su vitrina, pero no tenía cómo
+   * encontrarla sin un pedido en la mano: el cliente adivinaba el slug
+   * `organization-<tenantId>`, que no es el de las farmacias sembradas
+   * (`farmacia-*`) ni resuelve una vitrina privada.
+   *
+   * ## La misma regla que `canAttend`
+   *
+   * Vitrinas **de tenant** (`target_id` = un tenant en el que el actor tiene
+   * membresía ACTIVA OWNER, ADMIN o STAFF), **activas**, de tipo organización,
+   * y las de farmacia sólo con `PHARMACY_STAFF`. Que la vitrina sea de tenant
+   * lo garantiza la construcción: los `target_id` buscados salen de
+   * `tenant_memberships.tenant_id`, FK a `directory.tenants`. La vitrina de
+   * SupportAdmin o de una unidad diagnóstica nunca entra.
+   *
+   * Dos consultas, sin importar cuántas organizaciones: membresías de la
+   * persona y vitrinas de esos tenants. Sólo lee; no expone nada que la
+   * sesión no pueda ya usar en la mensajería.
+   *
+   * @param actor - La sesión.
+   */
+  async listAttendableOrganizationShowcases(
+    actor: AuthenticatedUser,
+  ): Promise<OrganizationShowcasesDto> {
+    const em = this.em.fork();
+    const types = ORGANIZATION_PROFILE_TARGET_TYPES.filter((type) =>
+      this.organizationStaff.mayAttendTargetType(actor, type),
+    );
+    if (types.length === 0) return { items: [] };
+    const tenantIds = await this.organizationStaff.attendableTenantIds(
+      em,
+      actor,
+    );
+    const profiles = await this.profilesRepo.listByTargetsTypesAndStatus(em, {
+      targetIds: tenantIds,
+      targetTypeConceptIds: types,
+      statusConceptId: CONCEPTS.STATE_ACTIVE,
+    });
+    return {
+      items: profiles.map((profile) => ({
+        profileId: profile.id,
+        slug: profile.slug,
+        displayName: profile.displayName,
+        avatarFileId: profile.avatarFileId ?? null,
+        targetTypeConceptId: profile.targetTypeConceptId,
+        kind:
+          KIND_BY_TARGET_CONCEPT[profile.targetTypeConceptId] ?? 'ORGANIZATION',
+      })),
+    };
   }
 
   /**
@@ -130,7 +194,11 @@ export class CommunitySocialReadService {
     const em = this.em.fork();
     const profile = await this.profilesRepo.findBySlug(em, slug);
     if (!profile) {
-      throw new ResourceNotFoundException('Perfil no encontrado', { slug });
+      throw new ResourceNotFoundException(
+        'Perfil no encontrado',
+        { slug },
+        CommunityErrorReason.PROFILE_NOT_FOUND_BY_SLUG,
+      );
     }
     return this.getProfile(profile.id, actor);
   }
@@ -142,9 +210,13 @@ export class CommunitySocialReadService {
     const em = this.em.fork();
     const profile = await this.profilesRepo.findById(em, profileId);
     if (!profile)
-      throw new ResourceNotFoundException('Perfil público no encontrado', {
-        profileId,
-      });
+      throw new ResourceNotFoundException(
+        'Perfil público no encontrado',
+        {
+          profileId,
+        },
+        CommunityErrorReason.PUBLIC_PROFILE_NOT_FOUND,
+      );
 
     // Un bloqueo responde 404 y no 403, por lo mismo que en las publicaciones:
     // «existe pero no podés verlo» ya confirma que ese perfil existe, y quien
@@ -157,9 +229,13 @@ export class CommunitySocialReadService {
       actorProfileId &&
       (await this.visibility.isBlockedBetween(em, actorProfileId, profile.id))
     )
-      throw new ResourceNotFoundException('Perfil público no encontrado', {
-        profileId,
-      });
+      throw new ResourceNotFoundException(
+        'Perfil público no encontrado',
+        {
+          profileId,
+        },
+        CommunityErrorReason.PUBLIC_PROFILE_BLOCKED,
+      );
 
     const [badges, prestige] = await Promise.all([
       this.profilesRepo.listBadgesBySubject(
@@ -302,9 +378,13 @@ export class CommunitySocialReadService {
     const em = this.em.fork();
     const post = await this.postsRepo.findById(em, postId);
     if (!post)
-      throw new ResourceNotFoundException('Publicación no encontrada', {
-        postId,
-      });
+      throw new ResourceNotFoundException(
+        'Publicación no encontrada',
+        {
+          postId,
+        },
+        CommunityErrorReason.POST_NOT_FOUND,
+      );
 
     const actorProfileId = await this.visibility.resolveActorProfileId(
       em,
@@ -313,9 +393,13 @@ export class CommunitySocialReadService {
     );
     const canView = await this.visibility.canViewPost(em, post, actorProfileId);
     if (!canView)
-      throw new ResourceNotFoundException('Publicación no encontrada', {
-        postId,
-      });
+      throw new ResourceNotFoundException(
+        'Publicación no encontrada',
+        {
+          postId,
+        },
+        CommunityErrorReason.POST_NOT_VISIBLE,
+      );
 
     const [media, hashtags, mentions, engagement] = await Promise.all([
       this.postsRepo.listMedia(em, post.id),
@@ -450,14 +534,22 @@ export class CommunitySocialReadService {
     const em = this.em.fork();
     const attachment = await this.commentsRepo.findMediaByFileId(em, fileId);
     if (!attachment) {
-      throw new ResourceNotFoundException('Archivo no encontrado', { fileId });
+      throw new ResourceNotFoundException(
+        'Archivo no encontrado',
+        { fileId },
+        CommunityErrorReason.COMMENT_MEDIA_NOT_FOUND,
+      );
     }
     const comment = await this.commentsRepo.findById(em, attachment.commentId);
     if (
       !comment ||
       comment.commentableTypeConceptId !== SOCIAL_OBJECT_CONCEPT_BY_CODE.POST
     ) {
-      throw new ResourceNotFoundException('Archivo no encontrado', { fileId });
+      throw new ResourceNotFoundException(
+        'Archivo no encontrado',
+        { fileId },
+        CommunityErrorReason.COMMENT_MEDIA_INVALID_PARENT,
+      );
     }
 
     const actorProfileId = await this.visibility.resolveActorProfileId(
@@ -467,11 +559,7 @@ export class CommunitySocialReadService {
     );
     // Mismo 404 que «no existe»: a quien enumera fileIds ajenos no se le
     // confirma si el archivo existe pero el post es privado.
-    await this.assertPostVisible(
-      em,
-      comment.commentableRefId,
-      actorProfileId,
-    );
+    await this.assertPostVisible(em, comment.commentableRefId, actorProfileId);
 
     return this.files.downloadPublicMedia(fileId);
   }
@@ -685,9 +773,13 @@ export class CommunitySocialReadService {
   ): Promise<void> {
     const post = await this.postsRepo.findById(em, postId);
     if (!post || !(await this.visibility.canViewPost(em, post, actorProfileId)))
-      throw new ResourceNotFoundException('Publicación no encontrada', {
-        postId,
-      });
+      throw new ResourceNotFoundException(
+        'Publicación no encontrada',
+        {
+          postId,
+        },
+        CommunityErrorReason.POST_NOT_VISIBLE,
+      );
   }
 
   /** Clave de continuación `(createdAt, id)` de un cursor, si es válida. */

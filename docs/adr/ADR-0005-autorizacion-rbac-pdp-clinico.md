@@ -46,5 +46,5 @@ grant). Para el resto de operaciones administrativas, solo RBAC.
 [autorización](../api/authorization.md).
 
 ## Plan de revisión
-Revisar en el modelo de amenazas (Fase 13) el impacto de `SUPERADMIN` y si se justifica
-un mecanismo de aprobación dual para su uso.
+Revisar si el uso de `SUPERADMIN` justifica un mecanismo de aprobación dual (ver el
+[modelo de amenazas](../security/threat-model.md)).

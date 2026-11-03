@@ -34,6 +34,7 @@ import { ESPECIFICAS_1 } from './especificas-1.mjs';
 import { ESPECIFICAS_2 } from './especificas-2.mjs';
 import { ESPECIFICAS_3 } from './especificas-3.mjs';
 import { ESPECIFICAS_NNAC } from './especificas-nnac.mjs';
+import { ESPECIFICAS_INTL, MEJORAS } from './mejoras-intl.mjs';
 import { CLINICAS } from './fichas-clinicas.mjs';
 import { FUENTES } from './fuentes.mjs';
 import {
@@ -54,6 +55,7 @@ const ESPECIFICAS = [
   ...ESPECIFICAS_2,
   ...ESPECIFICAS_3,
   ...ESPECIFICAS_NNAC,
+  ...ESPECIFICAS_INTL,
 ];
 const FECHA_ESPECIFICAS = '2026-10-02';
 
@@ -248,7 +250,17 @@ const INSTRUMENTOS = [
   ['Beers/STOPP', 'criterios de Beers/STOPP'],
 ];
 
+/**
+ * Los campos de la ficha con su ampliación internacional, si tiene una
+ * (`mejoras-intl.mjs`).
+ */
 function camposDe(ficha) {
+  const base = camposBase(ficha);
+  const mejora = MEJORAS[ficha.code];
+  return mejora === undefined ? base : mejora.aplicar(base);
+}
+
+function camposBase(ficha) {
   const especifica = ESPECIFICAS.find((e) => e.code === ficha.code);
   if (especifica !== undefined) return especifica.campos().flat(Infinity);
   if (ficha.code === 'ODONTO_ODONTOGRAMA_OMS') {
@@ -280,9 +292,22 @@ function camposDe(ficha) {
 }
 
 function nota(ficha, campos) {
+  const mejora = MEJORAS[ficha.code];
+  const propia = notaBase(ficha, campos);
+  return mejora === undefined ? propia : `${propia} ${mejora.nota}`;
+}
+
+/**
+ * Fichas que nacieron después de la v2, ya con secciones y listas cerradas: su
+ * nota es la del `.json`, sin el agregado que cuenta la reorganización v2.
+ */
+const POSTERIORES_A_V2 = new Set(['TRANSV_CITA_MEDICA']);
+
+function notaBase(ficha, campos) {
   // Las específicas nacen en v2: su nota es la propia, sin el agregado.
   const especifica = ESPECIFICAS.find((e) => e.code === ficha.code);
   if (especifica !== undefined) return especifica.nota;
+  if (POSTERIORES_A_V2.has(ficha.code)) return ficha.provenance.note ?? '';
   const previa = (ficha.provenance.note ?? '').split(` ${MARCA_V2}:`)[0].trim();
   const texto = campos
     .map(
@@ -302,7 +327,20 @@ function nota(ficha, campos) {
   return previa === '' ? agregado : `${previa} ${agregado}`;
 }
 
-const VERSION_V2 = { ODONTO_ODONTOGRAMA_OMS: 3 };
+const VERSION_V2 = {
+  ODONTO_ODONTOGRAMA_OMS: 3,
+  // 2026-10-28: consentimiento DIRIGIDO; sin subir la versión el seed no lo propaga.
+  TRANSV_CONSENTIMIENTO_INFORMADO: 3,
+  // 2026-10-29: nace en versión 1, ya con el formato v2.
+  TRANSV_CITA_MEDICA: 1,
+};
+
+/**
+ * Fichas escritas a mano (v4.2.0), fuera del generador: el script las lee y
+ * las deja como están. Sin esta lista `--check` fallaba porque no tienen
+ * constructor.
+ */
+const A_MANO = new Set(['PSIQ_AUDIT_TAMIZAJE', 'PSIQ_SRQ20_TAMIZAJE']);
 
 async function main() {
   const soloComprobar = process.argv.includes('--check');
@@ -323,6 +361,10 @@ async function main() {
   for (const archivo of archivos.sort()) {
     const ficha = JSON.parse(readFileSync(archivo, 'utf8'));
     vistos.add(ficha.code);
+    if (A_MANO.has(ficha.code)) {
+      totalCampos += ficha.fields.length;
+      continue;
+    }
     const campos = camposDe(ficha);
 
     const tipoPrevio = new Map(ficha.fields.map((c) => [c.code, c.dataType]));
@@ -340,9 +382,12 @@ async function main() {
       ...ficha,
       kind: claseDe(ficha.code),
       name: nombreDe(ficha, claseDe(ficha.code)),
-      version: esEspecifica
-        ? ficha.version
-        : Math.max(ficha.version, VERSION_V2[ficha.code] ?? 2),
+      version: Math.max(
+        esEspecifica
+          ? ficha.version
+          : Math.max(ficha.version, VERSION_V2[ficha.code] ?? 2),
+        MEJORAS[ficha.code]?.version ?? 0,
+      ),
       provenance: { ...ficha.provenance, note: nota(ficha, campos) },
       fields: campos,
     };
@@ -362,6 +407,10 @@ async function main() {
       else writeFileSync(archivo, texto);
     }
   }
+
+  const sinFicha = Object.keys(MEJORAS).filter((code) => !vistos.has(code));
+  if (sinFicha.length > 0)
+    throw new Error(`Mejoras sin ficha: ${sinFicha.join(', ')}`);
 
   const sinArchivo = [
     ...Object.keys(CONSTRUCTORES),

@@ -27,6 +27,14 @@ import {
 import { AUTHZ } from '../authz.concepts';
 import { EFFECT_CONCEPT } from './authz-policies.service';
 import { SCOPE_CONCEPT } from './authz-catalog.service';
+import { AuthzErrorReason } from '../authz.error-reasons';
+import { ROLE_CONCEPT_BY_CODE } from '../../iam/domain/role-mapping';
+
+/** Códigos que sólo pueden existir como rol de plataforma, nunca creados vía API. */
+const RESERVED_ROLE_CODES: ReadonlySet<string> = new Set([
+  ...Object.keys(ROLE_CONCEPT_BY_CODE),
+  'SYSTEM',
+]);
 
 const BASE_ROLE_CONCEPT: Record<BaseRole, string> = {
   CLINICAL: AUTHZ.BASE_ROLE_CLINICAL,
@@ -99,19 +107,38 @@ export class AuthzRolesService {
       { operation: 'authz.role.create', code: dto.code },
       'Creating role',
     );
+    // Los códigos de plataforma viajan en el claim `roles` del token y hay
+    // lógica que los trata como privilegio (`SUPERADMIN` es comodín de RBAC,
+    // `SYSTEM` habilita el barrido entre tenants). Un rol de negocio con uno de
+    // esos códigos, asignado a un usuario, lo elevaría.
+    if (RESERVED_ROLE_CODES.has(dto.code.trim().toUpperCase())) {
+      throw new ConflictException(
+        'El código de rol está reservado por la plataforma',
+        { code: dto.code },
+        AuthzErrorReason.ROLE_CODE_RESERVED,
+      );
+    }
     return this.em.transactional(async (tx) => {
       const clash = await this.rolesRepo.findByCode(tx, dto.code);
       if (clash)
-        throw new ConflictException('Ya existe un rol con ese código', {
-          code: dto.code,
-        });
+        throw new ConflictException(
+          'Ya existe un rol con ese código',
+          {
+            code: dto.code,
+          },
+          AuthzErrorReason.ROLE_CODE_ALREADY_EXISTS,
+        );
 
       if (dto.parentRoleId) {
         const parent = await this.rolesRepo.findById(tx, dto.parentRoleId);
         if (!parent) {
-          throw new ResourceNotFoundException('El rol padre no existe', {
-            parentRoleId: dto.parentRoleId,
-          });
+          throw new ResourceNotFoundException(
+            'El rol padre no existe',
+            {
+              parentRoleId: dto.parentRoleId,
+            },
+            AuthzErrorReason.ROLE_PARENT_NOT_FOUND,
+          );
         }
       }
 
@@ -158,7 +185,11 @@ export class AuthzRolesService {
     return this.em.transactional(async (tx) => {
       const role = await this.rolesRepo.findById(tx, roleId);
       if (!role)
-        throw new ResourceNotFoundException('Rol no encontrado', { roleId });
+        throw new ResourceNotFoundException(
+          'Rol no encontrado',
+          { roleId },
+          AuthzErrorReason.ROLE_NOT_FOUND,
+        );
 
       // Valida que cada permiso exista antes de aplicar.
       for (const item of dto.permissions) {
@@ -167,9 +198,13 @@ export class AuthzRolesService {
           item.permissionId,
         );
         if (!permission) {
-          throw new ResourceNotFoundException('Permiso no encontrado', {
-            permissionId: item.permissionId,
-          });
+          throw new ResourceNotFoundException(
+            'Permiso no encontrado',
+            {
+              permissionId: item.permissionId,
+            },
+            AuthzErrorReason.ROLE_PERMISSION_NOT_FOUND,
+          );
         }
       }
 
@@ -217,7 +252,11 @@ export class AuthzRolesService {
     return this.em.transactional(async (tx) => {
       const role = await this.rolesRepo.findById(tx, roleId);
       if (!role)
-        throw new ResourceNotFoundException('Rol no encontrado', { roleId });
+        throw new ResourceNotFoundException(
+          'Rol no encontrado',
+          { roleId },
+          AuthzErrorReason.ROLE_NOT_FOUND,
+        );
 
       for (const field of dto.fields) {
         // Regla de negocio (check DB): can_write=true exige can_read=true.
@@ -225,6 +264,7 @@ export class AuthzRolesService {
           throw new PreconditionFailedException(
             'canWrite=true requiere canRead=true',
             { entity: field.entity, columnName: field.columnName },
+            AuthzErrorReason.ROLE_FIELD_PERMISSION_WRITE_REQUIRES_READ,
           );
         }
       }

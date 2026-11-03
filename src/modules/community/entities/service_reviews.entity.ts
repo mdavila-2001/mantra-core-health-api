@@ -123,4 +123,10 @@ export class ServiceReviews {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  /**
+   * Identificador asociado a verified crm case.
+   */
+  @Property({ fieldName: 'verified_crm_case_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  verifiedCrmCaseId?: string;
 }

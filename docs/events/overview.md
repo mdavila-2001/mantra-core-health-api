@@ -8,8 +8,7 @@
 
 ## Por qué `messaging` "desbloquea a los demás"
 
-Cita textual del propio README del módulo: *"Los 17 módulos de la tanda A declaran sus eventos en
-el 'Pendiente' de su README porque no había dónde publicarlos. `OutboxService` es esa API."* —
+`OutboxService` es la API con la que un módulo publica sus eventos de dominio:
 `messaging` no es un dominio de negocio más entre 60: es la infraestructura de eventos que el
 resto del sistema consume.
 

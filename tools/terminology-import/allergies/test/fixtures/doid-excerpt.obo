@@ -1,0 +1,67 @@
+format-version: 1.2
+data-version: releases/2026-09-30/doid.obo
+
+[Term]
+id: DOID:1205
+name: allergic disease
+def: "An immune system disease that is an exaggerated immune response to allergens, such as insect venom, dust mites, pollen, pet dander, drugs or some foods." [url:http\://en.wikipedia.org/wiki/Allergy] {comment="ls:IEDB"}
+subset: NCIthesaurus
+synonym: "allergic hypersensitivity disease" EXACT []
+synonym: "hypersensitivity" EXACT []
+synonym: "hypersensitivity reaction type I disease" EXACT []
+xref: ICD10CM:T78.40
+xref: MESH:D006967
+xref: NCI:C3114
+xref: SNOMEDCT_US_2025_09_01:257550005
+xref: UMLS_CUI:C0020517
+is_a: DOID:2914 ! immune system disease
+property_value: OBI:9991118 "allergic disease" xsd:string
+
+[Term]
+id: DOID:4481
+name: allergic rhinitis
+alt_id: DOID:12089
+alt_id: DOID:14030
+alt_id: DOID:8241
+alt_id: DOID:8242
+def: "A rhinitis that is an allergic inflammation and irritation of the nasal airways involving sneezing, runny nose, nasal congestion, itching and tearing of the eyes caused by exposure to an allergen such as pollen, dust, mold, animal dander and droppings of cockroaches or house dust mites." [url:http\://en.wikipedia.org/wiki/Allergic_rhinitis, url:http\://en.wikipedia.org/wiki/Rhinitis, url:https\://www.merriam-webster.com/dictionary/allergic%20rhinitis#medicalDictionary] {comment="ls:IEDB"}
+subset: NCIthesaurus
+synonym: "atopic rhinitis" EXACT []
+synonym: "hay fever" EXACT []
+synonym: "Non-seasonal allergic rhinitis" EXACT []
+synonym: "Perenial allergic rhinitis" EXACT []
+synonym: "pollenosis" EXACT []
+synonym: "seasonal allergic rhinitis" EXACT []
+xref: EFO:0003956
+xref: MIM:607154
+xref: NCI:C34987
+xref: SNOMEDCT_US_2025_09_01:38103000
+xref: UMLS_CUI:C0002103
+is_a: DOID:0060496 ! respiratory allergy
+is_a: DOID:4483 ! rhinitis
+property_value: skos:exactMatch "MESH:D065631" xsd:string
+
+[Term]
+id: DOID:2914
+name: immune system disease
+def: "A disease of anatomical entity that is located_in the immune system." [url:http\://en.wikipedia.org/wiki/Immune_system]
+subset: DO_AGR_slim
+subset: DO_CFDE_slim
+subset: DO_FlyBase_slim
+subset: DO_GXD_slim
+subset: DO_MGI_slim
+xref: EFO:0000540
+xref: ICD10CM:D89.9
+xref: ICD9CM:279.9
+xref: SNOMEDCT_US_2025_09_01:154782004
+xref: UMLS_CUI:C0041806
+is_a: DOID:7 ! disease of anatomical entity
+
+[Term]
+id: DOID:0060496
+name: respiratory allergy
+def: "An allergic disease that is located_in the respiratory tract." [url:https\://www.ncbi.nlm.nih.gov/pubmed/25006500, url:https\://www.ncbi.nlm.nih.gov/pubmed/28187789]
+subset: DO_IEDB_slim
+synonym: "airway allergy" EXACT []
+is_a: DOID:1205 ! allergic disease
+

@@ -28,7 +28,9 @@ import {
   FileVersionsRepository,
   FilesRepository,
 } from '../repositories';
-import { canActorReadOwnFile } from './file-access';
+import { canActorMutateOwnFile, canActorReadOwnFile } from './file-access';
+import { InsufficientRoleException } from '../../../common/errors/domain.exception';
+import { CommonErrorReason } from '../common.error-reasons';
 import { FileVersions, Files } from '../entities';
 import {
   CLINICAL_RECORD_OWNER_TYPES,
@@ -78,10 +80,10 @@ const LINKED_FILES_PAGE_SIZE = 100;
  * qué es esto», y ninguna pantalla decide nada grave a partir de la categoría.
  */
 function categoryFromConcept(conceptId: string): FileCategory {
-  const encontrada = Object.values(FileCategory).find(
-    (valor) => CONCEPTS[`FILE_CATEGORY_${valor}`] === conceptId,
+  const found = Object.values(FileCategory).find(
+    (value) => CONCEPTS[`FILE_CATEGORY_${value}`] === conceptId,
   );
-  return encontrada ?? FileCategory.DOCUMENT;
+  return found ?? FileCategory.DOCUMENT;
 }
 
 /**
@@ -93,10 +95,10 @@ function categoryFromConcept(conceptId: string): FileCategory {
  * Entre equivocarse de más y equivocarse de menos, acá se elige de más.
  */
 function sensitivityFromConcept(conceptId: string): FileSensitivity {
-  const encontrada = Object.values(FileSensitivity).find(
-    (valor) => CONCEPTS[`SENSITIVITY_${valor}`] === conceptId,
+  const found = Object.values(FileSensitivity).find(
+    (value) => CONCEPTS[`SENSITIVITY_${value}`] === conceptId,
   );
-  return encontrada ?? FileSensitivity.PHI;
+  return found ?? FileSensitivity.PHI;
 }
 
 /**
@@ -259,6 +261,7 @@ export class FilesService {
       if (!file) {
         throw new ResourceNotFoundException('Archivo no encontrado');
       }
+      this.assertCanMutateFile(file, actor);
 
       const nextNumber =
         (await this.fileVersionsRepo.maxVersionNumber(tx, fileId)) + 1;
@@ -328,6 +331,11 @@ export class FilesService {
         dto.storageUri,
         { contentHash: dto.contentHash, sizeBytes: dto.sizeBytes },
       );
+      const file = await this.filesRepo.findById(tx, fileId);
+      if (!file) {
+        throw new ResourceNotFoundException('Archivo no encontrado');
+      }
+      this.assertCanMutateFile(file, actor);
       const source = await this.fileVersionsRepo.findByFileAndId(
         tx,
         fileId,
@@ -418,6 +426,7 @@ export class FilesService {
       if (!file) {
         throw new ResourceNotFoundException('Archivo no encontrado');
       }
+      this.assertCanMutateFile(file, actor);
 
       const link = this.fileLinksRepo.create(tx, {
         fileId,
@@ -507,7 +516,7 @@ export class FilesService {
    * @returns Las versiones pendientes, de la más antigua a la más nueva.
    */
   async listPendingScan(limit: number): Promise<PendingScanResponseDto> {
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const versions = await this.fileVersionsRepo.findPendingScan(em, limit);
     return {
       items: versions.map((version) => ({
@@ -537,6 +546,7 @@ export class FilesService {
       if (!file) {
         throw new ResourceNotFoundException('Archivo no encontrado');
       }
+      this.assertCanMutateFile(file, actor);
 
       if (file.legalHoldUntil && file.legalHoldUntil.getTime() > Date.now()) {
         this.logger.warn(
@@ -561,6 +571,37 @@ export class FilesService {
       );
       return { id: file.id, deletedAt };
     });
+  }
+
+  /**
+   * AUTHZ-T03 · política única de escritura sobre un archivo ya cargado.
+   *
+   * Se llama después de cargar el archivo y antes de mutar nada, dentro de la
+   * transacción. Quien no puede ni leerlo recibe el mismo 404 que un id
+   * inexistente (no se confirma que el uuid existe); un revisor de sólo lectura
+   * sí sabe que existe y recibe 403 con `FILE_MUTATION_NOT_ALLOWED`.
+   */
+  private assertCanMutateFile(
+    file: Pick<Files, 'id' | 'createdByUserId'>,
+    actor: AuthenticatedUser,
+  ): void {
+    if (canActorMutateOwnFile(file, actor)) return;
+    this.logger.warn(
+      {
+        operation: 'common.file.mutation_denied',
+        fileId: file.id,
+        actorId: actor.id,
+      },
+      'File mutation denied',
+    );
+    if (!canActorReadOwnFile(file, actor)) {
+      throw new ResourceNotFoundException('Archivo no encontrado');
+    }
+    throw new InsufficientRoleException(
+      'No tiene permiso para modificar este archivo',
+      undefined,
+      CommonErrorReason.FILE_MUTATION_NOT_ALLOWED,
+    );
   }
 
   private assertLifecycleWired(): void {
@@ -608,7 +649,7 @@ export class FilesService {
       'Generating download URL',
     );
 
-    const forked = this.em.fork();
+    const forked = this.em.fork({ keepTransactionContext: true });
 
     const file = await this.filesRepo.findById(forked, fileId);
     if (!file) {
@@ -786,7 +827,7 @@ export class FilesService {
       'Listing linked files',
     );
 
-    const forked = this.em.fork();
+    const forked = this.em.fork({ keepTransactionContext: true });
     const ownerTypeConceptId = CONCEPTS[`OWNER_${ownerType}`];
 
     const links = await this.fileLinksRepo.findByOwner(
@@ -796,7 +837,7 @@ export class FilesService {
       LINKED_FILES_PAGE_SIZE,
     );
 
-    const vivos: { link: (typeof links)[number]; file: Files }[] = [];
+    const live: { link: (typeof links)[number]; file: Files }[] = [];
     for (const link of links) {
       const file = await this.filesRepo.findById(forked, link.fileId);
       if (
@@ -806,17 +847,17 @@ export class FilesService {
       ) {
         continue;
       }
-      vivos.push({ link, file });
+      live.push({ link, file });
     }
 
     // N-01: con `actor` (el listado genérico) se exige propiedad o rol de
     // revisión por archivo. Sin él, lo llama una ruta que ya autorizó por el
     // contexto (p. ej. la historia del paciente): ahí «puede verlo» no significa
     // «lo subió».
-    const visibles = actor
-      ? vivos.filter(({ file }) => canActorReadOwnFile(file, actor))
-      : vivos;
-    if (vivos.length > 0 && visibles.length === 0) {
+    const visible = actor
+      ? live.filter(({ file }) => canActorReadOwnFile(file, actor))
+      : live;
+    if (live.length > 0 && visible.length === 0) {
       throw new ForbiddenException(
         'No tiene acceso a los adjuntos de este recurso',
       );
@@ -825,15 +866,15 @@ export class FilesService {
     // 5.2 · AC-5.2-2: el tipo y el tamaño viven en la versión vigente. Se
     // resuelven **todas juntas, en una consulta**, y no una por adjunto: diez
     // adjuntos no pueden costar diez lecturas más de las que ya costaban.
-    const versiones = await this.fileVersionsRepo.findByIds(
+    const versions = await this.fileVersionsRepo.findByIds(
       forked,
-      visibles
+      visible
         .map(({ file }) => file.currentVersionId)
         .filter((id): id is string => typeof id === 'string'),
     );
-    const versionPorId = new Map(versiones.map((v) => [v.id, v]));
+    const versionById = new Map(versions.map((v) => [v.id, v]));
 
-    const items: LinkedFileResponseDto[] = visibles.map(({ link, file }) => ({
+    const items: LinkedFileResponseDto[] = visible.map(({ link, file }) => ({
       linkId: link.id,
       ownerId: link.ownerId,
       ownerType,
@@ -843,7 +884,7 @@ export class FilesService {
         categoryFromConcept(file.categoryConceptId),
         sensitivityFromConcept(file.sensitivityConceptId),
         file.currentVersionId
-          ? versionPorId.get(file.currentVersionId)
+          ? versionById.get(file.currentVersionId)
           : undefined,
       ),
     }));
@@ -882,15 +923,15 @@ export class FilesService {
     sensitivity: FileSensitivity,
     version?: Pick<FileVersions, 'fileId' | 'mimeType' | 'sizeBytes'>,
   ): FileResponseDto {
-    const vigente = version?.fileId === file.id ? version : undefined;
+    const current = version?.fileId === file.id ? version : undefined;
     return {
       id: file.id,
       currentVersionId: file.currentVersionId,
       originalName: file.originalName,
-      ...(vigente
+      ...(current
         ? {
-            mimeType: vigente.mimeType,
-            sizeBytes: Number(vigente.sizeBytes),
+            mimeType: current.mimeType,
+            sizeBytes: Number(current.sizeBytes),
           }
         : {}),
       category,

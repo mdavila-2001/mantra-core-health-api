@@ -8,11 +8,55 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
+import {
+  PreconditionFailedException,
+  ResourceNotFoundException,
+  runWithTenant,
+} from '../../../common';
 import type { GraphNodes } from '../entities';
 import { GraphProjectionService } from './graph-projection.service';
 
 const actor = { id: 'user-1', roles: ['SYSTEM'] } as any;
 const TENANT_ID = '11111111-1111-1111-1111-111111111111';
+
+const OTHER_TENANT = '99999999-9999-9999-9999-999999999999';
+
+/**
+ * Afirma que la promesa falla como "no existe": 404, `GRAPH_RESOURCE_OUT_OF_SCOPE` y sin `details`.
+ *
+ * @param promise - Operación bajo prueba.
+ */
+async function expectOutOfScope(promise: Promise<unknown>): Promise<void> {
+  const error: any = await promise.then(
+    () => undefined,
+    (e: unknown) => e,
+  );
+  expect(error).toBeInstanceOf(ResourceNotFoundException);
+  expect(error.getStatus()).toBe(404);
+  expect(error.code).toBe('NOT_FOUND');
+  expect(error.reason).toBe('GRAPH_RESOURCE_OUT_OF_SCOPE');
+  expect(error.details).toBeUndefined();
+}
+
+/**
+ * Ejecuta cada método del servicio dentro del contexto de tenant, como lo hace
+ * `TenantContextInterceptor` en una petición real.
+ *
+ * @param service - Servicio bajo prueba.
+ * @param tenantId - Tenant activo del contexto.
+ * @returns Proxy que fija el tenant en cada llamada.
+ */
+function scoped<S extends object>(service: S, tenantId: string): S {
+  return new Proxy(service, {
+    get(target, key) {
+      const value = (target as any)[key];
+      return typeof value === 'function'
+        ? (...args: unknown[]) =>
+            runWithTenant(tenantId, () => value.apply(target, args))
+        : value;
+    },
+  });
+}
 const NODE_A = '22222222-2222-2222-2222-222222222222';
 const NODE_B = '33333333-3333-3333-3333-333333333333';
 const EDGE_ID = '44444444-4444-4444-4444-444444444444';
@@ -82,7 +126,16 @@ function build() {
     outbox as any,
     logger as any,
   );
-  return { service, em, tx, projectionRepo, analyticsRepo, outbox, logger };
+  return {
+    service: scoped(service, TENANT_ID),
+    rawService: service,
+    em,
+    tx,
+    projectionRepo,
+    analyticsRepo,
+    outbox,
+    logger,
+  };
 }
 
 const NODE_DTO = {
@@ -305,6 +358,7 @@ describe('GraphProjectionService', () => {
       const d = build();
       d.projectionRepo.findDefinitionById.mockResolvedValue({
         id: DEF_ID,
+        tenantId: TENANT_ID,
         state: 'draft',
       });
 
@@ -565,6 +619,93 @@ describe('GraphProjectionService', () => {
       await expect(
         d.service.reconcileSourceVersion(DTO, actor),
       ).rejects.toThrow(/no está proyectado/);
+    });
+  });
+
+  describe('alcance por tenant (GRAPH-01)', () => {
+    it('operador de A no arranca una corrida sobre la definición de B', async () => {
+      const d = build();
+      d.projectionRepo.findDefinitionById.mockResolvedValue({
+        id: DEF_ID,
+        tenantId: OTHER_TENANT,
+        state: 'active',
+      });
+      await expectOutOfScope(d.service.startProjectionRun(DEF_ID, {}, actor));
+      expect(d.projectionRepo.findRunningRunForUpdate).not.toHaveBeenCalled();
+      expect(d.projectionRepo.createRun).not.toHaveBeenCalled();
+    });
+
+    it('no avanza ni publica evento sobre la corrida de B', async () => {
+      const d = build();
+      const run = {
+        id: RUN_ID,
+        tenantId: OTHER_TENANT,
+        status: 'running',
+        sourceCheckpoint: '100',
+        nodesWritten: '10',
+        edgesWritten: '5',
+      };
+      d.projectionRepo.findRunForUpdate.mockResolvedValue(run);
+      await expectOutOfScope(
+        d.service.advanceProjectionRun(
+          RUN_ID,
+          { sourceCheckpoint: '200', finalBatch: true } as any,
+          actor,
+        ),
+      );
+      expect(run).toMatchObject({ status: 'running', sourceCheckpoint: '100' });
+      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+    });
+
+    it('no expira la arista de B ni invalida sus rutas', async () => {
+      const d = build();
+      const edge = {
+        edgeId: EDGE_ID,
+        tenantId: OTHER_TENANT,
+        lifecycleState: 'active',
+        confidenceScore: 0.8,
+      };
+      d.projectionRepo.findEdgeForUpdate.mockResolvedValue(edge);
+      await expectOutOfScope(
+        d.service.expireEdge(EDGE_ID, { evidenceHash: 'h' } as any, actor),
+      );
+      expect(edge.lifecycleState).toBe('active');
+      expect(d.projectionRepo.createEvidence).not.toHaveBeenCalled();
+      expect(
+        d.analyticsRepo.deleteCachedPathsTouchingEdges,
+      ).not.toHaveBeenCalled();
+      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+    });
+
+    it('un UUID inexistente responde igual que uno de otro tenant', async () => {
+      const foreign = build();
+      foreign.projectionRepo.findRunForUpdate.mockResolvedValue({
+        id: RUN_ID,
+        tenantId: OTHER_TENANT,
+        status: 'running',
+      });
+      const missing = build();
+      missing.projectionRepo.findRunForUpdate.mockResolvedValue(null);
+      const a: any = await foreign.service
+        .advanceProjectionRun(RUN_ID, { sourceCheckpoint: '1' } as any, actor)
+        .catch((e: unknown) => e);
+      const b: any = await missing.service
+        .advanceProjectionRun(RUN_ID, { sourceCheckpoint: '1' } as any, actor)
+        .catch((e: unknown) => e);
+      expect(a.getResponse()).toEqual(b.getResponse());
+      expect(a.getStatus()).toBe(b.getStatus());
+    });
+
+    it('sin tenant en el contexto la mutación por UUID se rechaza (412)', async () => {
+      const d = build();
+      await expect(
+        d.rawService.advanceProjectionRun(
+          RUN_ID,
+          { sourceCheckpoint: '1' } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.projectionRepo.findRunForUpdate).not.toHaveBeenCalled();
     });
   });
 });

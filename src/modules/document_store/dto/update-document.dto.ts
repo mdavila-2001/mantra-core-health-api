@@ -7,6 +7,7 @@ import {
   Matches,
   Min,
 } from 'class-validator';
+import { MaxJsonSize } from '../../../common/validators/max-json-size.validator';
 
 const DOCUMENT_TYPE_RE = /^[a-z][a-z0-9_.-]{1,60}$/;
 
@@ -21,12 +22,14 @@ export class UpdateDocumentDto {
   /**
    * Identificador asociado a tenant.
    */
-  @ApiProperty({
-    description: 'Tenant propietario del documento',
+  @ApiPropertyOptional({
+    description:
+      'Se ignora como fuente de verdad: el tenant es el activo (X-Tenant-Id). Si se envía y no coincide, responde 404',
     format: 'uuid',
   })
+  @IsOptional()
   @IsUUID()
-  tenantId!: string;
+  tenantId?: string;
 
   /**
    * Valor de expected version mantenido por la instancia.
@@ -49,6 +52,7 @@ export class UpdateDocumentDto {
   })
   @IsOptional()
   @IsObject()
+  @MaxJsonSize(900 * 1024)
   payload?: Record<string, unknown>;
 
   /**

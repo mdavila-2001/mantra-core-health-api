@@ -6,25 +6,25 @@ La API los compone en `src/app.module.ts`. El catálogo de entidades, índices y
 
 ## Cifras medidas
 
-Medido el 2026-10-09 sobre `origin/dev` (`886a1471`). Los números envejecen: repetí los comandos desde la raíz del repo antes de citarlos.
+Medido el 2026-10-09 sobre `origin/test` (`687a7c20`). Los números envejecen: repetí los comandos desde la raíz del repo antes de citarlos.
 
 <!--
   find src/modules -mindepth 1 -maxdepth 1 -type d | wc -l      -> 70
-  find src/modules -name '*.entity.ts' | wc -l                  -> 1262
-  ls src/modules/*/README.md | wc -l                            -> 70
+  find src/modules -name '*.entity.ts' | wc -l                  -> 1261
+  ls src/modules/*/README.md | wc -l                            -> 68
   ls src/worker-*.ts | wc -l                                    -> 24
   find src/worker/jobs -name '*.job.ts' | wc -l                 -> 38
-  find src -name '*.spec.ts' | wc -l                            -> 813
+  find src -name '*.spec.ts' | wc -l                            -> 806
 -->
 
 | Qué | Cantidad |
 |---|---|
 | Directorios de módulo en `src/modules/` | 70 |
-| Entidades MikroORM (`*.entity.ts`, todas dentro de `src/modules/`) | 1 262 |
+| Entidades MikroORM (`*.entity.ts`, todas dentro de `src/modules/`) | 1 261 |
 | `README.md` de módulo | 70 |
 | Entry points de worker (`src/worker-*.ts`) | 24 |
 | Archivos de job (`src/worker/jobs/**/*.job.ts`) | 38 |
-| Archivos de spec unitario bajo `src/` | 813 |
+| Archivos de spec unitario bajo `src/` | 806 |
 
 La cifra de workers de otros documentos (por ejemplo, el `CLAUDE.md` raíz) puede diferir; la que cuenta es el número de `src/worker-*.ts`, y que un entry point exista no implica que esté activo en un despliegue (véase [workers](../worker/README.md)).
 
@@ -122,4 +122,4 @@ La cifra de workers de otros documentos (por ejemplo, el `CLAUDE.md` raíz) pued
 - Los valores cerrados suelen referenciar `terminology.catalog_concepts`; consultá el catálogo antes de agregar un enum o una columna.
 - Para pruebas, usá el spec dirigido de la unidad con `corepack yarn test --runInBand <carpeta>`. La integración puede requerir servicios reales; véase [test/integration](../../test/integration/README.md).
 
-El [informe maestro de revisión](../../docs/revision-backend-2026-10-04/README.md) indica qué módulos fueron realmente leídos y cuáles siguen pendientes. Este índice no es una certificación de seguridad, contrato o esquema.
+Este índice no es una certificación de seguridad, contrato o esquema.

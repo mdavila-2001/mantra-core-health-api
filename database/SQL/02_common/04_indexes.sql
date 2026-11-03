@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 02 · schema common
+-- SALUD v4.2.83 · módulo 02 · schema common
 -- Generado de diagram_02_common.puml — NO editar a mano.
 
 
@@ -22,6 +22,8 @@ CREATE INDEX IF NOT EXISTS "ix_identifiers_created_by_user_id" ON "common"."iden
 
 CREATE INDEX IF NOT EXISTS "ix_identifiers_updated_by_user_id" ON "common"."identifiers" ("updated_by_user_id");
 
+CREATE UNIQUE INDEX IF NOT EXISTS "uq_identifiers_national_id_normalized" ON "common"."identifiers" (coalesce(nullif(regexp_replace(upper(regexp_replace(value, '[\s.-]+', '', 'g')), '^0+', ''), ''), '0')) WHERE type_concept_id = '595e7a3d-ba37-5014-9a72-635363b94864' AND state_concept_id = '38a1d301-f40d-5b17-a695-5e6d605f8b19' AND owner_type_concept_id = '350a0150-c27c-5241-b5d8-78daa13bed34' AND valid_to IS NULL;
+
 CREATE INDEX IF NOT EXISTS "ix_contact_points_owner_type_concept_id" ON "common"."contact_points" ("owner_type_concept_id");
 
 CREATE INDEX IF NOT EXISTS "ix_contact_points_system_concept_id" ON "common"."contact_points" ("system_concept_id");
@@ -40,6 +42,8 @@ CREATE INDEX IF NOT EXISTS "ix_addresses_type_concept_id" ON "common"."addresses
 
 CREATE INDEX IF NOT EXISTS "ix_addresses_administrative_area_concept_id" ON "common"."addresses" ("administrative_area_concept_id");
 
+CREATE INDEX IF NOT EXISTS "ix_addresses_administrative_area_2_concept_id" ON "common"."addresses" ("administrative_area_2_concept_id");
+
 CREATE INDEX IF NOT EXISTS "ix_addresses_municipality_concept_id" ON "common"."addresses" ("municipality_concept_id");
 
 CREATE INDEX IF NOT EXISTS "ix_addresses_country_concept_id" ON "common"."addresses" ("country_concept_id");
@@ -49,6 +53,10 @@ CREATE INDEX IF NOT EXISTS "ix_addresses_created_by_user_id" ON "common"."addres
 CREATE INDEX IF NOT EXISTS "ix_addresses_updated_by_user_id" ON "common"."addresses" ("updated_by_user_id");
 
 -- OMITIDO "gist_addresses_location" (geography_point) gist: columna(s) ['geography_point'] no existe(n) — requiere PostGIS/otro tipo.
+
+CREATE INDEX IF NOT EXISTS "ix_addresses_owner_current" ON "common"."addresses" ("owner_type_concept_id", "owner_id") WHERE valid_to IS NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS "uq_addresses_owner_preferred" ON "common"."addresses" ("owner_type_concept_id", "owner_id") WHERE is_preferred AND valid_to IS NULL;
 
 CREATE INDEX IF NOT EXISTS "ix_files_tenant_id" ON "common"."files" ("tenant_id");
 

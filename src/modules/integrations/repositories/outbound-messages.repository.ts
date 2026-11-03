@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { OutboundMessages } from '../entities';
-import { createdBy } from '../../../common';
+import { createdBy, touch } from '../../../common';
 
 /** Datos para encolar un mensaje saliente (UC-12-05). */
 export interface CreateOutboundData {
@@ -96,12 +96,17 @@ export class OutboundMessagesRepository {
     return em.findOne(OutboundMessages, { idempotencyKey });
   }
 
-  /** Correlación de callbacks entrantes (UC-12-10). */
-  findByCorrelationId(
+  /**
+   * Correlación de callbacks entrantes (UC-12-10). Sólo alcanza mensajes de la
+   * misma conexión que recibió el callback: callback → conexión → mensaje
+   * saliente. Un `correlationId` de otra conexión no correlaciona.
+   */
+  findByCorrelationIdInConnection(
     em: EntityManager,
+    connectionId: string,
     correlationId: string,
   ): Promise<OutboundMessages | null> {
-    return em.findOne(OutboundMessages, { correlationId });
+    return em.findOne(OutboundMessages, { connectionId, correlationId });
   }
 
   /**
@@ -133,20 +138,30 @@ export class OutboundMessagesRepository {
   }
 
   /**
-   * Circuit breaker (UC-12-12): retiene en lote los mensajes QUEUED de una
-   * conexión (QUEUED -> HELD). Devuelve el número de filas afectadas.
+   * Circuit breaker (UC-12-12): retiene los mensajes QUEUED de una conexión
+   * (QUEUED -> HELD). Devuelve cuántos retuvo.
+   *
+   * Pasa por la unidad de trabajo del ORM y no por un `nativeUpdate`: así cada
+   * fila lleva su `row_version` y el espejo sella su revisión en
+   * `outbound_messages_history`, que antes quedaba vacía para este cambio.
    */
-  holdQueuedForConnection(
+  async holdQueuedForConnection(
     em: EntityManager,
     connectionId: string,
     queuedStateConceptId: string,
     heldStateConceptId: string,
+    actorUserId: string,
   ): Promise<number> {
-    return em.nativeUpdate(
-      OutboundMessages,
-      { connectionId, statusConceptId: queuedStateConceptId },
-      { statusConceptId: heldStateConceptId },
-    );
+    const queued = await em.find(OutboundMessages, {
+      connectionId,
+      statusConceptId: queuedStateConceptId,
+    });
+    for (const message of queued) {
+      message.statusConceptId = heldStateConceptId;
+      touch(message, actorUserId);
+    }
+    await em.flush();
+    return queued.length;
   }
 
   /**
@@ -162,12 +177,14 @@ export class OutboundMessagesRepository {
     queuedStatusConceptId: string,
     now: Date,
     limit: number,
+    connectionIds?: string[],
   ): Promise<OutboundMessages[]> {
     return em.find(
       OutboundMessages,
       {
         statusConceptId: queuedStatusConceptId,
         scheduledAt: { $lte: now },
+        ...(connectionIds ? { connectionId: { $in: connectionIds } } : {}),
       },
       { orderBy: { scheduledAt: 'ASC' }, limit },
     );
@@ -182,10 +199,14 @@ export class OutboundMessagesRepository {
     em: EntityManager,
     failedStatusConceptId: string,
     limit: number,
+    connectionIds?: string[],
   ): Promise<OutboundMessages[]> {
     return em.find(
       OutboundMessages,
-      { statusConceptId: failedStatusConceptId },
+      {
+        statusConceptId: failedStatusConceptId,
+        ...(connectionIds ? { connectionId: { $in: connectionIds } } : {}),
+      },
       { orderBy: { updatedAt: 'ASC' }, limit },
     );
   }

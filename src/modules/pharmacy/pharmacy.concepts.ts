@@ -62,6 +62,27 @@ export const { seeds: PHARMACY_CONCEPT_SEEDS, ids: PHARM } =
       display: 'On-site dispensing',
     },
 
+    // --- Turnos de guardia (pharmacy_on_call_shifts, P34) ---
+    // El UUID de ON_CALL_SHIFT_ACTIVE está escrito en el EXCLUDE del modelo
+    // (diagram_33, `ex_pharmacy_on_call_shifts_site_overlap`): renombrar la clave
+    // lo cambia y la base dejaría de impedir el solape.
+    ON_CALL_SHIFT_ACTIVE: {
+      code: 'PHARM_ON_CALL_SHIFT_ACTIVE',
+      display: 'On-call shift active',
+    },
+    ON_CALL_SHIFT_CANCELLED: {
+      code: 'PHARM_ON_CALL_SHIFT_CANCELLED',
+      display: 'On-call shift cancelled',
+    },
+    ON_CALL_SOURCE_PHARMACY: {
+      code: 'PHARM_ON_CALL_SOURCE_PHARMACY',
+      display: 'On-call shift declared by the pharmacy',
+    },
+    ON_CALL_SOURCE_PLATFORM: {
+      code: 'PHARM_ON_CALL_SOURCE_PLATFORM',
+      display: 'On-call shift loaded by the platform on behalf of the pharmacy',
+    },
+
     // --- Productos (pharmacy_products.status_concept_id) ---
     PRODUCT_ACTIVE: {
       code: 'PHARM_PRODUCT_ACTIVE',
@@ -70,6 +91,11 @@ export const { seeds: PHARMACY_CONCEPT_SEEDS, ids: PHARM } =
     PRODUCT_RETIRED: {
       code: 'PHARM_PRODUCT_RETIRED',
       display: 'Pharmacy product retired',
+    },
+    // P47: borrador, sólo lo ve la farmacia; no sale en ninguna lectura pública.
+    PRODUCT_DRAFT: {
+      code: 'PHARM_PRODUCT_DRAFT',
+      display: 'Pharmacy product draft',
     },
 
     // --- Identificadores de producto (pharmacy_product_identifiers) ---

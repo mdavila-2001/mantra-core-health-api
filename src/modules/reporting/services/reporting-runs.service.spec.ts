@@ -14,7 +14,31 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  runWithTenant,
 } from '../../../common';
+import { ReportingErrorReason } from '../reporting.error-reasons';
+
+const TENANT_A = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+const TENANT_B = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+
+/**
+ * Devuelve el servicio de modo que cada llamada corra con `tenantId` como
+ * tenant activo, igual que lo deja el `TenantContextInterceptor`.
+ *
+ * @param service - Servicio bajo prueba.
+ * @param tenantId - Tenant del contexto de la petición.
+ * @returns Un proxy que ejecuta cada método dentro de `runWithTenant`.
+ */
+function inTenant<T extends object>(service: T, tenantId: string): T {
+  return new Proxy(service, {
+    get(target, property, receiver) {
+      const value = Reflect.get(target, property, receiver);
+      if (typeof value !== 'function') return value;
+      return (...args: unknown[]) =>
+        runWithTenant(tenantId, () => value.apply(target, args));
+    },
+  });
+}
 
 const actor = { id: 'user-1', roles: ['REPORTING_ADMIN'] };
 const DEFINITION = '11111111-1111-1111-1111-111111111111';
@@ -61,7 +85,13 @@ function build() {
     definitionsRepo as any,
     logger as any,
   );
-  return { service, tx, runsRepo, definitionsRepo };
+  return {
+    service: inTenant(service, TENANT_A),
+    raw: service,
+    tx,
+    runsRepo,
+    definitionsRepo,
+  };
 }
 
 /**
@@ -73,6 +103,7 @@ function build() {
 function activeDefinition(overrides: Record<string, unknown> = {}): any {
   return {
     id: DEFINITION,
+    tenantId: TENANT_A,
     currentVersion: 2,
     stateConceptId: CONCEPTS.REPORT_STATE_ACTIVE,
     defaultOutputFormatConceptId: CONCEPTS.OUTPUT_CSV,
@@ -206,6 +237,7 @@ describe('ReportingRunsService', () => {
     ) {
       const exec: any = {
         id: EXECUTION,
+        tenantId: TENANT_A,
         statusConceptId: CONCEPTS.EXECUTION_RUNNING,
         ...execution,
       };
@@ -347,6 +379,7 @@ describe('ReportingRunsService', () => {
     function dueSchedule(overrides: Record<string, unknown> = {}): any {
       return {
         id: SCHEDULE,
+        tenantId: TENANT_A,
         reportDefinitionId: DEFINITION,
         outputFormatConceptId: CONCEPTS.OUTPUT_PDF,
         parametersJson: { desde: '2026-01-01' },
@@ -435,6 +468,7 @@ describe('ReportingRunsService', () => {
     function succeededExecution(overrides: Record<string, unknown> = {}): any {
       return {
         id: EXECUTION,
+        tenantId: TENANT_A,
         statusConceptId: CONCEPTS.EXECUTION_SUCCEEDED,
         scheduleId: SCHEDULE,
         ...overrides,
@@ -550,6 +584,7 @@ describe('ReportingRunsService', () => {
     function wire(d: ReturnType<typeof build>) {
       d.runsRepo.findScheduleById.mockResolvedValue({
         id: SCHEDULE,
+        tenantId: TENANT_A,
         stateConceptId: CONCEPTS.SCHEDULE_STATE_ACTIVE,
       });
     }
@@ -603,6 +638,7 @@ describe('ReportingRunsService', () => {
       const d = build();
       d.runsRepo.findScheduleById.mockResolvedValue({
         id: SCHEDULE,
+        tenantId: TENANT_A,
         stateConceptId: CONCEPTS.SCHEDULE_SUSPENDED,
       });
 
@@ -622,6 +658,7 @@ describe('ReportingRunsService', () => {
     function failedExecution(overrides: Record<string, unknown> = {}): any {
       return {
         id: EXECUTION,
+        tenantId: TENANT_A,
         reportDefinitionId: DEFINITION,
         statusConceptId: CONCEPTS.EXECUTION_FAILED,
         errorText: 'timeout',
@@ -706,6 +743,324 @@ describe('ReportingRunsService', () => {
       await expect(
         d.service.retryExecution(EXECUTION, {}, actor as any),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+});
+
+/** Aserciones del 404 uniforme de REP-01. */
+async function expectOutOfScope(promise: Promise<unknown>, message: string) {
+  const error = await promise.then(
+    () => null,
+    (e: unknown) => e,
+  );
+  expect(error).toBeInstanceOf(ResourceNotFoundException);
+  const exception = error as ResourceNotFoundException;
+  expect(exception.getStatus()).toBe(404);
+  expect(exception.message).toBe(message);
+  expect(exception.reason).toBe(
+    ReportingErrorReason.REPORTING_RESOURCE_OUT_OF_SCOPE,
+  );
+  expect(exception.details).toBeUndefined();
+  return exception;
+}
+
+describe('ReportingRunsService · alcance de tenant (REP-01)', () => {
+  const system = { id: 'worker-1', roles: ['SYSTEM'] };
+  const execution = (overrides: Record<string, unknown> = {}): any => ({
+    id: EXECUTION,
+    tenantId: TENANT_B,
+    reportDefinitionId: DEFINITION,
+    statusConceptId: CONCEPTS.EXECUTION_FAILED,
+    ...overrides,
+  });
+
+  describe('createExecution / createSchedule', () => {
+    it('la ejecución y la programación heredan el tenant de la definición, no el del cuerpo', async () => {
+      const d = build();
+      d.definitionsRepo.findDefinitionById.mockResolvedValue(
+        activeDefinition({ tenantId: TENANT_A }),
+      );
+      d.definitionsRepo.findActiveVersion.mockResolvedValue({ id: VERSION });
+      d.definitionsRepo.findParametersByDefinition.mockResolvedValue([]);
+      d.runsRepo.createExecution.mockReturnValue({ id: EXECUTION });
+      d.runsRepo.createSchedule.mockReturnValue({ id: SCHEDULE });
+
+      await d.service.createExecution(
+        DEFINITION,
+        { tenantId: TENANT_B } as any,
+        actor,
+      );
+      await d.service.createSchedule(
+        DEFINITION,
+        {
+          name: 'Semanal',
+          cronExpression: '0 8 * * 1',
+          firstRunAt: '2026-12-01T08:00:00.000Z',
+          outputFormat: 'CSV',
+          tenantId: TENANT_B,
+        } as any,
+        actor,
+      );
+
+      expect(d.runsRepo.createExecution.mock.calls[0][1].tenantId).toBe(
+        TENANT_A,
+      );
+      expect(d.runsRepo.createSchedule.mock.calls[0][1].tenantId).toBe(
+        TENANT_A,
+      );
+    });
+
+    it('ejecutar o programar una definición de otro tenant: 404 uniforme, igual que inexistente, sin filas', async () => {
+      const d = build();
+      d.definitionsRepo.findDefinitionById.mockResolvedValue(
+        activeDefinition({ tenantId: TENANT_B }),
+      );
+
+      const foreignRun = await expectOutOfScope(
+        d.service.createExecution(DEFINITION, {}, actor),
+        'Definición no encontrada',
+      );
+      await expectOutOfScope(
+        d.service.createSchedule(
+          DEFINITION,
+          {
+            name: 'Semanal',
+            cronExpression: '0 8 * * 1',
+            firstRunAt: '2026-12-01T08:00:00.000Z',
+            outputFormat: 'CSV',
+          } as any,
+          actor,
+        ),
+        'Definición no encontrada',
+      );
+
+      d.definitionsRepo.findDefinitionById.mockResolvedValue(null);
+      const missingRun = await expectOutOfScope(
+        d.service.createExecution(DEFINITION, {}, actor),
+        'Definición no encontrada',
+      );
+
+      expect(foreignRun.getResponse()).toEqual(missingRun.getResponse());
+      expect(d.runsRepo.createExecution).not.toHaveBeenCalled();
+      expect(d.runsRepo.createSchedule).not.toHaveBeenCalled();
+    });
+
+    it('sin tenant en el contexto el actor de tenant se rechaza antes de tocar la base', async () => {
+      const d = build();
+
+      await expect(
+        d.raw.createExecution(DEFINITION, {}, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.definitionsRepo.findDefinitionById).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('materializeSnapshot, retryExecution, dispatchDistributions', () => {
+    it('materializar la ejecución de otro tenant: 404 uniforme; no crea snapshot ni cambia su estado', async () => {
+      const d = build();
+      const foreign = execution({ statusConceptId: CONCEPTS.EXECUTION_QUEUED });
+      d.runsRepo.findExecutionForUpdate.mockResolvedValue(foreign);
+
+      const foreignError = await expectOutOfScope(
+        d.service.materializeSnapshot(
+          EXECUTION,
+          { storageUri: 's3://x' },
+          actor,
+        ),
+        'Ejecución no encontrada',
+      );
+      d.runsRepo.findExecutionForUpdate.mockResolvedValue(null);
+      const missingError = await expectOutOfScope(
+        d.service.materializeSnapshot(
+          EXECUTION,
+          { storageUri: 's3://x' },
+          actor,
+        ),
+        'Ejecución no encontrada',
+      );
+
+      expect(foreignError.getResponse()).toEqual(missingError.getResponse());
+      expect(d.runsRepo.createSnapshot).not.toHaveBeenCalled();
+      expect(foreign.statusConceptId).toBe(CONCEPTS.EXECUTION_QUEUED);
+    });
+
+    it('el tenant activo viaja a la consulta que bloquea la ejecución', async () => {
+      const d = build();
+      d.runsRepo.findExecutionForUpdate.mockResolvedValue(null);
+
+      await expect(
+        d.service.retryExecution(EXECUTION, {}, actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+
+      expect(d.runsRepo.findExecutionForUpdate).toHaveBeenCalledWith(
+        d.tx,
+        EXECUTION,
+        TENANT_A,
+      );
+    });
+
+    it('reintentar la ejecución de otro tenant: 404 uniforme; estado y distribuciones de B no cambian', async () => {
+      const d = build();
+      const foreign = execution();
+      d.runsRepo.findExecutionForUpdate.mockResolvedValue(foreign);
+
+      await expectOutOfScope(
+        d.service.retryExecution(
+          EXECUTION,
+          { requeueDistributions: true },
+          actor,
+        ),
+        'Ejecución no encontrada',
+      );
+
+      expect(foreign.statusConceptId).toBe(CONCEPTS.EXECUTION_FAILED);
+      expect(
+        d.runsRepo.findDistributionsByExecutionForUpdate,
+      ).not.toHaveBeenCalled();
+    });
+
+    it('distribuir la ejecución de otro tenant: 404 uniforme y no crea distribuciones', async () => {
+      const d = build();
+      d.runsRepo.findExecutionById.mockResolvedValue(
+        execution({ statusConceptId: CONCEPTS.EXECUTION_SUCCEEDED }),
+      );
+
+      await expectOutOfScope(
+        d.service.dispatchDistributions(EXECUTION, {}, actor),
+        'Ejecución no encontrada',
+      );
+
+      expect(d.runsRepo.createDistribution).not.toHaveBeenCalled();
+    });
+
+    it('el worker SYSTEM sin tenant en el contexto materializa cualquier ejecución (barrido global explícito)', async () => {
+      const d = build();
+      const queued = execution({ statusConceptId: CONCEPTS.EXECUTION_QUEUED });
+      d.runsRepo.findExecutionForUpdate.mockResolvedValue(queued);
+      d.runsRepo.findSnapshotByExecution.mockResolvedValue(null);
+      d.runsRepo.createSnapshot.mockReturnValue({ id: 'snap-1' });
+
+      const res = await d.raw.materializeSnapshot(
+        EXECUTION,
+        { storageUri: 's3://x' },
+        system,
+      );
+
+      expect(res.executionStatusConceptId).toBe(CONCEPTS.EXECUTION_SUCCEEDED);
+      expect(d.runsRepo.findExecutionForUpdate).toHaveBeenCalledWith(
+        d.tx,
+        EXECUTION,
+        undefined,
+      );
+    });
+
+    it('el worker SYSTEM que declara tenant queda acotado a él', async () => {
+      const d = build();
+      d.runsRepo.findExecutionForUpdate.mockResolvedValue(
+        execution({ statusConceptId: CONCEPTS.EXECUTION_QUEUED }),
+      );
+
+      await expectOutOfScope(
+        inTenant(d.raw, TENANT_A).materializeSnapshot(
+          EXECUTION,
+          { storageUri: 's3://x' },
+          system,
+        ),
+        'Ejecución no encontrada',
+      );
+      expect(d.runsRepo.createSnapshot).not.toHaveBeenCalled();
+    });
+
+    it('un SYSTEM sin tenant sigue recibiendo 404 si la ejecución no existe', async () => {
+      const d = build();
+      d.runsRepo.findExecutionForUpdate.mockResolvedValue(null);
+
+      await expectOutOfScope(
+        d.raw.retryExecution(EXECUTION, {}, system),
+        'Ejecución no encontrada',
+      );
+    });
+  });
+
+  describe('subscribe', () => {
+    const schedule = (overrides: Record<string, unknown> = {}): any => ({
+      id: SCHEDULE,
+      tenantId: TENANT_A,
+      stateConceptId: CONCEPTS.SCHEDULE_STATE_ACTIVE,
+      ...overrides,
+    });
+
+    it('suscribirse dos veces a la programación propia deja una sola suscripción (idempotente)', async () => {
+      const d = build();
+      d.runsRepo.findScheduleById.mockResolvedValue(schedule());
+      d.runsRepo.findSubscription.mockResolvedValueOnce(null);
+      d.runsRepo.createSubscription.mockReturnValue({ id: 'sub-1' });
+
+      const first = await d.service.subscribe(
+        SCHEDULE,
+        { channelId: CHANNEL },
+        actor,
+      );
+      d.runsRepo.findSubscription.mockResolvedValueOnce({
+        id: 'sub-1',
+        isActive: true,
+      });
+      const second = await d.service.subscribe(
+        SCHEDULE,
+        { channelId: CHANNEL },
+        actor,
+      );
+
+      expect(first.id).toBe('sub-1');
+      expect(second).toMatchObject({ id: 'sub-1', reactivated: false });
+      expect(d.runsRepo.createSubscription).toHaveBeenCalledTimes(1);
+    });
+
+    it('suscribirse a la programación de otro tenant: 404 uniforme y no crea suscripción', async () => {
+      const d = build();
+      d.runsRepo.findScheduleById.mockResolvedValue(
+        schedule({ tenantId: TENANT_B }),
+      );
+
+      await expectOutOfScope(
+        d.service.subscribe(SCHEDULE, { channelId: CHANNEL }, actor),
+        'Programación no encontrada',
+      );
+
+      expect(d.runsRepo.findSubscription).not.toHaveBeenCalled();
+      expect(d.runsRepo.createSubscription).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('schedulerTick', () => {
+    it('sin tenant en el contexto es el barrido global: no filtra por tenant', async () => {
+      const d = build();
+      d.runsRepo.findDueSchedules.mockResolvedValue([]);
+
+      await d.raw.schedulerTick({}, system);
+
+      expect(d.runsRepo.findDueSchedules).toHaveBeenCalledWith(
+        d.tx,
+        expect.any(Date),
+        CONCEPTS.SCHEDULE_STATE_ACTIVE,
+        50,
+        undefined,
+      );
+    });
+
+    it('con tenant en el contexto sólo toma las programaciones de ese tenant', async () => {
+      const d = build();
+      d.runsRepo.findDueSchedules.mockResolvedValue([]);
+
+      await inTenant(d.raw, TENANT_A).schedulerTick({}, system);
+
+      expect(d.runsRepo.findDueSchedules).toHaveBeenCalledWith(
+        d.tx,
+        expect.any(Date),
+        CONCEPTS.SCHEDULE_STATE_ACTIVE,
+        50,
+        TENANT_A,
+      );
     });
   });
 });

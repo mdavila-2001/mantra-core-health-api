@@ -1,4 +1,5 @@
 import { describe, it, expect, jest } from '@jest/globals';
+import { ForbiddenException } from '@nestjs/common';
 import { ConceptMapsService } from './concept-maps.service';
 import {
   CONCEPTS,
@@ -97,6 +98,35 @@ describe('ConceptMapsService', () => {
       expect(locked.equivalenceConceptId).toBe(CONCEPTS.EQUIV_EQUIVALENT);
       expect(result.matches[0].conceptMapId).toBe('cm-1');
     });
+
+    it('rechaza con 403 curar un mapeo a una sesión sin rol de terminología', async () => {
+      const { service, conceptsRepo, conceptMapsRepo } = build();
+
+      await expect(
+        service.translate(dto, { id: 'u-2', roles: ['PATIENT', 'USER'] }),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(conceptsRepo.findById).not.toHaveBeenCalled();
+      expect(conceptMapsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it.each(['TERMINOLOGY_ENGINEER', 'SUPERADMIN'])(
+      'deja curar a %s',
+      async (role) => {
+        const { service, conceptsRepo, conceptMapsRepo } = build();
+        conceptsRepo.findById
+          .mockResolvedValueOnce(activeConcept('c-1'))
+          .mockResolvedValueOnce(activeConcept('c-2'));
+        conceptMapsRepo.findEquivalent.mockResolvedValue(null);
+        conceptMapsRepo.create.mockReturnValue({ id: 'cm-9' });
+
+        const result = await service.translate(dto, {
+          id: 'u-3',
+          roles: [role],
+        });
+
+        expect(result.matches[0].conceptMapId).toBe('cm-9');
+      },
+    );
 
     it('exige la equivalencia al curar (PreconditionFailed)', async () => {
       const { service } = build();

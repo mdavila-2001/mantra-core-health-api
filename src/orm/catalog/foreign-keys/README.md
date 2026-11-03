@@ -1,83 +1,83 @@
 # src / orm / catalog / foreign keys
 
-Agrupa los componentes relacionados con **foreign keys** y mantiene cohesionada esta responsabilidad del sistema.
+Groups **foreign keys**-related components and keeps this system responsibility cohesive.
 
-## Contenido
+## Contents
 
-### Archivos
+### Files
 
 | Archivo | Responsabilidad |
 | --- | --- |
-| `accounting.1.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `accounting.2.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `ads.1.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `ads.2.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `ads.3.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `audit.1.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `audit.2.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `audit.3.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `auth_providers.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `authz.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `automation.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `billing.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `chart.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `clinical_ext.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `clinical.1.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `clinical.2.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `common.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `community.1.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `community.2.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `consent.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `crm.1.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `crm.2.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `delegated_access.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `diagnostic_units.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `diagnostics.1.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `diagnostics.2.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `directory.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `education.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `erp.1.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `erp.2.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `erp.3.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `forms.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `geo.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `health_context.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `health_data.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `iam.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `identity_assurance.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `index.ts` | Punto de exportación pública de la carpeta. |
-| `insurance.1.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `insurance.2.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `integration_contracts.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `integrations.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `marketing.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `messaging.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `organization_extensions.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `payments.1.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `payments.2.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `pharmacy_inventory.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `pharmacy.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `platform_ops.1.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `platform_ops.2.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `polyglot_storage.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `practice.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `procedures_perioperative.1.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `procedures_perioperative.2.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `profiles.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `promotions.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `qa_lab.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `read_models.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `reporting.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `scheduling.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `system_context.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `system_ops.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `telemetry.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `terminology.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `tracking.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `workflow.fk.ts` | Implementación o recurso de soporte de esta carpeta. |
+| `accounting.1.fk.ts` | Support implementation or resource for this folder. |
+| `accounting.2.fk.ts` | Support implementation or resource for this folder. |
+| `ads.1.fk.ts` | Support implementation or resource for this folder. |
+| `ads.2.fk.ts` | Support implementation or resource for this folder. |
+| `ads.3.fk.ts` | Support implementation or resource for this folder. |
+| `audit.1.fk.ts` | Support implementation or resource for this folder. |
+| `audit.2.fk.ts` | Support implementation or resource for this folder. |
+| `audit.3.fk.ts` | Support implementation or resource for this folder. |
+| `auth_providers.fk.ts` | Support implementation or resource for this folder. |
+| `authz.fk.ts` | Support implementation or resource for this folder. |
+| `automation.fk.ts` | Support implementation or resource for this folder. |
+| `billing.fk.ts` | Support implementation or resource for this folder. |
+| `chart.fk.ts` | Support implementation or resource for this folder. |
+| `clinical_ext.fk.ts` | Support implementation or resource for this folder. |
+| `clinical.1.fk.ts` | Support implementation or resource for this folder. |
+| `clinical.2.fk.ts` | Support implementation or resource for this folder. |
+| `common.fk.ts` | Support implementation or resource for this folder. |
+| `community.1.fk.ts` | Support implementation or resource for this folder. |
+| `community.2.fk.ts` | Support implementation or resource for this folder. |
+| `consent.fk.ts` | Support implementation or resource for this folder. |
+| `crm.1.fk.ts` | Support implementation or resource for this folder. |
+| `crm.2.fk.ts` | Support implementation or resource for this folder. |
+| `delegated_access.fk.ts` | Support implementation or resource for this folder. |
+| `diagnostic_units.fk.ts` | Support implementation or resource for this folder. |
+| `diagnostics.1.fk.ts` | Support implementation or resource for this folder. |
+| `diagnostics.2.fk.ts` | Support implementation or resource for this folder. |
+| `directory.fk.ts` | Support implementation or resource for this folder. |
+| `education.fk.ts` | Support implementation or resource for this folder. |
+| `erp.1.fk.ts` | Support implementation or resource for this folder. |
+| `erp.2.fk.ts` | Support implementation or resource for this folder. |
+| `erp.3.fk.ts` | Support implementation or resource for this folder. |
+| `forms.fk.ts` | Support implementation or resource for this folder. |
+| `geo.fk.ts` | Support implementation or resource for this folder. |
+| `health_context.fk.ts` | Support implementation or resource for this folder. |
+| `health_data.fk.ts` | Support implementation or resource for this folder. |
+| `iam.fk.ts` | Support implementation or resource for this folder. |
+| `identity_assurance.fk.ts` | Support implementation or resource for this folder. |
+| `index.ts` | Public export barrel for this folder. |
+| `insurance.1.fk.ts` | Support implementation or resource for this folder. |
+| `insurance.2.fk.ts` | Support implementation or resource for this folder. |
+| `integration_contracts.fk.ts` | Support implementation or resource for this folder. |
+| `integrations.fk.ts` | Support implementation or resource for this folder. |
+| `marketing.fk.ts` | Support implementation or resource for this folder. |
+| `messaging.fk.ts` | Support implementation or resource for this folder. |
+| `organization_extensions.fk.ts` | Support implementation or resource for this folder. |
+| `payments.1.fk.ts` | Support implementation or resource for this folder. |
+| `payments.2.fk.ts` | Support implementation or resource for this folder. |
+| `pharmacy_inventory.fk.ts` | Support implementation or resource for this folder. |
+| `pharmacy.fk.ts` | Support implementation or resource for this folder. |
+| `platform_ops.1.fk.ts` | Support implementation or resource for this folder. |
+| `platform_ops.2.fk.ts` | Support implementation or resource for this folder. |
+| `polyglot_storage.fk.ts` | Support implementation or resource for this folder. |
+| `practice.fk.ts` | Support implementation or resource for this folder. |
+| `procedures_perioperative.1.fk.ts` | Support implementation or resource for this folder. |
+| `procedures_perioperative.2.fk.ts` | Support implementation or resource for this folder. |
+| `profiles.fk.ts` | Support implementation or resource for this folder. |
+| `promotions.fk.ts` | Support implementation or resource for this folder. |
+| `qa_lab.fk.ts` | Support implementation or resource for this folder. |
+| `read_models.fk.ts` | Support implementation or resource for this folder. |
+| `reporting.fk.ts` | Support implementation or resource for this folder. |
+| `scheduling.fk.ts` | Support implementation or resource for this folder. |
+| `system_context.fk.ts` | Support implementation or resource for this folder. |
+| `system_ops.fk.ts` | Support implementation or resource for this folder. |
+| `telemetry.fk.ts` | Support implementation or resource for this folder. |
+| `terminology.fk.ts` | Support implementation or resource for this folder. |
+| `tracking.fk.ts` | Support implementation or resource for this folder. |
+| `workflow.fk.ts` | Support implementation or resource for this folder. |
 
-## Criterios de mantenimiento
+## Maintenance guidelines
 
-- Mantener las reglas de negocio fuera de los adaptadores de transporte.
-- Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
-- Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
+- Keep business rules outside transport adapters.
+- Document decisions, preconditions, parameters, return values, and relevant errors with TSDoc.
+- Update this index when a component is added, removed, or its responsibility changes.

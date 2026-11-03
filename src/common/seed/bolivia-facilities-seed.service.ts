@@ -45,15 +45,18 @@ export interface BoliviaFacilitiesResult {
  * Materializa el directorio de establecimientos de salud de Santa Cruz como el
  * conjunto de valores `VS_BO_HEALTH_FACILITY`.
  *
- * ## Por qué es un conjunto de valores y no organizaciones
+ * ## Por qué es un conjunto de valores
  *
- * Porque es una **lista de consulta**, no un padrón de clientes. El registro de
- * procesos describe con detalle cómo se da de alta una organización de verdad
- * —razón social, forma societaria, NIT, SEPREC, licencia de funcionamiento,
- * certificado del SEDES, poder del representante legal, GPS de cada sucursal—
- * y ninguna de esas quinientas tres pasó por ahí. Crearlas como
- * `directory.tenants` las daría por registradas sin que nadie las registrara, y
- * dejaría el alta real sin trabajo que hacer.
+ * Porque es una **lista de consulta**: no pasó por el alta de una organización
+ * de verdad —razón social, forma societaria, NIT, SEPREC, licencia de
+ * funcionamiento, certificado del SEDES, poder del representante legal, GPS de
+ * cada sucursal—. Eso no cambia: este paso solo materializa la lista.
+ *
+ * Las organizaciones que el directorio y los enlaces necesitan las crea aparte
+ * `PadronOrganizationsSeedService` (opt-in), con el actor semilla como dueño y
+ * sin sello de verificación que nadie haya respaldado: quedan activas y sin
+ * verificar, y cada ficha dice que viene del padrón público, que no está
+ * reclamada y que la organización no la verificó, hasta que la reclame.
  *
  * Lo que sí resuelve es lo que hoy no se puede: que el médico diga en qué
  * hospital está de turno y en qué clínica atiende, eligiendo de una lista de
@@ -178,14 +181,14 @@ export class BoliviaFacilitiesSeedService {
 
   /** Rompe si el catálogo declara dos veces el mismo código. */
   private assertUniqueCodes(): void {
-    const vistos = new Set<string>();
+    const seen = new Set<string>();
     for (const facility of BOLIVIA_FACILITIES) {
-      if (vistos.has(facility.code)) {
+      if (seen.has(facility.code)) {
         throw new Error(
           `El directorio declara el código "${facility.code}" más de una vez`,
         );
       }
-      vistos.add(facility.code);
+      seen.add(facility.code);
     }
   }
 
@@ -278,7 +281,7 @@ export class BoliviaFacilitiesSeedService {
    * sabemos» de «está vacía».
    */
   private propertiesOf(facility: BoliviaFacilitySeed): [string, string][] {
-    const pares: [string, string | null][] = [
+    const pairs: [string, string | null][] = [
       [BO_FACILITY_PROPERTY_CODES.tipo, facility.tipo],
       [
         BO_FACILITY_PROPERTY_CODES.nivel,
@@ -290,7 +293,7 @@ export class BoliviaFacilitiesSeedService {
       [BO_FACILITY_PROPERTY_CODES.telefono, facility.telefonos[0] ?? null],
       [BO_FACILITY_PROPERTY_CODES.nit, facility.nit],
     ];
-    return pares.filter((par): par is [string, string] => Boolean(par[1]));
+    return pairs.filter((par): par is [string, string] => Boolean(par[1]));
   }
 
   /** La expansión, en el orden del listado. */

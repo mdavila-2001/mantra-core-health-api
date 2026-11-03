@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 05 · schema profiles
+-- SALUD v4.2.83 · módulo 05 · schema profiles
 -- Generado de diagram_05_profiles.puml — NO editar a mano.
 
 
@@ -114,6 +114,48 @@ DO $$ BEGIN
     ALTER TABLE "profiles"."patient_portal_proxies"
         ADD CONSTRAINT "fk_patient_portal_proxies_related_person_id" FOREIGN KEY ("related_person_id")
         REFERENCES "profiles"."related_persons" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "profiles"."patient_primary_practitioners"
+        ADD CONSTRAINT "fk_patient_primary_practitioners_patient_profile_id" FOREIGN KEY ("patient_profile_id")
+        REFERENCES "profiles"."patient_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "profiles"."patient_primary_practitioners"
+        ADD CONSTRAINT "fk_patient_primary_practitioners_practitioner_profile_id" FOREIGN KEY ("practitioner_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "profiles"."practitioner_admissions"
+        ADD CONSTRAINT "fk_practitioner_admissions_practitioner_profile_id" FOREIGN KEY ("practitioner_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "profiles"."practitioner_admission_reviews"
+        ADD CONSTRAINT "fk_practitioner_admission_reviews_admission_id" FOREIGN KEY ("admission_id")
+        REFERENCES "profiles"."practitioner_admissions" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "profiles"."practitioner_admission_reviews"
+        ADD CONSTRAINT "fk_practitioner_admission_reviews_requirement_id" FOREIGN KEY ("requirement_id")
+        REFERENCES "profiles"."admission_requirements" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "profiles"."practitioner_admission_events"
+        ADD CONSTRAINT "fk_practitioner_admission_events_admission_id" FOREIGN KEY ("admission_id")
+        REFERENCES "profiles"."practitioner_admissions" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "profiles"."practitioner_admission_events"
+        ADD CONSTRAINT "fk_practitioner_admission_events_requirement_id" FOREIGN KEY ("requirement_id")
+        REFERENCES "profiles"."admission_requirements" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN

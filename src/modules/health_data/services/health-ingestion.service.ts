@@ -6,7 +6,7 @@ import {
   CONCEPTS,
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
+  requireTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -27,6 +27,9 @@ import {
   ProjectCanonicalResourceDto,
   CanonicalResourceVersionResponseDto,
 } from '../dto';
+import { assertHealthResourceInTenant } from '../health-data-scope';
+import { HealthDataErrorReason } from '../health_data.error-reasons';
+import { assertResourceInTenant } from '../../../common/tenant/resource-scope';
 
 /**
  * Ingesta y proyección canónica: lotes desde una conexión de origen, registros
@@ -74,6 +77,9 @@ export class HealthIngestionService {
     dto: CreateSourceConnectionDto,
     actor: AuthenticatedUser,
   ): Promise<SourceConnectionResponseDto> {
+    // El tenant sale del contexto autenticado, nunca del cuerpo: el interceptor
+    // rechaza un `dto.tenantId` contradictorio y acá se ignora el declarado.
+    const tenantId = requireTenantId();
     this.logger.info(
       {
         operation: 'health-data.source-connection.create',
@@ -86,12 +92,12 @@ export class HealthIngestionService {
     return this.em.transactional(async (tx) => {
       let system = await this.ingestionRepo.findSourceSystemByCode(
         tx,
-        dto.tenantId,
+        tenantId,
         dto.sourceSystemCode,
       );
       if (!system) {
         system = this.ingestionRepo.createSourceSystem(tx, {
-          tenantId: dto.tenantId,
+          tenantId,
           code: dto.sourceSystemCode,
           name: dto.sourceSystemName,
           sourceTypeConceptId: dto.sourceTypeConceptId,
@@ -134,19 +140,28 @@ export class HealthIngestionService {
       'Opening ingestion batch',
     );
 
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const connection = await this.ingestionRepo.findConnectionForUpdate(
+      // La conexión no lleva tenant propio: lo hereda de su sistema de origen.
+      const found = await this.ingestionRepo.findConnectionForUpdate(
         tx,
         dto.healthSourceConnectionId,
       );
-      if (!connection) {
-        throw new ResourceNotFoundException(
-          'Conexión de origen no encontrada',
-          {
-            healthSourceConnectionId: dto.healthSourceConnectionId,
-          },
-        );
-      }
+      const owner = found
+        ? await this.ingestionRepo.findSourceSystemById(
+            tx,
+            found.healthSourceSystemId,
+          )
+        : null;
+      const connection = assertResourceInTenant(
+        found,
+        owner?.tenantId,
+        tenantId,
+        {
+          message: 'Conexión de origen no encontrada',
+          reason: HealthDataErrorReason.SOURCE_CONNECTION_NOT_AVAILABLE,
+        },
+      );
       if (connection.statusConceptId !== CONCEPTS.STATE_ACTIVE) {
         throw new PreconditionFailedException(
           'La conexión de origen no está activa',
@@ -171,7 +186,7 @@ export class HealthIngestionService {
       }
 
       const batch = this.ingestionRepo.createBatch(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         healthSourceConnectionId: dto.healthSourceConnectionId,
         batchIdentifier: dto.batchIdentifier,
         ingestionModeConceptId: dto.ingestionModeConceptId,
@@ -206,11 +221,14 @@ export class HealthIngestionService {
     batchId: string,
     dto: RecordIngestionRecordDto,
   ): Promise<IngestionRecordResponseDto> {
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const batch = await this.ingestionRepo.findBatchForUpdate(tx, batchId);
-      if (!batch) {
-        throw new ResourceNotFoundException('Lote no encontrado', { batchId });
-      }
+      const batch = assertHealthResourceInTenant(
+        await this.ingestionRepo.findBatchForUpdate(tx, batchId),
+        tenantId,
+        'Lote no encontrado',
+        HealthDataErrorReason.INGESTION_BATCH_NOT_AVAILABLE,
+      );
       if (batch.statusConceptId !== CONCEPTS.BATCH_RECEIVING) {
         throw new PreconditionFailedException(
           'El lote ya no está recibiendo registros',
@@ -270,11 +288,14 @@ export class HealthIngestionService {
       'Closing ingestion batch',
     );
 
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const batch = await this.ingestionRepo.findBatchForUpdate(tx, batchId);
-      if (!batch) {
-        throw new ResourceNotFoundException('Lote no encontrado', { batchId });
-      }
+      const batch = assertHealthResourceInTenant(
+        await this.ingestionRepo.findBatchForUpdate(tx, batchId),
+        tenantId,
+        'Lote no encontrado',
+        HealthDataErrorReason.INGESTION_BATCH_NOT_AVAILABLE,
+      );
       // El lote se cierra una vez: reabrirlo cambiaría el contenido de algo que
       // ya se dio por completo aguas abajo.
       if (batch.statusConceptId !== CONCEPTS.BATCH_RECEIVING) {
@@ -324,19 +345,26 @@ export class HealthIngestionService {
       'Projecting canonical resource version',
     );
 
+    // El custodio sale del contexto; `dto.custodianTenantId` se ignora (el
+    // interceptor ya rechaza uno contradictorio).
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const record = await this.ingestionRepo.findRecordForUpdate(
+      // El registro no lleva tenant propio: lo hereda de su lote.
+      const found = await this.ingestionRepo.findRecordForUpdate(
         tx,
         dto.healthIngestionRecordId,
       );
-      if (!record) {
-        throw new ResourceNotFoundException(
-          'Registro de ingesta no encontrado',
-          {
-            healthIngestionRecordId: dto.healthIngestionRecordId,
-          },
-        );
-      }
+      const batch = found
+        ? await this.ingestionRepo.findBatchById(
+            tx,
+            found.healthIngestionBatchId,
+          )
+        : null;
+      const record = assertResourceInTenant(found, batch?.tenantId, tenantId, {
+        message: 'Registro de ingesta no encontrado',
+        reason: HealthDataErrorReason.INGESTION_RECORD_NOT_AVAILABLE,
+      });
+      await this.assertSourceSystemCoherent(tx, tenantId, batch, dto);
       if (record.processingStatusConceptId !== CONCEPTS.RECORD_QUEUED) {
         throw new PreconditionFailedException(
           'El registro no está en cola de proyección',
@@ -349,7 +377,7 @@ export class HealthIngestionService {
       const contentHash = this.contentHash(dto.normalizedPayloadJson);
       let resource = await this.resourcesRepo.findResourceByLogicalIdForUpdate(
         tx,
-        dto.custodianTenantId,
+        tenantId,
         record.resourceTypeConceptId,
         dto.logicalIdentifier,
       );
@@ -357,7 +385,7 @@ export class HealthIngestionService {
 
       if (!resource) {
         resource = this.resourcesRepo.createResource(tx, {
-          custodianTenantId: dto.custodianTenantId,
+          custodianTenantId: tenantId,
           resourceTypeConceptId: record.resourceTypeConceptId,
           logicalIdentifier: dto.logicalIdentifier,
           patientProfileId: dto.patientProfileId,
@@ -397,7 +425,7 @@ export class HealthIngestionService {
       // La procedencia se escribe antes que la versión porque ésta la
       // referencia: la trazabilidad no es un añadido posterior.
       const provenance = this.provenanceRepo.createProvenanceRecord(tx, {
-        custodianTenantId: dto.custodianTenantId,
+        custodianTenantId: tenantId,
         activityConceptId: CONCEPTS.PROV_INGEST,
         sourceSystemId: dto.sourceSystemId,
         responsibleAgentId: actor.id,
@@ -438,7 +466,7 @@ export class HealthIngestionService {
         targetId: version.id,
       });
       this.provenanceRepo.createLineageEdge(tx, {
-        tenantId: dto.custodianTenantId,
+        tenantId,
         sourceTypeConceptId: CONCEPTS.HD_ENTITY_INGESTION_RECORD,
         sourceId: record.id,
         targetTypeConceptId: CONCEPTS.HD_ENTITY_RESOURCE_VERSION,
@@ -468,6 +496,46 @@ export class HealthIngestionService {
   }
 
   // --- Apoyo ---
+
+  /**
+   * El sistema de origen declarado al proyectar debe ser el de la conexión del
+   * lote y pertenecer al tenant activo; si no, el recurso quedaría atado a un
+   * origen ajeno al lote del que sale.
+   *
+   * @param tx - Transacción activa.
+   * @param tenantId - Tenant activo.
+   * @param batch - Lote del registro que se proyecta.
+   * @param dto - Comando de proyección.
+   * @throws ResourceNotFoundException uniforme si el sistema es ajeno o no existe.
+   * @throws PreconditionFailedException si el sistema no es el de la conexión del lote.
+   */
+  private async assertSourceSystemCoherent(
+    tx: EntityManager,
+    tenantId: string,
+    batch: { healthSourceConnectionId: string } | null,
+    dto: ProjectCanonicalResourceDto,
+  ): Promise<void> {
+    if (!dto.sourceSystemId) return;
+    assertHealthResourceInTenant(
+      await this.ingestionRepo.findSourceSystemById(tx, dto.sourceSystemId),
+      tenantId,
+      'Sistema de origen no encontrado',
+      HealthDataErrorReason.SOURCE_SYSTEM_NOT_AVAILABLE,
+    );
+    const connection = batch
+      ? await this.ingestionRepo.findConnectionById(
+          tx,
+          batch.healthSourceConnectionId,
+        )
+      : null;
+    if (connection && connection.healthSourceSystemId !== dto.sourceSystemId) {
+      throw new PreconditionFailedException(
+        'El sistema de origen no corresponde a la conexión del lote',
+        undefined,
+        HealthDataErrorReason.SOURCE_SYSTEM_MISMATCH,
+      );
+    }
+  }
 
   /** Hash del payload con las claves ordenadas: identifica el contenido, no su orden. */
   private contentHash(payload: unknown): string {

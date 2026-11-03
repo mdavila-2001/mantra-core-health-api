@@ -4,13 +4,10 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
   type AuthenticatedUser,
 } from '../../../common';
 import {
-  DiagnosticUnitsRepository,
   DiagnosticPriceSchedulesRepository,
-  DiagnosticStudyOfferingsRepository,
   DiagnosticStudyPricesRepository,
 } from '../repositories';
 import {
@@ -21,6 +18,7 @@ import {
   StudyPriceResponseDto,
 } from '../dto';
 import { DUNIT } from '../diagnostic_units.concepts';
+import { DiagnosticUnitScopeService } from './diagnostic-unit-scope.service';
 
 /**
  * Casos de uso de precios: crear un cronograma (UC-23-06), fijar/versionar el
@@ -34,17 +32,15 @@ export class DiagnosticPricingService {
    * Inicializa la instancia y sus dependencias.
    *
    * @param em - Contexto de persistencia o transacción activa.
-   * @param unitsRepo - Valor de units repo requerido por la operación.
+   * @param scope - Resolvedor de recursos acotados al tenant activo.
    * @param schedulesRepo - Valor de schedules repo requerido por la operación.
-   * @param offeringsRepo - Valor de offerings repo requerido por la operación.
    * @param pricesRepo - Valor de prices repo requerido por la operación.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
-    private readonly unitsRepo: DiagnosticUnitsRepository,
+    private readonly scope: DiagnosticUnitScopeService,
     private readonly schedulesRepo: DiagnosticPriceSchedulesRepository,
-    private readonly offeringsRepo: DiagnosticStudyOfferingsRepository,
     private readonly pricesRepo: DiagnosticStudyPricesRepository,
     private readonly logger: PinoLogger,
   ) {
@@ -62,9 +58,10 @@ export class DiagnosticPricingService {
       'Creating price schedule',
     );
     return this.em.transactional(async (tx) => {
-      const unit = await this.unitsRepo.findById(tx, unitId);
-      if (!unit)
-        throw new ResourceNotFoundException('Unidad no encontrada', { unitId });
+      const unit = await this.scope.unit(tx, unitId);
+      if (dto.diagnosticUnitSiteId) {
+        await this.scope.siteOfUnit(tx, dto.diagnosticUnitSiteId, unit.id);
+      }
       if (unit.statusConceptId !== DUNIT.UNIT_ACTIVE) {
         throw new PreconditionFailedException('La unidad no está activa', {
           unitId,
@@ -114,27 +111,17 @@ export class DiagnosticPricingService {
       'Versioning study price',
     );
     return this.em.transactional(async (tx) => {
-      const schedule = await this.schedulesRepo.findById(tx, scheduleId);
-      if (!schedule) {
-        throw new ResourceNotFoundException('Cronograma no encontrado', {
-          scheduleId,
-        });
-      }
+      const schedule = await this.scope.schedule(tx, scheduleId);
       if (schedule.statusConceptId !== DUNIT.SCHEDULE_ACTIVE) {
         throw new PreconditionFailedException('El cronograma no está activo', {
           scheduleId,
         });
       }
 
-      const offering = await this.offeringsRepo.findById(
+      const offering = await this.scope.offering(
         tx,
         dto.diagnosticStudyOfferingId,
       );
-      if (!offering) {
-        throw new ResourceNotFoundException('Oferta de estudio no encontrada', {
-          offeringId: dto.diagnosticStudyOfferingId,
-        });
-      }
       if (offering.diagnosticUnitId !== schedule.diagnosticUnitId) {
         throw new PreconditionFailedException(
           'La oferta no pertenece a la misma unidad que el cronograma',
@@ -201,11 +188,7 @@ export class DiagnosticPricingService {
       'Closing price',
     );
     return this.em.transactional(async (tx) => {
-      const price = await this.pricesRepo.findById(tx, priceId);
-      if (!price)
-        throw new ResourceNotFoundException('Precio no encontrado', {
-          priceId,
-        });
+      const price = await this.scope.price(tx, priceId);
 
       if (price.statusConceptId !== DUNIT.PRICE_ACTIVE || price.effectiveTo) {
         throw new PreconditionFailedException(

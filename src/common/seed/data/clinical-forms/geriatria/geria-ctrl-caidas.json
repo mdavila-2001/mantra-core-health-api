@@ -2,14 +2,14 @@
   "code": "GERIA_CTRL_CAIDAS",
   "name": "Evaluación de caídas",
   "specialty": { "code": "GERIATRIA", "display": "Geriatría" },
-  "version": 1,
+  "version": 2,
   "provenance": {
     "sourceTitle": "Atención integrada para las personas mayores (ICOPE): guía de evaluación y planes de atención",
     "organization": "Organización Mundial de la Salud (OMS)",
     "url": "https://www.who.int/publications/i/item/WHO-FWC-ALC-19.1",
     "license": "CC BY-NC-SA 3.0 IGO",
     "retrievedAt": "2026-10-02",
-    "note": "Caídas, factores de riesgo modificables y consecuencias."
+    "note": "Caídas, factores de riesgo modificables y consecuencias. Ampliación internacional (2026-10-24): el índice de riesgo de caídas de Downton desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 3.0 o 4.0 según cada uno, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
   },
   "fields": [
     {
@@ -63,6 +63,62 @@
         "Incontinencia de urgencia"
       ],
       "multiple": true
+    },
+    {
+      "section": "Evaluación: caídas",
+      "code": "downton_medicamentos",
+      "name": "Downton — medicamentos",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Ninguno (0 puntos)",
+        "Tranquilizantes o sedantes (1 punto)",
+        "Diuréticos (1 punto)",
+        "Antihipertensivos (no diuréticos) (1 punto)",
+        "Antiparkinsonianos (1 punto)",
+        "Antidepresivos (1 punto)",
+        "Otros medicamentos (0 puntos)"
+      ],
+      "multiple": true,
+      "description": "Fuente: índice de riesgo de caídas de Downton (Downton JH, Andrews K. Aging (Milano). 1991;3:219-28), según el arquetipo openEHR openEHR-EHR-OBSERVATION.downton_fall_risk_index.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: caídas",
+      "code": "downton_deficits_sensoriales",
+      "name": "Downton — déficits sensoriales",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Ninguno (0 puntos)",
+        "Alteración visual (1 punto)",
+        "Alteración auditiva (1 punto)",
+        "Extremidades (amputación, ACV, neuropatía, etc.) (1 punto)"
+      ],
+      "multiple": true,
+      "description": "Fuente: índice de riesgo de caídas de Downton (Downton JH, Andrews K. Aging (Milano). 1991;3:219-28), según el arquetipo openEHR openEHR-EHR-OBSERVATION.downton_fall_risk_index.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: caídas",
+      "code": "downton_estado_mental",
+      "name": "Downton — estado mental",
+      "dataType": "string",
+      "required": false,
+      "options": ["0 — Orientado", "1 — Confuso"],
+      "description": "Fuente: índice de riesgo de caídas de Downton (Downton JH, Andrews K. Aging (Milano). 1991;3:219-28), según el arquetipo openEHR openEHR-EHR-OBSERVATION.downton_fall_risk_index.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: caídas",
+      "code": "downton_marcha",
+      "name": "Downton — marcha",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Normal",
+        "0 — Segura con ayudas para caminar",
+        "1 — Insegura con o sin ayudas",
+        "0 — Imposible"
+      ],
+      "description": "Más «caídas previas» (1 punto si hubo alguna). Fuente: índice de riesgo de caídas de Downton (Downton JH, Andrews K. Aging (Milano). 1991;3:219-28), según el arquetipo openEHR openEHR-EHR-OBSERVATION.downton_fall_risk_index.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Evaluación: caídas",

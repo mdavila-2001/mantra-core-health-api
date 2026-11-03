@@ -25,16 +25,16 @@ la redención revertida) porque ahí sí hay un identificador natural.
 
 ## DTO por área
 
-| Área | Entrada | Respuesta |
-| --- | --- | --- |
-| Programa | `CreateLoyaltyProgramDto` (+ `LoyaltyTierDto`, `EarningRuleDto`) | `LoyaltyProgramResponseDto` |
-| Membresía | `EnrollMemberDto` | `MembershipResponseDto` |
-| Puntos | `EarnPointsDto`, `RedeemPointsDto` | `PointsLedgerResponseDto`, `RecomputeBalanceResponseDto` |
-| Expiración | `ExpirePointsDto` | `ExpirePointsResponseDto` |
-| Promoción | `CreatePromotionDto` (+ `DiscountRuleDto`) | `PromotionResponseDto` |
-| Cupones | `IssueCouponsDto` | `IssueCouponsResponseDto` |
-| Redención | `ValidateCouponDto`, `CreateRedemptionDto`, `ApplyDiscountDto`, `ReverseRedemptionDto` | `ValidateCouponResponseDto`, `RedemptionResponseDto`, `ApplyDiscountResponseDto`, `ReverseRedemptionResponseDto` |
-| Referidos | `CreateReferralDto`, `QualifyReferralDto` | `ReferralResponseDto`, `QualifyReferralResponseDto` |
+| Área       | Entrada                                                                                | Respuesta                                                                                                        |
+| ---------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Programa   | `CreateLoyaltyProgramDto` (+ `LoyaltyTierDto`, `EarningRuleDto`)                       | `LoyaltyProgramResponseDto`                                                                                      |
+| Membresía  | `EnrollMemberDto`                                                                      | `MembershipResponseDto`                                                                                          |
+| Puntos     | `EarnPointsDto`, `RedeemPointsDto`                                                     | `PointsLedgerResponseDto`, `RecomputeBalanceResponseDto`                                                         |
+| Expiración | `ExpirePointsDto`                                                                      | `ExpirePointsResponseDto`                                                                                        |
+| Promoción  | `CreatePromotionDto` (+ `DiscountRuleDto`)                                             | `PromotionResponseDto`                                                                                           |
+| Cupones    | `IssueCouponsDto`                                                                      | `IssueCouponsResponseDto`                                                                                        |
+| Redención  | `ValidateCouponDto`, `CreateRedemptionDto`, `ApplyDiscountDto`, `ReverseRedemptionDto` | `ValidateCouponResponseDto`, `RedemptionResponseDto`, `ApplyDiscountResponseDto`, `ReverseRedemptionResponseDto` |
+| Referidos  | `CreateReferralDto`, `QualifyReferralDto`                                              | `ReferralResponseDto`, `QualifyReferralResponseDto`                                                              |
 
 `CreateRedemptionDto` extiende `ValidateCouponDto`: redimir es validar y además dejar constancia, y
 heredar evita que los dos contratos se separen con el tiempo.

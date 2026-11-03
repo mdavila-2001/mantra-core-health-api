@@ -21,6 +21,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   PreconditionFailedException,
   Roles,
@@ -40,7 +41,7 @@ import {
 } from '../dto';
 
 /** Lo que deja el interceptor de multipart, acotado a lo que aquí se usa. */
-interface ArchivoSubido {
+interface FileUploaded {
   /** Contenido en memoria. */
   buffer: Buffer;
   /** Nombre con el que llegó, sólo para el registro. */
@@ -74,6 +75,11 @@ export class TerminologyVersionsController {
    * @param user - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de import concepts conforme al contrato `Promise<ImportConceptsResponseDto>`.
    */
+  @Audited({
+    action: 'CATALOG_CONCEPTS_IMPORTED',
+    entity: 'catalog_import_batch',
+    entityId: 'result.id',
+  })
   @Post(':versionId/import')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -109,6 +115,11 @@ export class TerminologyVersionsController {
    * @param user - Usuario autenticado que ejecuta la operación.
    * @returns Los contadores de la importación y su lote.
    */
+  @Audited({
+    action: 'CATALOG_CONCEPTS_FILE_IMPORTED',
+    entity: 'catalog_import_batch',
+    entityId: 'result.id',
+  })
   @Post(':versionId/import-file')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -152,7 +163,7 @@ export class TerminologyVersionsController {
   })
   async importConceptsFile(
     @Param('versionId', ParseUUIDPipe) versionId: string,
-    @UploadedFile() file: ArchivoSubido | undefined,
+    @UploadedFile() file: FileUploaded | undefined,
     @Body() options: ImportConceptsFileRequestDto,
     @CurrentUser() user: AuthenticatedUser,
     @Res({ passthrough: true }) response: Response,
@@ -184,6 +195,11 @@ export class TerminologyVersionsController {
    * @param user - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de publish version conforme al contrato `Promise<PublishVersionResponseDto>`.
    */
+  @Audited({
+    action: 'CODE_SYSTEM_VERSION_PUBLISHED',
+    entity: 'code_system_version',
+    entityId: 'param:versionId',
+  })
   @Post(':versionId/publish')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 19 · schema community
+-- SALUD v4.2.83 · módulo 19 · schema community
 -- Generado de diagram_19_community.puml — NO editar a mano.
 
 
@@ -191,6 +191,13 @@ DO $$ BEGIN
         REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: crm.crm_cases (requiere schema crm)
+DO $$ BEGIN
+    ALTER TABLE "community"."service_reviews"
+        ADD CONSTRAINT "fk_service_reviews_verified_crm_case_id" FOREIGN KEY ("verified_crm_case_id")
+        REFERENCES "crm"."crm_cases" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "community"."review_dimension_scores"
@@ -216,6 +223,83 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN
     ALTER TABLE "community"."review_responses"
         ADD CONSTRAINT "fk_review_responses_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.patient_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "community"."party_ratings"
+        ADD CONSTRAINT "fk_party_ratings_reviewer_patient_profile_id" FOREIGN KEY ("reviewer_patient_profile_id")
+        REFERENCES "profiles"."patient_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "community"."party_ratings"
+        ADD CONSTRAINT "fk_party_ratings_reviewer_practitioner_profile_id" FOREIGN KEY ("reviewer_practitioner_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: practice.practices (requiere schema practice)
+DO $$ BEGIN
+    ALTER TABLE "community"."party_ratings"
+        ADD CONSTRAINT "fk_party_ratings_reviewer_practice_id" FOREIGN KEY ("reviewer_practice_id")
+        REFERENCES "practice"."practices" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.patient_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "community"."party_ratings"
+        ADD CONSTRAINT "fk_party_ratings_target_patient_profile_id" FOREIGN KEY ("target_patient_profile_id")
+        REFERENCES "profiles"."patient_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "community"."party_ratings"
+        ADD CONSTRAINT "fk_party_ratings_target_practitioner_profile_id" FOREIGN KEY ("target_practitioner_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: practice.practices (requiere schema practice)
+DO $$ BEGIN
+    ALTER TABLE "community"."party_ratings"
+        ADD CONSTRAINT "fk_party_ratings_target_practice_id" FOREIGN KEY ("target_practice_id")
+        REFERENCES "practice"."practices" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: clinical.encounters (requiere schema clinical)
+DO $$ BEGIN
+    ALTER TABLE "community"."party_ratings"
+        ADD CONSTRAINT "fk_party_ratings_verified_encounter_id" FOREIGN KEY ("verified_encounter_id")
+        REFERENCES "clinical"."encounters" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: practice.practitioner_role_assignments (requiere schema practice)
+DO $$ BEGIN
+    ALTER TABLE "community"."party_ratings"
+        ADD CONSTRAINT "fk_party_ratings_verified_role_assignment_id" FOREIGN KEY ("verified_role_assignment_id")
+        REFERENCES "practice"."practitioner_role_assignments" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "community"."party_ratings"
+        ADD CONSTRAINT "fk_party_ratings_moderation_status_concept_id" FOREIGN KEY ("moderation_status_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "community"."party_ratings"
+        ADD CONSTRAINT "fk_party_ratings_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "community"."party_ratings"
+        ADD CONSTRAINT "fk_party_ratings_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
         REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
@@ -686,21 +770,21 @@ DO $$ BEGIN
     ALTER TABLE "community"."chat_auto_replies"
         ADD CONSTRAINT "fk_chat_auto_replies_status_concept_id" FOREIGN KEY ("status_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: iam.users (requiere schema iam)
 DO $$ BEGIN
     ALTER TABLE "community"."chat_auto_replies"
         ADD CONSTRAINT "fk_chat_auto_replies_created_by_user_id" FOREIGN KEY ("created_by_user_id")
         REFERENCES "iam"."users" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: iam.users (requiere schema iam)
 DO $$ BEGIN
     ALTER TABLE "community"."chat_auto_replies"
         ADD CONSTRAINT "fk_chat_auto_replies_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
         REFERENCES "iam"."users" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
@@ -735,6 +819,27 @@ DO $$ BEGIN
     ALTER TABLE "community"."direct_messages"
         ADD CONSTRAINT "fk_direct_messages_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
         REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "community"."direct_messages"
+        ADD CONSTRAINT "fk_direct_messages_authored_by_user_id" FOREIGN KEY ("authored_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "community"."direct_messages"
+        ADD CONSTRAINT "fk_direct_messages_on_behalf_of_profile_id" FOREIGN KEY ("on_behalf_of_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: delegated_access.practitioner_delegate_assignments (requiere schema delegated_access)
+DO $$ BEGIN
+    ALTER TABLE "community"."direct_messages"
+        ADD CONSTRAINT "fk_direct_messages_delegate_assignment_id" FOREIGN KEY ("delegate_assignment_id")
+        REFERENCES "delegated_access"."practitioner_delegate_assignments" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -1294,5 +1399,103 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN
     ALTER TABLE "community"."comment_media"
         ADD CONSTRAINT "fk_comment_media_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: directory.tenants (requiere schema directory)
+DO $$ BEGIN
+    ALTER TABLE "community"."conversation_assignments"
+        ADD CONSTRAINT "fk_conversation_assignments_tenant_id" FOREIGN KEY ("tenant_id")
+        REFERENCES "directory"."tenants" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "community"."conversation_assignments"
+        ADD CONSTRAINT "fk_conversation_assignments_practitioner_profile_id" FOREIGN KEY ("practitioner_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "community"."conversation_assignments"
+        ADD CONSTRAINT "fk_conversation_assignments_assigned_user_id" FOREIGN KEY ("assigned_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "community"."conversation_assignments"
+        ADD CONSTRAINT "fk_conversation_assignments_status_concept_id" FOREIGN KEY ("status_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "community"."conversation_assignments"
+        ADD CONSTRAINT "fk_conversation_assignments_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "community"."conversation_assignments"
+        ADD CONSTRAINT "fk_conversation_assignments_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: directory.tenants (requiere schema directory)
+DO $$ BEGIN
+    ALTER TABLE "community"."conversation_internal_notes"
+        ADD CONSTRAINT "fk_conversation_internal_notes_tenant_id" FOREIGN KEY ("tenant_id")
+        REFERENCES "directory"."tenants" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "community"."conversation_internal_notes"
+        ADD CONSTRAINT "fk_conversation_internal_notes_author_user_id" FOREIGN KEY ("author_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: directory.tenants (requiere schema directory)
+DO $$ BEGIN
+    ALTER TABLE "community"."reply_templates"
+        ADD CONSTRAINT "fk_reply_templates_tenant_id" FOREIGN KEY ("tenant_id")
+        REFERENCES "directory"."tenants" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "community"."reply_templates"
+        ADD CONSTRAINT "fk_reply_templates_practitioner_profile_id" FOREIGN KEY ("practitioner_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "community"."reply_templates"
+        ADD CONSTRAINT "fk_reply_templates_category_concept_id" FOREIGN KEY ("category_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "community"."reply_templates"
+        ADD CONSTRAINT "fk_reply_templates_status_concept_id" FOREIGN KEY ("status_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "community"."reply_templates"
+        ADD CONSTRAINT "fk_reply_templates_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "community"."reply_templates"
+        ADD CONSTRAINT "fk_reply_templates_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
         REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;

@@ -156,3 +156,46 @@ describe('CreateServiceRequestDto — formInstanceId (P43)', () => {
     ).toEqual(['formInstanceId']);
   });
 });
+
+describe('CreateServiceRequestDto · ejecutor de la orden', () => {
+  const base = {
+    custodianTenantId: '11111111-1111-4111-8111-111111111111',
+    patientProfileId: '22222222-2222-4222-8222-222222222222',
+    codeConceptId: '33333333-3333-4333-8333-333333333333',
+  };
+
+  /**
+   * Propiedades con error de un cuerpo.
+   *
+   * @param body - Cuerpo recibido.
+   * @returns Las propiedades inválidas.
+   */
+  async function invalid(body: Record<string, unknown>): Promise<string[]> {
+    const errors = await validate(
+      plainToInstance(CreateServiceRequestDto, { ...base, ...body }),
+    );
+    return errors.map((error) => error.property);
+  }
+
+  it('un cuerpo sin los tres campos es válido', async () => {
+    expect(await invalid({})).toEqual([]);
+  });
+
+  it.each([
+    'performerSelectionConceptId',
+    'performerPractitionerProfileId',
+    'suggestedPracticeSiteId',
+  ])('%s mal formado da error de forma', async (field) => {
+    expect(await invalid({ [field]: 'no-es-uuid' })).toEqual([field]);
+  });
+
+  it('con los tres uuid bien formados es válido (la coherencia del modo la valida el servicio)', async () => {
+    expect(
+      await invalid({
+        performerSelectionConceptId: '44444444-4444-4444-8444-444444444444',
+        performerPractitionerProfileId: '55555555-5555-4555-8555-555555555555',
+        suggestedPracticeSiteId: '66666666-6666-4666-8666-666666666666',
+      }),
+    ).toEqual([]);
+  });
+});

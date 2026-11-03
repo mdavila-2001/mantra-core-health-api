@@ -3,13 +3,13 @@
   Fuente real: src/modules/terminology/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `terminology`
 
 **Fuente:** [`src/modules/terminology/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/terminology/README.md)
-· 7 controllers · 9 services · 9 repositories · 15 entidades · 19 DTO
+· 7 controllers · 9 services · 9 repositories · 16 entidades · 19 DTO
 
 ---
 
@@ -31,7 +31,7 @@ referenciadas por FK (`*_concept_id`), resueltas desde `CONCEPTS` (`src/common`)
   find src/modules/terminology -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **7 controllers, 24 rutas HTTP, 15 entidades y 9 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **7 controllers, 23 rutas HTTP, 15 entidades y 9 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
@@ -46,7 +46,6 @@ Entidades (`tableName`, 15 de 15 archivos `*.entity.ts`): `catalog_concepts`, `c
 | `POST /terminology/code-systems` | SECURITY_ADMIN | `terminology-code-systems` |
 | `POST /terminology/code-systems/:id/versions` | SECURITY_ADMIN | `terminology-code-systems` |
 | `GET /terminology/concepts` | sesión | `terminology-concepts` |
-| `GET /terminology/concepts/glossary-graph` | sesión | `terminology-concepts` |
 | `GET /terminology/concepts/:conceptId/glossary-neighborhood` | sesión | `terminology-concepts` |
 | `GET /terminology/concepts/:conceptId` | sesión | `terminology-concepts` |
 | `POST /terminology/concepts/:conceptId/designations` | SECURITY_ADMIN | `terminology-concepts` |
@@ -172,6 +171,21 @@ Los endpoints administrativos exigen rol global `SECURITY_ADMIN` (`@Roles`) sobr
 el `JwtAuthGuard` global. `$translate` y `$lookup` sólo exigen autenticación: el
 caso de uso los asigna al consumidor FHIR, no al terminólogo.
 
+### Contenido `professional` (farmacología clínica)
+
+Las secciones del code system `clinical-pharmacology` (posología incluida) llevan
+`audience: 'professional'` dentro de su `value_json`. `$lookup` y
+`GET /terminology/concepts/:conceptId` las omiten salvo que el sujeto tenga un rol
+clínico (los asistenciales de `CLINICAL_ROLE_SEED` o el `SUPERADMIN` de plataforma); sin sujeto no
+se entrega ninguna. Un `SECURITY_ADMIN` o un `PATIENT` no las ven. La regla vive en
+`pharmacology-audience.ts`. La expansión de un conjunto de valores no las alcanza:
+ese code system no es miembro de ninguno.
+
+`$lookup` agrega a cada propiedad que es una sección `sourceAge` (estado S7):
+`{ known, sourceDate?, retrievedAt }`. `known: false` es una ficha de CIMA que no
+publica su fecha (`document.versionUnpublished`): se carga igual y el dato que vale
+es la fecha de consulta.
+
 ## Persistencia
 
 Servicios dueños de la transacción (`em.transactional`); repositorios sin estado
@@ -207,11 +221,8 @@ NODE_OPTIONS=--experimental-vm-modules npx jest src/modules/terminology
 
 ## Auditoría vigente
 
-La revisión de octubre de 2026 detectó que la escritura de políticas de catálogo
-por tenant requiere una comprobación de ámbito organizacional adicional. También
-registró límites que faltan en colecciones de entrada. El plan de corrección y la
-matriz de pruebas están en
-[`docs/revision-backend-2026-10-04/modulos/terminology.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/terminology.md).
+La escritura de políticas de catálogo por tenant no comprueba el ámbito
+organizacional, y algunas colecciones de entrada no tienen límite.
 
 ```bash
 corepack yarn test src/modules/terminology --runInBand --silent

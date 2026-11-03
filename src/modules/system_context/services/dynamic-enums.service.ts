@@ -11,6 +11,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { SystemContextRepository } from '../repositories';
+import { SystemContextErrorReason } from '../system_context.error-reasons';
 import {
   CreateEnumDefinitionDto,
   EnumDefinitionResponseDto,
@@ -124,6 +125,10 @@ export class DynamicEnumsService {
     const options = (
       await this.contextRepo.findEnumOptions(em, version.id)
     ).filter((option) => option.enabled);
+    const nombresEs = await this.contextRepo.findSpanishDisplays(
+      em,
+      options.map((option) => option.conceptId),
+    );
 
     return {
       code: definition.code,
@@ -144,6 +149,7 @@ export class DynamicEnumsService {
         conceptId: option.conceptId,
         code: option.code,
         display: option.display,
+        displayEs: nombresEs.get(option.conceptId),
         ordinal: option.ordinal,
         isDefault: option.isDefault ?? false,
       })),
@@ -514,6 +520,15 @@ export class DynamicEnumsService {
         });
       }
 
+      // Sin esta espera, dos requests paralelos por el mismo campo ven ambos
+      // "libre" y crean dos bindings activos: la resolución posterior
+      // (`findOne`) quedaría indeterminada.
+      await this.contextRepo.lockEnumTarget(
+        tx,
+        dto.targetSchemaName,
+        dto.targetEntityName,
+        dto.targetFieldName,
+      );
       const existing = await this.contextRepo.findEnumBindingByTarget(
         tx,
         dto.targetSchemaName,
@@ -528,6 +543,7 @@ export class DynamicEnumsService {
             target: `${dto.targetSchemaName}.${dto.targetEntityName}.${dto.targetFieldName}`,
             bindingId: existing.id,
           },
+          SystemContextErrorReason.SYSTEM_CONTEXT_BINDING_CONFLICT,
         );
       }
 

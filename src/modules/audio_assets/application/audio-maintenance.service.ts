@@ -2,8 +2,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import { createHash } from 'node:crypto';
 import { FILE_STORAGE_ADAPTER, type FileStorageAdapter } from '../../../common';
 import { loadAudioEnv } from '../audio.env';
-import { AudioAssetsRepository } from '../repositories/audio-assets.repository';
-import { AudioMaintenanceRepository } from '../repositories/audio-maintenance.repository';
+import { AudioAssetsRepository } from '../infrastructure/repositories/audio-assets.repository';
+import { AudioMaintenanceRepository } from '../infrastructure/repositories/audio-maintenance.repository';
 
 export interface VerifyAudioAssetsResult {
   checked: number;

@@ -6,8 +6,14 @@ import {
   MessagingController,
   MessagingInternalController,
   ProviderWebhooksController,
+  WebPushController,
 } from './controllers';
-import { OutboxService, QueuesService, NotificationsService } from './services';
+import {
+  OutboxService,
+  QueuesService,
+  NotificationsService,
+  WebPushService,
+} from './services';
 import {
   OutboxRepository,
   QueuesRepository,
@@ -32,6 +38,7 @@ import { NotificationsGateway } from './gateways';
     MessagingController,
     MessagingInternalController,
     ProviderWebhooksController,
+    WebPushController,
   ],
   providers: [
     OutboxRepository,
@@ -41,6 +48,7 @@ import { NotificationsGateway } from './gateways';
     OutboxService,
     QueuesService,
     NotificationsService,
+    WebPushService,
     // Auth del gateway WS — igual que en `CommunityMessagingModule`, no es un
     // `APP_GUARD` (los gateways no pasan por el pipeline HTTP de Nest) y se
     // provee acá explícitamente para que `NotificationsGateway` lo inyecte.
@@ -50,6 +58,6 @@ import { NotificationsGateway } from './gateways';
   // `NotificationsService` se exporta para que otros dominios puedan pedir un
   // envío (p. ej. IAM al verificar el correo del auto-registro) sin duplicar la
   // lógica de consentimiento, rebote y evidencia que vive aquí.
-  exports: [OutboxService, QueuesService, NotificationsService],
+  exports: [OutboxService, QueuesService, NotificationsService, WebPushService],
 })
 export class MessagingModule {}

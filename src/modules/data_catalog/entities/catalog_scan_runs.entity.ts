@@ -2,31 +2,37 @@ import { Entity, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 import { randomUUID } from 'node:crypto';
 
 /**
- * Corrida de descubrimiento técnico (`data_catalog.catalog_scan_runs`).
- *
- * Es a la vez el job durable y su evidencia: se acepta en QUEUED, un worker la
- * reclama con lease y la cierra con contadores, huella del snapshot y
- * limitaciones del conector. No se reescribe una vez terminal.
+ * Mapea la entidad persistente asociada a `catalog_scan_runs`.
  */
 @Entity({ schema: 'data_catalog', tableName: 'catalog_scan_runs' })
 export class CatalogScanRuns {
-  /** Identificador de la corrida. */
+  /**
+   * Identificador único de la instancia.
+   */
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  /** Fuente escaneada; hoy sólo `primary` (la base de la propia API). */
+  /**
+   * Valor de source code mantenido por la instancia.
+   */
   @Property({ fieldName: 'source_code', columnType: 'varchar' })
   sourceCode!: string;
 
-  /** Alcance del escaneo; `FULL` es el único que puede inferir desapariciones. */
+  /**
+   * Valor de mode mantenido por la instancia.
+   */
   @Property({ columnType: 'varchar' })
   mode!: string;
 
-  /** QUEUED → RUNNING → SUCCEEDED | FAILED | CANCELLED. */
+  /**
+   * Valor de status mantenido por la instancia.
+   */
   @Property({ columnType: 'varchar' })
   status!: string;
 
-  /** Clave de idempotencia enviada por el solicitante, única por usuario. */
+  /**
+   * Valor de idempotency key mantenido por la instancia.
+   */
   @Property({
     fieldName: 'idempotency_key',
     columnType: 'varchar',
@@ -34,15 +40,21 @@ export class CatalogScanRuns {
   })
   idempotencyKey?: string;
 
-  /** Quién pidió la corrida. */
-  @Property({ fieldName: 'requested_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  /**
+   * Identificador asociado a requested by user.
+   */
+  @Property({ fieldName: 'requested_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   requestedByUserId?: string;
 
-  /** Momento de la aceptación durable. */
+  /**
+   * Valor de requested at mantenido por la instancia.
+   */
   @Property({ fieldName: 'requested_at', columnType: 'timestamptz' })
   requestedAt!: Date;
 
-  /** Primer momento en que un worker la tomó. */
+  /**
+   * Valor de started at mantenido por la instancia.
+   */
   @Property({
     fieldName: 'started_at',
     columnType: 'timestamptz',
@@ -50,7 +62,9 @@ export class CatalogScanRuns {
   })
   startedAt?: Date;
 
-  /** Cierre en un estado terminal. */
+  /**
+   * Valor de finished at mantenido por la instancia.
+   */
   @Property({
     fieldName: 'finished_at',
     columnType: 'timestamptz',
@@ -58,7 +72,9 @@ export class CatalogScanRuns {
   })
   finishedAt?: Date;
 
-  /** Intención de cancelar; no es la cancelación, que la confirma el runner. */
+  /**
+   * Valor de cancel requested at mantenido por la instancia.
+   */
   @Property({
     fieldName: 'cancel_requested_at',
     columnType: 'timestamptz',
@@ -66,11 +82,15 @@ export class CatalogScanRuns {
   })
   cancelRequestedAt?: Date;
 
-  /** Token del worker que tiene la corrida; sirve de fencing al cerrarla. */
+  /**
+   * Valor de lease owner mantenido por la instancia.
+   */
   @Property({ fieldName: 'lease_owner', columnType: 'varchar', nullable: true })
   leaseOwner?: string;
 
-  /** Vencido el lease, otro worker puede recuperar la corrida. */
+  /**
+   * Valor de lease expires at mantenido por la instancia.
+   */
   @Property({
     fieldName: 'lease_expires_at',
     columnType: 'timestamptz',
@@ -78,11 +98,15 @@ export class CatalogScanRuns {
   })
   leaseExpiresAt?: Date;
 
-  /** Intentos consumidos (cada reclamo suma uno). */
+  /**
+   * Valor de attempt mantenido por la instancia.
+   */
   @Property({ columnType: 'int' })
   attempt!: number;
 
-  /** Versión del motor observado. */
+  /**
+   * Valor de engine version mantenido por la instancia.
+   */
   @Property({
     fieldName: 'engine_version',
     columnType: 'varchar',
@@ -90,11 +114,15 @@ export class CatalogScanRuns {
   })
   engineVersion?: string;
 
-  /** Versión del conector que produjo la evidencia. */
+  /**
+   * Valor de connector version mantenido por la instancia.
+   */
   @Property({ fieldName: 'connector_version', columnType: 'varchar' })
   connectorVersion!: string;
 
-  /** Schemas excluidos por diseño (sistema, internos de extensiones). */
+  /**
+   * Valor de excluded schemas mantenido por la instancia.
+   */
   @Property({
     fieldName: 'excluded_schemas',
     type: 'json',
@@ -103,11 +131,15 @@ export class CatalogScanRuns {
   })
   excludedSchemas?: unknown;
 
-  /** Limitaciones del conector declaradas en la corrida. */
+  /**
+   * Valor de limitations mantenido por la instancia.
+   */
   @Property({ type: 'json', columnType: 'jsonb', nullable: true })
   limitations?: unknown;
 
-  /** Contadores del resultado; null mientras la corrida no termina. */
+  /**
+   * Valor de objects observed mantenido por la instancia.
+   */
   @Property({
     fieldName: 'objects_observed',
     columnType: 'int',
@@ -115,6 +147,9 @@ export class CatalogScanRuns {
   })
   objectsObserved?: number;
 
+  /**
+   * Valor de columns observed mantenido por la instancia.
+   */
   @Property({
     fieldName: 'columns_observed',
     columnType: 'int',
@@ -122,12 +157,21 @@ export class CatalogScanRuns {
   })
   columnsObserved?: number;
 
+  /**
+   * Valor de objects added mantenido por la instancia.
+   */
   @Property({ fieldName: 'objects_added', columnType: 'int', nullable: true })
   objectsAdded?: number;
 
+  /**
+   * Valor de objects changed mantenido por la instancia.
+   */
   @Property({ fieldName: 'objects_changed', columnType: 'int', nullable: true })
   objectsChanged?: number;
 
+  /**
+   * Valor de objects not observed mantenido por la instancia.
+   */
   @Property({
     fieldName: 'objects_not_observed',
     columnType: 'int',
@@ -135,6 +179,9 @@ export class CatalogScanRuns {
   })
   objectsNotObserved?: number;
 
+  /**
+   * Valor de objects reappeared mantenido por la instancia.
+   */
   @Property({
     fieldName: 'objects_reappeared',
     columnType: 'int',
@@ -142,12 +189,21 @@ export class CatalogScanRuns {
   })
   objectsReappeared?: number;
 
+  /**
+   * Valor de columns added mantenido por la instancia.
+   */
   @Property({ fieldName: 'columns_added', columnType: 'int', nullable: true })
   columnsAdded?: number;
 
+  /**
+   * Valor de columns changed mantenido por la instancia.
+   */
   @Property({ fieldName: 'columns_changed', columnType: 'int', nullable: true })
   columnsChanged?: number;
 
+  /**
+   * Valor de columns not observed mantenido por la instancia.
+   */
   @Property({
     fieldName: 'columns_not_observed',
     columnType: 'int',
@@ -155,7 +211,9 @@ export class CatalogScanRuns {
   })
   columnsNotObserved?: number;
 
-  /** Huella SHA-256 de la estructura observada (sin estadísticas). */
+  /**
+   * Valor de snapshot hash mantenido por la instancia.
+   */
   @Property({
     fieldName: 'snapshot_hash',
     columnType: 'varchar',
@@ -163,27 +221,45 @@ export class CatalogScanRuns {
   })
   snapshotHash?: string;
 
-  /** Código estable del fallo, si lo hubo. */
+  /**
+   * Valor de error code mantenido por la instancia.
+   */
   @Property({ fieldName: 'error_code', columnType: 'varchar', nullable: true })
   errorCode?: string;
 
-  /** Mensaje saneado del fallo. */
+  /**
+   * Valor de error message mantenido por la instancia.
+   */
   @Property({ fieldName: 'error_message', columnType: 'text', nullable: true })
   errorMessage?: string;
 
+  /**
+   * Fecha y hora en que se creó el registro.
+   */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
   createdAt!: Date;
 
+  /**
+   * Fecha y hora de la última actualización.
+   */
   @Property({ fieldName: 'updated_at', columnType: 'timestamptz' })
   updatedAt!: Date;
 
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  /**
+   * Identificador asociado a created by user.
+   */
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   createdByUserId?: string;
 
-  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  /**
+   * Identificador asociado a updated by user.
+   */
+  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   updatedByUserId?: string;
 
-  /** Concurrencia optimista. */
+  /**
+   * Versión usada para controlar actualizaciones concurrentes.
+   */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
 }

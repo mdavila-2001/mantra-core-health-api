@@ -45,27 +45,38 @@ function build() {
   };
   // Por defecto no hay casa matriz georreferenciada (subtarea 1.3).
   const addressesRepo = {
-    findVigenteByOwnerAndUse: mockFn(() => Promise.resolve(null)),
+    findCurrentByOwnerAndUse: mockFn(() => Promise.resolve(null)),
   };
   // Por defecto la organización no declaró representante ni gerencias
   // (subtarea 1.4); los tests que las ejercen sobrescriben estos dobles.
   const legalRepo = {
     listLegalRepsByTenant: mockFn(() => Promise.resolve([])),
     findPersonsByIds: mockFn(() => Promise.resolve(new Map())),
+    // Por defecto la carpeta legal está vacía; los tests de la carpeta la llenan.
+    listAffiliationDocsByTenant: mockFn(() => Promise.resolve([])),
   };
   const identifiersRepo = {
     findByIds: mockFn(() => Promise.resolve(new Map())),
   };
   const contactPointsRepo = {
-    findVigentesByOwners: mockFn(() => Promise.resolve([])),
+    findAllCurrentByOwners: mockFn(() => Promise.resolve([])),
   };
   // El mapa va al revés que en el servicio (código -> concepto), como el real.
   const concepts = {
     resolve: mockFn(() =>
       Promise.resolve({
-        documentType: new Map(),
+        documentType: new Map([
+          ['ESCRITURA_CONSTITUCION', 'ct-doc-constitucion'],
+          ['NIT_EXHIBICION', 'ct-doc-nit'],
+          ['MATRICULA_SEPREC', 'ct-doc-seprec'],
+          ['PODER_REPRESENTANTE_LEGAL', 'ct-doc-poder'],
+        ]),
         issuingAuthority: new Map(),
-        verificationStatus: new Map(),
+        verificationStatus: new Map([
+          ['PENDIENTE', 'ct-ver-pendiente'],
+          ['VERIFICADO', 'ct-ver-verificado'],
+          ['RECHAZADO', 'ct-ver-rechazado'],
+        ]),
         representativeRole: new Map([
           ['REPRESENTANTE_LEGAL', 'ct-representante'],
           ['GERENTE_GENERAL', 'ct-general'],
@@ -139,7 +150,7 @@ describe('DirectoryReadService — alcance por organización', () => {
       (s: any) => s.listBranchAssignments(TENANT, 'm1', actor),
     ],
     ['getTenantById', (s: any) => s.getTenantById(TENANT, actor)],
-  ])('%s exige poder leer la organización', async (_nombre, invoke) => {
+  ])('%s exige poder leer la organización', async (_name, invoke) => {
     // Un listado es justo la forma en que un fallo de alcance se vuelve una fuga
     // masiva entre organizaciones.
     const d = build();
@@ -264,11 +275,7 @@ describe('DirectoryReadService.listMemberships', () => {
       membershipRow('m1', '2026-01-01T00:00:00Z'),
       membershipRow('m2', '2026-01-01T00:00:00Z'),
     ]);
-    const first = await d.service.listMemberships(
-      TENANT,
-      { limit: 1 },
-      actor,
-    );
+    const first = await d.service.listMemberships(TENANT, { limit: 1 }, actor);
 
     d.membershipsRepo.findPageByTenant.mockClear();
     d.membershipsRepo.findPageByTenant.mockResolvedValue([]);
@@ -444,7 +451,7 @@ describe('DirectoryReadService.listMemberships', () => {
       });
       // Tal como vuelve MikroORM: `numeric` como string, `null` (no
       // `undefined`) para lo que no aplicara — acá sí aplica.
-      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue({
+      d.addressesRepo.findCurrentByOwnerAndUse.mockResolvedValue({
         latitude: '-17.7833',
         longitude: '-63.1821',
       });
@@ -501,6 +508,91 @@ describe('DirectoryReadService.listMemberships', () => {
      * Una membresía viva contra una organización que ya no está no es culpa de
      * quien pregunta: se omite en vez de romperle el panel.
      */
+    describe('carpeta legal', () => {
+      const conTenant = (d: ReturnType<typeof build>) => {
+        d.membershipsRepo.findActiveByUser.mockResolvedValue([
+          { tenantId: 'ten-1', tenantRoleConceptId: DIR.ROLE_OWNER },
+        ]);
+        d.tenantsRepo.findById.mockResolvedValue({
+          ...tenantRow('ten-1', 'LAB-1'),
+          legalEntityTypeConceptId: CONCEPTS.LEGAL_ENTITY_SRL,
+        });
+      };
+      const doc = (overrides: Record<string, unknown>) => ({
+        documentTypeConceptId: 'ct-doc-nit',
+        verificationStatusConceptId: 'ct-ver-pendiente',
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+        createdAt: new Date('2026-05-01T00:00:00Z'),
+        ...overrides,
+      });
+
+      it('publica la forma societaria por su código, no por el concepto', async () => {
+        const d = build();
+        conTenant(d);
+
+        const output = await d.service.listMyTenants(actor);
+
+        expect(output.items[0].legalEntityType).toBe('SRL');
+        expect(output.items[0]).not.toHaveProperty('legalDocuments');
+        expect(output.items[0]).not.toHaveProperty('taxIdentifier');
+      });
+
+      it('lista los papeles en orden canónico con su estado, y saca el NIT de su documento', async () => {
+        const d = build();
+        conTenant(d);
+        d.legalRepo.listAffiliationDocsByTenant.mockResolvedValue([
+          doc({
+            documentTypeConceptId: 'ct-doc-poder',
+            verificationStatusConceptId: 'ct-ver-verificado',
+          }),
+          doc({
+            documentNumber: '1020304050',
+            registeredAt: new Date('2026-05-01'),
+          }),
+          doc({ documentTypeConceptId: 'ct-doc-constitucion' }),
+        ]);
+
+        const output = await d.service.listMyTenants(actor);
+
+        expect(output.items[0].legalDocuments).toEqual([
+          { role: 'CONSTITUTION_DOC', verificationStatus: 'PENDIENTE' },
+          {
+            role: 'TAX_IDENTIFIER_DOC',
+            verificationStatus: 'PENDIENTE',
+            documentNumber: '1020304050',
+            registeredAt: new Date('2026-05-01'),
+          },
+          { role: 'POWER_OF_ATTORNEY_DOC', verificationStatus: 'VERIFICADO' },
+        ]);
+        expect(output.items[0].taxIdentifier).toBe('1020304050');
+      });
+
+      it('ante dos filas del mismo papel gana la más reciente, y las dadas de baja no cuentan', async () => {
+        const d = build();
+        conTenant(d);
+        d.legalRepo.listAffiliationDocsByTenant.mockResolvedValue([
+          doc({
+            documentTypeConceptId: 'ct-doc-seprec',
+            verificationStatusConceptId: 'ct-ver-rechazado',
+            createdAt: new Date('2026-04-01T00:00:00Z'),
+          }),
+          doc({
+            documentTypeConceptId: 'ct-doc-seprec',
+            createdAt: new Date('2026-06-01T00:00:00Z'),
+          }),
+          doc({ statusConceptId: 'baja' }),
+          doc({ documentTypeConceptId: 'ct-desconocido' }),
+        ]);
+
+        const output = await d.service.listMyTenants(actor);
+
+        expect(output.items[0].legalDocuments).toEqual([
+          { role: 'COMMERCE_REGISTRY_DOC', verificationStatus: 'PENDIENTE' },
+        ]);
+        expect(output.items[0]).not.toHaveProperty('taxIdentifier');
+      });
+    });
+
     it('una organización que ya no existe se omite en vez de fallar', async () => {
       const d = build();
       d.membershipsRepo.findActiveByUser.mockResolvedValue([
@@ -594,7 +686,7 @@ describe('DirectoryReadService.listMemberships', () => {
       d.identifiersRepo.findByIds.mockResolvedValue(
         new Map([['ci-1', { id: 'ci-1', value: '4872190 SC' }]]),
       );
-      d.contactPointsRepo.findVigentesByOwners.mockResolvedValue([
+      d.contactPointsRepo.findAllCurrentByOwners.mockResolvedValue([
         {
           ownerId: 'person-rep',
           systemConceptId: CONCEPTS.CONTACT_EMAIL,
@@ -711,7 +803,7 @@ describe('DirectoryReadService.listMemberships', () => {
         ]),
       );
       d.identifiersRepo.findByIds.mockResolvedValue(new Map());
-      d.contactPointsRepo.findVigentesByOwners.mockResolvedValue([
+      d.contactPointsRepo.findAllCurrentByOwners.mockResolvedValue([
         {
           ownerId: 'person-rep2',
           systemConceptId: CONCEPTS.CONTACT_EMAIL,

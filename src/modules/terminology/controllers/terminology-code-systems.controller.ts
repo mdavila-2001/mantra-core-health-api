@@ -9,7 +9,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { CodeSystemsReadService, CodeSystemsService } from '../services';
 import {
   CreateCodeSystemDto,
@@ -80,6 +85,11 @@ export class TerminologyCodeSystemsController {
    * @param user - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de create code system conforme al contrato `Promise<CodeSystemResponseDto>`.
    */
+  @Audited({
+    action: 'CODE_SYSTEM_CREATED',
+    entity: 'code_system',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -99,6 +109,11 @@ export class TerminologyCodeSystemsController {
    * @param user - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de create version conforme al contrato `Promise<CodeSystemVersionResponseDto>`.
    */
+  @Audited({
+    action: 'CODE_SYSTEM_VERSION_CREATED',
+    entity: 'code_system_version',
+    entityId: 'result.id',
+  })
   @Post(':id/versions')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

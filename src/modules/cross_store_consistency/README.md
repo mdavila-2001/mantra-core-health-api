@@ -119,7 +119,7 @@ MANTENIMIENTO
   admin/archive-jobs ──────────────> sin manifiesto frío no se purga lo caliente
 ```
 
-## Reglas de negocio
+## Business rules
 
 - **Un dataset no se proyecta sobre sí mismo.** Eso no es una proyección: es un bucle, y el canónico
   dejaría de ser el único origen.
@@ -168,7 +168,7 @@ MANTENIMIENTO
 qué clave, si se confirmó, hasta dónde se ha leído, qué no cuadró y qué evidencia hay de que un
 borrado se cumplió. La escritura real la hace el worker de cada backend.
 
-## Permisos
+## Permissions
 
 `DATA_GOVERNANCE_ADMIN` define proyecciones, repara derivas, mueve datos y reprocesa la cola muerta.
 `PRIVACY_OFFICER` / `DPO` solicitan y cierran borrados. `PROJECTION_WORKER` entrega y manda a cola
@@ -184,7 +184,7 @@ desde el canónico es una decisión de gobierno.
 
 Ninguna ruta es pública.
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE` sobre el SLO al hacer upsert, sobre el intento de entrega, sobre el **checkpoint** —dos
 consumidores de la misma partición no pueden avanzarlo a la vez—, sobre la entrada de cola muerta, la
@@ -200,9 +200,9 @@ ya tomó.
 detectada, solicitud de borrado, ejecución, referencias residuales, cierre y archivado. Es un módulo
 donde casi todo lo que pasa merece atención. No se loguean payloads ni localizadores.
 
-## Pruebas
+## Tests
 
-`corepack yarn test src/modules/cross_store_consistency --runInBand --silent` — 6 suites y 99 pruebas aprobadas durante la revisión. El módulo conserva control e idempotencia; la confirmación física depende de los workers y adaptadores de cada store. Ver [auditoría backend](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/cross_store_consistency.md).
+`corepack yarn test src/modules/cross_store_consistency --runInBand --silent` — 6 suites y 99 pruebas aprobadas durante la revisión. El módulo conserva control e idempotencia; la confirmación física depende de los workers y adaptadores de cada store.
 
 ## Divergencias con el caso de uso v3.9
 
@@ -212,7 +212,7 @@ donde casi todo lo que pasa merece atención. No se loguean payloads ni localiza
 - **UC-62-03 y UC-62-06 no tienen ruta.** Los dos se declaran *internos*, parte del commit de otro
   caso de uso, y así están implementados.
 
-## Pendiente
+## Fuera de este módulo
 
 - **La escritura real en los stores secundarios y el borrado real en ellos**: los hacen los workers
   de cada backend. Este módulo lleva el control.
@@ -224,7 +224,7 @@ donde casi todo lo que pasa merece atención. No se loguean payloads ni localiza
 - **Disparo por `reconciliation_interval_minutes`** (UC-62-05): el SLO lo declara; el planificador lo
   ejecuta.
 - **Purga real de `redis_runtime.*_cache_entries`** (UC-62-12): se encola el job y se publica el
-  evento. Ese esquema es del módulo 56, **sin asignar**.
+  evento; la purga la hace quien opera ese esquema.
 - **Movimiento físico de payloads y verificación del `manifest_hash` antes de purgar el origen**
   (UC-62-13): el job se registra; el movimiento es del módulo 60.
 - **`audit.audit_events`**: el caso de uso lo declara en los catorce. El registro de auditoría es del

@@ -11,8 +11,8 @@ function parse(csv: string) {
 /** Arma el fixture `ok-50`: cincuenta conceptos sintéticos bien formados. */
 function ok50(): string {
   const rows = Array.from({ length: 50 }, (_, index) => {
-    const numero = String(index + 1).padStart(3, '0');
-    return `ZZ-${numero},Ejemplo ${numero},Definición del ejemplo ${numero}`;
+    const ordinal = String(index + 1).padStart(3, '0');
+    return `ZZ-${ordinal},Ejemplo ${ordinal},Definición del ejemplo ${ordinal}`;
   });
   return ['code,display,definition', ...rows].join('\n') + '\n';
 }

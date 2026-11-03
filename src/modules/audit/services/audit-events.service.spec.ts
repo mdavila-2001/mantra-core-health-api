@@ -9,6 +9,8 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { AuditEventsService } from './audit-events.service';
+import { AuditLogRepository } from '../repositories/audit-log.repository';
+import { AuditErrorReason } from '../audit.error-reasons';
 import { CONCEPTS } from '../../../common';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
@@ -129,6 +131,139 @@ describe('AuditEventsService', () => {
       expect(res.verified).toBe(false);
       expect(res.brokenAt).toBe('x1');
     });
+  });
+
+  describe('verifyIntegrity: cadena larga y verificación parcial (AUD-01)', () => {
+    /** Cadena sellada de `n` eslabones (más que una página de 5000). */
+    function sealedChain(n: number, tamperAt?: number) {
+      const chain: any[] = [];
+      let prev: string | undefined;
+      for (let i = 0; i < n; i += 1) {
+        const link: any = {
+          id: `l${String(i).padStart(6, '0')}`,
+          userId: 'u',
+          action: 'A',
+          entity: 'e',
+          outcomeConceptId: CONCEPTS.OUTCOME_SUCCESS,
+          previousHash: prev,
+          recordedAt: new Date(Date.UTC(2026, 0, 1) + i * 1000),
+        };
+        link.recordHash = AuditLogRepository.hash(
+          prev,
+          AuditLogRepository.content(link),
+          link.recordedAt,
+        );
+        prev = link.recordHash;
+        chain.push(link);
+      }
+      if (tamperAt !== undefined) chain[tamperAt].action = 'ALTERADA';
+      return chain;
+    }
+
+    /** Simula `findChain` paginado por cursor sobre la cadena en memoria. */
+    function paged(d: ReturnType<typeof build>, chain: any[]) {
+      d.auditLogRepo.findChain.mockImplementation(
+        async (_tx: any, _tenant: any, limit: number, after?: any) => {
+          const start = after
+            ? chain.findIndex((l) => l.id === after.id) + 1
+            : 0;
+          return chain.slice(start, start + limit);
+        },
+      );
+    }
+
+    it('correcto: cadena íntegra de más de 5000 eslabones => verified, complete y conteo real', async () => {
+      const d = build();
+      paged(d, sealedChain(5003));
+      const res = await d.service.verifyIntegrity({}, actor);
+      expect(res).toMatchObject({
+        verified: true,
+        complete: true,
+        checkedCount: 5003,
+        brokenAt: null,
+        attestationId: 'a1',
+      });
+      expect(d.auditLogRepo.append).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          action: 'INTEGRITY_ATTESTATION',
+          outcomeConceptId: CONCEPTS.OUTCOME_SUCCESS,
+        }),
+      );
+    });
+
+    it('error: una alteración posterior al primer corte se detecta y se atesta como falla', async () => {
+      const d = build();
+      paged(d, sealedChain(5003, 5001));
+      const res = await d.service.verifyIntegrity({}, actor);
+      expect(res).toMatchObject({
+        verified: false,
+        complete: true,
+        brokenAt: 'l005001',
+        checkedCount: 5001,
+        attestationId: 'a1',
+      });
+      expect(d.auditLogRepo.append).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          outcomeConceptId: CONCEPTS.OUTCOME_FAILURE,
+          entityId: 'l005001',
+        }),
+      );
+    });
+
+    it('límite: diagnóstico menor al total => parcial, sin atestación positiva', async () => {
+      const d = build();
+      paged(d, sealedChain(20));
+      const res = await d.service.verifyIntegrity({ limit: 10 }, actor);
+      expect(res).toEqual({
+        verified: false,
+        complete: false,
+        checkedCount: 10,
+        brokenAt: null,
+        attestationId: null,
+      });
+      expect(d.auditLogRepo.append).not.toHaveBeenCalled();
+    });
+
+    it('límite: diagnóstico igual al total => completo y verificado', async () => {
+      const d = build();
+      paged(d, sealedChain(10));
+      const res = await d.service.verifyIntegrity({ limit: 10 }, actor);
+      expect(res).toMatchObject({
+        verified: true,
+        complete: true,
+        checkedCount: 10,
+      });
+      expect(d.auditLogRepo.append).toHaveBeenCalledTimes(1);
+    });
+
+    it('un diagnóstico parcial que encuentra un eslabón roto atesta la falla', async () => {
+      const d = build();
+      paged(d, sealedChain(20, 3));
+      const res = await d.service.verifyIntegrity({ limit: 10 }, actor);
+      expect(res).toMatchObject({
+        verified: false,
+        brokenAt: 'l000003',
+        attestationId: 'a1',
+      });
+    });
+
+    it.each([0, -1, 1.5, 100001])(
+      'falla catalogada: límite %p => 400 AUDIT_INTEGRITY_RANGE_INVALID sin fila WORM',
+      async (limit) => {
+        const d = build();
+        await expect(
+          d.service.verifyIntegrity({ limit }, actor),
+        ).rejects.toMatchObject({
+          status: 400,
+          code: 'VALIDATION_FAILED',
+          reason: AuditErrorReason.INTEGRITY_RANGE_INVALID,
+        });
+        expect(d.em.transactional).not.toHaveBeenCalled();
+        expect(d.auditLogRepo.append).not.toHaveBeenCalled();
+      },
+    );
   });
 
   describe('applyRetention (UC-10-09)', () => {

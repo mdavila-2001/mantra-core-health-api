@@ -1,0 +1,363 @@
+import { jest } from '@jest/globals';
+
+import {
+  BOLIVIA_CARRIERS,
+  BOLIVIA_CURATED_CARRIERS,
+  BOLIVIA_HEALTH_PLANS,
+  BOLIVIA_PUBLIC_INSURERS,
+  carrierId,
+  carrierPlanId,
+  carrierProductId,
+  declaredPlanSector,
+} from '../../../../common/seed/bolivia-insurance.catalog';
+import { CONCEPTS } from '../../../../common/constants/concepts';
+import { DIR } from '../../../directory/directory.concepts';
+import { INS } from '../../domain/insurance.concepts';
+import { InsuranceCatalogService } from './insurance-catalog.service';
+
+const mockFn = (impl?: any): any => (jest.fn as any)(impl);
+
+const BISA = 'BO_ASEG_BISA_SEGUROS_Y_REASEGUROS_S_A';
+const CNS = 'BO_PUB_CNS';
+
+/**
+ * Arma el servicio con un `EntityManager` que responde por tipo de entidad.
+ *
+ * @param rows - Aseguradoras, productos y planes que la base «tiene».
+ * @returns El servicio y el espía del `find`.
+ */
+function build(rows: {
+  carriers: unknown[];
+  products: unknown[];
+  plans: unknown[];
+  /** Códigos de privadas que la consulta de cuenta devuelve (por defecto, todas las pedidas). */
+  withAccount?: string[];
+}) {
+  const execute = mockFn((sql: string, params: unknown[]) => {
+    const asked = params.slice(0, -7) as string[];
+    const keep = rows.withAccount
+      ? asked.filter((id) => rows.withAccount!.some((c) => carrierId(c) === id))
+      : asked;
+    return Promise.resolve(keep.map((id) => ({ id })));
+  });
+  const find = mockFn((entity: { name: string }) => {
+    if (entity.name === 'InsuranceCarriers')
+      return Promise.resolve(rows.carriers);
+    if (entity.name === 'InsuranceProducts')
+      return Promise.resolve(rows.products);
+    return Promise.resolve(rows.plans);
+  });
+  const service = new InsuranceCatalogService({
+    find,
+    getConnection: () => ({ execute }),
+  } as never);
+  return { service, find, execute };
+}
+
+/** Una aseguradora tal como la devuelve la base. */
+const carrierRow = (code: string, sigla: string) => ({
+  id: carrierId(code),
+  carrierCode: code,
+  legalName: `${sigla} S.A.`,
+  sigla,
+  statusConceptId: INS.CARRIER_ACTIVE,
+});
+
+describe('InsuranceCatalogService', () => {
+  it('devuelve las aseguradoras con sus planes anidados', async () => {
+    const d = build({
+      carriers: [carrierRow(BISA, 'BISA')],
+      products: [
+        { id: carrierProductId(BISA), insuranceCarrierId: carrierId(BISA) },
+      ],
+      plans: [
+        {
+          id: carrierPlanId(BISA, 'RED_MAX'),
+          insuranceProductId: carrierProductId(BISA),
+          planCode: `${BISA}_RED_MAX`,
+          name: 'Red Max',
+          statusConceptId: INS.PLAN_ACTIVE,
+        },
+      ],
+    });
+
+    const { carriers } = await d.service.listHealthCatalog();
+
+    expect(carriers).toHaveLength(1);
+    expect(carriers[0].name).toBe('BISA');
+    expect(carriers[0].isPublic).toBe(false);
+    // El código del plan se sirve sin el prefijo de su aseguradora: es lo que
+    // distingue un plan de otro dentro de la misma compañía.
+    expect(carriers[0].plans).toEqual([
+      { id: carrierPlanId(BISA, 'RED_MAX'), code: 'RED_MAX', name: 'Red Max' },
+    ]);
+  });
+
+  it('marca como público un seguro de la seguridad social', async () => {
+    const d = build({
+      carriers: [carrierRow(CNS, 'CNS')],
+      products: [
+        { id: carrierProductId(CNS), insuranceCarrierId: carrierId(CNS) },
+      ],
+      plans: [],
+    });
+
+    const { carriers } = await d.service.listHealthCatalog();
+
+    expect(carriers[0].isPublic).toBe(true);
+  });
+
+  it('rotula los seguros públicos «Nombre completo - SIGLA» y los privados con su marca', async () => {
+    const isPublic = (code: string, legalName: string, sigla: string) => ({
+      ...carrierRow(code, sigla),
+      legalName,
+    });
+    const d = build({
+      carriers: [
+        isPublic(
+          'BO_PUB_BANCA_PRIVADA',
+          'Caja de Salud de la Banca Privada',
+          'CSBP',
+        ),
+        isPublic(
+          'BO_PUB_CAMINOS',
+          'Caja de Salud de Caminos y Ramas Anexas',
+          'Caja de Caminos',
+        ),
+        carrierRow(BISA, 'BISA'),
+      ],
+      products: [],
+      plans: [],
+    });
+
+    const { carriers } = await d.service.listHealthCatalog();
+
+    expect(carriers.map((c) => c.name).sort()).toEqual([
+      'BISA',
+      'Caja de Salud de Caminos y Ramas Anexas',
+      'Caja de Salud de la Banca Privada - CSBP',
+    ]);
+  });
+
+  it('pide sólo los identificadores del catálogo curado, no todas las aseguradoras', async () => {
+    const d = build({ carriers: [], products: [], plans: [] });
+
+    await d.service.listHealthCatalog();
+    // Las privadas con cuenta se resuelven en una sola consulta con `exists`.
+    expect(d.execute).toHaveBeenCalledTimes(1);
+
+    const filter = d.find.mock.calls[0][1] as {
+      id: { $in: string[] };
+      statusConceptId: string;
+    };
+    expect(filter.id.$in).toHaveLength(
+      BOLIVIA_CARRIERS.length +
+        BOLIVIA_CURATED_CARRIERS.length +
+        BOLIVIA_PUBLIC_INSURERS.length,
+    );
+    expect(filter.statusConceptId).toBe(INS.CARRIER_ACTIVE);
+  });
+
+  describe('seguro privado sólo con cuenta registrada', () => {
+    it('ofrece la privada con cuenta y omite la que no la tiene', async () => {
+      const d = build({
+        carriers: [],
+        products: [],
+        plans: [],
+        withAccount: [BISA],
+      });
+
+      await d.service.listHealthCatalog();
+
+      const ids = (d.find.mock.calls[0][1] as { id: { $in: string[] } }).id.$in;
+      expect(ids).toContain(carrierId(BISA));
+      const sinCuenta = BOLIVIA_CARRIERS.find((c) => c.code !== BISA)!;
+      expect(ids).not.toContain(carrierId(sinCuenta.code));
+    });
+
+    it('no ofrece ninguna privada si ninguna tiene cuenta, pero sí las públicas', async () => {
+      const d = build({
+        carriers: [],
+        products: [],
+        plans: [],
+        withAccount: [],
+      });
+
+      await d.service.listHealthCatalog();
+
+      const ids = (d.find.mock.calls[0][1] as { id: { $in: string[] } }).id.$in;
+      expect(ids).toHaveLength(BOLIVIA_PUBLIC_INSURERS.length);
+      expect(ids).toContain(carrierId(CNS));
+    });
+
+    it('la consulta exige tenant activo, membresía OWNER/ADMIN vigente, usuario y credencial activos', async () => {
+      const d = build({ carriers: [], products: [], plans: [] });
+
+      await d.service.listHealthCatalog();
+
+      const [sql, params] = d.execute.mock.calls[0] as [string, unknown[]];
+      expect(sql).toContain('cr.tenant_id is not null');
+      expect(sql).toContain('t.status_concept_id = ?');
+      expect(sql).toContain('tm.status_concept_id = ?');
+      expect(sql).toContain('tm.tenant_role_concept_id in (?, ?)');
+      expect(sql).toContain('tm.start_date <= now()');
+      expect(sql).toContain('tm.end_date is null or tm.end_date > now()');
+      expect(sql).toContain('u.status_concept_id = ?');
+      expect(sql).toContain('ac.state_concept_id = ?');
+      expect(sql).toContain('ac.expires_at is null or ac.expires_at > now()');
+      expect(params.slice(-7)).toEqual([
+        INS.CARRIER_ACTIVE,
+        CONCEPTS.TENANT_ACTIVE,
+        DIR.MEMBERSHIP_ACTIVE,
+        DIR.ROLE_OWNER,
+        DIR.ROLE_ADMIN,
+        CONCEPTS.USER_ACTIVE,
+        CONCEPTS.STATE_ACTIVE,
+      ]);
+    });
+
+    it('una pública sin cuenta sigue apareciendo, con la misma forma de respuesta', async () => {
+      const d = build({
+        carriers: [carrierRow(CNS, 'CNS')],
+        products: [],
+        plans: [],
+        withAccount: [],
+      });
+
+      const { carriers } = await d.service.listHealthCatalog();
+
+      expect(carriers).toEqual([
+        {
+          id: carrierId(CNS),
+          code: CNS,
+          name: 'CNS S.A. - CNS',
+          legalName: 'CNS S.A.',
+          isPublic: true,
+          plans: [],
+        },
+      ]);
+    });
+  });
+
+  it('no consulta productos ni planes si no hay aseguradoras', async () => {
+    const d = build({ carriers: [], products: [], plans: [] });
+
+    const { carriers } = await d.service.listHealthCatalog();
+
+    expect(carriers).toEqual([]);
+    expect(d.find).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('catálogo de planes sembrado', () => {
+  it('le da plan BASE a todas las aseguradoras, también a las que tienen planes con nombre', () => {
+    // BISA publica cinco planes con nombre y aun así tiene su comodín: quien no
+    // recuerda cuál tiene igual puede declarar su cobertura.
+    expect(declaredPlanSector(carrierPlanId(BISA, 'BASE'))).toBe('private');
+    expect(declaredPlanSector(carrierPlanId(CNS, 'BASE'))).toBe('public');
+  });
+
+  it('clasifica cada plan con nombre en el sector de su aseguradora', () => {
+    for (const plan of BOLIVIA_HEALTH_PLANS) {
+      const expected = BOLIVIA_PUBLIC_INSURERS.some(
+        (i) => i.code === plan.carrierCode,
+      )
+        ? 'public'
+        : 'private';
+      expect(
+        declaredPlanSector(carrierPlanId(plan.carrierCode, plan.code)),
+      ).toBe(expected);
+    }
+  });
+
+  it('no reconoce un plan que no es del catálogo', () => {
+    expect(declaredPlanSector('00000000-0000-0000-0000-000000000000')).toBe(
+      undefined,
+    );
+  });
+
+  it('sólo siembra productos con componente de salud', () => {
+    const codes = BOLIVIA_HEALTH_PLANS.map((p) => p.code);
+    // Vida pura, desgravamen, sepelio, SOAT y rentas vitalicias quedan fuera:
+    // acá se le pregunta al paciente por su cobertura médica.
+    for (const forbidden of [
+      'SOAT',
+      'DESGRAVAMEN',
+      'SEPELIO',
+      'RENTA_VITALICIA',
+    ]) {
+      expect(codes).not.toContain(forbidden);
+    }
+  });
+
+  it('nombra los cinco planes de salud de BISA', () => {
+    const ofBisa = BOLIVIA_HEALTH_PLANS.filter(
+      (p) => p.carrierCode === BISA,
+    ).map((p) => p.code);
+    expect(ofBisa).toEqual([
+      'ADVANCE',
+      'RED_MAX',
+      'INFINITY_GREEN',
+      'MUNDIAL_BLUE',
+      'NARANJA_PLUS',
+    ]);
+  });
+});
+
+describe('catálogo de aseguradoras ampliado (26/10/2026)', () => {
+  const all = [
+    ...BOLIVIA_CARRIERS.map((c) => c.code),
+    ...BOLIVIA_CURATED_CARRIERS.map((c) => c.code),
+    ...BOLIVIA_PUBLIC_INSURERS.map((c) => c.code),
+  ];
+
+  it('no repite códigos entre el listado, las curadas y las públicas', () => {
+    expect(new Set(all).size).toBe(all.length);
+  });
+
+  it('trae todos los entes gestores de la seguridad social de corto plazo', () => {
+    const publicCodes = new Set(BOLIVIA_PUBLIC_INSURERS.map((c) => c.code));
+    for (const code of [
+      'BO_PUB_CNS',
+      'BO_PUB_CPS',
+      'BO_PUB_COSSMIL',
+      'BO_PUB_CBES',
+      'BO_PUB_BANCA_PRIVADA',
+      'BO_PUB_CAMINOS',
+      'BO_PUB_CORDES',
+      'BO_PUB_SINEC',
+      'BO_PUB_SSU',
+      'BO_PUB_SSU_LA_PAZ',
+      'BO_PUB_SSU_COCHABAMBA',
+      'BO_PUB_SSU_SUCRE',
+      'BO_PUB_SSU_ORURO',
+      'BO_PUB_SSU_POTOSI',
+      'BO_PUB_SSU_TARIJA',
+      'BO_PUB_SSU_SANTA_CRUZ',
+      'BO_PUB_SUS',
+    ]) {
+      expect(publicCodes.has(code)).toBe(true);
+    }
+  });
+
+  it('las curadas usan la regla de código del extractor y son del sector privado', () => {
+    for (const carrier of BOLIVIA_CURATED_CARRIERS) {
+      expect(carrier.code).toMatch(/^BO_ASEG_[A-Z0-9_]+$/);
+      expect(declaredPlanSector(carrierPlanId(carrier.code, 'BASE'))).toBe(
+        'private',
+      );
+    }
+    expect(BOLIVIA_CURATED_CARRIERS.map((c) => c.code)).toContain(
+      'BO_ASEG_SEGUROS_PROVIDA_S_A',
+    );
+  });
+
+  it('los entes nuevos son públicos: su plan BASE cae en el sector público', () => {
+    expect(declaredPlanSector(carrierPlanId('BO_PUB_CBES', 'BASE'))).toBe(
+      'public',
+    );
+    expect(
+      declaredPlanSector(carrierPlanId('BO_PUB_SSU_SANTA_CRUZ', 'BASE')),
+    ).toBe('public');
+  });
+});

@@ -16,9 +16,12 @@ import {
 import type { Response } from 'express';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   ParseOptionalLimitPipe,
+  servedContentHeaders,
   type AuthenticatedUser,
+  Roles,
 } from '../../../common';
 import {
   CommunityMessagingService,
@@ -48,7 +51,12 @@ import {
 /** Tope por defecto de filas por página, igual que en el resto de la API. */
 const DEFAULT_PAGE_LIMIT = 50;
 
-/** Endpoints de mensajería social (conversaciones, mensajes directos, recibos). */
+/** Endpoints de mensajería social (conversaciones, mensajes directos, recibos). *
+ * `@Roles()` vacío en cada ruta (O3-3): sin rol global. El servicio exige que
+ * el perfil sea del actor (`assertActsAsMessagingProfile` /
+ * `assertOwnMessagingProfile`) y que sea participante activo de la
+ * conversación; una conversación ajena responde 404.
+ */
 @ApiTags('community-messaging')
 @ApiBearerAuth()
 @Controller('community/conversations')
@@ -65,7 +73,13 @@ export class CommunityMessagingController {
   ) {}
 
   /** Bootstrap: crea una conversación con participantes. */
+  @Audited({
+    action: 'CONVERSATION_CREATED',
+    entity: 'conversation',
+    entityId: 'result.id',
+  })
   @Post()
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Crear una conversación con participantes' })
   createConversation(
@@ -76,7 +90,13 @@ export class CommunityMessagingController {
   }
 
   /** UC-19-06. */
+  @Audited({
+    action: 'DIRECT_MESSAGE_SENT',
+    entity: 'direct_message',
+    entityId: 'result.id',
+  })
   @Post(':conversationId/messages')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Enviar un mensaje directo en la conversación' })
   sendMessage(
@@ -88,7 +108,13 @@ export class CommunityMessagingController {
   }
 
   /** F4.5 · Editar el texto de un mensaje propio. */
+  @Audited({
+    action: 'DIRECT_MESSAGE_EDITED',
+    entity: 'direct_message',
+    entityId: 'param:messageId',
+  })
   @Patch(':conversationId/messages/:messageId')
+  @Roles()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Editar el texto de un mensaje propio' })
   editMessage(
@@ -101,7 +127,13 @@ export class CommunityMessagingController {
   }
 
   /** F4.5 · Eliminar un mensaje propio (lógico: queda «Se eliminó este mensaje»). */
+  @Audited({
+    action: 'DIRECT_MESSAGE_DELETED',
+    entity: 'direct_message',
+    entityId: 'param:messageId',
+  })
   @Delete(':conversationId/messages/:messageId')
+  @Roles()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Eliminar un mensaje propio' })
   deleteMessage(
@@ -119,7 +151,13 @@ export class CommunityMessagingController {
   }
 
   /** UC-19-07. */
+  @Audited({
+    action: 'CONVERSATION_READ_MARKED',
+    entity: 'message_receipt',
+    entityId: 'param:conversationId',
+  })
   @Post(':conversationId/read')
+  @Roles()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Marcar mensajes como leídos (recibos)' })
   markRead(
@@ -131,7 +169,13 @@ export class CommunityMessagingController {
   }
 
   /** F4.4 · Favorita, fijada o archivada, de mi lado. */
+  @Audited({
+    action: 'CONVERSATION_PARTICIPANT_UPDATED',
+    entity: 'conversation_participant',
+    entityId: 'param:conversationId',
+  })
   @Patch(':conversationId/participant')
+  @Roles()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Marcar la conversación como favorita, fijada o archivada',
@@ -145,7 +189,13 @@ export class CommunityMessagingController {
   }
 
   /** F4.6 · Fijar un mensaje en la barra superior del hilo. */
+  @Audited({
+    action: 'DIRECT_MESSAGE_PINNED',
+    entity: 'conversation',
+    entityId: 'param:conversationId',
+  })
   @Post(':conversationId/pin')
+  @Roles()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Fijar un mensaje de la conversación' })
   pinMessage(
@@ -157,7 +207,13 @@ export class CommunityMessagingController {
   }
 
   /** F4.6 · Soltar el mensaje fijado. */
+  @Audited({
+    action: 'DIRECT_MESSAGE_UNPINNED',
+    entity: 'conversation',
+    entityId: 'param:conversationId',
+  })
   @Delete(':conversationId/pin')
+  @Roles()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Soltar el mensaje fijado de la conversación' })
   unpinMessage(
@@ -171,7 +227,12 @@ export class CommunityMessagingController {
   // --- Lecturas (UC-19-14, cara de lectura) ---
 
   /** Personas activas —pacientes y profesionales— con quienes iniciar un chat. */
+  @Audited({
+    action: 'CONVERSATION_CONTACTS_SEARCHED',
+    entity: 'conversation',
+  })
   @Post('contacts/search')
+  @Roles()
   @HttpCode(HttpStatus.OK)
   @Header('Cache-Control', 'private, no-store')
   @ApiOperation({ summary: 'Buscar personas para iniciar una conversación' })
@@ -198,6 +259,7 @@ export class CommunityMessagingController {
    * debe conservar un adjunto clínico después de cerrar sesión.
    */
   @Get(':conversationId/attachments/:fileId/content')
+  @Roles()
   @Header('Cache-Control', 'private, no-store')
   @ApiOperation({
     summary: 'Descargar el adjunto de una conversación (participante activo)',
@@ -216,14 +278,14 @@ export class CommunityMessagingController {
       profileId,
       actor,
     );
-    res.setHeader('Content-Type', content.mimeType);
-    if (content.originalName) {
-      // Codificado, igual que en `CommonFilesController`: un nombre de archivo
-      // con comillas o saltos de línea podría inyectar cabeceras.
-      res.setHeader(
-        'Content-Disposition',
-        `attachment; filename*=UTF-8''${encodeURIComponent(content.originalName)}`,
-      );
+    // `servedContentHeaders` no confía en el `mimeType` persistido: una imagen
+    // rasterizada sale `inline` (el hilo la muestra y se puede abrir en otra
+    // pestaña); cualquier otro tipo sale `attachment`, y uno fuera de la lista
+    // cerrada (SVG, HTML…) como `application/octet-stream`. Siempre `nosniff`.
+    for (const [name, value] of Object.entries(
+      servedContentHeaders(content.mimeType, content.originalName),
+    )) {
+      res.setHeader(name, value);
     }
     res.send(content.buffer);
   }
@@ -235,6 +297,7 @@ export class CommunityMessagingController {
    * (nombre del otro lado o texto del último mensaje).
    */
   @Get()
+  @Roles()
   @ApiOperation({ summary: 'Conversaciones activas de un perfil' })
   listConversations(
     @Query('profileId', ParseUUIDPipe) profileId: string,
@@ -252,6 +315,7 @@ export class CommunityMessagingController {
 
   /** Mensajes de una conversación en la que se participa. */
   @Get(':conversationId/messages')
+  @Roles()
   @ApiOperation({ summary: 'Mensajes de una conversación' })
   listMessages(
     @Param('conversationId', ParseUUIDPipe) conversationId: string,
@@ -268,6 +332,7 @@ export class CommunityMessagingController {
 
   /** F4.2 · Quién de los otros está en línea, y si no, cuándo se lo vio. */
   @Get(':conversationId/presence')
+  @Roles()
   @ApiOperation({ summary: 'Presencia de los demás participantes' })
   conversationPresence(
     @Param('conversationId', ParseUUIDPipe) conversationId: string,

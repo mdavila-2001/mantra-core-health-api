@@ -114,7 +114,7 @@ MANTENIMIENTO
   projections/reconcile > actualiza, invalida rutas y CADUCA el riesgo
 ```
 
-## Reglas de negocio
+## Business rules
 
 - **Un evento con `source_version` anterior se descarta** y se devuelve `stale: true`. Los eventos
   llegan sin orden garantizado; aplicar uno viejo devolvería el nodo a un estado que ya no es el
@@ -171,7 +171,7 @@ MANTENIMIENTO
 del worker de analítica. Lo que aporta es el versionado de los resultados, la deduplicación, la
 caducidad y la purga completa.
 
-## Permisos
+## Permissions
 
 `GRAPH_PROJECTION_WORKER` y `SYSTEM` proyectan, avanzan corridas, expiran aristas y reconcilian.
 `DATA_GOVERNANCE_ADMIN` y `COMPLIANCE_OFFICER` definen alcances. `GRAPH_ANALYST` y `API_CONSUMER`
@@ -185,7 +185,7 @@ capacidades distintas, y quien puede escribirlo podría fabricar la relación qu
 
 Ninguna ruta es pública.
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE` sobre el nodo y la arista por su clave de origen —dos eventos del mismo agregado
 compiten—, sobre el alcance, la corrida, el hallazgo, el puntaje de riesgo y el job de borrado.
@@ -200,7 +200,7 @@ no bloquearse hasta que la primera termine.
 y reconciliación de un borrado. No se loguean etiquetas de nodo, identificadores ni explicaciones de
 riesgo.
 
-## Pruebas
+## Tests
 
 `corepack yarn test src/modules/graph_intelligence --runInBand --silent` — 4 suites y 87 pruebas
 aprobadas durante la revisión (28 proyección + 19 recorrido + 25 analítica + 15 de delegación).
@@ -217,26 +217,30 @@ aprobadas durante la revisión (28 proyección + 19 recorrido + 25 analítica + 
   ventana en la que el derecho al olvido está solicitado pero no cumplido, sin nada que garantice que
   la segunda llamada llegue.
 
-## Pendiente
+## Fuera de este módulo
 
 - **Cálculo real de comunidades y riesgo**, y evaluación de `traversal_expression`: el worker de
   analítica los aporta. Este módulo gobierna, versiona y registra.
 - **Alta de `graph_projection_definitions` y `graph_rule_definitions`**: las dos tablas se leen pero
   ningún caso de uso del módulo 61 les da un endpoint de alta. No se ha inventado uno.
-- **Comprobación de consentimiento contra `consent.consents` / `consent.privacy_restrictions`**
-  (UC-61-05): el alcance exige `patientProfileId` cuando `requiresPatientContext`, pero no se
-  contrasta contra el módulo 07, que es de la parte de Pablo.
+- **Consentimiento por contexto de paciente (UC-61-05, GRAPH-02):** `traverse` y `findPath` con
+  `patientProfileId` pasan por `GraphConsentGate`, que exige un consentimiento `ACTIVE` del paciente
+  para el propósito declarado, emitido para el tenant activo y vigente, y ninguna restricción de
+  privacidad activa que le aplique al actor. Toda denegación es `403 FORBIDDEN /
+  GRAPH_CONSENT_REQUIRED` y ocurre antes de resolver el nodo, leer la caché o recorrer.
+  `consent.privacy_restrictions` no declara propósito, así que una restricción vigente niega la
+  consulta completa (opción conservadora).
 - **`audit.audit_events`** en cambio de política de acceso, consulta al grafo y triage: el caso de uso
   lo pide. El registro de auditoría es del módulo 06.
 - **`redis_runtime.*_cache_entries`** (UC-61-04, 12): la invalidación se publica por outbox
-  (`GraphAccessScopeChanged`); quien la consume y vacía la caché de sesión es el worker. Ese esquema
-  es del módulo 56, **sin asignar**.
-- **Índice `MULTIVALUE` sobre `member_node_ids[]`**: la depuración de comunidades al borrar recorre
-  las del tenant en memoria. Con volumen alto conviene el operador de arrays de Postgres, que exige
-  el índice que el modelo declara pero el ORM no materializa.
+  (`GraphAccessScopeChanged`); quien la consume y vacía la caché de sesión es el worker.
+- **Índice `MULTIVALUE` sobre `member_node_ids[]`**: el modelo lo declara pero el ORM no lo
+  materializa, así que la depuración de comunidades al borrar recorre las del tenant en memoria.
 
 ## Revisión ALOVIDA
 
-Las mutaciones por UUID todavía no comparan el tenant activo contra el recurso cargado, y el
-recorrido con paciente no contrasta consentimiento. Ver el
-[informe de revisión](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/graph_intelligence.md).
+Las mutaciones por UUID (corrida, definición, arista, scope, regla y hallazgo) toman el tenant de
+`requireTenantId()` y cargan el agregado con `assertGraphResourceInTenant`: ajeno e inexistente
+responden igual (`404 / GRAPH_RESOURCE_OUT_OF_SCOPE`). Un actor de sistema sin tenant declarado
+(`X-Tenant-Id` o `tenantId` en el cuerpo) recibe `412 TENANT_REQUIRED`. El recorrido con paciente
+contrasta consentimiento (ver arriba).

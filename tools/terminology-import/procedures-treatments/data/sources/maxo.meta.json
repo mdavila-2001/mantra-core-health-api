@@ -1,0 +1,18 @@
+{
+  "source": "maxo",
+  "name": "Medical Action Ontology (MAxO)",
+  "publisher": "Monarch Initiative / Medical Action Ontology team",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+  "homepage": "https://github.com/monarch-initiative/MAxO",
+  "retrievedAt": "2026-10-24T00:46:39.056Z",
+  "commit": "59b5d75a454fdf6dc06e237fdab92c5b928d4bd3",
+  "files": {
+    "maxo.obo": {
+      "url": "https://raw.githubusercontent.com/monarch-initiative/MAxO/59b5d75a454fdf6dc06e237fdab92c5b928d4bd3/maxo.obo",
+      "fileUrl": "https://github.com/monarch-initiative/MAxO/blob/59b5d75a454fdf6dc06e237fdab92c5b928d4bd3/maxo.obo",
+      "sha256": "005178e62f2b3a3a173bd10f38b4538d4252b9f6c309574113671469826c60d8",
+      "bytes": 4180499
+    }
+  }
+}

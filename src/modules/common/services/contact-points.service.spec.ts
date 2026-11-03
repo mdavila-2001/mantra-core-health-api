@@ -30,11 +30,11 @@ describe('ContactPointsService', () => {
     const repo = {
       findById: fn(),
       create: fn(),
-      findVigentesByOwner: fn(),
-      findVigentesByOwners: fn(),
-      findVigenteByOwnerAndSystem: fn(),
-      findVigenteByOwnerSystemAndUse: fn(),
-      closeVigente: fn(),
+      findAllCurrentByOwner: fn(),
+      findAllCurrentByOwners: fn(),
+      findCurrentByOwnerAndSystem: fn(),
+      findCurrentByOwnerSystemAndUse: fn(),
+      closeCurrent: fn(),
     };
     const service = new ContactPointsService(
       em as never,

@@ -10,10 +10,21 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
-import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  type AuthenticatedUser,
+  Roles,
+} from '../../../common';
 import { SetOrganizationLogoDto } from '../dto/set-organization-logo.dto';
 import { OrganizationLogoService } from '../services/organization-logo.service';
 
+/**
+ * El logo de una organización. `@Roles()` vacío en cada ruta (O3-3): sin rol
+ * global; `OrganizationLogoService` exige pertenecer a la organización para
+ * leer (`assertCanRead`) y ser OWNER/ADMIN o plataforma para cambiarlo
+ * (`assertCanAdminister`).
+ */
 @ApiTags('directory-tenants')
 @ApiBearerAuth()
 @Controller('tenants/:tenantId/logo')
@@ -21,6 +32,7 @@ export class OrganizationLogoController {
   constructor(private readonly logos: OrganizationLogoService) {}
 
   @Get()
+  @Roles()
   @ApiOperation({ summary: 'Logo de la propia organización' })
   get(
     @Param('tenantId', ParseUUIDPipe) id: string,
@@ -29,7 +41,13 @@ export class OrganizationLogoController {
     return this.logos.get(id, actor);
   }
 
+  @Audited({
+    action: 'TENANT_LOGO_SET',
+    entity: 'tenant',
+    entityId: 'param:tenantId',
+  })
   @Put()
+  @Roles()
   @ApiOperation({
     summary: 'Cambiar o quitar el logo como administrador de la organización',
   })
@@ -42,6 +60,7 @@ export class OrganizationLogoController {
   }
 
   @Get('content')
+  @Roles()
   @Header('Cache-Control', 'private, no-store')
   @ApiOperation({ summary: 'Imagen del logo para miembros de la organización' })
   async content(

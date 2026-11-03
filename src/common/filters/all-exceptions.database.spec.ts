@@ -75,6 +75,7 @@ function bodyOf(response: { json: { mock: { calls: unknown[][] } } }) {
     code?: string;
     message?: string;
     details?: unknown;
+    reason?: string;
   };
 }
 
@@ -163,6 +164,30 @@ describe('AllExceptionsFilter · SQLSTATE del SQL crudo', () => {
 
     expect(response.status).toHaveBeenCalledWith(status);
     expect(bodyOf(response).code).toBe(code);
+  });
+
+  it('23P01 de una restricción del mapa (§0.2 F2–F5) → 409 con su reason', () => {
+    const { filter, host, response } = build();
+
+    filter.catch(
+      pgError('23P01', { constraint: 'ex_encounter_locations_bed_occupancy' }),
+      host,
+    );
+
+    expect(response.status).toHaveBeenCalledWith(HttpStatus.CONFLICT);
+    expect(bodyOf(response).reason).toBe('BED_DOUBLE_OCCUPANCY');
+  });
+
+  it('23P01 de una restricción fuera del mapa conserva el reason genérico', () => {
+    const { filter, host, response } = build();
+
+    filter.catch(
+      pgError('23P01', { constraint: 'ex_appointments_practitioner_time' }),
+      host,
+    );
+
+    expect(response.status).toHaveBeenCalledWith(HttpStatus.CONFLICT);
+    expect(bodyOf(response).reason).toBe('EXCLUSION_CONSTRAINT_VIOLATION');
   });
 
   it('registra tabla y restricción en el log, pero no en la respuesta', () => {

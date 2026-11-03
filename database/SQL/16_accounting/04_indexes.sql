@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 16 · schema accounting
+-- SALUD v4.2.83 · módulo 16 · schema accounting
 -- Generado de diagram_16_accounting.puml — NO editar a mano.
 
 
@@ -560,6 +560,14 @@ CREATE INDEX IF NOT EXISTS "ix_cost_centers_created_by_user_id" ON "accounting".
 
 CREATE INDEX IF NOT EXISTS "ix_cost_centers_updated_by_user_id" ON "accounting"."cost_centers" ("updated_by_user_id");
 
+CREATE INDEX IF NOT EXISTS "ix_cost_centers_tenant_id" ON "accounting"."cost_centers" ("tenant_id");
+
+CREATE INDEX IF NOT EXISTS "ix_cost_centers_clinical_unit_id" ON "accounting"."cost_centers" ("clinical_unit_id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "ux_cost_centers_tenant_id_id" ON "accounting"."cost_centers" ("tenant_id", "id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "ux_cost_centers_unit_active" ON "accounting"."cost_centers" ("clinical_unit_id") WHERE clinical_unit_id IS NOT NULL AND status_concept_id = '38a1d301-f40d-5b17-a695-5e6d605f8b19';
+
 CREATE INDEX IF NOT EXISTS "ix_cost_center_maps_practice_id" ON "accounting"."cost_center_maps" ("practice_id");
 
 CREATE INDEX IF NOT EXISTS "ix_cost_center_maps_source_type_concept_id" ON "accounting"."cost_center_maps" ("source_type_concept_id");
@@ -570,7 +578,7 @@ CREATE INDEX IF NOT EXISTS "ix_cost_center_maps_created_by_user_id" ON "accounti
 
 CREATE INDEX IF NOT EXISTS "ix_cost_center_maps_updated_by_user_id" ON "accounting"."cost_center_maps" ("updated_by_user_id");
 
-CREATE UNIQUE INDEX IF NOT EXISTS "uq_journal_transactions_transaction_number" ON "accounting"."journal_transactions" ("transaction_number");
+CREATE UNIQUE INDEX IF NOT EXISTS "uq_journal_transactions_practice_id_transaction_number" ON "accounting"."journal_transactions" ("practice_id", "transaction_number");
 
 CREATE INDEX IF NOT EXISTS "ix_journal_transactions_practice_id" ON "accounting"."journal_transactions" ("practice_id");
 
@@ -702,6 +710,10 @@ CREATE INDEX IF NOT EXISTS "ix_infrastructure_items_created_by_user_id" ON "acco
 
 CREATE INDEX IF NOT EXISTS "ix_infrastructure_items_updated_by_user_id" ON "accounting"."infrastructure_items" ("updated_by_user_id");
 
+CREATE INDEX IF NOT EXISTS "ix_infrastructure_items_tenant_id" ON "accounting"."infrastructure_items" ("tenant_id");
+
+CREATE INDEX IF NOT EXISTS "ix_infrastructure_items_care_space_id" ON "accounting"."infrastructure_items" ("care_space_id");
+
 CREATE INDEX IF NOT EXISTS "ix_employee_payments_employee_id" ON "accounting"."employee_payments" ("employee_id");
 
 CREATE INDEX IF NOT EXISTS "ix_employee_payments_fiscal_period_id" ON "accounting"."employee_payments" ("fiscal_period_id");
@@ -713,3 +725,29 @@ CREATE INDEX IF NOT EXISTS "ix_employee_payments_status_concept_id" ON "accounti
 CREATE INDEX IF NOT EXISTS "ix_employee_payments_created_by_user_id" ON "accounting"."employee_payments" ("created_by_user_id");
 
 CREATE INDEX IF NOT EXISTS "ix_employee_payments_updated_by_user_id" ON "accounting"."employee_payments" ("updated_by_user_id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "uq_practitioner_simple_accounts_practice_code" ON "accounting"."practitioner_simple_accounts" ("practice_id", "code");
+
+CREATE INDEX IF NOT EXISTS "ix_practitioner_simple_accounts_practice_id" ON "accounting"."practitioner_simple_accounts" ("practice_id");
+
+CREATE INDEX IF NOT EXISTS "ix_practitioner_simple_accounts_created_by_user_id" ON "accounting"."practitioner_simple_accounts" ("created_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_practitioner_simple_accounts_updated_by_user_id" ON "accounting"."practitioner_simple_accounts" ("updated_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_practitioner_simple_records_practice_id" ON "accounting"."practitioner_simple_records" ("practice_id");
+
+CREATE INDEX IF NOT EXISTS "ix_practitioner_simple_records_account_id" ON "accounting"."practitioner_simple_records" ("account_id");
+
+CREATE INDEX IF NOT EXISTS "ix_practitioner_simple_records_created_by_user_id" ON "accounting"."practitioner_simple_records" ("created_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_practitioner_simple_records_updated_by_user_id" ON "accounting"."practitioner_simple_records" ("updated_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_practitioner_simple_transactions_practice_id" ON "accounting"."practitioner_simple_transactions" ("practice_id");
+
+CREATE INDEX IF NOT EXISTS "ix_practitioner_simple_transactions_debit_account_id" ON "accounting"."practitioner_simple_transactions" ("debit_account_id");
+
+CREATE INDEX IF NOT EXISTS "ix_practitioner_simple_transactions_credit_account_id" ON "accounting"."practitioner_simple_transactions" ("credit_account_id");
+
+CREATE INDEX IF NOT EXISTS "ix_practitioner_simple_transactions_created_by_user_id" ON "accounting"."practitioner_simple_transactions" ("created_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_practitioner_simple_transactions_updated_by_user_id" ON "accounting"."practitioner_simple_transactions" ("updated_by_user_id");

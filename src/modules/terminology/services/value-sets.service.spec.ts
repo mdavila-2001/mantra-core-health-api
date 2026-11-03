@@ -604,6 +604,49 @@ describe('ValueSetsService', () => {
       );
     });
 
+    it('filter: pasa las palabras normalizadas (sin tildes ni mayúsculas) al repositorio', async () => {
+      const harness = withDefaultVersion();
+      harness.valueSetsRepo.findMembersPage.mockResolvedValue([]);
+
+      await harness.service.readExpansion('vs-1', {
+        limit: 10,
+        filter: '  Tórax   MANO ',
+      });
+
+      expect(harness.valueSetsRepo.findMembersPage).toHaveBeenCalledWith(
+        expect.anything(),
+        'vsv-1',
+        undefined,
+        11,
+        ['torax', 'mano'],
+      );
+    });
+
+    it('filter vacío o sólo espacios equivale a no filtrar (la llamada no cambia)', async () => {
+      const harness = withDefaultVersion();
+      harness.valueSetsRepo.findMembersPage.mockResolvedValue([]);
+
+      await harness.service.readExpansion('vs-1', { limit: 10, filter: '   ' });
+
+      expect(harness.valueSetsRepo.findMembersPage).toHaveBeenCalledWith(
+        expect.anything(),
+        'vsv-1',
+        undefined,
+        11,
+      );
+    });
+
+    it('filter de más de 100 caracteres es 400', async () => {
+      const harness = withDefaultVersion();
+
+      await expect(
+        harness.service.readExpansion('vs-1', {
+          limit: 10,
+          filter: 'x'.repeat(101),
+        }),
+      ).rejects.toThrow('filter admite hasta 100 caracteres');
+    });
+
     it('rechaza un cursor que no decodifica (400, no 500)', async () => {
       const harness = withDefaultVersion();
 

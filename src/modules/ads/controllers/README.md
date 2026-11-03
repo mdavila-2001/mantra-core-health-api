@@ -53,7 +53,7 @@ Los casos de uso escriben tres rutas con dos puntos (`/campaigns:launch`, `/feed
 proyecto y el enrutador de Nest 11 interpreta `:` como inicio de parámetro en cualquier posición del
 segmento.
 
-## Pruebas
+## Tests
 
 `ads.controller.spec.ts` con los cuatro servicios mockeados: delegación, argumentos (incluido el
 actor y los ids de ruta, con los dos de la corrida de feed) y propagación de errores.

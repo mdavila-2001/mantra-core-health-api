@@ -146,7 +146,9 @@ describe('ConditionsService (UC-08-08)', () => {
     it('sin el campo sigue naciendo confirmado: el contrato anterior no cambia', async () => {
       const d = build();
       d.conditionsRepo.findActiveByCode.mockResolvedValue(null);
-      d.conditionsRepo.create.mockReturnValue(created(CLIN.CONDITION_CONFIRMED));
+      d.conditionsRepo.create.mockReturnValue(
+        created(CLIN.CONDITION_CONFIRMED),
+      );
 
       await d.service.create(body, actor);
 
@@ -158,7 +160,9 @@ describe('ConditionsService (UC-08-08)', () => {
     it('confirmado explícito equivale a omitirlo', async () => {
       const d = build();
       d.conditionsRepo.findActiveByCode.mockResolvedValue(null);
-      d.conditionsRepo.create.mockReturnValue(created(CLIN.CONDITION_CONFIRMED));
+      d.conditionsRepo.create.mockReturnValue(
+        created(CLIN.CONDITION_CONFIRMED),
+      );
 
       await d.service.create(
         { ...body, verificationStatusConceptId: CLIN.CONDITION_CONFIRMED },
@@ -177,12 +181,12 @@ describe('ConditionsService (UC-08-08)', () => {
       ],
       ['un concepto que no es de verificación', CLIN.CONDITION_ACTIVE],
       ['un uuid cualquiera', '2f3c6a52-6a0e-4c0e-9c8e-3d9c8e1f5a77'],
-    ])('no se registra %s: 422 y no escribe nada', async (_caso, valor) => {
+    ])('no se registra %s: 422 y no escribe nada', async (_case, value) => {
       const d = build();
 
       await expect(
         d.service.create(
-          { ...body, verificationStatusConceptId: valor },
+          { ...body, verificationStatusConceptId: value },
           actor,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
@@ -596,7 +600,7 @@ describe('ConditionsService.verify (C3 / P41)', () => {
     };
   }
 
-  function armar(condition = presumptive()) {
+  function setup(condition = presumptive()) {
     const d = build();
     // Toda evidencia pedida existe y es del paciente, salvo que el test diga
     // otra cosa; un informe nombra su orden y una nota, su consulta.
@@ -612,7 +616,7 @@ describe('ConditionsService.verify (C3 / P41)', () => {
 
   describe('correcto', () => {
     it('confirma con motivo y fechas: activa, confirmada y la decisión sellada en el historial', async () => {
-      const d = armar();
+      const d = setup();
       const res = await d.service.verify(
         'cond-1',
         {
@@ -648,7 +652,7 @@ describe('ConditionsService.verify (C3 / P41)', () => {
     });
 
     it('refuta sólo con evidencia de análisis del mismo paciente: queda inactiva', async () => {
-      const d = armar();
+      const d = setup();
       const res = await d.service.verify(
         'cond-1',
         {
@@ -676,7 +680,7 @@ describe('ConditionsService.verify (C3 / P41)', () => {
   describe('límite', () => {
     it('confirma una crónica sin fin esperado y usa el inicio que ya tenía', async () => {
       const start = new Date('2026-08-01T00:00:00Z');
-      const d = armar(
+      const d = setup(
         presumptive({
           onsetAt: start,
           expectedResolutionAt: new Date('2026-12-01T00:00:00Z'),
@@ -697,7 +701,7 @@ describe('ConditionsService.verify (C3 / P41)', () => {
     });
 
     it('una crónica descarta el fin esperado aunque venga en el cuerpo', async () => {
-      const d = armar();
+      const d = setup();
       const res = await d.service.verify(
         'cond-1',
         {
@@ -718,7 +722,7 @@ describe('ConditionsService.verify (C3 / P41)', () => {
     });
 
     it('acepta un fin esperado igual al inicio', async () => {
-      const d = armar();
+      const d = setup();
       const res = await d.service.verify(
         'cond-1',
         {
@@ -733,7 +737,7 @@ describe('ConditionsService.verify (C3 / P41)', () => {
     });
 
     it('un motivo hecho de espacios no cuenta como sustento', async () => {
-      const d = armar();
+      const d = setup();
       await expect(
         d.service.verify(
           'cond-1',
@@ -746,7 +750,7 @@ describe('ConditionsService.verify (C3 / P41)', () => {
 
   describe('inválido / no autorizado', () => {
     it('409 si el diagnóstico ya estaba confirmado, sin tocar nada', async () => {
-      const d = armar(
+      const d = setup(
         presumptive({ verificationStatusConceptId: CLIN.CONDITION_CONFIRMED }),
       );
       await expect(
@@ -760,7 +764,7 @@ describe('ConditionsService.verify (C3 / P41)', () => {
     });
 
     it('422 al confirmar sin fin esperado ni curso crónico', async () => {
-      const d = armar();
+      const d = setup();
       await expect(
         d.service.verify(
           'cond-1',
@@ -771,7 +775,7 @@ describe('ConditionsService.verify (C3 / P41)', () => {
     });
 
     it('422 al confirmar sin inicio, ni en el cuerpo ni en la condición', async () => {
-      const d = armar();
+      const d = setup();
       await expect(
         d.service.verify(
           'cond-1',
@@ -786,7 +790,7 @@ describe('ConditionsService.verify (C3 / P41)', () => {
     });
 
     it('422 si el fin esperado es anterior al inicio', async () => {
-      const d = armar();
+      const d = setup();
       await expect(
         d.service.verify(
           'cond-1',
@@ -802,7 +806,7 @@ describe('ConditionsService.verify (C3 / P41)', () => {
     });
 
     it('422 si la evidencia es de otro paciente (o no existe)', async () => {
-      const d = armar();
+      const d = setup();
       (d.tx as any).findOne.mockResolvedValue(null);
       await expect(
         d.service.verify(
@@ -815,7 +819,7 @@ describe('ConditionsService.verify (C3 / P41)', () => {
     });
 
     it('422 si el informe no nombra orden y no se indicó ninguna', async () => {
-      const d = armar();
+      const d = setup();
       (d.tx as any).findOne.mockResolvedValue({ id: 'dr-1' });
       await expect(
         d.service.verify(
@@ -830,7 +834,7 @@ describe('ConditionsService.verify (C3 / P41)', () => {
     });
 
     it('422 si el curso clínico no es uno del catálogo', async () => {
-      const d = armar();
+      const d = setup();
       await expect(
         d.service.verify(
           'cond-1',
@@ -847,7 +851,7 @@ describe('ConditionsService.verify (C3 / P41)', () => {
     });
 
     it('422 si la nota no trae su identificador', async () => {
-      const d = armar();
+      const d = setup();
       await expect(
         d.service.verify(
           'cond-1',
@@ -858,7 +862,7 @@ describe('ConditionsService.verify (C3 / P41)', () => {
     });
 
     it('404 si la condición no existe', async () => {
-      const d = armar();
+      const d = setup();
       d.conditionsRepo.findById.mockResolvedValue(null);
       await expect(
         d.service.verify(
@@ -870,7 +874,7 @@ describe('ConditionsService.verify (C3 / P41)', () => {
     });
 
     it('403 si no puede escribir en la historia del paciente', async () => {
-      const d = armar();
+      const d = setup();
       d.clinicalRead.assertCanWriteHistory.mockRejectedValue(
         new ForbiddenException('sin vínculo'),
       );
@@ -885,7 +889,7 @@ describe('ConditionsService.verify (C3 / P41)', () => {
     });
 
     it('403 si la sesión no tiene perfil profesional', async () => {
-      const d = armar();
+      const d = setup();
       await expect(
         d.service.verify(
           'cond-1',

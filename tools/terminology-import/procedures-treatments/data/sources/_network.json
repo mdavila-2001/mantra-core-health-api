@@ -1,0 +1,77 @@
+{
+  "probedAt": "2026-10-24T16:49:06.892Z",
+  "hosts": {
+    "clinicaltrials.gov": {
+      "source": "clinicaltrials-gov",
+      "status": "200"
+    },
+    "www.cms.gov": {
+      "source": "icd10pcs-cms",
+      "status": "200"
+    },
+    "icd.who.int": {
+      "source": "ichi-who",
+      "status": "302"
+    },
+    "icdcdn.who.int": {
+      "source": "ichi-who",
+      "status": "400"
+    },
+    "id.who.int": {
+      "source": "icd11-who",
+      "status": "404"
+    },
+    "icdaccessmanagement.who.int": {
+      "source": "icd11-who",
+      "status": "301"
+    },
+    "www.minsalud.gov.co": {
+      "source": "cups-minsalud",
+      "status": "200"
+    },
+    "web.sispro.gov.co": {
+      "source": "cups-minsalud",
+      "status": "error: curl: (35) Recv failure: Connection reset by peer"
+    },
+    "nlmpubs.nlm.nih.gov": {
+      "source": "mesh-nlm",
+      "status": "200"
+    },
+    "id.nlm.nih.gov": {
+      "source": "mesh-nlm",
+      "status": "301"
+    },
+    "evs.nci.nih.gov": {
+      "source": "ncit-evs",
+      "status": "200"
+    },
+    "eutils.ncbi.nlm.nih.gov": {
+      "source": "pubmed-europepmc",
+      "status": "301"
+    },
+    "www.ebi.ac.uk": {
+      "source": "pubmed-europepmc",
+      "status": "200"
+    },
+    "query.wikidata.org": {
+      "source": "wikidata",
+      "status": "200"
+    },
+    "www.nice.org.uk": {
+      "source": "nice-ipg",
+      "status": "200"
+    },
+    "www.cochranelibrary.com": {
+      "source": "cochrane",
+      "status": "403"
+    },
+    "www.minsalud.gob.bo": {
+      "source": "nnac-bolivia",
+      "status": "error: curl: (52) Empty reply from server"
+    },
+    "www.sanidad.gob.es": {
+      "source": "cie10es-sanidad",
+      "status": "200"
+    }
+  }
+}

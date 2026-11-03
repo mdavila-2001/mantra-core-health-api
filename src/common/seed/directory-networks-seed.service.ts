@@ -3,20 +3,19 @@ import { MikroORM } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 
 import { ConflictException } from '../errors/domain.exception';
-import { deterministicId } from '../constants/concepts';
+import { deterministicId, SEED } from '../constants/concepts';
 import { AuthenticationCredentials, Users } from '../../modules/iam/entities';
 import {
   PersonAccountLinks,
   PractitionerAffiliations,
 } from '../../modules/profiles/entities';
 import { PROF } from '../../modules/profiles/profiles.concepts';
-import { SEED } from '../constants/concepts';
 import { runWithTenant } from '../tenant/tenant-context';
-import { IamPractitionerSelfRegistrationService } from '../../modules/iam/services';
-import type { RegisterPractitionerDto } from '../../modules/iam/dto';
-import { ProfilesPractitionersService } from '../../modules/profiles/services';
+import { IamPractitionerSelfRegistrationService } from '../../modules/iam/application/services';
+import type { RegisterPractitionerDto } from '../../modules/iam/presentation/dto';
+import { ProfilesPractitionersService } from '../../modules/profiles/application/services';
 import { PractitionerSitesService } from '../../modules/practice/services';
-import { InsuranceBackboneService } from '../../modules/insurance/services';
+import { InsuranceBackboneService } from '../../modules/insurance/application/services';
 import {
   InsuranceCarriers,
   NetworkProviderMemberships,
@@ -24,8 +23,11 @@ import {
 } from '../../modules/insurance/entities';
 import { CatalogConcepts } from '../../modules/terminology/entities';
 import { ValueSetsRepository } from '../../modules/terminology/repositories';
-import { MEDICAL_SPECIALTY_VALUE_SET } from '../../modules/profiles/services/medical-specialty-catalog.service';
+import { MEDICAL_SPECIALTY_VALUE_SET } from '../../modules/profiles/application/services/medical-specialty-catalog.service';
 import { SPANISH_DESIGNATIONS } from './terminology-designations.es';
+import { demoGateSkip } from './demo-gate';
+import { SEED_ACTOR_ID } from './seed-actor';
+import { PractitionerShowcaseSeed } from './practitioner-showcase-seed';
 import {
   syntheticBirthDate,
   syntheticEmail,
@@ -35,8 +37,7 @@ import {
 import networksDataset from './data/bolivia/provider-networks.dataset.json';
 
 /** Santa Cruz (`geo:bo:department:SC`): las dos redes son de esa plaza. */
-const DEPARTAMENTO_SANTA_CRUZ = '16fe92e8-bec7-577d-9e63-4a0d8ff3b0e4';
-const SEED_ACTOR_ID = deterministicId('seed:user:bootstrap-actor');
+const DEPARTMENT_SANTA_CRUZ = '16fe92e8-bec7-577d-9e63-4a0d8ff3b0e4';
 const SOURCE_NAME = 'red de aseguradora';
 
 export interface DirectoryNetworksResult {
@@ -45,11 +46,13 @@ export interface DirectoryNetworksResult {
   sitesCreated: number;
   membershipsCreated: number;
   workplacesCreated: number;
+  /** Vitrinas públicas de médicos creadas en esta pasada. */
+  showcasesCreated: number;
   networksCreated: number;
   /** Especialidades del dataset que no mapean a `VS_MEDICAL_SPECIALTY`. */
   unmappedSpecialties: string[];
   failed: string[];
-  reason?: 'not-configured' | 'seed-actor-missing';
+  reason?: 'not-configured' | 'production-not-allowed' | 'seed-actor-missing';
 }
 
 interface Site {
@@ -59,7 +62,7 @@ interface Site {
   source_row: number;
 }
 
-interface Ficha {
+interface Sheet {
   key: string;
   nombre: string;
   especialidades: string[];
@@ -109,13 +112,18 @@ export class DirectoryNetworksSeedService {
     private readonly insurance: InsuranceBackboneService,
     private readonly valueSets: ValueSetsRepository,
     private readonly logger: PinoLogger,
+    private readonly showcases: PractitionerShowcaseSeed,
   ) {
     this.logger.setContext(DirectoryNetworksSeedService.name);
   }
 
   async run(
     enabled = process.env.SEED_DIRECTORY_NETWORKS_ENABLED === 'true',
-    password = process.env.SEED_PEOPLE_PASSWORD,
+    // Contraseña compartida de las cuentas de demostración, con su mismo candado
+    // (`demo-gate.ts`): en producción no se crea ninguna cuenta.
+    password = process.env.SEED_DEMO_PASSWORD,
+    nodeEnv = process.env.NODE_ENV,
+    allowProduction = process.env.SEED_DEMO_ALLOW_PRODUCTION === 'true',
   ): Promise<DirectoryNetworksResult> {
     const result: DirectoryNetworksResult = {
       practitionersCreated: 0,
@@ -123,12 +131,16 @@ export class DirectoryNetworksSeedService {
       sitesCreated: 0,
       membershipsCreated: 0,
       workplacesCreated: 0,
+      showcasesCreated: 0,
       networksCreated: 0,
       unmappedSpecialties: [],
       failed: [],
     };
-    if (!enabled || !password)
-      return { ...result, reason: 'not-configured' };
+    if (!enabled) return { ...result, reason: 'not-configured' };
+    const gate = demoGateSkip({ password, nodeEnv, allowProduction });
+    if (gate || !password) {
+      return { ...result, reason: gate ?? 'not-configured' };
+    }
 
     const em = this.orm.em.fork();
     if (!(await em.findOne(Users, { id: SEED_ACTOR_ID }))) {
@@ -172,13 +184,18 @@ export class DirectoryNetworksSeedService {
           if (!link) throw new Error('la cuenta no tiene persona vinculada');
           profileId = link.personId;
         } else {
-          const [primera] = record.sedes;
-          const registration = await this.registrationWithNationalId(record, email, password, {
-            specialtyConceptIds: concepts.length ? concepts : undefined,
-            ownSite: primera ? this.siteOf(primera) : undefined,
-          });
+          const [first] = record.sedes;
+          const registration = await this.registrationWithNationalId(
+            record,
+            email,
+            password,
+            {
+              specialtyConceptIds: concepts.length ? concepts : undefined,
+              ownSite: first ? this.siteOf(first) : undefined,
+            },
+          );
           result.practitionersCreated++;
-          if (primera) result.sitesCreated++;
+          if (first) result.sitesCreated++;
           userId = registration.userId;
           profileId = registration.practitionerProfileId;
           practiceId = registration.ownPracticeId;
@@ -190,16 +207,16 @@ export class DirectoryNetworksSeedService {
         practiceId ??= existing[0]?.practiceId;
         const names = new Set(existing.map((x) => x.name));
         for (const site of record.sedes) {
-          const sitio = this.siteOf(site);
-          if (names.has(sitio.name)) continue;
+          const resolvedSite = this.siteOf(site);
+          if (names.has(resolvedSite.name)) continue;
           const created = await runWithTenant(SEED.tenantId, () =>
             this.sites.createOwnSite(
               { id: userId, roles: ['PRACTITIONER'] },
-              sitio,
+              resolvedSite,
             ),
           );
           practiceId ??= created.practiceId;
-          names.add(sitio.name);
+          names.add(resolvedSite.name);
           result.sitesCreated++;
         }
 
@@ -225,6 +242,20 @@ export class DirectoryNetworksSeedService {
             actor,
           );
           result.workplacesCreated++;
+        }
+
+        // La vitrina pública del médico, por el mismo caso de uso que su
+        // `PUT /community/profiles/me`, sin iniciar sesión como él.
+        if (
+          await this.showcases.ensure({
+            userId,
+            practitionerProfileId: profileId,
+            displayName: this.displayName(record),
+            email,
+            headline: record.especialidades[0],
+          })
+        ) {
+          result.showcasesCreated++;
         }
 
         if (practiceId) {
@@ -270,6 +301,7 @@ export class DirectoryNetworksSeedService {
         sites: result.sitesCreated,
         memberships: result.membershipsCreated,
         workplaces: result.workplacesCreated,
+        showcases: result.showcasesCreated,
         failed: result.failed.length,
         unmapped: result.unmappedSpecialties.length,
       },
@@ -279,19 +311,19 @@ export class DirectoryNetworksSeedService {
   }
 
   /** Una ficha por persona: pliega las filas repetidas y las dos redes. */
-  private records(): Ficha[] {
-    const byKey = new Map<string, Ficha>();
+  private records(): Sheet[] {
+    const byKey = new Map<string, Sheet>();
     for (const red of networksDataset.datos.redes) {
       for (const p of red.profesionales) {
-        const clave = normalize(p.nombre);
-        const record = byKey.get(clave) ?? {
-          key: clave,
+        const key = normalize(p.nombre);
+        const record = byKey.get(key) ?? {
+          key: key,
           nombre: p.nombre,
           especialidades: [],
           sedes: [],
           carriers: [],
         };
-        byKey.set(clave, record);
+        byKey.set(key, record);
         if (!record.carriers.includes(red.carrierCode)) {
           record.carriers.push(red.carrierCode);
         }
@@ -309,14 +341,17 @@ export class DirectoryNetworksSeedService {
     return [...byKey.values()];
   }
 
-  private email(record: Ficha): string {
+  /** «APELLIDOS, NOMBRES» → «NOMBRES APELLIDOS»; sin coma, el nombre tal cual. */
+  private displayName(record: Sheet): string {
+    if (!record.nombre.includes(',')) return record.nombre;
+    const [surnames, names] = record.nombre.split(',').map((x) => x.trim());
+    return `${names} ${surnames}`.trim();
+  }
+
+  private email(record: Sheet): string {
     const parts = record.nombre.replace(',', ' ').split(/\s+/).filter(Boolean);
     const suffix = deterministicId(`seed:directory:${record.key}`).slice(0, 6);
-    return syntheticEmail(
-      parts[1] ?? parts[0] ?? '',
-      parts[0] ?? '',
-      suffix,
-    );
+    return syntheticEmail(parts[1] ?? parts[0] ?? '', parts[0] ?? '', suffix);
   }
 
   private siteOf(site: Site): {
@@ -343,13 +378,13 @@ export class DirectoryNetworksSeedService {
    * chocar con otra ya dada; se reintenta con otra sal en vez de fallar.
    */
   private async registrationWithNationalId(
-    record: Ficha,
+    record: Sheet,
     email: string,
     password: string,
     extra: Partial<RegisterPractitionerDto>,
   ) {
-    const coma = record.nombre.includes(',');
-    const [apellidos, nombres] = coma
+    const comma = record.nombre.includes(',');
+    const [surnames, names] = comma
       ? record.nombre.split(',').map((x) => x.trim())
       : [undefined, undefined];
     for (let sal = 0; sal < 5; sal++) {
@@ -357,11 +392,11 @@ export class DirectoryNetworksSeedService {
       const dto: RegisterPractitionerDto = {
         email,
         password,
-        ...(coma
-          ? { name: nombres, lastName: apellidos }
+        ...(comma
+          ? { name: names, lastName: surnames }
           : { displayName: record.nombre }),
         nationalId: syntheticNationalId(key),
-        issuerAdministrativeAreaConceptId: DEPARTAMENTO_SANTA_CRUZ,
+        issuerAdministrativeAreaConceptId: DEPARTMENT_SANTA_CRUZ,
         birthDate: syntheticBirthDate(key),
         mobilePhone: syntheticMobilePhone(key),
         licenseNumber: `SINT-${syntheticNationalId(`license:${key}`)}`,
@@ -416,10 +451,8 @@ export class DirectoryNetworksSeedService {
       MEDICAL_SPECIALTY_VALUE_SET,
     );
     const ids = set
-      ? ((await this.valueSets.findIncludedConceptIdsByValueSet(
-          em,
-          set.id,
-        )) ?? [])
+      ? ((await this.valueSets.findIncludedConceptIdsByValueSet(em, set.id)) ??
+        [])
       : [];
     const concepts = ids.length
       ? await em.find(CatalogConcepts, { id: { $in: [...ids] } })

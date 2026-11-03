@@ -60,6 +60,18 @@ export class Branches {
   @Property({ columnType: 'numeric', nullable: true })
   longitude?: string;
 
+  /** Texto libre: horario, piso, qué se atiende ahí (carga masiva, P54). */
+  @Property({ columnType: 'text', nullable: true })
+  description?: string;
+
+  /** Enlace de mapa tal como lo pegó la persona (http/https). */
+  @Property({
+    fieldName: 'location_url',
+    columnType: 'varchar(2000)',
+    nullable: true,
+  })
+  locationUrl?: string;
+
   /**
    * Fecha y hora en que se creó el registro.
    */

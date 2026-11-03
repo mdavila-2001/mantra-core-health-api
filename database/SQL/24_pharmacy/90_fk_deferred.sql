@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 24 · schema pharmacy
+-- SALUD v4.2.83 · módulo 24 · schema pharmacy
 -- Generado de diagram_24_pharmacy.puml — NO editar a mano.
 
 
@@ -35,6 +35,13 @@ DO $$ BEGIN
     ALTER TABLE "pharmacy"."pharmacies"
         ADD CONSTRAINT "fk_pharmacies_default_currency_concept_id" FOREIGN KEY ("default_currency_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: practice.practice_sites (requiere schema practice)
+DO $$ BEGIN
+    ALTER TABLE "pharmacy"."pharmacies"
+        ADD CONSTRAINT "fk_pharmacies_primary_practice_site_id" FOREIGN KEY ("primary_practice_site_id")
+        REFERENCES "practice"."practice_sites" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -111,6 +118,34 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN
     ALTER TABLE "pharmacy"."pharmacy_sites"
         ADD CONSTRAINT "fk_pharmacy_sites_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "pharmacy"."pharmacy_on_call_shifts"
+        ADD CONSTRAINT "fk_pharmacy_on_call_shifts_source_concept_id" FOREIGN KEY ("source_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "pharmacy"."pharmacy_on_call_shifts"
+        ADD CONSTRAINT "fk_pharmacy_on_call_shifts_status_concept_id" FOREIGN KEY ("status_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "pharmacy"."pharmacy_on_call_shifts"
+        ADD CONSTRAINT "fk_pharmacy_on_call_shifts_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "pharmacy"."pharmacy_on_call_shifts"
+        ADD CONSTRAINT "fk_pharmacy_on_call_shifts_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
         REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
@@ -194,6 +229,20 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "pharmacy"."pharmacy_products"
+        ADD CONSTRAINT "fk_pharmacy_products_catalog_product_concept_id" FOREIGN KEY ("catalog_product_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- compuesta: pharmacy.pharmacy_products sólo apunta a pharmacy.pharmacy_product_categories del mismo pharmacy_id
+DO $$ BEGIN
+    ALTER TABLE "pharmacy"."pharmacy_products"
+        ADD CONSTRAINT "fk_pharmacy_products_pharmacy_product_category_id" FOREIGN KEY ("pharmacy_id", "pharmacy_product_category_id")
+        REFERENCES "pharmacy"."pharmacy_product_categories" ("pharmacy_id", "id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "pharmacy"."pharmacy_products"
         ADD CONSTRAINT "fk_pharmacy_products_status_concept_id" FOREIGN KEY ("status_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
@@ -209,6 +258,34 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN
     ALTER TABLE "pharmacy"."pharmacy_products"
         ADD CONSTRAINT "fk_pharmacy_products_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "pharmacy"."pharmacy_product_categories"
+        ADD CONSTRAINT "fk_pharmacy_product_categories_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "pharmacy"."pharmacy_product_categories"
+        ADD CONSTRAINT "fk_pharmacy_product_categories_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: common.files (requiere schema common)
+DO $$ BEGIN
+    ALTER TABLE "pharmacy"."pharmacy_product_images"
+        ADD CONSTRAINT "fk_pharmacy_product_images_image_file_id" FOREIGN KEY ("image_file_id")
+        REFERENCES "common"."files" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "pharmacy"."pharmacy_product_images"
+        ADD CONSTRAINT "fk_pharmacy_product_images_created_by_user_id" FOREIGN KEY ("created_by_user_id")
         REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
@@ -294,6 +371,13 @@ DO $$ BEGIN
     ALTER TABLE "pharmacy"."pharmacy_product_prices"
         ADD CONSTRAINT "fk_pharmacy_product_prices_recorded_by_user_id" FOREIGN KEY ("recorded_by_user_id")
         REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: integrations.provider_connections (requiere schema integrations)
+DO $$ BEGIN
+    ALTER TABLE "pharmacy"."pharmacy_integration_connections"
+        ADD CONSTRAINT "fk_pharmacy_integration_connections_connection_id" FOREIGN KEY ("connection_id")
+        REFERENCES "integrations"."provider_connections" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)

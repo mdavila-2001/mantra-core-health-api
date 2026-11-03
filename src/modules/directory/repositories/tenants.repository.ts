@@ -6,6 +6,12 @@ import { createdBy } from '../../../common';
 /** Datos para dar de alta un tenant (raíz o sub-tenant). */
 export interface CreateTenantData {
   /**
+   * Identificador fijo. Solo lo fija un proceso interno (los seeds) para que la
+   * organización tenga el mismo id en todos los entornos; el alta por API no lo
+   * expone y el valor lo genera la entidad.
+   */
+  id?: string;
+  /**
    * Valor de code mantenido por la instancia.
    */
   code: string;
@@ -131,6 +137,7 @@ export class TenantsRepository {
     return em.create(
       Tenants,
       {
+        ...(data.id ? { id: data.id } : {}),
         code: data.code,
         legalName: data.legalName,
         tradeName: data.tradeName,

@@ -15,7 +15,12 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { EmbeddingPipelineService, VectorGovernanceService } from '../services';
 import {
   RegisterModelVersionDto,
@@ -55,6 +60,11 @@ export class VectorGovernanceController {
   ) {}
 
   /** UC-59-01. */
+  @Audited({
+    action: 'EMBEDDING_MODEL_VERSION_REGISTERED',
+    entity: 'embedding_model_version',
+    entityId: 'result.id',
+  })
   @Post('embedding-model-versions')
   @Roles('AI_GOVERNANCE_OFFICER', 'MLOPS_ENGINEER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -71,6 +81,11 @@ export class VectorGovernanceController {
   }
 
   /** UC-59-13 (retirada del modelo). */
+  @Audited({
+    action: 'EMBEDDING_MODEL_VERSION_RETIRED',
+    entity: 'embedding_model_version',
+    entityId: 'param:id',
+  })
   @Post('embedding-model-versions/:id/retire')
   @Roles('AI_GOVERNANCE_OFFICER', 'MLOPS_ENGINEER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -88,6 +103,11 @@ export class VectorGovernanceController {
   }
 
   /** UC-59-02. */
+  @Audited({
+    action: 'VECTOR_COLLECTION_CREATED',
+    entity: 'vector_collection',
+    entityId: 'result.id',
+  })
   @Post('collections')
   @Roles('RAG_COLLECTION_ADMIN', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -104,6 +124,11 @@ export class VectorGovernanceController {
   }
 
   /** UC-59-03 (definición). */
+  @Audited({
+    action: 'RAG_ACCESS_POLICY_DEFINED',
+    entity: 'rag_access_policy',
+    entityId: 'result.id',
+  })
   @Post('rag-access-policies')
   @Roles('PRIVACY_OFFICER', 'DPO', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -120,6 +145,11 @@ export class VectorGovernanceController {
   }
 
   /** UC-59-03 (publicación). */
+  @Audited({
+    action: 'RAG_ACCESS_POLICY_PUBLISHED',
+    entity: 'rag_access_policy',
+    entityId: 'param:id',
+  })
   @Put('rag-access-policies/:id/publish')
   @Roles('PRIVACY_OFFICER', 'DPO', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -137,6 +167,11 @@ export class VectorGovernanceController {
   }
 
   /** UC-59-04. */
+  @Audited({
+    action: 'EMBEDDING_JOB_QUEUED',
+    entity: 'embedding_job',
+    entityId: 'result.id',
+  })
   @Post('collections/:id/embedding-jobs')
   @Roles('RAG_COLLECTION_ADMIN', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -165,6 +200,11 @@ export class VectorGovernanceController {
   }
 
   /** UC-59-11. */
+  @Audited({
+    action: 'VECTOR_COLLECTION_RE_EMBEDDED',
+    entity: 'vector_collection',
+    entityId: 'param:id',
+  })
   @Post('collections/:id/re-embed')
   @Roles('AI_GOVERNANCE_OFFICER', 'MLOPS_ENGINEER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -182,6 +222,11 @@ export class VectorGovernanceController {
   }
 
   /** UC-59-13 (sellado de la colección). */
+  @Audited({
+    action: 'VECTOR_COLLECTION_LIFECYCLE_UPDATED',
+    entity: 'vector_collection',
+    entityId: 'param:id',
+  })
   @Put('collections/:id/lifecycle')
   @Roles('AI_GOVERNANCE_OFFICER', 'RAG_COLLECTION_ADMIN', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)

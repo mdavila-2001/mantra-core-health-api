@@ -136,6 +136,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AccessScopeResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AccessScopeResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AccessScopeResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AccessScopeResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AccessScopeResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -281,6 +282,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AccessScopeResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AccessScopeResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AccessScopeResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AccessScopeResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AccessScopeResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -311,7 +313,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: DATA_GOVERNANCE_ADMIN, COMPLIANCE_OFFICER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Alcance de acceso no encontrado. | Excepción explícita en src/modules/graph_intelligence/services/graph-traversal.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -432,6 +433,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CommunitiesResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CommunitiesResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CommunitiesResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CommunitiesResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CommunitiesResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -582,6 +584,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RiskScoresResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RiskScoresResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RiskScoresResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RiskScoresResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RiskScoresResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -717,6 +720,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<GraphDeletionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<GraphDeletionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<GraphDeletionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<GraphDeletionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GraphDeletionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -862,6 +866,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ExpireEdgeResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ExpireEdgeResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ExpireEdgeResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ExpireEdgeResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ExpireEdgeResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -894,7 +899,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, GRAPH_PROJECTION_WORKER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Arista no encontrada. | Excepción explícita en src/modules/graph_intelligence/services/graph-projection.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -1011,6 +1015,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PathResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PathResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PathResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PathResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PathResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1153,6 +1158,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ProjectionRunResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ProjectionRunResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ProjectionRunResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ProjectionRunResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ProjectionRunResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1187,7 +1193,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, GRAPH_ANALYST, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Definición de proyección no encontrada. | Excepción explícita en src/modules/graph_intelligence/services/graph-projection.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La definición de proyección no está activa. | Excepción explícita en src/modules/graph_intelligence/services/graph-projection.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1297,6 +1302,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ProjectionRunResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ProjectionRunResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ProjectionRunResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ProjectionRunResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ProjectionRunResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1331,7 +1337,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, GRAPH_PROJECTION_WORKER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Corrida de proyección no encontrada. | Excepción explícita en src/modules/graph_intelligence/services/graph-projection.service.ts |
 | 409 | `CONFLICT` | El checkpoint no puede retroceder. | Excepción explícita en src/modules/graph_intelligence/services/graph-projection.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La corrida ya no está en marcha. | Excepción explícita en src/modules/graph_intelligence/services/graph-projection.service.ts |
@@ -1465,6 +1470,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<EdgeResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<EdgeResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<EdgeResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<EdgeResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `EdgeResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1628,6 +1634,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<NodeResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<NodeResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<NodeResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<NodeResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `NodeResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1776,6 +1783,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ReconcileResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ReconcileResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ReconcileResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReconcileResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReconcileResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1906,6 +1914,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RuleHitResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RuleHitResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RuleHitResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RuleHitResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RuleHitResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1936,7 +1945,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: COMPLIANCE_OFFICER, GRAPH_ANALYST, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Hallazgo no encontrado. | Excepción explícita en src/modules/graph_intelligence/services/graph-analytics.service.ts |
 | 409 | `CONFLICT` | Esa transición del hallazgo no está permitida. | Excepción explícita en src/modules/graph_intelligence/services/graph-analytics.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -2060,6 +2068,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<EvaluateRuleResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<EvaluateRuleResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<EvaluateRuleResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<EvaluateRuleResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `EvaluateRuleResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2094,7 +2103,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, GRAPH_ANALYTICS_WORKER, COMPLIANCE_OFFICER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Definición de regla no encontrada. | Excepción explícita en src/modules/graph_intelligence/services/graph-analytics.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La definición de regla no está activa. | Excepción explícita en src/modules/graph_intelligence/services/graph-analytics.service.ts |
 | 422 | `PRECONDITION_FAILED` | La regla tiene que evaluarse bajo un alcance de acceso activo. | Excepción explícita en src/modules/graph_intelligence/services/graph-analytics.service.ts |
@@ -2210,6 +2218,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TraverseResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TraverseResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TraverseResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TraverseResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TraverseResponseDto`. Ejemplo completo derivado de ese DTO:
 

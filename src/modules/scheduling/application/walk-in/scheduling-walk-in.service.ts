@@ -100,6 +100,21 @@ export class SchedulingWalkInService {
           { bookingChannel: 'WALK_IN' },
         );
 
+      // Agendado para su hora: la reserva queda confirmada y el encuentro se
+      // abre cuando el profesional inicie la atención.
+      if (dto.startAttention === false) {
+        return {
+          patientProfileId: patient.patientProfileId,
+          personId: patient.personId,
+          patientCode: patient.patientCode,
+          bookingId: booking.id,
+          bookableSlotId: slot.id,
+          appointmentId: appointment.id,
+          statusConceptId: booking.statusConceptId,
+          retractedSlots,
+        };
+      }
+
       // El encuentro nace abierto: quien llegó al mostrador ya está siendo
       // atendido, no esperando un check-in posterior.
       const encounter = this.encounters.open(tx, {

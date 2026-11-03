@@ -1,5 +1,5 @@
-import { PractitionerSignatureAssetsController } from './controllers/practitioner-signature-assets.controller';
-import { PractitionerSignatureAssetsService } from './services/practitioner-signature-assets.service';
+import { PractitionerSignatureAssetsController } from './presentation/controllers/practitioner-signature-assets.controller';
+import { PractitionerSignatureAssetsService } from './application/services/practitioner-signature-assets.service';
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 // Verificar una matrícula concede el rol asistencial: la autoridad sobre los
@@ -17,26 +17,28 @@ import { DirectoryModule } from '../directory/directory.module';
 // `insurance` no importa `profiles`.
 import { InsuranceModule } from '../insurance/insurance.module';
 import * as entities from './entities';
-import { MedicalSpecialtyCatalogService } from './services/medical-specialty-catalog.service';
-import { AdministrativeAreaCatalogService } from './services/administrative-area-catalog.service';
-import { HealthFacilityCatalogService } from './services/health-facility-catalog.service';
+import { MedicalSpecialtyCatalogService } from './application/services/medical-specialty-catalog.service';
+import { AdministrativeAreaCatalogService } from './application/services/administrative-area-catalog.service';
+import { HealthFacilityCatalogService } from './application/services/health-facility-catalog.service';
 import {
   ProfilesDependentRequestsController,
   ProfilesPatientsController,
   ProfilesPractitionersController,
   TenantPractitionerRequestsController,
-} from './controllers';
+} from './presentation/controllers';
+import { RegistrationAffiliationsService } from './application/services/registration-affiliations.service';
 import {
   DependentLinkRequestsService,
   ProfilesAffiliationsService,
   ProfilesPatientsService,
   ProfilesPractitionersService,
-} from './services';
+} from './application/services';
 import {
   PersonsRepository,
   PersonProfilesRepository,
   PatientProfilesRepository,
   PersonAccountLinksRepository,
+  PatientPrimaryPractitionersRepository,
   HealthPractitionerProfilesRepository,
   JurisdictionAuthorizationsRepository,
   ProfessionalCredentialsRepository,
@@ -47,13 +49,63 @@ import {
   PatientMergeEventsRepository,
   RelatedPersonsRepository,
   PatientPortalProxiesRepository,
-} from './repositories';
-import { ProfileOwnershipService } from './services';
-import { PatientRepresentationService } from './services/patient-representation.service';
-import { LinkableOrganizationsService } from './services/linkable-organizations.service';
-import { MessagingAffiliationNoticeAdapter } from './adapters/messaging-affiliation-notice.adapter';
-import { AFFILIATION_NOTICE_PORT } from './ports/affiliation-notice.port';
+  PractitionerAdmissionsRepository,
+  PractitionerAdmissionEventsRepository,
+  PractitionerAdmissionReviewsRepository,
+  AdmissionRequirementsRepository,
+} from './infrastructure/repositories';
+import { ProfileOwnershipService } from './application/services';
+import { PatientRepresentationService } from './application/services/patient-representation.service';
+import { LinkableOrganizationsService } from './application/services/linkable-organizations.service';
+import { MessagingAffiliationNoticeAdapter } from './infrastructure/adapters/messaging-affiliation-notice.adapter';
+import { AFFILIATION_NOTICE_PORT } from './application/ports/affiliation-notice.port';
 import { MessagingModule } from '../messaging/messaging.module';
+import { PROFILES_TERMINOLOGY_PORT } from './application/ports/profiles-terminology.port';
+import { ProfilesTerminologyAdapter } from './infrastructure/adapters/profiles-terminology.adapter';
+import { AFFILIATION_ORGANIZATIONS_PORT } from './application/ports/affiliation-organizations.port';
+import { ATTACHABLE_FILES_PORT } from './application/ports/attachable-files.port';
+import { CLINICAL_PATIENT_HISTORY_ACCESS_PORT } from './application/ports/clinical-patient-history-access.port';
+import { DEPENDENT_LINK_IDENTIFIERS_PORT } from './application/ports/dependent-link-identifiers.port';
+import { DEPENDENT_LINK_NOTIFICATIONS_PORT } from './application/ports/dependent-link-notifications.port';
+import { AffiliationOrganizationsAdapter } from './infrastructure/adapters/affiliation-organizations.adapter';
+import { AttachableFilesAdapter } from './infrastructure/adapters/attachable-files.adapter';
+import { ClinicalPatientHistoryAccessAdapter } from './infrastructure/adapters/clinical-patient-history-access.adapter';
+import { DependentLinkContextAdapter } from './infrastructure/adapters/dependent-link-context.adapter';
+import { PRACTITIONER_CONTEXT_PORT } from './application/ports/practitioner-context.port';
+import { PractitionerContextAdapter } from './infrastructure/adapters/practitioner-context.adapter';
+import { PERSON_RECORDS_PORT } from './application/ports/person-records.port';
+import { PATIENT_ADDRESS_BOOK_PORT } from './application/ports/patient-address-book.port';
+import { PatientAddressBookAdapter } from './infrastructure/adapters/patient-address-book.adapter';
+import { PatientAddressBookService } from './application/services/patient-address-book.service';
+import { PatientAddressBookController } from './presentation/controllers/patient-address-book.controller';
+import { PrimaryPractitionerService } from './application/services/primary-practitioner.service';
+import { PrimaryPractitionerController } from './presentation/controllers/primary-practitioner.controller';
+import { PersonRecordsAdapter } from './infrastructure/adapters/person-records.adapter';
+import { PATIENT_COVERAGES_PORT } from './application/ports/patient-coverages.port';
+import { PatientCoveragesAdapter } from './infrastructure/adapters/patient-coverages.adapter';
+import { ClinicalPatientHistoryAdapter } from './infrastructure/adapters/clinical-patient-history.adapter';
+import { CLINICAL_PATIENT_HISTORY_PORT } from './application/ports/clinical-patient-history.port';
+// Admisiones de profesionales (v4.2.67): la verificación del alta de médicos.
+// `CommunityModule` da el sello público (se concede al verificar y se baja al
+// suspender o vencer); no cierra ciclo: ya es alcanzable desde `DirectoryModule`.
+import { CommunityModule } from '../community/community.module';
+import { AdmissionsController } from './presentation/controllers/admissions.controller';
+import { OwnAdmissionController } from './presentation/controllers/own-admission.controller';
+import { ADMISSION_NOTICE_PORT } from './application/ports/admission-notice.port';
+import { ADMISSION_FOREIGN_READS_PORT } from './application/ports/admission-foreign-reads.port';
+import { ADMISSION_FILES_PORT } from './application/ports/admission-files.port';
+import { PUBLIC_VERIFICATION_SEAL_PORT } from './application/ports/public-verification-seal.port';
+import { AdmissionForeignReadsAdapter } from './infrastructure/adapters/admission-foreign-reads.adapter';
+import { AdmissionFilesAdapter } from './infrastructure/adapters/admission-files.adapter';
+import { CommunityVerificationSealAdapter } from './infrastructure/adapters/community-verification-seal.adapter';
+import { MessagingAdmissionNoticeAdapter } from './infrastructure/adapters/messaging-admission-notice.adapter';
+import { PractitionerAdmissionsService } from './application/services/practitioner-admissions.service';
+import { PractitionerAdmissionsReadService } from './application/services/practitioner-admissions-read.service';
+import { PractitionerVerificationReader } from './application/services/practitioner-verification-reader.service';
+import { PractitionerAdmissionChecklistService } from './application/services/practitioner-admission-checklist.service';
+import { PractitionerAdmissionEvidenceService } from './application/services/practitioner-admission-evidence.service';
+import { PractitionerAdmissionDocumentsService } from './application/services/practitioner-admission-documents.service';
+import { PractitionerVerificationProjector } from './application/services/practitioner-verification-projector.service';
 
 /**
  * Módulo Profiles (05): personas, pacientes y fuerza laboral de salud. Cubre alta
@@ -76,22 +128,35 @@ import { MessagingModule } from '../messaging/messaging.module';
     DirectoryModule,
     MessagingModule,
     InsuranceModule,
+    CommunityModule,
   ],
   controllers: [
+    // Las rutas `me` de la admisión van antes que las de `ProfilesPractitionersController`
+    // (`practitioners/:id/...`) para que `me` no se lea como un id.
+    OwnAdmissionController,
+    AdmissionsController,
     PractitionerSignatureAssetsController,
     ProfilesPatientsController,
+    PatientAddressBookController,
+    PrimaryPractitionerController,
     ProfilesDependentRequestsController,
     ProfilesPractitionersController,
     TenantPractitionerRequestsController,
   ],
   providers: [
     PractitionerSignatureAssetsService,
+    PractitionerContextAdapter,
+    {
+      provide: PRACTITIONER_CONTEXT_PORT,
+      useExisting: PractitionerContextAdapter,
+    },
     ProfileOwnershipService,
     PatientRepresentationService,
     MedicalSpecialtyCatalogService,
     AdministrativeAreaCatalogService,
     HealthFacilityCatalogService,
     ProfilesAffiliationsService,
+    RegistrationAffiliationsService,
     LinkableOrganizationsService,
     // El emisor de avisos del vínculo entra por su puerto: el servicio que
     // decide no sabe que existe un canal in-app, y eso es lo que deja probar la
@@ -99,6 +164,53 @@ import { MessagingModule } from '../messaging/messaging.module';
     {
       provide: AFFILIATION_NOTICE_PORT,
       useClass: MessagingAffiliationNoticeAdapter,
+    },
+    {
+      provide: PROFILES_TERMINOLOGY_PORT,
+      useClass: ProfilesTerminologyAdapter,
+    },
+    {
+      provide: AFFILIATION_ORGANIZATIONS_PORT,
+      useClass: AffiliationOrganizationsAdapter,
+    },
+    {
+      provide: ATTACHABLE_FILES_PORT,
+      useClass: AttachableFilesAdapter,
+    },
+    {
+      provide: CLINICAL_PATIENT_HISTORY_ACCESS_PORT,
+      useClass: ClinicalPatientHistoryAccessAdapter,
+    },
+    PersonRecordsAdapter,
+    PatientCoveragesAdapter,
+    ClinicalPatientHistoryAdapter,
+    {
+      provide: CLINICAL_PATIENT_HISTORY_PORT,
+      useExisting: ClinicalPatientHistoryAdapter,
+    },
+    {
+      provide: PERSON_RECORDS_PORT,
+      useExisting: PersonRecordsAdapter,
+    },
+    PatientAddressBookService,
+    PatientAddressBookAdapter,
+    PrimaryPractitionerService,
+    {
+      provide: PATIENT_ADDRESS_BOOK_PORT,
+      useExisting: PatientAddressBookAdapter,
+    },
+    {
+      provide: PATIENT_COVERAGES_PORT,
+      useExisting: PatientCoveragesAdapter,
+    },
+    DependentLinkContextAdapter,
+    {
+      provide: DEPENDENT_LINK_IDENTIFIERS_PORT,
+      useExisting: DependentLinkContextAdapter,
+    },
+    {
+      provide: DEPENDENT_LINK_NOTIFICATIONS_PORT,
+      useExisting: DependentLinkContextAdapter,
     },
     // Repositorios
     PersonsRepository,
@@ -115,6 +227,32 @@ import { MessagingModule } from '../messaging/messaging.module';
     PatientMergeEventsRepository,
     RelatedPersonsRepository,
     PatientPortalProxiesRepository,
+    PatientPrimaryPractitionersRepository,
+    PractitionerAdmissionsRepository,
+    PractitionerAdmissionEventsRepository,
+    PractitionerAdmissionReviewsRepository,
+    AdmissionRequirementsRepository,
+    // Admisiones de profesionales: el único escritor de PRACT_VERIF_* es el proyector.
+    {
+      provide: ADMISSION_NOTICE_PORT,
+      useClass: MessagingAdmissionNoticeAdapter,
+    },
+    {
+      provide: ADMISSION_FOREIGN_READS_PORT,
+      useClass: AdmissionForeignReadsAdapter,
+    },
+    { provide: ADMISSION_FILES_PORT, useClass: AdmissionFilesAdapter },
+    {
+      provide: PUBLIC_VERIFICATION_SEAL_PORT,
+      useClass: CommunityVerificationSealAdapter,
+    },
+    PractitionerAdmissionEvidenceService,
+    PractitionerAdmissionChecklistService,
+    PractitionerVerificationProjector,
+    PractitionerAdmissionsReadService,
+    PractitionerVerificationReader,
+    PractitionerAdmissionsService,
+    PractitionerAdmissionDocumentsService,
     // Servicios
     ProfilesPatientsService,
     ProfilesPractitionersService,
@@ -125,6 +263,9 @@ import { MessagingModule } from '../messaging/messaging.module';
   // repositorios y no el servicio porque `registerPatient` de este módulo es
   // admin-only y abre su propia transacción.
   exports: [
+    // Los vínculos con instituciones que el profesional elige en su alta: los
+    // pide `iam` dentro de la transacción del registro.
+    RegistrationAffiliationsService,
     // `DirectoryNetworksSeedService` (H3) carga los consultorios de las redes
     // con el mismo caso de uso que el alta administrativa de una afiliación.
     ProfilesPractitionersService,
@@ -155,6 +296,13 @@ import { MessagingModule } from '../messaging/messaging.module';
     // regla vive acá porque la representación es un dato de perfiles.
     PatientRepresentationService,
     PatientPortalProxiesRepository,
+    // El alta (iam), la verificación heredada de credenciales y el efecto de M27
+    // (identity_assurance) pasan por la admisión; los lectores de DTO de
+    // profesional (guía, ficha, buscador) piden el estado visible.
+    PractitionerAdmissionsService,
+    PractitionerAdmissionsReadService,
+    // El sello solo, para quien no puede importar este módulo (`community`).
+    PractitionerVerificationReader,
   ],
 })
 export class ProfilesModule {}

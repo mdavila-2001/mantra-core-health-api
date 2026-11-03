@@ -12,9 +12,32 @@ import { INTEG } from '../integrations.concepts';
 import {
   PreconditionFailedException,
   ResourceNotFoundException,
+  runWithTenant,
 } from '../../../common';
+import { IntegrationsErrorReason } from '../integrations.error-reasons';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
+const TENANT = 't1';
+const OTHER_TENANT = 't2';
+
+/**
+ * Ejecuta cada método del servicio con `tenant` como tenant activo del
+ * contexto, igual que lo deja el interceptor en una petición real.
+ *
+ * @param service - Servicio bajo prueba.
+ * @param tenant - Tenant activo.
+ * @returns Proxy que fija el contexto en cada llamada.
+ */
+function inTenant<T extends object>(service: T, tenant: string): T {
+  return new Proxy(service, {
+    get(target, prop, receiver) {
+      const value = Reflect.get(target, prop, receiver);
+      if (typeof value !== 'function') return value;
+      return (...args: unknown[]) =>
+        runWithTenant(tenant, () => value.apply(target, args));
+    },
+  });
+}
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -24,7 +47,7 @@ function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const providersRepo = { findById: mockFn() };
-  const connectionsRepo = { findById: mockFn(), create: mockFn() };
+  const connectionsRepo = { findByIdInScope: mockFn(), create: mockFn() };
   const credentialsRepo = {
     findActiveByConnection: mockFn(),
     create: mockFn(),
@@ -36,13 +59,14 @@ function build() {
   const service = new IntegrationsConnectionsService(
     em as any,
     providersRepo as any,
-    connectionsRepo,
+    connectionsRepo as any,
     credentialsRepo,
     outboundRepo as any,
     logger as any,
   );
   return {
-    service,
+    service: inTenant(service, TENANT),
+    raw: service,
     tx,
     providersRepo,
     connectionsRepo,
@@ -59,7 +83,7 @@ describe('IntegrationsConnectionsService', () => {
       await expect(
         d.service.provisionConnection(
           'p1',
-          { tenantId: 't1', secretType: 'API_KEY', secretRef: 'r' } as any,
+          { tenantId: TENANT, secretType: 'API_KEY', secretRef: 'r' } as any,
           actor,
         ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
@@ -74,7 +98,7 @@ describe('IntegrationsConnectionsService', () => {
       await expect(
         d.service.provisionConnection(
           'p1',
-          { tenantId: 't1', secretType: 'API_KEY', secretRef: 'r' } as any,
+          { tenantId: TENANT, secretType: 'API_KEY', secretRef: 'r' } as any,
           actor,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
@@ -88,7 +112,7 @@ describe('IntegrationsConnectionsService', () => {
       });
       const conn: any = {
         id: 'c1',
-        tenantId: 't1',
+        tenantId: TENANT,
         stateConceptId: INTEG.CONN_ACTIVE,
         updatedAt: new Date(),
       };
@@ -97,7 +121,7 @@ describe('IntegrationsConnectionsService', () => {
 
       const res = await d.service.provisionConnection(
         'p1',
-        { tenantId: 't1', secretType: 'API_KEY', secretRef: 'r' } as any,
+        { tenantId: TENANT, secretType: 'API_KEY', secretRef: 'r' } as any,
         actor,
       );
 
@@ -110,8 +134,9 @@ describe('IntegrationsConnectionsService', () => {
   describe('rotateCredential (UC-12-03)', () => {
     it('rejects when connection is not active (precondition)', async () => {
       const d = build();
-      d.connectionsRepo.findById.mockResolvedValue({
+      d.connectionsRepo.findByIdInScope.mockResolvedValue({
         id: 'c1',
+        tenantId: TENANT,
         stateConceptId: INTEG.CONN_PAUSED,
       });
       await expect(
@@ -123,10 +148,11 @@ describe('IntegrationsConnectionsService', () => {
       const d = build();
       const conn: any = {
         id: 'c1',
+        tenantId: TENANT,
         stateConceptId: INTEG.CONN_ACTIVE,
         updatedAt: new Date(),
       };
-      d.connectionsRepo.findById.mockResolvedValue(conn);
+      d.connectionsRepo.findByIdInScope.mockResolvedValue(conn);
       const prev: any = {
         id: 'old',
         stateConceptId: INTEG.CRED_ACTIVE,
@@ -151,8 +177,9 @@ describe('IntegrationsConnectionsService', () => {
   describe('pauseConnection (UC-12-12)', () => {
     it('is a no-op when already paused (idempotent)', async () => {
       const d = build();
-      d.connectionsRepo.findById.mockResolvedValue({
+      d.connectionsRepo.findByIdInScope.mockResolvedValue({
         id: 'c1',
+        tenantId: TENANT,
         stateConceptId: INTEG.CONN_PAUSED,
       });
       const res = await d.service.pauseConnection('c1', actor);
@@ -164,16 +191,132 @@ describe('IntegrationsConnectionsService', () => {
       const d = build();
       const conn: any = {
         id: 'c1',
+        tenantId: TENANT,
         stateConceptId: INTEG.CONN_ACTIVE,
         updatedAt: new Date(),
       };
-      d.connectionsRepo.findById.mockResolvedValue(conn);
+      d.connectionsRepo.findByIdInScope.mockResolvedValue(conn);
       d.outboundRepo.holdQueuedForConnection.mockResolvedValue(3);
 
       const res = await d.service.pauseConnection('c1', actor);
 
       expect(conn.stateConceptId).toBe(INTEG.CONN_PAUSED);
       expect(res.heldMessages).toBe(3);
+    });
+  });
+  describe('aislamiento por tenant (INT-01)', () => {
+    const foreignConnection = () => ({
+      id: 'c-b',
+      tenantId: OTHER_TENANT,
+      stateConceptId: INTEG.CONN_ACTIVE,
+      updatedAt: new Date(),
+    });
+
+    it('la conexión se crea en el tenant del contexto aunque el cuerpo no lo declare', async () => {
+      const d = build();
+      d.providersRepo.findById.mockResolvedValue({
+        id: 'p1',
+        stateConceptId: INTEG.PROVIDER_ACTIVE,
+      });
+      d.connectionsRepo.create.mockReturnValue({
+        id: 'c1',
+        tenantId: TENANT,
+        stateConceptId: INTEG.CONN_ACTIVE,
+        updatedAt: new Date(),
+      });
+      d.credentialsRepo.create.mockReturnValue({ id: 'cred1' });
+
+      await d.service.provisionConnection(
+        'p1',
+        { secretType: 'API_KEY', secretRef: 'r' } as any,
+        actor,
+      );
+
+      expect(d.connectionsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ tenantId: TENANT }),
+      );
+    });
+
+    it('rechaza un tenantId del cuerpo distinto del activo, sin crear nada', async () => {
+      const d = build();
+      const attempt = d.service.provisionConnection(
+        'p1',
+        {
+          tenantId: OTHER_TENANT,
+          secretType: 'API_KEY',
+          secretRef: 'r',
+        } as any,
+        actor,
+      );
+      await expect(attempt).rejects.toBeInstanceOf(PreconditionFailedException);
+      await expect(attempt).rejects.toMatchObject({
+        reason: IntegrationsErrorReason.INTEGRATIONS_TENANT_MISMATCH,
+      });
+      expect(d.connectionsRepo.create).not.toHaveBeenCalled();
+      expect(d.credentialsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('sin tenant activo no se aprovisiona ni se opera (TENANT_REQUIRED)', async () => {
+      const d = build();
+      await expect(
+        d.raw.provisionConnection('p1', { secretRef: 'r' } as any, actor),
+      ).rejects.toMatchObject({ details: { reason: 'TENANT_REQUIRED' } });
+      await expect(
+        d.raw.rotateCredential('c1', { secretRef: 'n' } as any, actor),
+      ).rejects.toMatchObject({ details: { reason: 'TENANT_REQUIRED' } });
+      await expect(d.raw.pauseConnection('c1', actor)).rejects.toMatchObject({
+        details: { reason: 'TENANT_REQUIRED' },
+      });
+      expect(d.connectionsRepo.findByIdInScope).not.toHaveBeenCalled();
+    });
+
+    it('rotar la credencial de una conexión de otro tenant responde 404 uniforme y no cambia el secreto', async () => {
+      const d = build();
+      const foreign = foreignConnection();
+      d.connectionsRepo.findByIdInScope.mockResolvedValue(null);
+      const attempt = await d.service
+        .rotateCredential('c-b', { secretRef: 'robado' } as any, actor)
+        .catch((e: any) => e);
+      d.connectionsRepo.findByIdInScope.mockResolvedValue(foreign);
+      const defensive = await d.service
+        .rotateCredential('c-b', { secretRef: 'robado' } as any, actor)
+        .catch((e: any) => e);
+
+      for (const error of [attempt, defensive]) {
+        expect(error).toBeInstanceOf(ResourceNotFoundException);
+        expect(error.getStatus()).toBe(404);
+        expect(error.reason).toBe(
+          IntegrationsErrorReason.INTEGRATIONS_RESOURCE_NOT_AVAILABLE,
+        );
+        expect(error.details).toBeUndefined();
+      }
+      expect(attempt.getResponse()).toEqual(defensive.getResponse());
+      expect(d.credentialsRepo.create).not.toHaveBeenCalled();
+      expect(d.credentialsRepo.findActiveByConnection).not.toHaveBeenCalled();
+      expect(d.connectionsRepo.findByIdInScope).toHaveBeenCalledWith(
+        d.tx,
+        'c-b',
+        TENANT,
+      );
+    });
+
+    it('pausar una conexión de otro tenant responde 404 uniforme y no la detiene ni retiene mensajes', async () => {
+      const d = build();
+      const foreign = foreignConnection();
+      d.connectionsRepo.findByIdInScope.mockResolvedValue(foreign);
+      const attempt = await d.service
+        .pauseConnection('c-b', actor)
+        .catch((e: any) => e);
+      d.connectionsRepo.findByIdInScope.mockResolvedValue(null);
+      const missing = await d.service
+        .pauseConnection('c-b', actor)
+        .catch((e: any) => e);
+
+      expect(attempt.getStatus()).toBe(404);
+      expect(attempt.getResponse()).toEqual(missing.getResponse());
+      expect(foreign.stateConceptId).toBe(INTEG.CONN_ACTIVE);
+      expect(d.outboundRepo.holdQueuedForConnection).not.toHaveBeenCalled();
     });
   });
 });

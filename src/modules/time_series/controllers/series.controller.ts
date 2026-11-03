@@ -10,7 +10,12 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   SeriesIngestService,
   SeriesQueryService,
@@ -67,6 +72,10 @@ export class SeriesController {
   }
 
   /** UC-58-01. */
+  @Audited({
+    action: 'TIME_SERIES_POINTS_INGESTED',
+    entity: 'hypertable',
+  })
   @Post('series/:seriesId/points/batch-ingest')
   @Roles('INGEST_GATEWAY', 'SYSTEM', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -83,6 +92,10 @@ export class SeriesController {
   }
 
   /** UC-58-12. */
+  @Audited({
+    action: 'TIME_SERIES_GOVERNED_BACKFILL_RUN',
+    entity: 'hypertable',
+  })
   @Post('series/:seriesId/backfill/governed')
   @Roles('DATA_PLATFORM_ADMIN', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -100,6 +113,10 @@ export class SeriesController {
   }
 
   /** UC-58-02. */
+  @Audited({
+    action: 'DEVICE_READINGS_INGESTED',
+    entity: 'device_raw_reading_series',
+  })
   @Post('devices/:deviceId/readings/ingest')
   @Roles('INGEST_GATEWAY', 'DEVICE', 'SYSTEM', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -117,6 +134,10 @@ export class SeriesController {
   }
 
   /** UC-58-03. */
+  @Audited({
+    action: 'DEVICE_READINGS_NORMALIZED',
+    entity: 'normalized_vital_series',
+  })
   @Post('normalize/run')
   @Roles('SYSTEM', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -133,6 +154,10 @@ export class SeriesController {
   }
 
   /** UC-58-10. */
+  @Audited({
+    action: 'ADS_DELIVERY_EVENTS_INGESTED',
+    entity: 'ads_delivery_event_series',
+  })
   @Post('ads/events/batch-ingest')
   @Roles('INGEST_GATEWAY', 'SYSTEM', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -148,6 +173,10 @@ export class SeriesController {
   }
 
   /** UC-58-11. */
+  @Audited({
+    action: 'TIME_SERIES_METRICS_INGESTED',
+    entity: 'hypertable',
+  })
   @Post('metrics/:dataset/batch-ingest')
   @Roles('INGEST_GATEWAY', 'SYSTEM', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -174,6 +203,10 @@ export class SeriesController {
   }
 
   /** UC-58-13. */
+  @Audited({
+    action: 'LOCATION_PING_SERIES_INGESTED',
+    entity: 'location_ping_series',
+  })
   @Post('location/pings/batch-ingest')
   @Roles('INGEST_GATEWAY', 'SYSTEM', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)

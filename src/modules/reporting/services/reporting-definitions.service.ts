@@ -5,7 +5,7 @@ import {
   CONCEPTS,
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
+  requireTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -13,6 +13,10 @@ import {
   ReportingDefinitionsRepository,
   ReportingRunsRepository,
 } from '../repositories';
+import {
+  assertReportingResource,
+  resolveReportingScope,
+} from './reporting-scope';
 import {
   CreateDataSourceDto,
   DataSourceResponseDto,
@@ -101,6 +105,8 @@ export class ReportingDefinitionsService {
     dto: CreateDataSourceDto,
     actor: AuthenticatedUser,
   ): Promise<DataSourceResponseDto> {
+    // El tenant sale del contexto verificado; el del cuerpo no es fuente de verdad.
+    const tenantId = requireTenantId();
     this.logger.info(
       { operation: 'reporting.data-source.create', code: dto.code },
       'Registering report data source',
@@ -132,7 +138,7 @@ export class ReportingDefinitionsService {
 
     return this.em.transactional(async (tx) => {
       const source = this.definitionsRepo.createDataSource(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         code: dto.code,
         name: dto.name,
         sourceTypeConceptId: SOURCE_TYPE_CONCEPT[dto.sourceType],
@@ -160,6 +166,7 @@ export class ReportingDefinitionsService {
     dto: CreateDefinitionDto,
     actor: AuthenticatedUser,
   ): Promise<DefinitionResponseDto> {
+    const tenantId = requireTenantId();
     this.logger.info(
       { operation: 'reporting.definition.create', code: dto.code },
       'Authoring report definition',
@@ -192,15 +199,12 @@ export class ReportingDefinitionsService {
     );
 
     return this.em.transactional(async (tx) => {
-      const source = await this.definitionsRepo.findDataSourceById(
-        tx,
-        dto.dataSourceId,
+      // La fuente se resuelve por UUID: debe ser del tenant activo.
+      const source = assertReportingResource(
+        await this.definitionsRepo.findDataSourceById(tx, dto.dataSourceId),
+        tenantId,
+        'Fuente de datos no encontrada',
       );
-      if (!source) {
-        throw new ResourceNotFoundException('Fuente de datos no encontrada', {
-          dataSourceId: dto.dataSourceId,
-        });
-      }
       if (source.stateConceptId !== CONCEPTS.STATE_ACTIVE) {
         throw new PreconditionFailedException(
           'La fuente de datos no está activa',
@@ -211,7 +215,7 @@ export class ReportingDefinitionsService {
       }
 
       const definition = this.definitionsRepo.createDefinition(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         code: dto.code,
         name: dto.name,
         description: dto.description,
@@ -280,22 +284,24 @@ export class ReportingDefinitionsService {
     dto: PublishReportVersionDto,
     actor: AuthenticatedUser,
   ): Promise<ReportVersionResponseDto> {
+    const scope = resolveReportingScope(actor);
     this.logger.info(
       { operation: 'reporting.version.publish', definitionId },
       'Publishing report version',
     );
 
     return this.em.transactional(async (tx) => {
-      // Bloquear la cabecera es lo que serializa el versionado.
-      const definition = await this.definitionsRepo.findDefinitionForUpdate(
-        tx,
-        definitionId,
-      );
-      if (!definition) {
-        throw new ResourceNotFoundException('Definición no encontrada', {
+      // Bloquear la cabecera es lo que serializa el versionado; el tenant va en
+      // la consulta para no bloquear una definición ajena.
+      const definition = assertReportingResource(
+        await this.definitionsRepo.findDefinitionForUpdate(
+          tx,
           definitionId,
-        });
-      }
+          scope,
+        ),
+        scope,
+        'Definición no encontrada',
+      );
       if (definition.stateConceptId === CONCEPTS.REPORT_DEPRECATED) {
         throw new PreconditionFailedException(
           'Una definición deprecada no admite versiones',
@@ -363,6 +369,7 @@ export class ReportingDefinitionsService {
     dto: CreateDashboardDto,
     actor: AuthenticatedUser,
   ): Promise<DashboardResponseDto> {
+    const tenantId = requireTenantId();
     this.logger.info(
       { operation: 'reporting.dashboard.create', code: dto.code },
       'Composing dashboard',
@@ -392,18 +399,14 @@ export class ReportingDefinitionsService {
     return this.em.transactional(async (tx) => {
       for (const widget of dto.widgets) {
         if (!widget.reportDefinitionId) continue;
-        const definition = await this.definitionsRepo.findDefinitionById(
-          tx,
-          widget.reportDefinitionId,
+        const definition = assertReportingResource(
+          await this.definitionsRepo.findDefinitionById(
+            tx,
+            widget.reportDefinitionId,
+          ),
+          tenantId,
+          'Definición del widget no encontrada',
         );
-        if (!definition) {
-          throw new ResourceNotFoundException(
-            'Definición del widget no encontrada',
-            {
-              reportDefinitionId: widget.reportDefinitionId,
-            },
-          );
-        }
         // Colgar un widget de un reporte deprecado dejaría el tablero mostrando
         // algo que la organización decidió dejar de publicar.
         if (definition.stateConceptId === CONCEPTS.REPORT_DEPRECATED) {
@@ -417,7 +420,7 @@ export class ReportingDefinitionsService {
       }
 
       const dashboard = this.definitionsRepo.createDashboard(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         code: dto.code,
         name: dto.name,
         description: dto.description,
@@ -462,21 +465,22 @@ export class ReportingDefinitionsService {
     dto: DeprecateDefinitionDto,
     actor: AuthenticatedUser,
   ): Promise<DeprecateDefinitionResponseDto> {
+    const scope = resolveReportingScope(actor);
     this.logger.warn(
       { operation: 'reporting.definition.deprecate', definitionId },
       'Deprecating report definition',
     );
 
     return this.em.transactional(async (tx) => {
-      const definition = await this.definitionsRepo.findDefinitionForUpdate(
-        tx,
-        definitionId,
-      );
-      if (!definition) {
-        throw new ResourceNotFoundException('Definición no encontrada', {
+      const definition = assertReportingResource(
+        await this.definitionsRepo.findDefinitionForUpdate(
+          tx,
           definitionId,
-        });
-      }
+          scope,
+        ),
+        scope,
+        'Definición no encontrada',
+      );
       if (definition.stateConceptId === CONCEPTS.REPORT_DEPRECATED) {
         throw new ConflictException('La definición ya está deprecada', {
           definitionId,

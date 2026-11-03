@@ -18,6 +18,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   PageResponseDto,
   Roles,
@@ -37,7 +38,10 @@ import {
  * Módulo 55 — Document Store. CRUD gobernado de documentos flexibles
  * (JSON/semiestructurados) sobre MongoDB, complementario a Postgres. La
  * colección viaja en la ruta y la valida `CollectionNameGuard`; todas las
- * operaciones se acotan por `tenantId`. El borrado es lógico (`deletedAt`).
+ * operaciones se acotan al tenant del contexto. Las lecturas, igual que las
+ * escrituras, las hacen solo los roles de almacenamiento: un documento flexible
+ * puede traer material clínico y no hay política por tipo o paciente que
+ * habilite a otro usuario del tenant. El borrado es lógico (`deletedAt`).
  */
 @ApiTags('document-store')
 @ApiBearerAuth()
@@ -60,6 +64,11 @@ export class DocumentStoreController {
    * @param actor - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de create conforme al contrato `Promise<DocumentResponseDto>`.
    */
+  @Audited({
+    action: 'DOCUMENT_STORE_DOCUMENT_CREATED',
+    entity: 'document',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('STORAGE_ADMIN', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -81,6 +90,7 @@ export class DocumentStoreController {
    * @returns Resultado de find one conforme al contrato `Promise<DocumentResponseDto>`.
    */
   @Get(':id')
+  @Roles('STORAGE_ADMIN', 'PLATFORM_ADMIN')
   @ApiOperation({ summary: 'Leer un documento por id (acotado por tenant)' })
   findOne(
     @Param('collection') collection: string,
@@ -98,6 +108,7 @@ export class DocumentStoreController {
    * @returns Resultado de list conforme al contrato `Promise<PageResponseDto<DocumentResponseDto>>`.
    */
   @Get()
+  @Roles('STORAGE_ADMIN', 'PLATFORM_ADMIN')
   @ApiOperation({ summary: 'Listar documentos del tenant (paginado)' })
   list(
     @Param('collection') collection: string,
@@ -115,6 +126,11 @@ export class DocumentStoreController {
    * @param actor - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de update conforme al contrato `Promise<DocumentResponseDto>`.
    */
+  @Audited({
+    action: 'DOCUMENT_STORE_DOCUMENT_UPDATED',
+    entity: 'document',
+    entityId: 'param:id',
+  })
   @Patch(':id')
   @Roles('STORAGE_ADMIN', 'PLATFORM_ADMIN')
   @ApiOperation({
@@ -138,6 +154,11 @@ export class DocumentStoreController {
    * @param actor - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de soft delete conforme al contrato `Promise<DocumentResponseDto>`.
    */
+  @Audited({
+    action: 'DOCUMENT_STORE_DOCUMENT_DELETED',
+    entity: 'document',
+    entityId: 'param:id',
+  })
   @Delete(':id')
   @Roles('STORAGE_ADMIN', 'PLATFORM_ADMIN')
   @ApiOperation({ summary: 'Borrado lógico de un documento (soft-delete)' })

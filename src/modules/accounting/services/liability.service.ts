@@ -8,8 +8,10 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { ACCT } from '../accounting.concepts';
+import { AccountingErrorReason } from '../accounting.error-reasons';
 import { LiabilityRepository } from '../repositories';
 import { PostingHelper, type PostingLine } from './posting.helper';
+import { AccountingScopeService } from './accounting-scope.service';
 import { toCents, fromCents } from './money';
 import { PayLiabilityDto, LiabilityPaymentResponseDto } from '../dto';
 
@@ -26,12 +28,14 @@ export class LiabilityService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param liabilityRepo - Valor de liability repo requerido por la operación.
    * @param posting - Valor de posting requerido por la operación.
+   * @param scope - Política de alcance de tenant (ACC-01).
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly liabilityRepo: LiabilityRepository,
     private readonly posting: PostingHelper,
+    private readonly scope: AccountingScopeService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(LiabilityService.name);
@@ -67,29 +71,42 @@ export class LiabilityService {
           principalComponent: dto.principalComponent,
           interestComponent: dto.interestComponent,
         },
+        AccountingErrorReason.LIABILITY_PAYMENT_COMPONENTS_MISMATCH,
       );
     }
     if (amountCents <= 0) {
-      throw new PreconditionFailedException('El pago debe ser positivo', {});
+      throw new PreconditionFailedException(
+        'El pago debe ser positivo',
+        {},
+        AccountingErrorReason.LIABILITY_PAYMENT_AMOUNT_NOT_POSITIVE,
+      );
     }
 
     return this.em.transactional(async (tx) => {
-      const liability = await this.liabilityRepo.findById(tx, liabilityId);
-      if (!liability) {
-        throw new ResourceNotFoundException('Pasivo no encontrado', {
-          liabilityId,
-        });
-      }
+      // ACC-01: la práctica es del tenant activo y el pasivo es de **esa**
+      // práctica; un pasivo de otra práctica responde como inexistente. Las
+      // cuentas del pago las acota el posteo, antes de escribir el asiento.
+      await this.scope.practice(dto.practiceId);
+      const liability = await this.scope.liabilityInPractice(
+        tx,
+        liabilityId,
+        dto.practiceId,
+      );
       if (liability.statusConceptId !== ACCT.LIABILITY_ACTIVE) {
-        throw new PreconditionFailedException('El pasivo no está ACTIVO', {
-          liabilityId,
-          status: liability.statusConceptId,
-        });
+        throw new PreconditionFailedException(
+          'El pasivo no está ACTIVO',
+          {
+            liabilityId,
+            status: liability.statusConceptId,
+          },
+          AccountingErrorReason.LIABILITY_NOT_ACTIVE,
+        );
       }
       if (!liability.accountId) {
         throw new PreconditionFailedException(
           'El pasivo no tiene cuenta contable',
           { liabilityId },
+          AccountingErrorReason.LIABILITY_ACCOUNT_MISSING,
         );
       }
 
@@ -108,6 +125,7 @@ export class LiabilityService {
             {
               liabilityScheduleId: dto.liabilityScheduleId,
             },
+            AccountingErrorReason.LIABILITY_SCHEDULE_NOT_FOUND,
           );
         }
         // Idempotencia por cuota: una cuota se paga una sola vez. Repetir el

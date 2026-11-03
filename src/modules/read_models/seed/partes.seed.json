@@ -1,0 +1,1757 @@
+[
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/marketing-insights",
+    "module": "M28 telemetry",
+    "routePattern": "/administration/marketing-insights",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_MARKETING_INSIGHTS",
+    "pageTitle": "AloVida Insights"
+  },
+  {
+    "portal": "WEB",
+    "group": "General",
+    "sectionPath": "administration/laboratory",
+    "module": "M20 diagnostics",
+    "routePattern": "/administration/laboratory",
+    "routeCode": "WEB.GENERAL.ADMINISTRATION_LABORATORY",
+    "pageTitle": "Resumen"
+  },
+  {
+    "portal": "WEB",
+    "group": "General",
+    "sectionPath": "administration/laboratory-orders",
+    "module": "M20 diagnostics",
+    "routePattern": "/administration/laboratory-orders",
+    "routeCode": "WEB.GENERAL.ADMINISTRATION_LABORATORY_ORDERS",
+    "pageTitle": "Órdenes"
+  },
+  {
+    "portal": "WEB",
+    "group": "General",
+    "sectionPath": "administration/laboratory-prices",
+    "module": "M20 diagnostics",
+    "routePattern": "/administration/laboratory-prices",
+    "routeCode": "WEB.GENERAL.ADMINISTRATION_LABORATORY_PRICES",
+    "pageTitle": "Precios"
+  },
+  {
+    "portal": "WEB",
+    "group": "General",
+    "sectionPath": "administration/laboratory-branches",
+    "module": "M04 directory",
+    "routePattern": "/administration/laboratory-branches",
+    "routeCode": "WEB.GENERAL.ADMINISTRATION_LABORATORY_BRANCHES",
+    "pageTitle": "Sucursales"
+  },
+  {
+    "portal": "WEB",
+    "group": "General",
+    "sectionPath": "dashboard",
+    "module": "M30 read_models",
+    "routePattern": "/dashboard",
+    "routeCode": "WEB.GENERAL.DASHBOARD",
+    "pageTitle": "Panel"
+  },
+  {
+    "portal": "WEB",
+    "group": "General",
+    "sectionPath": "tutorials",
+    "module": "—  ayuda en producto",
+    "routePattern": "/tutorials",
+    "routeCode": "WEB.GENERAL.TUTORIALS",
+    "pageTitle": "Tutoriales"
+  },
+  {
+    "portal": "WEB",
+    "group": "General",
+    "sectionPath": "messaging",
+    "module": "M19 community",
+    "routePattern": "/messaging",
+    "routeCode": "WEB.GENERAL.MESSAGING",
+    "pageTitle": "Chats"
+  },
+  {
+    "portal": "WEB",
+    "group": "General",
+    "sectionPath": "directories",
+    "module": "M04 directory",
+    "routePattern": "/directories",
+    "routeCode": "WEB.GENERAL.DIRECTORIES",
+    "pageTitle": "Directorios"
+  },
+  {
+    "portal": "WEB",
+    "group": "General",
+    "sectionPath": "directory",
+    "module": "M05 profiles",
+    "routePattern": "/directory",
+    "routeCode": "WEB.GENERAL.DIRECTORY",
+    "pageTitle": "Directorio de médicos"
+  },
+  {
+    "portal": "WEB",
+    "group": "General",
+    "sectionPath": "psychological-help",
+    "module": "M-mental-health-support",
+    "routePattern": "/psychological-help",
+    "routeCode": "WEB.GENERAL.PSYCHOLOGICAL_HELP",
+    "pageTitle": "Ayuda psicológica"
+  },
+  {
+    "portal": "WEB",
+    "group": "General",
+    "sectionPath": "groups",
+    "module": "M19 community",
+    "routePattern": "/groups",
+    "routeCode": "WEB.GENERAL.GROUPS",
+    "pageTitle": "Grupos y foros"
+  },
+  {
+    "portal": "WEB",
+    "group": "General",
+    "sectionPath": "laboratory-directory",
+    "module": "M23 diagnostic_units",
+    "routePattern": "/laboratory-directory",
+    "routeCode": "WEB.GENERAL.LABORATORY_DIRECTORY",
+    "pageTitle": "Directorio de laboratorios"
+  },
+  {
+    "portal": "WEB",
+    "group": "General",
+    "sectionPath": "clinics-directory",
+    "module": "M04 directory",
+    "routePattern": "/clinics-directory",
+    "routeCode": "WEB.GENERAL.CLINICS_DIRECTORY",
+    "pageTitle": "Directorio de clínicas"
+  },
+  {
+    "portal": "WEB",
+    "group": "General",
+    "sectionPath": "pharmacies-directory",
+    "module": "M22 pharmacy",
+    "routePattern": "/pharmacies-directory",
+    "routeCode": "WEB.GENERAL.PHARMACIES_DIRECTORY",
+    "pageTitle": "Directorio de farmacias"
+  },
+  {
+    "portal": "WEB",
+    "group": "General",
+    "sectionPath": "insurers-directory",
+    "module": "M26 insurance",
+    "routePattern": "/insurers-directory",
+    "routeCode": "WEB.GENERAL.INSURERS_DIRECTORY",
+    "pageTitle": "Directorio de aseguradoras"
+  },
+  {
+    "portal": "WEB",
+    "group": "Atención",
+    "sectionPath": "schedule",
+    "module": "M41 scheduling",
+    "routePattern": "/schedule",
+    "routeCode": "WEB.ATENCION.SCHEDULE",
+    "pageTitle": "Consultas médicas"
+  },
+  {
+    "portal": "WEB",
+    "group": "Atención",
+    "sectionPath": "medical-records",
+    "module": "M08 clinical · M15 chart",
+    "routePattern": "/medical-records",
+    "routeCode": "WEB.ATENCION.MEDICAL_RECORDS",
+    "pageTitle": "Archivo clínico"
+  },
+  {
+    "portal": "WEB",
+    "group": "Atención",
+    "sectionPath": "my-primary-patients",
+    "module": "M05 profiles",
+    "routePattern": "/my-primary-patients",
+    "routeCode": "WEB.ATENCION.MY_PRIMARY_PATIENTS",
+    "pageTitle": "Mis pacientes de cabecera"
+  },
+  {
+    "portal": "WEB",
+    "group": "Atención",
+    "sectionPath": "diagnostics",
+    "module": "M20 diagnostics · M08 clinical",
+    "routePattern": "/diagnostics",
+    "routeCode": "WEB.ATENCION.DIAGNOSTICS",
+    "pageTitle": "Laboratorio e imagen"
+  },
+  {
+    "portal": "WEB",
+    "group": "Atención",
+    "sectionPath": "interventions",
+    "module": "M53 procedures_perioperative",
+    "routePattern": "/interventions",
+    "routeCode": "WEB.ATENCION.INTERVENTIONS",
+    "pageTitle": "Intervenciones"
+  },
+  {
+    "portal": "WEB",
+    "group": "Atención",
+    "sectionPath": "lab-visits",
+    "module": "M62 pharma_lab",
+    "routePattern": "/lab-visits",
+    "routeCode": "WEB.ATENCION.LAB_VISITS",
+    "pageTitle": "Visitas de laboratorio"
+  },
+  {
+    "portal": "WEB",
+    "group": "Atención",
+    "sectionPath": "my-visits",
+    "module": "M62 pharma_lab",
+    "routePattern": "/my-visits",
+    "routeCode": "WEB.ATENCION.MY_VISITS",
+    "pageTitle": "Mis visitas médicas"
+  },
+  {
+    "portal": "WEB",
+    "group": "Atención",
+    "sectionPath": "glossary",
+    "module": "M03 terminology",
+    "routePattern": "/glossary",
+    "routeCode": "WEB.ATENCION.GLOSSARY",
+    "pageTitle": "Glosario"
+  },
+  {
+    "portal": "WEB",
+    "group": "Atención",
+    "sectionPath": "form-builder",
+    "module": "M09 forms · M15 chart",
+    "routePattern": "/form-builder",
+    "routeCode": "WEB.ATENCION.FORM_BUILDER",
+    "pageTitle": "Formularios"
+  },
+  {
+    "portal": "WEB",
+    "group": "Atención",
+    "sectionPath": "my-services",
+    "module": "M17 billing",
+    "routePattern": "/my-services",
+    "routeCode": "WEB.ATENCION.MY_SERVICES",
+    "pageTitle": "Mis servicios"
+  },
+  {
+    "portal": "WEB",
+    "group": "Atención",
+    "sectionPath": "my-quotations",
+    "module": "M17 billing",
+    "routePattern": "/my-quotations",
+    "routeCode": "WEB.ATENCION.MY_QUOTATIONS",
+    "pageTitle": "Cotizaciones"
+  },
+  {
+    "portal": "WEB",
+    "group": "Atención",
+    "sectionPath": "my-medical-groups",
+    "module": "M21 medical_groups",
+    "routePattern": "/my-medical-groups",
+    "routeCode": "WEB.ATENCION.MY_MEDICAL_GROUPS",
+    "pageTitle": "Grupos médicos"
+  },
+  {
+    "portal": "WEB",
+    "group": "Atención",
+    "sectionPath": "questionnaires",
+    "module": "M-surveys",
+    "routePattern": "/questionnaires",
+    "routeCode": "WEB.ATENCION.QUESTIONNAIRES",
+    "pageTitle": "Encuestas"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/patients",
+    "module": "M05 profiles",
+    "routePattern": "/administration/patients",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_PATIENTS",
+    "pageTitle": "Pacientes"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/admissions",
+    "module": "M05 profiles",
+    "routePattern": "/administration/admissions",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_ADMISSIONS",
+    "pageTitle": "Admisiones"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/users",
+    "module": "M01 iam",
+    "routePattern": "/administration/users",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_USERS",
+    "pageTitle": "Usuarios"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/organizations",
+    "module": "M04 directory",
+    "routePattern": "/administration/organizations",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_ORGANIZATIONS",
+    "pageTitle": "Organizaciones"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/insurance",
+    "module": "M26 insurance",
+    "routePattern": "/administration/insurance",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_INSURANCE",
+    "pageTitle": "Mis productos"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/brokers",
+    "module": "M26 insurance",
+    "routePattern": "/administration/brokers",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_BROKERS",
+    "pageTitle": "Brokers"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/insurance-claims",
+    "module": "M26 insurance",
+    "routePattern": "/administration/insurance-claims",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_INSURANCE_CLAIMS",
+    "pageTitle": "Solicitudes de seguro"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/insurance-analytics",
+    "module": "M26 insurance",
+    "routePattern": "/administration/insurance-analytics",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_INSURANCE_ANALYTICS",
+    "pageTitle": "Siniestralidad y analítica"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/insurer-practitioner-requests",
+    "module": "M26 insurance",
+    "routePattern": "/administration/insurer-practitioner-requests",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_INSURER_PRACTITIONER_REQUESTS",
+    "pageTitle": "Profesionales que piden sumarse"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/received-claims",
+    "module": "M26 insurance",
+    "routePattern": "/administration/received-claims",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_RECEIVED_CLAIMS",
+    "pageTitle": "Solicitudes recibidas"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/insurance-patients",
+    "module": "M26 insurance",
+    "routePattern": "/administration/insurance-patients",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_INSURANCE_PATIENTS",
+    "pageTitle": "Pacientes de la aseguradora"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/insurance-campaigns",
+    "module": "M26 insurance",
+    "routePattern": "/administration/insurance-campaigns",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_INSURANCE_CAMPAIGNS",
+    "pageTitle": "Campañas preventivas"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/delegated-access",
+    "module": "M29 delegated_access",
+    "routePattern": "/administration/delegated-access",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_DELEGATED_ACCESS",
+    "pageTitle": "Acceso delegado"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/identity-providers",
+    "module": "M40 auth_providers",
+    "routePattern": "/administration/identity-providers",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_IDENTITY_PROVIDERS",
+    "pageTitle": "Proveedores de identidad"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/identity-assurance",
+    "module": "M27 identity_assurance",
+    "routePattern": "/administration/identity-assurance",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_IDENTITY_ASSURANCE",
+    "pageTitle": "Verificación de identidad"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/terminology",
+    "module": "M03 terminology",
+    "routePattern": "/administration/terminology",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_TERMINOLOGY",
+    "pageTitle": "Terminología"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/content-packs",
+    "module": "M03 terminology",
+    "routePattern": "/administration/content-packs",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_CONTENT_PACKS",
+    "pageTitle": "Paquetes de contenido"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/moderation",
+    "module": "M19 community",
+    "routePattern": "/administration/moderation",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_MODERATION",
+    "pageTitle": "Moderación"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/health-context",
+    "module": "M44 health_context",
+    "routePattern": "/administration/health-context",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_HEALTH_CONTEXT",
+    "pageTitle": "Contexto sanitario"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/geolocation",
+    "module": "M13 geo",
+    "routePattern": "/administration/geolocation",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_GEOLOCATION",
+    "pageTitle": "Geolocalización"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/services-catalog",
+    "module": "M17 billing",
+    "routePattern": "/administration/services-catalog",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_SERVICES_CATALOG",
+    "pageTitle": "Catálogo de servicios"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/medical-organization",
+    "module": "M14 practice",
+    "routePattern": "/administration/medical-organization",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_MEDICAL_ORGANIZATION",
+    "pageTitle": "Mis organizaciones"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/medical-center-setup",
+    "module": "M14 practice",
+    "routePattern": "/administration/medical-center-setup",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_MEDICAL_CENTER_SETUP",
+    "pageTitle": "Configurar práctica"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/medical-laboratory",
+    "module": "M23 diagnostic_units",
+    "routePattern": "/administration/medical-laboratory",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_MEDICAL_LABORATORY",
+    "pageTitle": "Laboratorio médico"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/clinical-forms",
+    "module": "M15 chart · M09 forms",
+    "routePattern": "/administration/clinical-forms",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_CLINICAL_FORMS",
+    "pageTitle": "Formularios clínicos"
+  },
+  {
+    "portal": "WEB",
+    "group": "Facturación",
+    "sectionPath": "billing",
+    "module": "M26 billing · M42 payments",
+    "routePattern": "/billing",
+    "routeCode": "WEB.FACTURACION.BILLING",
+    "pageTitle": "Facturación"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/pharma-lab",
+    "module": "M62 pharma_lab",
+    "routePattern": "/administration/pharma-lab",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_PHARMA_LAB",
+    "pageTitle": "Laboratorio farmacéutico"
+  },
+  {
+    "portal": "WEB",
+    "group": "Facturación",
+    "sectionPath": "administration/accounting",
+    "module": "M16 accounting",
+    "routePattern": "/administration/accounting",
+    "routeCode": "WEB.FACTURACION.ADMINISTRATION_ACCOUNTING",
+    "pageTitle": "Contabilidad"
+  },
+  {
+    "portal": "WEB",
+    "group": "Mi cuenta",
+    "sectionPath": "my-account/dependents",
+    "module": "M05 profiles",
+    "routePattern": "/my-account/dependents",
+    "routeCode": "WEB.MI_CUENTA.MY_ACCOUNT_DEPENDENTS",
+    "pageTitle": "Dependientes"
+  },
+  {
+    "portal": "WEB",
+    "group": "Mi cuenta",
+    "sectionPath": "my-account",
+    "module": "M05 profiles",
+    "routePattern": "/my-account",
+    "routeCode": "WEB.MI_CUENTA.MY_ACCOUNT",
+    "pageTitle": "Mi perfil"
+  },
+  {
+    "portal": "WEB",
+    "group": "Mi cuenta",
+    "sectionPath": "my-account/privacy",
+    "module": "M07 consent",
+    "routePattern": "/my-account/privacy",
+    "routeCode": "WEB.MI_CUENTA.MY_ACCOUNT_PRIVACY",
+    "pageTitle": "Mi privacidad"
+  },
+  {
+    "portal": "WEB",
+    "group": "Mi cuenta",
+    "sectionPath": "my-account/clinical-access",
+    "module": "M06 authz",
+    "routePattern": "/my-account/clinical-access",
+    "routeCode": "WEB.MI_CUENTA.MY_ACCOUNT_CLINICAL_ACCESS",
+    "pageTitle": "Quién ve mi historia"
+  },
+  {
+    "portal": "WEB",
+    "group": "Mi cuenta",
+    "sectionPath": "my-account/security",
+    "module": "M01 iam",
+    "routePattern": "/my-account/security",
+    "routeCode": "WEB.MI_CUENTA.MY_ACCOUNT_SECURITY",
+    "pageTitle": "Seguridad"
+  },
+  {
+    "portal": "WEB",
+    "group": "Mi cuenta",
+    "sectionPath": "my-account/appointments",
+    "module": "M41 scheduling",
+    "routePattern": "/my-account/appointments",
+    "routeCode": "WEB.MI_CUENTA.MY_ACCOUNT_APPOINTMENTS",
+    "pageTitle": "Mis citas"
+  },
+  {
+    "portal": "WEB",
+    "group": "Mi cuenta",
+    "sectionPath": "my-account/medical-record",
+    "module": "M08 clinical",
+    "routePattern": "/my-account/medical-record",
+    "routeCode": "WEB.MI_CUENTA.MY_ACCOUNT_MEDICAL_RECORD",
+    "pageTitle": "Mi historia clínica"
+  },
+  {
+    "portal": "WEB",
+    "group": "Mi cuenta",
+    "sectionPath": "my-account/diagnostic-results",
+    "module": "M20 diagnostics",
+    "routePattern": "/my-account/diagnostic-results",
+    "routeCode": "WEB.MI_CUENTA.MY_ACCOUNT_DIAGNOSTIC_RESULTS",
+    "pageTitle": "Mis resultados"
+  },
+  {
+    "portal": "WEB",
+    "group": "Mi cuenta",
+    "sectionPath": "my-account/diagnostic-orders",
+    "module": "M20 diagnostics",
+    "routePattern": "/my-account/diagnostic-orders",
+    "routeCode": "WEB.MI_CUENTA.MY_ACCOUNT_DIAGNOSTIC_ORDERS",
+    "pageTitle": "Mis órdenes"
+  },
+  {
+    "portal": "WEB",
+    "group": "Mi cuenta",
+    "sectionPath": "my-account/quotations",
+    "module": "M-cotizaciones",
+    "routePattern": "/my-account/quotations",
+    "routeCode": "WEB.MI_CUENTA.MY_ACCOUNT_QUOTATIONS",
+    "pageTitle": "Cotizaciones"
+  },
+  {
+    "portal": "WEB",
+    "group": "Mi cuenta",
+    "sectionPath": "my-account/questionnaires",
+    "module": "M-surveys",
+    "routePattern": "/my-account/questionnaires",
+    "routeCode": "WEB.MI_CUENTA.MY_ACCOUNT_QUESTIONNAIRES",
+    "pageTitle": "Mis cuestionarios"
+  },
+  {
+    "portal": "WEB",
+    "group": "Mi cuenta",
+    "sectionPath": "settings",
+    "module": "M35 messaging",
+    "routePattern": "/settings",
+    "routeCode": "WEB.MI_CUENTA.SETTINGS",
+    "pageTitle": "Ajustes"
+  },
+  {
+    "portal": "WEB",
+    "group": "Mi cuenta",
+    "sectionPath": "notification-center",
+    "module": "M35 messaging",
+    "routePattern": "/notification-center",
+    "routeCode": "WEB.MI_CUENTA.NOTIFICATION_CENTER",
+    "pageTitle": "Notificaciones"
+  },
+  {
+    "portal": "WEB",
+    "group": "Mi cuenta",
+    "sectionPath": "my-account/identity",
+    "module": "M27 identity_assurance",
+    "routePattern": "/my-account/identity",
+    "routeCode": "WEB.MI_CUENTA.MY_ACCOUNT_IDENTITY",
+    "pageTitle": "Mi identidad"
+  },
+  {
+    "portal": "WEB",
+    "group": "Mi cuenta",
+    "sectionPath": "my-account/pharmacy",
+    "module": "M24 pharmacy",
+    "routePattern": "/my-account/pharmacy",
+    "routeCode": "WEB.MI_CUENTA.MY_ACCOUNT_PHARMACY",
+    "pageTitle": "Farmacia"
+  },
+  {
+    "portal": "WEB",
+    "group": "Mi cuenta",
+    "sectionPath": "my-account/pharmacy-orders",
+    "module": "M24 pharmacy",
+    "routePattern": "/my-account/pharmacy-orders",
+    "routeCode": "WEB.MI_CUENTA.MY_ACCOUNT_PHARMACY_ORDERS",
+    "pageTitle": "Mis pedidos"
+  },
+  {
+    "portal": "WEB",
+    "group": "Mi cuenta",
+    "sectionPath": "my-account/loyalty",
+    "module": "M51 promotions",
+    "routePattern": "/my-account/loyalty",
+    "routeCode": "WEB.MI_CUENTA.MY_ACCOUNT_LOYALTY",
+    "pageTitle": "Mis puntos"
+  },
+  {
+    "portal": "WEB",
+    "group": "Mi cuenta",
+    "sectionPath": "my-account/promotions",
+    "module": "M51 promotions",
+    "routePattern": "/my-account/promotions",
+    "routeCode": "WEB.MI_CUENTA.MY_ACCOUNT_PROMOTIONS",
+    "pageTitle": "Promociones"
+  },
+  {
+    "portal": "WEB",
+    "group": "Mi cuenta",
+    "sectionPath": "my-account/spending",
+    "module": "M17 billing",
+    "routePattern": "/my-account/spending",
+    "routeCode": "WEB.MI_CUENTA.MY_ACCOUNT_SPENDING",
+    "pageTitle": "Mis gastos"
+  },
+  {
+    "portal": "WEB",
+    "group": "Mi cuenta",
+    "sectionPath": "my-account/invoices",
+    "module": "M26 billing",
+    "routePattern": "/my-account/invoices",
+    "routeCode": "WEB.MI_CUENTA.MY_ACCOUNT_INVOICES",
+    "pageTitle": "Mis facturas"
+  },
+  {
+    "portal": "WEB",
+    "group": "Mi cuenta",
+    "sectionPath": "my-account/requests",
+    "module": "M26 insurance",
+    "routePattern": "/my-account/requests",
+    "routeCode": "WEB.MI_CUENTA.MY_ACCOUNT_REQUESTS",
+    "pageTitle": "Mis solicitudes"
+  },
+  {
+    "portal": "WEB",
+    "group": "Mi cuenta",
+    "sectionPath": "my-account/verifications",
+    "module": "M05 profiles · M26 insurance",
+    "routePattern": "/my-account/verifications",
+    "routeCode": "WEB.MI_CUENTA.MY_ACCOUNT_VERIFICATIONS",
+    "pageTitle": "Mis verificaciones"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/my-practice",
+    "module": "M14 practice",
+    "routePattern": "/administration/my-practice",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_MY_PRACTICE",
+    "pageTitle": "Mi consultorio propio"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/my-organization",
+    "module": "M04 directory",
+    "routePattern": "/administration/my-organization",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_MY_ORGANIZATION",
+    "pageTitle": "Mi organización"
+  },
+  {
+    "portal": "WEB",
+    "group": "General",
+    "sectionPath": "administration/pharmacy",
+    "module": "M24 pharmacy",
+    "routePattern": "/administration/pharmacy",
+    "routeCode": "WEB.GENERAL.ADMINISTRATION_PHARMACY",
+    "pageTitle": "Resumen"
+  },
+  {
+    "portal": "WEB",
+    "group": "General",
+    "sectionPath": "administration/pharmacy-catalog",
+    "module": "M24 pharmacy",
+    "routePattern": "/administration/pharmacy-catalog",
+    "routeCode": "WEB.GENERAL.ADMINISTRATION_PHARMACY_CATALOG",
+    "pageTitle": "Catálogo"
+  },
+  {
+    "portal": "WEB",
+    "group": "General",
+    "sectionPath": "administration/pharmacy-hours",
+    "module": "M24 pharmacy",
+    "routePattern": "/administration/pharmacy-hours",
+    "routeCode": "WEB.GENERAL.ADMINISTRATION_PHARMACY_HOURS",
+    "pageTitle": "Horario y turnos"
+  },
+  {
+    "portal": "WEB",
+    "group": "General",
+    "sectionPath": "administration/pharmacy-orders",
+    "module": "M24 pharmacy",
+    "routePattern": "/administration/pharmacy-orders",
+    "routeCode": "WEB.GENERAL.ADMINISTRATION_PHARMACY_ORDERS",
+    "pageTitle": "Solicitudes de retiro"
+  },
+  {
+    "portal": "WEB",
+    "group": "General",
+    "sectionPath": "administration/pharmacy-campaigns",
+    "module": "M51 promotions",
+    "routePattern": "/administration/pharmacy-campaigns",
+    "routeCode": "WEB.GENERAL.ADMINISTRATION_PHARMACY_CAMPAIGNS",
+    "pageTitle": "Promociones"
+  },
+  {
+    "portal": "WEB",
+    "group": "General",
+    "sectionPath": "administration/pharmacy-profile",
+    "module": "M24 pharmacy",
+    "routePattern": "/administration/pharmacy-profile",
+    "routeCode": "WEB.GENERAL.ADMINISTRATION_PHARMACY_PROFILE",
+    "pageTitle": "Ficha de la farmacia"
+  },
+  {
+    "portal": "WEB",
+    "group": "General",
+    "sectionPath": "administration/pharmacy-branches",
+    "module": "M04 directory",
+    "routePattern": "/administration/pharmacy-branches",
+    "routeCode": "WEB.GENERAL.ADMINISTRATION_PHARMACY_BRANCHES",
+    "pageTitle": "Sucursales"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/data-catalog",
+    "module": "M67 data_catalog",
+    "routePattern": "/administration/data-catalog",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_DATA_CATALOG",
+    "pageTitle": "Catálogo de datos"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/web-analytics",
+    "module": "M28 telemetry",
+    "routePattern": "/administration/web-analytics",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_WEB_ANALYTICS",
+    "pageTitle": "Analítica web"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/qa-lab",
+    "module": "M36 qa_lab · M68 qa_execution",
+    "routePattern": "/administration/qa-lab",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_QA_LAB",
+    "pageTitle": "QA Lab"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/operations",
+    "module": "M11 system_ops · M46 platform_ops",
+    "routePattern": "/administration/operations",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_OPERATIONS",
+    "pageTitle": "Operación"
+  },
+  {
+    "portal": "WEB",
+    "group": "Superadministración",
+    "sectionPath": "superadmin/observability",
+    "module": "M58 time_series · M46 platform_ops",
+    "routePattern": "/superadmin/observability",
+    "routeCode": "WEB.SUPERADMINISTRACION.SUPERADMIN_OBSERVABILITY",
+    "pageTitle": "Observabilidad"
+  },
+  {
+    "portal": "WEB",
+    "group": "Superadministración",
+    "sectionPath": "superadmin/measurement",
+    "module": "M58 time_series · M28 telemetry",
+    "routePattern": "/superadmin/measurement",
+    "routeCode": "WEB.SUPERADMINISTRACION.SUPERADMIN_MEASUREMENT",
+    "pageTitle": "Medición por funcionalidad"
+  },
+  {
+    "portal": "WEB",
+    "group": "Superadministración",
+    "sectionPath": "superadmin/data-catalog",
+    "module": "M67 data_catalog",
+    "routePattern": "/superadmin/data-catalog",
+    "routeCode": "WEB.SUPERADMINISTRACION.SUPERADMIN_DATA_CATALOG",
+    "pageTitle": "Catálogo de datos"
+  },
+  {
+    "portal": "WEB",
+    "group": "Superadministración",
+    "sectionPath": "superadmin/portal",
+    "module": "M67 data_catalog",
+    "routePattern": "/superadmin/portal",
+    "routeCode": "WEB.SUPERADMINISTRACION.SUPERADMIN_PORTAL",
+    "pageTitle": "Portal de inventario"
+  },
+  {
+    "portal": "WEB",
+    "group": "Superadministración",
+    "sectionPath": "superadmin/flows",
+    "module": "M36 qa_lab",
+    "routePattern": "/superadmin/flows",
+    "routeCode": "WEB.SUPERADMINISTRACION.SUPERADMIN_FLOWS",
+    "pageTitle": "Catálogo de flujos"
+  },
+  {
+    "portal": "WEB",
+    "group": "Superadministración",
+    "sectionPath": "superadmin/qa-lab",
+    "module": "M36 qa_lab · M68 qa_execution",
+    "routePattern": "/superadmin/qa-lab",
+    "routeCode": "WEB.SUPERADMINISTRACION.SUPERADMIN_QA_LAB",
+    "pageTitle": "Orquestación de pruebas"
+  },
+  {
+    "portal": "WEB",
+    "group": "Superadministración",
+    "sectionPath": "superadmin/web-analytics",
+    "module": "M28 telemetry",
+    "routePattern": "/superadmin/web-analytics",
+    "routeCode": "WEB.SUPERADMINISTRACION.SUPERADMIN_WEB_ANALYTICS",
+    "pageTitle": "Analítica web"
+  },
+  {
+    "portal": "WEB",
+    "group": "Superadministración",
+    "sectionPath": "superadmin/operations",
+    "module": "M11 system_ops · M46 platform_ops",
+    "routePattern": "/superadmin/operations",
+    "routeCode": "WEB.SUPERADMINISTRACION.SUPERADMIN_OPERATIONS",
+    "pageTitle": "Operación"
+  },
+  {
+    "portal": "WEB",
+    "group": "Superadministración",
+    "sectionPath": "superadmin/instances",
+    "module": "M46 platform_ops · ops_console",
+    "routePattern": "/superadmin/instances",
+    "routeCode": "WEB.SUPERADMINISTRACION.SUPERADMIN_INSTANCES",
+    "pageTitle": "Instancias y herramientas"
+  },
+  {
+    "portal": "WEB",
+    "group": "Superadministración",
+    "sectionPath": "superadmin/bulk-imports",
+    "module": "bulk_import",
+    "routePattern": "/superadmin/bulk-imports",
+    "routeCode": "WEB.SUPERADMINISTRACION.SUPERADMIN_BULK_IMPORTS",
+    "pageTitle": "Cargas masivas"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/support-requests",
+    "module": "M29 delegated_access",
+    "routePattern": "/administration/support-requests",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_SUPPORT_REQUESTS",
+    "pageTitle": "Solicitudes de apoyo"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/support-team",
+    "module": "M29 delegated_access",
+    "routePattern": "/administration/support-team",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_SUPPORT_TEAM",
+    "pageTitle": "Equipo de apoyo"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/support-access-lookup",
+    "module": "M29 delegated_access",
+    "routePattern": "/administration/support-access-lookup",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_SUPPORT_ACCESS_LOOKUP",
+    "pageTitle": "Quién tiene acceso"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/support-invitations",
+    "module": "M29 delegated_access",
+    "routePattern": "/administration/support-invitations",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_SUPPORT_INVITATIONS",
+    "pageTitle": "Invitaciones y QR"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/session-controls",
+    "module": "M01 iam",
+    "routePattern": "/administration/session-controls",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_SESSION_CONTROLS",
+    "pageTitle": "Controles de sesión"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/support-review",
+    "module": "M29 delegated_access",
+    "routePattern": "/administration/support-review",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_SUPPORT_REVIEW",
+    "pageTitle": "Revisión periódica"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/support-activity",
+    "module": "M29 delegated_access",
+    "routePattern": "/administration/support-activity",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_SUPPORT_ACTIVITY",
+    "pageTitle": "Actividad del equipo de apoyo"
+  },
+  {
+    "portal": "WEB",
+    "group": "Atención",
+    "sectionPath": "my-team",
+    "module": "M29 delegated_access",
+    "routePattern": "/my-team",
+    "routeCode": "WEB.ATENCION.MY_TEAM",
+    "pageTitle": "Mi equipo"
+  },
+  {
+    "portal": "WEB",
+    "group": "Atención",
+    "sectionPath": "my-support",
+    "module": "M29 delegated_access",
+    "routePattern": "/my-support",
+    "routeCode": "WEB.ATENCION.MY_SUPPORT",
+    "pageTitle": "Mis accesos"
+  },
+  {
+    "portal": "WEB",
+    "group": "Atención",
+    "sectionPath": "support-inbox",
+    "module": "M19 community",
+    "routePattern": "/support-inbox",
+    "routeCode": "WEB.ATENCION.SUPPORT_INBOX",
+    "pageTitle": "Bandeja de mensajes"
+  },
+  {
+    "portal": "WEB",
+    "group": "Atención",
+    "sectionPath": "combined-agenda",
+    "module": "M41 scheduling",
+    "routePattern": "/combined-agenda",
+    "routeCode": "WEB.ATENCION.COMBINED_AGENDA",
+    "pageTitle": "Agenda combinada"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/access-governance",
+    "module": "M29 delegated_access",
+    "routePattern": "/administration/access-governance",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_ACCESS_GOVERNANCE",
+    "pageTitle": "Gobierno de accesos"
+  },
+  {
+    "portal": "WEB",
+    "group": "Atención",
+    "sectionPath": "administration/team-management",
+    "module": "M29 delegated_access",
+    "routePattern": "/administration/team-management",
+    "routeCode": "WEB.ATENCION.ADMINISTRATION_TEAM_MANAGEMENT",
+    "pageTitle": "Mi equipo (administración)"
+  },
+  {
+    "portal": "WEB",
+    "group": "Atención",
+    "sectionPath": "my-reviews",
+    "module": "M29 delegated_access",
+    "routePattern": "/my-reviews",
+    "routeCode": "WEB.ATENCION.MY_REVIEWS",
+    "pageTitle": "Mis revisiones"
+  },
+  {
+    "portal": "WEB",
+    "group": "Facturación",
+    "sectionPath": "administration/accounting",
+    "module": "M16 accounting",
+    "routePattern": "/administration/accounting/billing-setup",
+    "routeCode": "WEB.FACTURACION.ADMINISTRATION_ACCOUNTING.BILLING_SETUP",
+    "pageTitle": "Configuración para facturar"
+  },
+  {
+    "portal": "WEB",
+    "group": "Facturación",
+    "sectionPath": "administration/accounting",
+    "module": "M16 accounting",
+    "routePattern": "/administration/accounting/cockpit",
+    "routeCode": "WEB.FACTURACION.ADMINISTRATION_ACCOUNTING.COCKPIT",
+    "pageTitle": "Vista contable"
+  },
+  {
+    "portal": "WEB",
+    "group": "Facturación",
+    "sectionPath": "administration/accounting",
+    "module": "M16 accounting",
+    "routePattern": "/administration/accounting/assets-liabilities",
+    "routeCode": "WEB.FACTURACION.ADMINISTRATION_ACCOUNTING.ASSETS_LIABILITIES",
+    "pageTitle": "Activos y pasivos"
+  },
+  {
+    "portal": "WEB",
+    "group": "Facturación",
+    "sectionPath": "administration/accounting",
+    "module": "M16 accounting",
+    "routePattern": "/administration/accounting/books",
+    "routeCode": "WEB.FACTURACION.ADMINISTRATION_ACCOUNTING.BOOKS",
+    "pageTitle": "Libros contables"
+  },
+  {
+    "portal": "WEB",
+    "group": "General",
+    "sectionPath": "groups",
+    "module": "M19 community",
+    "routePattern": "/groups/:groupId",
+    "routeCode": "WEB.GENERAL.GROUPS.GROUPID",
+    "pageTitle": "Grupo"
+  },
+  {
+    "portal": "WEB",
+    "group": "Atención",
+    "sectionPath": "questionnaires",
+    "module": "M-surveys",
+    "routePattern": "/questionnaires/:surveyId",
+    "routeCode": "WEB.ATENCION.QUESTIONNAIRES.SURVEYID",
+    "pageTitle": "Encuesta"
+  },
+  {
+    "portal": "WEB",
+    "group": "Mi cuenta",
+    "sectionPath": "my-account/questionnaires",
+    "module": "M-surveys",
+    "routePattern": "/my-account/questionnaires/:invitationId",
+    "routeCode": "WEB.MI_CUENTA.MY_ACCOUNT_QUESTIONNAIRES.INVITATIONID",
+    "pageTitle": "Responder cuestionario"
+  },
+  {
+    "portal": "WEB",
+    "group": "Mi cuenta",
+    "sectionPath": "my-account/medical-record",
+    "module": "M08 clinical",
+    "routePattern": "/my-account/medical-record/where-to-buy/:requestId",
+    "routeCode": "WEB.MI_CUENTA.MY_ACCOUNT_MEDICAL_RECORD.WHERE_TO_BUY_REQUESTID",
+    "pageTitle": "Dónde comprar mi receta"
+  },
+  {
+    "portal": "WEB",
+    "group": "Mi cuenta",
+    "sectionPath": "my-account/pharmacy",
+    "module": "M24 pharmacy",
+    "routePattern": "/my-account/pharmacy/prescriptions",
+    "routeCode": "WEB.MI_CUENTA.MY_ACCOUNT_PHARMACY.PRESCRIPTIONS",
+    "pageTitle": "Mis recetas"
+  },
+  {
+    "portal": "WEB",
+    "group": "Mi cuenta",
+    "sectionPath": "my-account/pharmacy",
+    "module": "M24 pharmacy",
+    "routePattern": "/my-account/pharmacy/cart",
+    "routeCode": "WEB.MI_CUENTA.MY_ACCOUNT_PHARMACY.CART",
+    "pageTitle": "Su carrito"
+  },
+  {
+    "portal": "WEB",
+    "group": "Mi cuenta",
+    "sectionPath": "my-account/pharmacy-orders",
+    "module": "M24 pharmacy",
+    "routePattern": "/my-account/pharmacy-orders/new",
+    "routeCode": "WEB.MI_CUENTA.MY_ACCOUNT_PHARMACY_ORDERS.NEW",
+    "pageTitle": "Confirme su pedido"
+  },
+  {
+    "portal": "WEB",
+    "group": "Mi cuenta",
+    "sectionPath": "my-account/pharmacy-orders",
+    "module": "M24 pharmacy",
+    "routePattern": "/my-account/pharmacy-orders/checkout",
+    "routeCode": "WEB.MI_CUENTA.MY_ACCOUNT_PHARMACY_ORDERS.CHECKOUT",
+    "pageTitle": "Confirme su pedido"
+  },
+  {
+    "portal": "WEB",
+    "group": "Mi cuenta",
+    "sectionPath": "my-account/pharmacy-orders",
+    "module": "M24 pharmacy",
+    "routePattern": "/my-account/pharmacy-orders/:orderId",
+    "routeCode": "WEB.MI_CUENTA.MY_ACCOUNT_PHARMACY_ORDERS.ORDERID",
+    "pageTitle": "Pedido de farmacia"
+  },
+  {
+    "portal": "WEB",
+    "group": "Mi cuenta",
+    "sectionPath": "my-account/pharmacy-orders",
+    "module": "M24 pharmacy",
+    "routePattern": "/my-account/pharmacy-orders/:orderId/receipt",
+    "routeCode": "WEB.MI_CUENTA.MY_ACCOUNT_PHARMACY_ORDERS.ORDERID_RECEIPT",
+    "pageTitle": "Comprobante de pago"
+  },
+  {
+    "portal": "WEB",
+    "group": "Mi cuenta",
+    "sectionPath": "my-account/pharmacy-orders",
+    "module": "M24 pharmacy",
+    "routePattern": "/my-account/pharmacy-orders/:orderId/invoice",
+    "routeCode": "WEB.MI_CUENTA.MY_ACCOUNT_PHARMACY_ORDERS.ORDERID_INVOICE",
+    "pageTitle": "Factura"
+  },
+  {
+    "portal": "WEB",
+    "group": "General",
+    "sectionPath": "administration/pharmacy-orders",
+    "module": "M24 pharmacy",
+    "routePattern": "/administration/pharmacy-orders/:orderId",
+    "routeCode": "WEB.GENERAL.ADMINISTRATION_PHARMACY_ORDERS.ORDERID",
+    "pageTitle": "Pedido en el mostrador"
+  },
+  {
+    "portal": "WEB",
+    "group": "Atención",
+    "sectionPath": "medical-records",
+    "module": "M08 clinical · M15 chart",
+    "routePattern": "/medical-records/:profileId",
+    "routeCode": "WEB.ATENCION.MEDICAL_RECORDS.PROFILEID",
+    "pageTitle": "Expediente clínico"
+  },
+  {
+    "portal": "WEB",
+    "group": "Atención",
+    "sectionPath": "medical-records",
+    "module": "M08 clinical · M15 chart",
+    "routePattern": "/medical-records/:profileId/consultation",
+    "routeCode": "WEB.ATENCION.MEDICAL_RECORDS.PROFILEID_CONSULTATION",
+    "pageTitle": "Consulta"
+  },
+  {
+    "portal": "WEB",
+    "group": "Atención",
+    "sectionPath": "medical-records",
+    "module": "M08 clinical · M15 chart",
+    "routePattern": "/medical-records/:profileId/request-access",
+    "routeCode": "WEB.ATENCION.MEDICAL_RECORDS.PROFILEID_REQUEST_ACCESS",
+    "pageTitle": "Solicitar vinculación"
+  },
+  {
+    "portal": "WEB",
+    "group": "Mi cuenta",
+    "sectionPath": "my-account",
+    "module": "M05 profiles",
+    "routePattern": "/my-account/access-requests",
+    "routeCode": "WEB.MI_CUENTA.MY_ACCOUNT.ACCESS_REQUESTS",
+    "pageTitle": "Solicitudes de vínculo"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/patients",
+    "module": "M05 profiles",
+    "routePattern": "/administration/patients/new",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_PATIENTS.NEW",
+    "pageTitle": "Nuevo paciente"
+  },
+  {
+    "portal": "WEB",
+    "group": "Atención",
+    "sectionPath": "my-quotations",
+    "module": "M17 billing",
+    "routePattern": "/my-quotations/new",
+    "routeCode": "WEB.ATENCION.MY_QUOTATIONS.NEW",
+    "pageTitle": "Nueva cotización"
+  },
+  {
+    "portal": "WEB",
+    "group": "Atención",
+    "sectionPath": "my-medical-groups",
+    "module": "M21 medical_groups",
+    "routePattern": "/my-medical-groups/new",
+    "routeCode": "WEB.ATENCION.MY_MEDICAL_GROUPS.NEW",
+    "pageTitle": "Crear grupo médico"
+  },
+  {
+    "portal": "WEB",
+    "group": "Atención",
+    "sectionPath": "my-medical-groups",
+    "module": "M21 medical_groups",
+    "routePattern": "/my-medical-groups/:id",
+    "routeCode": "WEB.ATENCION.MY_MEDICAL_GROUPS.ID",
+    "pageTitle": "Grupo médico"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/patients",
+    "module": "M05 profiles",
+    "routePattern": "/administration/patients/merge",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_PATIENTS.MERGE",
+    "pageTitle": "Fusionar duplicados"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/patients",
+    "module": "M05 profiles",
+    "routePattern": "/administration/patients/assisted-registration",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_PATIENTS.ASSISTED_REGISTRATION",
+    "pageTitle": "Alta asistida"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/patients",
+    "module": "M05 profiles",
+    "routePattern": "/administration/patients/:profileId",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_PATIENTS.PROFILEID",
+    "pageTitle": "Ficha de paciente"
+  },
+  {
+    "portal": "WEB",
+    "group": "General",
+    "sectionPath": "directory",
+    "module": "M05 profiles",
+    "routePattern": "/directory/:profileId",
+    "routeCode": "WEB.GENERAL.DIRECTORY.PROFILEID",
+    "pageTitle": "Perfil profesional"
+  },
+  {
+    "portal": "WEB",
+    "group": "General",
+    "sectionPath": "laboratory-directory",
+    "module": "M23 diagnostic_units",
+    "routePattern": "/laboratory-directory/:unitId",
+    "routeCode": "WEB.GENERAL.LABORATORY_DIRECTORY.UNITID",
+    "pageTitle": "Perfil de laboratorio"
+  },
+  {
+    "portal": "WEB",
+    "group": "General",
+    "sectionPath": "clinics-directory",
+    "module": "M04 directory",
+    "routePattern": "/clinics-directory/:slug",
+    "routeCode": "WEB.GENERAL.CLINICS_DIRECTORY.SLUG",
+    "pageTitle": "Perfil de clínica"
+  },
+  {
+    "portal": "WEB",
+    "group": "General",
+    "sectionPath": "insurers-directory",
+    "module": "M26 insurance",
+    "routePattern": "/insurers-directory/:slug",
+    "routeCode": "WEB.GENERAL.INSURERS_DIRECTORY.SLUG",
+    "pageTitle": "Aseguradora"
+  },
+  {
+    "portal": "WEB",
+    "group": "General",
+    "sectionPath": "pharmacies-directory",
+    "module": "M22 pharmacy",
+    "routePattern": "/pharmacies-directory/:slug",
+    "routeCode": "WEB.GENERAL.PHARMACIES_DIRECTORY.SLUG",
+    "pageTitle": "Perfil de farmacia"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/insurance-claims",
+    "module": "M26 insurance",
+    "routePattern": "/administration/insurance-claims/:claimId",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_INSURANCE_CLAIMS.CLAIMID",
+    "pageTitle": "Solicitud de seguro"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/brokers",
+    "module": "M26 insurance",
+    "routePattern": "/administration/brokers/:brokerId",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_BROKERS.BROKERID",
+    "pageTitle": "Perfil del corredor"
+  },
+  {
+    "portal": "WEB_PUBLICO",
+    "group": "Autenticación",
+    "sectionPath": "onboarding",
+    "module": null,
+    "routePattern": "/onboarding",
+    "routeCode": "WEB_PUBLICO.AUTENTICACION.ONBOARDING",
+    "pageTitle": "Complete su perfil"
+  },
+  {
+    "portal": "WEB",
+    "group": "Mi cuenta",
+    "sectionPath": "my-account",
+    "module": "M05 profiles",
+    "routePattern": "/my-account/edit",
+    "routeCode": "WEB.MI_CUENTA.MY_ACCOUNT.EDIT",
+    "pageTitle": "Editar perfil"
+  },
+  {
+    "portal": "WEB",
+    "group": "Mi cuenta",
+    "sectionPath": "my-account",
+    "module": "M05 profiles",
+    "routePattern": "/my-account/profile/edit",
+    "routeCode": "WEB.MI_CUENTA.MY_ACCOUNT.PROFILE_EDIT",
+    "pageTitle": "Editar sus datos"
+  },
+  {
+    "portal": "WEB",
+    "group": "Mi cuenta",
+    "sectionPath": "my-account",
+    "module": "M05 profiles",
+    "routePattern": "/my-account/articles",
+    "routeCode": "WEB.MI_CUENTA.MY_ACCOUNT.ARTICLES",
+    "pageTitle": "Artículos médicos"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/terminology",
+    "module": "M03 terminology",
+    "routePattern": "/administration/terminology/import",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_TERMINOLOGY.IMPORT",
+    "pageTitle": "Importar terminología"
+  },
+  {
+    "portal": "WEB",
+    "group": "Superadministración",
+    "sectionPath": "superadmin/qa-lab",
+    "module": "M36 qa_lab · M68 qa_execution",
+    "routePattern": "/superadmin/qa-lab/plans/:planId",
+    "routeCode": "WEB.SUPERADMINISTRACION.SUPERADMIN_QA_LAB.PLANS_PLANID",
+    "pageTitle": "Plan de QA"
+  },
+  {
+    "portal": "WEB",
+    "group": "Superadministración",
+    "sectionPath": "superadmin/flows",
+    "module": "M36 qa_lab",
+    "routePattern": "/superadmin/flows/:flowId",
+    "routeCode": "WEB.SUPERADMINISTRACION.SUPERADMIN_FLOWS.FLOWID",
+    "pageTitle": "Flujo"
+  },
+  {
+    "portal": "WEB",
+    "group": "Superadministración",
+    "sectionPath": "superadmin/data-catalog",
+    "module": "M67 data_catalog",
+    "routePattern": "/superadmin/data-catalog/:objectId",
+    "routeCode": "WEB.SUPERADMINISTRACION.SUPERADMIN_DATA_CATALOG.OBJECTID",
+    "pageTitle": "Ficha del catálogo"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/organizations",
+    "module": "M04 directory",
+    "routePattern": "/administration/organizations/new",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_ORGANIZATIONS.NEW",
+    "pageTitle": "Nueva organización"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/organizations",
+    "module": "M04 directory",
+    "routePattern": "/administration/organizations/:tenantId/verify",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_ORGANIZATIONS.TENANTID_VERIFY",
+    "pageTitle": "Verificar organización"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/organizations",
+    "module": "M04 directory",
+    "routePattern": "/administration/organizations/:tenantId/branches/new",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_ORGANIZATIONS.TENANTID_BRANCHES_NEW",
+    "pageTitle": "Nueva sucursal"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/organizations",
+    "module": "M04 directory",
+    "routePattern": "/administration/organizations/:tenantId/memberships/new",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_ORGANIZATIONS.TENANTID_MEMBERSHIPS_NEW",
+    "pageTitle": "Sumar a la organización"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/organizations",
+    "module": "M04 directory",
+    "routePattern": "/administration/organizations/:tenantId/child-organizations/new",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_ORGANIZATIONS.TENANTID_CHILD_ORGANIZATIONS_NEW",
+    "pageTitle": "Nueva sub-organización"
+  },
+  {
+    "portal": "WEB",
+    "group": "Administración",
+    "sectionPath": "administration/organizations",
+    "module": "M04 directory",
+    "routePattern": "/administration/organizations/:tenantId",
+    "routeCode": "WEB.ADMINISTRACION.ADMINISTRATION_ORGANIZATIONS.TENANTID",
+    "pageTitle": "Ficha de organización"
+  },
+  {
+    "portal": "WEB",
+    "group": "Atención",
+    "sectionPath": "schedule",
+    "module": "M41 scheduling",
+    "routePattern": "/schedule/book/:slotId",
+    "routeCode": "WEB.ATENCION.SCHEDULE.BOOK_SLOTID",
+    "pageTitle": "Reservar una cita"
+  },
+  {
+    "portal": "WEB",
+    "group": "Mi cuenta",
+    "sectionPath": "my-account/appointments",
+    "module": "M41 scheduling",
+    "routePattern": "/my-account/appointments/book/:slotId",
+    "routeCode": "WEB.MI_CUENTA.MY_ACCOUNT_APPOINTMENTS.BOOK_SLOTID",
+    "pageTitle": "Pedir una cita"
+  },
+  {
+    "portal": "WEB",
+    "group": "Atención",
+    "sectionPath": "glossary",
+    "module": "M03 terminology",
+    "routePattern": "/glossary/anatomy-atlas",
+    "routeCode": "WEB.ATENCION.GLOSSARY.ANATOMY_ATLAS",
+    "pageTitle": "Atlas anatómico 3D"
+  },
+  {
+    "portal": "WEB",
+    "group": "Atención",
+    "sectionPath": "glossary",
+    "module": "M03 terminology",
+    "routePattern": "/glossary/network",
+    "routeCode": "WEB.ATENCION.GLOSSARY.NETWORK",
+    "pageTitle": "Mapa de relaciones del glosario"
+  },
+  {
+    "portal": "WEB",
+    "group": "Atención",
+    "sectionPath": "glossary",
+    "module": "M03 terminology",
+    "routePattern": "/glossary/compare",
+    "routeCode": "WEB.ATENCION.GLOSSARY.COMPARE",
+    "pageTitle": "Comparar términos del glosario"
+  },
+  {
+    "portal": "WEB",
+    "group": "Atención",
+    "sectionPath": "glossary",
+    "module": "M03 terminology",
+    "routePattern": "/glossary/:conceptId",
+    "routeCode": "WEB.ATENCION.GLOSSARY.CONCEPTID",
+    "pageTitle": "Término del glosario"
+  },
+  {
+    "portal": "WEB_PUBLICO",
+    "group": "Autenticación",
+    "sectionPath": "verify/portability",
+    "module": null,
+    "routePattern": "/verify/portability/:manifestHash",
+    "routeCode": "WEB_PUBLICO.AUTENTICACION.VERIFY_PORTABILITY_MANIFESTHASH",
+    "pageTitle": "Verificar certificado"
+  },
+  {
+    "portal": "WEB_PUBLICO",
+    "group": "Autenticación",
+    "sectionPath": "auth",
+    "module": null,
+    "routePattern": "/auth",
+    "routeCode": "WEB_PUBLICO.AUTENTICACION.AUTH",
+    "pageTitle": "Iniciar sesión"
+  },
+  {
+    "portal": "WEB_PUBLICO",
+    "group": "Autenticación",
+    "sectionPath": "auth/organization",
+    "module": null,
+    "routePattern": "/auth/organization",
+    "routeCode": "WEB_PUBLICO.AUTENTICACION.AUTH_ORGANIZATION",
+    "pageTitle": "Elija su organización"
+  },
+  {
+    "portal": "WEB_PUBLICO",
+    "group": "Autenticación",
+    "sectionPath": "auth/register",
+    "module": null,
+    "routePattern": "/auth/register",
+    "routeCode": "WEB_PUBLICO.AUTENTICACION.AUTH_REGISTER",
+    "pageTitle": "Crear cuenta"
+  },
+  {
+    "portal": "WEB_PUBLICO",
+    "group": "Autenticación",
+    "sectionPath": "auth/register",
+    "module": null,
+    "routePattern": "/auth/register/organization-type",
+    "routeCode": "WEB_PUBLICO.AUTENTICACION.AUTH_REGISTER_ORGANIZATION_TYPE",
+    "pageTitle": "Registre su organización"
+  },
+  {
+    "portal": "WEB_PUBLICO",
+    "group": "Autenticación",
+    "sectionPath": "auth/register",
+    "module": null,
+    "routePattern": "/auth/register/organization",
+    "routeCode": "WEB_PUBLICO.AUTENTICACION.AUTH_REGISTER_ORGANIZATION",
+    "pageTitle": "Registrar aseguradora"
+  },
+  {
+    "portal": "WEB_PUBLICO",
+    "group": "Autenticación",
+    "sectionPath": "auth/register",
+    "module": null,
+    "routePattern": "/auth/register/pharmacy",
+    "routeCode": "WEB_PUBLICO.AUTENTICACION.AUTH_REGISTER_PHARMACY",
+    "pageTitle": "Registrar farmacia"
+  },
+  {
+    "portal": "WEB_PUBLICO",
+    "group": "Autenticación",
+    "sectionPath": "auth/verify-email",
+    "module": null,
+    "routePattern": "/auth/verify-email",
+    "routeCode": "WEB_PUBLICO.AUTENTICACION.AUTH_VERIFY_EMAIL",
+    "pageTitle": "Verificar correo"
+  },
+  {
+    "portal": "WEB_PUBLICO",
+    "group": "Autenticación",
+    "sectionPath": "auth/forgot-password",
+    "module": null,
+    "routePattern": "/auth/forgot-password",
+    "routeCode": "WEB_PUBLICO.AUTENTICACION.AUTH_FORGOT_PASSWORD",
+    "pageTitle": "Recuperar contraseña"
+  },
+  {
+    "portal": "WEB_PUBLICO",
+    "group": "Autenticación",
+    "sectionPath": "auth/activate",
+    "module": null,
+    "routePattern": "/auth/activate",
+    "routeCode": "WEB_PUBLICO.AUTENTICACION.AUTH_ACTIVATE",
+    "pageTitle": "Activar cuenta"
+  },
+  {
+    "portal": "WEB_PUBLICO",
+    "group": "Autenticación",
+    "sectionPath": "auth/resend-verification",
+    "module": null,
+    "routePattern": "/auth/resend-verification",
+    "routeCode": "WEB_PUBLICO.AUTENTICACION.AUTH_RESEND_VERIFICATION",
+    "pageTitle": "Reenviar verificación"
+  },
+  {
+    "portal": "WEB_PUBLICO",
+    "group": "Autenticación",
+    "sectionPath": "auth/reset-password",
+    "module": null,
+    "routePattern": "/auth/reset-password",
+    "routeCode": "WEB_PUBLICO.AUTENTICACION.AUTH_RESET_PASSWORD",
+    "pageTitle": "Nueva contraseña"
+  },
+  {
+    "portal": "WEB_PUBLICO",
+    "group": "Público",
+    "sectionPath": "search",
+    "module": null,
+    "routePattern": "/search",
+    "routeCode": "WEB_PUBLICO.PUBLICO.SEARCH",
+    "pageTitle": "Buscador público"
+  },
+  {
+    "portal": "INSIGHTS",
+    "group": "Marketing",
+    "sectionPath": "insights",
+    "module": "M28 telemetry",
+    "routePattern": "/insights",
+    "routeCode": "INSIGHTS.MARKETING.INSIGHTS",
+    "pageTitle": "AloVida Insights"
+  },
+  {
+    "portal": "INSIGHTS",
+    "group": "Marketing",
+    "sectionPath": "insights",
+    "module": "M28 telemetry",
+    "routePattern": "/insights/campaigns",
+    "routeCode": "INSIGHTS.MARKETING.INSIGHTS.CAMPAIGNS",
+    "pageTitle": "Resumen de campañas"
+  },
+  {
+    "portal": "INSIGHTS",
+    "group": "Marketing",
+    "sectionPath": "insights",
+    "module": "M28 telemetry",
+    "routePattern": "/insights/funnel",
+    "routeCode": "INSIGHTS.MARKETING.INSIGHTS.FUNNEL",
+    "pageTitle": "Embudo y experiencia del paciente"
+  },
+  {
+    "portal": "INSIGHTS",
+    "group": "Marketing",
+    "sectionPath": "insights",
+    "module": "M28 telemetry",
+    "routePattern": "/insights/app-usage",
+    "routeCode": "INSIGHTS.MARKETING.INSIGHTS.APP_USAGE",
+    "pageTitle": "Uso de la app"
+  },
+  {
+    "portal": "INSIGHTS",
+    "group": "Marketing",
+    "sectionPath": "insights",
+    "module": "M28 telemetry",
+    "routePattern": "/insights/social",
+    "routeCode": "INSIGHTS.MARKETING.INSIGHTS.SOCIAL",
+    "pageTitle": "Redes sociales"
+  },
+  {
+    "portal": "INSIGHTS",
+    "group": "Marketing",
+    "sectionPath": "insights",
+    "module": "M28 telemetry",
+    "routePattern": "/insights/opinion",
+    "routeCode": "INSIGHTS.MARKETING.INSIGHTS.OPINION",
+    "pageTitle": "Opinión pública"
+  },
+  {
+    "portal": "INSIGHTS",
+    "group": "Marketing",
+    "sectionPath": "insights",
+    "module": "M28 telemetry",
+    "routePattern": "/insights/reports",
+    "routeCode": "INSIGHTS.MARKETING.INSIGHTS.REPORTS",
+    "pageTitle": "Generador de informes"
+  },
+  {
+    "portal": "INSIGHTS",
+    "group": "Marketing",
+    "sectionPath": "insights",
+    "module": "M28 telemetry",
+    "routePattern": "/insights/observatory",
+    "routeCode": "INSIGHTS.MARKETING.INSIGHTS.OBSERVATORY",
+    "pageTitle": "Observatorio de salud"
+  },
+  {
+    "portal": "INSIGHTS",
+    "group": "Marketing",
+    "sectionPath": "insights",
+    "module": "M28 telemetry",
+    "routePattern": "/insights/alerts",
+    "routeCode": "INSIGHTS.MARKETING.INSIGHTS.ALERTS",
+    "pageTitle": "Alertas de marketing"
+  },
+  {
+    "portal": "MOBILE",
+    "group": "Aplicación móvil",
+    "sectionPath": "/",
+    "module": null,
+    "routePattern": "/",
+    "routeCode": "MOBILE.APP.RAIZ",
+    "pageTitle": "Inicio"
+  },
+  {
+    "portal": "MOBILE",
+    "group": "Aplicación móvil",
+    "sectionPath": "/design-system",
+    "module": null,
+    "routePattern": "/design-system",
+    "routeCode": "MOBILE.APP.DESIGN_SYSTEM",
+    "pageTitle": "Sistema de diseño"
+  },
+  {
+    "portal": "MOBILE",
+    "group": "Aplicación móvil",
+    "sectionPath": "/showcase",
+    "module": null,
+    "routePattern": "/showcase",
+    "routeCode": "MOBILE.APP.SHOWCASE",
+    "pageTitle": "Vitrina de componentes"
+  }
+]

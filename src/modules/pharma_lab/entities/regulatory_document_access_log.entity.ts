@@ -20,7 +20,7 @@ export class RegulatoryDocumentAccessLog {
   /**
    * Documento consultado.
    */
-  @Property({ fieldName: 'regulatory_document_id', type: 'uuid' }) // FK → pharma_lab.regulatory_documents
+  @Property({ fieldName: 'regulatory_document_id', type: 'uuid' }) // FK → pharma_lab.regulatory_documents (inferida)
   regulatoryDocumentId!: string;
 
   /**
@@ -30,7 +30,7 @@ export class RegulatoryDocumentAccessLog {
     fieldName: 'regulatory_document_version_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → pharma_lab.regulatory_document_versions
+  }) // FK → pharma_lab.regulatory_document_versions (inferida)
   regulatoryDocumentVersionId?: string;
 
   /**
@@ -42,7 +42,7 @@ export class RegulatoryDocumentAccessLog {
   /**
    * Quién accedió.
    */
-  @Property({ fieldName: 'actor_user_id', type: 'uuid' }) // FK → iam.users
+  @Property({ fieldName: 'actor_user_id', type: 'uuid' }) // FK → iam.users (inferida)
   actorUserId!: string;
 
   /**

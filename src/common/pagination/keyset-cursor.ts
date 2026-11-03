@@ -1,4 +1,5 @@
-import { BadRequestException } from '@nestjs/common';
+import { badRequestWithReason } from '../errors/reasoned-http-exceptions';
+import { SystemErrorReason } from '../errors/system-error-reasons';
 
 /**
  * Clave de ordenación de un cursor keyset. Sólo admite escalares porque el cursor
@@ -22,6 +23,15 @@ export function encodeKeysetCursor(key: KeysetCursorKey): string {
   return Buffer.from(JSON.stringify(key), 'utf8').toString('base64url');
 }
 
+/** 400 `INVALID_CURSOR`; no repite el cursor recibido. */
+function invalidCursor() {
+  return badRequestWithReason(
+    'El cursor de paginación no es válido',
+    SystemErrorReason.INVALID_CURSOR,
+    { parameter: 'cursor' },
+  );
+}
+
 /**
  * Decodifica un cursor emitido por {@link encodeKeysetCursor}.
  *
@@ -32,14 +42,14 @@ export function encodeKeysetCursor(key: KeysetCursorKey): string {
  *
  * @param cursor - Valor recibido en el query param.
  * @returns Clave de continuación decodificada.
- * @throws BadRequestException si el cursor no es un objeto plano de escalares.
+ * @throws BadRequestException (`INVALID_CURSOR`) si el cursor no es un objeto plano de escalares.
  */
 export function decodeKeysetCursor(cursor: string): KeysetCursorKey {
   let parsed: unknown;
   try {
     parsed = JSON.parse(Buffer.from(cursor, 'base64url').toString('utf8'));
   } catch {
-    throw new BadRequestException('El cursor de paginación no es válido');
+    throw invalidCursor();
   }
 
   if (
@@ -53,7 +63,7 @@ export function decodeKeysetCursor(cursor: string): KeysetCursorKey {
         typeof value === 'number',
     )
   ) {
-    throw new BadRequestException('El cursor de paginación no es válido');
+    throw invalidCursor();
   }
 
   return parsed as KeysetCursorKey;

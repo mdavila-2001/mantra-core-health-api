@@ -310,12 +310,8 @@ describe('armarPapel', () => {
       conditions: [{ codeConceptId: 'concept-1' }],
       conceptsById,
     });
-    const diagnoses = role.secciones.find(
-      (s) => s.titulo === 'Diagnósticos',
-    );
-    expect(diagnoses?.lineas).toContain(
-      'CIE-10 J06.9 — Rinofaringitis aguda',
-    );
+    const diagnoses = role.secciones.find((s) => s.titulo === 'Diagnósticos');
+    expect(diagnoses?.lineas).toContain('CIE-10 J06.9 — Rinofaringitis aguda');
   });
 
   it('las prescripciones incluyen medicamento, dosis y frecuencia', () => {
@@ -379,9 +375,7 @@ describe('armarPapel', () => {
 
   it('una sección sin datos dice explícitamente que no hay datos', () => {
     const role = buildRole(base);
-    const diagnoses = role.secciones.find(
-      (s) => s.titulo === 'Diagnósticos',
-    );
+    const diagnoses = role.secciones.find((s) => s.titulo === 'Diagnósticos');
     expect(diagnoses?.lineas).toEqual(['Sin datos registrados.']);
   });
 });

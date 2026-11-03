@@ -8,8 +8,20 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { PermissionSetsService } from './permission-sets.service';
-import { ConflictException, ResourceNotFoundException } from '../../../common';
+import {
+  ConflictException,
+  DomainException,
+  PreconditionFailedException,
+  ResourceNotFoundException,
+} from '../../../common';
 import { STATUS } from './concept-maps';
+import { DelegatedAccessErrorReason } from '../delegated_access.error-reasons';
+import {
+  ACTIVE_TENANT,
+  buildScope,
+  inTenant,
+  thrown,
+} from './delegation-scope.testing';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -32,17 +44,23 @@ function build() {
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   em.fork = mockFn(() => em);
-  const service = new PermissionSetsService(
+  const scope = buildScope({
+    setsRepo,
+    delegatesRepo: { findById: mockFn() },
+    orgAssignmentsRepo: { findById: mockFn() },
+  });
+  const raw = new PermissionSetsService(
     em as any,
     setsRepo,
     itemsRepo as any,
+    scope.scope,
     logger as any,
   );
-  return { service, tx, em, setsRepo, itemsRepo };
+  return { service: inTenant(raw), raw, tx, em, setsRepo, itemsRepo };
 }
 
 const setDto = {
-  tenantId: 't1',
+  tenantId: ACTIVE_TENANT,
   code: 'SET-A',
   name: 'Secretary set',
   items: [
@@ -89,6 +107,7 @@ describe('PermissionSetsService', () => {
       const d = build();
       const set = {
         id: 's1',
+        tenantId: ACTIVE_TENANT,
         versionNumber: 1,
         statusConceptId: STATUS.ACTIVE,
         updatedAt: new Date(),
@@ -102,6 +121,79 @@ describe('PermissionSetsService', () => {
       expect(set.versionNumber).toBe(2);
       expect(d.itemsRepo.deleteBySet).toHaveBeenCalledWith(d.tx, 's1');
       expect(res).toEqual({ id: 's1', versionNumber: 2, itemCount: 1 });
+    });
+  });
+
+  describe('tenant del actor (DLG-01)', () => {
+    it('Correcto: el set nace en el tenant del contexto', async () => {
+      const d = build();
+      d.setsRepo.create.mockReturnValue({ id: 's1', versionNumber: 1 });
+      await d.service.createSet(setDto, actor);
+      expect(d.setsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ tenantId: ACTIVE_TENANT }),
+      );
+      expect(d.setsRepo.findByCode).toHaveBeenCalledWith(
+        d.tx,
+        ACTIVE_TENANT,
+        'SET-A',
+      );
+    });
+
+    it('Falla catalogada: un tenantId del cuerpo ajeno da 403 DELEGATED_TENANT_SCOPE_REQUIRED y no persiste', async () => {
+      const d = build();
+      const err = await thrown(
+        d.service.createSet({ ...setDto, tenantId: 't2' }, actor),
+      );
+      expect(err.getStatus()).toBe(403);
+      expect(err.reason).toBe(
+        DelegatedAccessErrorReason.DELEGATED_TENANT_SCOPE_REQUIRED,
+      );
+      expect(d.setsRepo.create).not.toHaveBeenCalled();
+      expect(d.itemsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('sin tenant en el contexto no se crea nada', async () => {
+      const d = build();
+      await expect(d.raw.createSet(setDto, actor)).rejects.toBeInstanceOf(
+        PreconditionFailedException,
+      );
+      expect(d.setsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('Error: versionar el set de otro tenant responde 404 idéntico a inexistente y no toca los ítems', async () => {
+      const d = build();
+      d.setsRepo.findById.mockResolvedValue(null);
+      const missing = await thrown(
+        d.service.publishVersion(
+          's1',
+          { items: [{ permissionId: 'p1' }] },
+          actor,
+        ),
+      );
+      const foreign = {
+        id: 's1',
+        tenantId: 't2',
+        versionNumber: 1,
+        statusConceptId: STATUS.ACTIVE,
+      };
+      d.setsRepo.findById.mockResolvedValue(foreign);
+      const err = await thrown(
+        d.service.publishVersion(
+          's1',
+          { items: [{ permissionId: 'p1' }] },
+          actor,
+        ),
+      );
+      expect(err).toBeInstanceOf(ResourceNotFoundException);
+      expect(err.getResponse()).toEqual(missing.getResponse());
+      expect(err.reason).toBe(
+        DelegatedAccessErrorReason.DELEGATED_PERMISSION_SET_NOT_FOUND,
+      );
+      expect(err.details).toBeUndefined();
+      expect(foreign.versionNumber).toBe(1);
+      expect(d.itemsRepo.deleteBySet).not.toHaveBeenCalled();
+      expect(d.itemsRepo.create).not.toHaveBeenCalled();
     });
   });
 

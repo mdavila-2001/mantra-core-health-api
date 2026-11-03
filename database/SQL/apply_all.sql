@@ -28,6 +28,8 @@
 \ir 01_iam/03_fk_intra.sql
 \echo >>> 01_iam/04_indexes.sql
 \ir 01_iam/04_indexes.sql
+\echo >>> 01_iam/05_constraints.sql
+\ir 01_iam/05_constraints.sql
 
 -- ═══ módulo 02_common ═══
 \echo >>> 02_common/01_schema.sql
@@ -58,6 +60,8 @@
 \ir 04_directory/03_fk_intra.sql
 \echo >>> 04_directory/04_indexes.sql
 \ir 04_directory/04_indexes.sql
+\echo >>> 04_directory/05_constraints.sql
+\ir 04_directory/05_constraints.sql
 
 -- ═══ módulo 05_profiles ═══
 \echo >>> 05_profiles/01_schema.sql
@@ -68,6 +72,8 @@
 \ir 05_profiles/03_fk_intra.sql
 \echo >>> 05_profiles/04_indexes.sql
 \ir 05_profiles/04_indexes.sql
+\echo >>> 05_profiles/05_constraints.sql
+\ir 05_profiles/05_constraints.sql
 
 -- ═══ módulo 06_authz ═══
 \echo >>> 06_authz/01_schema.sql
@@ -78,6 +84,8 @@
 \ir 06_authz/03_fk_intra.sql
 \echo >>> 06_authz/04_indexes.sql
 \ir 06_authz/04_indexes.sql
+\echo >>> 06_authz/05_constraints.sql
+\ir 06_authz/05_constraints.sql
 
 -- ═══ módulo 07_consent ═══
 \echo >>> 07_consent/01_schema.sql
@@ -88,6 +96,8 @@
 \ir 07_consent/03_fk_intra.sql
 \echo >>> 07_consent/04_indexes.sql
 \ir 07_consent/04_indexes.sql
+\echo >>> 07_consent/05_constraints.sql
+\ir 07_consent/05_constraints.sql
 
 -- ═══ módulo 08_clinical ═══
 \echo >>> 08_clinical/01_schema.sql
@@ -132,6 +142,8 @@
 \ir 11_system_ops/03_fk_intra.sql
 \echo >>> 11_system_ops/04_indexes.sql
 \ir 11_system_ops/04_indexes.sql
+\echo >>> 11_system_ops/05_constraints.sql
+\ir 11_system_ops/05_constraints.sql
 
 -- ═══ módulo 12_integrations ═══
 \echo >>> 12_integrations/01_schema.sql
@@ -162,6 +174,8 @@
 \ir 14_practice/03_fk_intra.sql
 \echo >>> 14_practice/04_indexes.sql
 \ir 14_practice/04_indexes.sql
+\echo >>> 14_practice/05_constraints.sql
+\ir 14_practice/05_constraints.sql
 
 -- ═══ módulo 15_chart ═══
 \echo >>> 15_chart/01_schema.sql
@@ -182,6 +196,8 @@
 \ir 16_accounting/03_fk_intra.sql
 \echo >>> 16_accounting/04_indexes.sql
 \ir 16_accounting/04_indexes.sql
+\echo >>> 16_accounting/05_constraints.sql
+\ir 16_accounting/05_constraints.sql
 
 -- ═══ módulo 17_billing ═══
 \echo >>> 17_billing/01_schema.sql
@@ -204,6 +220,8 @@
 \ir 18_clinical_ext/03_fk_intra.sql
 \echo >>> 18_clinical_ext/04_indexes.sql
 \ir 18_clinical_ext/04_indexes.sql
+\echo >>> 18_clinical_ext/05_constraints.sql
+\ir 18_clinical_ext/05_constraints.sql
 
 -- ═══ módulo 19_community ═══
 \echo >>> 19_community/01_schema.sql
@@ -214,6 +232,8 @@
 \ir 19_community/03_fk_intra.sql
 \echo >>> 19_community/04_indexes.sql
 \ir 19_community/04_indexes.sql
+\echo >>> 19_community/05_constraints.sql
+\ir 19_community/05_constraints.sql
 
 -- ═══ módulo 20_diagnostics ═══
 \echo >>> 20_diagnostics/01_schema.sql
@@ -256,6 +276,8 @@
 \ir 24_pharmacy/03_fk_intra.sql
 \echo >>> 24_pharmacy/04_indexes.sql
 \ir 24_pharmacy/04_indexes.sql
+\echo >>> 24_pharmacy/05_constraints.sql
+\ir 24_pharmacy/05_constraints.sql
 
 -- ═══ módulo 25_pharmacy_inventory ═══
 \echo >>> 25_pharmacy_inventory/01_schema.sql
@@ -416,6 +438,8 @@
 \ir 41_scheduling/03_fk_intra.sql
 \echo >>> 41_scheduling/04_indexes.sql
 \ir 41_scheduling/04_indexes.sql
+\echo >>> 41_scheduling/05_constraints.sql
+\ir 41_scheduling/05_constraints.sql
 
 -- ═══ módulo 42_payments ═══
 \echo >>> 42_payments/01_schema.sql
@@ -536,6 +560,8 @@
 \ir 53_procedures_perioperative/03_fk_intra.sql
 \echo >>> 53_procedures_perioperative/04_indexes.sql
 \ir 53_procedures_perioperative/04_indexes.sql
+\echo >>> 53_procedures_perioperative/05_constraints.sql
+\ir 53_procedures_perioperative/05_constraints.sql
 
 -- ═══ módulo 54_polyglot_storage ═══
 \echo >>> 54_polyglot_storage/01_schema.sql
@@ -606,6 +632,8 @@
 \ir 65_surveys/03_fk_intra.sql
 \echo >>> 65_surveys/04_indexes.sql
 \ir 65_surveys/04_indexes.sql
+\echo >>> 65_surveys/05_constraints.sql
+\ir 65_surveys/05_constraints.sql
 
 -- ═══ módulo 66_medical_groups ═══
 \echo >>> 66_medical_groups/01_schema.sql
@@ -618,6 +646,50 @@
 \ir 66_medical_groups/04_indexes.sql
 \echo >>> 66_medical_groups/05_constraints.sql
 \ir 66_medical_groups/05_constraints.sql
+
+-- ═══ módulo 67_data_catalog ═══
+\echo >>> 67_data_catalog/01_schema.sql
+\ir 67_data_catalog/01_schema.sql
+\echo >>> 67_data_catalog/02_tables.sql
+\ir 67_data_catalog/02_tables.sql
+\echo >>> 67_data_catalog/03_fk_intra.sql
+\ir 67_data_catalog/03_fk_intra.sql
+\echo >>> 67_data_catalog/04_indexes.sql
+\ir 67_data_catalog/04_indexes.sql
+\echo >>> 67_data_catalog/05_constraints.sql
+\ir 67_data_catalog/05_constraints.sql
+
+-- ═══ módulo 68_qa_execution ═══
+\echo >>> 68_qa_execution/01_schema.sql
+\ir 68_qa_execution/01_schema.sql
+\echo >>> 68_qa_execution/02_tables.sql
+\ir 68_qa_execution/02_tables.sql
+\echo >>> 68_qa_execution/03_fk_intra.sql
+\ir 68_qa_execution/03_fk_intra.sql
+\echo >>> 68_qa_execution/04_indexes.sql
+\ir 68_qa_execution/04_indexes.sql
+
+-- ═══ módulo 69_pharma_lab ═══
+\echo >>> 69_pharma_lab/01_schema.sql
+\ir 69_pharma_lab/01_schema.sql
+\echo >>> 69_pharma_lab/02_tables.sql
+\ir 69_pharma_lab/02_tables.sql
+\echo >>> 69_pharma_lab/03_fk_intra.sql
+\ir 69_pharma_lab/03_fk_intra.sql
+\echo >>> 69_pharma_lab/04_indexes.sql
+\ir 69_pharma_lab/04_indexes.sql
+
+-- ═══ módulo 70_observability ═══
+\echo >>> 70_observability/01_schema.sql
+\ir 70_observability/01_schema.sql
+\echo >>> 70_observability/02_tables.sql
+\ir 70_observability/02_tables.sql
+\echo >>> 70_observability/03_fk_intra.sql
+\ir 70_observability/03_fk_intra.sql
+\echo >>> 70_observability/04_indexes.sql
+\ir 70_observability/04_indexes.sql
+\echo >>> 70_observability/05_constraints.sql
+\ir 70_observability/05_constraints.sql
 
 -- 90_fk_deferred.sql OMITIDOS a propósito.
 \echo === apply_all completado (sin 90_fk_deferred) ===

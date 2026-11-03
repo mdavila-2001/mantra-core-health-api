@@ -1,6 +1,12 @@
+import {
+  collectionPoint,
+  collectionPointsOfSite,
+  type CollectionPointRow,
+} from '../../practice/services/ops/collection-points';
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
+import { ClinicalErrorReason } from '../clinical.error-reasons';
 import {
   PreconditionFailedException,
   ResourceNotFoundException,
@@ -24,10 +30,22 @@ import { OutboxService } from '../../messaging/services';
 import {
   DEFAULT_DUPLICATE_STUDY_WINDOW_DAYS,
   DuplicateStudyDetector,
+  type DuplicateStudyScope,
 } from './duplicate-study-detector';
+import {
+  ServiceRequestDetailService,
+  type PreparedStudyDetail,
+} from './service-request-detail.service';
 import { DiagnosticStudyOfferings } from '../../diagnostic_units/entities';
 // P43: la orden puede declarar de qué formulario médico cerrado sale.
 import { FormInstanceOriginValidator } from '../../forms/services/form-instance-origin.validator';
+import { PerformerSelectionValidator } from './performer-selection.validator';
+import { SuggestedSiteNamesReader } from './suggested-site-names.reader';
+import { ServiceRequestNotesService } from './service-request-notes.service';
+import {
+  analysisCategoryOf,
+  categoryConceptIdFor,
+} from '../service-request-category';
 
 /**
  * Cómo trata `create` la regla de antiduplicación cuando el llamador no es la
@@ -42,6 +60,19 @@ export interface CreateServiceRequestOptions {
    * `PeriopPreopService` (la orden preoperatoria se justifica por el caso).
    */
   duplicatePolicy?: 'enforce' | 'skip';
+  /**
+   * `'enforce'` (default): el estudio debe ser de `service-request-code` y
+   * su categoría la del catálogo (V1, V2). `'skip'`: para callers internos con
+   * códigos que no son del catálogo de estudios (`PeriopPreopService`).
+   */
+  catalog?: 'enforce' | 'skip';
+  /** `POST /clinical/requisitions`: agrupa los renglones de una misma solicitud. */
+  requisitionId?: string;
+  /**
+   * Transacción abierta por quien llama (la requisición: N renglones atómicos).
+   * Sin ella, `create` abre la suya.
+   */
+  transaction?: EntityManager;
 }
 
 /** UC-08-05: creación de órdenes de servicio (service_request) en estado activo. */
@@ -59,6 +90,10 @@ export class ServiceRequestsService {
    * @param outbox - Publicación transaccional del hecho (MCH-027).
    * @param clinicalNotifications - Aviso in-app al paciente (MCH-027).
    * @param formOrigin - Valida la instancia de formulario de origen (P43).
+   * @param performerSelection - Reglas del modo de ejecutor (centros médicos).
+   * @param siteNames - Nombre de la sede sugerida, para el paciente.
+   * @param basedOnNotes - Notas que motivan la orden (P40).
+   * @param detail - Validación y lectura del detalle (muestra, componentes, imagen; v4.2.82).
    */
   constructor(
     private readonly em: EntityManager,
@@ -70,6 +105,10 @@ export class ServiceRequestsService {
     private readonly outbox: OutboxService,
     private readonly clinicalNotifications: ClinicalNotificationsService,
     private readonly formOrigin: FormInstanceOriginValidator,
+    private readonly performerSelection: PerformerSelectionValidator,
+    private readonly siteNames: SuggestedSiteNamesReader,
+    private readonly basedOnNotes: ServiceRequestNotesService,
+    private readonly detail: ServiceRequestDetailService,
   ) {
     this.logger.setContext(ServiceRequestsService.name);
   }
@@ -90,10 +129,7 @@ export class ServiceRequestsService {
     actor: AuthenticatedUser,
   ): Promise<DuplicateStudyCheckResultDto> {
     const tenantId = requireTenantId();
-    await this.clinicalRead.assertCanReadHistory(
-      dto.patientProfileId,
-      actor,
-    );
+    await this.clinicalRead.assertCanReadHistory(dto.patientProfileId, actor);
 
     const em = this.em.fork();
     const encounter = await this.encountersRepo.findById(em, dto.encounterId);
@@ -108,6 +144,11 @@ export class ServiceRequestsService {
     }
 
     const codeConceptId = await this.resolveCodeConceptId(em, dto);
+    const scope: DuplicateStudyScope = {
+      bodySiteConceptId: dto.bodySiteConceptId,
+      lateralityConceptId: dto.lateralityConceptId,
+      componentConceptIds: dto.componentConceptIds,
+    };
     const windowDays = dto.windowDays ?? DEFAULT_DUPLICATE_STUDY_WINDOW_DAYS;
     const now = new Date();
 
@@ -118,6 +159,7 @@ export class ServiceRequestsService {
         codeConceptId,
         windowDays,
         now,
+        scope,
       ),
       this.duplicateStudyDetector.findPendingReport(
         em,
@@ -129,6 +171,28 @@ export class ServiceRequestsService {
     ]);
 
     if (!match) {
+      // Sin informe, ¿hay una orden activa del mismo estudio esperando
+      // realizarse? Pedirlo otra vez es el mismo duplicado.
+      const activa =
+        await this.duplicateStudyDetector.findActiveOrderWithoutReport(
+          em,
+          dto.patientProfileId,
+          codeConceptId,
+          windowDays,
+          tenantId,
+          now,
+          scope,
+        );
+      if (activa) {
+        return {
+          isDuplicate: true,
+          previousStudy: activa,
+          warningMessage: this.duplicateStudyDetector.warningMessageFor(activa),
+          requiresJustification: true,
+          pendingReport: true,
+          windowDays,
+        };
+      }
       return {
         isDuplicate: false,
         previousStudy: null,
@@ -184,10 +248,38 @@ export class ServiceRequestsService {
       encounter.patientProfileId !== dto.patientProfileId ||
       encounter.tenantId !== dto.custodianTenantId
     ) {
-      throw new ResourceNotFoundException('Encuentro no encontrado', {
-        encounterId: dto.encounterId,
-      });
+      throw new ResourceNotFoundException(
+        'Encuentro no encontrado',
+        { encounterId: dto.encounterId },
+        ClinicalErrorReason.ENCOUNTER_NOT_FOUND,
+      );
     }
+  }
+
+  /**
+   * P40: el `category_concept_id` que se guarda. El texto (`category`) se
+   * resuelve a su concepto; si viaja con `categoryConceptId`, tienen que
+   * coincidir —un concepto que el texto no nombra (p. ej. procedimiento) es
+   * `OTHER`—, y en ese caso se guarda el concepto, que es el más preciso.
+   */
+  private resolveCategoryConceptId(
+    dto: CreateServiceRequestDto,
+  ): string | undefined {
+    if (dto.category === undefined) return dto.categoryConceptId;
+    if (dto.categoryConceptId === undefined) {
+      return categoryConceptIdFor(dto.category);
+    }
+    if (analysisCategoryOf(dto.categoryConceptId) !== dto.category) {
+      throw new PreconditionFailedException(
+        'La categoría indicada no corresponde al concepto de categoría',
+        {
+          category: dto.category,
+          categoryConceptId: dto.categoryConceptId,
+        },
+        ClinicalErrorReason.SERVICE_REQUEST_CATEGORY_MISMATCH,
+      );
+    }
+    return dto.categoryConceptId;
   }
 
   /** UC-08-05: registra una orden de servicio con intención de orden. */
@@ -203,8 +295,37 @@ export class ServiceRequestsService {
       },
       'Placing service request',
     );
-    return this.em.transactional(async (tx) => {
+    const declaredCategoryConceptId = this.resolveCategoryConceptId(dto);
+    const basedOnNoteIds = dto.basedOnNoteIds ?? [];
+    const inTransaction = <T>(work: (tx: EntityManager) => Promise<T>) =>
+      options.transaction
+        ? work(options.transaction)
+        : this.em.transactional(work);
+    return inTransaction(async (tx) => {
       await this.assertEncounterBelongsToPatient(tx, dto);
+      // v4.2.82: V1–V9 contra el catálogo, antes de escribir nada.
+      const prepared = await this.detail.prepare(
+        tx,
+        {
+          codeConceptId: dto.codeConceptId,
+          categoryConceptId: declaredCategoryConceptId,
+          specimenTypeConceptId: dto.specimenTypeConceptId,
+          componentConceptIds: dto.componentConceptIds,
+          imaging: dto.imaging,
+        },
+        { catalog: options.catalog },
+      );
+      const categoryConceptId = prepared.categoryConceptId;
+      // P40: las notas citadas, del mismo paciente y encuentro; 422 antes de escribir.
+      if (basedOnNoteIds.length > 0) {
+        await this.basedOnNotes.assertUsable(
+          tx,
+          basedOnNoteIds,
+          dto.patientProfileId,
+          dto.custodianTenantId,
+          dto.encounterId,
+        );
+      }
       // P43: sólo si viaja; 422 antes de escribir nada.
       if (dto.formInstanceId !== undefined) {
         await this.formOrigin.assertUsableOrigin(
@@ -214,7 +335,31 @@ export class ServiceRequestsService {
         );
       }
 
-      const decision = await this.resolveDuplicateDecision(tx, dto, options);
+      // La recomendación de ejecutor se valida antes de escribir nada: 422 si el
+      // modo no es coherente. No toca `performerTenantId` (ver más abajo).
+      const performer = await this.performerSelection.resolve(tx, {
+        procedureConceptId: dto.codeConceptId,
+        performerSelectionConceptId: dto.performerSelectionConceptId,
+        performerPractitionerProfileId: dto.performerPractitionerProfileId,
+        suggestedPracticeSiteId: dto.suggestedPracticeSiteId,
+        requesterProfileId:
+          dto.requesterProfileId ?? actor.practitionerProfileId,
+      });
+
+      const decision = await this.resolveDuplicateDecision(
+        tx,
+        dto,
+        options,
+        prepared,
+      );
+      // F5b: punto de toma de la sede sugerida (422 si no lo es); sin pedido
+      // explícito, en laboratorio, el primer punto disponible de la sede.
+      const point = await this.resolveCollectionPoint(
+        tx,
+        dto.suggestedCareSpaceId,
+        performer.suggestedPracticeSiteId ?? null,
+        categoryConceptId,
+      );
 
       const sr = this.serviceRequestsRepo.create(tx, {
         custodianTenantId: dto.custodianTenantId,
@@ -222,17 +367,47 @@ export class ServiceRequestsService {
         encounterId: dto.encounterId,
         formInstanceId: dto.formInstanceId,
         codeConceptId: dto.codeConceptId,
-        categoryConceptId: dto.categoryConceptId,
+        categoryConceptId,
         intentConceptId: CLIN.SERVICE_REQUEST_INTENT_ORDER,
         priorityConceptId: dto.priorityConceptId,
         statusConceptId: decision.statusConceptId,
         requesterProfileId: dto.requesterProfileId,
+        // Tal como llegó: la sugerencia de una sede NO le da a su organización
+        // acceso a la orden (RN-11); solo `performerTenantId` lo concede.
         performerTenantId: dto.performerTenantId,
+        performerSelectionConceptId: performer.performerSelectionConceptId,
+        performerPractitionerProfileId:
+          performer.performerPractitionerProfileId ?? undefined,
+        suggestedPracticeSiteId: performer.suggestedPracticeSiteId ?? undefined,
+        suggestedCareSpaceId: point?.id,
         previousDiagnosticReportId: decision.previousDiagnosticReportId,
         duplicateOverrideReason: decision.duplicateOverrideReason,
+        requisitionId: options.requisitionId,
+        specimenTypeConceptId: prepared.specimenTypeConceptId,
+        modalityConceptId: prepared.modalityConceptId,
+        bodySiteConceptId: prepared.bodySiteConceptId,
+        lateralityConceptId: prepared.lateralityConceptId,
+        contrastConceptId: prepared.contrastConceptId,
         actorUserId: actor.id,
       });
       await tx.flush();
+      // Los componentes marcados, después de la orden (misma razón que las
+      // notas: no son relación del ORM) y con el custodio de la orden.
+      if (prepared.componentConceptIds.length > 0) {
+        await this.detail.writeComponents(
+          tx,
+          sr,
+          prepared.componentConceptIds,
+          actor.id,
+        );
+        await tx.flush();
+      }
+      // Después del flush de la orden: el vínculo no es una relación del ORM,
+      // así que el orden de los INSERT no lo garantiza la unidad de trabajo.
+      if (basedOnNoteIds.length > 0) {
+        this.basedOnNotes.link(tx, sr.id, basedOnNoteIds, actor.id);
+        await tx.flush();
+      }
 
       this.logger.info(
         {
@@ -269,6 +444,20 @@ export class ServiceRequestsService {
         },
         actorUserId: actor.id,
       });
+      if (point)
+        await this.outbox.publishDomainEvent(tx, {
+          tenantId: sr.custodianTenantId,
+          eventType: 'clinical.service_request.collection_point_suggested',
+          aggregateType: 'clinical.service_requests',
+          aggregateId: sr.id,
+          payloadJson: {
+            serviceRequestId: sr.id,
+            careSpaceId: point.id,
+            practiceSiteId: point.practiceSiteId,
+            explicit: !!dto.suggestedCareSpaceId,
+          },
+          actorUserId: actor.id,
+        });
       await tx.flush();
 
       // Y la campana del paciente, dentro de la transacción (ver
@@ -283,15 +472,75 @@ export class ServiceRequestsService {
         );
       }
 
+      const view = (await this.detail.describe(tx, [sr])).get(sr.id);
       return {
         id: sr.id,
         patientProfileId: sr.patientProfileId,
         formInstanceId: sr.formInstanceId ?? null,
+        requisitionId: sr.requisitionId ?? null,
+        codeConceptId: sr.codeConceptId,
+        codeDisplay: view?.codeDisplay,
+        specimenTypeConceptId: sr.specimenTypeConceptId ?? null,
+        specimenTypeDisplay: view?.specimenTypeDisplay ?? null,
+        components: view?.components ?? [],
+        componentsSpecified: view?.componentsSpecified ?? false,
+        imaging: view?.imaging ?? null,
+        category: analysisCategoryOf(sr.categoryConceptId),
+        basedOnNoteIds: [...basedOnNoteIds],
         status: sr.statusConceptId,
         intent: sr.intentConceptId ?? CLIN.SERVICE_REQUEST_INTENT_ORDER,
+        performerSelectionConceptId: performer.performerSelectionConceptId,
+        performerPractitionerProfileId:
+          performer.performerPractitionerProfileId,
+        suggestedPracticeSiteId: performer.suggestedPracticeSiteId,
+        suggestedPracticeSiteName: performer.suggestedPracticeSiteId
+          ? ((
+              await this.siteNames.namesFor(tx, [
+                performer.suggestedPracticeSiteId,
+              ])
+            ).get(performer.suggestedPracticeSiteId) ?? null)
+          : null,
+        suggestedCareSpace: point
+          ? { id: point.id, code: point.code, name: point.name }
+          : null,
         createdAt: sr.createdAt,
       };
     });
+  }
+
+  /**
+   * F5b (CONTRATO-F2-F5 §F5b): el punto de toma tiene que ser un espacio
+   * `SPACE_FN_SAMPLE_COLLECTION` activo y disponible de la sede sugerida
+   * (422 `COLLECTION_POINT_INVALID`; un espacio que no se ve —otro tenant—
+   * da lo mismo). Sin pedido explícito y en una orden de laboratorio, el
+   * primer punto disponible de la sede (o ninguno).
+   */
+  private async resolveCollectionPoint(
+    tx: EntityManager,
+    requested: string | undefined,
+    siteId: string | null,
+    categoryConceptId: string | undefined,
+  ): Promise<CollectionPointRow | null> {
+    if (requested) {
+      const point = siteId ? await collectionPoint(tx, requested) : null;
+      if (!point || point.practiceSiteId !== siteId || !point.available)
+        throw new PreconditionFailedException(
+          'El punto de toma no es un punto disponible de la sede sugerida',
+          { suggestedCareSpaceId: requested },
+          ClinicalErrorReason.COLLECTION_POINT_INVALID,
+        );
+      return point;
+    }
+    if (
+      !siteId ||
+      !categoryConceptId ||
+      analysisCategoryOf(categoryConceptId) !== 'LAB'
+    )
+      return null;
+    return (
+      (await collectionPointsOfSite(tx, siteId)).find((p) => p.available) ??
+      null
+    );
   }
 
   /**
@@ -306,6 +555,7 @@ export class ServiceRequestsService {
     tx: EntityManager,
     dto: CreateServiceRequestDto,
     options: CreateServiceRequestOptions,
+    prepared: PreparedStudyDetail,
   ): Promise<{
     statusConceptId: string;
     previousDiagnosticReportId?: string;
@@ -315,12 +565,19 @@ export class ServiceRequestsService {
       return { statusConceptId: CLIN.SERVICE_REQUEST_ACTIVE };
     }
 
+    // V10: la clave incluye región, lateralidad y componentes cuando viajan.
+    const scope: DuplicateStudyScope = {
+      bodySiteConceptId: prepared.bodySiteConceptId,
+      lateralityConceptId: prepared.lateralityConceptId,
+      componentConceptIds: prepared.componentConceptIds,
+    };
     const match = await this.duplicateStudyDetector.findDuplicate(
       tx,
       dto.patientProfileId,
       dto.codeConceptId,
       DEFAULT_DUPLICATE_STUDY_WINDOW_DAYS,
       new Date(),
+      scope,
     );
 
     if (match) {
@@ -354,6 +611,45 @@ export class ServiceRequestsService {
           ? undefined
           : dto.duplicateOverrideReason,
       };
+    }
+
+    // Sin informe previo, una orden activa del mismo estudio también es
+    // duplicado. No hay informe que reutilizar ni al que enlazar: sólo se puede
+    // repetir con justificación. La columna `duplicate_override_reason` exige
+    // `previous_diagnostic_report_id` (CHECK), así que la justificación se
+    // valida (mín. 20 caracteres, en el DTO) y se registra la decisión en el
+    // log, pero no se persiste en la orden.
+    if (!dto.previousDiagnosticReportId) {
+      const activa =
+        await this.duplicateStudyDetector.findActiveOrderWithoutReport(
+          tx,
+          dto.patientProfileId,
+          dto.codeConceptId,
+          DEFAULT_DUPLICATE_STUDY_WINDOW_DAYS,
+          dto.custodianTenantId,
+          new Date(),
+          scope,
+        );
+      if (activa) {
+        if (
+          dto.reusePreviousReport === true ||
+          dto.duplicateOverrideReason === undefined
+        ) {
+          throw new PreconditionFailedException(
+            'El paciente ya tiene una orden activa de este estudio, sin informe; hace falta justificar la repetición',
+            { reason: 'DUPLICATE_STUDY_DETECTED', previousStudy: activa },
+          );
+        }
+        this.logger.info(
+          {
+            operation: 'clinical.service-request.duplicate-decision',
+            previousServiceRequestId: activa.serviceRequestId,
+            reused: false,
+          },
+          'Duplicate active order repeated with justification',
+        );
+        return { statusConceptId: CLIN.SERVICE_REQUEST_ACTIVE };
+      }
     }
 
     if (dto.previousDiagnosticReportId) {

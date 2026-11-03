@@ -3,13 +3,13 @@
   Fuente real: src/modules/pharmacy_inventory/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `pharmacy_inventory`
 
 **Fuente:** [`src/modules/pharmacy_inventory/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/pharmacy_inventory/README.md)
-· 6 controllers · 11 services · 16 repositories · 21 entidades · 16 DTO
+· 9 controllers · 12 services · 21 repositories · 21 entidades · 22 DTO
 
 ---
 
@@ -43,6 +43,7 @@ Importa (`pharmacy_inventory.module.ts`): `DirectoryAuthorizationModule`, `Insur
 | `POST /internal/inventory-sync/:batchId/reconcile` | SECURITY_ADMIN | `pharmacy-inventory-internal` |
 | `GET /pharmacy-inventory/sites/:siteId/stock` | sesión | `pharmacy-inventory-read` |
 | `GET /pharmacy-inventory/availability` | sesión | `pharmacy-inventory-read` |
+| `GET /pharmacy-inventory/availability/medications` | sesión | `pharmacy-inventory-read` |
 | `POST /pharmacy/:siteId/inventory-locations` | SECURITY_ADMIN | `pharmacy-inventory` |
 | `POST /pharmacy/:pharmacyId/reservations` | SECURITY_ADMIN | `pharmacy-inventory` |
 | `POST /pharmacy/:pharmacyId/transfers` | SECURITY_ADMIN | `pharmacy-inventory` |
@@ -89,6 +90,7 @@ Importa (`pharmacy_inventory.module.ts`): `DirectoryAuthorizationModule`, `Insur
 | --- | --- |
 | `GET /pharmacy-inventory/sites/{siteId}/stock?product=` | Stock disponible de una sede, agregado por producto sobre sus ubicaciones activas |
 | `GET /pharmacy-inventory/availability?products=a,b&lat=&lng=&limit=` | Qué sedes pueden surtir un pedido: completas primero, luego distancia y precio |
+| `GET /pharmacy-inventory/availability/medications?medications=a,b&lat=&lng=&limit=` | Lo mismo por medicamento de una receta, en toda la red: un producto propio por medicamento en cada sede y los medicamentos que le faltan |
 
 La visibilidad es la del directorio de farmacias (módulo 24) y se **reutiliza**
 —`PharmacyReadRepository` viene exportado por `PharmacyModule`— en vez de
@@ -101,6 +103,49 @@ Haversine sobre las coordenadas de `common.addresses` (vía
 se inventa: `distanceKm` va `null` y la sede ordena al final. El total de una
 sede sólo existe si **todos** sus disponibles tienen precio publicado en la
 misma moneda.
+
+## Sistema propio de cada farmacia (FAR-C9 · C9-3)
+
+Cada conexión de la pestaña Integración puede hablar con el sistema **de esa
+farmacia** en vez del que configura el servidor (`PHARMACY_ERP_BASE_URL`, FAR-07).
+
+| Método y ruta | Qué hace |
+| --- | --- |
+| `PUT /pharmacies/:pharmacyId/integration-connections/:connectionId/external-system` | Guarda formato, dirección, código y clave. **Prueba antes de guardar**: si el sistema no responde con esa clave, 502 y no se escribe nada |
+| `POST …/external-system/test` | Prueba el sistema que usa hoy la conexión; dice si es el de la farmacia o el del servidor |
+| `DELETE …/external-system` | Pausa la conexión de integraciones, retira la clave y deja `connection_id` en nulo |
+
+- **Dónde queda.** En el módulo de integraciones: un proveedor por formato
+  (`external_providers`, `PHARMACY_ALOVIDA_STANDARD` y `PHARMACY_SIMULATED_CHAIN`),
+  una `provider_connections` por conexión de farmacia (dirección y código en
+  `config_json`) y la clave en su `provider_credentials` activa, cifrada con
+  `encryptSecret` (`MFA_ENCRYPTION_KEY`). `pharmacy_integration_connections.connection_id`
+  apunta a esa conexión (v4.2.83). Guardar otra vez retira la clave anterior.
+- **Formatos.** `ALOVIDA_STANDARD` es el contrato que publica la plataforma
+  (`docs/integrations/pharmacy-standard.openapi.yaml`).
+  `SIMULATED_CHAIN` es la cadena de `mock-provider-server/`, a propósito distinta
+  (Bearer, paginada, otros nombres). Cada uno tiene su cliente en
+  `infrastructure/adapters/external-system-clients.ts`; la sincronización no sabe
+  con cuál habla.
+- **La clave no sale nunca**: ni en respuestas (`apiKeyConfigured` dice si hay
+  una), ni en logs, ni en los mensajes de error, y solo viaja en el cuerpo del `PUT`.
+- **Hosts.** La dirección la escribe la farmacia y la llama el servidor. Solo
+  `http`/`https` sin usuario ni consulta, y solo los hosts de
+  `PHARMACY_EXTERNAL_ALLOWED_HOSTS`: **sin lista no se llama a nadie**, en
+  cualquier entorno (422 `PHARMACY_INTEGRATION_HOST_NOT_ALLOWED`). Solo fuera
+  de producción, `PHARMACY_EXTERNAL_ALLOW_ANY_HOST=true` lo abre a propósito
+  (una máquina local con el simulador). En producción solo vale `https` y el
+  cliente rechaza **al conectar** las IP internas (loopback, privadas,
+  link-local y metadatos de la nube, CGNAT), así un nombre permitido que
+  resuelve adentro no pasa. La regla se vuelve a aplicar en cada llamada, no
+  solo al guardar, y antes de llamar se comprueba que la conexión sea del actor.
+- **Topes.** Cada respuesta, 10 MB como máximo; un listado paginado, 200
+  páginas y 20.000 filas en total. Pasado eso cuenta como sistema caído.
+- **Sin sistema propio** la conexión usa el del servidor, como en FAR-07; si
+  tampoco hay, 422 `PHARMACY_INTEGRATION_NOT_CONFIGURED`.
+- `GET …/integration-connections` agrega `system` (formato, dirección, código,
+  `apiKeyConfigured`) a cada conexión, y `providerConfigured` pasa a ser por
+  conexión: el sistema propio o, si no tiene, el del servidor.
 
 ## Criterios de mantenimiento
 
@@ -120,8 +165,7 @@ farmacia, sede, ubicación, lote y producto.
 
 ## Revisión backend 2026-10-05
 
-La [revisión estricta](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/pharmacy_inventory.md)
-documenta que los comandos administrativos aceptan relaciones de inventario sin
-alcance de tenant y que los asientos de conteo/recall usan IDs de sede o ubicación
-como farmacia. Deben corregirse y validarse sobre PostgreSQL con FK activas antes
-de considerar confiable el movimiento de stock.
+Los comandos administrativos aceptan relaciones de inventario sin alcance de
+tenant, y los asientos de conteo/recall usan IDs de sede o ubicación como
+farmacia: el movimiento de stock no está validado sobre PostgreSQL con FK
+activas.

@@ -142,6 +142,20 @@ export class JournalTransactionItemDto {
   @ApiPropertyOptional({ format: 'uuid', nullable: true }) fiscalPeriodId!:
     string | null;
   @ApiProperty({ format: 'uuid' }) statusConceptId!: string;
+  @ApiPropertyOptional({
+    nullable: true,
+    enum: [
+      'DRAFT',
+      'AUTO_CLASSIFIED',
+      'PENDING_REVIEW',
+      'APPROVED',
+      'POSTED',
+      'REVERSED',
+    ],
+    description:
+      'Código del estado en la máquina C-17 (borrador, posteado, reversado…)',
+  })
+  status!: string | null;
   @ApiPropertyOptional({ format: 'uuid', nullable: true })
   transactionTypeConceptId!: string | null;
   @ApiPropertyOptional({ format: 'uuid', nullable: true }) currencyConceptId!:
@@ -174,6 +188,12 @@ export class LedgerEntryItemDto {
   amountBase!: string;
   @ApiPropertyOptional({ format: 'uuid', nullable: true }) costCenterId!:
     string | null;
+  /** Centro de beneficio imputado a la línea, si lo tiene. */
+  @ApiPropertyOptional({ format: 'uuid', nullable: true }) profitCenterId!:
+    string | null;
+  /** Activo fijo imputado a la línea, si lo tiene. */
+  @ApiPropertyOptional({ format: 'uuid', nullable: true }) assetId!:
+    string | null;
   @ApiPropertyOptional({ format: 'uuid', nullable: true }) currencyConceptId!:
     string | null;
 }
@@ -187,6 +207,20 @@ export class JournalTransactionDetailDto {
   @ApiPropertyOptional({ format: 'uuid', nullable: true }) fiscalPeriodId!:
     string | null;
   @ApiProperty({ format: 'uuid' }) statusConceptId!: string;
+  @ApiPropertyOptional({
+    nullable: true,
+    enum: [
+      'DRAFT',
+      'AUTO_CLASSIFIED',
+      'PENDING_REVIEW',
+      'APPROVED',
+      'POSTED',
+      'REVERSED',
+    ],
+    description:
+      'Código del estado en la máquina C-17 (borrador, posteado, reversado…)',
+  })
+  status!: string | null;
   @ApiPropertyOptional({ format: 'uuid', nullable: true }) currencyConceptId!:
     string | null;
   @ApiPropertyOptional({ nullable: true }) totalAmount!: string | null;

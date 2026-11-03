@@ -7,6 +7,7 @@ import {
   GraphProjectionService,
   GraphTraversalService,
   GraphAnalyticsService,
+  GraphConsentGate,
 } from './services';
 import {
   GraphProjectionRepository,
@@ -33,6 +34,7 @@ import {
     GraphProjectionService,
     GraphTraversalService,
     GraphAnalyticsService,
+    GraphConsentGate,
   ],
 })
 export class GraphIntelligenceModule {}

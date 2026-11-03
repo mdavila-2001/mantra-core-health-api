@@ -27,8 +27,7 @@ ser scrapeado, no para ser el sistema de métricas final.
 actual** (verificado: solo se re-exporta desde `src/orm/index.ts`, ningún otro archivo lo
 importa). El contador existe y se actualiza en cada consulta, pero no hay forma de leerlo desde
 fuera del proceso hoy — ni un endpoint `/metrics`, ni Prometheus, ni integración con el health
-check. Es la pieza que falta para que esto sea observabilidad real, no solo instrumentación
-interna.
+check: es instrumentación interna, no observabilidad.
 
 ## Log de consultas lentas — la señal que sí es visible hoy
 

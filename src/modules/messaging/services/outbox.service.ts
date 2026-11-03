@@ -16,6 +16,7 @@ import {
 } from '../../../observability';
 import { OutboxRepository, QueuesRepository } from '../repositories';
 import { DomainEvents } from '../entities';
+import { MessagingErrorReason } from '../messaging.error-reasons';
 import {
   RunOutboxRelayDto,
   OutboxRelayResponseDto,
@@ -395,14 +396,20 @@ export class OutboxService {
     );
 
     return this.em.transactional(async (tx) => {
+      // Se bloquea la fila del evento (inmutable): dos despachos simultáneos
+      // del mismo evento se serializan y el segundo ve las entregas del
+      // primero en lugar de competir por la unicidad (evento, suscripción).
       const event = await this.outboxRepo.findDomainEventById(
         tx,
         domainEventId,
+        { forUpdate: true },
       );
       if (!event) {
-        throw new ResourceNotFoundException('Evento de dominio no encontrado', {
-          domainEventId,
-        });
+        throw new ResourceNotFoundException(
+          'Evento de dominio no encontrado',
+          { domainEventId },
+          MessagingErrorReason.DOMAIN_EVENT_NOT_FOUND,
+        );
       }
 
       const outbox = await this.outboxRepo.findOutboxByDomainEvent(
@@ -414,9 +421,8 @@ export class OutboxService {
       if (!outbox || outbox.statusConceptId !== CONCEPTS.OUTBOX_PUBLISHED) {
         throw new PreconditionFailedException(
           'El evento todavía no está publicado',
-          {
-            domainEventId,
-          },
+          { domainEventId },
+          MessagingErrorReason.DOMAIN_EVENT_NOT_PUBLISHED,
         );
       }
 

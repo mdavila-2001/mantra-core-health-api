@@ -98,7 +98,7 @@ describe('CreateQuotationDto con el body del front (AG-35 · M4 H3.S1.M1)', () =
   describe.each([
     ['con el pipe global de main.ts', GLOBAL],
     ['sin conversión implícita', WITHOUT_CONVERSION],
-  ])('%s', (_nombre, pipe) => {
+  ])('%s', (_name, pipe) => {
     it('correcto: acepta los importes numéricos del front y los entrega como texto exacto', async () => {
       const dto = await run(pipe, FRONT_BODY);
 

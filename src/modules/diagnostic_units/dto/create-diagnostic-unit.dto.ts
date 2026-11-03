@@ -106,12 +106,14 @@ export class CreateDiagnosticUnitDto {
   /**
    * Identificador asociado a tenant.
    */
-  @ApiProperty({
-    description: 'Tenant propietario de la unidad',
+  @ApiPropertyOptional({
+    description:
+      'Se ignora como propietario: la unidad pertenece al tenant activo (X-Tenant-Id). Si se envía y no coincide, responde 404.',
     format: 'uuid',
   })
+  @IsOptional()
   @IsUUID()
-  tenantId!: string;
+  tenantId?: string;
 
   /**
    * Valor de code mantenido por la instancia.

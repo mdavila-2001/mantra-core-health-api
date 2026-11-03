@@ -78,6 +78,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `ListContentPacksResponseDto` | No |
 | 429 | Consulta completada correctamente. | `ListContentPacksResponseDto` | No |
 | 500 | Consulta completada correctamente. | `ListContentPacksResponseDto` | No |
+| 504 | Consulta completada correctamente. | `ListContentPacksResponseDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListContentPacksResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -148,7 +149,7 @@ Contexto declarado en el controlador: Aplica un paquete. Responde `200` y no `20
 
 ### Descripción del sistema
 
-NestJS resuelve `POST /admin/content-packs/{code}/apply` en `ContentPacksController_aplicar`. El controlador delega en `ContentPacksService.aplicar`. Valida el body como `ApplyContentPackDto` y consume `application/json`. El tipo de retorno estático es `Promise<ApplyContentPackResponseDto>`.
+NestJS resuelve `POST /admin/content-packs/{code}/apply` en `ContentPacksController_aplicar`. El controlador delega en `ContentPacksService.apply`. Valida el body como `ApplyContentPackDto` y consume `application/json`. El tipo de retorno estático es `Promise<ApplyContentPackResponseDto>`.
 
 ### Parámetros
 
@@ -210,6 +211,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ApplyContentPackResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ApplyContentPackResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ApplyContentPackResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ApplyContentPackResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ApplyContentPackResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -243,7 +245,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SUPERADMIN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Paquete de contenido no encontrado | Excepción explícita en src/modules/content_packs/content-packs.service.ts |
-| 409 | `CONFLICT` | El email ya tiene una credencial de contraseña activa | Excepción explícita en src/modules/iam/services/iam-users.service.ts |
+| 404 | `NOT_FOUND` | Esta organización todavía no tiene vitrina pública: se proyecta al verificarla | Excepción explícita en src/modules/community/services/public-profile-projection.service.ts |
+| 409 | `CONFLICT` | El email ya tiene una credencial de contraseña | Excepción explícita en src/modules/iam/application/services/iam-users.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Las cuentas de demostración necesitan una contraseña: declárela en la ' +           'petición o en SEED_DEMO_PASSWORD. | Excepción explícita en src/modules/content_packs/content-packs.service.ts |
 | 422 | `PRECONDITION_FAILED` | Las cuentas de demostración no se crean en producción. Si de verdad ' +           'las quiere acá, hace falta habilitarlo explícitamente en el entorno. | Excepción explícita en src/modules/content_packs/content-packs.service.ts |

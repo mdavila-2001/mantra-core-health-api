@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { findPractitionerNames } from '../../profiles/read/practitioner-names';
+import { findPractitionerNames } from '../../profiles/infrastructure/read-models/practitioner-names';
 import { CatalogConcepts } from '../../terminology/entities';
 import {
   CareSpaces,

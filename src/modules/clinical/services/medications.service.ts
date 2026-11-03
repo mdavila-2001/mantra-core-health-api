@@ -2,10 +2,12 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { ClinicalNotificationsService } from './clinical-notifications.service';
+import { ClinicalErrorReason } from '../clinical.error-reasons';
 import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  roleAuthorizesInTenant,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -31,6 +33,7 @@ import { FormInstanceOriginValidator } from '../../forms/services/form-instance-
 import { CLIN } from '../clinical.concepts';
 import { ClinicalReadService } from './clinical-read.service';
 import { PrescriptionSignaturePoliciesService } from './prescription-signature-policies.service';
+import { assertValidToNotInPast } from './prescription-valid-to';
 import { AuditTrailService } from '../../audit/services';
 import { HistoryRepository } from '../../audit/repositories';
 import { AUD } from '../../audit/audit.concepts';
@@ -103,8 +106,8 @@ export class MedicationsService {
    * El DTO conserva `prescriberProfileId` por compatibilidad, pero si declara
    * un perfil distinto del de la sesión es 403: nadie prescribe en nombre de
    * otro profesional. Sin perfil profesional en la sesión tampoco se prescribe
-   * (403), porque la receta saldría sin médico ni matrícula. `SUPERADMIN` pasa
-   * con lo que declare, igual que en `assertFirmaElPrescriptor`.
+   * (403), porque la receta saldría sin médico ni matrícula. `SUPERADMIN`
+   * global pasa con lo que declare, igual que en `assertPrescriberSignature`.
    *
    * @param declared - Lo que trajo el cuerpo, si trajo algo.
    * @param actor - La sesión que prescribe.
@@ -114,7 +117,10 @@ export class MedicationsService {
     declared: string | undefined,
     actor: AuthenticatedUser,
   ): string {
-    if (actor.roles.includes('SUPERADMIN')) {
+    // Prescribir por otro profesional es un atajo de plataforma sobre la
+    // historia de una persona, que no es de ningún tenant: sólo el
+    // `SUPERADMIN` global (#1241). El acotado prescribe como cualquiera.
+    if (roleAuthorizesInTenant(actor, 'SUPERADMIN', undefined)) {
       const chosen = declared ?? actor.practitionerProfileId;
       if (!chosen) {
         throw new ForbiddenException(
@@ -219,6 +225,7 @@ export class MedicationsService {
       throw new PreconditionFailedException(
         'La condición indicada no existe o no pertenece a este paciente',
         { conditionId, patientProfileId },
+        ClinicalErrorReason.MEDICATION_INDICATION_INVALID,
       );
     }
   }
@@ -287,13 +294,15 @@ export class MedicationsService {
    *
    * Si la receta declara prescriptor, firma ese perfil. Si no lo declara (el
    * campo es opcional al prescribir), firma quien redactó el borrador.
-   * `SUPERADMIN` pasa, igual que en el resto del sistema de roles.
+   * `SUPERADMIN` global pasa, igual que en el resto del sistema de roles.
    */
   private assertPrescriberSignature(
     request: MedicationRequests,
     actor: AuthenticatedUser,
   ): void {
-    if (actor.roles.includes('SUPERADMIN')) return;
+    // Firmar por otro profesional: sólo el `SUPERADMIN` global; el acotado en
+    // `scopedRoles` firma lo suyo, como cualquiera (#1241).
+    if (roleAuthorizesInTenant(actor, 'SUPERADMIN', undefined)) return;
     const isTheirs = request.prescriberProfileId
       ? request.prescriberProfileId === actor.practitionerProfileId
       : request.createdByUserId === actor.id;
@@ -313,9 +322,13 @@ export class MedicationsService {
   ): Promise<MedicationRequests> {
     const request = await this.requestsRepo.findById(tx, requestId);
     if (!request) {
-      throw new ResourceNotFoundException('Receta no encontrada', {
-        requestId,
-      });
+      throw new ResourceNotFoundException(
+        'Receta no encontrada',
+        {
+          requestId,
+        },
+        ClinicalErrorReason.MEDICATION_REQUEST_NOT_FOUND,
+      );
     }
     return request;
   }
@@ -324,6 +337,24 @@ export class MedicationsService {
    * UC-08-10: prescribe una medicación. La receta nace en DRAFT (borrador
    * editable/eliminable por el autor); no surte efecto hasta emitirla (`issue`).
    */
+  /**
+   * §2: sella una revisión de `medication_requests_history`. La receta está
+   * fuera del espejo automático (`EXPLICITLY_WIRED_SOURCES`), así que cada
+   * transición la versiona acá, en la misma transacción, desde el borrador.
+   */
+  private async versionRequest(
+    tx: EntityManager,
+    request: MedicationRequests,
+    operationConceptId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    await this.historyRepo.append(tx, RX_HISTORY_ENTITY, request.id, {
+      operationConceptId,
+      dataSnapshot: this.snapshot(request),
+      changedByUserId: actor.id,
+    });
+  }
+
   async prescribe(
     dto: CreateMedicationRequestDto,
     actor: AuthenticatedUser,
@@ -340,6 +371,11 @@ export class MedicationsService {
       const prescriberProfileId = this.resolvePrescriber(
         dto.prescriberProfileId,
         actor,
+      );
+      // Una receta que nacería vencida se rechaza antes de escribir nada.
+      assertValidToNotInPast(
+        dto.validTo ? new Date(dto.validTo) : undefined,
+        new Date(),
       );
       if (dto.indicationConditionId !== undefined) {
         await this.assertIndicationBelongsToPatient(
@@ -382,6 +418,7 @@ export class MedicationsService {
         actorUserId: actor.id,
       });
       await tx.flush();
+      await this.versionRequest(tx, request, AUD.OPERATION_INSERT, actor);
 
       this.logger.info(
         { operation: 'clinical.medication.prescribe', requestId: request.id },
@@ -410,6 +447,7 @@ export class MedicationsService {
         throw new PreconditionFailedException(
           'Solo un borrador (DRAFT) admite edición; una receta emitida es inmutable',
           { requestId, status: request.statusConceptId },
+          ClinicalErrorReason.MEDICATION_REQUEST_NOT_EDITABLE,
         );
       }
 
@@ -435,7 +473,12 @@ export class MedicationsService {
         request.unitConceptId = dto.unitConceptId;
       if (dto.validFrom !== undefined)
         request.validFrom = new Date(dto.validFrom);
-      if (dto.validTo !== undefined) request.validTo = new Date(dto.validTo);
+      if (dto.validTo !== undefined) {
+        assertValidToNotInPast(new Date(dto.validTo), new Date(), {
+          requestId,
+        });
+        request.validTo = new Date(dto.validTo);
+      }
       if (dto.patientInstructionsText !== undefined)
         request.patientInstructionsText = dto.patientInstructionsText;
       if (dto.indicationConditionId !== undefined) {
@@ -455,6 +498,7 @@ export class MedicationsService {
       if (request.indicationConditionId) request.indicationText = undefined;
       touch(request, actor.id);
       await tx.flush();
+      await this.versionRequest(tx, request, AUD.OPERATION_UPDATE, actor);
 
       this.logger.info(
         { operation: 'clinical.medication.editDraft', requestId },
@@ -483,6 +527,7 @@ export class MedicationsService {
         throw new PreconditionFailedException(
           'Solo un borrador (DRAFT) puede firmarse antes de emitirse',
           { requestId, status: request.statusConceptId },
+          ClinicalErrorReason.MEDICATION_REQUEST_NOT_SIGNABLE,
         );
       }
       // Antes del atajo idempotente: quien no es el prescriptor recibe 403
@@ -499,6 +544,7 @@ export class MedicationsService {
           entityId: request.id,
           tenantId: request.custodianTenantId,
         });
+        await this.versionRequest(tx, request, AUD.OPERATION_UPDATE, actor);
       }
       return this.toRequestResponse(request);
     });
@@ -537,6 +583,7 @@ export class MedicationsService {
         throw new PreconditionFailedException(
           'Solo un borrador (DRAFT) puede emitirse',
           { requestId, status: request.statusConceptId },
+          ClinicalErrorReason.MEDICATION_REQUEST_NOT_ISSUABLE,
         );
       }
 
@@ -553,9 +600,13 @@ export class MedicationsService {
           throw new ConflictException(
             'La clave de idempotencia ya fue usada para emitir otra receta',
             { requestId, idempotencyKey },
+            ClinicalErrorReason.MEDICATION_ISSUE_IDEMPOTENCY_KEY_CONFLICT,
           );
         }
       }
+
+      // Un borrador cuyo fin de vigencia pasó mientras esperaba no se emite.
+      assertValidToNotInPast(request.validTo, new Date(), { requestId });
 
       if (!request.signedAt) {
         const signatureRequired =
@@ -567,6 +618,7 @@ export class MedicationsService {
           throw new PreconditionFailedException(
             'La política vigente exige firmar la receta antes de emitirla',
             { requestId },
+            ClinicalErrorReason.MEDICATION_SIGNATURE_REQUIRED,
           );
         }
       }
@@ -583,12 +635,8 @@ export class MedicationsService {
         entityId: request.id,
         tenantId: request.custodianTenantId,
       });
-      // §2: sella la primera revisión versionada del contenido emitido.
-      await this.historyRepo.append(tx, RX_HISTORY_ENTITY, request.id, {
-        operationConceptId: AUD.OPERATION_INSERT,
-        dataSnapshot: this.snapshot(request),
-        changedByUserId: actor.id,
-      });
+      // §2: la emisión es una revisión más; la primera la selló el borrador.
+      await this.versionRequest(tx, request, AUD.OPERATION_UPDATE, actor);
 
       this.logger.info(
         {
@@ -634,6 +682,7 @@ export class MedicationsService {
         throw new PreconditionFailedException(
           'Solo una receta emitida (ISSUED) puede invalidarse',
           { requestId, status: request.statusConceptId },
+          ClinicalErrorReason.MEDICATION_REQUEST_NOT_INVALIDATABLE,
         );
       }
       request.statusConceptId = CLIN.MEDICATION_REQUEST_INVALIDATED;
@@ -647,11 +696,7 @@ export class MedicationsService {
         entityId: request.id,
         tenantId: request.custodianTenantId,
       });
-      await this.historyRepo.append(tx, RX_HISTORY_ENTITY, request.id, {
-        operationConceptId: AUD.OPERATION_UPDATE,
-        dataSnapshot: this.snapshot(request),
-        changedByUserId: actor.id,
-      });
+      await this.versionRequest(tx, request, AUD.OPERATION_UPDATE, actor);
 
       this.logger.info(
         {
@@ -685,8 +730,17 @@ export class MedicationsService {
         throw new PreconditionFailedException(
           'Solo una receta emitida (ISSUED) puede reemplazarse',
           { requestId, status: original.statusConceptId },
+          ClinicalErrorReason.MEDICATION_REQUEST_NOT_REPLACEABLE,
         );
       }
+
+      // El reemplazo hereda el fin de vigencia si no trae otro: tampoco nace
+      // vencido.
+      assertValidToNotInPast(
+        dto.validTo ? new Date(dto.validTo) : original.validTo,
+        new Date(),
+        { requestId },
+      );
 
       const replacement = this.requestsRepo.create(tx, {
         custodianTenantId: original.custodianTenantId,
@@ -731,11 +785,8 @@ export class MedicationsService {
         entityId: original.id,
         tenantId: original.custodianTenantId,
       });
-      await this.historyRepo.append(tx, RX_HISTORY_ENTITY, original.id, {
-        operationConceptId: AUD.OPERATION_UPDATE,
-        dataSnapshot: this.snapshot(original),
-        changedByUserId: actor.id,
-      });
+      await this.versionRequest(tx, original, AUD.OPERATION_UPDATE, actor);
+      await this.versionRequest(tx, replacement, AUD.OPERATION_INSERT, actor);
 
       this.logger.info(
         {
@@ -774,8 +825,15 @@ export class MedicationsService {
         throw new PreconditionFailedException(
           'Solo una receta emitida o completada puede renovarse',
           { requestId, status: source.statusConceptId },
+          ClinicalErrorReason.MEDICATION_REQUEST_NOT_RENEWABLE,
         );
       }
+
+      assertValidToNotInPast(
+        dto.validTo ? new Date(dto.validTo) : undefined,
+        new Date(),
+        { requestId },
+      );
 
       const renewal = this.requestsRepo.create(tx, {
         custodianTenantId: source.custodianTenantId,
@@ -811,6 +869,7 @@ export class MedicationsService {
         entityId: renewal.id,
         tenantId: source.custodianTenantId,
       });
+      await this.versionRequest(tx, renewal, AUD.OPERATION_INSERT, actor);
 
       this.logger.info(
         {
@@ -840,9 +899,13 @@ export class MedicationsService {
       if (dto.requestId) {
         const request = await this.requestsRepo.findById(tx, dto.requestId);
         if (!request) {
-          throw new ResourceNotFoundException('Prescripción no encontrada', {
-            requestId: dto.requestId,
-          });
+          throw new ResourceNotFoundException(
+            'Prescripción no encontrada',
+            {
+              requestId: dto.requestId,
+            },
+            ClinicalErrorReason.MEDICATION_REQUEST_FOR_ADMINISTRATION_NOT_FOUND,
+          );
         }
         // Solo se dispensa contra una receta emitida (sellada). Un borrador aún
         // no surte efecto; una invalidada/reemplazada/completada no es dispensable.
@@ -853,6 +916,7 @@ export class MedicationsService {
               requestId: dto.requestId,
               status: request.statusConceptId,
             },
+            ClinicalErrorReason.MEDICATION_REQUEST_NOT_ISSUED,
           );
         }
         if (dto.isFinalDose) {

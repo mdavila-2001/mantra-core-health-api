@@ -18,6 +18,7 @@ import {
   EncounterSealGuardService,
 } from '../../clinical/services';
 import { DocumentsRepository } from '../repositories';
+import { ChartEncounterScopeService } from './chart-encounter-scope.service';
 import { CHART } from '../chart.concepts';
 import { CreateDocumentDto, DocumentResponseDto } from '../dto';
 
@@ -39,6 +40,7 @@ export class ChartDocumentsService {
    * @param clinicalRead - Resuelve si el actor puede leer la historia del paciente dueño del documento.
    * @param fileUpload - Sirve los bytes de un archivo ya autorizado por contexto.
    * @param encounterSealGuard - Rechaza la escritura si el encuentro está sellado (BR-14/CL-07).
+   * @param encounterScope - Acota el encuentro del cuerpo al paciente del expediente (CHART-01).
    */
   constructor(
     private readonly em: EntityManager,
@@ -48,6 +50,7 @@ export class ChartDocumentsService {
     private readonly clinicalRead: ClinicalReadService,
     private readonly fileUpload: FileUploadService,
     private readonly encounterSealGuard: EncounterSealGuardService,
+    private readonly encounterScope: ChartEncounterScopeService,
   ) {
     this.logger.setContext(ChartDocumentsService.name);
   }
@@ -66,6 +69,15 @@ export class ChartDocumentsService {
       'Attaching patient document',
     );
     return this.em.transactional(async (tx) => {
+      // CHART-01: el encuentro tiene que ser de ESTE paciente; uno ajeno o
+      // inexistente responde igual y no deja registro ni archivos vinculados.
+      if (dto.encounterId) {
+        await this.encounterScope.assertEncounterBelongsToPatientAndWritable(
+          tx,
+          dto.encounterId,
+          dto.patientProfileId,
+        );
+      }
       // BR-14 (CL-07): un documento no puede nacer contra un encuentro ya
       // sellado.
       if (dto.encounterId) {

@@ -66,6 +66,13 @@ export interface DdlLayerResult {
   readonly skipped: number;
   /** Fallos tolerados (por ejemplo, una extensión opcional sin permisos). */
   readonly failures: readonly string[];
+  /**
+   * Subconjunto de `failures` que compromete la integridad declarada del modelo
+   * (FKs y únicos de integridad, ORMN-01). El resto —índices de rendimiento,
+   * extensiones opcionales— degrada con alerta; esto, no: el proceso puede
+   * arrancar, pero la readiness no se anuncia hasta resolverlo.
+   */
+  readonly blocking?: readonly string[];
   /** Duración de la capa en milisegundos. */
   readonly tookMs: number;
 }

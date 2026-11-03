@@ -68,9 +68,7 @@ describe('detectarFormato', () => {
     it('texto sin columnas separadas', () => {
       const file = Buffer.from('esto es una nota suelta\nsin columnas\n');
 
-      expect(() => detectFormat(file)).toThrow(
-        /no tiene columnas separadas/,
-      );
+      expect(() => detectFormat(file)).toThrow(/no tiene columnas separadas/);
     });
 
     it('cada motivo dice algo distinto', () => {

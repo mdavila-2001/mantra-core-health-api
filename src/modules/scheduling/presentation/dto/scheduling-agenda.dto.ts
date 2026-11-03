@@ -289,6 +289,16 @@ export class ListSlotsQueryDto {
   limit?: number;
 }
 
+/** Lo que cuesta un cupo, en la moneda de la práctica (FAC-01). */
+export class SlotPriceDto {
+  /** Importe en bolivianos, mayor que 0. */
+  @ApiProperty({ example: 150 })
+  amount!: number;
+
+  @ApiProperty({ enum: ['BOB'] })
+  currencyCode!: 'BOB';
+}
+
 /** Un cupo agendable, con lo que el front necesita para ofrecerlo. */
 export class SlotListItemDto {
   /**
@@ -348,6 +358,14 @@ export class SlotListItemDto {
    */
   @ApiPropertyOptional({ format: 'uuid', nullable: true })
   serviceConceptId!: string | null;
+
+  /**
+   * El precio de la consulta de la práctica del recurso (`CITA_MEDICA`), o
+   * `null` si la práctica todavía no lo publicó. Nunca 0: un precio de 0 se
+   * rechaza al cargarlo (FAC-01, CONTRATO §3).
+   */
+  @ApiProperty({ type: SlotPriceDto, nullable: true })
+  price!: SlotPriceDto | null;
 }
 
 /** Respuesta de `GET /scheduling/slots`. */

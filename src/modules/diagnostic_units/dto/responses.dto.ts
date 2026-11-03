@@ -175,6 +175,18 @@ export class EquipmentResponseDto {
     format: 'uuid',
   })
   operationalStatus!: string;
+
+  /** F5a: sala del equipo. */
+  @ApiPropertyOptional({ format: 'uuid', nullable: true, type: String })
+  careSpaceId?: string | null;
+
+  /** F5a: DICOM AE Title. */
+  @ApiPropertyOptional({ nullable: true, type: String })
+  aeTitle?: string | null;
+
+  /** F5a: DICOM Station Name. */
+  @ApiPropertyOptional({ nullable: true, type: String })
+  stationName?: string | null;
 }
 
 /** Respuesta tras registrar/renovar una acreditación. */

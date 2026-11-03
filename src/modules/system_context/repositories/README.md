@@ -52,7 +52,7 @@ Las tablas con columnas de auditoría —definiciones, bindings, contextos— pa
 `createdBy(actorUserId)` al crearse y por `touch(entity, actorUserId)` al modificarse desde el
 servicio.
 
-## Pruebas
+## Tests
 
 El repositorio no tiene suite propia; se ejercita como doble desde `dynamic-enums.service.spec.ts` y
 `system-contexts.service.spec.ts`.

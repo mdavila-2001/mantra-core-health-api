@@ -22,6 +22,7 @@ cambiar el comportamiento de la vieja.
 | `DB_NAME` | sí | Base de datos |
 | `DB_POOL_MIN` | no (2) | Mínimo del pool |
 | `DB_POOL_MAX` | no (10) | Máximo del pool |
+| `DB_CONNECTION_TIMEOUT_MS` | no (30000) | Espera máxima por una conexión libre del pool, en ms |
 | `DB_APP_USER` | no | Rol de runtime sujeto a RLS; tiene precedencia sobre `DB_USER` |
 | `DB_APP_PASSWORD` | no | Su contraseña |
 

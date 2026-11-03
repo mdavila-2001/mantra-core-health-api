@@ -12,5 +12,5 @@ la transacción. No hay reglas de negocio aquí; solo consultas y `em.create(...
 - `pharmacy-product-identifiers.repository.ts` — identificadores GTIN/NDC (create; solo `created_*`).
 - `pharmacy-price-lists.repository.ts` — listas de precios (findById, findByPharmacyAndCode, create).
 - `pharmacy-product-prices.repository.ts` — precios versionados (maxVersionNumber, findActiveBy*, create; sin `row_version`).
-- `pharmacy-integration-connections.repository.ts` — conexiones (findById, findByPharmacyAndConnection, create con auto-referencia).
+- `pharmacy-integration-connections.repository.ts` — conexiones (findById, findByPharmacyAndConnection, create sin conexión externa hasta que se configure el sistema de la farmacia).
 - `pharmacy-external-product-mappings.repository.ts` — mapeos externos (findByConnectionAndProduct, findActiveByProduct, create).

@@ -54,6 +54,11 @@ export interface ValueColumns {
    */
   valueConceptId?: string;
   /**
+   * La opción de un campo `code` sin `valueSetId`: texto libre, no concepto.
+   * Ver el comentario de la columna en `FieldValues`.
+   */
+  valueCode?: string;
+  /**
    * Valor de value reference type mantenido por la instancia.
    */
   valueReferenceType?: string;
@@ -215,6 +220,42 @@ export class FieldValuesRepository {
    */
   countByField(em: EntityManager, fieldId: string): Promise<number> {
     return em.count(FieldValues, { fieldId });
+  }
+
+  /**
+   * Las opciones de un campo de elección (sin `valueSetId`) que YA tienen al
+   * menos una respuesta capturada, de las que se le pasan.
+   *
+   * Es la consulta detrás de la regla «no se puede quitar una opción ya
+   * respondida» de `PATCH /forms/field-definitions/:id`: antes de reemplazar
+   * `options`, el servicio compara las que se van a retirar contra esto, y
+   * rechaza si alguna aparece. Elegida sobre «marcar retirada y seguir
+   * ofreciéndola oculta» por ser la que no exige esquema nuevo — ver la nota
+   * de alcance en `docs/pendientes-backend-formularios.md` del frontend.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param fieldId - Campo de elección a revisar.
+   * @param codes - Las opciones candidatas a quitar.
+   * @returns El subconjunto de `codes` que ya tiene alguna respuesta.
+   */
+  async findCodesInUseByField(
+    em: EntityManager,
+    fieldId: string,
+    codes: readonly string[],
+  ): Promise<readonly string[]> {
+    if (codes.length === 0) return [];
+    const filas = await em.find(
+      FieldValues,
+      { fieldId, valueCode: { $in: [...codes] } },
+      { fields: ['valueCode'] },
+    );
+    return [
+      ...new Set(
+        filas
+          .map((f) => f.valueCode)
+          .filter((c): c is string => c !== undefined),
+      ),
+    ];
   }
 
   /**

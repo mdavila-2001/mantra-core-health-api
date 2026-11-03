@@ -12,8 +12,44 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  runWithTenant,
 } from '../../../common';
 import { DUNIT } from '../diagnostic_units.concepts';
+import { DiagnosticUnitsErrorReason } from '../diagnostic_units.error-reasons';
+import { DiagnosticUnitScopeService } from './diagnostic-unit-scope.service';
+
+const T1 = '11111111-1111-4111-8111-111111111111';
+const T2 = '22222222-2222-4222-8222-222222222222';
+
+/**
+ * Devuelve el servicio con cada método ejecutándose dentro del contexto de
+ * `tenantId`, como lo deja el interceptor de tenant en una petición real.
+ */
+function inTenant<T extends object>(service: T, tenantId: string = T1): T {
+  return new Proxy(service, {
+    get(target, prop, receiver) {
+      const value = Reflect.get(target, prop, receiver);
+      if (typeof value !== 'function') return value;
+      return (...args: unknown[]) =>
+        runWithTenant(tenantId, () => value.apply(target, args));
+    },
+  });
+}
+
+/** Exige el 404 uniforme: mismo `reason`, sin `details`. */
+async function expectOutOfScope(promise: Promise<unknown>) {
+  const error: any = await promise.then(
+    () => null,
+    (e: unknown) => e,
+  );
+  expect(error).toBeInstanceOf(ResourceNotFoundException);
+  expect(error.getStatus()).toBe(404);
+  expect(error.reason).toBe(
+    DiagnosticUnitsErrorReason.DIAGNOSTIC_UNIT_RESOURCE_OUT_OF_SCOPE,
+  );
+  expect(error.details).toBeUndefined();
+  return error;
+}
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -33,17 +69,40 @@ function build() {
   const componentsRepo = { create: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
-  const service = new DiagnosticStudiesService(
-    em as any,
+  const sitesRepo = { findById: mockFn() };
+  const scope = new DiagnosticUnitScopeService(
     unitsRepo as any,
+    sitesRepo as any,
+    {} as any,
+    {} as any,
+    offeringsRepo as any,
+    {} as any,
+    {} as any,
+  );
+  const raw = new DiagnosticStudiesService(
+    em as any,
+    scope,
     offeringsRepo,
     componentsRepo,
     logger as any,
   );
-  return { service, tx, unitsRepo, offeringsRepo, componentsRepo };
+  return {
+    raw,
+    service: inTenant(raw),
+    tx,
+    unitsRepo,
+    sitesRepo,
+    offeringsRepo,
+    componentsRepo,
+  };
 }
 
-const activeUnit = { id: 'u1', statusConceptId: DUNIT.UNIT_ACTIVE };
+const activeUnit = {
+  id: 'u1',
+  tenantId: T1,
+  statusConceptId: DUNIT.UNIT_ACTIVE,
+};
+const foreignUnit = { ...activeUnit, tenantId: T2 };
 
 describe('DiagnosticStudiesService', () => {
   describe('createOffering (UC-23-05)', () => {
@@ -81,6 +140,10 @@ describe('DiagnosticStudiesService', () => {
         studyCode: 'S',
         statusConceptId: DUNIT.OFFERING_ACTIVE,
       });
+      d.offeringsRepo.findById.mockResolvedValue({
+        id: 'o2',
+        diagnosticUnitId: 'u1',
+      });
       const res = await d.service.createOffering(
         'u1',
         {
@@ -99,6 +162,10 @@ describe('DiagnosticStudiesService', () => {
     it('rejects a self-referencing panel component (precondition)', async () => {
       const d = build();
       d.unitsRepo.findById.mockResolvedValue(activeUnit);
+      d.offeringsRepo.findById.mockResolvedValue({
+        id: 'o1',
+        diagnosticUnitId: 'u1',
+      });
       d.offeringsRepo.findByStudyCode.mockResolvedValue(null);
       d.offeringsRepo.create.mockReturnValue({
         id: 'o1',
@@ -133,9 +200,11 @@ describe('DiagnosticStudiesService', () => {
       const d = build();
       const offering = {
         id: 'o1',
+        diagnosticUnitId: 'u1',
         statusConceptId: DUNIT.OFFERING_ACTIVE,
         updatedAt: new Date(),
       };
+      d.unitsRepo.findById.mockResolvedValue(activeUnit);
       d.offeringsRepo.findById.mockResolvedValue(offering);
       const res = await d.service.retireOffering('o1', actor);
       expect(res).toEqual({ ok: true });
@@ -144,13 +213,109 @@ describe('DiagnosticStudiesService', () => {
 
     it('rejects retiring an already-retired offering (conflict)', async () => {
       const d = build();
+      d.unitsRepo.findById.mockResolvedValue(activeUnit);
       d.offeringsRepo.findById.mockResolvedValue({
         id: 'o1',
+        diagnosticUnitId: 'u1',
         statusConceptId: DUNIT.OFFERING_RETIRED,
       });
       await expect(
         d.service.retireOffering('o1', actor),
       ).rejects.toBeInstanceOf(ConflictException);
+    });
+  });
+
+  describe('alcance de tenant (DUNIT-01)', () => {
+    const dto = { studyCode: 'S', studyConceptId: 'c', displayName: 'x' };
+
+    it('publicar en una unidad de otro tenant responde 404 uniforme y no escribe', async () => {
+      const d = build();
+      d.unitsRepo.findById.mockResolvedValue(foreignUnit);
+      await expectOutOfScope(d.service.createOffering('u1', dto as any, actor));
+      expect(d.offeringsRepo.create).not.toHaveBeenCalled();
+      expect(d.tx.flush).not.toHaveBeenCalled();
+    });
+
+    it('una unidad ajena responde igual que una inexistente', async () => {
+      const ajena = build();
+      ajena.unitsRepo.findById.mockResolvedValue(foreignUnit);
+      const inexistente = build();
+      inexistente.unitsRepo.findById.mockResolvedValue(null);
+      const a = await expectOutOfScope(
+        ajena.service.createOffering('u1', dto as any, actor),
+      );
+      const b = await expectOutOfScope(
+        inexistente.service.createOffering('u1', dto as any, actor),
+      );
+      expect(a.getResponse()).toEqual(b.getResponse());
+    });
+
+    it('rechaza una oferta de otro tenant como componente y no crea nada', async () => {
+      const d = build();
+      d.unitsRepo.findById.mockImplementation((_tx: any, id: string) =>
+        Promise.resolve(id === 'u1' ? activeUnit : foreignUnit),
+      );
+      d.offeringsRepo.findByStudyCode.mockResolvedValue(null);
+      d.offeringsRepo.findById.mockResolvedValue({
+        id: 'oB',
+        diagnosticUnitId: 'uB',
+      });
+      await expectOutOfScope(
+        d.service.createOffering(
+          'u1',
+          { ...dto, components: [{ componentOfferingId: 'oB' }] } as any,
+          actor,
+        ),
+      );
+      expect(d.offeringsRepo.create).not.toHaveBeenCalled();
+      expect(d.componentsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('rechaza un sitio del cuerpo que no es de la unidad', async () => {
+      const d = build();
+      d.unitsRepo.findById.mockResolvedValue(activeUnit);
+      d.sitesRepo.findById.mockResolvedValue({
+        id: 's9',
+        diagnosticUnitId: 'u-otra',
+      });
+      await expectOutOfScope(
+        d.service.createOffering(
+          'u1',
+          { ...dto, diagnosticUnitSiteId: 's9' } as any,
+          actor,
+        ),
+      );
+      expect(d.offeringsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('retirar una oferta de otro tenant conserva su estado', async () => {
+      const d = build();
+      const offering = {
+        id: 'oB',
+        diagnosticUnitId: 'uB',
+        statusConceptId: DUNIT.OFFERING_ACTIVE,
+      };
+      d.offeringsRepo.findById.mockResolvedValue(offering);
+      d.unitsRepo.findById.mockResolvedValue(foreignUnit);
+      await expectOutOfScope(d.service.retireOffering('oB', actor));
+      expect(offering.statusConceptId).toBe(DUNIT.OFFERING_ACTIVE);
+    });
+
+    it('el administrador de B retira su propia oferta', async () => {
+      const d = build();
+      const offering = {
+        id: 'oB',
+        diagnosticUnitId: 'uB',
+        statusConceptId: DUNIT.OFFERING_ACTIVE,
+        updatedAt: new Date(),
+      };
+      d.offeringsRepo.findById.mockResolvedValue(offering);
+      d.unitsRepo.findById.mockResolvedValue(foreignUnit);
+      const service = inTenant(d.raw, T2);
+      await expect(service.retireOffering('oB', actor)).resolves.toEqual({
+        ok: true,
+      });
+      expect(offering.statusConceptId).toBe(DUNIT.OFFERING_RETIRED);
     });
   });
 });

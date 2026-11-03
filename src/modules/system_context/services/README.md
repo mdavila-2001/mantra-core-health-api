@@ -15,7 +15,7 @@ Comparten repositorio y nada más. La resolución de un valor de enum es un cami
 ejecuta en cada escritura; el refresco de contexto es un trabajo de fondo. Mezclarlos pondría al
 primero a cargar el segundo.
 
-## Reglas de negocio
+## Business rules
 
 ### Enumeraciones dinámicas
 
@@ -102,7 +102,7 @@ respuesta normal del validador.
 entrada obligatoria ausente, retiro y rollback. No se loguea el contenido del contexto: puede llevar
 referencias gobernadas que no tienen por qué acabar en un log.
 
-## Pruebas
+## Tests
 
 - `dynamic-enums.service.spec.ts` (36): invariantes del snapshot de opciones, numeración de
   versiones, supersedimiento y token de caché, ambos modos de validación, resolución por concepto y

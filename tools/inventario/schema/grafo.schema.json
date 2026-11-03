@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "grafo.schema.json",
+  "title": "Grafo de un proceso del inventario de flujos",
+  "description": "Contrato que consume el componente de grafo del portal: nodos, aristas y los roles que intervienen.",
+  "type": "object",
+  "required": ["proceso", "nombre", "tipo", "nodos", "aristas", "roles"],
+  "additionalProperties": false,
+  "properties": {
+    "proceso": { "type": "string", "minLength": 1 },
+    "nombre": { "type": "string", "minLength": 1 },
+    "tipo": { "enum": ["MODULO", "CRITICO"] },
+    "roles": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "nodos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "tipo", "etiqueta"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "tipo": {
+            "enum": [
+              "ETAPA",
+              "OPERACION",
+              "ACTOR",
+              "TABLA",
+              "EVENTO",
+              "TRABAJO"
+            ]
+          },
+          "etiqueta": { "type": "string", "minLength": 1 },
+          "operacionId": { "type": "string" },
+          "riesgo": { "enum": ["ALTO", "MEDIO", "BAJO"] },
+          "etapa": { "type": "string" }
+        }
+      }
+    },
+    "aristas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["de", "a", "tipo"],
+        "additionalProperties": false,
+        "properties": {
+          "de": { "type": "string" },
+          "a": { "type": "string" },
+          "tipo": {
+            "enum": [
+              "CONTIENE",
+              "ACTUA",
+              "LEE",
+              "ESCRIBE",
+              "BORRA",
+              "PUBLICA",
+              "ENCOLA",
+              "SIGUE"
+            ]
+          },
+          "etiqueta": { "type": "string" }
+        }
+      }
+    }
+  }
+}

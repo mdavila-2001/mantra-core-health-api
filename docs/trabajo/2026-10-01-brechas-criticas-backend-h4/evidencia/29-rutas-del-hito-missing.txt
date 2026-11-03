@@ -1,6 +1,0 @@
-matched=581
-missing_in_backend=62
-
-Rutas del Hito 4 que siguen Missing in Backend:
-  POST /insurance/received-claims/:id/invoice/annulment
-  POST /insurance/received-claims/:id/invoice

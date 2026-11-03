@@ -2,6 +2,11 @@ import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { Invoices, InvoiceLines } from '../entities';
 import { createdBy } from '../../../common';
+// Lectura de las entidades de `insurance` y de su mapa de conceptos (el
+// núcleo compartido): ver `insurance-patient-account.repository.ts` para el
+// mismo criterio al revés.
+import { ClaimDisputes, InsuranceClaimLines } from '../../insurance/entities';
+import { INS } from '../../insurance/domain/insurance.concepts';
 
 /** Cabecera de factura a crear (los totales se calculan en el servicio). */
 export interface CreateInvoiceData {
@@ -78,6 +83,11 @@ export interface CreateInvoiceLineData {
    */
   serviceId?: string;
   /**
+   * Línea del reclamo a la aseguradora que respalda esta línea (carril 16,
+   * REQ-16-028). Único en la base: una línea del reclamo se factura una vez.
+   */
+  insuranceClaimLineId?: string;
+  /**
    * Valor de description mantenido por la instancia.
    */
   description?: string;
@@ -135,6 +145,44 @@ export class InvoicesRepository {
    */
   findById(em: EntityManager, id: string): Promise<Invoices | null> {
     return em.findOne(Invoices, { id });
+  }
+
+  /**
+   * Si la factura está en pausa por una objeción abierta del paciente (carril
+   * 16, REQ-16-032).
+   *
+   * La pausa se **deriva**, no se guarda: una factura está en pausa mientras
+   * algún reclamo vinculado a sus líneas por `insurance_claim_line_id` tenga una
+   * disputa de tipo objeción del paciente que no esté resuelta. Resolverla (la
+   * apelación la deja `DISPUTE_RESOLVED`) la libera sin un segundo camino de
+   * escritura, y alcanza también a las facturas emitidas después de objetar.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param invoiceId - Factura que se quiere cobrar.
+   * @returns `true` si hay una objeción abierta sobre alguno de sus reclamos.
+   */
+  async hasOpenPatientObjection(
+    em: EntityManager,
+    invoiceId: string,
+  ): Promise<boolean> {
+    const lines = await em.find(InvoiceLines, {
+      invoiceId,
+      insuranceClaimLineId: { $ne: null },
+    });
+    if (lines.length === 0) return false;
+    const claimLines = await em.find(InsuranceClaimLines, {
+      id: { $in: lines.map((line) => line.insuranceClaimLineId as string) },
+    });
+    const claimIds = [
+      ...new Set(claimLines.map((line) => line.insuranceClaimId)),
+    ];
+    if (claimIds.length === 0) return false;
+    const open = await em.count(ClaimDisputes, {
+      insuranceClaimId: { $in: claimIds },
+      disputeTypeConceptId: INS.DISPUTE_TYPE_PATIENT_OBJECTION,
+      statusConceptId: { $ne: INS.DISPUTE_RESOLVED },
+    });
+    return open > 0;
   }
 
   /**
@@ -272,6 +320,7 @@ export class InvoicesRepository {
       {
         invoiceId: data.invoiceId,
         serviceId: data.serviceId,
+        insuranceClaimLineId: data.insuranceClaimLineId,
         description: data.description,
         quantity: data.quantity,
         unitPrice: data.unitPrice,

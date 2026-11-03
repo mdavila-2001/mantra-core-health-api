@@ -299,8 +299,41 @@ export const DELEGATED_ACCESS_SMOKE: SmokeCase[] = [
       practitionerDelegateAssignmentId: c.vars.daDelegateId,
       purpose: 'TREATMENT',
       patientProfileId: c.vars.patientProfileId,
+      // El sujeto evaluado tiene que ser el titular de la asignación del delegado: sin esto el
+      // servicio evalúa al actor autenticado y responde 200 con `allowed: false`
+      // (`DELEGATED_SUBJECT_MISMATCH`). La asignación de la organización cuelga de la membresía
+      // de `adminUserId` (ver el caso "incorpora usuario" del smoke de Directory).
+      effectiveUserId: c.adminUserId,
     }),
     expectedStatus: 200,
+    // Un 200 no prueba nada aquí: la evaluación responde 200 también cuando deniega. El caso
+    // existe para ver `allowed: true`.
+    capture: (b) => {
+      if (b.allowed !== true)
+        throw new Error(
+          `la evaluación debía permitir y respondió allowed=${String(b.allowed)} (${String(b.reason ?? 'sin motivo')})`,
+        );
+    },
+  },
+  {
+    module: 'DelegatedAccess',
+    endpoint: 'POST /authz/effective-actor/evaluate',
+    name: 'límite: sujeto que no es el delegado -> allowed:false',
+    method: 'post',
+    path: () => '/authz/effective-actor/evaluate',
+    body: (c) => ({
+      practitionerDelegateAssignmentId: c.vars.daDelegateId,
+      purpose: 'TREATMENT',
+      patientProfileId: c.vars.patientProfileId,
+      effectiveUserId: UUID_ABSENT,
+    }),
+    expectedStatus: 200,
+    capture: (b) => {
+      if (b.allowed !== false)
+        throw new Error(
+          `un sujeto ajeno a la delegación no puede recibir allowed=${String(b.allowed)}`,
+        );
+    },
   },
   {
     module: 'DelegatedAccess',

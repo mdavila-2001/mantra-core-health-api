@@ -22,6 +22,28 @@ export interface NeighborCountScope {
   slugPropertyCode: string;
 }
 
+/**
+ * Una evidencia de una relación, con sus calificadores ya traducidos a código
+ * de concepto (`catalog_concepts.code`). Es lo que el vecindario del glosario
+ * necesita para decir de dónde sale una relación y a quién aplica.
+ */
+export interface RelationshipEvidenceSummary {
+  /** `concept_relationship_id` de la evidencia. */
+  relationshipId: string;
+  /** Id de origen en la fuente (`ORPHA:…`, PMID, `NNAC25_…`). */
+  sourceReference: string;
+  /** Código del sexo al que aplica; `null` si aplica a todos. */
+  sexCode: string | null;
+  ageMinDays: number | null;
+  ageMaxDays: number | null;
+  /** Código de aplicabilidad en el embarazo; `null` si la fuente no lo dice. */
+  pregnancyCode: string | null;
+  /** Código del nivel de atención (I, II, III); `null` si no lo restringe. */
+  careLevelCode: string | null;
+  /** Código de la línea de tratamiento; `null` si no lo dice. */
+  lineOfTherapyCode: string | null;
+}
+
 /** Datos mínimos para materializar una relación entre conceptos. */
 export interface CreateConceptRelationshipData {
   /**
@@ -222,6 +244,66 @@ export class ConceptRelationshipsRepository {
       relationshipTypeConceptId: row.type_id,
       direction,
       total: Number(row.total),
+    }));
+  }
+
+  /**
+   * La evidencia de un lote de relaciones, con los calificadores traducidos a
+   * código de concepto en la misma consulta.
+   *
+   * El vecindario la pide sólo para los vecinos de la página que tienen
+   * evidencia (`evidence_count > 0`), así que el lote es chico y el camino es
+   * el índice de la FK `concept_relationship_id`.
+   *
+   * @param em - Contexto de persistencia.
+   * @param relationshipIds - Relaciones cuya evidencia se quiere.
+   * @returns Una fila por evidencia, ordenadas por relación y referencia.
+   */
+  async findEvidenceSummaries(
+    em: EntityManager,
+    relationshipIds: string[],
+  ): Promise<RelationshipEvidenceSummary[]> {
+    if (relationshipIds.length === 0) return [];
+    const rows: {
+      relationship_id: string;
+      source_reference: string;
+      sex_code: string | null;
+      age_min_days: number | null;
+      age_max_days: number | null;
+      pregnancy_code: string | null;
+      care_level_code: string | null;
+      line_of_therapy_code: string | null;
+    }[] = await em.getConnection().execute(
+      `SELECT e.concept_relationship_id AS relationship_id,
+              e.source_reference,
+              sex.code AS sex_code,
+              e.age_min_days,
+              e.age_max_days,
+              pregnancy.code AS pregnancy_code,
+              care.code AS care_level_code,
+              line.code AS line_of_therapy_code
+         FROM terminology.concept_relationship_evidence e
+         LEFT JOIN terminology.catalog_concepts sex
+                ON sex.id = e.sex_concept_id
+         LEFT JOIN terminology.catalog_concepts pregnancy
+                ON pregnancy.id = e.pregnancy_applicability_concept_id
+         LEFT JOIN terminology.catalog_concepts care
+                ON care.id = e.care_level_concept_id
+         LEFT JOIN terminology.catalog_concepts line
+                ON line.id = e.line_of_therapy_concept_id
+        WHERE e.concept_relationship_id IN (?)
+        ORDER BY e.concept_relationship_id, e.source_reference`,
+      [[...relationshipIds]],
+    );
+    return rows.map((row) => ({
+      relationshipId: row.relationship_id,
+      sourceReference: row.source_reference,
+      sexCode: row.sex_code,
+      ageMinDays: row.age_min_days,
+      ageMaxDays: row.age_max_days,
+      pregnancyCode: row.pregnancy_code,
+      careLevelCode: row.care_level_code,
+      lineOfTherapyCode: row.line_of_therapy_code,
     }));
   }
 

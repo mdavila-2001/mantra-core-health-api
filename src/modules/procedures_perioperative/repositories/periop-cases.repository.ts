@@ -1,6 +1,8 @@
+import { SurgicalSafetyChecklists } from '../entities';
 import { Injectable } from '@nestjs/common';
 import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
+import { Procedures } from '../../clinical/entities';
 import {
   ProcedureCases,
   ProcedureCaseStatusHistory,
@@ -183,20 +185,51 @@ export class PeriopCasesRepository {
    * @param id - Identificador de id.
    * @returns Resultado de find case by id conforme al contrato `Promise<ProcedureCases | null>`.
    */
-  findCaseById(em: EntityManager, id: string): Promise<ProcedureCases | null> {
-    return em.findOne(ProcedureCases, { id });
-  }
-
-  /** Toda transición de estado del caso se hace con la fila bloqueada. */
-  findCaseForUpdate(
+  findCaseById(
     em: EntityManager,
     id: string,
+    custodianTenantId?: string,
   ): Promise<ProcedureCases | null> {
     return em.findOne(
       ProcedureCases,
-      { id },
+      custodianTenantId === undefined ? { id } : { id, custodianTenantId },
+    );
+  }
+
+  /**
+   * Toda transición de estado del caso se hace con la fila bloqueada.
+   *
+   * Con `custodianTenantId` el filtro va en la consulta: no se bloquea (ni se
+   * espera el bloqueo de) un caso de otro tenant.
+   */
+  findCaseForUpdate(
+    em: EntityManager,
+    id: string,
+    custodianTenantId?: string,
+  ): Promise<ProcedureCases | null> {
+    return em.findOne(
+      ProcedureCases,
+      custodianTenantId === undefined ? { id } : { id, custodianTenantId },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
+  }
+
+  /**
+   * Busca un procedimiento del historial **solo si es del paciente y del tenant
+   * custodio indicados**. El filtro va en la consulta: un id ajeno no se distingue
+   * de uno inexistente.
+   */
+  findProcedureOfPatient(
+    em: EntityManager,
+    procedureId: string,
+    patientProfileId: string,
+    custodianTenantId: string,
+  ): Promise<Procedures | null> {
+    return em.findOne(Procedures, {
+      id: procedureId,
+      patientProfileId,
+      custodianTenantId,
+    });
   }
 
   /**
@@ -209,8 +242,15 @@ export class PeriopCasesRepository {
   findCaseByNumber(
     em: EntityManager,
     caseNumber: string,
+    custodianTenantId?: string,
   ): Promise<ProcedureCases | null> {
-    return em.findOne(ProcedureCases, { caseNumber });
+    // El número es único por tenant (`uk_procedure_cases_tenant_number`): sin
+    // el tenant, con RLS apagado, los casos de otro tenant agotaban los cinco
+    // intentos de `nextCaseNumber`.
+    return em.findOne(ProcedureCases, {
+      caseNumber,
+      ...(custodianTenantId ? { custodianTenantId } : {}),
+    });
   }
 
   /**
@@ -224,13 +264,13 @@ export class PeriopCasesRepository {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param custodianTenantId - Tenant custodio, obligatorio.
-   * @param filtros - Acotaciones opcionales y paginación.
+   * @param filters - Acotaciones opcionales y paginación.
    * @returns Los casos que cumplen el filtro.
    */
   async findCases(
     em: EntityManager,
     custodianTenantId: string,
-    filtros: {
+    filters: {
       /** Paciente del caso. */
       patientProfileId?: string;
       /** Quirófano reservado. */
@@ -250,24 +290,24 @@ export class PeriopCasesRepository {
     },
   ): Promise<ProcedureCases[]> {
     const where: Record<string, unknown> = { custodianTenantId };
-    if (filtros.patientProfileId)
-      where.patientProfileId = filtros.patientProfileId;
-    if (filtros.operatingRoomId)
-      where.operatingRoomId = filtros.operatingRoomId;
-    if (filtros.primarySurgeonProfileId)
-      where.primarySurgeonProfileId = filtros.primarySurgeonProfileId;
-    if (filtros.statusConceptId)
-      where.statusConceptId = filtros.statusConceptId;
-    if (filtros.from || filtros.to) {
+    if (filters.patientProfileId)
+      where.patientProfileId = filters.patientProfileId;
+    if (filters.operatingRoomId)
+      where.operatingRoomId = filters.operatingRoomId;
+    if (filters.primarySurgeonProfileId)
+      where.primarySurgeonProfileId = filters.primarySurgeonProfileId;
+    if (filters.statusConceptId)
+      where.statusConceptId = filters.statusConceptId;
+    if (filters.from || filters.to) {
       where.scheduledStartAt = {
-        ...(filtros.from ? { $gte: filtros.from } : {}),
-        ...(filtros.to ? { $lt: filtros.to } : {}),
+        ...(filters.from ? { $gte: filters.from } : {}),
+        ...(filters.to ? { $lt: filters.to } : {}),
       };
     }
     return em.find(ProcedureCases, where, {
       orderBy: { scheduledStartAt: 'ASC', id: 'ASC' },
-      limit: filtros.limit,
-      offset: filtros.offset,
+      limit: filters.limit,
+      offset: filters.offset,
     });
   }
 
@@ -277,13 +317,13 @@ export class PeriopCasesRepository {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param custodianTenantId - Tenant custodio, obligatorio.
-   * @param filtros - Las mismas acotaciones, sin paginación.
+   * @param filters - Las mismas acotaciones, sin paginación.
    * @returns Cuántos casos cumplen el filtro.
    */
   countCasesMatching(
     em: EntityManager,
     custodianTenantId: string,
-    filtros: {
+    filters: {
       /** Paciente del caso. */
       patientProfileId?: string;
       /** Quirófano reservado. */
@@ -299,18 +339,18 @@ export class PeriopCasesRepository {
     },
   ): Promise<number> {
     const where: Record<string, unknown> = { custodianTenantId };
-    if (filtros.patientProfileId)
-      where.patientProfileId = filtros.patientProfileId;
-    if (filtros.operatingRoomId)
-      where.operatingRoomId = filtros.operatingRoomId;
-    if (filtros.primarySurgeonProfileId)
-      where.primarySurgeonProfileId = filtros.primarySurgeonProfileId;
-    if (filtros.statusConceptId)
-      where.statusConceptId = filtros.statusConceptId;
-    if (filtros.from || filtros.to) {
+    if (filters.patientProfileId)
+      where.patientProfileId = filters.patientProfileId;
+    if (filters.operatingRoomId)
+      where.operatingRoomId = filters.operatingRoomId;
+    if (filters.primarySurgeonProfileId)
+      where.primarySurgeonProfileId = filters.primarySurgeonProfileId;
+    if (filters.statusConceptId)
+      where.statusConceptId = filters.statusConceptId;
+    if (filters.from || filters.to) {
       where.scheduledStartAt = {
-        ...(filtros.from ? { $gte: filtros.from } : {}),
-        ...(filtros.to ? { $lt: filtros.to } : {}),
+        ...(filters.from ? { $gte: filters.from } : {}),
+        ...(filters.to ? { $lt: filters.to } : {}),
       };
     }
     return em.count(ProcedureCases, where);
@@ -676,6 +716,12 @@ export class PeriopCasesRepository {
     em: EntityManager,
     data: {
       /**
+       * Tenant de la sala (= `custodian_tenant_id` del caso, por la FK
+       * compuesta de F4). NOT NULL desde la integración F2–F5 y con RLS forzada:
+       * la API lo escribe siempre en vez de depender del trigger de relleno.
+       */
+      tenantId: string;
+      /**
        * Identificador asociado a operating room.
        */
       operatingRoomId: string;
@@ -712,6 +758,7 @@ export class PeriopCasesRepository {
     return em.create(
       OperatingRoomUtilizationEvents,
       {
+        tenantId: data.tenantId,
         operatingRoomId: data.operatingRoomId,
         procedureCaseId: data.procedureCaseId,
         eventTypeConceptId: data.eventTypeConceptId,
@@ -845,5 +892,23 @@ export class PeriopCasesRepository {
       { procedureCaseId },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
+  }
+
+  /**
+   * Check-list OMS del caso (F4, gates de §F4.3).
+   *
+   * @param em - Transacción.
+   * @param procedureCaseId - Caso.
+   * @param checklistTypeConceptId - Tipo (`CHECKLIST_WHO`).
+   */
+  findSafetyChecklistByCase(
+    em: EntityManager,
+    procedureCaseId: string,
+    checklistTypeConceptId: string,
+  ): Promise<SurgicalSafetyChecklists | null> {
+    return em.findOne(SurgicalSafetyChecklists, {
+      procedureCaseId,
+      checklistTypeConceptId,
+    });
   }
 }

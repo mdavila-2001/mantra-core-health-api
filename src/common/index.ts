@@ -35,6 +35,7 @@ export {
   runWithTenant,
   getCurrentTenantId,
   requireTenantId,
+  marketplaceTenantScope,
 } from './tenant/tenant-context';
 export type { TenantContext } from './tenant/tenant-context';
 export { TenantContextInterceptor } from './tenant/tenant-context.interceptor';
@@ -149,6 +150,9 @@ export { buildCorsOptions, loadCorsAllowedOrigins } from './http/cors-origins';
 export { ParseOptionalLimitPipe } from './http/parse-optional-limit.pipe';
 export { ParseUuidListPipe } from './http/parse-uuid-list.pipe';
 export { ParseOptionalDatePipe } from './http/parse-optional-date.pipe';
+export { RequestId } from './http/request-id.decorator';
+export { RequestIdBodyInterceptor } from './http/request-id-body.interceptor';
+export { stripEtagOnNoStore } from './http/no-store-etag.middleware';
 
 // Almacenamiento de archivos (adaptador seleccionado por entorno)
 export { FileStorageModule } from './storage/file-storage.module';
@@ -163,11 +167,25 @@ export { S3FileStorageAdapter } from './storage/s3-file-storage.adapter';
 export { storageEnvSchema, loadStorageEnv } from './storage/storage.env';
 export type { StorageEnv, FileStorageAdapterName } from './storage/storage.env';
 export {
+  UNSUPPORTED_IMAGE_FORMAT_REASON,
   UPLOAD_MIME_ALLOWLIST,
+  detectUnsupportedImageFormat,
   isMimeTypeAllowedForCategory,
   sniffMimeType,
 } from './storage/upload-content-type';
-export type { SniffedMimeType } from './storage/upload-content-type';
+export type {
+  SniffedMimeType,
+  UnsupportedImageFormat,
+} from './storage/upload-content-type';
+export {
+  OPAQUE_MIME_TYPE,
+  servedContentHeaders,
+} from './storage/served-content-headers';
+export {
+  LOGO_IMAGE_MIME_TYPES,
+  LOGO_MAX_BYTES,
+  assertLogoImage,
+} from './storage/logo-image';
 export { appSecurityEnvSchema } from './security/app-security.env';
 
 // Bypass de verificación DEV/TEST (corrección #12, contrato DEV_VERIFICATION_BYPASS.md)
@@ -196,6 +214,15 @@ export type { ConceptName } from './constants/concepts';
 export { STICKER_PACK, STICKER_PACK_FILE_IDS } from './constants/sticker-pack';
 export type { StickerPackEntry } from './constants/sticker-pack';
 
+// Distancia en línea recta (ver el JSDoc del módulo: convive con las copias
+// locales de farmacia, comunidad y marketplace, no las reemplaza)
+export { straightLineKm, coordinateOf } from './geo/straight-line-distance';
+export type { GeoPoint } from './geo/straight-line-distance';
+
 // Dinero decimal exacto (ver el JSDoc del módulo: convive con las utilidades
 // de accounting y billing, no las reemplaza)
-export { addDecimals as sumarDecimales, sameDecimals as mismosDecimales } from './money/decimal-money';
+export {
+  addDecimals as sumarDecimales,
+  sameDecimals as mismosDecimales,
+  multiplyDecimalsToMoney,
+} from './money/decimal-money';

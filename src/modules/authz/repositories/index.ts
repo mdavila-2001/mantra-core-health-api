@@ -12,3 +12,6 @@ export * from './patient-legal-representations.repository';
 export * from './field-permissions.repository';
 export * from './resource-scope-grants.repository';
 export * from './authz-service-principals.repository';
+export * from './authz-admin-read.repository';
+export * from './authz-clinical-scope.repository';
+export * from './authz-governance-read.repository';

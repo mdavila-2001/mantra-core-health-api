@@ -19,14 +19,14 @@ import { IdentifiersRepository } from './identifiers.repository';
  */
 describe('IdentifiersRepository', () => {
   /** Un `EntityManager` que sólo recuerda con qué lo llamaron. */
-  function emQueRecuerda() {
-    const llamadas: Record<string, unknown>[] = [];
+  function recordingEm() {
+    const calls: Record<string, unknown>[] = [];
     return {
-      llamadas,
+      llamadas: calls,
       em: {
-        create: (_entidad: unknown, datos: Record<string, unknown>) => {
-          llamadas.push(datos);
-          return datos;
+        create: (_entity: unknown, data: Record<string, unknown>) => {
+          calls.push(data);
+          return data;
         },
       } as never,
     };
@@ -41,37 +41,37 @@ describe('IdentifiersRepository', () => {
   };
 
   it('la razón social llega a la fila', () => {
-    const { em, llamadas } = emQueRecuerda();
+    const { em, llamadas: calls } = recordingEm();
 
     new IdentifiersRepository().create(em, {
       ...base,
       holderName: 'Comercial Rojas S.R.L.',
     });
 
-    expect(llamadas[0].holderName).toBe('Comercial Rojas S.R.L.');
+    expect(calls[0].holderName).toBe('Comercial Rojas S.R.L.');
   });
 
   /** Un CI no tiene razón social: la fila no puede inventarle una. */
   it('sin razón social la fila no la inventa', () => {
-    const { em, llamadas } = emQueRecuerda();
+    const { em, llamadas: calls } = recordingEm();
 
     new IdentifiersRepository().create(em, base);
 
-    expect(llamadas[0].holderName).toBeUndefined();
+    expect(calls[0].holderName).toBeUndefined();
   });
 
   it('los campos que ya existían siguen llegando', () => {
-    const { em, llamadas } = emQueRecuerda();
+    const { em, llamadas: calls } = recordingEm();
 
     new IdentifiersRepository().create(em, {
       ...base,
       issuerAdministrativeAreaConceptId: 'depto-sc',
     });
 
-    const fila = llamadas[0];
-    expect(fila.ownerId).toBe('per-1');
-    expect(fila.typeConceptId).toBe('id-type-tax');
-    expect(fila.value).toBe('1234567');
-    expect(fila.issuerAdministrativeAreaConceptId).toBe('depto-sc');
+    const row = calls[0];
+    expect(row.ownerId).toBe('per-1');
+    expect(row.typeConceptId).toBe('id-type-tax');
+    expect(row.value).toBe('1234567');
+    expect(row.issuerAdministrativeAreaConceptId).toBe('depto-sc');
   });
 });

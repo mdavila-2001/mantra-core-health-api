@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import {
+  Deployments,
   HealthChecks,
   HealthCheckRuns,
   HealthIncidents,
@@ -118,18 +119,29 @@ export interface CreateIncidentData {
 export class OpsIncidentsRepository {
   // --- Health checks (UC-46-06) ---
 
+  /** Despliegue del tenant que una corrida cita; `null` si no existe o es de otro tenant. */
+  findDeploymentInTenant(
+    em: EntityManager,
+    id: string,
+    tenantId: string,
+  ): Promise<Deployments | null> {
+    return em.findOne(Deployments, { id, tenantId });
+  }
+
   /**
    * Obtiene find health check by id.
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param id - Identificador de id.
+   * @param tenantId - Tenant activo: el check de otro tenant no se encuentra.
    * @returns Resultado de find health check by id conforme al contrato `Promise<HealthChecks | null>`.
    */
   findHealthCheckById(
     em: EntityManager,
     id: string,
+    tenantId: string,
   ): Promise<HealthChecks | null> {
-    return em.findOne(HealthChecks, { id });
+    return em.findOne(HealthChecks, { id, tenantId });
   }
 
   /** Log append-only: la corrida se inserta, y una lectura errónea se corrige con otra. */
@@ -207,13 +219,15 @@ export class OpsIncidentsRepository {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param id - Identificador de id.
+   * @param tenantId - Tenant activo: el incidente de otro tenant no se encuentra.
    * @returns Resultado de find incident by id conforme al contrato `Promise<HealthIncidents | null>`.
    */
   findIncidentById(
     em: EntityManager,
     id: string,
+    tenantId: string,
   ): Promise<HealthIncidents | null> {
-    return em.findOne(HealthIncidents, { id });
+    return em.findOne(HealthIncidents, { id, tenantId });
   }
 
   /**
@@ -221,15 +235,17 @@ export class OpsIncidentsRepository {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param id - Identificador de id.
+   * @param tenantId - Tenant activo: el incidente de otro tenant no se bloquea.
    * @returns Resultado de find incident for update conforme al contrato `Promise<HealthIncidents | null>`.
    */
   findIncidentForUpdate(
     em: EntityManager,
     id: string,
+    tenantId: string,
   ): Promise<HealthIncidents | null> {
     return em.findOne(
       HealthIncidents,
-      { id },
+      { id, tenantId },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
   }

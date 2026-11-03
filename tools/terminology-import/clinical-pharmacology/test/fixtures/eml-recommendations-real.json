@@ -1,0 +1,432 @@
+{
+ "17": {
+  "@context": [
+   "http://schema.org/docs/jsonldcontext.json",
+   "https://list.essentialmeds.org/contexts/v1.jsonld"
+  ],
+  "@id": "/recommendations/17",
+  "@type": [
+   "MedicalGuidelineRecommendation",
+   "EssentialMedicineRecommendation"
+  ],
+  "recognizingAuthority": {
+   "@type": "Organization",
+   "name": "World Health Organization",
+   "url": "http://www.who.int/"
+  },
+  "guidelineDate": "1984-12-07",
+  "guidelineSubject": {
+   "@type": "TherapeuticProcedure",
+   "code": [],
+   "drug": [
+    {
+     "@context": [
+      "http://schema.org/docs/jsonldcontext.json",
+      "https://list.essentialmeds.org/contexts/v1.jsonld"
+     ],
+     "@id": "/medicines/16",
+     "@type": [
+      "Drug",
+      "Medicine"
+     ],
+     "name": "codeine",
+     "nonProprietaryName": "codeine",
+     "description": "<div data-contents=\"true\"><div class=\"\" data-block=\"true\" data-editor=\"fgsa5\" data-offset-key=\"43vfa-0-0\"><div data-offset-key=\"43vfa-0-0\" class=\"public-DraftStyleDefault-block public-DraftStyleDefault-ltr\"><span data-offset-key=\"43vfa-0-0\"><span data-text=\"true\">Codeine is an opioid analgesic for the treatment of mild to moderate pain.  It also has antitussive and antidiarrhoeal activity.</span></span></div></div></div>",
+     "sameAs": "http://en.wikipedia.org/wiki/Codeine",
+     "activeIngredient": [
+      "codeine"
+     ],
+     "ingredient": [
+      {
+       "@type": "Substance",
+       "name": "codeine",
+       "sameAs": "http://www.drugbank.ca/drugs/DB00318"
+      }
+     ],
+     "drugUnit": [
+      "Oral > Solid: 30 mg tablet (codeine phosphate)",
+      "Oral > Solid: 10 mg tablet (codeine phosphate)"
+     ],
+     "guideline": [
+      {
+       "@id": "/recommendations/17"
+      },
+      {
+       "@id": "/recommendations/649"
+      },
+      {
+       "@id": "/recommendations/650"
+      }
+     ],
+     "equivalentFor": [],
+     "status": "AddedToEml",
+     "antibioticStewardshipGroup": []
+    }
+   ],
+   "indication": {
+    "@id": "_:i12",
+    "@type": "MedicalIndication",
+    "name": "Pain",
+    "disambiguatingDescription": null,
+    "code": {
+     "@type": "MedicalCode",
+     "codeValue": "MG3Z",
+     "codingSystem": "ICD-11",
+     "sameAs": "http://id.who.int/icd/entity/661232217/mms/unspecified"
+    }
+   }
+  },
+  "evidenceOrigin": [
+   "Codeine was added to the core list of the EML as an opioid analgesic in 1984 in addition to its original listings as an antitussive and antidiarrhoeal.  A square box symbol was added to the analgesic listing in 1988 to accommodate alternative drugs.  The square box was removed in 2003 following a review."
+  ],
+  "section": {
+   "@type": "Section",
+   "name": "2.2. Opioid analgesics",
+   "parentItem": {
+    "@type": "Section",
+    "name": "2. Medicines for pain and palliative care",
+    "parentItem": null
+   }
+  },
+  "drugUnit": [
+   "Oral > Solid: 30 mg tablet (codeine phosphate)"
+  ],
+  "patentInformation": "Patents have expired in most jurisdictions",
+  "list": "CoreList",
+  "population": {
+   "@type": "Population",
+   "age": "AdolescentAndAdult",
+   "sex": [
+    "Female",
+    "Male"
+   ],
+   "ageRestriction": null,
+   "weightRestriction": null,
+   "condition": {
+    "@id": "_:i12"
+   }
+  },
+  "includedInEmlc": false,
+  "statusForIndication": "AddedToEml",
+  "history": [
+   {
+    "@type": "DecisionToAdd",
+    "guidelineDate": "1984-12-07",
+    "list": "CoreList"
+   }
+  ],
+  "therapeuticEquivalenceInClass": false,
+  "therapeuticEquivalenceInClassRestriction": null,
+  "therapeuticEquivalenceInClassRestrictionForEmlc": null
+ },
+ "41": {
+  "@context": [
+   "http://schema.org/docs/jsonldcontext.json",
+   "https://list.essentialmeds.org/contexts/v1.jsonld"
+  ],
+  "@id": "/recommendations/41",
+  "@type": [
+   "MedicalGuidelineRecommendation",
+   "EssentialMedicineRecommendation"
+  ],
+  "recognizingAuthority": {
+   "@type": "Organization",
+   "name": "World Health Organization",
+   "url": "http://www.who.int/"
+  },
+  "guidelineDate": "2025-05-09",
+  "guidelineSubject": {
+   "@type": "TherapeuticProcedure",
+   "code": [
+    {
+     "@type": "MedicalCode",
+     "codeValue": "A03BA01",
+     "codingSystem": "ATC"
+    }
+   ],
+   "drug": [
+    {
+     "@context": [
+      "http://schema.org/docs/jsonldcontext.json",
+      "https://list.essentialmeds.org/contexts/v1.jsonld"
+     ],
+     "@id": "/medicines/10",
+     "@type": [
+      "Drug",
+      "Medicine"
+     ],
+     "name": "atropine",
+     "nonProprietaryName": "atropine",
+     "description": "<div data-contents=\"true\"><div class=\"\" data-block=\"true\" data-editor=\"936ph\" data-offset-key=\"7c9a0-0-0\"><div data-offset-key=\"7c9a0-0-0\" class=\"public-DraftStyleDefault-block public-DraftStyleDefault-ltr\"><span data-offset-key=\"7c9a0-0-0\"><span data-text=\"true\">Atropine is a muscarinic antagonist with multiple therapeutic indications including reduction of salivary and bronchial secretions during surgical procedures, treatment of organophosphate poisoning, and as a cycloplegic and mydriatic agent following topical administration into the eye. </span></span></div></div></div>",
+     "sameAs": "http://en.wikipedia.org/wiki/Atropine",
+     "activeIngredient": [
+      "atropine"
+     ],
+     "ingredient": [
+      {
+       "@type": "Substance",
+       "name": "atropine",
+       "sameAs": "http://www.drugbank.ca/drugs/DB00572"
+      }
+     ],
+     "drugUnit": [
+      "Parenteral > General injections > unspecified: 1 mg in 1 mL ampoule or vial (sulfate); 400 µg per  mL in 1 mL ampoule or vial (sulfate)",
+      "Parenteral > General injections > unspecified: 1 mg in 1 mL ampoule or vial (sulfate)",
+      "Local > Ophthalmological > Solution (eye drops): 0.1% (sulfate); 0.5% (sulfate); 1% (sulfate)"
+     ],
+     "guideline": [
+      {
+       "@id": "/recommendations/10"
+      },
+      {
+       "@id": "/recommendations/41"
+      },
+      {
+       "@id": "/recommendations/298"
+      }
+     ],
+     "equivalentFor": [
+      {
+       "@id": "/recommendations/204"
+      }
+     ],
+     "status": "AddedToEml",
+     "antibioticStewardshipGroup": []
+    }
+   ],
+   "indication": {
+    "@id": "_:i524",
+    "@type": "MedicalIndication",
+    "name": "Exposure to or harmful effects of undetermined intent of pesticides",
+    "disambiguatingDescription": null,
+    "code": {
+     "@type": "MedicalCode",
+     "codeValue": "PH53",
+     "codingSystem": "ICD-11",
+     "sameAs": "http://id.who.int/icd/entity/938040061"
+    }
+   }
+  },
+  "evidenceOrigin": [
+   "Following the review of the age-appropriateness of formulations on the EMLc, the Expert Committee recommended:\n\n- to modify the formulation descriptions to better describe the available dosage forms."
+  ],
+  "section": {
+   "@type": "Section",
+   "name": "4.2. Antidotes and other substances used in poisonings > Specific",
+   "parentItem": {
+    "@type": "Section",
+    "name": "4. Antidotes and other substances used in poisonings",
+    "parentItem": null
+   }
+  },
+  "drugUnit": [
+   "Parenteral > General injections > unspecified: 1 mg in 1 mL ampoule or vial (sulfate)"
+  ],
+  "patentInformation": "Patents have expired in most jurisdictions",
+  "list": "CoreList",
+  "population": {
+   "@type": "Population",
+   "age": [
+    "AdolescentAndAdult",
+    "Children",
+    "Newborn"
+   ],
+   "sex": [
+    "Female",
+    "Male"
+   ],
+   "ageRestriction": null,
+   "weightRestriction": null,
+   "condition": {
+    "@id": "_:i524"
+   }
+  },
+  "includedInEmlc": true,
+  "statusForIndication": "AddedToEml",
+  "history": [
+   {
+    "@type": "DecisionToAdd",
+    "guidelineDate": "2025-05-09",
+    "list": "CoreList"
+   },
+   {
+    "@type": "DecisionToAdd",
+    "guidelineDate": "2007-10-25",
+    "list": "CoreList"
+   },
+   {
+    "@type": "DecisionToAdd",
+    "guidelineDate": "1979-07-06",
+    "list": "CoreList"
+   },
+   {
+    "@type": "DecisionToAdd",
+    "guidelineDate": "1977-10-21",
+    "list": "CoreList"
+   }
+  ],
+  "therapeuticEquivalenceInClass": false,
+  "therapeuticEquivalenceInClassRestriction": null,
+  "therapeuticEquivalenceInClassRestrictionForEmlc": null
+ },
+ "143": {
+  "@context": [
+   "http://schema.org/docs/jsonldcontext.json",
+   "https://list.essentialmeds.org/contexts/v1.jsonld"
+  ],
+  "@id": "/recommendations/143",
+  "@type": [
+   "MedicalGuidelineRecommendation",
+   "EssentialMedicineRecommendation"
+  ],
+  "recognizingAuthority": {
+   "@type": "Organization",
+   "name": "World Health Organization",
+   "url": "http://www.who.int/"
+  },
+  "guidelineDate": "2025-05-09",
+  "guidelineSubject": {
+   "@type": "TherapeuticProcedure",
+   "code": [
+    {
+     "@type": "MedicalCode",
+     "codeValue": "B03AA07",
+     "codingSystem": "ATC"
+    },
+    {
+     "@type": "MedicalCode",
+     "codeValue": "B03AA02",
+     "codingSystem": "ATC"
+    }
+   ],
+   "drug": [
+    {
+     "@context": [
+      "http://schema.org/docs/jsonldcontext.json",
+      "https://list.essentialmeds.org/contexts/v1.jsonld"
+     ],
+     "@id": "/medicines/118",
+     "@type": [
+      "Drug",
+      "Medicine"
+     ],
+     "name": "ferrous salt",
+     "nonProprietaryName": "ferrous salt",
+     "description": "<div data-contents=\"true\"><div class=\"\" data-block=\"true\" data-editor=\"5h4c3\" data-offset-key=\"12m8-0-0\"><div data-offset-key=\"12m8-0-0\" class=\"public-DraftStyleDefault-block public-DraftStyleDefault-ltr\"><span data-offset-key=\"12m8-0-0\"><span data-text=\"true\">Ferrous salts are iron compounds used to prevent and treat iron deficiency anaemia. </span></span></div></div></div>",
+     "sameAs": "http://en.wikipedia.org/wiki/Ferrous_salt",
+     "activeIngredient": [
+      "ferrous salt"
+     ],
+     "ingredient": [
+      {
+       "@type": "Substance",
+       "name": "ferrous salt",
+       "sameAs": "http://www.drugbank.ca/drugs/DB01592"
+      }
+     ],
+     "drugUnit": [
+      "Oral > Liquid: 25 mg per  mL elemental iron; 9 mg per  mL elemental iron",
+      "Oral > Solid > tablet: 60 to 65 mg elemental iron"
+     ],
+     "guideline": [
+      {
+       "@id": "/recommendations/143"
+      }
+     ],
+     "equivalentFor": [],
+     "status": "AddedToEml",
+     "antibioticStewardshipGroup": []
+    }
+   ],
+   "indication": {
+    "@id": "_:i563",
+    "@type": "MedicalIndication",
+    "name": "Iron deficiency anaemia",
+    "disambiguatingDescription": null,
+    "code": {
+     "@type": "MedicalCode",
+     "codeValue": "3A00.Z",
+     "codingSystem": "ICD-11",
+     "sameAs": "http://id.who.int/icd/entity/1577750667/mms/unspecified"
+    }
+   }
+  },
+  "evidenceOrigin": [
+   "Following the review of the age-appropriateness of formulations on the EMLc, the Expert Committee recommended:\n\n- the addition of a new strength of oral liquid containing equivalent to 9 mg/mL of elemental iron to the EMLc;\n- remove reference to specific ferrous salts;\n- to update the listing for the tablet formulation to include a strength range of 60 mg to 65 mg of elemental iron."
+  ],
+  "section": {
+   "@type": "Section",
+   "name": "10.1. Antianaemia medicines",
+   "parentItem": {
+    "@type": "Section",
+    "name": "10. Medicines affecting the blood",
+    "parentItem": null
+   }
+  },
+  "drugUnit": [
+   "Oral > Liquid: 25 mg per  mL elemental iron; 9 mg per  mL elemental iron",
+   "Oral > Solid > tablet: 60 to 65 mg elemental iron"
+  ],
+  "patentInformation": "Patents have expired in most jurisdictions",
+  "list": "CoreList",
+  "population": {
+   "@type": "Population",
+   "age": [
+    "AdolescentAndAdult",
+    "Children",
+    "Newborn"
+   ],
+   "sex": [
+    "Female",
+    "Male"
+   ],
+   "ageRestriction": null,
+   "weightRestriction": null,
+   "condition": {
+    "@id": "_:i563"
+   }
+  },
+  "includedInEmlc": true,
+  "statusForIndication": "AddedToEml",
+  "history": [
+   {
+    "@type": "DecisionToAdd",
+    "guidelineDate": "2025-05-09",
+    "list": "CoreList"
+   },
+   {
+    "@type": "DecisionToAdd",
+    "guidelineDate": "2007-10-25",
+    "list": "CoreList"
+   },
+   {
+    "@type": "DecisionToAdd",
+    "guidelineDate": "2007-10-25",
+    "list": "CoreList"
+   },
+   {
+    "@type": "DecisionToAdd",
+    "guidelineDate": "1987-12-04",
+    "list": "CoreList"
+   },
+   {
+    "@type": "DecisionToAdd",
+    "guidelineDate": "1982-12-03",
+    "list": "CoreList"
+   },
+   {
+    "@type": "DecisionToAdd",
+    "guidelineDate": "1979-07-06",
+    "list": "CoreList"
+   },
+   {
+    "@type": "DecisionToAdd",
+    "guidelineDate": "1977-10-21",
+    "list": "CoreList"
+   }
+  ],
+  "therapeuticEquivalenceInClass": false,
+  "therapeuticEquivalenceInClassRestriction": null,
+  "therapeuticEquivalenceInClassRestrictionForEmlc": null
+ }
+}

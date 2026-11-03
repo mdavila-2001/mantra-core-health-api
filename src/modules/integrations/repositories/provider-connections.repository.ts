@@ -55,6 +55,47 @@ export class ProviderConnectionsRepository {
   }
 
   /**
+   * Conexión por id acotada al tenant: con `tenantId` sólo alcanza las del
+   * tenant (una ajena cuenta como inexistente); sin él (barrido interno de
+   * `SYSTEM`) no filtra.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de la conexión.
+   * @param tenantId - Tenant activo, o `undefined` para el barrido interno.
+   * @returns La conexión o `null`.
+   */
+  findByIdInScope(
+    em: EntityManager,
+    id: string,
+    tenantId: string | undefined,
+  ): Promise<ProviderConnections | null> {
+    return em.findOne(
+      ProviderConnections,
+      tenantId === undefined ? { id } : { id, tenantId },
+    );
+  }
+
+  /**
+   * Ids de las conexiones de un tenant: acota los listados de mensajes que
+   * descubren los jobs.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Tenant activo.
+   * @returns Los ids de sus conexiones.
+   */
+  async findIdsByTenant(
+    em: EntityManager,
+    tenantId: string,
+  ): Promise<string[]> {
+    const rows = await em.find(
+      ProviderConnections,
+      { tenantId },
+      { fields: ['id'] },
+    );
+    return rows.map((row) => row.id);
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.

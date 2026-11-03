@@ -26,7 +26,7 @@ cumplimiento, y quien opera no debería poder cambiar la vara con la que se le m
 `POST /tracking/webhooks/carriers/:carrierCode` es `@Public()`: el transportista es un tercero sin
 sesión en el sistema. Su identidad se acredita con el código de la ruta —que debe existir como
 transportista registrado— y, cuando el conector de integraciones lo aporte, con la firma del
-proveedor (ver *Pendiente* del módulo).
+proveedor (ver *Fuera de este módulo* en el README del módulo).
 
 Es también el único método del controlador que no recibe `@CurrentUser()`: no hay actor.
 
@@ -50,7 +50,7 @@ Los casos de uso escriben tres rutas con dos puntos (`/eta:recompute`, `/{id}:ca
 `/sla:scan`). Aquí se usan segmentos normales por el mismo motivo que en el resto del proyecto: el
 enrutador de Nest 11 interpreta `:` como inicio de parámetro en cualquier posición del segmento.
 
-## Pruebas
+## Tests
 
 `tracking.controller.spec.ts` con el servicio mockeado: delegación, argumentos (incluido el actor y
 los ids de ruta), el webhook sin actor y propagación de errores.

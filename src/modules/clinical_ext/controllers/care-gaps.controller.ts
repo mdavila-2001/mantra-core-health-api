@@ -9,7 +9,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { CareGapsService } from '../services';
 import {
   RecomputeCareGapsDto,
@@ -38,7 +43,13 @@ export class CareGapsController {
   constructor(private readonly careGapsService: CareGapsService) {}
 
   /** UC-18-09. */
+  @Audited({
+    action: 'CARE_GAPS_RECOMPUTED',
+    entity: 'care_gap',
+    entityId: 'result.id',
+  })
   @Post('care-gaps/recompute')
+  @Roles('CLINICIAN', 'PRACTITIONER')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Detectar y abrir brechas de cuidado (batch)' })
   recompute(
@@ -49,7 +60,13 @@ export class CareGapsController {
   }
 
   /** UC-18-10. */
+  @Audited({
+    action: 'CARE_GAP_CLOSED',
+    entity: 'care_gap',
+    entityId: 'param:id',
+  })
   @Patch('care-gaps/:id/close')
+  @Roles('CLINICIAN', 'PRACTITIONER')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Cerrar una brecha de cuidado por evento clínico' })
   close(
@@ -61,7 +78,13 @@ export class CareGapsController {
   }
 
   /** UC-18-11. */
+  @Audited({
+    action: 'IMMUNIZATION_PLAN_PROJECTED',
+    entity: 'patient_profile',
+    entityId: 'param:id',
+  })
   @Post('patients/:id/immunization-plan/project')
+  @Roles('CLINICIAN', 'PRACTITIONER')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Proyectar el plan de inmunización y abrir brechas',
@@ -75,6 +98,11 @@ export class CareGapsController {
   }
 
   /** Alta de dosis del calendario de inmunización (alimenta UC-18-11). */
+  @Audited({
+    action: 'IMMUNIZATION_SCHEDULE_CREATED',
+    entity: 'immunization_schedule',
+    entityId: 'result.id',
+  })
   @Post('immunization-schedules')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

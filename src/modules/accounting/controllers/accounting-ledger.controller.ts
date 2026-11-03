@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   ParseOptionalLimitPipe,
   Roles,
@@ -74,9 +75,10 @@ export class AccountingLedgerController {
   @ApiOperation({ summary: 'Plan de cuentas de una práctica' })
   chartOfAccounts(
     @Query('practiceId', ParseUUIDPipe) practiceId: string,
+    @CurrentUser() actor: AuthenticatedUser,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
   ): Promise<ChartOfAccountsResponseDto> {
-    return this.ledgerReadService.chartOfAccounts(practiceId, limit);
+    return this.ledgerReadService.chartOfAccounts(practiceId, actor, limit);
   }
 
   /** UC-16-06: balance de sumas y saldos. */
@@ -89,8 +91,9 @@ export class AccountingLedgerController {
   })
   trialBalance(
     @Query() query: TrialBalanceQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<TrialBalanceResponseDto> {
-    return this.ledgerReadService.trialBalance(query);
+    return this.ledgerReadService.trialBalance(query, actor);
   }
 
   /** UC-16-01·L: el libro diario. */
@@ -99,8 +102,9 @@ export class AccountingLedgerController {
   @ApiOperation({ summary: 'Libro diario de una práctica' })
   listJournal(
     @Query() query: ListJournalQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ListJournalResponseDto> {
-    return this.ledgerReadService.listJournal(query);
+    return this.ledgerReadService.listJournal(query, actor);
   }
 
   /**
@@ -159,11 +163,17 @@ export class AccountingLedgerController {
   @ApiOperation({ summary: 'Un asiento con sus líneas' })
   getJournalTransaction(
     @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<JournalTransactionDetailDto> {
-    return this.ledgerReadService.getJournalTransaction(id);
+    return this.ledgerReadService.getJournalTransaction(id, actor);
   }
 
   /** Soporte: alta de cuenta del plan contable. */
+  @Audited({
+    action: 'LEDGER_ACCOUNT_CREATED',
+    entity: 'account',
+    entityId: 'result.id',
+  })
   @Post('accounts')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -176,6 +186,11 @@ export class AccountingLedgerController {
   }
 
   /** UC-16-01. */
+  @Audited({
+    action: 'JOURNAL_POSTED',
+    entity: 'journal_transaction',
+    entityId: 'result.id',
+  })
   @Post('journal-transactions')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -193,6 +208,11 @@ export class AccountingLedgerController {
    * ALOVIDA C-17 — crea el asiento en estado DRAFT (sin postear). Punto de entrada
    * del flujo canónico DRAFT → AUTO_CLASSIFIED → PENDING_REVIEW → APPROVED → POSTED.
    */
+  @Audited({
+    action: 'JOURNAL_DRAFT_CREATED',
+    entity: 'journal_transaction',
+    entityId: 'result.id',
+  })
   @Post('journal-transactions/drafts')
   @Roles('SECURITY_ADMIN', 'PRACTITIONER')
   @HttpCode(HttpStatus.CREATED)
@@ -209,6 +229,11 @@ export class AccountingLedgerController {
   }
 
   /** ALOVIDA C-17 — DRAFT → AUTO_CLASSIFIED. */
+  @Audited({
+    action: 'JOURNAL_CLASSIFIED',
+    entity: 'journal_transaction',
+    entityId: 'param:id',
+  })
   @Post('journal-transactions/:id/classify')
   @Roles('SECURITY_ADMIN', 'PRACTITIONER')
   @HttpCode(HttpStatus.OK)
@@ -222,6 +247,11 @@ export class AccountingLedgerController {
   }
 
   /** ALOVIDA C-17 — AUTO_CLASSIFIED → PENDING_REVIEW. */
+  @Audited({
+    action: 'JOURNAL_REVIEW_SUBMITTED',
+    entity: 'journal_transaction',
+    entityId: 'param:id',
+  })
   @Post('journal-transactions/:id/submit-review')
   @Roles('SECURITY_ADMIN', 'PRACTITIONER')
   @HttpCode(HttpStatus.OK)
@@ -235,6 +265,11 @@ export class AccountingLedgerController {
   }
 
   /** ALOVIDA C-17 — PENDING_REVIEW → APPROVED (exige rol de aprobación). */
+  @Audited({
+    action: 'JOURNAL_APPROVED',
+    entity: 'journal_transaction',
+    entityId: 'param:id',
+  })
   @Post('journal-transactions/:id/approve')
   @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER')
   @HttpCode(HttpStatus.OK)
@@ -248,6 +283,11 @@ export class AccountingLedgerController {
   }
 
   /** ALOVIDA C-17 — APPROVED → POSTED (posteo efectivo en el mayor). */
+  @Audited({
+    action: 'JOURNAL_POSTED',
+    entity: 'journal_transaction',
+    entityId: 'param:id',
+  })
   @Post('journal-transactions/:id/post')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -263,6 +303,11 @@ export class AccountingLedgerController {
   }
 
   /** UC-16-02. */
+  @Audited({
+    action: 'POSTING_ACCOUNTS_DETERMINED',
+    entity: 'account_determination_rule',
+    entityId: 'result.id',
+  })
   @Post('postings/determine-accounts')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -276,6 +321,11 @@ export class AccountingLedgerController {
   }
 
   /** UC-16-03. */
+  @Audited({
+    action: 'JOURNAL_REVERSED',
+    entity: 'journal_transaction',
+    entityId: 'param:id',
+  })
   @Post('journal-transactions/:id/reverse')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -289,6 +339,11 @@ export class AccountingLedgerController {
   }
 
   /** UC-16-13. */
+  @Audited({
+    action: 'JOURNAL_FILE_ATTACHED',
+    entity: 'journal_transaction',
+    entityId: 'param:id',
+  })
   @Post('journal-transactions/:id/files')
   @Roles('SECURITY_ADMIN', 'PRACTITIONER')
   @HttpCode(HttpStatus.CREATED)

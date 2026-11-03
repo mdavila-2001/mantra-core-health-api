@@ -6,15 +6,15 @@ import type {
   ContactPointsRepository,
   IdentifiersRepository,
 } from '../../../common/repositories';
-import { composeAccountDisplayName } from '../../../profiles/person-name';
+import { composeAccountDisplayName } from '../../../profiles/domain/person-name';
 import { PROF } from '../../../profiles/profiles.concepts';
 import type {
   PatientProfilesRepository,
   PersonProfilesRepository,
   PersonsRepository,
   RelatedPersonsRepository,
-} from '../../../profiles/repositories';
-import { createGuardianRelatedPerson } from '../../../profiles/services/guardian-related-person';
+} from '../../../profiles/infrastructure/repositories';
+import { createGuardianRelatedPerson } from '../../../profiles/application/services/guardian-related-person';
 import type {
   WalkInPatientData,
   WalkInPatientResult,

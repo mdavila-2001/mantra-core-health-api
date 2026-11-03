@@ -1,0 +1,274 @@
+{
+  "files": {
+    "uberon/uberon-edit.obo": {
+      "url": "https://raw.githubusercontent.com/obophenotype/uberon/v2026-10-01/src/ontology/uberon-edit.obo",
+      "bytes": 12358690,
+      "sha256": "77a0bbaa472f9358a98bfd08d9127fd3bd845bc364bcb3cc4459fd5a6687d497",
+      "retrievedAt": "2026-10-24T00:47:19.190Z"
+    },
+    "cl/cl.obo": {
+      "url": "https://raw.githubusercontent.com/obophenotype/cell-ontology/v2026-06-08/cl.obo",
+      "bytes": 17353259,
+      "sha256": "7e19b4aef8e7fe7720b0c4474c6a5b8713c904ea9ab7b7d5d96f2cb28b8fc51f",
+      "retrievedAt": "2026-10-24T00:47:20.706Z"
+    },
+    "ehdaa2/ehdaa2.obo": {
+      "url": "https://raw.githubusercontent.com/obophenotype/human-developmental-anatomy-ontology/cebc2be955caf6fe347df8a7e844e8c64ad35c97/src/ontology/ehdaa2.obo",
+      "bytes": 933914,
+      "sha256": "544bde20316d27ebdc44397cdecec8b0958973e5999e21117ab13a6ab8866495",
+      "retrievedAt": "2026-10-24T00:47:21.287Z"
+    },
+    "hsapdv/hsapdv.obo": {
+      "url": "https://raw.githubusercontent.com/obophenotype/developmental-stage-ontologies/v2025-01-23/src/ontology/components/hsapdv.obo",
+      "bytes": 143585,
+      "sha256": "2fd1c669eb8c96a90ed67ae66603ac1322709832f4d0c23de8bb4a59e8741da9",
+      "retrievedAt": "2026-10-24T00:47:21.776Z"
+    },
+    "so/so.obo": {
+      "url": "https://raw.githubusercontent.com/The-Sequence-Ontology/SO-Ontologies/4340c143bac3578bba0c013d02e8c5f0e51ad14a/Ontology_Files/so.obo",
+      "bytes": 1058091,
+      "sha256": "22a8f3ec2b49125dbb6cee8456f0bca86dd8c98f433165ffa4b554da4f155204",
+      "retrievedAt": "2026-10-24T00:47:22.226Z"
+    },
+    "trans/trans.obo": {
+      "url": "https://raw.githubusercontent.com/DiseaseOntology/PathogenTransmissionOntology/v2026-03-13/src/ontology/trans.obo",
+      "bytes": 14505,
+      "sha256": "a8bb259d256e9711f8d628b53f15f5a09c333cf606362c520703383b51b94224",
+      "retrievedAt": "2026-10-24T00:47:22.839Z"
+    },
+    "apollo_sv/apollo_sv.obo": {
+      "url": "https://raw.githubusercontent.com/ApolloDev/apollo-sv/v2026-07-19/apollo_sv.obo",
+      "bytes": 1063442,
+      "sha256": "b5c7e2849633752572acdac2ae2ef7b858452692e7ab99285aceca03da3a516a",
+      "retrievedAt": "2026-10-24T00:47:23.387Z"
+    },
+    "stato/stato.obo": {
+      "url": "https://raw.githubusercontent.com/ISA-tools/stato/v2026-04-20/releases/2026-04-20/stato.obo",
+      "bytes": 1300340,
+      "sha256": "452565fbd6fba485f3bd81a972f481736029f36989eb59c0c3d4526317aee08e",
+      "retrievedAt": "2026-10-24T00:47:23.945Z"
+    },
+    "ecto/ecto-base.obo": {
+      "url": "https://raw.githubusercontent.com/EnvironmentOntology/environmental-exposure-ontology/v2026-07-28/ecto-base.obo",
+      "bytes": 1620370,
+      "sha256": "eeaa8440524a820331075e3711016285738c85961cdba8c83ba63ffd462bfbc7",
+      "retrievedAt": "2026-10-24T00:47:24.490Z"
+    },
+    "exo/exo.obo": {
+      "url": "https://raw.githubusercontent.com/CTDbase/exposure-ontology/v2025-08-29/exo.obo",
+      "bytes": 67331,
+      "sha256": "fe87d8b005a2ee33182a61618c485cb4b97e96b02a4daff2078f8fbdee8953e2",
+      "retrievedAt": "2026-10-24T00:47:24.850Z"
+    },
+    "go/go-edit.obo": {
+      "url": "https://raw.githubusercontent.com/geneontology/go-ontology/325856eea99660d02585bfb3d20d938c8d1b1371/src/ontology/go-edit.obo",
+      "bytes": 35432122,
+      "sha256": "9c7290aa9e1652e1bed952ec96bfbe85547f6739a8cd5099a62f0a8dadd6df8a",
+      "retrievedAt": "2026-10-24T00:47:27.508Z"
+    },
+    "pato/pato-base.obo": {
+      "url": "https://raw.githubusercontent.com/pato-ontology/pato/v2026-10-01/pato-base.obo",
+      "bytes": 786491,
+      "sha256": "97d736330bde5a69e7dd333bd737f0288a27e85453b25bdfef1c19fe0dd4e01a",
+      "retrievedAt": "2026-10-24T00:47:27.964Z"
+    },
+    "hgnc/hgnc_complete_set.json": {
+      "url": "https://storage.googleapis.com/public-download-files/hgnc/json/json/hgnc_complete_set.json",
+      "bytes": 33242047,
+      "sha256": "72bfe0c05800163c040a2cf663c70501f9ac9236469fbd0b552f2cd37a4d7f67",
+      "retrievedAt": "2026-10-24T00:47:30.802Z"
+    },
+    "abbreviations-metainventory/Metainventory_Version1.0.0.csv": {
+      "url": "https://raw.githubusercontent.com/lisavirginia/clinical-abbreviations/v1.0.2/metainventory/Metainventory_Version1.0.0.csv",
+      "bytes": 40035867,
+      "sha256": "35ebc2b7e40f43448ce47cb74f6195f32facb04a32bd42aeda33bed8280ba257",
+      "retrievedAt": "2026-10-24T00:47:34.054Z"
+    },
+    "ncbitaxon-medical/mondo-edit.obo": {
+      "url": "https://raw.githubusercontent.com/monarch-initiative/mondo/v2026-10-06/src/ontology/mondo-edit.obo",
+      "bytes": 46165069,
+      "sha256": "0c1db51e6d84b7a5e9999257022838d2b416030cacdc62386191a3db09442195",
+      "retrievedAt": "2026-10-24T00:47:37.099Z"
+    },
+    "ncbitaxon-medical/ncbitaxon_import.obo": {
+      "url": "https://raw.githubusercontent.com/monarch-initiative/mondo/v2026-10-06/imports/ncbitaxon_import.obo",
+      "bytes": 359627,
+      "sha256": "a970a8ee729bc2dd9e509a51531b80e387bc5c52e32ed4c096970a146ddb7dfb",
+      "retrievedAt": "2026-10-24T00:47:37.506Z"
+    },
+    "ncbitaxon-medical/doid-merged.json": {
+      "url": "https://raw.githubusercontent.com/DiseaseOntology/HumanDiseaseOntology/v2026-09-30/src/ontology/doid-merged.json",
+      "bytes": 24179774,
+      "sha256": "49570c8f38bf7d7af663012384011841ce80ddb2a6c3035d5ba35117131a0bc0",
+      "retrievedAt": "2026-10-24T00:47:38.912Z"
+    },
+    "aeo/aeo.obo": {
+      "url": "https://raw.githubusercontent.com/obophenotype/human-developmental-anatomy-ontology/cebc2be955caf6fe347df8a7e844e8c64ad35c97/src/ontology/aeo.obo",
+      "bytes": 73204,
+      "sha256": "2b2be65370ce2c5f29d1195155fdce5c08da1896acbcd60ab8d2f0323ee4e8e7",
+      "retrievedAt": "2026-10-24T00:55:15.120Z"
+    },
+    "caro/caro.obo": {
+      "url": "https://raw.githubusercontent.com/obophenotype/caro/v2023-03-15/caro.obo",
+      "bytes": 596405,
+      "sha256": "edb091304843d5932ff83fe958a1cd6790ed15dbc43053078193cfeb738a9563",
+      "retrievedAt": "2026-10-24T00:55:15.544Z"
+    },
+    "geno/geno-base.obo": {
+      "url": "https://raw.githubusercontent.com/monarch-initiative/GENO-ontology/v2026-02-02/geno-base.obo",
+      "bytes": 224429,
+      "sha256": "9b5f2a369d7c854cfa38664842b7a9b0be022ec46211f55536ad5b16dedb176f",
+      "retrievedAt": "2026-10-24T01:05:19.183Z"
+    },
+    "oba/oba.obo": {
+      "url": "https://raw.githubusercontent.com/obophenotype/bio-attribute-ontology/v2026-10-10/oba.obo",
+      "bytes": 37709017,
+      "sha256": "3a307dd85dde57235c4d54614abd29d0be1f505a7fd5a1725ee37da28ab8079c",
+      "retrievedAt": "2026-10-24T01:05:21.753Z"
+    },
+    "nbo/nbo-base.obo": {
+      "url": "https://raw.githubusercontent.com/obo-behavior/behavior-ontology/v2023-07-04/nbo-base.obo",
+      "bytes": 352666,
+      "sha256": "4fb9509b35f88d3823ca926b3f0bacf5f4bb0c167378447b84abab55d4c8b590",
+      "retrievedAt": "2026-10-24T01:05:22.109Z"
+    },
+    "envo/envo.obo": {
+      "url": "https://raw.githubusercontent.com/EnvironmentOntology/envo/v2026-10-23/envo.obo",
+      "bytes": 3015236,
+      "sha256": "3b10403c67f51eac849623bc96de757744a3bf29815b3341d0cd1a0f547f4932",
+      "retrievedAt": "2026-10-24T01:05:22.839Z"
+    },
+    "fma/fma.owl": {
+      "url": "https://bitbucket.org/uwsig/fma/raw/0e89b8ae8a647e5ee75d3119a20cb69abfbfc25f/fma.owl",
+      "bytes": 201448396,
+      "sha256": "3c2222348c9084b35ab3a4c27ab78b661adae17aa25cd349b3b74b22a763b9e4",
+      "retrievedAt": "2026-10-24T01:05:36.127Z"
+    },
+    "ogms/ogms-edit.owl": {
+      "url": "https://raw.githubusercontent.com/OGMS/ogms/1a8c3d5e5b1b052090890112de5faeec6b3b3599/src/ontology/ogms-edit.owl",
+      "bytes": 71723,
+      "sha256": "a34e058aa6336e3a32f336a4919ccb5a420450039fa8bb7e3550996c3de7f17a",
+      "retrievedAt": "2026-10-24T01:09:21.608Z"
+    },
+    "ido/ido.owl": {
+      "url": "https://raw.githubusercontent.com/infectious-disease-ontology/infectious-disease-ontology/3c365c38f9d72ab9d61094a3aa3ce912259cb0ba/ido.owl",
+      "bytes": 767134,
+      "sha256": "de5d35114bb65b7475551388e8a7899d202c4d69672bd9e39466605119fafb50",
+      "retrievedAt": "2026-10-24T01:09:22.096Z"
+    },
+    "omrse/omrse-edit.owl": {
+      "url": "https://raw.githubusercontent.com/mcwdsi/OMRSE/v2026-09-03/src/ontology/omrse-edit.owl",
+      "bytes": 349166,
+      "sha256": "a09d34536adb407d97a16da4652288ac4fbb5eaa774ea4ceef474db5dd4ae209",
+      "retrievedAt": "2026-10-24T01:09:22.410Z"
+    },
+    "bto/bto-base.obo": {
+      "url": "https://raw.githubusercontent.com/BRENDA-Enzymes/BTO/v2022-10-26/bto-base.obo",
+      "bytes": 2109317,
+      "sha256": "4592acc80e34a6177bdb84ca37cb235fa8cd79388a51682cebd45c2be8cff81e",
+      "retrievedAt": "2026-10-24T01:14:49.769Z"
+    },
+    "occo/occo.owl": {
+      "url": "https://raw.githubusercontent.com/Occupation-Ontology/OccO/v2025-10-06/occo.owl",
+      "bytes": 5465131,
+      "sha256": "97462cabc824526898e486c6d780d62ab13b81ec98d30d4f05df41178b2d9f37",
+      "retrievedAt": "2026-10-24T01:14:50.397Z"
+    },
+    "aro/aro.obo": {
+      "url": "https://raw.githubusercontent.com/arpcard/aro/f0f7f45053e52bb756e0077883eaa93ccfff2b75/src/ontology/aro.obo",
+      "bytes": 3318162,
+      "sha256": "d12ec5d36c55f371079c392492b034d115adb256f8d2ff4a84041c6202f4a1c4",
+      "retrievedAt": "2026-10-24T01:18:27.914Z"
+    },
+    "pbpko/pbpko-base.obo": {
+      "url": "https://raw.githubusercontent.com/InSilicoVida-Research-Lab/pbpko/v2026-07-15/pbpko-base.obo",
+      "bytes": 509079,
+      "sha256": "51dad1c239ea4e998d3edbf138a3fe38f8d524f411dcb593107ef69f9cfac3e3",
+      "retrievedAt": "2026-10-24T01:18:28.230Z"
+    },
+    "opl/opl.owl": {
+      "url": "https://raw.githubusercontent.com/OPL-ontology/OPL/v2023-08-28/opl.owl",
+      "bytes": 941059,
+      "sha256": "6291a89589f01196cb4848bf215450e7b83c2a6af4422102f239895fa41c9dee",
+      "retrievedAt": "2026-10-24T01:18:28.689Z"
+    },
+    "obcs/obcs.owl": {
+      "url": "https://raw.githubusercontent.com/obcs/obcs/v2023-12-08/obcs.owl",
+      "bytes": 1880209,
+      "sha256": "15c9fc46a03ed693f60c23cfcc73c1172967262c3b552c2c836c5b9273c1e008",
+      "retrievedAt": "2026-10-24T01:18:29.110Z"
+    },
+    "hancestro/hancestro-base.obo": {
+      "url": "https://raw.githubusercontent.com/EBISPOT/hancestro/v2025-10-14/hancestro-base.obo",
+      "bytes": 240082,
+      "sha256": "5ca91be8006e846146c842d1c13367e049057c4ad01b51434cec0841f07c0e8e",
+      "retrievedAt": "2026-10-24T01:18:29.426Z"
+    },
+    "hso/hso.owl": {
+      "url": "https://raw.githubusercontent.com/SVA-SE/HSO/2cb6a9badc1e5a33369ffcc28928d4ac99efc71e/hso.owl",
+      "bytes": 1360745,
+      "sha256": "759a191213d53226f35a9b0f76125d49bb2bdf5cfea534953215e5f476d8c7e6",
+      "retrievedAt": "2026-10-24T01:18:29.927Z"
+    },
+    "mf/MF.owl": {
+      "url": "https://raw.githubusercontent.com/jannahastings/mental-functioning-ontology/ba59d2c92dfa5c3190c8cba636687c1ef2fa06f2/ontology/MF.owl",
+      "bytes": 430780,
+      "sha256": "1c0166102ddfc57a5415b541b86a4894116e00a36f66d49fd2bafb647f67b587",
+      "retrievedAt": "2026-10-24T01:18:30.233Z"
+    },
+    "mfoem/MFOEM.owl": {
+      "url": "https://raw.githubusercontent.com/jannahastings/emotion-ontology/7f4bddd2dee96ef635880987315a1cf947b57ed8/ontology/MFOEM.owl",
+      "bytes": 640327,
+      "sha256": "b3b5f3a74be326350df3fffd24992dee9b990af3da0690a9d302cc1de2940894",
+      "retrievedAt": "2026-10-24T01:18:30.597Z"
+    },
+    "pw/pathway_v2026-05-16.obo": {
+      "url": "https://raw.githubusercontent.com/rat-genome-database/PW-Pathway-Ontology/5dfd607e558beb1a20f78001e6d388cf9466593b/pathway_v2026-05-16.obo",
+      "bytes": 1347139,
+      "sha256": "612231cd72e61149c76b1d4f872f4b567a10a1ac366c0c4abd20a191f3111318",
+      "retrievedAt": "2026-10-24T01:18:31.068Z"
+    },
+    "omp/omp.obo": {
+      "url": "https://raw.githubusercontent.com/microbialphenotypes/OMP-ontology/04c460f93961a3697cfc0d3995d351ff9c3b135f/omp.obo",
+      "bytes": 956565,
+      "sha256": "d31f1a993c392ef038278b1f3ed98689d32e0c7b67db8591a238e7a927997061",
+      "retrievedAt": "2026-10-24T01:20:00.885Z"
+    },
+    "ohpi/ohpi-base.obo": {
+      "url": "https://raw.githubusercontent.com/OHPI/ohpi/8f9169aa3766fa4e3a9bc4473d1f67aa38eafb60/ohpi-base.obo",
+      "bytes": 19155,
+      "sha256": "6ba16a917ccf426053a328422b7b4fd7955976254efc2e192f6fc80cf8cb0d6e",
+      "retrievedAt": "2026-10-24T01:20:01.231Z"
+    },
+    "ohmi/ohmi.owl": {
+      "url": "https://raw.githubusercontent.com/ohmi-ontology/ohmi/96cf9d5ef1795fbe009d90300f92b6ac958a48c3/ohmi.owl",
+      "bytes": 3113369,
+      "sha256": "f7c809d9dba32784fd22b8449418b82e2ac5dff7e89bdc67aacfb10df66c3706",
+      "retrievedAt": "2026-10-24T01:20:01.674Z"
+    },
+    "mod/PSI-MOD.obo": {
+      "url": "https://raw.githubusercontent.com/HUPO-PSI/psi-mod-CV/v1.039.0/PSI-MOD.obo",
+      "bytes": 1798361,
+      "sha256": "4f2be91dbbce1ca7fe68f2c72c2403323daeeeede58e8c0c4349e5b9d4281577",
+      "retrievedAt": "2026-10-24T01:20:02.169Z"
+    },
+    "rbo/rbo-base.obo": {
+      "url": "https://raw.githubusercontent.com/Radiobiology-Informatics-Consortium/RBO/131f012c756373a9cfd02d0a07b08d5dad7e6a58/rbo-base.obo",
+      "bytes": 52694,
+      "sha256": "fb3417841be1b74e7bd6e49cb287ad5872633b395eed6e4481a738a20db1cef3",
+      "retrievedAt": "2026-10-24T01:20:02.546Z"
+    },
+    "taxrank/taxrank.obo": {
+      "url": "https://raw.githubusercontent.com/phenoscape/taxrank/v2025-09-24/taxrank.obo",
+      "bytes": 15848,
+      "sha256": "8cf42bd61ac683366ddde5018a7900804b8c942636e61f0793de4a289788e7c0",
+      "retrievedAt": "2026-10-24T01:20:02.846Z"
+    },
+    "clo/clo.owl": {
+      "url": "https://raw.githubusercontent.com/CLO-Ontology/CLO/v2026-06-19/clo.owl",
+      "bytes": 37965858,
+      "sha256": "64b8167d3bdf789d902906053fcec29c0644d34e22378032fa0d2e03915d8920",
+      "retrievedAt": "2026-10-24T01:22:43.428Z"
+    }
+  }
+}

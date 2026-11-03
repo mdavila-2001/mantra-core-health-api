@@ -62,9 +62,15 @@ export class HealthPractitionerProfiles {
   @Property({ fieldName: 'photo_file_id', type: 'uuid', nullable: true }) // FK → common.files
   photoFileId?: string;
 
+  /**
+   * Identificador asociado a signature file.
+   */
   @Property({ fieldName: 'signature_file_id', type: 'uuid', nullable: true }) // FK → common.files (inferida)
   signatureFileId?: string;
 
+  /**
+   * Identificador asociado a seal file.
+   */
   @Property({ fieldName: 'seal_file_id', type: 'uuid', nullable: true }) // FK → common.files (inferida)
   sealFileId?: string;
 

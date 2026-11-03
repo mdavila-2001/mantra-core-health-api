@@ -31,13 +31,6 @@ export class ServiceRequests {
   encounterId?: string;
 
   /**
-   * P43: instancia (cerrada) del formulario médico de la que sale el registro.
-   * Nula cuando se emite desde la historia del paciente, sin formulario.
-   */
-  @Property({ fieldName: 'form_instance_id', type: 'uuid', nullable: true }) // FK → forms.form_instances
-  formInstanceId?: string;
-
-  /**
    * Identificador asociado a code concept.
    */
   @Property({ fieldName: 'code_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
@@ -80,6 +73,36 @@ export class ServiceRequests {
   performerTenantId?: string;
 
   /**
+   * Identificador asociado a performer selection concept.
+   */
+  @Property({
+    fieldName: 'performer_selection_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts
+  performerSelectionConceptId?: string;
+
+  /**
+   * Identificador asociado a performer practitioner profile.
+   */
+  @Property({
+    fieldName: 'performer_practitioner_profile_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → profiles.health_practitioner_profiles
+  performerPractitionerProfileId?: string;
+
+  /**
+   * Identificador asociado a suggested practice site.
+   */
+  @Property({
+    fieldName: 'suggested_practice_site_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → practice.practice_sites
+  suggestedPracticeSiteId?: string;
+
+  /**
    * El informe diagnóstico previo que satisface este pedido (antiduplicación,
    * v4.2.17). Presente cuando el motor de duplicidad encontró un informe
    * liberado o final del mismo estudio dentro de la ventana: `null` significa
@@ -105,6 +128,13 @@ export class ServiceRequests {
     nullable: true,
   })
   duplicateOverrideReason?: string;
+
+  /**
+   * P43: instancia (cerrada) del formulario médico de la que sale el registro.
+   * Nula cuando se emite desde la historia del paciente, sin formulario.
+   */
+  @Property({ fieldName: 'form_instance_id', type: 'uuid', nullable: true }) // FK → forms.form_instances (inferida)
+  formInstanceId?: string;
 
   /**
    * Fecha y hora en que se creó el registro.
@@ -135,4 +165,58 @@ export class ServiceRequests {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  /**
+   * Identificador asociado a suggested care space.
+   */
+  @Property({
+    fieldName: 'suggested_care_space_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK (destino no resuelto)
+  suggestedCareSpaceId?: string;
+
+  /**
+   * Identificador asociado a requisition.
+   */
+  @Property({ fieldName: 'requisition_id', type: 'uuid', nullable: true })
+  requisitionId?: string;
+
+  /**
+   * Identificador asociado a specimen type concept.
+   */
+  @Property({
+    fieldName: 'specimen_type_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  specimenTypeConceptId?: string;
+
+  /**
+   * Identificador asociado a modality concept.
+   */
+  @Property({ fieldName: 'modality_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts (inferida)
+  modalityConceptId?: string;
+
+  /**
+   * Identificador asociado a body site concept.
+   */
+  @Property({ fieldName: 'body_site_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts (inferida)
+  bodySiteConceptId?: string;
+
+  /**
+   * Identificador asociado a laterality concept.
+   */
+  @Property({
+    fieldName: 'laterality_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  lateralityConceptId?: string;
+
+  /**
+   * Identificador asociado a contrast concept.
+   */
+  @Property({ fieldName: 'contrast_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts (inferida)
+  contrastConceptId?: string;
 }

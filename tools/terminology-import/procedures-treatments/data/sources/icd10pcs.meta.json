@@ -1,0 +1,26 @@
+{
+  "source": "icd10pcs",
+  "name": "ICD-10-PCS FY2027 — tablas oficiales e índice (CMS)",
+  "publisher": "Centers for Medicare & Medicaid Services (CMS)",
+  "license": "Dominio público (obra del gobierno de EE. UU.)",
+  "licenseUrl": "https://www.cms.gov/medicare/coding-billing/icd-10-codes",
+  "homepage": "https://www.cms.gov/medicare/coding-billing/icd-10-codes",
+  "retrievedAt": "2026-10-24T16:37:52.357Z",
+  "lastModified": "Fri, 05 Jun 2026 17:08:03 GMT",
+  "files": {
+    "icd10pcs-tables-index-2027.zip": {
+      "url": "https://www.cms.gov/files/zip/2027-icd-10-pcs-code-tables-index.zip",
+      "fileUrl": "https://www.cms.gov/files/zip/2027-icd-10-pcs-code-tables-index.zip",
+      "lastModified": "Fri, 05 Jun 2026 17:06:10 GMT",
+      "sha256": "db77f8b948a612db66320724a515dd7bc350036805ff0ecfd58839bcbfb34c84",
+      "bytes": 8078885
+    },
+    "icd10pcs-order-2027.zip": {
+      "url": "https://www.cms.gov/files/zip/2027-icd-10-pcs-order-file-long-abbreviated-titles.zip",
+      "fileUrl": "https://www.cms.gov/files/zip/2027-icd-10-pcs-order-file-long-abbreviated-titles.zip",
+      "lastModified": "Fri, 05 Jun 2026 17:08:03 GMT",
+      "sha256": "c9064c5c66873ecc4cc9aab1b100be605f2db457fd458113076b5eb6ce246439",
+      "bytes": 1322280
+    }
+  }
+}

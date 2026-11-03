@@ -2,14 +2,14 @@
   "code": "OBST_TRABAJO_DE_PARTO",
   "name": "Trabajo de parto (guía de cuidados de la OMS)",
   "specialty": { "code": "OBSTETRICIA", "display": "Obstetricia" },
-  "version": 1,
+  "version": 2,
   "provenance": {
     "sourceTitle": "Guía de cuidados durante el trabajo de parto (WHO Labour Care Guide, 2020)",
     "organization": "Organización Mundial de la Salud (OMS)",
     "url": "https://www.who.int/publications/i/item/9789240017566",
     "license": "CC BY-NC-SA 3.0 IGO",
     "retrievedAt": "2026-10-02",
-    "note": "Variables de la Labour Care Guide de la OMS: bienestar materno y fetal y progreso del trabajo de parto."
+    "note": "Variables de la Labour Care Guide de la OMS: bienestar materno y fetal y progreso del trabajo de parto. Ampliación internacional (2026-10-24): los cinco ítems del puntaje de Bishop (con la estación corregida respecto del arquetipo) desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 3.0 o 4.0 según cada uno, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
   },
   "fields": [
     {
@@ -41,6 +41,61 @@
       "dataType": "string",
       "required": false,
       "options": ["5/5", "4/5", "3/5", "2/5", "1/5", "0/5"]
+    },
+    {
+      "section": "Evaluación: trabajo de parto",
+      "code": "bishop_dilatacion",
+      "name": "Bishop — dilatación",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Cerrado",
+        "1 — 1 a 2 cm",
+        "2 — 3 a 4 cm",
+        "3 — 5 cm o más"
+      ],
+      "description": "Para valorar la maduración cervical antes de una inducción; la suma va de 0 a 13. Fuente: puntaje de Bishop (Bishop EH. Obstet Gynecol. 1964;24:266-8), según el arquetipo openEHR openEHR-EHR-OBSERVATION.bishop_score.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: trabajo de parto",
+      "code": "bishop_borramiento",
+      "name": "Bishop — borramiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — 0 a 30 %",
+        "1 — 40 a 50 %",
+        "2 — 60 a 70 %",
+        "3 — 80 % o más"
+      ],
+      "description": "Fuente: puntaje de Bishop (Bishop EH. Obstet Gynecol. 1964;24:266-8), según el arquetipo openEHR openEHR-EHR-OBSERVATION.bishop_score.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: trabajo de parto",
+      "code": "bishop_estacion",
+      "name": "Bishop — altura de la presentación (estación)",
+      "dataType": "string",
+      "required": false,
+      "options": ["0 — −3", "1 — −2", "2 — −1 o 0", "3 — +1 o +2"],
+      "description": "Puntaje de la estación corregido respecto del arquetipo, que trae invertidos −3 y −2. Fuente: puntaje de Bishop (Bishop EH. Obstet Gynecol. 1964;24:266-8), según el arquetipo openEHR openEHR-EHR-OBSERVATION.bishop_score.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: trabajo de parto",
+      "code": "bishop_consistencia",
+      "name": "Bishop — consistencia del cuello",
+      "dataType": "string",
+      "required": false,
+      "options": ["0 — Firme", "1 — Intermedia", "2 — Blanda"],
+      "description": "Fuente: puntaje de Bishop (Bishop EH. Obstet Gynecol. 1964;24:266-8), según el arquetipo openEHR openEHR-EHR-OBSERVATION.bishop_score.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: trabajo de parto",
+      "code": "bishop_posicion",
+      "name": "Bishop — posición del cuello",
+      "dataType": "string",
+      "required": false,
+      "options": ["0 — Posterior", "1 — Media", "2 — Anterior"],
+      "description": "Fuente: puntaje de Bishop (Bishop EH. Obstet Gynecol. 1964;24:266-8), según el arquetipo openEHR openEHR-EHR-OBSERVATION.bishop_score.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Evaluación: trabajo de parto",

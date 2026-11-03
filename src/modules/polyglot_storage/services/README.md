@@ -34,7 +34,7 @@ Tres servicios. Cada método público es un caso de uso completo dentro de un ú
   *prohibido gana sobre permitido*: una lista de países permitidos puesta por descuido no debe
   habilitar un país explícitamente vetado. Y datos de paciente sin cifrado a nivel de campo se
   rechazan: el cifrado en reposo del disco no protege de quien tiene acceso al motor.
-- `defineAccessPolicy` (UC-54-07) — la expresión de filtro se guarda tal cual (ver *Pendiente* en el
+- `defineAccessPolicy` (UC-54-07) — la expresión de filtro se guarda tal cual (ver *Fuera de este módulo* en el
   README del módulo).
 - `bindTenantStorage` (UC-54-08) — el vínculo es lo que pasa la colocación de `APPROVED` a
   `ACTIVATED`. Aprobada significa "cumple el gobierno"; activada, "hay alguien escribiendo aquí".

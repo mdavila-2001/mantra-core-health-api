@@ -1,6 +1,11 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { PrivacyRestrictionsService } from '../services';
 import {
   CreatePrivacyRestrictionDto,
@@ -22,6 +27,11 @@ export class PrivacyRestrictionsController {
   ) {}
 
   /** UC-07-07. */
+  @Audited({
+    action: 'PRIVACY_RESTRICTION_APPLIED',
+    entity: 'privacy_restriction',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

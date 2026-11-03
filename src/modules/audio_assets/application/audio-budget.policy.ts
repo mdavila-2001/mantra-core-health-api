@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { loadAudioEnv } from '../audio.env';
 import type { AudioGenerationMode } from '../domain/audio.types';
-import { AudioAssetsRepository } from '../repositories/audio-assets.repository';
+import { AudioAssetsRepository } from '../infrastructure/repositories/audio-assets.repository';
 
 export type AudioBudgetDenialReason =
   | 'TTS_DISABLED'

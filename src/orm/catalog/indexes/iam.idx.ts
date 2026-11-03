@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `iam`.
- * 65 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 72 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const iamIndexes: readonly IndexTuple[] = [
@@ -12,13 +12,13 @@ export const iamIndexes: readonly IndexTuple[] = [
   ['account_lockouts', 'ix_account_lockouts_user_id', ['user_id'], false, 'btree'],
   ['account_lockouts', 'ix_account_lockouts_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['account_lockouts', 'ix_account_lockouts_locked_until', ['locked_until'], false, 'btree'],
+  ['api_key_scopes', 'ix_api_key_scopes_api_key_id', ['api_key_id'], false, 'btree'],
+  ['api_key_scopes', 'uk_api_key_scopes_key_scope', ['api_key_id', 'scope_concept_id', 'resource'], true, 'btree'],
   ['api_keys', 'uk_api_keys_key_prefix', ['key_prefix'], true, 'btree'],
   ['api_keys', 'ix_api_keys_tenant_id', ['tenant_id'], false, 'btree'],
   ['api_keys', 'ix_api_keys_owner_user_id', ['owner_user_id'], false, 'btree'],
   ['api_keys', 'ix_api_keys_service_principal_id', ['service_principal_id'], false, 'btree'],
   ['api_keys', 'ix_api_keys_status_concept_id', ['status_concept_id'], false, 'btree'],
-  ['api_key_scopes', 'ix_api_key_scopes_api_key_id', ['api_key_id'], false, 'btree'],
-  ['api_key_scopes', 'uk_api_key_scopes_key_scope', ['api_key_id', 'scope_concept_id', 'resource'], true, 'btree'],
   ['authentication_credentials', 'ix_authentication_credentials_user_id', ['user_id'], false, 'btree'],
   ['authentication_credentials', 'ix_authentication_credentials_method_concept_id', ['method_concept_id'], false, 'btree'],
   ['authentication_credentials', 'ix_authentication_credentials_hash_algorithm_concept_id', ['hash_algorithm_concept_id'], false, 'btree'],
@@ -52,6 +52,13 @@ export const iamIndexes: readonly IndexTuple[] = [
   ['security_events', 'ix_security_events_outcome_concept_id', ['outcome_concept_id'], false, 'btree'],
   ['security_events', 'ix_security_events_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
   ['security_events', 'brin_security_events_recorded_at', ['recorded_at'], false, 'brin'],
+  ['session_policies', 'ix_session_policies_tenant_id', ['tenant_id', 'status_concept_id'], false, 'btree'],
+  ['session_policies', 'ix_session_policies_scope_concept_id', ['scope_concept_id'], false, 'btree'],
+  ['session_policies', 'ix_session_policies_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['session_policies', 'uq_session_policies_active_tenant_scope', ['tenant_id', 'scope_concept_id'], true, 'btree', 'role_code IS NULL AND status_concept_id = \'38a1d301-f40d-5b17-a695-5e6d605f8b19\''],
+  ['session_policies', 'uq_session_policies_active_tenant_scope_role', ['tenant_id', 'scope_concept_id', 'role_code'], true, 'btree', 'role_code IS NOT NULL AND status_concept_id = \'38a1d301-f40d-5b17-a695-5e6d605f8b19\''],
+  ['session_policies', 'ix_session_policies_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['session_policies', 'ix_session_policies_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['sessions', 'uq_sessions_token_id', ['token_id'], true, 'btree'],
   ['sessions', 'ix_sessions_user_id', ['user_id'], false, 'btree'],
   ['sessions', 'ix_sessions_device_id', ['device_id'], false, 'btree'],
@@ -59,6 +66,11 @@ export const iamIndexes: readonly IndexTuple[] = [
   ['sessions', 'ix_sessions_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['sessions', 'ix_sessions_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['sessions', 'ix_sessions_user_state_expiry', ['user_id', 'state_concept_id', 'expires_at'], false, 'btree'],
+  ['user_global_roles', 'ix_user_global_roles_user_id', ['user_id'], false, 'btree'],
+  ['user_global_roles', 'ix_user_global_roles_role_concept_id', ['role_concept_id'], false, 'btree'],
+  ['user_global_roles', 'ix_user_global_roles_state_concept_id', ['state_concept_id'], false, 'btree'],
+  ['user_global_roles', 'ix_user_global_roles_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['user_global_roles', 'ix_user_global_roles_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['users', 'ix_users_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['users', 'ix_users_preferred_language_concept_id', ['preferred_language_concept_id'], false, 'btree'],
   ['users', 'ix_users_residence_country_concept_id', ['residence_country_concept_id'], false, 'btree'],
@@ -67,9 +79,4 @@ export const iamIndexes: readonly IndexTuple[] = [
   ['users', 'ix_users_legal_basis_concept_id', ['legal_basis_concept_id'], false, 'btree'],
   ['users', 'ix_users_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['users', 'ix_users_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
-  ['user_global_roles', 'ix_user_global_roles_user_id', ['user_id'], false, 'btree'],
-  ['user_global_roles', 'ix_user_global_roles_role_concept_id', ['role_concept_id'], false, 'btree'],
-  ['user_global_roles', 'ix_user_global_roles_state_concept_id', ['state_concept_id'], false, 'btree'],
-  ['user_global_roles', 'ix_user_global_roles_created_by_user_id', ['created_by_user_id'], false, 'btree'],
-  ['user_global_roles', 'ix_user_global_roles_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
 ];

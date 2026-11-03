@@ -1,3 +1,7 @@
+import { BookingStateTransitionHandler } from './booking-state-transition.handler';
+import type { BookingBillingPort } from '../ports/booking-billing.port';
+import type { BookingCompletedPort } from '../ports/booking-completed.port';
+import { createFakeBookingBilling } from './booking-billing.testing';
 import { AuditBookingHistoryAdapter } from '../../infrastructure/adapters/audit-booking-history.adapter';
 import { ClinicalAppointmentsAdapter } from '../../infrastructure/adapters/clinical-appointments.adapter';
 import { FormsOriginAdapter } from '../../infrastructure/adapters/forms-origin.adapter';
@@ -6,6 +10,7 @@ import { ProfilesPatientRepresentationAdapter } from '../../infrastructure/adapt
 import { SchedulingBookingsService } from './scheduling-bookings.service';
 import {
   BookingAccess,
+  BookingBillingBridge,
   BookingChangeNotifier,
   BookingItemAssembler,
   BookingMaterializer,
@@ -56,6 +61,10 @@ export interface BookingsServiceDoubles {
   representation: any;
   formOrigin: any;
   serviceAgenda: any;
+  /** Facturación; por omisión, una en memoria sin precios (FAC-01). */
+  billing?: BookingBillingPort;
+  /** Receptor del cierre de la atención; por omisión no hace nada. */
+  bookingCompleted?: BookingCompletedPort;
 }
 
 /**
@@ -89,13 +98,20 @@ export function createBookingsService(d: BookingsServiceDoubles) {
     d.em,
     d.noticeRepo,
     d.notices,
+    { announceAcceptance: async () => false },
     d.logger,
   );
   const serviceSlots = new ServiceSlotLifecycle(
     d.bookingsRepo,
     d.serviceAgenda,
+    d.catalogRepo,
   );
   const clinicalSync = new ClinicalAppointmentSync(clinical);
+  const billing = new BookingBillingBridge(
+    d.billing ?? createFakeBookingBilling(),
+    d.catalogRepo,
+    clinical,
+  );
   const slotPolicy = new SlotPolicyResolver(d.catalogRepo);
   const materializer = new BookingMaterializer(
     d.em,
@@ -130,6 +146,14 @@ export function createBookingsService(d: BookingsServiceDoubles) {
     d.logger,
   );
 
+  const startAppointment = new StartAppointmentUseCase(
+    d.em,
+    access,
+    transitions,
+    clinicalSync,
+    d.logger,
+  );
+
   return new SchedulingBookingsService(
     new PlaceHoldUseCase(d.em, d.bookingsRepo, slotPolicy, access, d.logger),
     new ConfirmBookingUseCase(materializer, d.logger),
@@ -159,22 +183,42 @@ export function createBookingsService(d: BookingsServiceDoubles) {
       notifier,
       d.logger,
     ),
-    cancelBooking,
-    new RejectBookingUseCase(cancelBooking, d.logger),
-    new SetPaymentStateUseCase(d.em, d.bookingsRepo, access, history, d.logger),
-    new GetPaymentStateUseCase(d.em, d.bookingsRepo, access),
-    new AcceptBookingUseCase(
+    new BookingStateTransitionHandler(
+      new AcceptBookingUseCase(
+        d.em,
+        d.bookingsRepo,
+        d.catalogRepo,
+        d.professionalTime,
+        access,
+        transitions,
+        clinicalSync,
+        displaced,
+        notifier,
+        d.logger,
+      ),
+      cancelBooking,
+      new RejectBookingUseCase(cancelBooking, d.logger),
+      startAppointment,
+      new CompleteAppointmentUseCase(
+        d.em,
+        access,
+        transitions,
+        serviceSlots,
+        clinicalSync,
+        d.bookingCompleted ?? { onBookingCompleted: async () => undefined },
+        d.logger,
+      ),
+      new CheckInBookingUseCase(d.em, d.bookingsRepo, transitions, d.logger),
+    ),
+    new SetPaymentStateUseCase(
       d.em,
       d.bookingsRepo,
-      d.catalogRepo,
-      d.professionalTime,
       access,
-      transitions,
-      clinicalSync,
-      displaced,
-      notifier,
+      history,
+      billing,
       d.logger,
     ),
+    new GetPaymentStateUseCase(d.em, d.bookingsRepo, access, billing),
     new RequestBookingInfoUseCase(d.em, access, transitions, d.logger),
     new ProposeScheduleUseCase(
       d.em,
@@ -184,22 +228,7 @@ export function createBookingsService(d: BookingsServiceDoubles) {
       transitions,
       d.logger,
     ),
-    new StartAppointmentUseCase(
-      d.em,
-      access,
-      transitions,
-      clinicalSync,
-      d.logger,
-    ),
-    new CompleteAppointmentUseCase(
-      d.em,
-      access,
-      transitions,
-      serviceSlots,
-      clinicalSync,
-      d.logger,
-    ),
-    new CheckInBookingUseCase(d.em, d.bookingsRepo, transitions, d.logger),
+    startAppointment,
     new SearchBookingsUseCase(
       d.em,
       d.bookingsRepo,
@@ -210,6 +239,7 @@ export function createBookingsService(d: BookingsServiceDoubles) {
       insurance,
       representation,
       assembler,
+      billing,
     ),
     new GetBookingUseCase(
       d.em,

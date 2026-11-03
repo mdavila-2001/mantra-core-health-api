@@ -1,11 +1,9 @@
--- SALUD v4.0.10 · módulo 17 · schema billing
+-- SALUD v4.2.83 · módulo 17 · schema billing
 -- Generado de diagram_17_billing.puml — NO editar a mano.
 
 
 -- FK sin destino canónico (no forzadas, temperatura-0):
 --   invoice_lines.service_id
---   reimbursements.claim_id
---   billing_document_links.claim_id
 
 
 -- destino: practice.practices (requiere schema practice)
@@ -54,6 +52,167 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN
     ALTER TABLE "billing"."service_catalog"
         ADD CONSTRAINT "fk_service_catalog_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: directory.tenants (requiere schema directory)
+DO $$ BEGIN
+    ALTER TABLE "billing"."space_tariffs"
+        ADD CONSTRAINT "fk_space_tariffs_tenant_id" FOREIGN KEY ("tenant_id")
+        REFERENCES "directory"."tenants" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: practice.practices (requiere schema practice)
+DO $$ BEGIN
+    ALTER TABLE "billing"."space_tariffs"
+        ADD CONSTRAINT "fk_space_tariffs_practice_id" FOREIGN KEY ("practice_id")
+        REFERENCES "practice"."practices" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "billing"."space_tariffs"
+        ADD CONSTRAINT "fk_space_tariffs_tariff_kind_concept_id" FOREIGN KEY ("tariff_kind_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "billing"."space_tariffs"
+        ADD CONSTRAINT "fk_space_tariffs_bed_category_concept_id" FOREIGN KEY ("bed_category_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: practice.care_spaces (requiere schema practice)
+DO $$ BEGIN
+    ALTER TABLE "billing"."space_tariffs"
+        ADD CONSTRAINT "fk_space_tariffs_care_space_id" FOREIGN KEY ("care_space_id")
+        REFERENCES "practice"."care_spaces" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- compuesta: billing.space_tariffs sólo apunta a billing.service_catalog del mismo practice_id
+DO $$ BEGIN
+    ALTER TABLE "billing"."space_tariffs"
+        ADD CONSTRAINT "fk_space_tariffs_service_catalog_id" FOREIGN KEY ("practice_id", "service_catalog_id")
+        REFERENCES "billing"."service_catalog" ("practice_id", "id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "billing"."space_tariffs"
+        ADD CONSTRAINT "fk_space_tariffs_currency_concept_id" FOREIGN KEY ("currency_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "billing"."space_tariffs"
+        ADD CONSTRAINT "fk_space_tariffs_status_concept_id" FOREIGN KEY ("status_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "billing"."space_tariffs"
+        ADD CONSTRAINT "fk_space_tariffs_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "billing"."space_tariffs"
+        ADD CONSTRAINT "fk_space_tariffs_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: directory.tenants (requiere schema directory)
+DO $$ BEGIN
+    ALTER TABLE "billing"."charge_captures"
+        ADD CONSTRAINT "fk_charge_captures_tenant_id" FOREIGN KEY ("tenant_id")
+        REFERENCES "directory"."tenants" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: practice.practices (requiere schema practice)
+DO $$ BEGIN
+    ALTER TABLE "billing"."charge_captures"
+        ADD CONSTRAINT "fk_charge_captures_practice_id" FOREIGN KEY ("practice_id")
+        REFERENCES "practice"."practices" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.patient_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "billing"."charge_captures"
+        ADD CONSTRAINT "fk_charge_captures_patient_profile_id" FOREIGN KEY ("patient_profile_id")
+        REFERENCES "profiles"."patient_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: clinical.encounters (requiere schema clinical)
+DO $$ BEGIN
+    ALTER TABLE "billing"."charge_captures"
+        ADD CONSTRAINT "fk_charge_captures_encounter_id" FOREIGN KEY ("encounter_id")
+        REFERENCES "clinical"."encounters" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "billing"."charge_captures"
+        ADD CONSTRAINT "fk_charge_captures_source_kind_concept_id" FOREIGN KEY ("source_kind_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: practice.care_spaces (requiere schema practice)
+DO $$ BEGIN
+    ALTER TABLE "billing"."charge_captures"
+        ADD CONSTRAINT "fk_charge_captures_care_space_id" FOREIGN KEY ("care_space_id")
+        REFERENCES "practice"."care_spaces" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "billing"."charge_captures"
+        ADD CONSTRAINT "fk_charge_captures_bed_category_concept_id" FOREIGN KEY ("bed_category_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- compuesta: billing.charge_captures sólo apunta a billing.service_catalog del mismo practice_id
+DO $$ BEGIN
+    ALTER TABLE "billing"."charge_captures"
+        ADD CONSTRAINT "fk_charge_captures_service_catalog_id" FOREIGN KEY ("practice_id", "service_catalog_id")
+        REFERENCES "billing"."service_catalog" ("practice_id", "id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "billing"."charge_captures"
+        ADD CONSTRAINT "fk_charge_captures_currency_concept_id" FOREIGN KEY ("currency_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: accounting.cost_centers (requiere schema accounting)
+DO $$ BEGIN
+    ALTER TABLE "billing"."charge_captures"
+        ADD CONSTRAINT "fk_charge_captures_cost_center_id" FOREIGN KEY ("cost_center_id")
+        REFERENCES "accounting"."cost_centers" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "billing"."charge_captures"
+        ADD CONSTRAINT "fk_charge_captures_status_concept_id" FOREIGN KEY ("status_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "billing"."charge_captures"
+        ADD CONSTRAINT "fk_charge_captures_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "billing"."charge_captures"
+        ADD CONSTRAINT "fk_charge_captures_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
         REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
@@ -139,6 +298,13 @@ DO $$ BEGIN
     ALTER TABLE "billing"."invoices"
         ADD CONSTRAINT "fk_invoices_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
         REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: insurance.insurance_claim_lines (requiere schema insurance)
+DO $$ BEGIN
+    ALTER TABLE "billing"."invoice_lines"
+        ADD CONSTRAINT "fk_invoice_lines_insurance_claim_line_id" FOREIGN KEY ("insurance_claim_line_id")
+        REFERENCES "insurance"."insurance_claim_lines" ("id") ON DELETE CASCADE;
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: accounting.accounts (requiere schema accounting)
@@ -512,6 +678,20 @@ DO $$ BEGIN
         REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: practice.practices (requiere schema practice)
+DO $$ BEGIN
+    ALTER TABLE "billing"."siat_simulated_invoices"
+        ADD CONSTRAINT "fk_siat_simulated_invoices_practice_id" FOREIGN KEY ("practice_id")
+        REFERENCES "practice"."practices" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: insurance.insurance_claims (requiere schema insurance)
+DO $$ BEGIN
+    ALTER TABLE "billing"."reimbursements"
+        ADD CONSTRAINT "fk_reimbursements_claim_id" FOREIGN KEY ("claim_id")
+        REFERENCES "insurance"."insurance_claims" ("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: accounting.journal_transactions (requiere schema accounting)
 DO $$ BEGIN
     ALTER TABLE "billing"."reimbursements"
@@ -783,6 +963,13 @@ DO $$ BEGIN
     ALTER TABLE "billing"."billing_document_links"
         ADD CONSTRAINT "fk_billing_document_links_purchase_order_id" FOREIGN KEY ("purchase_order_id")
         REFERENCES "erp"."purchase_orders" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: insurance.insurance_claims (requiere schema insurance)
+DO $$ BEGIN
+    ALTER TABLE "billing"."billing_document_links"
+        ADD CONSTRAINT "fk_billing_document_links_claim_id" FOREIGN KEY ("claim_id")
+        REFERENCES "insurance"."insurance_claims" ("id") ON DELETE CASCADE;
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: clinical.encounters (requiere schema clinical)

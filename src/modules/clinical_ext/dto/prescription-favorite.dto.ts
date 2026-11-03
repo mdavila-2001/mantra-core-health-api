@@ -45,9 +45,13 @@ export class CreatePrescriptionFavoriteDto {
   /**
    * Valor de dose text mantenido por la instancia.
    */
-  @ApiPropertyOptional({ description: 'Posología por defecto' })
+  @ApiPropertyOptional({
+    description: 'Posología por defecto',
+    maxLength: 500,
+  })
   @IsOptional()
   @IsString()
+  @MaxLength(500)
   doseText?: string;
 
   /**
@@ -64,9 +68,13 @@ export class CreatePrescriptionFavoriteDto {
   /**
    * Valor de frequency text mantenido por la instancia.
    */
-  @ApiPropertyOptional({ description: 'Frecuencia por defecto' })
+  @ApiPropertyOptional({
+    description: 'Frecuencia por defecto',
+    maxLength: 500,
+  })
   @IsOptional()
   @IsString()
+  @MaxLength(500)
   frequencyText?: string;
 
   /**
@@ -94,9 +102,11 @@ export class CreatePrescriptionFavoriteDto {
   @ApiPropertyOptional({
     description:
       'Indicaciones al paciente por defecto, separadas de la posología',
+    maxLength: 2000,
   })
   @IsOptional()
   @IsString()
+  @MaxLength(2000)
   patientInstructionsText?: string;
 }
 

@@ -11,6 +11,7 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { DIR } from '../../modules/directory/directory.concepts';
 import { ProviderAccountsSeedService } from './provider-accounts-seed.service';
 import { PROVIDER_ACCOUNTS } from './provider-accounts.catalog';
+import { SEED_ACTOR_ID } from './seed-actor';
 
 const INSURER = 'aseguradora.demo@alovida.test';
 const PHARMACY = 'farmacia.demo@alovida.test';
@@ -25,9 +26,9 @@ const PHARMACY = 'farmacia.demo@alovida.test';
 function build(memberships: Record<string, string> = {}) {
   const userId = (email: string) => `user:${email}`;
   const rows = new Map(
-    Object.entries(memberships).map(([email, rol]) => [
+    Object.entries(memberships).map(([email, role]) => [
       userId(email),
-      { userId: userId(email), tenantRoleConceptId: rol } as any,
+      { userId: userId(email), tenantRoleConceptId: role } as any,
     ]),
   );
   const created: { entity: string; data: any }[] = [];
@@ -53,9 +54,10 @@ function build(memberships: Record<string, string> = {}) {
   };
   const orm = { em: { fork: mockFn(() => em) } };
   const users = {
-    createUser: mockFn((input: any) =>
-      Promise.resolve({ id: userId(input.email) }),
-    ),
+    createUser: mockFn((input: any) => {
+      created.push({ entity: 'cuenta', data: { email: input.email } });
+      return Promise.resolve({ id: userId(input.email) });
+    }),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new ProviderAccountsSeedService(
@@ -68,17 +70,19 @@ function build(memberships: Record<string, string> = {}) {
     service,
     /** Rol de tenant con el que quedó (o se creó) la membresía de la cuenta. */
     rolDe: (email: string): string | undefined => {
-      const creada = created.find(
+      const createdAccount = created.find(
         (row) =>
           row.entity === 'TenantMemberships' &&
           row.data.userId === userId(email),
       );
       return (
-        creada?.data.tenantRoleConceptId ??
+        createdAccount?.data.tenantRoleConceptId ??
         rows.get(userId(email))?.tenantRoleConceptId
       );
     },
     row: (email: string) => rows.get(userId(email)),
+    /** Lo escrito, en orden: el actor semilla tiene que ir antes. */
+    created,
   };
 }
 
@@ -90,25 +94,40 @@ describe('ProviderAccountsSeedService · rol en la organización', () => {
   });
 
   it('una base nueva crea la membresía con el rol que declara el catálogo', async () => {
-    const { service, rolDe } = build();
+    const { service, rolDe: roleOf } = build();
 
     await service.run('demo-password', 'development');
 
-    expect(rolDe(INSURER)).toBe(DIR.ROLE_ADMIN);
-    expect(rolDe(PHARMACY)).toBe(DIR.ROLE_STAFF);
+    expect(roleOf(INSURER)).toBe(DIR.ROLE_ADMIN);
+    expect(roleOf(PHARMACY)).toBe(DIR.ROLE_STAFF);
+  });
+
+  it('en una base nueva materializa el actor semilla antes de la primera cuenta (api#1230)', async () => {
+    const { service, created } = build();
+
+    await service.run('demo-password', 'development');
+
+    expect(created[0]).toMatchObject({
+      entity: 'Users',
+      data: { id: SEED_ACTOR_ID },
+    });
+    expect(created.filter((c) => c.entity === 'Users')).toHaveLength(1);
+    expect(created.filter((c) => c.entity === 'cuenta')).toHaveLength(
+      PROVIDER_ACCOUNTS.length,
+    );
   });
 
   it('una base ya sembrada sube a la aseguradora de STAFF a ADMIN', async () => {
     const todasStaff = Object.fromEntries(
       PROVIDER_ACCOUNTS.map((c) => [c.email, DIR.ROLE_STAFF]),
     );
-    const { service, row: fila } = build(todasStaff);
+    const { service, row: row } = build(todasStaff);
 
     await service.run('demo-password', 'development');
 
-    expect(fila(INSURER).tenantRoleConceptId).toBe(DIR.ROLE_ADMIN);
-    expect(fila(INSURER).updatedAt).toBeInstanceOf(Date);
-    expect(fila(PHARMACY).tenantRoleConceptId).toBe(DIR.ROLE_STAFF);
-    expect(fila(PHARMACY).updatedAt).toBeUndefined();
+    expect(row(INSURER).tenantRoleConceptId).toBe(DIR.ROLE_ADMIN);
+    expect(row(INSURER).updatedAt).toBeInstanceOf(Date);
+    expect(row(PHARMACY).tenantRoleConceptId).toBe(DIR.ROLE_STAFF);
+    expect(row(PHARMACY).updatedAt).toBeUndefined();
   });
 });

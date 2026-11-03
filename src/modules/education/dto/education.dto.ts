@@ -568,9 +568,14 @@ export class EnrollLearnerDto {
   /**
    * Identificador asociado a learner ref.
    */
-  @ApiProperty({ format: 'uuid' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Aprendiz que se inscribe. Un LEARNER no lo declara: se deriva de su sesión y uno ajeno responde 403 (LEARNER_ENROLLMENT_OWNER_REQUIRED). Un administrador debe indicarlo',
+  })
+  @IsOptional()
   @IsUUID()
-  learnerRefId!: string;
+  learnerRefId?: string;
 
   /**
    * Valor de source mantenido por la instancia.

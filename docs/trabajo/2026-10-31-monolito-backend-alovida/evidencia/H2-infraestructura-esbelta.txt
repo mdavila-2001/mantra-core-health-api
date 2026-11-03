@@ -1,0 +1,20 @@
+=== EVIDENCIA H2.S1.M1 & H2.S1.M2 ===
+Fecha: 2026-10-31 12:36 UTC-4
+1. Verificación Compose Monolítico:
+Comando: docker compose -f c:\Alovida\mantra-core-health-api\docker-compose.monolith.yml config
+Resultado: Sintaxis y validación de esquema exitosas (exit code 0).
+Servicios definidos (4):
+- postgres: postgis/postgis:16-3.4-alpine (límite 512 MB, healthcheck pg_isready)
+- redis: redis:7-alpine (límite 256 MB, healthcheck redis-cli ping)
+- minio: minio/minio:RELEASE.2024-10-13T13-34-11Z (límite 256 MB, healthcheck curl live)
+- api: NestJS Monolith Runtime (límite 1536 MB, healthcheck /health)
+Consumo máximo RAM stack: < 2.5 GB (frente a los 8+ GB del stack previo).
+Peso del compose: ~4 KB (frente a los 217 KB que rompían Coolify por MAX_ARG_STRLEN).
+
+2. Verificación Postura de Seguridad:
+Comando: Select-String -Path c:\Alovida\mantra-core-health-api\.env.monolith.example -Pattern "RLS_ENFORCE=true"
+Resultado:
+mantra-core-health-api\.env.monolith.example:25:RLS_ENFORCE=true
+Separación establecida:
+- DB_USER: alovida_admin (propietario DDL / migraciones)
+- DB_APP_USER: alovida_app (aplicación DML sin bypassrls)

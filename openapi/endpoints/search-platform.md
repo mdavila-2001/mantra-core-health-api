@@ -115,6 +115,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<SearchResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<SearchResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<SearchResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SearchResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SearchResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -265,6 +266,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IndexDocumentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IndexDocumentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IndexDocumentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IndexDocumentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IndexDocumentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -382,6 +384,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<DeleteDocumentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DeleteDocumentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DeleteDocumentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DeleteDocumentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DeleteDocumentResponseDto`. Ejemplo completo derivado de ese DTO:
 

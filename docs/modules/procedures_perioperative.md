@@ -3,13 +3,13 @@
   Fuente real: src/modules/procedures_perioperative/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `procedures_perioperative`
 
 **Fuente:** [`src/modules/procedures_perioperative/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/procedures_perioperative/README.md)
-· 2 controllers · 4 services · 5 repositories · 37 entidades · 2 DTO
+· 2 controllers · 5 services · 5 repositories · 37 entidades · 2 DTO
 
 ---
 
@@ -28,7 +28,7 @@ implantes e insumos, reporte operatorio firmado, recuperación, cancelación y c
   find src/modules/procedures_perioperative -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **2 controllers, 32 rutas HTTP, 37 entidades y 4 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **2 controllers, 32 rutas HTTP, 37 entidades y 4 servicios**. La columna _Acceso_ sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
@@ -36,21 +36,23 @@ Importa (`AuditModule`, `MessagingModule`, `ClinicalModule`).
 
 Entidades (`tableName`, 37 de 37 archivos `*.entity.ts`): `anesthesia_airway_assessments`, `anesthesia_events`, `anesthesia_plans`, `implant_identifiers`, `instrument_sets`, `operating_room_utilization_events`, `operative_findings`, `operative_reports`, `operative_steps`, `pacu_assessments`, `pacu_stays`, `postoperative_followups`, `postoperative_orders`, `preoperative_assessments`, `preoperative_orders`, `preoperative_risk_scores`, `procedure_body_sites`, `procedure_cancellations`, `procedure_case_diagnoses`, `procedure_case_locations`, `procedure_case_milestones`, `procedure_case_status_history`, `procedure_case_team_members`, `procedure_cases`, `procedure_charge_items`, `procedure_complications`, `procedure_devices`, `procedure_implants`, `procedure_medication_uses`, `procedure_outcomes`, `procedure_performers`, `procedure_specimens`, `sterility_verification_checks`, `sterilization_loads`, `surgical_safety_checklists`, `surgical_safety_items`, `surgical_safety_responses`.
 
-| Método y ruta | Acceso | Controller |
-| --- | --- | --- |
-| `GET /dental-procedures/catalog` | CLINICIAN, PRACTITIONER | `dental` |
-| `GET /dental-procedures` | CLINICIAN, PRACTITIONER | `dental` |
-| `POST /dental-procedures` | CLINICIAN, PRACTITIONER | `dental` |
-| `GET /procedure-cases` | SURGEON,
+| Método y ruta                    | Acceso                  | Controller |
+| -------------------------------- | ----------------------- | ---------- |
+| `GET /dental-procedures/catalog` | CLINICIAN, PRACTITIONER | `dental`   |
+| `GET /dental-procedures`         | CLINICIAN, PRACTITIONER | `dental`   |
+| `POST /dental-procedures`        | CLINICIAN, PRACTITIONER | `dental`   |
+| `GET /procedure-cases`           | SURGEON,                |
+
     ANESTHESIOLOGIST,
     PERIOP_NURSE,
     SURGERY_SCHEDULER,
     PERIOP_ADMIN, | `periop` |
+
 | `GET /procedure-cases/:id` | SURGEON,
-    ANESTHESIOLOGIST,
-    PERIOP_NURSE,
-    SURGERY_SCHEDULER,
-    PERIOP_ADMIN, | `periop` |
+ANESTHESIOLOGIST,
+PERIOP_NURSE,
+SURGERY_SCHEDULER,
+PERIOP_ADMIN, | `periop` |
 | `POST /procedure-cases` | SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN | `periop` |
 | `PATCH /procedure-cases/:id` | SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN | `periop` |
 | `POST /procedure-cases/:id/confirm` | SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN | `periop` |
@@ -59,20 +61,20 @@ Entidades (`tableName`, 37 de 37 archivos `*.entity.ts`): `anesthesia_airway_ass
 | `POST /procedure-cases/:id/preoperative-assessments` | ANESTHESIOLOGIST, SURGEON, PERIOP_ADMIN | `periop` |
 | `POST /procedure-cases/:id/preoperative-orders` | ANESTHESIOLOGIST, SURGEON, PERIOP_ADMIN | `periop` |
 | `GET /procedure-cases/:id/team-members` | SURGEON,
-    ANESTHESIOLOGIST,
-    PERIOP_NURSE,
-    SURGERY_SCHEDULER,
-    PERIOP_ADMIN, | `periop` |
+ANESTHESIOLOGIST,
+PERIOP_NURSE,
+SURGERY_SCHEDULER,
+PERIOP_ADMIN, | `periop` |
 | `POST /procedure-cases/:id/team-members/:memberId/accept` | SURGEON,
-    ANESTHESIOLOGIST,
-    PERIOP_NURSE,
-    SURGERY_SCHEDULER,
-    PERIOP_ADMIN, | `periop` |
+ANESTHESIOLOGIST,
+PERIOP_NURSE,
+SURGERY_SCHEDULER,
+PERIOP_ADMIN, | `periop` |
 | `POST /procedure-cases/:id/team-members/:memberId/respond` | SURGEON,
-    ANESTHESIOLOGIST,
-    PERIOP_NURSE,
-    SURGERY_SCHEDULER,
-    PERIOP_ADMIN, | `periop` |
+ANESTHESIOLOGIST,
+PERIOP_NURSE,
+SURGERY_SCHEDULER,
+PERIOP_ADMIN, | `periop` |
 | `POST /procedure-cases/:id/preoperative-orders/verify` | ANESTHESIOLOGIST, PERIOP_NURSE, PERIOP_ADMIN | `periop` |
 | `POST /procedure-cases/:id/safety-checklists/:checklistId/responses` | PERIOP_NURSE, SURGEON, ANESTHESIOLOGIST, PERIOP_ADMIN | `periop` |
 | `POST /procedure-cases/:id/anesthesia-plans` | ANESTHESIOLOGIST, PERIOP_ADMIN | `periop` |
@@ -93,22 +95,22 @@ Entidades (`tableName`, 37 de 37 archivos `*.entity.ts`): `anesthesia_airway_ass
 
 ## Casos de uso cubiertos (14)
 
-| UC | Endpoint | Descripción |
-| --- | --- | --- |
-| UC-53-01 | `POST /procedure-cases` | Programar caso y reservar quirófano |
-| UC-53-02 | `POST /procedure-cases/:id/diagnoses` · `.../team-members` | Diagnósticos y equipo |
-| UC-53-03 | `POST /procedure-cases/:id/preoperative-assessments` | Valoración y riesgo |
-| UC-53-04 | `POST /procedure-cases/:id/preoperative-orders/verify` | Clearance de órdenes |
-| UC-53-05 | `POST /procedure-cases/:id/safety-checklists/:cid/responses` | Checklist por fases |
-| UC-53-06 | `POST /procedure-cases/:id/anesthesia-plans` · `.../:planId/approve` | Plan de anestesia |
-| UC-53-07 | `POST /procedure-cases/:id/anesthesia-events` | Eventos intraoperatorios |
-| UC-53-08 | `POST /procedure-cases/:id/operative-steps` · `.../findings` | Pasos y hallazgos |
-| UC-53-09 | `POST /procedure-cases/:id/implants` | Implantes con UDI, lote y serie |
-| UC-53-10 | `POST /procedure-cases/:id/medication-uses` · `.../specimens` | Insumos y muestras |
-| UC-53-11 | `POST /procedure-cases/:id/operative-reports` · `.../:rid/sign` | Reporte operatorio |
-| UC-53-12 | `POST /procedure-cases/:id/pacu-stays` · `/pacu-stays/:id/assessments` · `.../discharge` | Recuperación |
-| UC-53-13 | `POST /procedure-cases/:id/cancel` | Cancelar y liberar quirófano |
-| UC-53-14 | `POST /procedure-cases/:id/charge-items/post` | Cargos y utilización |
+| UC       | Endpoint                                                                                 | Descripción                         |
+| -------- | ---------------------------------------------------------------------------------------- | ----------------------------------- |
+| UC-53-01 | `POST /procedure-cases`                                                                  | Programar caso y reservar quirófano |
+| UC-53-02 | `POST /procedure-cases/:id/diagnoses` · `.../team-members`                               | Diagnósticos y equipo               |
+| UC-53-03 | `POST /procedure-cases/:id/preoperative-assessments`                                     | Valoración y riesgo                 |
+| UC-53-04 | `POST /procedure-cases/:id/preoperative-orders/verify`                                   | Clearance de órdenes                |
+| UC-53-05 | `POST /procedure-cases/:id/safety-checklists/:cid/responses`                             | Checklist por fases                 |
+| UC-53-06 | `POST /procedure-cases/:id/anesthesia-plans` · `.../:planId/approve`                     | Plan de anestesia                   |
+| UC-53-07 | `POST /procedure-cases/:id/anesthesia-events`                                            | Eventos intraoperatorios            |
+| UC-53-08 | `POST /procedure-cases/:id/operative-steps` · `.../findings`                             | Pasos y hallazgos                   |
+| UC-53-09 | `POST /procedure-cases/:id/implants`                                                     | Implantes con UDI, lote y serie     |
+| UC-53-10 | `POST /procedure-cases/:id/medication-uses` · `.../specimens`                            | Insumos y muestras                  |
+| UC-53-11 | `POST /procedure-cases/:id/operative-reports` · `.../:rid/sign`                          | Reporte operatorio                  |
+| UC-53-12 | `POST /procedure-cases/:id/pacu-stays` · `/pacu-stays/:id/assessments` · `.../discharge` | Recuperación                        |
+| UC-53-13 | `POST /procedure-cases/:id/cancel`                                                       | Cancelar y liberar quirófano        |
+| UC-53-14 | `POST /procedure-cases/:id/charge-items/post`                                            | Cargos y utilización                |
 
 ## Entidades
 
@@ -125,7 +127,7 @@ Se escriben 26 tablas de `procedures_perioperative.*`: `procedure_cases`,
 
 `surgical_safety_items` se lee (catálogo de ítems del checklist). `instrument_sets`,
 `sterilization_loads`, `sterility_verification_checks`, `procedure_outcomes` y
-`procedure_performers` no se tocan (ver *Pendiente*).
+`procedure_performers` no se tocan (ver _Fuera de este módulo_).
 
 ## Flujo general
 
@@ -163,6 +165,20 @@ facturar (sólo completed) ──> cargos + duración real y desviación frente 
 - **La valoración exige revisar alergias y medicación**: es lo que más veces está detrás de un
   incidente en quirófano. Las puntuaciones de riesgo son **inmutables**, con su modelo y versión,
   para que años después se sepa con qué se decidió.
+- **Una aceptación vale para lo que se aceptó** (DOC-MOD-005, DOC-DOC-010). Cambiar la fecha o el
+  paciente (`PATCH /procedure-cases/:id`), sumar un integrante o darle otro rol a quien ya estaba
+  (`POST .../team-members`) o registrar la valoración preoperatoria, que es donde constan los
+  riesgos identificados (`POST .../preoperative-assessments`), devuelve a `TEAM_ASSIGNED` a cada
+  integrante que había aceptado y borra su `accepted_at`; el caso listo para operar vuelve a
+  `CASE_SCHEDULED` con el motivo en la historia y el equipo recibe
+  `periop.case.reacceptance_required` por el outbox, con los campos cambiados
+  (`scheduledStartAt`, `scheduledEndAt`, `patientProfileId`, `teamComposition`, `teamRole`,
+  `identifiedRisks`). Las rutas de equipo y valoración sólo actúan antes de la ejecución y sólo si
+  había algo aceptado o el caso estaba listo: armar el equipo de un caso nuevo no avisa a nadie. La
+  regla vive en `PeriopReacceptanceService`. El módulo no guarda qué versión del caso aceptó cada
+  integrante: ese dato es del modelo (`mantra-core-health-model#57`). El procedimiento y la sala
+  no cambian después de programar el caso porque ningún endpoint los modifica; la documentación
+  que altera responsabilidades es de `chart`.
 - **Sólo un paciente apto alcanza el hito de clearance**; declarar despejado a uno que no lo está
   sería lo contrario de lo que el hito significa.
 - **El caso pasa a listo cuando no queda ninguna orden pendiente**: operar con una pendiente es el
@@ -255,31 +271,29 @@ El módulo era de **sólo escritura**: no tenía ni un `@Get`, así que un caso
 creado sólo era accesible por el uuid que devolvía su propio POST y ningún
 integrante podía consultar aquello en lo que participaba. Se añadieron tres:
 
-| Endpoint | Para qué |
-| --- | --- |
-| `GET /procedure-cases` | Agenda quirúrgica, acotada al tenant del contexto y filtrable por paciente, quirófano, cirujano, estado y ventana temporal. |
-| `GET /procedure-cases/:id` | Detalle agregado: cabecera, diagnósticos, equipo, hitos, órdenes preoperatorias, valoración, plan anestésico e informes. Va en una sola respuesta para que la pantalla no encadene ocho llamadas ni muestre un caso a medias si una falla. |
-| `GET /procedure-cases/:id/team-members` | Equipo con el estado de cada integrante; sin ella el cirujano principal —dado de alta dentro del POST del caso— no podía aceptar su participación. |
+| Endpoint                                | Para qué                                                                                                                                                                                                                                   |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `GET /procedure-cases`                  | Agenda quirúrgica, acotada al tenant del contexto y filtrable por paciente, quirófano, cirujano, estado y ventana temporal.                                                                                                                |
+| `GET /procedure-cases/:id`              | Detalle agregado: cabecera, diagnósticos, equipo, hitos, órdenes preoperatorias, valoración, plan anestésico e informes. Va en una sola respuesta para que la pantalla no encadene ocho llamadas ni muestre un caso a medias si una falla. |
+| `GET /procedure-cases/:id/team-members` | Equipo con el estado de cada integrante; sin ella el cirujano principal —dado de alta dentro del POST del caso— no podía aceptar su participación.                                                                                         |
 
 El quirófano que exige `POST /procedure-cases` se resuelve con las lecturas de
 `practice` (`GET /practices` → `/practices/:id/sites` → `/sites/:id/care-spaces`).
 
 ## Pruebas
 
-`corepack yarn test src/modules/procedures_perioperative --runInBand --silent` — 6 suites y 149 pruebas aprobadas durante la revisión (dos advertencias JSON preexistentes). El detalle por UUID debe recibir el mismo alcance de tenant que la agenda; ver [auditoría backend](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/procedures_perioperative.md).
+`corepack yarn test src/modules/procedures_perioperative --runInBand --silent` — 6 suites y 149 pruebas aprobadas durante la revisión (dos advertencias JSON preexistentes). El detalle por UUID no aplica el alcance de tenant que sí aplica la agenda.
 
-## Pendiente
+## Fuera de este módulo
 
 - **Esterilización**: `instrument_sets`, `sterilization_loads` y `sterility_verification_checks`
   pertenecen al circuito de central de esterilización, que el caso de uso no cubre en este módulo.
-- **Resultados a largo plazo**: `procedure_outcomes` se poblará desde el seguimiento clínico, no
-  desde el acto quirúrgico.
+- **Resultados a largo plazo**: `procedure_outcomes` no lo escribe el acto quirúrgico; sale del
+  seguimiento clínico.
 - **`procedure_performers`**: el modelo distingue el equipo del **caso** (que sí se registra) del
-  ejecutante del **procedimiento** codificado; lo segundo se poblará al consolidar el procedimiento
-  en la historia clínica.
-- **Conciliación de cargos**: `billing_claim_line_id` e `invoice_line_id` quedan sin poblar; los
-  fija facturación al consolidar, igual que el `journal_transaction_id` de ERP.
+  ejecutante del **procedimiento** codificado; lo segundo corresponde a la consolidación del
+  procedimiento en la historia clínica.
+- **Conciliación de cargos**: `billing_claim_line_id` e `invoice_line_id` los fija facturación al
+  consolidar, igual que el `journal_transaction_id` de ERP.
 - **Cronómetro del quirófano**: los eventos de utilización se registran, pero el cálculo agregado de
   ocupación y recambio por sala vive en reportes.
-- **Outbox**: `CaseScheduled`, `TimeOutCompleted`, `ImplantRecorded`, `OperativeReportSigned`,
-  `CaseCancelled` se emitirán cuando exista el módulo 35.

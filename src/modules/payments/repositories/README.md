@@ -46,7 +46,7 @@ Consultas por PK o por columna indexada (clave natural/FK). No hay N+1: los serv
 colecciones piden una sola lista (`findSplitsByIntent`, `findRefundsByTransaction`) y agregan en
 memoria.
 
-## Pruebas
+## Tests
 
 Se ejercitan indirectamente desde los specs de servicio, donde van mockeados. No hay specs de
 repositorio aislados: sin base real solo se estaría verificando el doble de MikroORM, no la consulta.

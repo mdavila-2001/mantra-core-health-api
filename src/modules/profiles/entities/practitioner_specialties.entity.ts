@@ -73,6 +73,16 @@ export class PractitionerSpecialties {
   verificationStatusConceptId!: string;
 
   /**
+   * Cuándo se verificó la especialidad.
+   */
+  @Property({
+    fieldName: 'verified_at',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  verifiedAt?: Date;
+
+  /**
    * Valor de valid from mantenido por la instancia.
    */
   @Property({ fieldName: 'valid_from', columnType: 'date', nullable: true })

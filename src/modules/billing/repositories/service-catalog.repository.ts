@@ -75,6 +75,18 @@ export interface SearchServiceCatalogFilters {
   afterCode?: string;
 }
 
+/** Filtros del listado administrativo, que cruza prácticas de una organización. */
+export interface SearchAdminServiceCatalogFilters {
+  /** Prácticas alcanzables por el actor (ya acotadas a su organización). */
+  practiceIds: readonly string[];
+  /** Texto libre sobre código o nombre. */
+  query?: string;
+  /** Sólo activos (`true`) o sólo inactivos (`false`). */
+  isActive?: boolean;
+  /** Última fila de la página anterior: el orden es `(code, id)`. */
+  after?: { code: string; id: string };
+}
+
 /** Acceso a datos de `billing.service_catalog`. */
 @Injectable()
 export class ServiceCatalogRepository {
@@ -87,6 +99,21 @@ export class ServiceCatalogRepository {
    */
   findById(em: EntityManager, id: string): Promise<ServiceCatalog | null> {
     return em.findOne(ServiceCatalog, { id });
+  }
+
+  /**
+   * Los ítems de un lote, para armar listas sin una consulta por fila.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ids - Ítems pedidos; con la lista vacía no consulta.
+   * @returns Los ítems que existen.
+   */
+  findByIds(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<ServiceCatalog[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(ServiceCatalog, { id: { $in: [...ids] } });
   }
 
   /**
@@ -103,6 +130,32 @@ export class ServiceCatalogRepository {
     code: string,
   ): Promise<ServiceCatalog | null> {
     return em.findOne(ServiceCatalog, { practiceId, code });
+  }
+
+  /**
+   * Cuáles de esos códigos ya existen en el catálogo de la práctica.
+   *
+   * Es la misma clave que `findByCode` (práctica + código), pero para un lote:
+   * la importación del arancel necesita saber cuáles saltar sin hacer una
+   * consulta por código.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practiceId - Práctica dueña del catálogo.
+   * @param codes - Códigos candidatos.
+   * @returns El subconjunto de `codes` que ya está dado de alta.
+   */
+  async findExistingCodes(
+    em: EntityManager,
+    practiceId: string,
+    codes: readonly string[],
+  ): Promise<Set<string>> {
+    if (codes.length === 0) return new Set();
+    const rows = await em.find(
+      ServiceCatalog,
+      { practiceId, code: { $in: [...codes] } },
+      { fields: ['code'] },
+    );
+    return new Set(rows.map((row) => row.code));
   }
 
   /**
@@ -138,6 +191,52 @@ export class ServiceCatalogRepository {
       orderBy: { code: 'ASC' },
       limit,
     });
+  }
+
+  /**
+   * Página del listado administrativo, ordenada de forma determinista por
+   * `(code, id)`: el código sólo es único dentro de una práctica, así que el
+   * desempate por `id` evita saltarse o repetir filas entre páginas.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param filters - Filtros ya acotados a la organización del actor.
+   * @param limit - Tope de filas a devolver.
+   * @returns Página de servicios que casan con el filtro.
+   */
+  searchAdminPage(
+    em: EntityManager,
+    filters: SearchAdminServiceCatalogFilters,
+    limit: number,
+  ): Promise<ServiceCatalog[]> {
+    if (filters.practiceIds.length === 0) return Promise.resolve([]);
+    const and: Record<string, unknown>[] = [
+      { practiceId: { $in: [...filters.practiceIds] } },
+    ];
+    if (filters.isActive !== undefined) {
+      and.push({ isActive: filters.isActive });
+    }
+    if (filters.query) {
+      const pattern = `%${filters.query}%`;
+      and.push({
+        $or: [{ code: { $ilike: pattern } }, { name: { $ilike: pattern } }],
+      });
+    }
+    if (filters.after) {
+      and.push({
+        $or: [
+          { code: { $gt: filters.after.code } },
+          { code: filters.after.code, id: { $gt: filters.after.id } },
+        ],
+      });
+    }
+    return em.find(
+      ServiceCatalog,
+      { $and: and },
+      {
+        orderBy: { code: 'ASC', id: 'ASC' },
+        limit,
+      },
+    );
   }
 
   /**

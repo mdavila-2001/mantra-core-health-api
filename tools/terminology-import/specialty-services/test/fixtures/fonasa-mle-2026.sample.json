@@ -1,0 +1,152 @@
+[
+ {
+  "code": "0101201",
+  "name": "CONSULTA MÉDICA DE ESPECIALIDAD EN DERMATOLOGÍA",
+  "level1_total": 17070,
+  "level1_copay": 6830,
+  "level2_total": 22190,
+  "level2_copay": 11950,
+  "level3_total": 27310,
+  "level3_copay": 17070
+ },
+ {
+  "code": "0101209",
+  "name": "CONSULTA MÉDICA DE ESPECIALIDAD EN NEUROLOGÍA ADULTOS",
+  "level1_total": 17070,
+  "level1_copay": 6830,
+  "level2_total": 22190,
+  "level2_copay": 11950,
+  "level3_total": 27310,
+  "level3_copay": 17070
+ },
+ {
+  "code": "0101212",
+  "name": "CONSULTA MÉDICA DE ESPECIALIDAD EN PSIQUIATRÍA ADULTOS (1RA CONSULTA)",
+  "level1_total": 29180,
+  "level1_copay": 11670,
+  "level2_total": 37930,
+  "level2_copay": 20420,
+  "level3_total": 46690,
+  "level3_copay": 29180
+ },
+ {
+  "code": "0101321",
+  "name": "CONSULTA MÉDICA DE ESPECIALIDAD EN ENFERMEDADES RESPIRATORIAS ADULTO",
+  "level1_total": 19220,
+  "level1_copay": 7690,
+  "level2_total": 0,
+  "level2_copay": 0,
+  "level3_total": 0,
+  "level3_copay": 0
+ },
+ {
+  "code": "0101322",
+  "name": "CONSULTA MÉDICA DE ESPECIALIDAD EN ENFERMEDADES RESPIRATORIAS PEDIÁTRICAS",
+  "level1_total": 19220,
+  "level1_copay": 7690,
+  "level2_total": 0,
+  "level2_copay": 0,
+  "level3_total": 0,
+  "level3_copay": 0
+ },
+ {
+  "code": "0101006",
+  "name": "ASISTENCIA DE CARDIÓLOGO A CIRUGÍAS NO CARDÍACAS",
+  "level1_total": 24960,
+  "level1_copay": 12480,
+  "level2_total": 32450,
+  "level2_copay": 19970,
+  "level3_total": 39940,
+  "level3_copay": 27460
+ },
+ {
+  "code": "0301002",
+  "name": "ACIDO FÓLICO O FOLATOS",
+  "level1_total": 5140,
+  "level1_copay": 2570,
+  "level2_total": 6680,
+  "level2_copay": 4110,
+  "level3_total": 8220,
+  "level3_copay": 5650
+ },
+ {
+  "code": "0501105",
+  "name": "SPECT DE PERFUSIÓN MIOCÁRDICA ESTRÉS Y REPOSO (NO INCLUYE HONORARIOS MÉDICO CARDIÓLOGO)",
+  "level1_total": 184730,
+  "level1_copay": 92360,
+  "level2_total": 240150,
+  "level2_copay": 147780,
+  "level3_total": 295570,
+  "level3_copay": 203200
+ },
+ {
+  "code": "0601105",
+  "name": "ATENCIÓN KINESIOLÓGICA INTEGRAL AMBULATORIA",
+  "level1_total": 7120,
+  "level1_copay": 3560,
+  "level2_total": 9260,
+  "level2_copay": 5700,
+  "level3_total": 11390,
+  "level3_copay": 7830
+ },
+ {
+  "code": "0602001",
+  "name": "ATENCIÓN INTEGRAL DE TERAPIA OCUPACIONAL",
+  "level1_total": 6300,
+  "level1_copay": 3150,
+  "level2_total": 8190,
+  "level2_copay": 5040,
+  "level3_total": 10080,
+  "level3_copay": 6930
+ },
+ {
+  "code": "0902001",
+  "name": "CONSULTA PSICÓLOGO CLÍNICO (SESIONES 45')",
+  "level1_total": 13110,
+  "level1_copay": 6550,
+  "level2_total": 17040,
+  "level2_copay": 10480,
+  "level3_total": 20980,
+  "level3_copay": 14420
+ },
+ {
+  "code": "1201001",
+  "name": "& CAMPIMETRÍA DE PROYECCIÓN, UNILATERAL (PROC.AUT.)",
+  "level1_total": 7560,
+  "level1_copay": 3780,
+  "level2_total": 9830,
+  "level2_copay": 6050,
+  "level3_total": 12100,
+  "level3_copay": 8320
+ },
+ {
+  "code": "1701001",
+  "name": "E.C.G. DE REPOSO (INCLUYE MÍNIMO 12 DERIVACIONES Y 4 COMPLEJOS POR DERIVACIÓN)",
+  "level1_total": 7620,
+  "level1_copay": 3810,
+  "level2_total": 9910,
+  "level2_copay": 6100,
+  "level3_total": 12190,
+  "level3_copay": 8380
+ },
+ {
+  "code": "2004010",
+  "name": "HONORARIO MATRONA POR LA ATENCIÓN EN PREPARTO (DESDE INGRESO A CENTRO ASISTENCIAL POR TRABAJO DE PARTO, YA SEA INICIAL O ACTIVO, HASTA EL PERIODO EXPULSIVO)",
+  "level1_total": 23650,
+  "level1_copay": 5910,
+  "level2_total": 30750,
+  "level2_copay": 13010,
+  "level3_total": 37840,
+  "level3_copay": 20100
+ },
+ {
+  "code": "2503007",
+  "name": "ATENCIÓN ODONTOLÓGICA INTEGRAL DEL PACIENTE ONCOLÓGICO",
+  "level1_total": 341960,
+  "level1_copay": 170980,
+  "level2_total": 0,
+  "level2_copay": 0,
+  "level3_total": 0,
+  "level3_copay": 0
+ }
+]

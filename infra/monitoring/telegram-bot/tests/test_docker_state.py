@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 
 from bot.docker_state import fetch_container_states, parse_inspect
+from bot.http_json import HttpError
 
 
 def inspect(**state_overrides):
@@ -60,6 +61,28 @@ def test_fetch_inspects_every_listed_container():
     states = fetch_container_states("http://proxy", getter)
     assert len(states) == 2
     assert calls == ["/containers/json?all=1", "/containers/a/json", "/containers/b/json"]
+
+
+def test_a_container_that_vanishes_mid_scan_is_skipped_not_fatal():
+    def getter(path):
+        if path.startswith("/containers/json"):
+            return [{"Id": "a"}, {"Id": "gone"}, {"Id": "b"}]
+        if path == "/containers/gone/json":
+            raise HttpError("GET falló: HTTPError")
+        return inspect()
+
+    assert len(fetch_container_states("http://proxy", getter)) == 2
+
+
+def test_a_failing_listing_still_raises():
+    def getter(path):
+        raise HttpError("GET falló: TimeoutError")
+
+    try:
+        fetch_container_states("http://proxy", getter)
+    except HttpError:
+        return
+    raise AssertionError("si Docker no responde al listado, tiene que fallar")
 
 
 def test_a_stopped_container_is_never_unhealthy_even_with_old_health():

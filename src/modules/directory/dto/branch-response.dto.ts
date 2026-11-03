@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 /** Respuesta pública de una branch (UC-04-04). */
 export class BranchResponseDto {
@@ -40,4 +40,26 @@ export class BranchResponseDto {
    */
   @ApiProperty({ type: String, format: 'date-time' })
   createdAt!: Date;
+
+  /** Mismo valor que `status`: la forma del listado, que el front reutiliza. */
+  @ApiProperty({ format: 'uuid' })
+  statusConceptId!: string;
+
+  @ApiPropertyOptional({ format: 'uuid' })
+  branchTypeConceptId?: string;
+
+  @ApiPropertyOptional()
+  timeZone?: string;
+
+  @ApiPropertyOptional()
+  description?: string;
+
+  @ApiPropertyOptional()
+  locationUrl?: string;
+
+  @ApiPropertyOptional()
+  latitude?: number;
+
+  @ApiPropertyOptional()
+  longitude?: number;
 }

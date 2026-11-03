@@ -228,10 +228,10 @@ describe('PersistenceSessionFactory', () => {
     it('NO se desvía si lectura y escritura son el mismo pool', async () => {
       // Sin réplica no hay a dónde ir: reintentar allí duplicaría el fallo y el
       // tiempo de respuesta sin ninguna posibilidad de éxito.
-      const compartida = connection('primary', 'mismo', 'write');
+      const shared = connection('primary', 'mismo', 'write');
       const d = build('fallback-to-primary', {
-        read: compartida,
-        write: compartida,
+        read: shared,
+        write: shared,
       });
 
       await expect(

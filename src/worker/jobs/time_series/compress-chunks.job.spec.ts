@@ -4,6 +4,8 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { CompressChunksJob } from './compress-chunks.job';
 
+const PLATFORM_TENANT = '22222222-2222-4222-8222-222222222222';
+
 function build(env: any = {}) {
   const api = { get: mockFn(), post: mockFn(), workerId: mockFn() };
   const logger = {
@@ -12,7 +14,11 @@ function build(env: any = {}) {
     warn: mockFn(),
     error: mockFn(),
   };
-  const workerEnv = { tsCompressionOlderThan: '7 days', ...env };
+  const workerEnv = {
+    tsCompressionOlderThan: '7 days',
+    tsAdminTenantId: PLATFORM_TENANT,
+    ...env,
+  };
   const job = new CompressChunksJob(api as any, logger as any, workerEnv);
   return { job, api, logger, workerEnv };
 }
@@ -32,7 +38,7 @@ describe('CompressChunksJob', () => {
       table: 'device_raw_reading_series',
       olderThan: '7 days',
       batchId: expect.any(String),
-      tenantId: expect.any(String),
+      tenantId: PLATFORM_TENANT,
     });
     // 12 tablas declaran segmentación de compresión.
     expect(d.api.post).toHaveBeenCalledTimes(12);

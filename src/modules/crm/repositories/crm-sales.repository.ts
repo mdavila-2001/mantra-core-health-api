@@ -8,6 +8,7 @@ import {
   Opportunities,
   OpportunityStageHistory,
   PipelineStages,
+  Pipelines,
   Contacts,
   ContactChannelEndpoints,
 } from '../entities';
@@ -216,10 +217,15 @@ export class CrmSalesRepository {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param id - Identificador de id.
+   * @param tenantId - Tenant activo: una cuenta de otro tenant no se encuentra.
    * @returns Resultado de find account by id conforme al contrato `Promise<CrmAccounts | null>`.
    */
-  findAccountById(em: EntityManager, id: string): Promise<CrmAccounts | null> {
-    return em.findOne(CrmAccounts, { id });
+  findAccountById(
+    em: EntityManager,
+    id: string,
+    tenantId: string,
+  ): Promise<CrmAccounts | null> {
+    return em.findOne(CrmAccounts, { id, tenantId });
   }
 
   /**
@@ -323,10 +329,15 @@ export class CrmSalesRepository {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param id - Identificador de id.
+   * @param tenantId - Tenant activo: un contacto de otro tenant no se encuentra.
    * @returns Resultado de find contact by id conforme al contrato `Promise<Contacts | null>`.
    */
-  findContactById(em: EntityManager, id: string): Promise<Contacts | null> {
-    return em.findOne(Contacts, { id });
+  findContactById(
+    em: EntityManager,
+    id: string,
+    tenantId: string,
+  ): Promise<Contacts | null> {
+    return em.findOne(Contacts, { id, tenantId });
   }
 
   /**
@@ -379,10 +390,19 @@ export class CrmSalesRepository {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param id - Identificador de id.
+   * @param tenantId - Tenant activo: un lead de otro tenant no se encuentra.
    * @returns Resultado de find lead by id for update conforme al contrato `Promise<Leads | null>`.
    */
-  findLeadByIdForUpdate(em: EntityManager, id: string): Promise<Leads | null> {
-    return em.findOne(Leads, { id }, { lockMode: LockMode.PESSIMISTIC_WRITE });
+  findLeadByIdForUpdate(
+    em: EntityManager,
+    id: string,
+    tenantId: string,
+  ): Promise<Leads | null> {
+    return em.findOne(
+      Leads,
+      { id, tenantId },
+      { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
   }
 
   /**
@@ -420,28 +440,77 @@ export class CrmSalesRepository {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param id - Identificador de id.
+   * @param tenantId - Tenant activo: una oportunidad de otro tenant no se encuentra.
    * @returns Resultado de find opportunity by id for update conforme al contrato `Promise<Opportunities | null>`.
    */
   findOpportunityByIdForUpdate(
     em: EntityManager,
     id: string,
+    tenantId: string,
   ): Promise<Opportunities | null> {
     return em.findOne(
       Opportunities,
-      { id },
+      { id, tenantId },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
+  }
+
+  /**
+   * Oportunidad del tenant, sin bloqueo (resolución de referencias).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de la oportunidad.
+   * @param tenantId - Tenant activo.
+   * @returns La oportunidad, o `null` si no existe o es de otro tenant.
+   */
+  findOpportunityById(
+    em: EntityManager,
+    id: string,
+    tenantId: string,
+  ): Promise<Opportunities | null> {
+    return em.findOne(Opportunities, { id, tenantId });
+  }
+
+  /**
+   * Pipeline del tenant.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador del pipeline.
+   * @param tenantId - Tenant activo.
+   * @returns El pipeline, o `null` si no existe o es de otro tenant.
+   */
+  findPipelineById(
+    em: EntityManager,
+    id: string,
+    tenantId: string,
+  ): Promise<Pipelines | null> {
+    return em.findOne(Pipelines, { id, tenantId });
   }
 
   /**
    * Obtiene find stage by id.
    *
    * @param em - Contexto de persistencia o transacción activa.
-   * @param id - Identificador de id.
-   * @returns Resultado de find stage by id conforme al contrato `Promise<PipelineStages | null>`.
+   * La etapa no lleva `tenant_id`: pertenece al tenant de su pipeline. Una
+   * etapa cuyo pipeline es de otro tenant no se encuentra.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de la etapa.
+   * @param tenantId - Tenant activo.
+   * @returns La etapa, o `null` si no existe o es de un pipeline ajeno.
    */
-  findStageById(em: EntityManager, id: string): Promise<PipelineStages | null> {
-    return em.findOne(PipelineStages, { id });
+  async findStageById(
+    em: EntityManager,
+    id: string,
+    tenantId: string,
+  ): Promise<PipelineStages | null> {
+    const stage = await em.findOne(PipelineStages, { id });
+    if (!stage) return null;
+    const pipeline = await em.findOne(Pipelines, {
+      id: stage.pipelineId,
+      tenantId,
+    });
+    return pipeline ? stage : null;
   }
 
   /** Registro append-only del movimiento de etapa (auditoría del pipeline). */

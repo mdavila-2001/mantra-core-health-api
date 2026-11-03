@@ -31,6 +31,21 @@ const TIMESERIES_TABLES = [
 ] as const;
 
 /**
+ * Las 6 series del módulo 70 `observability` que declaran hypertable (nota
+ * HYPERTABLE POLICY del modelo): [tabla, columna de tiempo]. Todas llevan esa
+ * columna en la clave primaria. Sin TimescaleDB se omiten y las series siguen
+ * siendo tablas normales (`requiresExtension`).
+ */
+const OBSERVABILITY_HYPERTABLES = [
+  ['error_events', 'occurred_at'],
+  ['http_request_minute_series', 'time'],
+  ['sql_statement_minute_series', 'time'],
+  ['worker_tick_minute_series', 'time'],
+  ['slow_request_samples', 'time'],
+  ['dependency_probe_runs', 'time'],
+] as const;
+
+/**
  * Conversión a hypertable.
  *
  * `migrate_data => TRUE` permite convertir una tabla que ya tiene filas (el caso
@@ -55,6 +70,21 @@ const hypertables: PhysicalStatementSpec[] = TIMESERIES_TABLES.map((table) => ({
   preconditionReason: `time_series.${table} ya es hypertable`,
   preconditionSeverity: 'info' as const,
 }));
+
+const observabilityHypertables: PhysicalStatementSpec[] =
+  OBSERVABILITY_HYPERTABLES.map(([table, timeColumn]) => ({
+    id: `hypertable:observability.${table}`,
+    description: `Particiona observability.${table} por ${timeColumn}, chunk de 1 día (TimescaleDB)`,
+    requiresExtension: 'timescaledb',
+    sql: `SELECT create_hypertable('observability.${table}', '${timeColumn}', chunk_time_interval => INTERVAL '1 day', if_not_exists => TRUE, migrate_data => TRUE)`,
+    precondition: `SELECT NOT EXISTS (
+                   SELECT 1 FROM timescaledb_information.hypertables
+                    WHERE hypertable_schema = 'observability'
+                      AND hypertable_name = '${table}'
+                 ) AS ok`,
+    preconditionReason: `observability.${table} ya es hypertable`,
+    preconditionSeverity: 'info' as const,
+  }));
 
 /**
  * Índices de similitud vectorial.
@@ -99,5 +129,6 @@ const vectorIndexes: PhysicalStatementSpec[] = [
 
 export const physicalCatalog: readonly PhysicalStatementSpec[] = [
   ...hypertables,
+  ...observabilityHypertables,
   ...vectorIndexes,
 ];

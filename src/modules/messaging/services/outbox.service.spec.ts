@@ -15,6 +15,7 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
 } from '../../../common';
+import { MessagingErrorReason } from '../messaging.error-reasons';
 
 const actor = { id: 'user-1', roles: ['SYSTEM'] };
 const EVENT = '11111111-1111-1111-1111-111111111111';
@@ -294,6 +295,83 @@ describe('OutboxService', () => {
       });
     });
 
+    it('creates one delivery per subscription when two are active and enqueues both jobs', async () => {
+      const d = build();
+      const SECOND = '55555555-5555-5555-5555-555555555555';
+      wire(d, [
+        subscription({
+          deliveryModeConceptId: CONCEPTS.MSG_DELIVERY_MODE_QUEUE,
+          targetQueue: 'billing-events',
+        }),
+        subscription({
+          id: SECOND,
+          subscriberCode: 'analytics',
+          deliveryModeConceptId: CONCEPTS.MSG_DELIVERY_MODE_QUEUE,
+          targetQueue: 'billing-events',
+        }),
+      ]);
+      d.queuesRepo.findQueueByCode.mockResolvedValue({
+        id: QUEUE,
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
+      });
+      d.outboxRepo.createEventDelivery
+        .mockReturnValueOnce({ id: 'delivery-1' })
+        .mockReturnValueOnce({ id: 'delivery-2' });
+      d.queuesRepo.createJob
+        .mockReturnValueOnce({ id: 'job-1' })
+        .mockReturnValueOnce({ id: 'job-2' });
+
+      const res = await d.service.dispatchEvent(EVENT, {}, actor);
+
+      expect(res.matched).toBe(2);
+      expect(res.deliveries.map((x) => x.subscriptionId)).toEqual([
+        SUBSCRIPTION,
+        SECOND,
+      ]);
+      expect(res.deliveries.map((x) => x.jobId)).toEqual(['job-1', 'job-2']);
+      expect(d.outboxRepo.createEventDelivery).toHaveBeenCalledTimes(2);
+      const dedupeKeys = d.queuesRepo.createJob.mock.calls.map(
+        (call: any[]) => call[1].dedupeKey,
+      );
+      expect(new Set(dedupeKeys).size).toBe(2);
+    });
+
+    it('a missing queue for one subscription does not stop the others', async () => {
+      const d = build();
+      const SECOND = '55555555-5555-5555-5555-555555555555';
+      wire(d, [
+        subscription({
+          deliveryModeConceptId: CONCEPTS.MSG_DELIVERY_MODE_QUEUE,
+          targetQueue: 'does-not-exist',
+        }),
+        subscription({ id: SECOND, subscriberCode: 'analytics' }),
+      ]);
+      d.queuesRepo.findQueueByCode.mockResolvedValue(null);
+      d.outboxRepo.createEventDelivery
+        .mockReturnValueOnce({ id: 'delivery-1' })
+        .mockReturnValueOnce({ id: 'delivery-2' });
+
+      const res = await d.service.dispatchEvent(EVENT, {}, actor);
+
+      expect(res.matched).toBe(2);
+      expect(res.deliveries[0].jobId).toBeUndefined();
+      expect(d.logger.warn).toHaveBeenCalled();
+      expect(d.outboxRepo.createEventDelivery).toHaveBeenCalledTimes(2);
+    });
+
+    it('locks the event row so concurrent dispatches of the same event serialize', async () => {
+      const d = build();
+      wire(d, [subscription()]);
+
+      await d.service.dispatchEvent(EVENT, {}, actor);
+
+      expect(d.outboxRepo.findDomainEventById).toHaveBeenCalledWith(
+        d.tx,
+        EVENT,
+        { forUpdate: true },
+      );
+    });
+
     it("scopes the subscription lookup to the event's own tenant", async () => {
       const d = build();
       wire(d, [subscription()]);
@@ -396,6 +474,11 @@ describe('OutboxService', () => {
       await expect(
         d.service.dispatchEvent(EVENT, {} as any, actor as any),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
+      await expect(
+        d.service.dispatchEvent(EVENT, {} as any, actor as any),
+      ).rejects.toMatchObject({
+        reason: MessagingErrorReason.DOMAIN_EVENT_NOT_PUBLISHED,
+      });
     });
 
     it('fails when the event does not exist', async () => {
@@ -405,6 +488,11 @@ describe('OutboxService', () => {
       await expect(
         d.service.dispatchEvent(EVENT, {} as any, actor as any),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      await expect(
+        d.service.dispatchEvent(EVENT, {} as any, actor as any),
+      ).rejects.toMatchObject({
+        reason: MessagingErrorReason.DOMAIN_EVENT_NOT_FOUND,
+      });
     });
   });
 

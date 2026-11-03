@@ -5,11 +5,17 @@ import {
   CONCEPTS,
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
 import { MarketingCampaignsRepository } from '../repositories';
+import { persistWithCodeConflict } from '../marketing.conflicts';
+import { MarketingErrorReason } from '../marketing.error-reasons';
+import {
+  activeMarketingTenant,
+  assertCampaignInTenant,
+  assertSegmentInTenant,
+} from '../marketing.tenant-scope';
 import {
   CreateSegmentDto,
   SegmentResponseDto,
@@ -87,10 +93,11 @@ export class MarketingCampaignsService {
     dto: CreateSegmentDto,
     actor: AuthenticatedUser,
   ): Promise<SegmentResponseDto> {
+    const tenantId = activeMarketingTenant(dto.tenantId);
     this.logger.info(
       {
         operation: 'marketing.segment.create',
-        tenantId: dto.tenantId,
+        tenantId,
         code: dto.code,
       },
       'Creating marketing segment',
@@ -98,19 +105,33 @@ export class MarketingCampaignsService {
 
     const duplicate = await this.campaignsRepo.findSegmentByCode(
       this.em,
-      dto.tenantId,
+      tenantId,
       dto.code,
     );
     if (duplicate) {
-      throw new ConflictException('Ya existe un segmento con ese código', {
-        tenantId: dto.tenantId,
-        code: dto.code,
-      });
+      throw new ConflictException(
+        'Ya existe un segmento con ese código',
+        { code: dto.code },
+        MarketingErrorReason.CODE_ALREADY_EXISTS,
+      );
     }
 
+    return persistWithCodeConflict(
+      () => this.persistSegment(dto, tenantId, actor),
+      'Ya existe un segmento con ese código',
+      dto.code,
+    );
+  }
+
+  /** Alta del segmento dentro de su transacción. */
+  private persistSegment(
+    dto: CreateSegmentDto,
+    tenantId: string,
+    actor: AuthenticatedUser,
+  ): Promise<SegmentResponseDto> {
     return this.em.transactional(async (tx) => {
       const segment = this.campaignsRepo.createSegment(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         code: dto.code,
         name: dto.name,
         segmentTypeConceptId: SEGMENT_TYPE_CONCEPT[dto.segmentType],
@@ -138,6 +159,7 @@ export class MarketingCampaignsService {
     dto: RefreshSegmentDto,
     actor: AuthenticatedUser,
   ): Promise<RefreshSegmentResponseDto> {
+    const tenantId = activeMarketingTenant();
     this.logger.info(
       {
         operation: 'marketing.segment.refresh',
@@ -149,15 +171,10 @@ export class MarketingCampaignsService {
 
     return this.em.transactional(async (tx) => {
       // El bloqueo del segmento es lo que serializa refrescos concurrentes.
-      const segment = await this.campaignsRepo.findSegmentForUpdate(
-        tx,
-        segmentId,
+      const segment = assertSegmentInTenant(
+        await this.campaignsRepo.findSegmentForUpdate(tx, tenantId, segmentId),
+        tenantId,
       );
-      if (!segment) {
-        throw new ResourceNotFoundException('Segmento no encontrado', {
-          segmentId,
-        });
-      }
       if (segment.stateConceptId !== CONCEPTS.STATE_ACTIVE) {
         throw new PreconditionFailedException('El segmento no está activo', {
           segmentId,
@@ -228,10 +245,11 @@ export class MarketingCampaignsService {
     dto: CreateCampaignDto,
     actor: AuthenticatedUser,
   ): Promise<CampaignResponseDto> {
+    const tenantId = activeMarketingTenant(dto.tenantId);
     this.logger.info(
       {
         operation: 'marketing.campaign.create',
-        tenantId: dto.tenantId,
+        tenantId,
         code: dto.code,
       },
       'Creating marketing campaign',
@@ -239,14 +257,15 @@ export class MarketingCampaignsService {
 
     const duplicate = await this.campaignsRepo.findCampaignByCode(
       this.em,
-      dto.tenantId,
+      tenantId,
       dto.code,
     );
     if (duplicate) {
-      throw new ConflictException('Ya existe una campaña con ese código', {
-        tenantId: dto.tenantId,
-        code: dto.code,
-      });
+      throw new ConflictException(
+        'Ya existe una campaña con ese código',
+        { code: dto.code },
+        MarketingErrorReason.CODE_ALREADY_EXISTS,
+      );
     }
 
     const startAt = dto.startAt ? new Date(dto.startAt) : undefined;
@@ -261,23 +280,38 @@ export class MarketingCampaignsService {
       );
     }
 
+    return persistWithCodeConflict(
+      () => this.persistCampaign(dto, tenantId, startAt, endAt, actor),
+      'Ya existe una campaña con ese código',
+      dto.code,
+    );
+  }
+
+  /** Alta de la campaña dentro de su transacción. */
+  private persistCampaign(
+    dto: CreateCampaignDto,
+    tenantId: string,
+    startAt: Date | undefined,
+    endAt: Date | undefined,
+    actor: AuthenticatedUser,
+  ): Promise<CampaignResponseDto> {
     return this.em.transactional(async (tx) => {
       if (dto.segmentId) {
         // El segmento se bloquea al vincularlo: no debe desaparecer ni cambiar de
-        // estado entre la validación y el alta de la campaña.
-        const segment = await this.campaignsRepo.findSegmentForUpdate(
-          tx,
-          dto.segmentId,
+        // estado entre la validación y el alta de la campaña. Un segmento de otro
+        // tenant responde igual que uno inexistente.
+        assertSegmentInTenant(
+          await this.campaignsRepo.findSegmentForUpdate(
+            tx,
+            tenantId,
+            dto.segmentId,
+          ),
+          tenantId,
         );
-        if (!segment) {
-          throw new ResourceNotFoundException('Segmento no encontrado', {
-            segmentId: dto.segmentId,
-          });
-        }
       }
 
       const campaign = this.campaignsRepo.createCampaign(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         code: dto.code,
         name: dto.name,
         campaignTypeConceptId: CAMPAIGN_TYPE_CONCEPT[dto.campaignType],
@@ -314,21 +348,21 @@ export class MarketingCampaignsService {
     dto: MaterializeMembersDto,
     actor: AuthenticatedUser,
   ): Promise<MaterializeMembersResponseDto> {
+    const tenantId = activeMarketingTenant();
     this.logger.info(
       { operation: 'marketing.campaign.materialize', campaignId },
       'Materializing campaign audience',
     );
 
     return this.em.transactional(async (tx) => {
-      const campaign = await this.campaignsRepo.findCampaignForUpdate(
-        tx,
-        campaignId,
-      );
-      if (!campaign) {
-        throw new ResourceNotFoundException('Campaña no encontrada', {
+      const campaign = assertCampaignInTenant(
+        await this.campaignsRepo.findCampaignForUpdate(
+          tx,
+          tenantId,
           campaignId,
-        });
-      }
+        ),
+        tenantId,
+      );
       if (!MATERIALIZABLE_CAMPAIGN_STATES.includes(campaign.statusConceptId)) {
         throw new PreconditionFailedException(
           'La campaña no admite materializar audiencia en su estado actual',
@@ -400,16 +434,31 @@ export class MarketingCampaignsService {
     dto: PublishTemplateVersionDto,
     actor: AuthenticatedUser,
   ): Promise<TemplateVersionResponseDto> {
+    const tenantId = activeMarketingTenant(dto.tenantId);
     this.logger.info(
-      { operation: 'marketing.template.publish', tenantId: dto.tenantId, code },
+      { operation: 'marketing.template.publish', tenantId, code },
       'Publishing content template version',
     );
 
+    return persistWithCodeConflict(
+      () => this.persistTemplateVersion(code, dto, tenantId, actor),
+      'Ya existe esa versión de la plantilla',
+      code,
+    );
+  }
+
+  /** Publicación de la versión dentro de su transacción. */
+  private persistTemplateVersion(
+    code: string,
+    dto: PublishTemplateVersionDto,
+    tenantId: string,
+    actor: AuthenticatedUser,
+  ): Promise<TemplateVersionResponseDto> {
     return this.em.transactional(async (tx) => {
       const previous =
         await this.campaignsRepo.findLatestTemplateVersionForUpdate(
           tx,
-          dto.tenantId,
+          tenantId,
           code,
         );
 
@@ -425,7 +474,7 @@ export class MarketingCampaignsService {
 
       const version = (previous?.version ?? 0) + 1;
       const template = this.campaignsRepo.createContentTemplate(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         code,
         name: dto.name,
         channelConceptId: CHANNEL_CONCEPT[dto.channel],

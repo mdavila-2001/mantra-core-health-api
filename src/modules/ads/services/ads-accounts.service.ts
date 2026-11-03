@@ -9,6 +9,7 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { AdsErrorReason } from '../ads.error-reasons';
 import { AdsAccountsRepository, AdsCampaignsRepository } from '../repositories';
 import {
   ProvisionAdAccountDto,
@@ -94,6 +95,7 @@ export class AdsAccountsService {
         {
           externalAccountRef: dto.externalAccountRef,
         },
+        AdsErrorReason.AD_ACCOUNT_REF_DUPLICATE,
       );
     }
 
@@ -107,6 +109,7 @@ export class AdsAccountsService {
             {
               businessManagerId: bmId,
             },
+            AdsErrorReason.BUSINESS_MANAGER_NOT_FOUND,
           );
         }
       } else {
@@ -114,6 +117,7 @@ export class AdsAccountsService {
           throw new PreconditionFailedException(
             'Sin business manager hay que aportar nombre y referencia externa para crearlo',
             { externalAccountRef: dto.externalAccountRef },
+            AdsErrorReason.BUSINESS_MANAGER_CREATION_DATA_MISSING,
           );
         }
         const existing = await this.accountsRepo.findBusinessManagerByRef(
@@ -126,6 +130,7 @@ export class AdsAccountsService {
             {
               externalBusinessRef: dto.externalBusinessRef,
             },
+            AdsErrorReason.BUSINESS_MANAGER_REF_DUPLICATE,
           );
         }
         const created = this.accountsRepo.createBusinessManager(tx, {
@@ -193,9 +198,13 @@ export class AdsAccountsService {
         businessManagerId,
       );
       if (!bm) {
-        throw new ResourceNotFoundException('Business manager no encontrado', {
-          businessManagerId,
-        });
+        throw new ResourceNotFoundException(
+          'Business manager no encontrado',
+          {
+            businessManagerId,
+          },
+          AdsErrorReason.BUSINESS_MANAGER_NOT_FOUND,
+        );
       }
 
       let partner = await this.accountsRepo.findPartnerByRef(
@@ -204,9 +213,13 @@ export class AdsAccountsService {
       );
       const partnerExisted = partner !== null;
       if (partner && partner.stateConceptId !== CONCEPTS.STATE_ACTIVE) {
-        throw new PreconditionFailedException('El socio no está activo', {
-          partnerId: partner.id,
-        });
+        throw new PreconditionFailedException(
+          'El socio no está activo',
+          {
+            partnerId: partner.id,
+          },
+          AdsErrorReason.PARTNER_NOT_ACTIVE,
+        );
       }
       if (!partner) {
         partner = this.accountsRepo.createPartner(tx, {
@@ -256,12 +269,14 @@ export class AdsAccountsService {
             {
               adAccountId: dto.delegatedAdAccountId,
             },
+            AdsErrorReason.AD_ACCOUNT_NOT_FOUND,
           );
         }
         if (account.businessManagerId !== businessManagerId) {
           throw new PreconditionFailedException(
             'La cuenta no pertenece a este business manager',
             { adAccountId: dto.delegatedAdAccountId },
+            AdsErrorReason.AD_ACCOUNT_NOT_IN_BUSINESS_MANAGER,
           );
         }
         const access = this.accountsRepo.createAccountUser(tx, {
@@ -306,9 +321,13 @@ export class AdsAccountsService {
         dto.businessManagerId,
       );
       if (!bm) {
-        throw new ResourceNotFoundException('Business manager no encontrado', {
-          businessManagerId: dto.businessManagerId,
-        });
+        throw new ResourceNotFoundException(
+          'Business manager no encontrado',
+          {
+            businessManagerId: dto.businessManagerId,
+          },
+          AdsErrorReason.BUSINESS_MANAGER_NOT_FOUND,
+        );
       }
 
       const duplicate = await this.accountsRepo.findConnectionByExternalAccount(
@@ -324,6 +343,7 @@ export class AdsAccountsService {
             platform: dto.platform,
             externalAdAccountId: dto.externalAdAccountId,
           },
+          AdsErrorReason.PLATFORM_ACCOUNT_ALREADY_CONNECTED,
         );
       }
 

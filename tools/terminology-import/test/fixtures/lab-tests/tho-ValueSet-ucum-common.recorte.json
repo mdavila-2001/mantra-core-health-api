@@ -1,0 +1,29 @@
+{
+ "resourceType": "ValueSet",
+ "id": "ucum-common",
+ "url": "http://terminology.hl7.org/ValueSet/ucum-common",
+ "version": "1.0.0",
+ "name": "CommonUCUMUnits",
+ "status": "active",
+ "compose": {
+  "include": [
+   {
+    "system": "http://unitsofmeasure.org",
+    "concept": [
+     {
+      "code": "m",
+      "display": "meter"
+     },
+     {
+      "code": "mg/dL",
+      "display": "milligram per deciliter"
+     },
+     {
+      "code": "%/100",
+      "display": "percent / 100"
+     }
+    ]
+   }
+  ]
+ }
+}

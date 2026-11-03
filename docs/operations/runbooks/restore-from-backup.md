@@ -67,24 +67,18 @@ Con volumen real y con el traslado de la copia a otro host, será mayor — cuá
 
 ### Lo que sigue sin demostrarse
 
-Esto es lo que la ficha MCH-016 pide y el ensayo local **no** cubre. Son bloqueos concretos, no
-pendientes genéricos:
+Esto es lo que la ficha MCH-016 pide y el ensayo local **no** cubre:
 
 1. **Restauración en infraestructura nueva.** El ensayo restaura en el mismo motor y la misma
    máquina, así que no prueba que un host vacío pueda reconstruirse.
-   *Qué falta:* un entorno de laboratorio efímero (una VM o un proyecto cloud descartable) donde
-   restaurar desde cero. *Quién lo puede dar:* quien administre la infraestructura de despliegue.
 2. **Una muestra clínica completa con adjuntos.** No hay con qué: `clinical.encounters`,
    `common.files` y el bucket de MinIO están vacíos en desarrollo, y el volcado de Postgres no
    incluye los bytes de los objetos. El script ya compara referencias contra objetos y **falla**
    (código 1) mientras no pueda demostrar nada sobre adjuntos — a propósito, para que la ausencia
    no se lea como éxito.
-   *Qué falta:* un juego de datos sintéticos con adjuntos reales cargados, y el volcado de MinIO
-   junto al de Postgres. *Quién lo puede dar:* el equipo que mantiene los seeds de desarrollo.
 3. **RPO.** Un `pg_dump` a demanda tiene pérdida cero por construcción, no por una capacidad
-   demostrada; informar `RPO=0` desde ahí sería inventar evidencia.
-   *Qué falta:* un backup programado real y su periodicidad. *Quién lo puede dar:* quien defina
-   el mecanismo de backup de producción, que hoy no está en este repositorio.
+   demostrada; informar `RPO=0` desde ahí sería inventar evidencia. El mecanismo de backup de
+   producción no está en este repositorio.
 4. **Consistencia entre almacenes.** Mongo, OpenSearch, Redis y MinIO no entran en el volcado.
    Una restauración sólo de Postgres deja el sistema coherente consigo mismo y no con el resto.
 
@@ -97,5 +91,4 @@ para declarar el objetivo cumplido. No registrar un `outcome` de éxito por habe
 ## Declaración de esta auditoría
 
 Este runbook es un procedimiento **esperado**, no uno **probado**. No ejecutar en un incidente
-real sin antes confirmar que el mecanismo de backup subyacente existe y es restaurable — ver
-`OPS-004` en [matriz de trazabilidad](../../governance/traceability-matrix.md).
+real sin antes confirmar que el mecanismo de backup subyacente existe y es restaurable.

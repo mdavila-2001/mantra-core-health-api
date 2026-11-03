@@ -2,43 +2,67 @@ import { Entity, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 import { randomUUID } from 'node:crypto';
 
 /**
- * Revisión inmutable de una ficha (`data_catalog.catalog_annotation_revisions`).
- * Cada cambio de contenido crea una; una aprobación se liga a un número de
- * revisión, nunca a "la ficha", para que editar después no herede el visto
- * bueno.
+ * Mapea la entidad persistente asociada a `catalog_annotation_revisions`.
  */
 @Entity({ schema: 'data_catalog', tableName: 'catalog_annotation_revisions' })
 export class CatalogAnnotationRevisions {
+  /**
+   * Identificador único de la instancia.
+   */
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
+  /**
+   * Identificador asociado a annotation.
+   */
   @Property({ fieldName: 'annotation_id', type: 'uuid' }) // FK → data_catalog.catalog_annotations
   annotationId!: string;
 
+  /**
+   * Valor de revision no mantenido por la instancia.
+   */
   @Property({ fieldName: 'revision_no', columnType: 'int' })
   revisionNo!: number;
 
-  /** Contenido completo de la ficha en esta revisión. */
+  /**
+   * Valor de content json mantenido por la instancia.
+   */
   @Property({ fieldName: 'content_json', type: 'json', columnType: 'jsonb' })
   contentJson!: unknown;
 
-  /** SHA-256 del contenido canónico; dos parches con el mismo resultado no duplican revisión. */
+  /**
+   * Valor de content hash mantenido por la instancia.
+   */
   @Property({ fieldName: 'content_hash', columnType: 'varchar' })
   contentHash!: string;
 
+  /**
+   * Valor de origin mantenido por la instancia.
+   */
   @Property({ columnType: 'varchar' })
   origin!: string;
 
-  /** Estado con el que nació la revisión (DRAFT o NEEDS_REVIEW). */
+  /**
+   * Valor de submitted status mantenido por la instancia.
+   */
   @Property({ fieldName: 'submitted_status', columnType: 'varchar' })
   submittedStatus!: string;
 
+  /**
+   * Valor de change reason mantenido por la instancia.
+   */
   @Property({ fieldName: 'change_reason', columnType: 'text', nullable: true })
   changeReason?: string;
 
-  @Property({ fieldName: 'author_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  /**
+   * Identificador asociado a author user.
+   */
+  @Property({ fieldName: 'author_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   authorUserId?: string;
 
+  /**
+   * Fecha y hora en que se creó el registro.
+   */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
   createdAt!: Date;
 }

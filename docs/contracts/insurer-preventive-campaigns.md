@@ -2,9 +2,6 @@
 
 - **Versión:** 1.1 · **Fecha:** 2026-09-26 (v1.0: 2026-09-25)
 - **Módulo:** `src/modules/insurance` · **Esquema:** `insurance` (parche del modelo `v4223`)
-- **Plan y evidencia:** `docs/trabajo/2026-09-25-insurance-preventive-campaigns/` (v1.0) y
-  `docs/trabajo/2026-09-26-campanas-aseguradora/` (v1.1 — certificación contra el prompt de
-  Tarea 4 y cierre de brechas)
 
 ## 1. Propósito y trazabilidad
 
@@ -32,7 +29,7 @@ a la membresía OWNER/ADMIN de la fila de arriba — es la autoridad real, no un
 
 ## 3. Decisión de producto D4: la campaña se anuncia, no se dirige
 
-La verificación del 2026-09-25 dejó abierta la decisión **D4**: dirigir campañas a pacientes por su diagnóstico exige un consentimiento específico que el sistema no tiene. Por eso:
+Dirigir campañas a pacientes por su diagnóstico exige un consentimiento específico que el sistema no tiene. Por eso (decisión **D4**):
 
 - La campaña se muestra a **todos los afiliados con cobertura vigente** de la aseguradora que la creó.
 - `targetConditionCode` (CIE-10) **describe** la patología que se previene. Nunca se cruza con `clinical.conditions` ni con ningún dato clínico del afiliado.

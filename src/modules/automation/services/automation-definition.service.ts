@@ -5,14 +5,17 @@ import {
   CONCEPTS,
   ConflictException,
   PreconditionFailedException,
+  requireTenantId,
   ResourceNotFoundException,
   type AuthenticatedUser,
 } from '../../../common';
 import { OutboxService } from '../../messaging/services';
+import { AutomationErrorReason } from '../automation.error-reasons';
 import {
   AgentsRepository,
   AutomationGovernanceRepository,
 } from '../repositories';
+import { AUTOMATION_SCOPE_FAILURES, inTenantScope } from './automation-scope';
 import {
   DefineWorkflowDto,
   WorkflowResponseDto,
@@ -58,11 +61,16 @@ export class AutomationDefinitionService {
    *
    * Un salto a un paso que no está en el lote se rechaza. Un grafo con una arista
    * colgando no falla al definirlo, falla a mitad de una ejecución.
+   *
+   * El tenant propietario sale del contexto de la petición, nunca del cuerpo, y
+   * el agente que cada paso referencia tiene que ser de ese mismo tenant: un
+   * UUID de agente ajeno responde igual que uno inexistente.
    */
   async defineWorkflow(
     dto: DefineWorkflowDto,
     actor: AuthenticatedUser,
   ): Promise<WorkflowResponseDto> {
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
       const existing = await this.governanceRepo.findWorkflowByCode(
         tx,
@@ -74,15 +82,20 @@ export class AutomationDefinitionService {
           {
             code: dto.code,
           },
+          AutomationErrorReason.WORKFLOW_CODE_ALREADY_EXISTS,
         );
       }
 
       const stepCodes = new Set<string>();
       for (const step of dto.steps) {
         if (stepCodes.has(step.stepCode)) {
-          throw new ConflictException('Dos pasos comparten el mismo código.', {
-            stepCode: step.stepCode,
-          });
+          throw new ConflictException(
+            'Dos pasos comparten el mismo código.',
+            {
+              stepCode: step.stepCode,
+            },
+            AutomationErrorReason.DUPLICATE_STEP_CODE_IN_BATCH,
+          );
         }
         stepCodes.add(step.stepCode);
       }
@@ -93,6 +106,7 @@ export class AutomationDefinitionService {
             throw new PreconditionFailedException(
               'Un paso salta a otro que no está declarado en el workflow.',
               { stepCode: step.stepCode, target },
+              AutomationErrorReason.STEP_TARGET_NOT_DECLARED,
             );
           }
         }
@@ -103,6 +117,7 @@ export class AutomationDefinitionService {
           throw new PreconditionFailedException(
             'Un paso de llamada a agente tiene que declarar qué agente llama.',
             { stepCode: step.stepCode },
+            AutomationErrorReason.AGENT_CALL_STEP_MISSING_AGENT,
           );
         }
         if (
@@ -112,19 +127,15 @@ export class AutomationDefinitionService {
           throw new PreconditionFailedException(
             'Un paso de llamada a herramienta tiene que declarar qué herramienta usa.',
             { stepCode: step.stepCode },
+            AutomationErrorReason.TOOL_CALL_STEP_MISSING_TOOL,
           );
         }
         if (step.agentId) {
-          const agent = await this.agentsRepo.findAgentById(tx, step.agentId);
-          if (!agent) {
-            throw new ResourceNotFoundException(
-              'Agente referenciado por un paso no encontrado.',
-              {
-                stepCode: step.stepCode,
-                agentId: step.agentId,
-              },
-            );
-          }
+          inTenantScope(
+            await this.agentsRepo.findAgentById(tx, step.agentId),
+            tenantId,
+            AUTOMATION_SCOPE_FAILURES.stepAgent,
+          );
         }
         if (step.agentToolId) {
           const tool = await this.agentsRepo.findToolById(tx, step.agentToolId);
@@ -132,13 +143,14 @@ export class AutomationDefinitionService {
             throw new ResourceNotFoundException(
               'Herramienta referenciada por un paso no encontrada.',
               { stepCode: step.stepCode, agentToolId: step.agentToolId },
+              AutomationErrorReason.STEP_TOOL_NOT_FOUND,
             );
           }
         }
       }
 
       const workflow = this.governanceRepo.createWorkflow(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         code: dto.code,
         name: dto.name,
         description: dto.description,
@@ -186,7 +198,7 @@ export class AutomationDefinitionService {
       }
 
       await this.outbox.publishDomainEvent(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         eventType: 'WorkflowDefined',
         aggregateType: 'automation.workflows',
         aggregateId: workflow.id,
@@ -221,35 +233,40 @@ export class AutomationDefinitionService {
    *
    * El workflow tiene que estar activo: registrar un disparador contra un borrador
    * lo dejaría armado para arrancar algo que aún se está escribiendo.
+   *
+   * El disparador hereda el tenant del contexto, y el workflow que enlaza tiene
+   * que ser de ese mismo tenant; uno ajeno responde igual que uno inexistente.
    */
   async configureTrigger(
     dto: ConfigureTriggerDto,
     actor: AuthenticatedUser,
   ): Promise<TriggerResponseDto> {
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
       const existing = await this.governanceRepo.findTriggerByCode(
         tx,
         dto.code,
       );
       if (existing) {
-        throw new ConflictException('Ya existe un disparador con ese código.', {
-          code: dto.code,
-        });
+        throw new ConflictException(
+          'Ya existe un disparador con ese código.',
+          {
+            code: dto.code,
+          },
+          AutomationErrorReason.TRIGGER_CODE_ALREADY_EXISTS,
+        );
       }
 
-      const workflow = await this.governanceRepo.findWorkflowById(
-        tx,
-        dto.workflowId,
+      const workflow = inTenantScope(
+        await this.governanceRepo.findWorkflowById(tx, dto.workflowId),
+        tenantId,
+        AUTOMATION_SCOPE_FAILURES.workflow,
       );
-      if (!workflow) {
-        throw new ResourceNotFoundException('Workflow no encontrado.', {
-          workflowId: dto.workflowId,
-        });
-      }
       if (workflow.stateConceptId === CONCEPTS.AUTO_WORKFLOW_ARCHIVED) {
         throw new PreconditionFailedException(
           'No se puede disparar un workflow archivado.',
           { workflowId: workflow.id },
+          AutomationErrorReason.WORKFLOW_ARCHIVED,
         );
       }
 
@@ -260,6 +277,7 @@ export class AutomationDefinitionService {
         throw new PreconditionFailedException(
           'Un disparador por evento tiene que declarar qué evento suscribe.',
           { code: dto.code },
+          AutomationErrorReason.EVENT_TRIGGER_MISSING_EVENT_TYPE,
         );
       }
       if (dto.triggerTypeConceptId === CONCEPTS.AUTO_TRIGGER_TYPE_SCHEDULE) {
@@ -267,13 +285,14 @@ export class AutomationDefinitionService {
           throw new PreconditionFailedException(
             'Un disparador por calendario tiene que declarar su cron.',
             { code: dto.code },
+            AutomationErrorReason.SCHEDULE_TRIGGER_MISSING_CRON,
           );
         }
         this.assertCron(dto.scheduleCron);
       }
 
       const trigger = this.governanceRepo.createTrigger(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         code: dto.code,
         name: dto.name,
         triggerTypeConceptId: dto.triggerTypeConceptId,
@@ -292,7 +311,7 @@ export class AutomationDefinitionService {
       });
 
       await this.outbox.publishDomainEvent(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         eventType: 'TriggerRegistered',
         aggregateType: 'automation.automation_triggers',
         aggregateId: trigger.id,
@@ -331,6 +350,7 @@ export class AutomationDefinitionService {
       throw new PreconditionFailedException(
         'La expresión cron tiene que tener cinco campos.',
         { fieldCount: fields.length },
+        AutomationErrorReason.CRON_INVALID_FIELD_COUNT,
       );
     }
   }

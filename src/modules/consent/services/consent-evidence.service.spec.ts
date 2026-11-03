@@ -24,7 +24,7 @@ function build() {
 
   const service = new ConsentEvidenceService(
     em as any,
-    evidenceRepo,
+    evidenceRepo as any,
     logger as any,
   );
   return { service, tx, evidenceRepo };

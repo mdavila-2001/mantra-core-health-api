@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
+import { ClinicalErrorReason } from '../clinical.error-reasons';
 import {
   PreconditionFailedException,
   ResourceNotFoundException,
@@ -69,6 +70,7 @@ export class DiagnosticReportsService {
             {
               serviceRequestId: dto.serviceRequestId,
             },
+            ClinicalErrorReason.SERVICE_REQUEST_NOT_FOUND,
           );
         }
         sr.statusConceptId = CLIN.SERVICE_REQUEST_COMPLETED;
@@ -119,9 +121,11 @@ export class DiagnosticReportsService {
   ): Promise<DiagnosticReportResponseDto> {
     const report = await this.reportsRepo.findById(this.em.fork(), reportId);
     if (!report) {
-      throw new ResourceNotFoundException('Reporte diagnóstico no encontrado', {
-        reportId,
-      });
+      throw new ResourceNotFoundException(
+        'Reporte diagnóstico no encontrado',
+        { reportId },
+        ClinicalErrorReason.DIAGNOSTIC_REPORT_NOT_FOUND,
+      );
     }
     // MCH-007: la ruta sólo trae el id; el paciente sale de la fila. Se
     // mantiene la verificación de permiso aunque la ruta esté obsoleta: no
@@ -143,6 +147,7 @@ export class DiagnosticReportsService {
         canonicalEndpoint:
           'diagnostics/reports/:reportId/versions/:versionId/release',
       },
+      ClinicalErrorReason.DIAGNOSTIC_REPORT_RELEASE_PATH_DEPRECATED,
     );
   }
 

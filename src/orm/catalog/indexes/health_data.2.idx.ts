@@ -2,11 +2,12 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `health_data` (parte 2/2).
- * 74 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 75 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const healthDataIndexes2: readonly IndexTuple[] = [
   // [tabla, nombre, columnas, único, método]
+  ['health_source_systems', 'ix_health_source_systems_tenant_created', ['tenant_id', 'created_at desc'], false, 'btree'],
   ['health_source_systems', 'uk_health_source_systems_tenant_code', ['tenant_id', 'code'], true, 'btree'],
   ['health_terminology_mapping_rules', 'ix_health_terminology_mapping_rules_health_terminology_f5718527', ['health_terminology_mapping_set_id'], false, 'btree'],
   ['health_terminology_mapping_rules', 'ix_health_terminology_mapping_rules_target_concept_id', ['target_concept_id'], false, 'btree'],

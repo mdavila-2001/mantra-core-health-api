@@ -71,6 +71,7 @@ function build() {
   );
   return {
     service,
+    em,
     tx,
     consentsRepo,
     provisionsRepo,
@@ -187,6 +188,39 @@ describe('PractitionerAccessRequestsService', () => {
       expect(d.notices.emit).toHaveBeenCalledWith(
         expect.objectContaining({ kind: 'ACCESS_DECLINED' }),
       );
+    });
+
+    it('P-10: el aviso sale después del commit, no desde dentro de la transacción', async () => {
+      const d = build();
+      d.consentsRepo.findById.mockResolvedValue({ ...request });
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: 'persona-titular',
+      });
+      d.patientProfilesRepo.findById.mockResolvedValue({
+        profileId: 'pac-titular',
+      });
+      let insideTransaction = false;
+      let noticeInside: boolean | undefined;
+      d.em.transactional.mockImplementation(async (cb: any) => {
+        insideTransaction = true;
+        try {
+          return await cb(d.tx);
+        } finally {
+          insideTransaction = false;
+        }
+      });
+      d.notices.emit.mockImplementation(async () => {
+        noticeInside = insideTransaction;
+      });
+
+      await d.service.decide(
+        'c-1',
+        { decision: 'DECLINED' } as any,
+        actorPatient,
+      );
+
+      expect(d.notices.emit).toHaveBeenCalledTimes(1);
+      expect(noticeInside).toBe(false);
     });
   });
 

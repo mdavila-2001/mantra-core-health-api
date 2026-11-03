@@ -4,7 +4,11 @@ import { randomUUID } from 'node:crypto';
 import request from 'supertest';
 import type { Server } from 'node:http';
 import { MikroORM } from '@mikro-orm/postgresql';
-import { bootstrapTestApp, type TestContext } from '../integration/harness';
+import {
+  bootstrapTestApp,
+  ensureTestSession,
+  type TestContext,
+} from '../integration/harness';
 import { CatalogConcepts } from '../../src/modules/terminology/entities';
 import { SEED } from '../../src/common';
 import { ALL_SMOKE } from './registry';
@@ -210,6 +214,7 @@ describe('Smoke test — 30 endpoints', () => {
         // admin: los endpoints `/me` resuelven de quién son los datos leyendo el JWT.
         const token = c.token?.(smokeCtx) ?? smokeCtx.adminToken;
         req = req.set('Authorization', `Bearer ${token}`);
+        if (c.tenantScoped) req = req.set('X-Tenant-Id', smokeCtx.tenantId);
       }
       if (c.body) req = req.send(c.body(smokeCtx) as object);
       const res = await req;
@@ -682,6 +687,15 @@ describe('Smoke test — 30 endpoints', () => {
       {
         expectedStatus: 401,
       },
+    );
+    // MCH-004: `logout-all` cierra TODAS las sesiones del admin, y un token sólo autentica
+    // mientras su `sid` siga activo en `iam.sessions`. Sin reabrirlas, los ~800 casos que
+    // siguen (Common en adelante) responden 401 y la batería no ejercita nada.
+    await ensureTestSession(ctx.orm, ctx.adminUserId, 'test-session');
+    await ensureTestSession(
+      ctx.orm,
+      ctx.adminUserId,
+      'test-session-tenantless',
     );
 
     // ------------------------------------------------------------------

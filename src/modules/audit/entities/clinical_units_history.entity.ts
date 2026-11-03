@@ -73,4 +73,10 @@ export class ClinicalUnitsHistory {
    */
   @Property({ fieldName: 'recorded_at', columnType: 'timestamptz' })
   recordedAt!: Date;
+
+  /**
+   * Identificador asociado a tenant.
+   */
+  @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants (inferida)
+  tenantId!: string;
 }

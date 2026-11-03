@@ -79,6 +79,18 @@ export class ClinicalNoteVersions {
   planText?: string;
 
   /**
+   * P39: filas campo/valor de la nota médica (`[{ label, value }]`), en el
+   * orden en que se escribieron. Nula en las versiones SOAP puras.
+   */
+  @Property({
+    fieldName: 'entries_json',
+    type: 'json',
+    columnType: 'jsonb',
+    nullable: true,
+  })
+  entriesJson?: unknown;
+
+  /**
    * Identificador asociado a supersedes version.
    */
   @Property({

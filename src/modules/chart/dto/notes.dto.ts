@@ -1,11 +1,15 @@
+import { applyDecorators } from '@nestjs/common';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
   ArrayMinSize,
+  ArrayUnique,
   IsArray,
   IsBoolean,
   IsInt,
   IsISO8601,
+  IsNotEmpty,
   IsOptional,
   IsString,
   IsUUID,
@@ -15,6 +19,7 @@ import {
   MinLength,
   ValidateNested,
 } from 'class-validator';
+import { IsPlainText } from '../../../common/validators/plain-text.validator';
 import { ChartNoteItemDto } from './chart-read.dto';
 
 /** Tamaño de página por defecto de `GET /charts/notes`. */
@@ -22,6 +27,96 @@ export const DEFAULT_NOTES_PAGE_SIZE = 50;
 
 /** Tope máximo de página de `GET /charts/notes`. */
 const MAX_NOTES_PAGE_SIZE = 100;
+
+/** P39: hasta cuántas filas campo/valor admite una versión de nota. */
+export const MAX_NOTE_ENTRIES = 40;
+
+/** P39: largo máximo del rótulo de una fila, ya recortado. */
+export const MAX_NOTE_ENTRY_LABEL_LENGTH = 60;
+
+/** P39: largo máximo del valor de una fila, ya recortado. */
+export const MAX_NOTE_ENTRY_VALUE_LENGTH = 500;
+
+/** Recorta un string; deja pasar lo demás para que `@IsString` lo rechace. */
+const trimString = ({ value }: { value: unknown }): unknown =>
+  typeof value === 'string' ? value.trim() : value;
+
+/**
+ * Clave con la que se comparan los rótulos: «Presión Arterial» y
+ * «presion arterial» son el mismo campo. Misma regla que el simulador del
+ * frontend (`medical-notes.handlers.ts`).
+ */
+export function normalizeNoteEntryLabel(label: unknown): string | undefined {
+  if (typeof label !== 'string') return undefined;
+  return label
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
+/**
+ * Una fila de la nota médica (P39, C1): «Presión arterial: 120/80».
+ *
+ * Rótulo y valor se recortan antes de validar: lo que se guarda es lo que se
+ * lee. Los dos son obligatorios y de texto plano.
+ */
+export class NoteEntryInputDto {
+  /** El campo: «Presión arterial». */
+  @ApiProperty({
+    maxLength: MAX_NOTE_ENTRY_LABEL_LENGTH,
+    example: 'Presión arterial',
+    description:
+      'Rótulo de la fila; se recorta. Único (sin distinguir mayúsculas ni tildes) dentro de la nota',
+  })
+  @Transform(trimString)
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(MAX_NOTE_ENTRY_LABEL_LENGTH)
+  @IsPlainText()
+  label!: string;
+
+  /** Lo que se anotó: «120/80». */
+  @ApiProperty({
+    maxLength: MAX_NOTE_ENTRY_VALUE_LENGTH,
+    example: '120/80',
+    description: 'Valor de la fila; se recorta',
+  })
+  @Transform(trimString)
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(MAX_NOTE_ENTRY_VALUE_LENGTH)
+  @IsPlainText()
+  value!: string;
+}
+
+/** Decoradores comunes del arreglo `entries` en los tres cuerpos que lo aceptan. */
+function NoteEntries(): PropertyDecorator {
+  return applyDecorators(
+    ApiPropertyOptional({
+      type: [NoteEntryInputDto],
+      maxItems: MAX_NOTE_ENTRIES,
+      description:
+        'P39: filas campo/valor de la nota médica, en orden. Se guardan en la versión; omitirlas o mandar [] deja la versión sin filas',
+    }),
+    IsOptional(),
+    IsArray(),
+    ArrayMaxSize(MAX_NOTE_ENTRIES),
+    ValidateNested({ each: true }),
+    Type(() => NoteEntryInputDto),
+    // Un rótulo vacío o que no es texto ya lo marca su propia fila; acá vale
+    // como único para no sumar un «repetido» falso a ese error.
+    ArrayUnique(
+      (entry: unknown) => {
+        const key = normalizeNoteEntryLabel(
+          (entry as { label?: unknown } | null)?.label,
+        );
+        return typeof key === 'string' && key !== '' ? key : Symbol();
+      },
+      { message: 'entries no admite dos filas con el mismo campo' },
+    ),
+  );
+}
 
 /** Cuerpo de `POST /charts/notes` (UC-15-01): crea una nota y su versión 1 borrador. */
 export class CreateNoteDto {
@@ -91,6 +186,12 @@ export class CreateNoteDto {
   chiefComplaintText?: string;
 
   /**
+   * P39: filas campo/valor de la nota médica.
+   */
+  @NoteEntries()
+  entries?: NoteEntryInputDto[];
+
+  /**
    * Valor de subjective text mantenido por la instancia.
    */
   @ApiPropertyOptional({ description: 'Bloque S (subjetivo) del SOAP' })
@@ -147,6 +248,12 @@ export class AddVersionDto {
   chiefComplaintText?: string;
 
   /**
+   * P39: filas campo/valor de la nota médica.
+   */
+  @NoteEntries()
+  entries?: NoteEntryInputDto[];
+
+  /**
    * Valor de subjective text mantenido por la instancia.
    */
   @ApiPropertyOptional()
@@ -182,14 +289,18 @@ export class AddVersionDto {
 /** Cuerpo de `POST .../versions/{versionId}/sign` (UC-15-03). */
 export class SignVersionDto {
   /**
-   * Identificador asociado a signer profile.
+   * Perfil profesional que firma. Opcional: el firmante es siempre el perfil
+   * de la sesión, así que el servidor lo deriva; si viene, se confirma contra
+   * la sesión (403 si difiere). Sólo `SUPERADMIN` puede nombrar otro perfil.
    */
-  @ApiProperty({
+  @ApiPropertyOptional({
     format: 'uuid',
-    description: 'Perfil del firmante (autor o delegado)',
+    description:
+      'Perfil del firmante. Si se omite, es el perfil profesional de la sesión.',
   })
+  @IsOptional()
   @IsUUID()
-  signerProfileId!: string;
+  signerProfileId?: string;
 
   /**
    * Valor de certificate thumbprint mantenido por la instancia.
@@ -216,14 +327,17 @@ export class SignVersionDto {
 /** Cuerpo de `POST .../versions/{versionId}/cosign` (UC-15-04). */
 export class CosignVersionDto {
   /**
-   * Identificador asociado a signer profile.
+   * Perfil profesional que cofirma. Opcional por la misma regla que
+   * {@link SignVersionDto.signerProfileId}: si se omite, es el de la sesión.
    */
-  @ApiProperty({
+  @ApiPropertyOptional({
     format: 'uuid',
-    description: 'Perfil del cofirmante / supervisor',
+    description:
+      'Perfil del cofirmante / supervisor. Si se omite, es el perfil profesional de la sesión.',
   })
+  @IsOptional()
   @IsUUID()
-  signerProfileId!: string;
+  signerProfileId?: string;
 
   /**
    * Valor de certificate thumbprint mantenido por la instancia.
@@ -276,6 +390,12 @@ export class AmendNoteDto {
   @IsOptional()
   @IsUUID()
   amendmentReasonConceptId?: string;
+
+  /**
+   * P39: filas campo/valor de la nota médica.
+   */
+  @NoteEntries()
+  entries?: NoteEntryInputDto[];
 
   /**
    * Valor de subjective text mantenido por la instancia.

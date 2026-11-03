@@ -1,6 +1,7 @@
-# Ejemplo completo de PLAN.md
+# Ejemplo completo de plan
 
-Plan real de un trabajo full-stack chico sobre la plataforma de salud.
+Plan real de un trabajo full-stack chico sobre la plataforma de salud, tal como va en el issue
+que origina el trabajo o en la descripción del PR (nunca en un archivo del repo).
 Abrilo cuando necesites ver la forma completa del artefacto, no solo las reglas.
 
 ```markdown

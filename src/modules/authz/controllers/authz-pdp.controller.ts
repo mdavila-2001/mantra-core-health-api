@@ -1,6 +1,11 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { AuthzPdpService } from '../services';
 import {
   InvalidateCacheDto,
@@ -28,6 +33,11 @@ export class AuthzPdpController {
   constructor(private readonly pdpService: AuthzPdpService) {}
 
   /** UC-06-11. */
+  @Audited({
+    action: 'PDP_CACHE_INVALIDATED',
+    entity: 'access_policy',
+    entityId: 'result.id',
+  })
   @Post('pdp/cache/invalidate')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -40,6 +50,11 @@ export class AuthzPdpController {
   }
 
   /** UC-06-12 (`/authz/decisions:evaluate` según spec). */
+  @Audited({
+    action: 'ACCESS_DECISION_EVALUATED',
+    entity: 'access_policy',
+    entityId: 'result.id',
+  })
   @Post('decisions/evaluate')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

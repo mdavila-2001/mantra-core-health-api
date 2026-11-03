@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Header,
   HttpCode,
   HttpStatus,
   Param,
@@ -9,14 +10,19 @@ import {
   Post,
   Put,
   Query,
+  Res,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiOkResponse,
   ApiOperation,
+  ApiProduces,
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
+import type { Response } from 'express';
 import {
+  Audited,
   CurrentUser,
   ParseOptionalLimitPipe,
   ParseOptionalDatePipe,
@@ -26,13 +32,19 @@ import {
 import {
   SchedulingBookingsService,
   SchedulingDelayService,
+  SchedulingPaymentReceiptsService,
   SchedulingWaitlistService,
 } from '../../application';
 import {
   AcceptBookingDto,
   RejectBookingDto,
   SetPaymentStateDto,
+  SetPaymentStateResponseDto,
   PaymentStateDto,
+  UploadPaymentReceiptDto,
+  RejectPaymentReceiptDto,
+  PaymentReceiptDto,
+  ConfirmPaymentReceiptResponseDto,
   RequestBookingInfoDto,
   ProposeScheduleDto,
   ProposeScheduleResponseDto,
@@ -65,6 +77,7 @@ export class SchedulingBookingsController {
     private readonly bookingsService: SchedulingBookingsService,
     private readonly waitlistService: SchedulingWaitlistService,
     private readonly delayService: SchedulingDelayService,
+    private readonly receiptsService: SchedulingPaymentReceiptsService,
   ) {}
 
   /**
@@ -141,6 +154,11 @@ export class SchedulingBookingsController {
    * El profesional acepta la solicitud (corrección #11): la cita queda
    * confirmada y recién ahí se programan sus recordatorios.
    */
+  @Audited({
+    action: 'BOOKING_ACCEPTED',
+    entity: 'appointment_booking',
+    entityId: 'param:id',
+  })
   @Post(':id/accept')
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
   @HttpCode(HttpStatus.OK)
@@ -164,6 +182,11 @@ export class SchedulingBookingsController {
    * No la alcanza `PATIENT`: es el prestador el que pide. La persona lee lo que
    * le pidieron en el motivo de su propia cita.
    */
+  @Audited({
+    action: 'BOOKING_INFO_REQUESTED',
+    entity: 'appointment_booking',
+    entityId: 'param:id',
+  })
   @Post(':id/request-info')
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
   @HttpCode(HttpStatus.OK)
@@ -187,6 +210,11 @@ export class SchedulingBookingsController {
    * quien la tiene; ésta contrapropone sobre lo que todavía no se aceptó, y la
    * solicitud sigue pendiente de que la persona lo mire.
    */
+  @Audited({
+    action: 'BOOKING_SCHEDULE_PROPOSED',
+    entity: 'appointment_booking',
+    entityId: 'param:id',
+  })
   @Post(':id/propose-schedule')
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
   @HttpCode(HttpStatus.OK)
@@ -203,6 +231,11 @@ export class SchedulingBookingsController {
    * El profesional rechaza la solicitud, con motivo obligatorio
    * (correcciones #11 y #14).
    */
+  @Audited({
+    action: 'BOOKING_REJECTED',
+    entity: 'appointment_booking',
+    entityId: 'param:id',
+  })
   @Post(':id/reject')
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
   @HttpCode(HttpStatus.OK)
@@ -231,6 +264,11 @@ export class SchedulingBookingsController {
    * decir que una cita está pagada es una afirmación del prestador, y dejársela
    * hacer a quien debe el dinero sería confiar en el campo equivocado.
    */
+  @Audited({
+    action: 'BOOKING_PAYMENT_STATE_SET',
+    entity: 'appointment_booking',
+    entityId: 'param:id',
+  })
   @Put(':id/payment-state')
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
   @HttpCode(HttpStatus.OK)
@@ -243,7 +281,7 @@ export class SchedulingBookingsController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: SetPaymentStateDto,
     @CurrentUser() actor: AuthenticatedUser,
-  ): Promise<PaymentStateDto> {
+  ): Promise<SetPaymentStateResponseDto> {
     return this.bookingsService.setPaymentState(id, dto, actor);
   }
 
@@ -268,11 +306,137 @@ export class SchedulingBookingsController {
   }
 
   /**
+   * El paciente sube el comprobante de lo que pagó.
+   *
+   * Queda pendiente hasta que el prestador lo revise: el paciente sigue sin
+   * poder marcar su cita como pagada (`PUT payment-state` no lo deja).
+   */
+  @Audited({
+    action: 'BOOKING_PAYMENT_RECEIPT_UPLOADED',
+    entity: 'appointment_booking',
+    entityId: 'param:id',
+  })
+  @Post(':id/payment-receipts')
+  @Roles('PATIENT')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Subir el comprobante de pago de una cita',
+    description:
+      'El paciente adjunta un archivo propio (png, jpeg, webp o pdf, hasta 5 MB). 404 si la cita no es suya; 422 si el archivo no sirve o la cita está cancelada o rechazada; 409 si la cita ya está pagada.',
+  })
+  uploadPaymentReceipt(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UploadPaymentReceiptDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PaymentReceiptDto> {
+    return this.receiptsService.upload(id, dto, actor);
+  }
+
+  /** Los comprobantes de la cita, del más reciente al más viejo. */
+  @Get(':id/payment-receipts')
+  @Roles('PATIENT', 'PRACTITIONER', 'SCHEDULING_ADMIN', 'SCHEDULING_AGENT')
+  @ApiOperation({
+    summary: 'Listar los comprobantes de pago de una cita',
+    description:
+      'Los ve el paciente de la cita y el prestador de esa agenda. Cualquier otro recibe 404.',
+  })
+  @ApiOkResponse({ type: PaymentReceiptDto, isArray: true })
+  listPaymentReceipts(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PaymentReceiptDto[]> {
+    return this.receiptsService.list(id, actor);
+  }
+
+  /**
+   * El archivo de un comprobante.
+   *
+   * Lo autoriza la cita, no el archivo: `GET /common/files/:id/content` solo se
+   * lo da a quien lo subió, y quien tiene que mirarlo es el médico.
+   */
+  @Get(':id/payment-receipts/:receiptId/content')
+  @Roles('PATIENT', 'PRACTITIONER', 'SCHEDULING_ADMIN', 'SCHEDULING_AGENT')
+  @Header('Cache-Control', 'private, no-store')
+  // Un comprobante se mira, no se ejecuta: aunque el archivo trajera algo
+  // activo, el navegador lo abre sin scripts ni recursos.
+  @Header('Content-Security-Policy', "sandbox; default-src 'none'")
+  @ApiOperation({
+    summary: 'Descargar el archivo de un comprobante de pago',
+    description: 'Mismos permisos que la lista de comprobantes.',
+  })
+  @ApiProduces('image/png', 'image/jpeg', 'image/webp', 'application/pdf')
+  async paymentReceiptContent(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('receiptId', ParseUUIDPipe) receiptId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+    @Res() res: Response,
+  ): Promise<void> {
+    const content = await this.receiptsService.content(id, receiptId, actor);
+    res.setHeader('Content-Type', content.mimeType);
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.send(content.buffer);
+  }
+
+  /**
+   * Confirma un comprobante: la cita queda pagada, en la misma transacción.
+   *
+   * Confirmar uno basta. Volver a confirmarlo devuelve lo mismo sin escribir.
+   */
+  @Audited({
+    action: 'BOOKING_PAYMENT_RECEIPT_CONFIRMED',
+    entity: 'appointment_booking',
+    entityId: 'param:id',
+  })
+  @Post(':id/payment-receipts/:receiptId/confirm')
+  @Roles('PRACTITIONER', 'SCHEDULING_ADMIN', 'SCHEDULING_AGENT')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Confirmar un comprobante de pago',
+    description:
+      'Deja el comprobante confirmado y la cita pagada. 409 si el comprobante ya se rechazó; 422 si la cita está cancelada o rechazada.',
+  })
+  confirmPaymentReceipt(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('receiptId', ParseUUIDPipe) receiptId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ConfirmPaymentReceiptResponseDto> {
+    return this.receiptsService.confirm(id, receiptId, actor);
+  }
+
+  /** Rechaza un comprobante con su motivo. No cambia el estado de pago. */
+  @Audited({
+    action: 'BOOKING_PAYMENT_RECEIPT_REJECTED',
+    entity: 'appointment_booking',
+    entityId: 'param:id',
+  })
+  @Post(':id/payment-receipts/:receiptId/reject')
+  @Roles('PRACTITIONER', 'SCHEDULING_ADMIN', 'SCHEDULING_AGENT')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Rechazar un comprobante de pago',
+    description:
+      'Guarda el motivo, que el paciente recibe en el aviso. 409 si el comprobante ya se confirmó.',
+  })
+  rejectPaymentReceipt(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('receiptId', ParseUUIDPipe) receiptId: string,
+    @Body() dto: RejectPaymentReceiptDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PaymentReceiptDto> {
+    return this.receiptsService.reject(id, receiptId, dto, actor);
+  }
+
+  /**
    * Inicia la atención (corrección #15).
    *
    * **No valida la fecha**: una cita confirmada se empieza cuando el
    * profesional decide, no cuando el reloj lo permite.
    */
+  @Audited({
+    action: 'BOOKING_STARTED',
+    entity: 'appointment_booking',
+    entityId: 'param:id',
+  })
   @Post(':id/start')
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
   @HttpCode(HttpStatus.OK)
@@ -292,6 +456,11 @@ export class SchedulingBookingsController {
    * Completa la atención (corrección #15). El paciente ve «completada» apenas
    * ocurre, sin refresco artificial.
    */
+  @Audited({
+    action: 'BOOKING_COMPLETED',
+    entity: 'appointment_booking',
+    entityId: 'param:id',
+  })
   @Post(':id/complete')
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
   @HttpCode(HttpStatus.OK)
@@ -308,6 +477,11 @@ export class SchedulingBookingsController {
   }
 
   /** UC-41-08. */
+  @Audited({
+    action: 'BOOKING_RESCHEDULED',
+    entity: 'appointment_booking',
+    entityId: 'param:id',
+  })
   @Post(':id/reschedule')
   // `PRACTITIONER` desde la corrección #14: mover un turno es un acto del
   // profesional tanto como del mostrador, y ahora exige motivo en las dos
@@ -324,6 +498,11 @@ export class SchedulingBookingsController {
   }
 
   /** UC-41-09. */
+  @Audited({
+    action: 'BOOKING_CANCELLED',
+    entity: 'appointment_booking',
+    entityId: 'param:id',
+  })
   @Post(':id/cancel')
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER', 'PATIENT')
   @HttpCode(HttpStatus.OK)
@@ -341,6 +520,11 @@ export class SchedulingBookingsController {
   }
 
   /** UC-41-10. */
+  @Audited({
+    action: 'BOOKING_CHECKED_IN',
+    entity: 'appointment_booking',
+    entityId: 'param:id',
+  })
   @Post(':id/check-in')
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT')
   @HttpCode(HttpStatus.OK)
@@ -359,6 +543,11 @@ export class SchedulingBookingsController {
    * queda en el historial del turno —así el paciente la ve aunque no abra la
    * campana— y sale como aviso in-app.
    */
+  @Audited({
+    action: 'BOOKING_DELAYED',
+    entity: 'appointment_booking',
+    entityId: 'param:id',
+  })
   @Post(':id/delay')
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
   @HttpCode(HttpStatus.OK)
@@ -376,6 +565,11 @@ export class SchedulingBookingsController {
   }
 
   /** UC-41-13. */
+  @Audited({
+    action: 'BOOKING_REMINDERS_SCHEDULED',
+    entity: 'appointment_booking',
+    entityId: 'param:id',
+  })
   @Post(':id/reminders')
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT')
   @HttpCode(HttpStatus.CREATED)

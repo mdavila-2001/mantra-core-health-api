@@ -12,7 +12,7 @@ import { ClinicalNotificationsService } from './clinical-notifications.service';
 
 const PATIENT = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 const ACCOUNT = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
-const MEDICO = 'cccccccc-cccc-cccc-cccc-cccccccccccc';
+const DOCTOR = 'cccccccc-cccc-cccc-cccc-cccccccccccc';
 
 /**
  * Construye el servicio con sus dependencias dobladas.
@@ -49,7 +49,7 @@ describe('ClinicalNotificationsService · disparadores de P1', () => {
   it('avisa al paciente de su receta, en su categoría y con destino navegable', async () => {
     const d = build();
 
-    await d.service.prescriptionIssued('rx-1', PATIENT, MEDICO);
+    await d.service.prescriptionIssued('rx-1', PATIENT, DOCTOR);
 
     const [input] = d.notifications.emitInApp.mock.calls[0] as any[];
     expect(input.recipientUserId).toBe(ACCOUNT);
@@ -57,13 +57,13 @@ describe('ClinicalNotificationsService · disparadores de P1', () => {
     expect(input.destination).toEqual({ type: 'PRESCRIPTION', id: 'rx-1' });
     // Idempotente por hecho: reintentar la emisión no produce dos campanazos.
     expect(input.debounceKey).toBe('clinical:PRESCRIPTION:rx-1');
-    expect(input.actorUserId).toBe(MEDICO);
+    expect(input.actorUserId).toBe(DOCTOR);
   });
 
   it('avisa del cierre del encuentro apuntando al encuentro', async () => {
     const d = build();
 
-    await d.service.encounterClosed('enc-1', PATIENT, MEDICO);
+    await d.service.encounterClosed('enc-1', PATIENT, DOCTOR);
 
     const [input] = d.notifications.emitInApp.mock.calls[0] as any[];
     expect(input.category).toBe('CLINICAL');
@@ -73,7 +73,7 @@ describe('ClinicalNotificationsService · disparadores de P1', () => {
   it('MCH-027 · avisa de la orden nueva apuntando a la orden, una vez por orden', async () => {
     const d = build();
 
-    await d.service.serviceRequestPlaced('sr-1', PATIENT, MEDICO);
+    await d.service.serviceRequestPlaced('sr-1', PATIENT, DOCTOR);
 
     const [input] = d.notifications.emitInApp.mock.calls[0] as any[];
     expect(input.recipientUserId).toBe(ACCOUNT);
@@ -86,7 +86,7 @@ describe('ClinicalNotificationsService · disparadores de P1', () => {
     const d = build();
     d.accountLinks.findActiveByPerson.mockResolvedValue(null);
 
-    const res = await d.service.prescriptionIssued('rx-1', PATIENT, MEDICO);
+    const res = await d.service.prescriptionIssued('rx-1', PATIENT, DOCTOR);
 
     expect(res.failed).toBeUndefined();
     expect(d.notifications.emitInApp).not.toHaveBeenCalled();
@@ -99,7 +99,7 @@ describe('ClinicalNotificationsService · disparadores de P1', () => {
     const d = build();
     d.accountLinks.findActiveByPerson.mockRejectedValue(new Error('boom'));
 
-    const res = await d.service.prescriptionIssued('rx-1', PATIENT, MEDICO);
+    const res = await d.service.prescriptionIssued('rx-1', PATIENT, DOCTOR);
 
     expect(res.failed).toBe(true);
     expect(d.logger.error).toHaveBeenCalled();

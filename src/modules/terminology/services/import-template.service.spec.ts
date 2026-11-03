@@ -1,6 +1,6 @@
 import { ErrorCode } from '../../../common';
 import { CsvParser, PERFILES_DE_IMPORTACION } from '../import';
-import { LECTOR_IMPORT } from './import-parsers.provider';
+import { READER_IMPORT } from './import-parsers.provider';
 import { ImportTemplateService } from './import-template.service';
 import { validateRows } from './row-validator';
 
@@ -12,16 +12,16 @@ import { validateRows } from './row-validator';
  * es la última, que la vuelve a leer con el parseador de verdad.
  */
 describe('ImportTemplateService', () => {
-  const service = new ImportTemplateService(LECTOR_IMPORT);
+  const service = new ImportTemplateService(READER_IMPORT);
 
   describe('la plantilla de conceptos en CSV', () => {
     it('trae el encabezado canónico y una fila de ejemplo', () => {
       const template = service.generate('conceptos', 'csv');
-      const lineas = template.contenido.toString('utf8').trimEnd().split('\n');
+      const lines = template.contenido.toString('utf8').trimEnd().split('\n');
 
-      expect(lineas).toHaveLength(2);
-      expect(lineas[0]).toBe('code,display,definition');
-      expect(lineas[1]).not.toBe('');
+      expect(lines).toHaveLength(2);
+      expect(lines[0]).toBe('code,display,definition');
+      expect(lines[1]).not.toBe('');
     });
 
     it('se descarga con nombre y con la codificación declarada', () => {

@@ -6,6 +6,7 @@ import {
   camposObligatoriosDePaciente,
   type TestContext,
 } from './harness';
+import { CONCEPTS } from '../../src/common';
 
 /**
  * Quitar el punto del mapa — contra la base.
@@ -61,11 +62,13 @@ describe('quitar el punto del mapa · contra la base', () => {
       .execute<{ latitude: string | null; longitude: string | null }[]>(
         `select a.latitude, a.longitude
            from common.addresses a
-           join terminology.catalog_concepts c on c.id = a.use_concept_id
           where a.owner_id = ?
-            and c.code = 'ADDR_USE_HOME'
+            and a.use_concept_id = ?
             and a.valid_to is null`,
-        [paciente.personId],
+        // Por id y no por código: el concepto `CONCEPTS.ADDR_USE_HOME` se
+        // llama `ADDR_HOME` en el catálogo del modelo, y comparar contra
+        // 'ADDR_USE_HOME' no encontraba ninguna fila (NaN en cada lectura).
+        [paciente.personId, CONCEPTS.ADDR_USE_HOME],
       );
     return filas[0] ?? null;
   }

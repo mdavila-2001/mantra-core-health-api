@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 15 · schema chart
+-- SALUD v4.2.83 · módulo 15 · schema chart
 -- Generado de diagram_15_chart.puml — NO editar a mano.
 
 
@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS "chart"."clinical_note_versions" (
     "objective_text" text,
     "assessment_text" text,
     "plan_text" text,
+    "entries_json" jsonb,
     "supersedes_version_id" uuid,
     "amendment_reason_concept_id" uuid,
     "amendment_reason_text" text,
@@ -91,6 +92,7 @@ CREATE TABLE IF NOT EXISTS "chart"."care_plans" (
     "start_date" date,
     "end_date" date,
     "author_profile_id" uuid,
+    "form_instance_id" uuid,
     "created_at" timestamptz NOT NULL,
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,

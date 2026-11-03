@@ -10,7 +10,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import { Audited, CurrentUser, type AuthenticatedUser } from '../../../common';
 import { PrescriptionFavoritesService } from '../services';
 import {
   CreatePrescriptionFavoriteDto,
@@ -54,6 +54,11 @@ export class PrescriptionFavoritesController {
   }
 
   /** Guarda una indicación repetida como favorito. */
+  @Audited({
+    action: 'PRESCRIPTION_FAVORITE_CREATED',
+    entity: 'prescription_favorite',
+    entityId: 'result.id',
+  })
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Guardar un favorito de prescripción' })
@@ -65,6 +70,11 @@ export class PrescriptionFavoritesController {
   }
 
   /** Borra un favorito propio. */
+  @Audited({
+    action: 'PRESCRIPTION_FAVORITE_REMOVED',
+    entity: 'prescription_favorite',
+    entityId: 'param:id',
+  })
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Borrar un favorito de prescripción propio' })

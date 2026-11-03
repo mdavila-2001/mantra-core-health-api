@@ -11,7 +11,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   AddMaterialAssetDto,
   ChangeProductStatusDto,
@@ -48,6 +53,11 @@ export class PharmaCatalogController {
   constructor(private readonly service: PharmaCatalogService) {}
 
   /** UC-17-21. */
+  @Audited({
+    action: 'PHARMA_PRODUCT_CREATED',
+    entity: 'pharma_product',
+    entityId: 'result.id',
+  })
   @Post('products')
   @HttpCode(HttpStatus.CREATED)
   @Roles('PHARMA_LAB_ADMIN', 'REGULATORY_AFFAIRS', 'PLATFORM_ADMIN')
@@ -76,6 +86,11 @@ export class PharmaCatalogController {
   }
 
   /** UC-17-22. */
+  @Audited({
+    action: 'PHARMA_PRODUCT_UPDATED',
+    entity: 'pharma_product',
+    entityId: 'param:productId',
+  })
   @Patch('products/:productId')
   @Roles('PHARMA_LAB_ADMIN', 'REGULATORY_AFFAIRS', 'PLATFORM_ADMIN')
   @ApiOperation({ summary: 'Actualizar un medicamento' })
@@ -89,6 +104,11 @@ export class PharmaCatalogController {
   }
 
   /** UC-17-23. */
+  @Audited({
+    action: 'PHARMA_PRODUCT_STATUS_CHANGED',
+    entity: 'pharma_product',
+    entityId: 'param:productId',
+  })
   @Post('products/:productId/status')
   @Roles('PHARMA_LAB_ADMIN', 'REGULATORY_AFFAIRS', 'PLATFORM_ADMIN')
   @ApiOperation({ summary: 'Cambiar el estado regulatorio de un medicamento' })
@@ -102,6 +122,11 @@ export class PharmaCatalogController {
   }
 
   /** UC-17-24. */
+  @Audited({
+    action: 'INFORMATIONAL_MATERIAL_CREATED',
+    entity: 'informational_material',
+    entityId: 'result.id',
+  })
   @Post('materials')
   @HttpCode(HttpStatus.CREATED)
   @Roles('PHARMA_LAB_ADMIN', 'REGULATORY_AFFAIRS', 'PLATFORM_ADMIN')
@@ -130,6 +155,11 @@ export class PharmaCatalogController {
   }
 
   /** UC-17-25. */
+  @Audited({
+    action: 'INFORMATIONAL_MATERIAL_ASSET_ADDED',
+    entity: 'material_asset',
+    entityId: 'result.id',
+  })
   @Post('materials/:materialId/assets')
   @HttpCode(HttpStatus.CREATED)
   @Roles('PHARMA_LAB_ADMIN', 'REGULATORY_AFFAIRS', 'PLATFORM_ADMIN')
@@ -160,6 +190,11 @@ export class PharmaCatalogController {
   }
 
   /** Envío a revisión interna. */
+  @Audited({
+    action: 'INFORMATIONAL_MATERIAL_SUBMITTED',
+    entity: 'informational_material',
+    entityId: 'param:materialId',
+  })
   @Post('materials/:materialId/submit')
   @Roles('PHARMA_LAB_ADMIN', 'REGULATORY_AFFAIRS', 'PLATFORM_ADMIN')
   @ApiOperation({ summary: 'Enviar el material a revisión interna' })
@@ -172,6 +207,11 @@ export class PharmaCatalogController {
   }
 
   /** UC-17-26. */
+  @Audited({
+    action: 'INFORMATIONAL_MATERIAL_DECIDED',
+    entity: 'material_approval',
+    entityId: 'result.id',
+  })
   @Post('materials/:materialId/decision')
   @Roles('PHARMA_LAB_ADMIN', 'REGULATORY_AFFAIRS', 'PLATFORM_ADMIN')
   @ApiOperation({ summary: 'Aprobar o rechazar el material' })

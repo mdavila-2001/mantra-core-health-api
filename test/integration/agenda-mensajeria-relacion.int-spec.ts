@@ -426,6 +426,12 @@ describe('Relación agenda → mensajería · dobles de ambos extremos (H2)', ()
             continue;
           }
           if (!ruta.endsWith('.ts')) continue;
+          // Lo que el build excluye (`tsconfig.build.json`: `**/*spec.ts`,
+          // `**/*.testing.ts`) no llega a `dist/`; un spec es justamente quien
+          // importa los dobles de `test/`. M1-bis comprueba que esa exclusión
+          // siga declarada, así que esto no abre un agujero: lo acota a lo que
+          // el build compila.
+          if (/spec\.ts$|\.testing\.ts$/.test(ruta)) continue;
           const texto = fs.readFileSync(ruta, 'utf8');
           // Cualquier import que salga de `src/` hacia `test/`.
           if (/from\s+['"][^'"]*\/test\//.test(texto)) {
@@ -448,6 +454,10 @@ describe('Relación agenda → mensajería · dobles de ambos extremos (H2)', ()
       // terminaría dentro de `dist/`.
       expect(tsconfigBuild).toMatch(/"exclude"/);
       expect(tsconfigBuild).toMatch(/test/);
+      // Y los specs y los `*.testing.ts`, que M1 deja fuera del escaneo
+      // precisamente porque el build no los compila.
+      expect(tsconfigBuild).toContain('"**/*spec.ts"');
+      expect(tsconfigBuild).toContain('"**/*.testing.ts"');
     });
   });
 
@@ -641,7 +651,20 @@ describe('Relación agenda → mensajería · dobles de ambos extremos (H2)', ()
 
       // Lo que vuelve reproducible al paquete: su commit está en la historia
       // del corte, así que los 117 archivos se pueden volver a sacar de acá
-      // aunque el paquete en sí no viaje en este repo.
+      // aunque el paquete en sí no viaje en este repo. En un clon superficial
+      // el ancestro no es alcanzable aunque exista: se dice así, en vez de un
+      // rojo que parece una regresión.
+      const superficial = spawnSync(
+        'git',
+        ['rev-parse', '--is-shallow-repository'],
+        { cwd: process.cwd(), encoding: 'utf8' },
+      );
+      if (superficial.stdout.trim() === 'true') {
+        throw new Error(
+          'H2.S1.M1 necesita el historial completo y este clon es superficial: ' +
+            'corré `git fetch --unshallow` (en CI, `fetch-depth: 0`).',
+        );
+      }
       expect(
         gitExitCode([
           'merge-base',

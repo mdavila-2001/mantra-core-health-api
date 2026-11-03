@@ -9,9 +9,12 @@ import {
 import {
   PharmacyOrdersService,
   PICKUP_CODE_UNIQUE_INDEX,
-} from './pharmacy-orders.service';
+} from '../application/pharmacy-orders/pharmacy-orders.service';
+import { PharmacyOrdersUseCases } from '../application/pharmacy-orders/pharmacy-orders.use-cases';
+import { PendingOrderLines } from '../application/pharmacy-orders/pending-order-lines';
+import { SiteStockWriter } from '../application/site-availability/site-stock-writer';
 import { pharmacyInventoryIndexes } from '../../../orm/catalog/indexes/pharmacy_inventory.idx';
-import { PINV } from '../pharmacy_inventory.concepts';
+import { PINV } from '../domain/pharmacy_inventory.concepts';
 
 /**
  * Ejecuta la operación mock fn.
@@ -80,7 +83,7 @@ function order(extra: Record<string, unknown> = {}) {
 }
 
 /** Una línea persistida del pedido. */
-function linea(extra: Record<string, unknown> = {}) {
+function orderLine(extra: Record<string, unknown> = {}) {
   return {
     id: 'line-1',
     inventoryReservationId: 'order-1',
@@ -97,8 +100,12 @@ function linea(extra: Record<string, unknown> = {}) {
  * @returns Resultado de build.
  */
 function build() {
-  const tx = { flush: mockFn() };
-  const fork = {};
+  const tx = { flush: mockFn(), execute: mockFn(async () => []) };
+  const fork = {
+    flush: mockFn(),
+    transactional: mockFn((cb: any) => cb(tx)),
+    execute: mockFn(async () => []),
+  };
   const em = {
     transactional: mockFn((cb: any) => cb(tx)),
     fork: mockFn(() => fork),
@@ -149,12 +156,12 @@ function build() {
   const pharmacyRepo = {
     findActiveSiteById: mockFn(async () => SITE),
     findVisibleById: mockFn(async () => PHARMACY),
-    findActiveProductsByIds: mockFn(async () => [PRODUCT]),
+    findSellableProductsByIds: mockFn(async () => [PRODUCT]),
     findCurrentPublicPriceLists: mockFn(async () => []),
     findCurrentPrices: mockFn(async () => []),
   };
   const reservationsService = { releaseConfirmedLines: mockFn(async () => 1) };
-  const outbox = { publishDomainEvent: mockFn(async () => ({})) };
+  const outbox = { publish: mockFn(async () => ({})) };
   const orderNotifications = {
     orderUnderReview: mockFn(async () => ({ suppressed: false })),
     orderConfirmed: mockFn(async () => ({ suppressed: false })),
@@ -170,8 +177,78 @@ function build() {
     activeClaimForDispensation: mockFn(async () => undefined),
   };
   const tenantAdministration = { canAdminister: mockFn(async () => false) };
+  // El chat del pedido (community), doblado: por defecto ninguna farmacia
+  // tiene vitrina y abrir el hilo devuelve uno fijo.
+  const orderChat = {
+    findPharmacyShowcases: mockFn(async () => new Map()),
+    openOrderConversation: mockFn(async () => ({
+      conversationId: 'conv-1',
+      pharmacyProfileId: 'vitrina-1',
+    })),
+  };
+  const accountLinks = {
+    findActiveByPerson: mockFn(async () => ({ userId: 'user-1' })),
+  };
   const logger = { setContext: mockFn(), info: mockFn() };
-  const service = new PharmacyOrdersService(
+  // El escritor por sede de verdad, sobre una sede en memoria: una ubicación
+  // (`loc-1`) y las posiciones que se le escriban (`sitePositions`). Las
+  // lecturas de inventario de la confirmación y el candado de la reserva leen
+  // de ahí cuando un test lo pide (`withSiteInMemory`).
+  const sitePositions: any[] = [];
+  const byKey = (key: any) =>
+    sitePositions.find(
+      (p) =>
+        p.inventoryLocationId === key.inventoryLocationId &&
+        p.pharmacyProductId === key.pharmacyProductId &&
+        (p.inventoryLotId ?? null) === (key.inventoryLotId ?? null),
+    ) ?? null;
+  const writerLocations = {
+    findFirstActiveInSite: mockFn(async () => ({ id: 'loc-1' })),
+    findActiveInSite: mockFn(async () => [{ id: 'loc-1' }]),
+    create: mockFn(),
+  };
+  const writerPositions = {
+    findByKeyForUpdate: mockFn(async (_tx: unknown, key: any) => byKey(key)),
+    findLooseForUpdate: mockFn(async () => []),
+    create: mockFn((_tx: unknown, data: any) => {
+      const row = {
+        onHandQuantity: '0',
+        reservedQuantity: '0',
+        quarantineQuantity: '0',
+        availableQuantity: '0',
+        lastLedgerSequence: '0',
+        updatedAt: new Date(),
+        ...data,
+      };
+      sitePositions.push(row);
+      return row;
+    }),
+  };
+  const siteStockWriter = new SiteStockWriter(
+    writerLocations as any,
+    writerPositions as any,
+    ledgerRepo as any,
+  );
+  const withSiteInMemory = () => {
+    inventoryReadRepo.findActiveLocationsBySites.mockResolvedValue([
+      { id: 'loc-1', pharmacySiteId: 'site-1' },
+    ]);
+    inventoryReadRepo.findStockPositions.mockImplementation(
+      async (_tx: unknown, _locations: unknown, ids: readonly string[]) =>
+        sitePositions.filter((p) => ids.includes(p.pharmacyProductId)),
+    );
+    stockRepo.findByKeyForUpdate.mockImplementation(
+      async (_tx: unknown, key: any) => byKey(key),
+    );
+  };
+  // Existing accounting cases explicitly use the CONNECTED/unmapped ledger path.
+  const externalStock = {
+    resolve: mockFn(async () => ({
+      mode: 'CONNECTED',
+      liveQuantities: new Map(),
+    })),
+  };
+  const useCases = new PharmacyOrdersUseCases(
     em as any,
     ordersRepo as any,
     reservationsRepo as any,
@@ -187,9 +264,20 @@ function build() {
     logger as any,
     settlements as any,
     tenantAdministration as any,
+    orderChat as any,
+    accountLinks as any,
+    // El alta del pedido no se ejercita acá: el guard de receta no se usa.
+    {} as any,
+    // Las líneas «por confirmar», con el escritor por sede doblado.
+    new PendingOrderLines(inventoryReadRepo as any, siteStockWriter as any),
+    externalStock as any,
   );
+  const service = new PharmacyOrdersService(useCases, logger as any);
   return {
     service,
+    externalStock,
+    orderChat,
+    accountLinks,
     settlements,
     tenantAdministration,
     tx,
@@ -206,6 +294,9 @@ function build() {
     reservationsService,
     outbox,
     orderNotifications,
+    sitePositions,
+    writerPositions,
+    withSiteInMemory,
   };
 }
 
@@ -460,15 +551,15 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
   describe('openReview', () => {
     it('ENVIADO → EN_REVISION: lock, event in the tx and bell after commit', async () => {
       const d = build();
-      const vivo = order();
-      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(vivo);
+      const live = order();
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(live);
 
       await runWithTenant('tenant-a', () =>
         d.service.openReview('order-1', staff),
       );
 
-      expect(vivo.reservationStatusConceptId).toBe(PINV.ORDER_EN_REVISION);
-      expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+      expect(live.reservationStatusConceptId).toBe(PINV.ORDER_EN_REVISION);
+      expect(d.outbox.publish).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({
           eventType: 'PharmacyOrderUnderReview',
@@ -491,7 +582,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       await expect(
         runWithTenant('tenant-a', () => d.service.openReview('order-1', staff)),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
-      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      expect(d.outbox.publish).not.toHaveBeenCalled();
       expect(
         d.reservationsService.releaseConfirmedLines,
       ).not.toHaveBeenCalled();
@@ -507,7 +598,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       await expect(
         runWithTenant('tenant-a', () => d.service.openReview('order-1', staff)),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
-      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      expect(d.outbox.publish).not.toHaveBeenCalled();
       expect(d.orderNotifications.orderUnderReview).not.toHaveBeenCalled();
     });
 
@@ -519,8 +610,271 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       await expect(
         runWithTenant('tenant-b', () => d.service.openReview('order-1', staff)),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
-      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      expect(d.outbox.publish).not.toHaveBeenCalled();
     });
+  });
+
+  describe('confirm · líneas «por confirmar» (D-5)', () => {
+    /** Una línea «por confirmar» de `prod-1`, 3 pedidas. */
+    const pendingLine = (extra: Record<string, unknown> = {}) =>
+      orderLine({
+        requestedQuantity: '3',
+        reservedQuantity: '0',
+        statusConceptId: PINV.RES_LINE_PENDING_CONFIRMATION,
+        unitPriceAmount: '12.50',
+        currencyConceptId: 'cur-bob',
+        ...extra,
+      });
+
+    function confirmWith(d: ReturnType<typeof build>, adjustments?: any[]) {
+      return runWithTenant('tenant-a', () =>
+        d.service.confirm('order-1', adjustments ? { adjustments } : {}, staff),
+      );
+    }
+
+    /** El error de la promesa. */
+    async function failure(promise: Promise<unknown>): Promise<any> {
+      try {
+        await promise;
+      } catch (error) {
+        return error;
+      }
+      throw new Error('se esperaba un rechazo');
+    }
+
+    it('without adjustment the pharmacy confirms the requested quantity: position, ledger entry and reservation', async () => {
+      const d = build();
+      d.withSiteInMemory();
+      const live = order();
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(live);
+      const line = pendingLine();
+      d.ordersRepo.findLinesByReservationIds.mockResolvedValue([line]);
+
+      await confirmWith(d);
+
+      // La posición nace en la sede con lo pedido y queda reservada entera.
+      expect(d.sitePositions).toHaveLength(1);
+      expect(d.sitePositions[0]).toMatchObject({
+        inventoryLocationId: 'loc-1',
+        pharmacyProductId: 'prod-1',
+        onHandQuantity: '3',
+        reservedQuantity: '3',
+        availableQuantity: '0',
+      });
+      // El libro: el alta de la existencia (con el pedido como origen) y la reserva.
+      expect(d.ledgerRepo.append).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          movementTypeConceptId: PINV.MV_COUNT_ADJUSTMENT,
+          quantityDelta: '3',
+          sourceId: 'order-1',
+          pharmacySiteId: 'site-1',
+        }),
+      );
+      expect(d.ledgerRepo.append).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          movementTypeConceptId: PINV.MV_RESERVE,
+          reservationDelta: '3',
+          sourceId: 'order-1',
+        }),
+      );
+      // La misma línea pasa a reservada: no se crea otra que sume dos veces.
+      expect(d.reservationsRepo.createLine).not.toHaveBeenCalled();
+      expect(line).toMatchObject({
+        statusConceptId: PINV.RES_LINE_CONFIRMED,
+        requestedQuantity: '3',
+        reservedQuantity: '3',
+        inventoryLocationId: 'loc-1',
+        unitPriceAmount: '12.50',
+      });
+      expect(live.reservationStatusConceptId).toBe(PINV.ORDER_CONFIRMADO);
+      // El total se vuelve a sellar con la línea ya reservada.
+      expect(live.totalAmount).toBe('37.50');
+    });
+
+    it('takes the site lock before the ledger lock, like «Lo tengo»', async () => {
+      const d = build();
+      d.withSiteInMemory();
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(order());
+      d.ordersRepo.findLinesByReservationIds.mockResolvedValue([pendingLine()]);
+
+      await confirmWith(d);
+
+      expect(d.tx.execute).toHaveBeenCalledWith(
+        'select pg_advisory_xact_lock(hashtext(?))',
+        ['pharmacy_inventory.site:site-1'],
+      );
+      expect(d.tx.execute.mock.invocationCallOrder[0]).toBeLessThan(
+        d.ledgerRepo.nextSequence.mock.invocationCallOrder[0],
+      );
+    });
+
+    it('CONFIRMAR_STOCK writes what the site has and reserves what was requested', async () => {
+      const d = build();
+      d.withSiteInMemory();
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(order());
+      const line = pendingLine();
+      d.ordersRepo.findLinesByReservationIds.mockResolvedValue([line]);
+
+      await confirmWith(d, [
+        { productId: 'prod-1', decision: 'CONFIRMAR_STOCK', quantity: 5 },
+      ]);
+
+      expect(d.sitePositions[0]).toMatchObject({
+        onHandQuantity: '5',
+        reservedQuantity: '3',
+        availableQuantity: '2',
+      });
+      expect(line.statusConceptId).toBe(PINV.RES_LINE_CONFIRMED);
+    });
+
+    it('fewer units than requested: the site keeps them and the line stays out of stock', async () => {
+      const d = build();
+      d.withSiteInMemory();
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(order());
+      const line = pendingLine();
+      d.ordersRepo.findLinesByReservationIds.mockResolvedValue([line]);
+
+      await confirmWith(d, [
+        { productId: 'prod-1', decision: 'CONFIRMAR_STOCK', quantity: 1 },
+      ]);
+
+      expect(d.sitePositions[0]).toMatchObject({
+        onHandQuantity: '1',
+        reservedQuantity: '0',
+        availableQuantity: '1',
+      });
+      expect(line).toMatchObject({
+        statusConceptId: PINV.RES_LINE_OUT_OF_STOCK,
+        reservedQuantity: '0',
+        requestedQuantity: '3',
+      });
+      const reserves = d.ledgerRepo.append.mock.calls.filter(
+        ([, entry]: any) => entry.movementTypeConceptId === PINV.MV_RESERVE,
+      );
+      expect(reserves).toHaveLength(0);
+    });
+
+    it('NO_DISPONIBLE leaves the line out of stock without writing the site', async () => {
+      const d = build();
+      d.withSiteInMemory();
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(order());
+      const line = pendingLine();
+      d.ordersRepo.findLinesByReservationIds.mockResolvedValue([line]);
+
+      await confirmWith(d, [
+        { productId: 'prod-1', decision: 'NO_DISPONIBLE' },
+      ]);
+
+      expect(line).toMatchObject({
+        statusConceptId: PINV.RES_LINE_OUT_OF_STOCK,
+        reservedQuantity: '0',
+      });
+      expect(d.sitePositions).toHaveLength(0);
+      expect(d.ledgerRepo.append).not.toHaveBeenCalled();
+      expect(
+        d.reservationsService.releaseConfirmedLines,
+      ).not.toHaveBeenCalled();
+      expect(d.outbox.publish).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          payloadJson: expect.objectContaining({ unavailableLineCount: 1 }),
+        }),
+      );
+    });
+
+    it('a generic can be proposed on it: the original reserves nothing and the proposal is kept', async () => {
+      const d = build();
+      d.withSiteInMemory();
+      const live = order();
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(live);
+      const line = pendingLine();
+      d.ordersRepo.findLinesByReservationIds.mockResolvedValue([line]);
+      d.ordersRepo.findProductsByIds.mockResolvedValue([PRODUCT, GENERIC]);
+
+      await confirmWith(d, [
+        {
+          productId: 'prod-1',
+          decision: 'PROPONER_GENERICO',
+          proposedProductId: 'prod-gen',
+        },
+      ]);
+
+      expect(line.statusConceptId).toBe(PINV.RES_LINE_OUT_OF_STOCK);
+      expect(d.sitePositions).toHaveLength(0);
+      expect(d.substitutionsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          inventoryReservationLineId: 'line-1',
+          proposedPharmacyProductId: 'prod-gen',
+        }),
+      );
+      expect(live.reservationStatusConceptId).toBe(
+        PINV.ORDER_ACEPTACION_PENDIENTE,
+      );
+    });
+
+    it('a product that got a position meanwhile is governed by the ledger: no write', async () => {
+      const d = build();
+      d.withSiteInMemory();
+      d.sitePositions.push({
+        inventoryLocationId: 'loc-1',
+        pharmacyProductId: 'prod-1',
+        onHandQuantity: '4',
+        reservedQuantity: '0',
+        quarantineQuantity: '0',
+        availableQuantity: '4',
+      });
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(order());
+      const line = pendingLine();
+      d.ordersRepo.findLinesByReservationIds.mockResolvedValue([line]);
+
+      await confirmWith(d, [
+        { productId: 'prod-1', decision: 'CONFIRMAR_STOCK', quantity: 9 },
+      ]);
+
+      // Lo que dice el libro manda: 4 en la sede, 3 reservadas.
+      expect(d.writerPositions.findByKeyForUpdate).not.toHaveBeenCalled();
+      expect(d.sitePositions[0]).toMatchObject({
+        onHandQuantity: '4',
+        reservedQuantity: '3',
+        availableQuantity: '1',
+      });
+      expect(line.statusConceptId).toBe(PINV.RES_LINE_CONFIRMED);
+    });
+
+    it.each([
+      [
+        'on a line that is not pending',
+        [orderLine()],
+        { productId: 'prod-1', decision: 'CONFIRMAR_STOCK', quantity: 2 },
+      ],
+      [
+        'without the quantity',
+        [pendingLine()],
+        { productId: 'prod-1', decision: 'CONFIRMAR_STOCK' },
+      ],
+    ])(
+      'CONFIRMAR_STOCK %s answers 422 without writing',
+      async (_name, lines, adjustment) => {
+        const d = build();
+        d.withSiteInMemory();
+        d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(order());
+        d.ordersRepo.findLinesByReservationIds.mockResolvedValue(lines);
+
+        const error = await failure(confirmWith(d, [adjustment]));
+
+        expect(error).toBeInstanceOf(PreconditionFailedException);
+        expect(error.getResponse()).toEqual(
+          expect.objectContaining({
+            reason: 'ORDER_LINE_NOT_PENDING_CONFIRMATION',
+          }),
+        );
+        expect(d.sitePositions).toHaveLength(0);
+        expect(d.ledgerRepo.append).not.toHaveBeenCalled();
+      },
+    );
   });
 
   describe('confirm', () => {
@@ -529,16 +883,16 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       ['EN_REVISION', PINV.ORDER_EN_REVISION],
     ])('confirms from %s sealing confirmed_at', async (_name, fromId) => {
       const d = build();
-      const vivo = order({ reservationStatusConceptId: fromId });
-      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(vivo);
+      const live = order({ reservationStatusConceptId: fromId });
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(live);
 
       await runWithTenant('tenant-a', () =>
         d.service.confirm('order-1', {}, staff),
       );
 
-      expect(vivo.reservationStatusConceptId).toBe(PINV.ORDER_CONFIRMADO);
-      expect(vivo.confirmedAt).toBeInstanceOf(Date);
-      expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+      expect(live.reservationStatusConceptId).toBe(PINV.ORDER_CONFIRMADO);
+      expect(live.confirmedAt).toBeInstanceOf(Date);
+      expect(d.outbox.publish).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({ eventType: 'PharmacyOrderConfirmed' }),
       );
@@ -547,10 +901,10 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
 
     it('NO_DISPONIBLE releases ONLY that line and leaves it OUT_OF_STOCK with zero reserved', async () => {
       const d = build();
-      const vivo = order();
-      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(vivo);
-      const affected = linea({ id: 'line-1', pharmacyProductId: 'prod-1' });
-      const intact = linea({ id: 'line-2', pharmacyProductId: 'prod-2' });
+      const live = order();
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(live);
+      const affected = orderLine({ id: 'line-1', pharmacyProductId: 'prod-1' });
+      const intact = orderLine({ id: 'line-2', pharmacyProductId: 'prod-2' });
       d.ordersRepo.findLinesByReservationIds.mockResolvedValue([
         affected,
         intact,
@@ -567,7 +921,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       // La primitiva compartida, acotada a la línea afectada — nada más.
       expect(d.reservationsService.releaseConfirmedLines).toHaveBeenCalledWith(
         d.tx,
-        vivo,
+        live,
         staff,
         { onlyLineIds: ['line-1'] },
       );
@@ -581,7 +935,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       const d = build();
       d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(order());
       d.ordersRepo.findLinesByReservationIds.mockResolvedValue([
-        linea({
+        orderLine({
           statusConceptId: PINV.RES_LINE_OUT_OF_STOCK,
           reservedQuantity: '0',
         }),
@@ -602,9 +956,9 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
 
     it('PROPONER_GENERICO persists the proposal and parks the order awaiting the patient', async () => {
       const d = build();
-      const vivo = order();
-      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(vivo);
-      const line = linea({ unitPriceAmount: '60.00' });
+      const live = order();
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(live);
+      const line = orderLine({ unitPriceAmount: '60.00' });
       d.ordersRepo.findLinesByReservationIds.mockResolvedValue([line]);
       d.ordersRepo.findProductsByIds.mockResolvedValue([PRODUCT, GENERIC]);
       // La oferta del genérico tiene precio publicado en la sede.
@@ -658,15 +1012,15 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
         }),
       );
       // El pedido espera al paciente, confirmado por el mostrador.
-      expect(vivo.reservationStatusConceptId).toBe(
+      expect(live.reservationStatusConceptId).toBe(
         PINV.ORDER_ACEPTACION_PENDIENTE,
       );
-      expect(vivo.confirmedAt).toBeInstanceOf(Date);
+      expect(live.confirmedAt).toBeInstanceOf(Date);
       // El stock del original NO se libera: si prefiere el original, sigue.
       expect(
         d.reservationsService.releaseConfirmedLines,
       ).not.toHaveBeenCalled();
-      expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+      expect(d.outbox.publish).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({
           eventType: 'PharmacyOrderSubstitutionsProposed',
@@ -683,9 +1037,9 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
 
     it('a proposal of ANOTHER medication answers 422 with zero writes', async () => {
       const d = build();
-      const vivo = order();
-      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(vivo);
-      d.ordersRepo.findLinesByReservationIds.mockResolvedValue([linea()]);
+      const live = order();
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(live);
+      d.ordersRepo.findLinesByReservationIds.mockResolvedValue([orderLine()]);
       d.ordersRepo.findProductsByIds.mockResolvedValue([
         PRODUCT,
         OTHER_CONCEPT,
@@ -710,15 +1064,15 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       );
 
       expect(error).toBeInstanceOf(PreconditionFailedException);
-      expect(vivo.reservationStatusConceptId).toBe(PINV.ORDER_ENVIADO);
+      expect(live.reservationStatusConceptId).toBe(PINV.ORDER_ENVIADO);
       expect(d.substitutionsRepo.create).not.toHaveBeenCalled();
-      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      expect(d.outbox.publish).not.toHaveBeenCalled();
     });
 
     it('PROPONER_GENERICO without a proposed product answers 422', async () => {
       const d = build();
       d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(order());
-      d.ordersRepo.findLinesByReservationIds.mockResolvedValue([linea()]);
+      d.ordersRepo.findLinesByReservationIds.mockResolvedValue([orderLine()]);
 
       await expect(
         runWithTenant('tenant-a', () =>
@@ -739,7 +1093,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
     it('an adjustment for a product outside the order answers 422', async () => {
       const d = build();
       d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(order());
-      d.ordersRepo.findLinesByReservationIds.mockResolvedValue([linea()]);
+      d.ordersRepo.findLinesByReservationIds.mockResolvedValue([orderLine()]);
 
       await expect(
         runWithTenant('tenant-a', () =>
@@ -754,30 +1108,30 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
           ),
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
-      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      expect(d.outbox.publish).not.toHaveBeenCalled();
     });
   });
 
   describe('reject', () => {
     it('releases the reserved stock through the shared primitive and notifies with the reason', async () => {
       const d = build();
-      const vivo = order({
+      const live = order({
         reservationStatusConceptId: PINV.ORDER_EN_REVISION,
       });
-      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(vivo);
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(live);
 
       await runWithTenant('tenant-a', () =>
         d.service.reject('order-1', { reason: 'Receta vencida' }, staff),
       );
 
-      expect(vivo.reservationStatusConceptId).toBe(PINV.ORDER_RECHAZADO);
-      expect(vivo.releasedAt).toBeInstanceOf(Date);
+      expect(live.reservationStatusConceptId).toBe(PINV.ORDER_RECHAZADO);
+      expect(live.releasedAt).toBeInstanceOf(Date);
       expect(d.reservationsService.releaseConfirmedLines).toHaveBeenCalledWith(
         d.tx,
-        vivo,
+        live,
         staff,
       );
-      expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+      expect(d.outbox.publish).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({
           eventType: 'PharmacyOrderRejected',
@@ -794,14 +1148,14 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
 
     it('the reason IS persisted on the order (v4.2.1): the GET can return it', async () => {
       const d = build();
-      const vivo = order();
-      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(vivo);
+      const live = order();
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(live);
 
       await runWithTenant('tenant-a', () =>
         d.service.reject('order-1', { reason: 'Sin stock real' }, staff),
       );
 
-      expect(vivo.rejectionReasonText).toBe('Sin stock real');
+      expect(live.rejectionReasonText).toBe('Sin stock real');
     });
 
     it('rejecting from LISTO_PARA_RETIRO is illegal: 422 and no release', async () => {
@@ -834,7 +1188,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       expect(
         d.reservationsService.releaseConfirmedLines,
       ).not.toHaveBeenCalled();
-      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      expect(d.outbox.publish).not.toHaveBeenCalled();
     });
   });
 
@@ -852,7 +1206,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       const d = build();
       const confirmed = confirmedWithdrawal();
       d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(confirmed);
-      d.ordersRepo.findLinesByReservationIds.mockResolvedValue([linea()]);
+      d.ordersRepo.findLinesByReservationIds.mockResolvedValue([orderLine()]);
 
       const res = await runWithTenant('tenant-a', () =>
         d.service.ready('order-1', staff),
@@ -866,11 +1220,11 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
         /^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{6}$/,
       );
       // La reserva corre de nuevo ~48 h desde ahora.
-      const horas = (confirmed.expiresAt.getTime() - Date.now()) / 3_600_000;
-      expect(horas).toBeGreaterThan(47.9);
-      expect(horas).toBeLessThanOrEqual(48);
+      const hours = (confirmed.expiresAt.getTime() - Date.now()) / 3_600_000;
+      expect(hours).toBeGreaterThan(47.9);
+      expect(hours).toBeLessThanOrEqual(48);
       // El hecho en la transacción; la campana después, CON el código.
-      expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+      expect(d.outbox.publish).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({ eventType: 'PharmacyOrderReady' }),
       );
@@ -918,7 +1272,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       expect(confirmed.reservationStatusConceptId).toBe(PINV.ORDER_CONFIRMADO);
       expect(confirmed.pickupCode).toBeUndefined();
       expect(confirmed.expiresAt).toBe(expires);
-      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      expect(d.outbox.publish).not.toHaveBeenCalled();
       expect(d.orderNotifications.orderReady).not.toHaveBeenCalled();
     });
 
@@ -938,7 +1292,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
         deliveryMode: 'PINV_DELIVERY_DOMICILIO',
       });
       expect(confirmed.reservationStatusConceptId).toBe(PINV.ORDER_CONFIRMADO);
-      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      expect(d.outbox.publish).not.toHaveBeenCalled();
     });
 
     it('a site without a counter cannot promise a pickup: typed 422', async () => {
@@ -956,7 +1310,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       expect(error).toBeInstanceOf(PreconditionFailedException);
       expect((error as any).details).toMatchObject({ siteId: 'site-1' });
       expect(confirmed.reservationStatusConceptId).toBe(PINV.ORDER_CONFIRMADO);
-      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      expect(d.outbox.publish).not.toHaveBeenCalled();
     });
 
     it('a pickup-code collision retries the whole transaction with a fresh code', async () => {
@@ -1049,8 +1403,8 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
     }
 
     /** Una línea reservada y aún sin entregar, con ubicación y lote. */
-    function lineaViva(extra: Record<string, unknown> = {}) {
-      return linea({
+    function liveLine(extra: Record<string, unknown> = {}) {
+      return orderLine({
         inventoryLocationId: 'loc-1',
         inventoryLotId: 'lot-1',
         ...extra,
@@ -1072,10 +1426,10 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
 
     it('the right code delivers the full balance and the order becomes RETIRADO', async () => {
       const d = build();
-      const orden = ready();
-      const lin = lineaViva();
+      const pharmacyOrder = ready();
+      const lin = liveLine();
       const pos = position();
-      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(orden);
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(pharmacyOrder);
       d.ordersRepo.findLinesByReservationIds.mockResolvedValue([lin]);
       d.stockRepo.findByKeyForUpdate.mockResolvedValue(pos);
 
@@ -1111,8 +1465,10 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       // La línea acumula y el pedido cierra.
       expect(lin.fulfilledQuantity).toBe('3');
       expect(lin.statusConceptId).toBe(PINV.RES_LINE_FULFILLED);
-      expect(orden.reservationStatusConceptId).toBe(PINV.ORDER_RETIRADO);
-      expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+      expect(pharmacyOrder.reservationStatusConceptId).toBe(
+        PINV.ORDER_RETIRADO,
+      );
+      expect(d.outbox.publish).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({
           eventType: 'PharmacyOrderDispensed',
@@ -1126,9 +1482,9 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
 
     it('a code mismatch is a typed 422 with ZERO writes', async () => {
       const d = build();
-      const orden = ready();
-      const lin = lineaViva();
-      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(orden);
+      const pharmacyOrder = ready();
+      const lin = liveLine();
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(pharmacyOrder);
       d.ordersRepo.findLinesByReservationIds.mockResolvedValue([lin]);
 
       const error = await runWithTenant('tenant-a', () =>
@@ -1144,8 +1500,8 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       // Cero efectos: ni dispensación, ni ledger, ni estado, ni evento.
       expect(d.dispensationsRepo.create).not.toHaveBeenCalled();
       expect(d.ledgerRepo.append).not.toHaveBeenCalled();
-      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
-      expect(orden.reservationStatusConceptId).toBe(
+      expect(d.outbox.publish).not.toHaveBeenCalled();
+      expect(pharmacyOrder.reservationStatusConceptId).toBe(
         PINV.ORDER_LISTO_PARA_RETIRO,
       );
       expect(lin.fulfilledQuantity).toBeUndefined();
@@ -1153,19 +1509,16 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
 
     it('a partial delivery keeps LISTO with the SAME code; the second one closes', async () => {
       const d = build();
-      const orden = ready();
-      const linea1 = lineaViva();
-      const linea2 = lineaViva({
+      const pharmacyOrder = ready();
+      const line1 = liveLine();
+      const line2 = liveLine({
         id: 'line-2',
         pharmacyProductId: 'prod-2',
         inventoryLocationId: 'loc-2',
         inventoryLotId: undefined,
       });
-      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(orden);
-      d.ordersRepo.findLinesByReservationIds.mockResolvedValue([
-        linea1,
-        linea2,
-      ]);
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(pharmacyOrder);
+      d.ordersRepo.findLinesByReservationIds.mockResolvedValue([line1, line2]);
       d.stockRepo.findByKeyForUpdate.mockResolvedValue(position());
 
       // Primera entrega: solo prod-1. El pedido sigue LISTO, mismo código.
@@ -1176,13 +1529,13 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
           staff,
         ),
       );
-      expect(linea1.fulfilledQuantity).toBe('3');
-      expect(linea2.fulfilledQuantity).toBeUndefined();
-      expect(orden.reservationStatusConceptId).toBe(
+      expect(line1.fulfilledQuantity).toBe('3');
+      expect(line2.fulfilledQuantity).toBeUndefined();
+      expect(pharmacyOrder.reservationStatusConceptId).toBe(
         PINV.ORDER_LISTO_PARA_RETIRO,
       );
-      expect(orden.pickupCode).toBe('ABC234');
-      expect(d.outbox.publishDomainEvent).toHaveBeenLastCalledWith(
+      expect(pharmacyOrder.pickupCode).toBe('ABC234');
+      expect(d.outbox.publish).toHaveBeenLastCalledWith(
         d.tx,
         expect.objectContaining({
           payloadJson: expect.objectContaining({
@@ -1200,18 +1553,20 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
           staff,
         ),
       );
-      expect(linea2.fulfilledQuantity).toBe('3');
-      expect(orden.reservationStatusConceptId).toBe(PINV.ORDER_RETIRADO);
+      expect(line2.fulfilledQuantity).toBe('3');
+      expect(pharmacyOrder.reservationStatusConceptId).toBe(
+        PINV.ORDER_RETIRADO,
+      );
     });
 
     it('a product without standing balance answers 422 without a ghost delivery', async () => {
       const d = build();
-      const orden = ready();
-      const delivered = lineaViva({
+      const pharmacyOrder = ready();
+      const delivered = liveLine({
         statusConceptId: PINV.RES_LINE_FULFILLED,
         fulfilledQuantity: '3',
       });
-      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(orden);
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(pharmacyOrder);
       d.ordersRepo.findLinesByReservationIds.mockResolvedValue([delivered]);
 
       const error = await runWithTenant('tenant-a', () =>
@@ -1234,8 +1589,10 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
 
     it('replaying the idempotency key returns the order without re-dispensing', async () => {
       const d = build();
-      const orden = ready({ reservationStatusConceptId: PINV.ORDER_RETIRADO });
-      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(orden);
+      const pharmacyOrder = ready({
+        reservationStatusConceptId: PINV.ORDER_RETIRADO,
+      });
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(pharmacyOrder);
       d.dispensationsRepo.findByIdempotencyKey.mockResolvedValue({
         id: 'disp-0',
         inventoryReservationId: 'order-1',
@@ -1252,7 +1609,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       expect(res.id).toBe('order-1');
       expect(d.dispensationsRepo.create).not.toHaveBeenCalled();
       expect(d.ledgerRepo.append).not.toHaveBeenCalled();
-      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      expect(d.outbox.publish).not.toHaveBeenCalled();
     });
 
     it('an idempotency key from another delivery is a conflict, not a silent no-op', async () => {
@@ -1338,9 +1695,9 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
 
     it('accepting swaps the stock: releases the original, reserves the proposed with its frozen price, ACEPTADO', async () => {
       const d = build();
-      const orden = waitingDecision();
-      const original = linea();
-      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(orden);
+      const pharmacyOrder = waitingDecision();
+      const original = orderLine();
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(pharmacyOrder);
       const sub = proposal();
       d.substitutionsRepo.findByReservationIds.mockResolvedValue([sub]);
       d.ordersRepo.findLinesByReservationIds.mockResolvedValue([original]);
@@ -1366,7 +1723,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       // El stock del original vuelve con la primitiva compartida.
       expect(d.reservationsService.releaseConfirmedLines).toHaveBeenCalledWith(
         d.tx,
-        orden,
+        pharmacyOrder,
         patient,
         { onlyLineIds: ['line-1'] },
       );
@@ -1392,8 +1749,10 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       // La propuesta sobrevive como historia decidida.
       expect(sub.statusConceptId).toBe(PINV.SUBSTITUTION_ACEPTADA);
       expect(sub.decidedAt).toBeInstanceOf(Date);
-      expect(orden.reservationStatusConceptId).toBe(PINV.ORDER_ACEPTADO);
-      expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+      expect(pharmacyOrder.reservationStatusConceptId).toBe(
+        PINV.ORDER_ACEPTADO,
+      );
+      expect(d.outbox.publish).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({
           eventType: 'PharmacyOrderSubstitutionsAccepted',
@@ -1403,20 +1762,20 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
 
     it('a product split across several portions is swapped WHOLE: all portions released, full quantity re-reserved', async () => {
       const d = build();
-      const orden = waitingDecision();
+      const pharmacyOrder = waitingDecision();
       // El renglón lógico prod-1 vive repartido en DOS porciones físicas
       // (dos posiciones/lotes): la identidad del contrato es el producto.
-      const portionA = linea({
+      const portionA = orderLine({
         id: 'line-1',
         requestedQuantity: '2',
         reservedQuantity: '2',
       });
-      const portionB = linea({
+      const portionB = orderLine({
         id: 'line-1b',
         requestedQuantity: '1',
         reservedQuantity: '1',
       });
-      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(orden);
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(pharmacyOrder);
       d.substitutionsRepo.findByReservationIds.mockResolvedValue([proposal()]);
       d.ordersRepo.findLinesByReservationIds.mockResolvedValue([
         portionA,
@@ -1446,7 +1805,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       // queda huérfana.
       expect(d.reservationsService.releaseConfirmedLines).toHaveBeenCalledWith(
         d.tx,
-        orden,
+        pharmacyOrder,
         patient,
         { onlyLineIds: ['line-1', 'line-1b'] },
       );
@@ -1462,14 +1821,14 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
 
     it('accepting re-freezes the header total from the standing lines', async () => {
       const d = build();
-      const orden = waitingDecision();
-      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(orden);
+      const pharmacyOrder = waitingDecision();
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(pharmacyOrder);
       d.substitutionsRepo.findByReservationIds.mockResolvedValue([proposal()]);
       // Primera lectura: el renglón original; segunda (post-swap): el nuevo.
       d.ordersRepo.findLinesByReservationIds
-        .mockResolvedValueOnce([linea()])
+        .mockResolvedValueOnce([orderLine()])
         .mockResolvedValue([
-          linea({
+          orderLine({
             id: 'line-2',
             pharmacyProductId: 'prod-gen',
             reservedQuantity: '3',
@@ -1497,15 +1856,15 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       );
 
       // 3 × 25.00, exacto y a 2 decimales.
-      expect(orden.totalAmount).toBe('75.00');
-      expect(orden.currencyConceptId).toBe('cur-bob');
+      expect(pharmacyOrder.totalAmount).toBe('75.00');
+      expect(pharmacyOrder.currencyConceptId).toBe('cur-bob');
     });
 
     it('preferring the original keeps the lines and returns the order to CONFIRMADO', async () => {
       const d = build();
-      const orden = waitingDecision();
-      const original = linea();
-      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(orden);
+      const pharmacyOrder = waitingDecision();
+      const original = orderLine();
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(pharmacyOrder);
       const sub = proposal();
       d.substitutionsRepo.findByReservationIds.mockResolvedValue([sub]);
       d.ordersRepo.findLinesByReservationIds.mockResolvedValue([original]);
@@ -1523,8 +1882,10 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       // La propuesta queda como historia rechazada.
       expect(sub.statusConceptId).toBe(PINV.SUBSTITUTION_RECHAZADA);
       expect(sub.decidedAt).toBeInstanceOf(Date);
-      expect(orden.reservationStatusConceptId).toBe(PINV.ORDER_CONFIRMADO);
-      expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+      expect(pharmacyOrder.reservationStatusConceptId).toBe(
+        PINV.ORDER_CONFIRMADO,
+      );
+      expect(d.outbox.publish).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({
           eventType: 'PharmacyOrderOriginalPreferred',
@@ -1534,10 +1895,10 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
 
     it('deciding is only legal on ACEPTACION_PENDIENTE: 422 with zero effects', async () => {
       const d = build();
-      const orden = order({
+      const pharmacyOrder = order({
         reservationStatusConceptId: PINV.ORDER_CONFIRMADO,
       });
-      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(orden);
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(pharmacyOrder);
 
       const error = await runWithTenant('tenant-a', () =>
         d.service
@@ -1546,15 +1907,15 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       );
 
       expect(error).toBeInstanceOf(PreconditionFailedException);
-      expect(orden.reservationStatusConceptId).toBe(PINV.ORDER_CONFIRMADO);
-      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      expect(pharmacyOrder.reservationStatusConceptId).toBe(
+        PINV.ORDER_CONFIRMADO,
+      );
+      expect(d.outbox.publish).not.toHaveBeenCalled();
     });
 
     it('a non-owner gets the same 404 as a nonexistent order', async () => {
       const d = build();
-      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(
-        waitingDecision(),
-      );
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(waitingDecision());
       const foreign = {
         id: 'user-x',
         roles: ['PATIENT'],
@@ -1571,9 +1932,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
 
     it('without standing proposals there is nothing to decide: 422', async () => {
       const d = build();
-      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(
-        waitingDecision(),
-      );
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(waitingDecision());
       d.substitutionsRepo.findByReservationIds.mockResolvedValue([
         proposal({ statusConceptId: PINV.SUBSTITUTION_RECHAZADA }),
       ]);
@@ -1589,15 +1948,15 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
   describe('avisos de cierre (FAR-E3)', () => {
     it('a COMPLETE dispense notifies the prescriber, navigating to the prescription', async () => {
       const d = build();
-      const orden = order({
+      const pharmacyOrder = order({
         reservationStatusConceptId: PINV.ORDER_LISTO_PARA_RETIRO,
         deliveryModeConceptId: PINV.DELIVERY_RETIRO,
         pickupCode: 'ABC234',
         medicationRequestId: 'req-1',
       });
-      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(orden);
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(pharmacyOrder);
       d.ordersRepo.findLinesByReservationIds.mockResolvedValue([
-        linea({ inventoryLocationId: 'loc-1' }),
+        orderLine({ inventoryLocationId: 'loc-1' }),
       ]);
       d.ordersRepo.findPrescriberProfileId.mockResolvedValue('presc-1');
 
@@ -1619,16 +1978,16 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
 
     it('a PARTIAL dispense does not notify the prescriber yet', async () => {
       const d = build();
-      const orden = order({
+      const pharmacyOrder = order({
         reservationStatusConceptId: PINV.ORDER_LISTO_PARA_RETIRO,
         deliveryModeConceptId: PINV.DELIVERY_RETIRO,
         pickupCode: 'ABC234',
         medicationRequestId: 'req-1',
       });
-      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(orden);
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(pharmacyOrder);
       d.ordersRepo.findLinesByReservationIds.mockResolvedValue([
-        linea({ inventoryLocationId: 'loc-1' }),
-        linea({
+        orderLine({ inventoryLocationId: 'loc-1' }),
+        orderLine({
           id: 'line-2',
           pharmacyProductId: 'prod-2',
           inventoryLocationId: 'loc-1',

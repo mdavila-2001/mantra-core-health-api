@@ -12,12 +12,15 @@ import { CatalogConcepts } from '../../terminology/entities';
 import {
   Pharmacies,
   PharmacyLicenses,
+  PharmacyOnCallShifts,
   PharmacyPriceLists,
   PharmacyProductPrices,
   PharmacyProducts,
   PharmacySites,
 } from '../entities';
 import { PHARM } from '../pharmacy.concepts';
+import { SELLABLE_STOCK_FILTER } from '../services/pharmacy-catalog-rules';
+import { siteProductAvailabilitySql } from '../../pharmacy_inventory/domain/site-product-availability';
 
 /** Acotaciones de la búsqueda de productos del directorio. */
 export interface ProductSearchFilter {
@@ -40,12 +43,12 @@ export class PharmacyReadRepository {
   /** Farmacias activas y verificadas del tenant activo. */
   findVisibleByTenant(
     em: EntityManager,
-    tenantId: string,
+    tenantId: string | undefined,
   ): Promise<Pharmacies[]> {
     return em.find(
       Pharmacies,
       {
-        tenantId,
+        ...(tenantId === undefined ? {} : { tenantId }),
         statusConceptId: PHARM.PHARMACY_ACTIVE,
         verificationStatusConceptId: PHARM.VERIFICATION_VERIFIED,
       },
@@ -56,12 +59,12 @@ export class PharmacyReadRepository {
   /** Detalle con el mismo filtro de publicación y aislamiento que el listado. */
   findVisibleById(
     em: EntityManager,
-    tenantId: string,
+    tenantId: string | undefined,
     id: string,
   ): Promise<Pharmacies | null> {
     return em.findOne(Pharmacies, {
       id,
-      tenantId,
+      ...(tenantId === undefined ? {} : { tenantId }),
       statusConceptId: PHARM.PHARMACY_ACTIVE,
       verificationStatusConceptId: PHARM.VERIFICATION_VERIFIED,
     });
@@ -128,6 +131,40 @@ export class PharmacyReadRepository {
   }
 
   /**
+   * Todo el catálogo de UNA farmacia —publicados, borradores y retirados—, para
+   * la lectura de gestión de su personal (P47 `managed=true`). Quien llama ya
+   * comprobó que el actor es de esa farmacia.
+   */
+  findCatalogProducts(
+    em: EntityManager,
+    pharmacyId: string,
+    filter: ProductSearchFilter,
+    limit: number,
+  ): Promise<PharmacyProducts[]> {
+    const term = filter.search?.trim();
+    return em.find(
+      PharmacyProducts,
+      {
+        pharmacyId,
+        ...(filter.conceptId ? { medicationConceptId: filter.conceptId } : {}),
+        ...(term
+          ? {
+              $or: [
+                { brandName: { $ilike: `%${term}%` } },
+                { genericName: { $ilike: `%${term}%` } },
+                { productCode: { $ilike: `%${term}%` } },
+              ],
+            }
+          : {}),
+      },
+      {
+        orderBy: { genericName: 'ASC', brandName: 'ASC', id: 'ASC' },
+        limit,
+      },
+    );
+  }
+
+  /**
    * Sólo el dueño de cada producto activo, para contar catálogo por farmacia
    * sin traer las filas enteras (proyección de columnas, no N+1 de counts).
    */
@@ -156,6 +193,66 @@ export class PharmacyReadRepository {
       id: { $in: [...ids] },
       statusConceptId: PHARM.PRODUCT_ACTIVE,
     });
+  }
+
+  /**
+   * Productos publicados que la farmacia no marcó «no tengo» (P47). Es lo que
+   * piden la disponibilidad, los precios de una sede y un pedido nuevo; cuánto
+   * hay en cada sede lo decide después la regla por sede.
+   */
+  findSellableProductsByIds(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<PharmacyProducts[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(PharmacyProducts, {
+      id: { $in: [...ids] },
+      statusConceptId: PHARM.PRODUCT_ACTIVE,
+      ...SELLABLE_STOCK_FILTER,
+    });
+  }
+
+  /**
+   * Los productos publicados y vendibles de unos medicamentos del vademécum,
+   * de cualquier farmacia: la disponibilidad por medicamento los cruza después
+   * con las farmacias visibles y con la regla por sede. Un producto sin
+   * `medication_concept_id` no entra: no hay con qué emparejarlo.
+   */
+  findSellableProductsByMedicationConcepts(
+    em: EntityManager,
+    conceptIds: readonly string[],
+  ): Promise<PharmacyProducts[]> {
+    if (conceptIds.length === 0) return Promise.resolve([]);
+    return em.find(PharmacyProducts, {
+      medicationConceptId: { $in: [...conceptIds] },
+      statusConceptId: PHARM.PRODUCT_ACTIVE,
+      ...SELLABLE_STOCK_FILTER,
+    });
+  }
+
+  /**
+   * De unos productos, los que una sede tiene **disponibles** hoy según la
+   * regla única por sede (`siteProductAvailabilitySql`): el libro si el
+   * producto tiene posición en la sede, lo declarado en el catálogo si no. Es
+   * la misma regla que leen el buscador, el catálogo público y la receta
+   * compartida.
+   */
+  async findAvailableProductIdsAtSite(
+    em: EntityManager,
+    siteId: string,
+    productIds: readonly string[],
+  ): Promise<Set<string>> {
+    if (productIds.length === 0) return new Set();
+    const availability = siteProductAvailabilitySql();
+    const rows = await em.getConnection().execute<{ product_id: string }[]>(
+      `SELECT av.product_id
+         FROM (${availability.sql}) av
+        WHERE av.site_id = ?
+          AND av.product_id IN (${productIds.map(() => '?').join(', ')})`,
+      [...availability.params, siteId, ...productIds],
+      'all',
+    );
+    return new Set(rows.map((row) => row.product_id));
   }
 
   /**
@@ -203,6 +300,24 @@ export class PharmacyReadRepository {
       statusConceptId: PHARM.PRICE_ACTIVE,
       effectiveFrom: { $lte: now },
       $or: [{ effectiveTo: null }, { effectiveTo: { $gt: now } }],
+    });
+  }
+
+  /**
+   * Turnos de guardia activos y vigentes en `now` de las sedes (P34). Un turno
+   * vencido o cancelado no sale de acá: el filtro está en la consulta.
+   */
+  findCurrentOnCallShifts(
+    em: EntityManager,
+    siteIds: readonly string[],
+    now: Date,
+  ): Promise<PharmacyOnCallShifts[]> {
+    if (siteIds.length === 0) return Promise.resolve([]);
+    return em.find(PharmacyOnCallShifts, {
+      pharmacySiteId: { $in: [...siteIds] },
+      statusConceptId: PHARM.ON_CALL_SHIFT_ACTIVE,
+      startsAt: { $lte: now },
+      endsAt: { $gt: now },
     });
   }
 

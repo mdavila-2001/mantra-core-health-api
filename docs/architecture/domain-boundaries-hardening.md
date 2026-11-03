@@ -109,17 +109,3 @@ dirección es la correcta.
 "lectura de citas — el motivo le llega a la otra parte") sigue en verde sin
 haberse modificado — es la prueba de que el comportamiento observable no
 cambió, sólo su ubicación.
-
-## Lo que queda pendiente
-
-- Las extracciones 2-4 de la tabla de arriba, cada una en su propio PR con su
-  propia caracterización antes de mover código (regla del carril: como mucho
-  una extracción por esta ficha).
-- El mismo ejercicio de inventario y plan para `profiles-practitioners.service.ts`
-  (2602 líneas) y `pharmacy-orders.service.ts` (2557 líneas): no se hizo en
-  este PR por alcance — sólo se los deja listados en el top 15 con su cifra
-  medida, sin analizar sus clústeres internos.
-- `scheduling-catalog.service.ts` (2253) y `profiles-patients.service.ts`
-  (2478) no estaban en la ficha original pero aparecen en el top 5 medido: se
-  documentan acá para que la próxima persona que trabaje performance/F11 no
-  vuelva a descubrirlos de cero.

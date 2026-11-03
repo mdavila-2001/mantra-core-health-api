@@ -1,0 +1,7 @@
+[Unit]
+Description=ALOVIDA: despliega el último commit de cada rama en Coolify
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/alovida-autodeploy
+Nice=10

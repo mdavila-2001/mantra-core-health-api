@@ -47,7 +47,7 @@ Los casos de uso escriben cuatro rutas con dos puntos (`/courses:publish`, `/ver
 segmentos normales por el mismo motivo que en el resto del proyecto: el enrutador de Nest 11
 interpreta `:` como inicio de parámetro en cualquier posición del segmento.
 
-## Pruebas
+## Tests
 
 `education.controller.spec.ts` con ambos servicios mockeados: delegación, argumentos (incluido el
 actor y los ids de ruta), el endpoint sin cuerpo y propagación de errores.

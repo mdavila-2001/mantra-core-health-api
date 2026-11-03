@@ -2,14 +2,14 @@
   "code": "PEDIA_RECIEN_NACIDO",
   "name": "Atención del recién nacido",
   "specialty": { "code": "PEDIATRIA", "display": "Pediatría" },
-  "version": 1,
+  "version": 2,
   "provenance": {
     "sourceTitle": "Recomendaciones de la OMS sobre la atención materna y neonatal para una experiencia posnatal positiva (2022)",
     "organization": "Organización Mundial de la Salud (OMS)",
     "url": "https://www.who.int/publications/i/item/9789240045989",
     "license": "CC BY-NC-SA 3.0 IGO",
     "retrievedAt": "2026-10-02",
-    "note": "Apgar, antropometría, tamizajes y signos de peligro del recién nacido."
+    "note": "Apgar, antropometría, tamizajes y signos de peligro del recién nacido. Ampliación internacional (2026-10-24): ítems del puntaje de Apgar al minuto y a los 5 minutos (traducción al castellano del CKM) desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 3.0 o 4.0 según cada uno, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas. Ampliación internacional (2026-10-24): examen físico del neonato, alimentación, posición para dormir, vitamina K y signos de peligro que faltaban desde la Digital adaptation kit for postnatal care: operational requirements for implementing WHO recommendations in digital systems (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-dak-pnc, commit 1c490e4); instantánea en tools/clinical-forms/who-dak/dak-snapshot.json. Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
   },
   "fields": [
     {
@@ -22,10 +22,132 @@
     },
     {
       "section": "Evaluación: recién nacido",
+      "code": "apgar_1min_respiracion",
+      "name": "Apgar al minuto — esfuerzo respiratorio",
+      "dataType": "string",
+      "required": false,
+      "options": ["0 — Ausente", "1 — Débil o irregular", "2 — Normal"],
+      "description": "Fuente: puntaje de Apgar (Apgar V. Curr Res Anesth Analg. 1953;32:260-7), según el arquetipo openEHR openEHR-EHR-OBSERVATION.apgar.v2 (rev. 2.0.5, publicado; CC BY-SA 4.0). Texto de la traducción al castellano (es) del CKM."
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "apgar_1min_frecuencia_cardiaca",
+      "name": "Apgar al minuto — frecuencia cardíaca",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Ausente",
+        "1 — <100 latidos por minuto",
+        "2 — ≥100 latidos por minuto"
+      ],
+      "description": "Fuente: puntaje de Apgar (Apgar V. Curr Res Anesth Analg. 1953;32:260-7), según el arquetipo openEHR openEHR-EHR-OBSERVATION.apgar.v2 (rev. 2.0.5, publicado; CC BY-SA 4.0). Texto de la traducción al castellano (es) del CKM."
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "apgar_1min_tono",
+      "name": "Apgar al minuto — tono muscular",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Ausente (flácido)",
+        "1 — Tono reducido",
+        "2 — Tono normal"
+      ],
+      "description": "Fuente: puntaje de Apgar (Apgar V. Curr Res Anesth Analg. 1953;32:260-7), según el arquetipo openEHR openEHR-EHR-OBSERVATION.apgar.v2 (rev. 2.0.5, publicado; CC BY-SA 4.0). Texto de la traducción al castellano (es) del CKM."
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "apgar_1min_reflejos",
+      "name": "Apgar al minuto — reflejos e irritabilidad",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Sin respuesta",
+        "1 — Respuesta reducida",
+        "2 — Respuesta normal"
+      ],
+      "description": "Fuente: puntaje de Apgar (Apgar V. Curr Res Anesth Analg. 1953;32:260-7), según el arquetipo openEHR openEHR-EHR-OBSERVATION.apgar.v2 (rev. 2.0.5, publicado; CC BY-SA 4.0). Texto de la traducción al castellano (es) del CKM."
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "apgar_1min_color",
+      "name": "Apgar al minuto — color de la piel",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Completamente azul",
+        "1 — Cuerpo rosado; extremidades azules",
+        "2 — Completamente rosado"
+      ],
+      "description": "Fuente: puntaje de Apgar (Apgar V. Curr Res Anesth Analg. 1953;32:260-7), según el arquetipo openEHR openEHR-EHR-OBSERVATION.apgar.v2 (rev. 2.0.5, publicado; CC BY-SA 4.0). Texto de la traducción al castellano (es) del CKM."
+    },
+    {
+      "section": "Evaluación: recién nacido",
       "code": "apgar_1",
       "name": "Apgar al minuto",
       "dataType": "integer",
       "required": true
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "apgar_5min_respiracion",
+      "name": "Apgar a los 5 minutos — esfuerzo respiratorio",
+      "dataType": "string",
+      "required": false,
+      "options": ["0 — Ausente", "1 — Débil o irregular", "2 — Normal"],
+      "description": "Fuente: puntaje de Apgar (Apgar V. Curr Res Anesth Analg. 1953;32:260-7), según el arquetipo openEHR openEHR-EHR-OBSERVATION.apgar.v2 (rev. 2.0.5, publicado; CC BY-SA 4.0). Texto de la traducción al castellano (es) del CKM."
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "apgar_5min_frecuencia_cardiaca",
+      "name": "Apgar a los 5 minutos — frecuencia cardíaca",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Ausente",
+        "1 — <100 latidos por minuto",
+        "2 — ≥100 latidos por minuto"
+      ],
+      "description": "Fuente: puntaje de Apgar (Apgar V. Curr Res Anesth Analg. 1953;32:260-7), según el arquetipo openEHR openEHR-EHR-OBSERVATION.apgar.v2 (rev. 2.0.5, publicado; CC BY-SA 4.0). Texto de la traducción al castellano (es) del CKM."
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "apgar_5min_tono",
+      "name": "Apgar a los 5 minutos — tono muscular",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Ausente (flácido)",
+        "1 — Tono reducido",
+        "2 — Tono normal"
+      ],
+      "description": "Fuente: puntaje de Apgar (Apgar V. Curr Res Anesth Analg. 1953;32:260-7), según el arquetipo openEHR openEHR-EHR-OBSERVATION.apgar.v2 (rev. 2.0.5, publicado; CC BY-SA 4.0). Texto de la traducción al castellano (es) del CKM."
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "apgar_5min_reflejos",
+      "name": "Apgar a los 5 minutos — reflejos e irritabilidad",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Sin respuesta",
+        "1 — Respuesta reducida",
+        "2 — Respuesta normal"
+      ],
+      "description": "Fuente: puntaje de Apgar (Apgar V. Curr Res Anesth Analg. 1953;32:260-7), según el arquetipo openEHR openEHR-EHR-OBSERVATION.apgar.v2 (rev. 2.0.5, publicado; CC BY-SA 4.0). Texto de la traducción al castellano (es) del CKM."
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "apgar_5min_color",
+      "name": "Apgar a los 5 minutos — color de la piel",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Completamente azul",
+        "1 — Cuerpo rosado; extremidades azules",
+        "2 — Completamente rosado"
+      ],
+      "description": "Fuente: puntaje de Apgar (Apgar V. Curr Res Anesth Analg. 1953;32:260-7), según el arquetipo openEHR openEHR-EHR-OBSERVATION.apgar.v2 (rev. 2.0.5, publicado; CC BY-SA 4.0). Texto de la traducción al castellano (es) del CKM."
     },
     {
       "section": "Evaluación: recién nacido",
@@ -64,10 +186,193 @@
     },
     {
       "section": "Evaluación: recién nacido",
+      "code": "rn_temperatura_al_tacto",
+      "name": "Temperatura al tacto",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Normal",
+        "Frío",
+        "Muy caliente (sobrecalentado: rubicundo, sudoroso o pelo húmedo)"
+      ],
+      "description": "Fuente: elemento PNC.B4b.DE.48 «Warmth» de la Digital adaptation kit for postnatal care: operational requirements for implementing WHO recommendations in digital systems (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-dak-pnc, commit 1c490e4). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "rn_piel",
+      "name": "Piel",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Normal",
+        "Palidez",
+        "Cianosis",
+        "Signos de infección cutánea (pústulas, ampollas, tumefacción, enrojecimiento o induración)"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Fuente: elemento PNC.B4b.DE.25 «Skin» de la Digital adaptation kit for postnatal care: operational requirements for implementing WHO recommendations in digital systems (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-dak-pnc, commit 1c490e4). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "rn_ictericia_localizacion",
+      "name": "Ictericia: hasta dónde llega",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Cara",
+        "Tórax",
+        "Abdomen",
+        "Piernas",
+        "Brazos",
+        "Palmas",
+        "Plantas"
+      ],
+      "multiple": true,
+      "description": "Sólo si hay ictericia. Fuente: elemento PNC.B4b.DE.31 «Jaundice location» de la Digital adaptation kit for postnatal care: operational requirements for implementing WHO recommendations in digital systems (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-dak-pnc, commit 1c490e4). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "rn_fontanelas",
+      "name": "Fontanelas",
+      "dataType": "string",
+      "required": false,
+      "options": ["Normales", "Abombadas o tensas", "Deprimidas"],
+      "description": "Fuente: elemento PNC.B4b.DE.80 «Fontanelles» de la Digital adaptation kit for postnatal care: operational requirements for implementing WHO recommendations in digital systems (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-dak-pnc, commit 1c490e4). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "rn_ojos",
+      "name": "Ojos",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Normales",
+        "Tumefactos y con secreción purulenta",
+        "Opacidades",
+        "Escleras amarillas",
+        "Enrojecimiento",
+        "Reflejo rojo normal",
+        "Reflejo rojo anormal"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Fuente: elemento PNC.B4b.DE.88 «Eyes» de la Digital adaptation kit for postnatal care: operational requirements for implementing WHO recommendations in digital systems (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-dak-pnc, commit 1c490e4). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "rn_cordon_umbilical",
+      "name": "Cordón umbilical",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Normal (tres vasos, limpio y seco)",
+        "Ombligo o piel periumbilical enrojecidos o tumefactos",
+        "Secreción purulenta",
+        "Sangrado"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Fuente: elemento PNC.B4b.DE.121 «Umbilical cord» de la Digital adaptation kit for postnatal care: operational requirements for implementing WHO recommendations in digital systems (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-dak-pnc, commit 1c490e4). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "rn_malformaciones",
+      "name": "Malformaciones",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Ninguna evidente",
+        "Pie bot",
+        "Labio leporino",
+        "Paladar hendido",
+        "Aspecto inusual que genera preocupación",
+        "Tejido expuesto en cabeza, abdomen, espalda, periné o genitales"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Fuente: elemento PNC.B4b.DE.52 «Malformation» de la Digital adaptation kit for postnatal care: operational requirements for implementing WHO recommendations in digital systems (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-dak-pnc, commit 1c490e4). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "rn_genitales",
+      "name": "Genitales",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Aspecto habitual",
+        "Sangrado vaginal",
+        "Labios fusionados",
+        "Testículos no descendidos",
+        "Hipospadias",
+        "Hidrocele",
+        "Hernia inguinal",
+        "Genitales ambiguos"
+      ],
+      "allowOther": true,
+      "description": "Fuente: elemento PNC.B4b.DE.128 «Genitalia» de la Digital adaptation kit for postnatal care: operational requirements for implementing WHO recommendations in digital systems (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-dak-pnc, commit 1c490e4). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "rn_ano",
+      "name": "Ano",
+      "dataType": "json",
+      "required": false,
+      "options": ["Normal (permeable)", "Ano imperforado", "Aspecto anormal"],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Fuente: elemento PNC.B4b.DE.142 «Anus» de la Digital adaptation kit for postnatal care: operational requirements for implementing WHO recommendations in digital systems (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-dak-pnc, commit 1c490e4). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "rn_espalda_columna",
+      "name": "Espalda y columna",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Normales",
+        "Hoyuelos o fositas",
+        "Apéndices cutáneos",
+        "Mechones de pelo",
+        "Anencefalia",
+        "Encefalocele",
+        "Espina bífida"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Fuente: elemento PNC.B4b.DE.152 «Back and spine» de la Digital adaptation kit for postnatal care: operational requirements for implementing WHO recommendations in digital systems (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-dak-pnc, commit 1c490e4). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+    },
+    {
+      "section": "Evaluación: recién nacido",
       "code": "lactancia_primera_hora",
       "name": "Lactancia en la primera hora",
       "dataType": "boolean",
       "required": false
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "rn_alimentacion_actual",
+      "name": "Alimentación actual",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Lactancia exclusiva a demanda",
+        "Lactancia exclusiva con horario",
+        "Mixta (fórmula y leche materna)",
+        "Fórmula"
+      ],
+      "allowOther": true,
+      "description": "Fuente: elemento PNC.B3b.DE.45 «Feeding status» de la Digital adaptation kit for postnatal care: operational requirements for implementing WHO recommendations in digital systems (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-dak-pnc, commit 1c490e4). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "rn_posicion_para_dormir",
+      "name": "Posición en la que suele dormir",
+      "dataType": "json",
+      "required": false,
+      "options": ["Boca arriba", "De costado", "Boca abajo", "No se sabe"],
+      "multiple": true,
+      "description": "Fuente: elemento PNC.B3b.DE.87 «Sleeping position» de la Digital adaptation kit for postnatal care: operational requirements for implementing WHO recommendations in digital systems (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-dak-pnc, commit 1c490e4). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
     },
     {
       "section": "Evaluación: recién nacido",
@@ -96,9 +401,18 @@
         "Tiraje",
         "Fiebre o hipotermia",
         "Ictericia en las primeras 24 h",
+        "Respiración ruidosa (quejido, estridor)",
+        "Cianosis central",
+        "Respiración lenta, boqueo o apnea",
+        "Aleteo nasal",
+        "Distensión abdominal",
+        "Sólo se mueve al estimularlo o no se mueve",
+        "Secreción purulenta del muñón umbilical",
+        "Sangrado del muñón umbilical",
         "Ninguno"
       ],
-      "multiple": true
+      "multiple": true,
+      "description": "Ampliada (2026-10-24) con los signos de peligro del elemento PNC.B4b.DE.1 de la Digital adaptation kit for postnatal care: operational requirements for implementing WHO recommendations in digital systems (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-dak-pnc, commit 1c490e4); traducción propia, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
     },
     {
       "section": "Evaluación: recién nacido",
@@ -106,6 +420,15 @@
       "name": "BCG y hepatitis B aplicadas",
       "dataType": "boolean",
       "required": false
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "rn_vitamina_k",
+      "name": "Vitamina K al nacer",
+      "dataType": "string",
+      "required": false,
+      "options": ["Sí", "No", "No se sabe"],
+      "description": "Fuente: elemento PNC.B3b.DE.24 «Vitamin K administered at birth» de la Digital adaptation kit for postnatal care: operational requirements for implementing WHO recommendations in digital systems (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-dak-pnc, commit 1c490e4). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
     },
     {
       "section": "Conclusión y plan",

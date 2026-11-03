@@ -30,7 +30,16 @@ RUN --mount=type=cache,target=/app/.yarn/cache,sharing=locked \
 # ---- build: compila TS -> dist (incluye main.js y los 20 worker-*.js) ----
 FROM deps AS build
 COPY . .
-RUN yarn build
+# Los seeds grandes (glosario, catálogos) pasan el tope de memoria por defecto
+# de Node (~2 GB) y `nest build` muere con «heap out of memory»: sin esto la
+# imagen no se construye y el servidor se queda con el código anterior.
+RUN NODE_OPTIONS=--max-old-space-size=4096 yarn build
+# Manifiesto de la sonda de piezas en ejecución (`/admin/ops/runtime-pieces`):
+# el escáner lee `src/`, que la imagen final no trae. Se genera aquí, con el
+# código fuente delante, y viaja dentro de `dist/`. Sin él la sonda responde
+# «escaneo no disponible». El CLI sale con 1 si no encuentra el código fuente: así un
+# manifiesto vacío rompe la construcción en vez de llegar a producción.
+RUN node dist/src/modules/platform_ops/runtime_pieces/runtime-pieces-manifest.cli.js dist/runtime-pieces.manifest.json
 
 # ---- deps de producción only (para la imagen final, sin devDependencies) ----
 FROM node:24-bookworm-slim AS prod-deps
@@ -64,6 +73,10 @@ RUN groupadd --gid 1001 nodeapp \
 COPY --chown=nodeapp:nodeapp package.json ./
 COPY --chown=nodeapp:nodeapp --from=prod-deps /app/node_modules ./node_modules
 COPY --chown=nodeapp:nodeapp --from=build /app/dist ./dist
+# El inventario del portal (`/admin/portal/*`) son archivos que genera
+# `tools/inventario/*.mjs` y que se leen de `process.cwd()/inventario`. Sin esta
+# copia la imagen no los trae y todas las rutas del portal responden 503.
+COPY --chown=nodeapp:nodeapp --from=build /app/inventario ./inventario
 
 # `FILE_STORAGE_LOCAL_DIR` (default ./storage/uploads) y la cache de MikroORM
 # (node_modules/.cache) se escriben en tiempo de ejecución: sin este mkdir

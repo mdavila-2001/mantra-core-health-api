@@ -1,0 +1,42 @@
+# fixture-source: mondo.sssom.tsv http://purl.obolibrary.org/obo/mondo/mappings/mondo.sssom.tsv (MONDO releases/2026-10-06)
+# fixture-lines: 3311,3312,3313,3314,3317,54290,54292,54293,54294,55647,55650,55651,55653,55654,57744,57745,57747,57749,57932,57935,57936,57937,60810,60811,63327,63329,63330,63331,64349,64350,64351,64352,73996,73997,94222,94224,94225,106008,106009
+subject_id	subject_label	predicate_id	object_id	object_label	mapping_justification
+MONDO:0001155	gastrojejunal ulcer	skos:exactMatch	DOID:10927	gastrojejunal ulcer	semapv:UnspecifiedMatching
+MONDO:0001155	gastrojejunal ulcer	skos:exactMatch	ICD10CM:K28	Gastrojejunal ulcer	semapv:UnspecifiedMatching
+MONDO:0001155	gastrojejunal ulcer	skos:exactMatch	ICD10CM:K28.0	Acute gastrojejunal ulcer with hemorrhage	semapv:UnspecifiedMatching
+MONDO:0001155	gastrojejunal ulcer	skos:exactMatch	ICD10WHO:K28	Gastrojejunal ulcer	semapv:UnspecifiedMatching
+MONDO:0001155	gastrojejunal ulcer	skos:exactMatch	UMLS:C1384631		semapv:UnspecifiedMatching
+MONDO:0011523	Bardet-Biedl syndrome 6	skos:exactMatch	DOID:0110128	Bardet-Biedl syndrome 6	semapv:UnspecifiedMatching
+MONDO:0011523	Bardet-Biedl syndrome 6	skos:exactMatch	OMIM:605231	bardet-biedl syndrome 6	semapv:UnspecifiedMatching
+MONDO:0011523	Bardet-Biedl syndrome 6	skos:exactMatch	UMLS:C1858054		semapv:UnspecifiedMatching
+MONDO:0011523	Bardet-Biedl syndrome 6	skos:exactMatch	mesh:C565738		semapv:UnspecifiedMatching
+MONDO:0011787	autosomal recessive limb-girdle muscular dystrophy type 2I	skos:exactMatch	DOID:0110299	autosomal recessive limb-girdle muscular dystrophy type 2I	semapv:UnspecifiedMatching
+MONDO:0011787	autosomal recessive limb-girdle muscular dystrophy type 2I	skos:exactMatch	OMIM:607155	muscular dystrophy-dystroglycanopathy (limb-girdle), type c, 5	semapv:UnspecifiedMatching
+MONDO:0011787	autosomal recessive limb-girdle muscular dystrophy type 2I	skos:exactMatch	Orphanet:34515	FKRP-related limb-girdle muscular dystrophy R9	semapv:UnspecifiedMatching
+MONDO:0011787	autosomal recessive limb-girdle muscular dystrophy type 2I	skos:exactMatch	UMLS:C1846672		semapv:UnspecifiedMatching
+MONDO:0011787	autosomal recessive limb-girdle muscular dystrophy type 2I	skos:exactMatch	mesh:C564612		semapv:UnspecifiedMatching
+MONDO:0012204	familial pseudohyperkalemia	skos:exactMatch	OMIM:609153	pseudohyperkalemia, familial, 2, due to red cell leak	semapv:UnspecifiedMatching
+MONDO:0012204	familial pseudohyperkalemia	skos:exactMatch	Orphanet:90044	Familial pseudohyperkalemia	semapv:UnspecifiedMatching
+MONDO:0012204	familial pseudohyperkalemia	skos:exactMatch	UMLS:C1836705		semapv:UnspecifiedMatching
+MONDO:0012204	familial pseudohyperkalemia	skos:exactMatch	mesh:C563785		semapv:UnspecifiedMatching
+MONDO:0012240	congenital myopathy 23	skos:exactMatch	DOID:0110932	nemaline myopathy 4	semapv:UnspecifiedMatching
+MONDO:0012240	congenital myopathy 23	skos:exactMatch	OMIM:609285	congenital myopathy 23	semapv:UnspecifiedMatching
+MONDO:0012240	congenital myopathy 23	skos:exactMatch	UMLS:C1836447		semapv:UnspecifiedMatching
+MONDO:0012240	congenital myopathy 23	skos:exactMatch	mesh:C538351		semapv:UnspecifiedMatching
+MONDO:0012820	colorectal cancer, susceptibility to, 3	skos:exactMatch	OMIM:612229	colorectal cancer, susceptibility to, 3	semapv:UnspecifiedMatching
+MONDO:0012820	colorectal cancer, susceptibility to, 3	skos:exactMatch	UMLS:C2677123		semapv:UnspecifiedMatching
+MONDO:0013341	methylmalonic acidemia due to transcobalamin receptor defect	skos:exactMatch	DOID:0060741	methylmalonic acidemia due to transcobalamin receptor defect	semapv:UnspecifiedMatching
+MONDO:0013341	methylmalonic acidemia due to transcobalamin receptor defect	skos:exactMatch	OMIM:613646	methylmalonic aciduria, transient, due to transcobalamin receptor defect	semapv:UnspecifiedMatching
+MONDO:0013341	methylmalonic acidemia due to transcobalamin receptor defect	skos:exactMatch	Orphanet:280183	Methylmalonic aciduria due to transcobalamin receptor defect	semapv:UnspecifiedMatching
+MONDO:0013341	methylmalonic acidemia due to transcobalamin receptor defect	skos:exactMatch	UMLS:C4749905		semapv:UnspecifiedMatching
+MONDO:0013576	recurrent infections associated with rare immunoglobulin isotypes deficiency	skos:exactMatch	OMIM:614102	immunoglobulin kappa light chain deficiency	semapv:UnspecifiedMatching
+MONDO:0013576	recurrent infections associated with rare immunoglobulin isotypes deficiency	skos:exactMatch	Orphanet:183675	Recurrent infections associated with rare immunoglobulin isotypes deficiency	semapv:UnspecifiedMatching
+MONDO:0013576	recurrent infections associated with rare immunoglobulin isotypes deficiency	skos:exactMatch	UMLS:C3279824		semapv:UnspecifiedMatching
+MONDO:0013576	recurrent infections associated with rare immunoglobulin isotypes deficiency	skos:exactMatch	mesh:C564131		semapv:UnspecifiedMatching
+MONDO:0016045	tetragametic chimerism	skos:exactMatch	Orphanet:199310	Tetragametic chimerism syndrome	semapv:UnspecifiedMatching
+MONDO:0016045	tetragametic chimerism	skos:exactMatch	UMLS:C0432480		semapv:UnspecifiedMatching
+MONDO:0023659	developmental and epileptic encephalopathy 96	skos:exactMatch	DOID:0070377	developmental and epileptic encephalopathy 96	semapv:UnspecifiedMatching
+MONDO:0023659	developmental and epileptic encephalopathy 96	skos:exactMatch	OMIM:619340	developmental and epileptic encephalopathy 96	semapv:UnspecifiedMatching
+MONDO:0023659	developmental and epileptic encephalopathy 96	skos:exactMatch	UMLS:C5543446		semapv:UnspecifiedMatching
+MONDO:0859159	deafness, cataract, impaired intellectual development, and polyneuropathy	skos:exactMatch	OMIM:619354	deafness, cataract, impaired intellectual development, and polyneuropathy	semapv:UnspecifiedMatching
+MONDO:0859159	deafness, cataract, impaired intellectual development, and polyneuropathy	skos:exactMatch	UMLS:C5543482		semapv:UnspecifiedMatching

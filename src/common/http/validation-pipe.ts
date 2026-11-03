@@ -4,6 +4,7 @@ import {
   type ValidationError,
 } from '@nestjs/common';
 import { ErrorCode } from '../errors/error-codes';
+import { SystemErrorReason } from '../errors/system-error-reasons';
 
 /**
  * Un campo del cuerpo que no cumplió su DTO, con la ruta completa.
@@ -88,6 +89,7 @@ export function validationFailed(
   return new BadRequestException({
     code: ErrorCode.VALIDATION_FAILED,
     message: 'Error de validación',
+    reason: SystemErrorReason.VALIDATION_PIPE_REJECTED,
     details: {
       violations: toViolationSentences(fields),
       fields,

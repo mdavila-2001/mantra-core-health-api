@@ -122,11 +122,11 @@ describe('DuplicateStudyDetector', () => {
       const { detector, em, execute } = build({});
       await detector.findDuplicate(em, PATIENT, CODE, 30, NOW);
 
-      const [consulta, parametros] = execute.mock.calls[0];
-      expect(consulta).toMatch(/LIMIT 1/);
-      expect(consulta).toMatch(/created_at/);
-      expect(consulta).not.toMatch(/updated_at/);
-      expect(parametros).toEqual([
+      const [query, params] = execute.mock.calls[0];
+      expect(query).toMatch(/LIMIT 1/);
+      expect(query).toMatch(/created_at/);
+      expect(query).not.toMatch(/updated_at/);
+      expect(params).toEqual([
         PATIENT,
         CODE,
         CLIN.RELEASE_RELEASED,
@@ -134,6 +134,64 @@ describe('DuplicateStudyDetector', () => {
         CLIN.SERVICE_REQUEST_REVOKED,
         daysAgo(30),
       ]);
+    });
+
+    it('V10 · sin alcance la consulta es la histórica: sin cláusulas de región ni componentes', async () => {
+      const { detector, em, execute } = build({});
+      await detector.findDuplicate(em, PATIENT, CODE, 30, NOW);
+      expect(execute.mock.calls[0][0]).not.toMatch(
+        /body_site_concept_id|laterality_concept_id|service_request_components/,
+      );
+    });
+
+    it('V10 · imagen: la clave incluye región y lateralidad (mano izquierda no es mano derecha)', async () => {
+      const { detector, em, execute } = build({});
+      await detector.findDuplicate(em, PATIENT, CODE, 30, NOW, {
+        bodySiteConceptId: 'mano',
+        lateralityConceptId: 'izq',
+      });
+      const [query, params] = execute.mock.calls[0];
+      expect(query).toMatch(
+        /sr\.body_site_concept_id IS NULL OR sr\.body_site_concept_id = \?::uuid/,
+      );
+      expect(query).toMatch(
+        /sr\.laterality_concept_id IS NULL OR sr\.laterality_concept_id = \?::uuid/,
+      );
+      expect(query).not.toMatch(/service_request_components/);
+      expect(params.slice(-2)).toEqual(['mano', 'izq']);
+    });
+
+    it('V10 · laboratorio: componentes no cubiertos por el informe previo no son duplicado', async () => {
+      const { detector, em, execute } = build({});
+      await detector.findDuplicate(em, PATIENT, CODE, 30, NOW, {
+        componentConceptIds: ['hb', 'hto'],
+      });
+      const [query, params] = execute.mock.calls[0];
+      // Una orden previa sin componentes registrados cubre todo («estudio completo»);
+      // una con componentes cubre sólo si incluye todos los pedidos.
+      expect(query).toMatch(
+        /NOT EXISTS \(SELECT 1 FROM clinical\.service_request_components c0/,
+      );
+      expect(query).toMatch(/unnest\(string_to_array\(\?, ','\)::uuid\[\]\)/);
+      expect(params[params.length - 1]).toBe('hb,hto');
+    });
+
+    it('V10 · la orden activa sin informe usa el mismo alcance', async () => {
+      const { detector, em, execute } = build({});
+      await detector.findActiveOrderWithoutReport(
+        em,
+        PATIENT,
+        CODE,
+        30,
+        TENANT_A,
+        NOW,
+        {
+          bodySiteConceptId: 'mano',
+        },
+      );
+      const [query, params] = execute.mock.calls[0];
+      expect(query).toMatch(/sr\.body_site_concept_id/);
+      expect(params[params.length - 1]).toBe('mano');
     });
 
     it('MCH-029 · sin fila en la ventana no hidrata ningún informe', async () => {

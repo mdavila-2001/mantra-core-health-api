@@ -1,6 +1,18 @@
--- SALUD v4.0.10 · módulo 41 · schema scheduling
+-- SALUD v4.2.83 · módulo 41 · schema scheduling
 -- Generado de diagram_41_scheduling.puml — NO editar a mano.
 
+
+CREATE UNIQUE INDEX IF NOT EXISTS "ux_practitioner_service_offerings_practitioner_service" ON "scheduling"."practitioner_service_offerings" ("practitioner_profile_id", "service_catalog_id");
+
+CREATE INDEX IF NOT EXISTS "ix_practitioner_service_offerings_service_catalog_id" ON "scheduling"."practitioner_service_offerings" ("service_catalog_id");
+
+CREATE INDEX IF NOT EXISTS "ix_practitioner_service_offerings_channel_concept_id" ON "scheduling"."practitioner_service_offerings" ("channel_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_practitioner_service_offerings_status_concept_id" ON "scheduling"."practitioner_service_offerings" ("status_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_practitioner_service_offerings_created_by_user_id" ON "scheduling"."practitioner_service_offerings" ("created_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_practitioner_service_offerings_updated_by_user_id" ON "scheduling"."practitioner_service_offerings" ("updated_by_user_id");
 
 CREATE INDEX IF NOT EXISTS "ix_booking_confirmation_rules_tenant_id" ON "scheduling"."booking_confirmation_rules" ("tenant_id");
 
@@ -50,6 +62,12 @@ CREATE INDEX IF NOT EXISTS "ix_schedulable_resources_updated_by_user_id" ON "sch
 
 CREATE INDEX IF NOT EXISTS "ix_schedulable_resources_tenant_id_state_concept_id" ON "scheduling"."schedulable_resources" ("tenant_id", "state_concept_id", "updated_at" DESC);
 
+CREATE INDEX IF NOT EXISTS "ix_schedulable_resources_care_space_id" ON "scheduling"."schedulable_resources" ("care_space_id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "ux_schedulable_resources_tenant_id_id" ON "scheduling"."schedulable_resources" ("tenant_id", "id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "ux_schedulable_resources_care_space_active" ON "scheduling"."schedulable_resources" ("care_space_id") WHERE care_space_id IS NOT NULL AND state_concept_id = '38a1d301-f40d-5b17-a695-5e6d605f8b19';
+
 CREATE INDEX IF NOT EXISTS "ix_schedule_templates_resource_id" ON "scheduling"."schedule_templates" ("resource_id");
 
 CREATE INDEX IF NOT EXISTS "ix_schedule_templates_practitioner_schedule_id" ON "scheduling"."schedule_templates" ("practitioner_schedule_id");
@@ -64,9 +82,13 @@ CREATE INDEX IF NOT EXISTS "ix_schedule_templates_created_by_user_id" ON "schedu
 
 CREATE INDEX IF NOT EXISTS "ix_schedule_templates_updated_by_user_id" ON "scheduling"."schedule_templates" ("updated_by_user_id");
 
+CREATE INDEX IF NOT EXISTS "ix_schedule_templates_care_space_id" ON "scheduling"."schedule_templates" ("care_space_id");
+
 CREATE INDEX IF NOT EXISTS "gist_schedule_templates_effective_period" ON "scheduling"."schedule_templates" USING gist (daterange(valid_from, valid_to, '[)'));
 
 CREATE INDEX IF NOT EXISTS "ix_schedule_rules_schedule_template_id" ON "scheduling"."schedule_rules" ("schedule_template_id");
+
+CREATE INDEX IF NOT EXISTS "ix_schedule_rules_booking_mode_concept_id" ON "scheduling"."schedule_rules" ("booking_mode_concept_id");
 
 CREATE INDEX IF NOT EXISTS "ix_schedule_rules_created_by_user_id" ON "scheduling"."schedule_rules" ("created_by_user_id");
 
@@ -82,6 +104,10 @@ CREATE INDEX IF NOT EXISTS "ix_availability_exceptions_created_by_user_id" ON "s
 
 CREATE INDEX IF NOT EXISTS "ix_availability_exceptions_updated_by_user_id" ON "scheduling"."availability_exceptions" ("updated_by_user_id");
 
+CREATE INDEX IF NOT EXISTS "ix_availability_exceptions_source_kind_concept_id" ON "scheduling"."availability_exceptions" ("source_kind_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_availability_exceptions_source_ref" ON "scheduling"."availability_exceptions" ("source_ref_id") WHERE source_ref_id IS NOT NULL;
+
 CREATE INDEX IF NOT EXISTS "gist_availability_exceptions_effective_period" ON "scheduling"."availability_exceptions" USING gist (tstzrange(start_at, end_at, '[)'));
 
 CREATE INDEX IF NOT EXISTS "ix_bookable_slots_resource_id" ON "scheduling"."bookable_slots" ("resource_id");
@@ -90,11 +116,17 @@ CREATE INDEX IF NOT EXISTS "ix_bookable_slots_schedule_template_id" ON "scheduli
 
 CREATE INDEX IF NOT EXISTS "ix_bookable_slots_service_concept_id" ON "scheduling"."bookable_slots" ("service_concept_id");
 
+CREATE INDEX IF NOT EXISTS "ix_bookable_slots_practitioner_service_offering_id" ON "scheduling"."bookable_slots" ("practitioner_service_offering_id");
+
 CREATE INDEX IF NOT EXISTS "ix_bookable_slots_status_concept_id" ON "scheduling"."bookable_slots" ("status_concept_id");
 
 CREATE INDEX IF NOT EXISTS "ix_bookable_slots_created_by_user_id" ON "scheduling"."bookable_slots" ("created_by_user_id");
 
 CREATE INDEX IF NOT EXISTS "ix_bookable_slots_updated_by_user_id" ON "scheduling"."bookable_slots" ("updated_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_bookable_slots_care_space_id" ON "scheduling"."bookable_slots" ("care_space_id");
+
+CREATE INDEX IF NOT EXISTS "ix_bookable_slots_healthcare_service_id" ON "scheduling"."bookable_slots" ("healthcare_service_id");
 
 CREATE UNIQUE INDEX IF NOT EXISTS "uq_slot_holds_hold_token" ON "scheduling"."slot_holds" ("hold_token");
 
@@ -146,6 +178,12 @@ CREATE INDEX IF NOT EXISTS "ix_appointment_bookings_status_concept_id" ON "sched
 
 CREATE INDEX IF NOT EXISTS "ix_appointment_bookings_booking_policy_id" ON "scheduling"."appointment_bookings" ("booking_policy_id");
 
+CREATE INDEX IF NOT EXISTS "ix_appointment_bookings_practitioner_service_offering_id" ON "scheduling"."appointment_bookings" ("practitioner_service_offering_id");
+
+CREATE INDEX IF NOT EXISTS "ix_appointment_bookings_follow_up_of_booking_id" ON "scheduling"."appointment_bookings" ("follow_up_of_booking_id");
+
+CREATE INDEX IF NOT EXISTS "ix_appointment_bookings_form_instance_id" ON "scheduling"."appointment_bookings" ("form_instance_id");
+
 CREATE INDEX IF NOT EXISTS "ix_appointment_bookings_created_by_user_id" ON "scheduling"."appointment_bookings" ("created_by_user_id");
 
 CREATE INDEX IF NOT EXISTS "ix_appointment_bookings_updated_by_user_id" ON "scheduling"."appointment_bookings" ("updated_by_user_id");
@@ -153,6 +191,12 @@ CREATE INDEX IF NOT EXISTS "ix_appointment_bookings_updated_by_user_id" ON "sche
 CREATE INDEX IF NOT EXISTS "ix_appointment_bookings_tenant_id_status_concept_id" ON "scheduling"."appointment_bookings" ("tenant_id", "status_concept_id", "updated_at" DESC);
 
 CREATE INDEX IF NOT EXISTS "ix_appointment_bookings_patient_profile_id_updated_at" ON "scheduling"."appointment_bookings" ("tenant_id", "patient_profile_id", "updated_at" DESC);
+
+CREATE INDEX IF NOT EXISTS "ix_appointment_bookings_care_space_id" ON "scheduling"."appointment_bookings" ("care_space_id");
+
+CREATE INDEX IF NOT EXISTS "ix_appointment_bookings_healthcare_service_id" ON "scheduling"."appointment_bookings" ("healthcare_service_id");
+
+CREATE INDEX IF NOT EXISTS "ix_appointment_bookings_booked_via_grant_id" ON "scheduling"."appointment_bookings" ("booked_via_grant_id");
 
 CREATE INDEX IF NOT EXISTS "ix_booking_reschedules_booking_id" ON "scheduling"."booking_reschedules" ("booking_id");
 
@@ -237,3 +281,23 @@ CREATE INDEX IF NOT EXISTS "ix_appointment_payment_states_tenant_status" ON "sch
 CREATE INDEX IF NOT EXISTS "ix_appointment_payment_states_status_concept_id" ON "scheduling"."appointment_payment_states" ("status_concept_id");
 
 CREATE INDEX IF NOT EXISTS "ix_appointment_payment_states_marked_by_user_id" ON "scheduling"."appointment_payment_states" ("marked_by_user_id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "ux_appointment_payment_states_invoice" ON "scheduling"."appointment_payment_states" ("invoice_id") WHERE invoice_id IS NOT NULL;
+
+CREATE INDEX IF NOT EXISTS "ix_appointment_payment_receipts_tenant_id" ON "scheduling"."appointment_payment_receipts" ("tenant_id");
+
+CREATE INDEX IF NOT EXISTS "ix_appointment_payment_receipts_appointment_booking_id" ON "scheduling"."appointment_payment_receipts" ("appointment_booking_id");
+
+CREATE INDEX IF NOT EXISTS "ix_appointment_payment_receipts_file_id" ON "scheduling"."appointment_payment_receipts" ("file_id");
+
+CREATE INDEX IF NOT EXISTS "ix_appointment_payment_receipts_uploaded_by_user_id" ON "scheduling"."appointment_payment_receipts" ("uploaded_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_appointment_payment_receipts_review_status_concept_id" ON "scheduling"."appointment_payment_receipts" ("review_status_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_appointment_payment_receipts_reviewed_by_user_id" ON "scheduling"."appointment_payment_receipts" ("reviewed_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_appointment_payment_receipts_created_by_user_id" ON "scheduling"."appointment_payment_receipts" ("created_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_appointment_payment_receipts_updated_by_user_id" ON "scheduling"."appointment_payment_receipts" ("updated_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_appointment_payment_receipts_booking_uploaded" ON "scheduling"."appointment_payment_receipts" ("appointment_booking_id", "uploaded_at");

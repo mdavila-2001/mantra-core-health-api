@@ -1,0 +1,2855 @@
+{
+  "PNC": {
+    "title": "Digital adaptation kit for postnatal care: operational requirements for implementing WHO recommendations in digital systems",
+    "repository": "https://github.com/WorldHealthOrganization/smart-dak-pnc",
+    "file": "input/dictionary/PNC DAK_core data dictionary.xlsx",
+    "commit": "1c490e45ac68bad3c8a024001cbc1f039de68a80 2025-09-17T13:23:09+05:30",
+    "elements": {
+      "PNC.B4a.DE.1": {
+        "sheet": "PNC.B4a.Maternal Physical Exam",
+        "id": "PNC.B4a.DE.1",
+        "label": "Woman's danger signs",
+        "description": "Specify if the woman has any danger signs, which are continuously monitored in the first 24 hours",
+        "multiple": true,
+        "options": [
+          {
+            "id": "PNC.B4a.DE.2",
+            "label": "No danger signs",
+            "description": "No danger signs are present"
+          },
+          {
+            "id": "PNC.B4a.DE.3",
+            "label": "Abnormal vaginal bleeding",
+            "description": "Woman is bleeding vaginally"
+          },
+          {
+            "id": "PNC.B4a.DE.4",
+            "label": "Central cyanosis",
+            "description": "Woman has a bluish discolouration of the skin and/or visible mucosa"
+          },
+          {
+            "id": "PNC.B4a.DE.5",
+            "label": "Convulsing",
+            "description": "Woman is convulsing"
+          },
+          {
+            "id": "PNC.B4a.DE.6",
+            "label": "Fever",
+            "description": "Woman has a fever (body temperature greater than or equal to 37.5 °C)"
+          },
+          {
+            "id": "PNC.B4a.DE.7",
+            "label": "Severe headache",
+            "description": "Woman has a severe headache"
+          },
+          {
+            "id": "PNC.B4a.DE.8",
+            "label": "Severe pain",
+            "description": "Woman is in severe pain (not abdominal pain)"
+          },
+          {
+            "id": "PNC.B4a.DE.9",
+            "label": "Severe vomiting",
+            "description": "Woman is vomiting severely"
+          },
+          {
+            "id": "PNC.B4a.DE.10",
+            "label": "Severe abdominal pain",
+            "description": "Woman is in severe abdominal pain"
+          },
+          {
+            "id": "PNC.B4a.DE.11",
+            "label": "Unconscious",
+            "description": "Woman is unconscious"
+          },
+          {
+            "id": "PNC.B4a.DE.12",
+            "label": "Visual disturbance",
+            "description": "Woman is visually disturbed"
+          }
+        ]
+      },
+      "PNC.B3a.DE.35": {
+        "sheet": "PNC.B3a.Mat_symptomswellbeing",
+        "id": "PNC.B3a.DE.35",
+        "label": "Specific complaint for the last 24 hours",
+        "description": "Indicate whether the woman reports any of the following complaints in the past 24 hours",
+        "multiple": true,
+        "options": [
+          {
+            "id": "PNC.B3a.DE.36",
+            "label": "None",
+            "description": "The woman reports absence of complaints in the past 24 hours"
+          },
+          {
+            "id": "PNC.B3a.DE.37",
+            "label": "Uterine cramping",
+            "description": "The woman report uterine cramping in the past 24 hours"
+          },
+          {
+            "id": "PNC.B3a.DE.38",
+            "label": "Headache",
+            "description": "The woman reports a headache in the past 24 hours"
+          },
+          {
+            "id": "PNC.B3a.DE.39",
+            "label": "Fatigue",
+            "description": "The woman reports fatigue in the past 24 hours"
+          },
+          {
+            "id": "PNC.B3a.DE.40",
+            "label": "Back pain",
+            "description": "The woman reports back pain in the past 24 hours"
+          },
+          {
+            "id": "PNC.B3a.DE.41",
+            "label": "Perineal pain",
+            "description": "The woman reports perineal pain in the past 24 hours"
+          },
+          {
+            "id": "PNC.B3a.DE.42",
+            "label": "Urinary incontinence",
+            "description": "The woman reports urinary incontinence in the past 24 hours"
+          },
+          {
+            "id": "PNC.B3a.DE.43",
+            "label": "Faecal incontinence",
+            "description": "The woman reports faecal incontinence in the past 24 hours"
+          },
+          {
+            "id": "PNC.B3a.DE.44",
+            "label": "Nausea",
+            "description": "The woman reports nausea in the past 24 hours"
+          },
+          {
+            "id": "PNC.B3a.DE.45",
+            "label": "Vomiting",
+            "description": "The woman reports vomiting in the past 24 hours"
+          },
+          {
+            "id": "PNC.B3a.DE.46",
+            "label": "Excessive vaginal bleeding",
+            "description": "The woman reports excessive bleeding in the past 24 hours"
+          },
+          {
+            "id": "PNC.B3a.DE.47",
+            "label": "Foul smelling secretions",
+            "description": "The woman reports foul smelling secretions in the past 24 hours"
+          },
+          {
+            "id": "PNC.B3a.DE.48",
+            "label": "Leg oedema",
+            "description": "The woman reports leg oedema in the past 24 hours"
+          },
+          {
+            "id": "PNC.B3a.DE.49",
+            "label": "Leg tenderness",
+            "description": "The woman reports leg tenderness in the past 24 hours"
+          },
+          {
+            "id": "PNC.B3a.DE.50",
+            "label": "Leg redness",
+            "description": "The woman reports leg redness in the past 24 hours"
+          },
+          {
+            "id": "PNC.B3a.DE.51",
+            "label": "Diarrhoea",
+            "description": "The woman reports diarrhoea in the past 24 hours"
+          },
+          {
+            "id": "PNC.B3a.DE.52",
+            "label": "Constipation",
+            "description": "The woman reports constipation in the past 24 hours"
+          },
+          {
+            "id": "PNC.B3a.DE.53",
+            "label": "Flu symptoms",
+            "description": "The woman reports flu symptoms in the past 24 hours"
+          },
+          {
+            "id": "PNC.B3a.DE.54",
+            "label": "Fever",
+            "description": "The woman reports fever in the past 24 hours"
+          },
+          {
+            "id": "PNC.B3a.DE.55",
+            "label": "Dizziness",
+            "description": "The woman reports dizziness in the past 24 hours"
+          },
+          {
+            "id": "PNC.B3a.DE.56",
+            "label": "Cough",
+            "description": "The woman reports a cough in the past 24 hours"
+          },
+          {
+            "id": "PNC.B3a.DE.57",
+            "label": "Shortness of breath",
+            "description": "The woman reports experiencing shortness of breath in the past 24 hours"
+          },
+          {
+            "id": "PNC.B3a.DE.58",
+            "label": "Chest pain",
+            "description": "The woman reports chest pain in the past 24 hours"
+          },
+          {
+            "id": "PNC.B3a.DE.59",
+            "label": "Other (specify)",
+            "description": "The woman reports other specific complaints in the past 24 hours, not listed above"
+          }
+        ]
+      },
+      "PNC.B3a.DE.23": {
+        "sheet": "PNC.B3a.Mat_symptomswellbeing",
+        "id": "PNC.B3a.DE.23",
+        "label": "Breastfeeding/breast issues",
+        "description": "Indicate whether the woman reports any problems breastfeeding and/or any discomfort/symptoms to the breasts",
+        "multiple": true,
+        "options": [
+          {
+            "id": "PNC.B3a.DE.24",
+            "label": "None",
+            "description": "The woman reports absence of discomfort/symptoms to the breasts"
+          },
+          {
+            "id": "PNC.B3a.DE.25",
+            "label": "Breast pain",
+            "description": "The woman reports presence of painful symptoms to the breasts"
+          },
+          {
+            "id": "PNC.B3a.DE.26",
+            "label": "Breast engorgement",
+            "description": "The woman reports breast engorgement"
+          },
+          {
+            "id": "PNC.B3a.DE.27",
+            "label": "Sore nipples",
+            "description": "The woman reports sore nipples"
+          },
+          {
+            "id": "PNC.B3a.DE.28",
+            "label": "Nipple infection",
+            "description": "The woman reports a nipple infection"
+          },
+          {
+            "id": "PNC.B3a.DE.29",
+            "label": "Mastitis / abscess",
+            "description": "The woman reports syptoms and signs compatibile with mastitis / abscess"
+          },
+          {
+            "id": "PNC.B3a.DE.30",
+            "label": "Low milk supply",
+            "description": "The woman reports low/insufficient milk supply"
+          },
+          {
+            "id": "PNC.B3a.DE.31",
+            "label": "Positioning issues",
+            "description": "The woman reports positioning h issues"
+          },
+          {
+            "id": "PNC.B3a.DE.32",
+            "label": "Latch issues",
+            "description": "The woman reports latch issues"
+          },
+          {
+            "id": "PNC.B3a.DE.33",
+            "label": "Reflux/spilling",
+            "description": "The woman reports reflux/spilling issues"
+          },
+          {
+            "id": "PNC.B3a.DE.34",
+            "label": "Other (specify)",
+            "description": "The woman reports other discomfort/symptoms to the breasts not listed above"
+          }
+        ]
+      },
+      "PNC.B3a.DE.1": {
+        "sheet": "PNC.B3a.Mat_symptomswellbeing",
+        "id": "PNC.B3a.DE.1",
+        "label": "Screening for postnatal depression and anxiety",
+        "description": "Specify the results of the clinical screening for signs of postnatal depression and anxiety",
+        "multiple": false,
+        "options": [
+          {
+            "id": "PNC.B3a.DE.2",
+            "label": "Not conducted",
+            "description": "Clinical inquiry on any signs of postnatal depression and anxiety not conducted"
+          },
+          {
+            "id": "PNC.B3a.DE.3",
+            "label": "Positive",
+            "description": "Clinical inquiry on any signs of postnatal depression and anxiety yielded positive results (signs are present)"
+          },
+          {
+            "id": "PNC.B3a.DE.4",
+            "label": "Negative",
+            "description": "Clinical inquiry on any signs of postnatal depression and anxiety yielded negative results (signs are not present)"
+          },
+          {
+            "id": "PNC.B3a.DE.5",
+            "label": "Unknown",
+            "description": "Not possible to ascertain whether the woman presents with any signs of postnatal depression and anxiety"
+          }
+        ]
+      },
+      "PNC.B4a.DE.27": {
+        "sheet": "PNC.B4a.Maternal Physical Exam",
+        "id": "PNC.B4a.DE.27",
+        "label": "Symptoms of severe pre-eclampsia",
+        "description": "Check if the woman has any of the following symptoms of severe pre-eclampsia",
+        "multiple": true,
+        "options": [
+          {
+            "id": "PNC.B4a.DE.28",
+            "label": "No symptoms of severe pre-eclampsia",
+            "description": "Woman does not have symptoms of severe pre-eclampsia"
+          },
+          {
+            "id": "PNC.B4a.DE.29",
+            "label": "Severe headache",
+            "description": "Woman has a severe headache"
+          },
+          {
+            "id": "PNC.B4a.DE.30",
+            "label": "Visual disturbance",
+            "description": "Woman has disturbance in her vision"
+          },
+          {
+            "id": "PNC.B4a.DE.31",
+            "label": "Epigastric pain",
+            "description": "Woman is experiencing epigastric pain"
+          },
+          {
+            "id": "PNC.B4a.DE.32",
+            "label": "Dizziness",
+            "description": "Woman is dizzy"
+          },
+          {
+            "id": "PNC.B4a.DE.33",
+            "label": "Vomiting",
+            "description": "Woman is vomiting"
+          }
+        ]
+      },
+      "PNC.B4a.DE.90": {
+        "sheet": "PNC.B4a.Maternal Physical Exam",
+        "id": "PNC.B4a.DE.90",
+        "label": "Fundal tone",
+        "description": "Specify the details of the woman's uterine tone assessment",
+        "multiple": false,
+        "options": [
+          {
+            "id": "PNC.B4a.DE.91",
+            "label": "Contracted",
+            "description": "The uterus appears contracted upon palpation."
+          },
+          {
+            "id": "PNC.B4a.DE.92",
+            "label": "Flaccid",
+            "description": "The uterus appears flaccid upon palpation."
+          },
+          {
+            "id": "PNC.B4a.DE.93",
+            "label": "Unknown",
+            "description": "Not possible to ascertain the uterine tone"
+          }
+        ]
+      },
+      "PNC.B4a.DE.94": {
+        "sheet": "PNC.B4a.Maternal Physical Exam",
+        "id": "PNC.B4a.DE.94",
+        "label": "Fundal height",
+        "description": "Specify the details of the woman's uterine position assessment",
+        "multiple": false,
+        "options": [
+          {
+            "id": "PNC.B4a.DE.95",
+            "label": "1-2 cm above the umbilicus",
+            "description": "The uterus is located 1–2 cm above the umbilicus upon palpation"
+          },
+          {
+            "id": "PNC.B4a.DE.96",
+            "label": "1-2 cm below the umbilicus",
+            "description": "The uterus is located 1–2 cm below the umbilicus upon palpation"
+          },
+          {
+            "id": "PNC.B4a.DE.97",
+            "label": "Midway between umbilicus and symphysis",
+            "description": "The uterus is located midway between the umbilicus and the symphysis upon palpation"
+          },
+          {
+            "id": "PNC.B4a.DE.98",
+            "label": "Intrapelvic",
+            "description": "The uterus is located intrapelvically upon palpation"
+          },
+          {
+            "id": "PNC.B4a.DE.99",
+            "label": "Other (specify)",
+            "description": "The uterus is dislocated elsewhere upon palpation"
+          }
+        ]
+      },
+      "PNC.B4a.DE.113": {
+        "sheet": "PNC.B4a.Maternal Physical Exam",
+        "id": "PNC.B4a.DE.113",
+        "label": "Perineal examination",
+        "description": "Specify the details of the woman's perineal examination",
+        "multiple": true,
+        "options": [
+          {
+            "id": "PNC.B4a.DE.114",
+            "label": "Absence of wounds",
+            "description": "The woman does not have any perineal wound(s)"
+          },
+          {
+            "id": "PNC.B4a.DE.115",
+            "label": "Clean and dry wounds",
+            "description": "The woman's perineal wound(s) is clean and dry"
+          },
+          {
+            "id": "PNC.B4a.DE.116",
+            "label": "Closed with stitches",
+            "description": "The woman's perineal wound(s) is closed with stitches"
+          },
+          {
+            "id": "PNC.B4a.DE.117",
+            "label": "Closed without stitches",
+            "description": "The woman's perineal wound(s) is closed without stitches"
+          },
+          {
+            "id": "PNC.B4a.DE.118",
+            "label": "Dehiscent",
+            "description": "The woman's perineal wound(s) is dehiscent"
+          },
+          {
+            "id": "PNC.B4a.DE.119",
+            "label": "Haematoma",
+            "description": "The woman's perineal wound(s) presents a haematoma"
+          },
+          {
+            "id": "PNC.B4a.DE.120",
+            "label": "Redness",
+            "description": "The woman's perineal wound(s) is red"
+          },
+          {
+            "id": "PNC.B4a.DE.121",
+            "label": "Swelling",
+            "description": "The woman's perineal wound(s) is swollen"
+          },
+          {
+            "id": "PNC.B4a.DE.122",
+            "label": "Warmth",
+            "description": "The woman's perineal wound(s) are warm"
+          },
+          {
+            "id": "PNC.B4a.DE.123",
+            "label": "Foul-smelling / purulent secretion",
+            "description": "The woman's perineal wound(s) presents foul-smelling and/or purulent secretion"
+          },
+          {
+            "id": "PNC.B4a.DE.124",
+            "label": "Serous secretion",
+            "description": "The woman's perineal wound(s) present serous secretion"
+          },
+          {
+            "id": "PNC.B4a.DE.125",
+            "label": "Other (specify)",
+            "description": "The woman's perineal wound(s) present other abnormalities not listed above"
+          }
+        ]
+      },
+      "PNC.B4a.DE.144": {
+        "sheet": "PNC.B4a.Maternal Physical Exam",
+        "id": "PNC.B4a.DE.144",
+        "label": "Caesarean section wound examination",
+        "description": "Specify the details of the woman's caesarean section wound examination",
+        "multiple": true,
+        "options": [
+          {
+            "id": "PNC.B4a.DE.145",
+            "label": "Wound exam not done",
+            "description": "The woman's caesarean section wound examination was not conducted"
+          },
+          {
+            "id": "PNC.B4a.DE.146",
+            "label": "Clean and dry wound",
+            "description": "The woman's caesarean section wound is clean and dry"
+          },
+          {
+            "id": "PNC.B4a.DE.147",
+            "label": "Closed with stitches",
+            "description": "The woman's caesarean section wound is closes with stitches (non‐absorbable staples, absorbable subcutaneous sutures, non-absorbable subcutaneous sutures)"
+          },
+          {
+            "id": "PNC.B4a.DE.148",
+            "label": "Closed without stitches",
+            "description": "The woman's caesarean section wound is closed without stitches"
+          },
+          {
+            "id": "PNC.B4a.DE.149",
+            "label": "Dehiscent",
+            "description": "The woman's caesarean section wound is dehiscent"
+          },
+          {
+            "id": "PNC.B4a.DE.150",
+            "label": "Haematoma",
+            "description": "The woman's caesarean section wound presents a haematoma"
+          },
+          {
+            "id": "PNC.B4a.DE.151",
+            "label": "Redness",
+            "description": "The woman's caesarean section wound is red"
+          },
+          {
+            "id": "PNC.B4a.DE.152",
+            "label": "Swelling",
+            "description": "The woman's caesarean section wound is swollen"
+          },
+          {
+            "id": "PNC.B4a.DE.153",
+            "label": "Warmth",
+            "description": "The woman's caesarean section wound is warm"
+          },
+          {
+            "id": "PNC.B4a.DE.154",
+            "label": "Foul-smelling / purulent secretion",
+            "description": "The woman's caesarean section wound presents with foul-smelling and/or purulent secretion"
+          },
+          {
+            "id": "PNC.B4a.DE.155",
+            "label": "Serous secretion",
+            "description": "The woman's caesarean section wound presents with serous secretion"
+          },
+          {
+            "id": "PNC.B4a.DE.156",
+            "label": "Other (specify)",
+            "description": "The woman's caesarean section wound presents with other abnormalities not listed above"
+          }
+        ]
+      },
+      "PNC.B3a.DE.147": {
+        "sheet": "PNC.B3a.Mat_symptomswellbeing",
+        "id": "PNC.B3a.DE.147",
+        "label": "Method of postpartum contraception selected",
+        "description": "Indicate method of postpartum contraception selected",
+        "multiple": false,
+        "options": [
+          {
+            "id": "PNC.B3a.DE.148",
+            "label": "Copper-bearing intrauterine device (Cu-IUD)",
+            "description": "Copper-bearing intrauterine device was inserted"
+          },
+          {
+            "id": "PNC.B3a.DE.149",
+            "label": "Levonorgestrel intrauterine device (LNG-IUD)",
+            "description": "Levonorgestrel intrauterine device, a hormone-releasing intrauterine contraception device, was inserted"
+          },
+          {
+            "id": "PNC.B3a.DE.150",
+            "label": "Etonogestrel (ETG) one-rod implant",
+            "description": "Administered etonogestrel one-rod implant"
+          },
+          {
+            "id": "PNC.B3a.DE.151",
+            "label": "Levonorgestrel (LNG) two-rod implant",
+            "description": "Administered levonorgestrel two-rod implant"
+          },
+          {
+            "id": "PNC.B3a.DE.152",
+            "label": "DMPA-IM",
+            "description": "Injectable depot medroxyprogesterone acetate (DMPA), administered intramuscularly"
+          },
+          {
+            "id": "PNC.B3a.DE.153",
+            "label": "DMPA-SC",
+            "description": "Injectable depot medroxyprogesterone acetate (DMPA), administered subcutaneously"
+          },
+          {
+            "id": "PNC.B3a.DE.154",
+            "label": "NET-EN norethisterone enanthate",
+            "description": "Injectable norethisterone enanthate (NET-EN) given"
+          },
+          {
+            "id": "PNC.B3a.DE.155",
+            "label": "Progestogen-only pills (POP)",
+            "description": "Progestogen-only pills (POP) provided"
+          },
+          {
+            "id": "PNC.B3a.DE.156",
+            "label": "Combined oral contraceptives (COCs)",
+            "description": "Combined oral contraceptive (COC) pills provided"
+          },
+          {
+            "id": "PNC.B3a.DE.157",
+            "label": "Combined contraceptive patch",
+            "description": "Transdermal combined contraceptive patch provided"
+          },
+          {
+            "id": "PNC.B3a.DE.158",
+            "label": "Combined contraceptive vaginal ring (CVR)",
+            "description": "Combined contraceptive vaginal ring (CVR) provided"
+          },
+          {
+            "id": "PNC.B3a.DE.159",
+            "label": "Progesterone-releasing vaginal ring (PVR)",
+            "description": "Progesterone-releasing vaginal ring (PVR) provided"
+          },
+          {
+            "id": "PNC.B3a.DE.160",
+            "label": "Lactational amenorrhoea method (LAM)",
+            "description": "Provided client guidance on how to appropriately use lactational amenorrhoea method (LAM)"
+          },
+          {
+            "id": "PNC.B3a.DE.161",
+            "label": "Male condoms",
+            "description": "Male condoms provided"
+          },
+          {
+            "id": "PNC.B3a.DE.162",
+            "label": "Female condoms",
+            "description": "Female condoms provided"
+          },
+          {
+            "id": "PNC.B3a.DE.163",
+            "label": "Male sterilization",
+            "description": "Male surgical sterilization (a vasectomy) procedure provided"
+          },
+          {
+            "id": "PNC.B3a.DE.164",
+            "label": "Female sterilization",
+            "description": "Female surgical sterilization procedure provided"
+          },
+          {
+            "id": "PNC.B3a.DE.165",
+            "label": "No method provided",
+            "description": "Client did not receive any method"
+          }
+        ]
+      },
+      "PNC.B4b.DE.1": {
+        "sheet": "PNC.B4b. Neonatal Physical Exam",
+        "id": "PNC.B4b.DE.1",
+        "label": "Newborn's danger signs",
+        "description": "Specify if the newborn has any danger signs, which are continuously monitored in the first 24 hours",
+        "multiple": true,
+        "options": [
+          {
+            "id": "PNC.B4b.DE.2",
+            "label": "None",
+            "description": "The newborn has no complications/danger signs"
+          },
+          {
+            "id": "PNC.B4b.DE.3",
+            "label": "Noisy breath (grunting, stridor)",
+            "description": "The newborn has noisy breathing (grunting, stridor)"
+          },
+          {
+            "id": "PNC.B4b.DE.4",
+            "label": "Cyanosis, central",
+            "description": "The newborn has cyanosis (central)"
+          },
+          {
+            "id": "PNC.B4b.DE.5",
+            "label": "Slow breathing, gasping, apnoea",
+            "description": "The newborn has slow breathing rate (< 16 bpm), gasping or has had episodes of apnoea"
+          },
+          {
+            "id": "PNC.B4b.DE.6",
+            "label": "Flaring of the nostrils with each breath",
+            "description": "The newborn has nostril flaring"
+          },
+          {
+            "id": "PNC.B4b.DE.7",
+            "label": "Not able to feed at all or not feeding well",
+            "description": "The newborn has not been feeding well or has not been able to feed at all"
+          },
+          {
+            "id": "PNC.B4b.DE.8",
+            "label": "Fits or convulsions",
+            "description": "The newborn has fits or convulsions"
+          },
+          {
+            "id": "PNC.B4b.DE.9",
+            "label": "Abdominal distension",
+            "description": "The newborn has abdominal distension or has developed a swollen belly"
+          },
+          {
+            "id": "PNC.B4b.DE.10",
+            "label": "Fast breathing (breathing rate ≥ 60/min)",
+            "description": "The newborn has tachypnoea (breathing rate ≥ 60/min)"
+          },
+          {
+            "id": "PNC.B4b.DE.11",
+            "label": "Severe chest in-drawing",
+            "description": "The newborn has severe chest in-drawing (inward movement of the lower chest wall when the child breathes in)"
+          },
+          {
+            "id": "PNC.B4b.DE.12",
+            "label": "Movement only when stimulated or no movement at all",
+            "description": "The newborn displays movement only when stimulated or displays no movement at all"
+          },
+          {
+            "id": "PNC.B4b.DE.13",
+            "label": "Draining purulent discharge from stump or cut",
+            "description": "The newborn's stump or cut drains purulent discharge"
+          },
+          {
+            "id": "PNC.B4b.DE.14",
+            "label": "Bleeding from stump or cut",
+            "description": "The newborn's stump or cut drains bloody discharge"
+          },
+          {
+            "id": "PNC.B4b.DE.15",
+            "label": "Fever/high body temperature (≥ 37.5 °C)",
+            "description": "The newborn developed a fever (body temperature ≥ 37.5°C)"
+          },
+          {
+            "id": "PNC.B4b.DE.16",
+            "label": "Low body temperature (< 35.5 °C)",
+            "description": "The newborn developed low body temperature <35.5°C)"
+          },
+          {
+            "id": "PNC.B4b.DE.17",
+            "label": "Jaundice in the first 24h after birth",
+            "description": "The newborn developed jaundice (yellow discoloration of a newborn baby's skin and eyes) in the first 24 hours after birth"
+          },
+          {
+            "id": "PNC.B4b.DE.18",
+            "label": "Other (specify)",
+            "description": "The newborn other complications/ dangers signs not listed above"
+          }
+        ]
+      },
+      "PNC.B4b.DE.25": {
+        "sheet": "PNC.B4b. Neonatal Physical Exam",
+        "id": "PNC.B4b.DE.25",
+        "label": "Skin",
+        "description": "Specify the details of the examination of the newborn’s skin",
+        "multiple": true,
+        "options": [
+          {
+            "id": "PNC.B4b.DE.26",
+            "label": "Normal findings",
+            "description": "The newborn has a normal skin evaluation, ruddy skin, and physiological findings."
+          },
+          {
+            "id": "PNC.B4b.DE.27",
+            "label": "Pallor",
+            "description": "The newborn has pallor"
+          },
+          {
+            "id": "PNC.B4b.DE.28",
+            "label": "Cyanosis",
+            "description": "The newborn has bluish skin coloration"
+          },
+          {
+            "id": "PNC.B4b.DE.29",
+            "label": "Signs of skin infection",
+            "description": "The newborn has signs of skin infection, with skin pustules or bullae, or swelling, redness, hardness of the skin."
+          },
+          {
+            "id": "PNC.B4b.DE.30",
+            "label": "Other (specify)",
+            "description": "The newborn has other skin condition not listed above"
+          }
+        ]
+      },
+      "PNC.B4b.DE.31": {
+        "sheet": "PNC.B4b. Neonatal Physical Exam",
+        "id": "PNC.B4b.DE.31",
+        "label": "Jaundice location",
+        "description": "Specify the location of jaundice",
+        "multiple": true,
+        "options": [
+          {
+            "id": "PNC.B4b.DE.32",
+            "label": "Face",
+            "description": "The newborn has a jaundiced face"
+          },
+          {
+            "id": "PNC.B4b.DE.33",
+            "label": "Chest",
+            "description": "The newborn has a jaundiced chest"
+          },
+          {
+            "id": "PNC.B4b.DE.34",
+            "label": "Abdomen",
+            "description": "The newborn has a jaundiced abdomen"
+          },
+          {
+            "id": "PNC.B4b.DE.35",
+            "label": "Legs",
+            "description": "The newborn has a jaundiced legs"
+          },
+          {
+            "id": "PNC.B4b.DE.36",
+            "label": "Arms",
+            "description": "The newborn has a jaundiced arms"
+          },
+          {
+            "id": "PNC.B4b.DE.37",
+            "label": "Palms",
+            "description": "The newborn has a jaundiced palms"
+          },
+          {
+            "id": "PNC.B4b.DE.38",
+            "label": "Soles",
+            "description": "The newborn has a jaundiced soles"
+          }
+        ]
+      },
+      "PNC.B4b.DE.48": {
+        "sheet": "PNC.B4b. Neonatal Physical Exam",
+        "id": "PNC.B4b.DE.48",
+        "label": "Warmth",
+        "description": "Specify whether the newborn is being kept at an appropriate temperature",
+        "multiple": false,
+        "options": [
+          {
+            "id": "PNC.B4b.DE.49",
+            "label": "Normal",
+            "description": "The newborn is adequately warm"
+          },
+          {
+            "id": "PNC.B4b.DE.50",
+            "label": "Cold",
+            "description": "The newborn is not adequately warm, and is cold"
+          },
+          {
+            "id": "PNC.B4b.DE.51",
+            "label": "Very warm",
+            "description": "The newborn is overheating (looks flushed or red, sweating or has damp hair)"
+          }
+        ]
+      },
+      "PNC.B4b.DE.80": {
+        "sheet": "PNC.B4b. Neonatal Physical Exam",
+        "id": "PNC.B4b.DE.80",
+        "label": "Fontanelles",
+        "description": "Specify the details of the examination of the newborn's fontanelles",
+        "multiple": false,
+        "options": [
+          {
+            "id": "PNC.B4b.DE.81",
+            "label": "Normal",
+            "description": "The newborn's fontanelles have a normal appearance"
+          },
+          {
+            "id": "PNC.B4b.DE.82",
+            "label": "Raised or bulging",
+            "description": "The newborn's fontanelles appear raised or bulged"
+          },
+          {
+            "id": "PNC.B4b.DE.83",
+            "label": "Depressed or sunken",
+            "description": "The newborn's fontanelles appear depressed or sunken"
+          }
+        ]
+      },
+      "PNC.B4b.DE.88": {
+        "sheet": "PNC.B4b. Neonatal Physical Exam",
+        "id": "PNC.B4b.DE.88",
+        "label": "Eyes",
+        "description": "Specify the details of the examination of the newborn's eyes",
+        "multiple": true,
+        "options": [
+          {
+            "id": "PNC.B4b.DE.89",
+            "label": "Normal",
+            "description": "The newborn's eyes have a normal appearance"
+          },
+          {
+            "id": "PNC.B4b.DE.90",
+            "label": "Swollen and draining pus",
+            "description": "The newborn's eyes present with secretions, draining pus."
+          },
+          {
+            "id": "PNC.B4b.DE.91",
+            "label": "Opacities",
+            "description": "The newborn's eyes present with corneal opacities"
+          },
+          {
+            "id": "PNC.B4b.DE.92",
+            "label": "Yellow sclera",
+            "description": "The newborn's eyes present with yellow sclera"
+          },
+          {
+            "id": "PNC.B4b.DE.93",
+            "label": "Redness",
+            "description": "The newborns eyes appear red"
+          },
+          {
+            "id": "PNC.B4b.DE.94",
+            "label": "Red reflex normal",
+            "description": "The evaluation of the red reflex in the newborn's eyes appears normal (bilateral, symmetrical, equivalent in colour, intensity and clarity)"
+          },
+          {
+            "id": "PNC.B4b.DE.95",
+            "label": "Red reflex abnormal",
+            "description": "The evaluation of the red reflex in the newborn's eyes appears abnormal (monolateral or asymmetrical, or discrepancies in colour, intensity and clarity)"
+          },
+          {
+            "id": "PNC.B4b.DE.96",
+            "label": "Other (specify)",
+            "description": "The newborn's eyes present with other abnormalities not listed above"
+          }
+        ]
+      },
+      "PNC.B4b.DE.121": {
+        "sheet": "PNC.B4b. Neonatal Physical Exam",
+        "id": "PNC.B4b.DE.121",
+        "label": "Umbilical cord",
+        "description": "Specify the details of the examination of the newborn's umbilical cord",
+        "multiple": true,
+        "options": [
+          {
+            "id": "PNC.B4b.DE.122",
+            "label": "Normal",
+            "description": "The newborn's cord appears normal (3 blood vessels - 2 arteries and 1 vein) and clean and dry"
+          },
+          {
+            "id": "PNC.B4b.DE.123",
+            "label": "Red or swollen umbilicus or skin around it",
+            "description": "The newborns umbilicus appears red or swollen"
+          },
+          {
+            "id": "PNC.B4b.DE.124",
+            "label": "Draining pus",
+            "description": "The newborn's umbilicus presents with draining pus"
+          },
+          {
+            "id": "PNC.B4b.DE.125",
+            "label": "Bleeding",
+            "description": "The newborns cord presents with bloody discharge"
+          },
+          {
+            "id": "PNC.B4b.DE.127",
+            "label": "Other (specify)",
+            "description": "The newborn's cord presents with other abnormalities not listed above"
+          }
+        ]
+      },
+      "PNC.B4b.DE.52": {
+        "sheet": "PNC.B4b. Neonatal Physical Exam",
+        "id": "PNC.B4b.DE.52",
+        "label": "Malformation",
+        "description": "Specify if the newborn has any malformation",
+        "multiple": true,
+        "options": [
+          {
+            "id": "PNC.B4b.DE.53",
+            "label": "None",
+            "description": "There are no evident malformation"
+          },
+          {
+            "id": "PNC.B4b.DE.54",
+            "label": "Club foot",
+            "description": "The newborn has club foot"
+          },
+          {
+            "id": "PNC.B4b.DE.55",
+            "label": "Cleft lip",
+            "description": "The newborn has cleft lip"
+          },
+          {
+            "id": "PNC.B4b.DE.56",
+            "label": "Cleft palate",
+            "description": "The newborn has cleft palate"
+          },
+          {
+            "id": "PNC.B4b.DE.57",
+            "label": "Odd-looking, unusual appearance",
+            "description": "The newborn has an odd-looking, unusual appearance that raises concern"
+          },
+          {
+            "id": "PNC.B4b.DE.58",
+            "label": "Open tissue on the head, abdomen back, perineum, or genital areas.",
+            "description": "The newborn has open tissue on the head, abdomen back, perineum, or genital areas."
+          },
+          {
+            "id": "PNC.B4b.DE.59",
+            "label": "Other (specify)",
+            "description": "The newborn has other condition not listed above"
+          }
+        ]
+      },
+      "PNC.B4b.DE.128": {
+        "sheet": "PNC.B4b. Neonatal Physical Exam",
+        "id": "PNC.B4b.DE.128",
+        "label": "Genitalia",
+        "description": "Specify the details of the examination of the newborn's genitalia",
+        "multiple": false,
+        "options": [
+          {
+            "id": "PNC.B4b.DE.129",
+            "label": "Usual appearance",
+            "description": "The newborn's genitalia appear normal, and according to the phenotypic sex"
+          },
+          {
+            "id": "PNC.B4b.DE.132",
+            "label": "Vaginal bleeding",
+            "description": "The newborn presents with vaginal bleeding"
+          },
+          {
+            "id": "PNC.B4b.DE.133",
+            "label": "Fused labia",
+            "description": "The newborn presents with fused labia (the labia minora are joined together)"
+          },
+          {
+            "id": "PNC.B4b.DE.134",
+            "label": "Undescended testicles",
+            "description": "The newborn presents with undescended testicles"
+          },
+          {
+            "id": "PNC.B4b.DE.137",
+            "label": "Hypospadias",
+            "description": "The newborn presents with hypospadias (opening of the urethra not located at the tip of the penis)"
+          },
+          {
+            "id": "PNC.B4b.DE.138",
+            "label": "Hydrocele",
+            "description": "The newborn presents with hydrocele (collection of fluid in the scrotum)"
+          },
+          {
+            "id": "PNC.B4b.DE.139",
+            "label": "Inguinal hernia",
+            "description": "The newborn presents with inguinal hernia"
+          },
+          {
+            "id": "PNC.B4b.DE.140",
+            "label": "Ambiguous genitalia",
+            "description": "The newborn presents with ambiguous genitalia"
+          },
+          {
+            "id": "PNC.B4b.DE.141",
+            "label": "Other (specify)",
+            "description": "The newborn's genitalia present with other abnormalities not listed above"
+          }
+        ]
+      },
+      "PNC.B4b.DE.142": {
+        "sheet": "PNC.B4b. Neonatal Physical Exam",
+        "id": "PNC.B4b.DE.142",
+        "label": "Anus",
+        "description": "Specify the details of the examination of the newborn's anal area",
+        "multiple": true,
+        "options": [
+          {
+            "id": "PNC.B4b.DE.143",
+            "label": "Normal",
+            "description": "The newborn's anus appears patent, usual appearance"
+          },
+          {
+            "id": "PNC.B4b.DE.144",
+            "label": "Imperforate anus",
+            "description": "The newborn presents with imperforate anus (opening to the anus missing or blocked)"
+          },
+          {
+            "id": "PNC.B4b.DE.145",
+            "label": "Unusual appearance",
+            "description": "The newborn presents with an abnormal anus (abnormal at inspection)"
+          },
+          {
+            "id": "PNC.B4b.DE.146",
+            "label": "Other (specify)",
+            "description": "The newborn's anal area presents with other abnormalities not listed above"
+          }
+        ]
+      },
+      "PNC.B4b.DE.152": {
+        "sheet": "PNC.B4b. Neonatal Physical Exam",
+        "id": "PNC.B4b.DE.152",
+        "label": "Back and spine",
+        "description": "Specify the details of the examination of the newborn's back and spine",
+        "multiple": true,
+        "options": [
+          {
+            "id": "PNC.B4b.DE.153",
+            "label": "Normal",
+            "description": "The newborn's back and spine appear normal"
+          },
+          {
+            "id": "PNC.B4b.DE.154",
+            "label": "Dimples or pits",
+            "description": "The newborn's back and spine present with dimples or pits"
+          },
+          {
+            "id": "PNC.B4b.DE.155",
+            "label": "Skin tags",
+            "description": "Skin tags are soft, skin-coloured growths on the skin."
+          },
+          {
+            "id": "PNC.B4b.DE.156",
+            "label": "Tufts of hair",
+            "description": "The newborn's back and spine present with tufts of hair"
+          },
+          {
+            "id": "PNC.B4b.DE.157",
+            "label": "Anencephaly",
+            "description": "The newborn presents with anencephaly (absence of components of the brain and/or skull)"
+          },
+          {
+            "id": "PNC.B4b.DE.158",
+            "label": "Encephalocele",
+            "description": "The newborn presents with encephalocele (sac-like protrusion of the brain and the membranes that cover it through openings in the skull)"
+          },
+          {
+            "id": "PNC.B4b.DE.159",
+            "label": "Spina Bifida",
+            "description": "The newborn presents with spina bifida (defect that causes a section of the spinal cord and spinal nerves exposed)"
+          },
+          {
+            "id": "PNC.B4b.DE.160",
+            "label": "Other (specify)",
+            "description": "The newborn's back and spine present with other abnormalities not listed above"
+          }
+        ]
+      },
+      "PNC.B3b.DE.24": {
+        "sheet": "PNC.B3b.Nb_symptomswellbeing",
+        "id": "PNC.B3b.DE.24",
+        "label": "Vitamin K administered at birth",
+        "description": "Indicate whether vitamin K injection was administered at birth",
+        "multiple": false,
+        "options": [
+          {
+            "id": "PNC.B3b.DE.25",
+            "label": "Yes",
+            "description": "1 mg of intramuscular injection of vitamin K at birth was administered"
+          },
+          {
+            "id": "PNC.B3b.DE.26",
+            "label": "No",
+            "description": "1 mg of intramuscular injection of vitamin K at birth was not administered"
+          },
+          {
+            "id": "PNC.B3b.DE.27",
+            "label": "Unknown",
+            "description": "Not possible to ascertain whether the newborn received 1 mg of intramuscular injection of vitamin K at birth"
+          }
+        ]
+      },
+      "PNC.B3b.DE.45": {
+        "sheet": "PNC.B3b.Nb_symptomswellbeing",
+        "id": "PNC.B3b.DE.45",
+        "label": "Feeding status",
+        "description": "Specify the details of current feeding status",
+        "multiple": false,
+        "options": [
+          {
+            "id": "PNC.B3b.DE.46",
+            "label": "Exclusive on demand",
+            "description": "Exclusive on demand (day and night) breastfeeding/breast milk is the current feeding practice for the newborn"
+          },
+          {
+            "id": "PNC.B3b.DE.47",
+            "label": "Exclusive on scheduled time",
+            "description": "Exclusive on scheduled time breastfeeding/breast milk is the current feeding practice for the newborn"
+          },
+          {
+            "id": "PNC.B3b.DE.48",
+            "label": "Mixed",
+            "description": "Mixed feeding (formula and breastfeeding/breast milk) is the current feeding practice for the newborn"
+          },
+          {
+            "id": "PNC.B3b.DE.49",
+            "label": "Formula",
+            "description": "Formula is the current feeding practice for the newborn"
+          },
+          {
+            "id": "PNC.B3b.DE.50",
+            "label": "Other (specify)",
+            "description": "Other current feeding practices not listed above"
+          }
+        ]
+      },
+      "PNC.B3b.DE.87": {
+        "sheet": "PNC.B3b.Nb_symptomswellbeing",
+        "id": "PNC.B3b.DE.87",
+        "label": "Sleeping position",
+        "description": "Specify the position in which the newborn usually sleeps",
+        "multiple": true,
+        "options": [
+          {
+            "id": "PNC.B3b.DE.88",
+            "label": "Supine (back)",
+            "description": "The newborn usually sleeps supine (on the back)"
+          },
+          {
+            "id": "PNC.B3b.DE.89",
+            "label": "Side",
+            "description": "The newborn usually sleeps on the side"
+          },
+          {
+            "id": "PNC.B3b.DE.90",
+            "label": "Stomach",
+            "description": "The newborn usually sleeps laying on the stomach"
+          },
+          {
+            "id": "PNC.B3b.DE.91",
+            "label": "Unknown",
+            "description": "Not possible to ascertain in what position the newborn usually sleeps"
+          }
+        ]
+      }
+    }
+  },
+  "HIV": {
+    "title": "WHO Digital Adaptation Kit for HIV (2023), Web Annex A: core data dictionary",
+    "repository": "https://github.com/WorldHealthOrganization/smart-hiv",
+    "file": "input/l2/HIV_DAK_2023-Web_Annex_A.Data_dictionary_231117_CLEAN.xlsx",
+    "commit": "b1e7735f1e50cc6e4d126ce6063793def9ae3a12 2026-03-04T13:53:02-05:00",
+    "elements": {
+      "HIV.D.DE197": {
+        "sheet": "HIV.D Care-Treatment",
+        "id": "HIV.D.DE197",
+        "label": "Reason(s) for adherence problem",
+        "description": "Reason why client was not adherent",
+        "multiple": true,
+        "options": [
+          {
+            "id": "HIV.D.DE198",
+            "label": "Forgot",
+            "description": "Client reported not being adherent because they forgot"
+          },
+          {
+            "id": "HIV.D.DE199",
+            "label": "Toxicity/side effects",
+            "description": "Client reported not being adherent because of toxicity/side effects"
+          },
+          {
+            "id": "HIV.D.DE200",
+            "label": "Busy",
+            "description": "Client reported not being adherent because they were busy"
+          },
+          {
+            "id": "HIV.D.DE201",
+            "label": "Change of routine",
+            "description": "Client reported not being adherent because of a change of routine"
+          },
+          {
+            "id": "HIV.D.DE202",
+            "label": "Travel cost",
+            "description": "Client reported not being adherent because of travel cost"
+          },
+          {
+            "id": "HIV.D.DE203",
+            "label": "Distance to clinic",
+            "description": "Client reported not being adherent because of distance to clinic"
+          },
+          {
+            "id": "HIV.D.DE204",
+            "label": "Client lost/ran out of pills",
+            "description": "Client reported not being adherent because client lost/ran out of pills"
+          },
+          {
+            "id": "HIV.D.DE205",
+            "label": "Stock-out",
+            "description": "Client reported not being adherent because of a stock-out"
+          },
+          {
+            "id": "HIV.D.DE206",
+            "label": "Too ill",
+            "description": "Client reported not being adherent because of being too ill"
+          },
+          {
+            "id": "HIV.D.DE207",
+            "label": "Pill burden",
+            "description": "Client reported not being adherent because of the pill burden"
+          },
+          {
+            "id": "HIV.D.DE208",
+            "label": "Felt well",
+            "description": "Client reported not being adherent because they felt well"
+          },
+          {
+            "id": "HIV.D.DE209",
+            "label": "Depression",
+            "description": "Client reported not being adherent because of depression"
+          },
+          {
+            "id": "HIV.D.DE210",
+            "label": "Alcohol use",
+            "description": "Client reported not being adherent because of alcohol use"
+          },
+          {
+            "id": "HIV.D.DE211",
+            "label": "Substance use",
+            "description": "Client reported not being adherent because of substance use (i.e. drugs)"
+          },
+          {
+            "id": "HIV.D.DE212",
+            "label": "Stigma/disclosure concerns",
+            "description": "Client reported not being adherent because of stigma/disclosure concerns"
+          },
+          {
+            "id": "HIV.D.DE213",
+            "label": "Lack of food",
+            "description": "Client reported not being adherent because of a lack of food"
+          },
+          {
+            "id": "HIV.D.DE214",
+            "label": "Poor palatability",
+            "description": "Client reported not being adherent because of poor palatability"
+          },
+          {
+            "id": "HIV.D.DE215",
+            "label": "Other reason for nonadherence",
+            "description": "Client reported not being adherent because of other reason for nonadherence"
+          }
+        ]
+      },
+      "HIV.D.DE17": {
+        "sheet": "HIV.D Care-Treatment",
+        "id": "HIV.D.DE17",
+        "label": "Signs of serious illness",
+        "description": "Signs that may indicate the client has a serious illness and needs triage or an emergency referral",
+        "multiple": true,
+        "options": [
+          {
+            "id": "HIV.D.DE18",
+            "label": "Fever of 39 C or greater",
+            "description": "Client has a fever with a measured temperature of 102.2 F/39 C or greater"
+          },
+          {
+            "id": "HIV.D.DE19",
+            "label": "Tachycardia",
+            "description": "Heart rate above a rate per minute based on age"
+          },
+          {
+            "id": "HIV.D.DE20",
+            "label": "Tachypnea",
+            "description": "Respiratory rate above a number of breaths per minute based on age"
+          },
+          {
+            "id": "HIV.D.DE21",
+            "label": "Unable to walk unaided",
+            "description": "Client is not able to walk without help"
+          },
+          {
+            "id": "HIV.D.DE22",
+            "label": "Lethargy",
+            "description": "Client is exhibiting lethargy as a sign of serious illness"
+          },
+          {
+            "id": "HIV.D.DE23",
+            "label": "Unconsciousness",
+            "description": "Client is currently unconscious"
+          },
+          {
+            "id": "HIV.D.DE24",
+            "label": "Convulsions",
+            "description": "Client is convulsing"
+          },
+          {
+            "id": "HIV.D.DE25",
+            "label": "Unable to drink",
+            "description": "Child is not able to drink"
+          },
+          {
+            "id": "HIV.D.DE26",
+            "label": "Unable to breastfeed",
+            "description": "Infant or child is not able to breastfeed"
+          },
+          {
+            "id": "HIV.D.DE27",
+            "label": "Repeated vomiting",
+            "description": "Client is repeatedly vomiting"
+          },
+          {
+            "id": "HIV.D.DE28",
+            "label": "Headache",
+            "description": "Client is exhibiting a headache"
+          },
+          {
+            "id": "HIV.D.DE29",
+            "label": "Other sign of serious illness",
+            "description": "Client is exhibiting another sign of a serious illness"
+          }
+        ]
+      },
+      "HIV.D.DE225": {
+        "sheet": "HIV.D Care-Treatment",
+        "id": "HIV.D.DE225",
+        "label": "Treatment failure",
+        "description": "ART treatment failure",
+        "multiple": true,
+        "options": [
+          {
+            "id": "HIV.D.DE226",
+            "label": "Clinical failure",
+            "description": "New or recurrent clinical event indicating severe immunodeficiency in adults or advanced or severe immunodeficiency in children"
+          },
+          {
+            "id": "HIV.D.DE227",
+            "label": "Immunological failure",
+            "description": "CD4 count at or below 250 cells/mm3 following clinical failure"
+          },
+          {
+            "id": "HIV.D.DE228",
+            "label": "Virological failure",
+            "description": "The inability to achieve or maintain viral suppression below a certain threshold indicated by viral load above 1000 copies/mL based on two consecutive viral load measurements in 3 months, with adherence support following the first viral load test"
+          }
+        ]
+      },
+      "HIV.D.DE391": {
+        "sheet": "HIV.D Care-Treatment",
+        "id": "HIV.D.DE391",
+        "label": "Reason for HIV viral load test",
+        "description": "Whether the viral load is being tested for routine monitoring on a set schedule or for targeted monitoring for suspected treatment failure",
+        "multiple": false,
+        "options": [
+          {
+            "id": "HIV.D.DE392",
+            "label": "Routine viral load test",
+            "description": "Routine refers to viral load tests obtained at standard intervals following ART initiation to monitor viral load response to ART"
+          },
+          {
+            "id": "HIV.D.DE393",
+            "label": "Targeted viral load monitoring",
+            "description": "Targeted refers to viral load tests obtained based on a specific clinical indication (such as concern about disease progression or failure to respond to ART)"
+          },
+          {
+            "id": "HIV.D.DE394",
+            "label": "Initial viral load test",
+            "description": "The first viral load test of the client"
+          },
+          {
+            "id": "HIV.D.DE395",
+            "label": "Follow-up viral load test after receiving enhanced adherence counselling",
+            "description": "A follow-up viral load test within 3-6 months after enhanced adherence counselling after client received a high viral load test result"
+          }
+        ]
+      },
+      "HIV.D.DE466": {
+        "sheet": "HIV.D Care-Treatment",
+        "id": "HIV.D.DE466",
+        "label": "Type of treatment-limiting toxicity",
+        "description": "Type of treatment-limiting toxicity experienced by client. Treatment-limiting toxicity is defined as a serious adverse drug reaction that results in drug discontinuation or substitution. In addition, any reaction that leads to treatment interruption or requires changing the drug or regimen because of an adverse drug reaction is also considered a serious adverse drug reaction.",
+        "multiple": true,
+        "options": [
+          {
+            "id": "HIV.D.DE467",
+            "label": "Gastrointestinal",
+            "description": "Treatment-limiting toxicity due to GI issues (nausea, diarrhoea, abdominal pain, vomiting)"
+          },
+          {
+            "id": "HIV.D.DE468",
+            "label": "Skin issues",
+            "description": "Treatment-limiting toxicity due to skin issues (rash, hypersensitivity reaction)"
+          },
+          {
+            "id": "HIV.D.DE469",
+            "label": "Peripheral neuropathy",
+            "description": "Treatment-limiting toxicity due to peripheral neuropathy (burning/numbness/ tingling)"
+          },
+          {
+            "id": "HIV.D.DE470",
+            "label": "Central nervous system symptoms",
+            "description": "Treatment-limiting toxicity due to central nervous system symptoms (dizzy, anxiety, nightmare, depression, seizures)"
+          },
+          {
+            "id": "HIV.D.DE471",
+            "label": "Weight gain",
+            "description": "Treatment-limiting toxicity due to weight gain"
+          },
+          {
+            "id": "HIV.D.DE472",
+            "label": "Hepatic dysfunction",
+            "description": "Treatment-limiting toxicity due to hepatic dysfunction (jaundice)"
+          },
+          {
+            "id": "HIV.D.DE473",
+            "label": "Haematological disorders",
+            "description": "Treatment-limiting toxicity due to haematological (anaemia, neutropenia) disorders"
+          },
+          {
+            "id": "HIV.D.DE474",
+            "label": "Fatigue",
+            "description": "Treatment-limiting toxicity due to fatigue"
+          },
+          {
+            "id": "HIV.D.DE475",
+            "label": "Headache",
+            "description": "Treatment-limiting toxicity due to headache"
+          },
+          {
+            "id": "HIV.D.DE476",
+            "label": "Bone dysfunction",
+            "description": "Treatment-limiting toxicity due to bone dysfunction (fractures, osteopenia)"
+          },
+          {
+            "id": "HIV.D.DE477",
+            "label": "Metabolic symptoms",
+            "description": "Treatment-limiting toxicity due to metabolic symptoms (body fat changes, hyperglycaemia, dyslipidaemia)"
+          },
+          {
+            "id": "HIV.D.DE478",
+            "label": "Kidney dysfunction",
+            "description": "Treatment-limiting toxicity due to kidney dysfunction (nephrolithiasis, renal insufficiency)"
+          },
+          {
+            "id": "HIV.D.DE479",
+            "label": "Unexpected adverse drug reaction",
+            "description": "Client experienced an unexpected adverse drug reaction"
+          }
+        ]
+      },
+      "HIV.D.DE162": {
+        "sheet": "HIV.D Care-Treatment",
+        "id": "HIV.D.DE162",
+        "label": "HBsAg test result",
+        "description": "Hepatitis B virus test result (HBsAg)",
+        "multiple": false,
+        "options": [
+          {
+            "id": "HIV.D.DE163",
+            "label": "Positive",
+            "description": "HBsAg test result was positive"
+          },
+          {
+            "id": "HIV.D.DE164",
+            "label": "Negative",
+            "description": "HBsAg test result was negative"
+          },
+          {
+            "id": "HIV.D.DE165",
+            "label": "Indeterminate",
+            "description": "HBsAg test result was indeterminate"
+          }
+        ]
+      },
+      "HIV.D.DE170": {
+        "sheet": "HIV.D Care-Treatment",
+        "id": "HIV.D.DE170",
+        "label": "HCV test result",
+        "description": "Hepatitis C virus test result (HCV antibody, HCV RNA or HCV core antigen)",
+        "multiple": false,
+        "options": [
+          {
+            "id": "HIV.D.DE171",
+            "label": "Positive",
+            "description": "HCV test result was positive"
+          },
+          {
+            "id": "HIV.D.DE172",
+            "label": "Negative",
+            "description": "HCV test result was negative"
+          },
+          {
+            "id": "HIV.D.DE173",
+            "label": "Indeterminate",
+            "description": "HCV test result was indeterminate"
+          }
+        ]
+      },
+      "HIV.D.DE973": {
+        "sheet": "HIV.D HIV-TB",
+        "id": "HIV.D.DE973",
+        "label": "Symptoms of TB",
+        "description": "Symptoms that may indicate TB disease in clients living with HIV, based on a clinical algorithm",
+        "multiple": false,
+        "options": [
+          {
+            "id": "HIV.D.DE974",
+            "label": "Current cough",
+            "description": "Client has a cough regardless of duration"
+          },
+          {
+            "id": "HIV.D.DE975",
+            "label": "Prolonged cough (>=2w)",
+            "description": "Client has a prolonged cough of 2 weeks or more"
+          },
+          {
+            "id": "HIV.D.DE976",
+            "label": "Fever of 39 °C or greater",
+            "description": "Client has a fever with a measured temperature of 102.2 °F/39 °C or greater"
+          },
+          {
+            "id": "HIV.D.DE977",
+            "label": "Weight loss (reported)",
+            "description": "Unexplained weight loss"
+          },
+          {
+            "id": "HIV.D.DE978",
+            "label": "Night sweats",
+            "description": "Client reports experiencing night sweats"
+          },
+          {
+            "id": "HIV.D.DE979",
+            "label": "Poor weight gain",
+            "description": "Client reports poor weight gain of child or infant or growth curve flattening or weight for age <-2 Z-scores."
+          },
+          {
+            "id": "HIV.D.DE980",
+            "label": "Reduced playfulness",
+            "description": "Client reports reduced playfulness of child"
+          },
+          {
+            "id": "HIV.D.DE981",
+            "label": "Chest pain",
+            "description": "Client reports chest pain"
+          },
+          {
+            "id": "HIV.D.DE982",
+            "label": "Haemoptysis",
+            "description": "Client reports experiencing haemoptysis"
+          },
+          {
+            "id": "HIV.D.DE983",
+            "label": "Lethargy",
+            "description": "Client reports lethargy"
+          },
+          {
+            "id": "HIV.D.DE984",
+            "label": "None",
+            "description": "No symptoms of TB identified"
+          }
+        ]
+      },
+      "HIV.D.DE986": {
+        "sheet": "HIV.D HIV-TB",
+        "id": "HIV.D.DE986",
+        "label": "TB screening result",
+        "description": "Record the result of the tuberculosis (TB) screening",
+        "multiple": false,
+        "options": [
+          {
+            "id": "HIV.D.DE987",
+            "label": "Screen positive for TB",
+            "description": "Screening result was positive for tuberculosis (TB)"
+          },
+          {
+            "id": "HIV.D.DE988",
+            "label": "Screen negative for TB",
+            "description": "Screening result was negative for tuberculosis (TB)"
+          },
+          {
+            "id": "HIV.D.DE989",
+            "label": "Inconclusive",
+            "description": "Screening result was inconclusive for tuberculosis (TB)"
+          }
+        ]
+      },
+      "HIV.D.DE778": {
+        "sheet": "HIV.D Care-Treatment",
+        "id": "HIV.D.DE778",
+        "label": "Syndrome/STI diagnosed",
+        "description": "Syndrome or STI for which client is diagnosed",
+        "multiple": true,
+        "options": [
+          {
+            "id": "HIV.D.DE779",
+            "label": "Urethral discharge syndrome",
+            "description": "Client diagnosed with urethral discharge syndrome"
+          },
+          {
+            "id": "HIV.D.DE780",
+            "label": "Vaginal discharge syndrome",
+            "description": "Client diagnosed with vaginal discharge syndrome"
+          },
+          {
+            "id": "HIV.D.DE781",
+            "label": "Lower Abdominal pain",
+            "description": "Client diagnosed with lower abdominal pain"
+          },
+          {
+            "id": "HIV.D.DE782",
+            "label": "Genital ulcer disease syndrome",
+            "description": "Client diagnosed with genital ulcer disease syndrome"
+          },
+          {
+            "id": "HIV.D.DE783",
+            "label": "Anorectal discharge",
+            "description": "Client diagnosed with anorectal discharge"
+          },
+          {
+            "id": "HIV.D.DE784",
+            "label": "Sent for testing",
+            "description": "Specimen sent for testing"
+          },
+          {
+            "id": "HIV.D.DE785",
+            "label": "Other",
+            "description": "Other syndrome/STI diagnosed"
+          }
+        ]
+      },
+      "HIV.D.DE789": {
+        "sheet": "HIV.D Care-Treatment",
+        "id": "HIV.D.DE789",
+        "label": "STI tested for",
+        "description": "STI for which the client was tested",
+        "multiple": true,
+        "options": [
+          {
+            "id": "HIV.D.DE790",
+            "label": "Neisseria gonorrhoeae",
+            "description": "Client tested for Neisseria gonorrhoeae"
+          },
+          {
+            "id": "HIV.D.DE791",
+            "label": "Chlamydia trachomatis",
+            "description": "Client tested for Chlamydia trachomatis"
+          },
+          {
+            "id": "HIV.D.DE792",
+            "label": "Trichomonas vaginalis",
+            "description": "Client tested for Trichomonas vaginalis"
+          },
+          {
+            "id": "HIV.D.DE793",
+            "label": "Syphilis (Treponema pallidum)",
+            "description": "Client tested for Syphilis (treponema pallidum)"
+          },
+          {
+            "id": "HIV.D.DE794",
+            "label": "Herpes simplex virus (HSV1, HSV2)",
+            "description": "Client tested for herpes simplex virus (HSV1, HSV2)"
+          },
+          {
+            "id": "HIV.D.DE795",
+            "label": "Mycoplasma genitalium",
+            "description": "Client tested for Mycoplasma genitalium"
+          },
+          {
+            "id": "HIV.D.DE796",
+            "label": "Mpox",
+            "description": "Client tested for Mpox"
+          },
+          {
+            "id": "HIV.D.DE797",
+            "label": "Hepatitis B",
+            "description": "Client tested for Hepatitis B"
+          },
+          {
+            "id": "HIV.D.DE798",
+            "label": "Hepatitis C",
+            "description": "Client tested for Hepatitis C"
+          },
+          {
+            "id": "HIV.D.DE799",
+            "label": "Other",
+            "description": "Client tested for other STI"
+          }
+        ]
+      },
+      "HIV.D.DE802": {
+        "sheet": "HIV.D Care-Treatment",
+        "id": "HIV.D.DE802",
+        "label": "Syphilis test result",
+        "description": "Result from syphilis test",
+        "multiple": false,
+        "options": [
+          {
+            "id": "HIV.D.DE803",
+            "label": "Positive",
+            "description": "Test result is positive for syphilis"
+          },
+          {
+            "id": "HIV.D.DE804",
+            "label": "Negative",
+            "description": "Test result is negative for syphilis"
+          },
+          {
+            "id": "HIV.D.DE805",
+            "label": "Inconclusive",
+            "description": "Test result is inconclusive"
+          }
+        ]
+      },
+      "HIV.D.DE808": {
+        "sheet": "HIV.D Care-Treatment",
+        "id": "HIV.D.DE808",
+        "label": "Gonorrhoea test result",
+        "description": "Result from Gonorrhoea test",
+        "multiple": false,
+        "options": [
+          {
+            "id": "HIV.D.DE809",
+            "label": "Positive",
+            "description": "Test result is positive for Neisseria gonorrhoeae"
+          },
+          {
+            "id": "HIV.D.DE810",
+            "label": "Negative",
+            "description": "Test result is negative for Neisseria gonorrhoeae"
+          },
+          {
+            "id": "HIV.D.DE811",
+            "label": "Inconclusive",
+            "description": "Test result is inconclusive"
+          }
+        ]
+      },
+      "HIV.D.DE1002": {
+        "sheet": "HIV.D HIV-TB",
+        "id": "HIV.D.DE1002",
+        "label": "TB treatment outcome",
+        "description": "Indicates patient's TB treatment outcome",
+        "multiple": false,
+        "options": [
+          {
+            "id": "HIV.D.DE1003",
+            "label": "Treatment failed",
+            "description": "The treatment regimen terminated or permanently changed to a new regimen or treatment strategy. Reasons for the change include: - no clinical response or no bacteriological response, or both (see note; - adverse drug reaction; or - evidence of additional drug-resistance to medicines in the regimen."
+          },
+          {
+            "id": "HIV.D.DE1004",
+            "label": "Cured",
+            "description": "Client with pulmonary TB with bacteriologically confirmed TB at the beginning of treatment who completed treatment as recommended by the national policy, with evidence of bacteriological response and no evidence of failure."
+          },
+          {
+            "id": "HIV.D.DE1005",
+            "label": "Treatment completed",
+            "description": "Patient completed treatment as recommended by the national policy but the outcome does not meet the definition for cure or treatment failure"
+          },
+          {
+            "id": "HIV.D.DE1006",
+            "label": "Died",
+            "description": "Client died before starting treatment or during the course of treatment"
+          },
+          {
+            "id": "HIV.D.DE1007",
+            "label": "Lost to follow-up",
+            "description": "Client was lost to follow-up"
+          },
+          {
+            "id": "HIV.D.DE1008",
+            "label": "Not evaluated",
+            "description": "No treatment outcome was assigned. This includes cases 'transferred out' to another treatment unit and whose treatment outcome is unknown; however, it excludes those lost to follow-up."
+          }
+        ]
+      }
+    }
+  },
+  "FP": {
+    "title": "WHO Digital Adaptation Kit for family planning and STIs: data dictionary",
+    "repository": "https://github.com/WorldHealthOrganization/smart-fp",
+    "file": "input/datadictionary/WHO-DD.xlsx",
+    "commit": "b69bbecd8c71c4e5a3438d9413a58331f4aa0a7f 2025-11-19T11:28:30+05:30",
+    "elements": {
+      "FP.DE.0059": {
+        "sheet": "New DD (Stacked)",
+        "id": "FP.DE.0059",
+        "label": "Reason for visit",
+        "description": "Establish reason for visit",
+        "multiple": true,
+        "options": [
+          {
+            "id": "FP.DE.0060",
+            "label": "Stopping contraception",
+            "description": "Visit to stop using contraception"
+          },
+          {
+            "id": "FP.DE.0061",
+            "label": "Contraception counseling",
+            "description": "Visit for counseling on contraception"
+          },
+          {
+            "id": "FP.DE.0062",
+            "label": "Starting contraception",
+            "description": "Visit to start contraception"
+          },
+          {
+            "id": "FP.DE.0063",
+            "label": "Contraceptive continuation",
+            "description": "Visit to continue use of current contraception method"
+          },
+          {
+            "id": "FP.DE.0064",
+            "label": "Emergency contraception",
+            "description": "Visit for emergency contraception"
+          },
+          {
+            "id": "FP.DE.0065",
+            "label": "Issues and concerns",
+            "description": "Side effects or symptoms with current method, administration, missed pills and late injections"
+          },
+          {
+            "id": "FP.DE.0066",
+            "label": "Implant removal",
+            "description": "Visit for removal of an implant"
+          },
+          {
+            "id": "FP.DE.0067",
+            "label": "IUD Removal",
+            "description": "Visit for removal of an intrauterine device"
+          },
+          {
+            "id": "FP.DE.0068",
+            "label": "Method switch",
+            "description": "Visit to change or switch contraceptive methods, given that the client is currently on a contraceptive method"
+          }
+        ]
+      },
+      "FP.DE.0074": {
+        "sheet": "New DD (Stacked)",
+        "id": "FP.DE.0074",
+        "label": "Pregnancy intention",
+        "description": "Client's intention or desire in the next year to either become pregnant or prevent a future pregnancy.",
+        "multiple": false,
+        "options": [
+          {
+            "id": "FP.DE.0075",
+            "label": "Yes, I want to become pregnant",
+            "description": "Client intends to become pregnant"
+          },
+          {
+            "id": "FP.DE.0076",
+            "label": "I'm OK either way",
+            "description": "Client is not intending to become pregnant, but would not be adverse to becoming pregnant"
+          },
+          {
+            "id": "FP.DE.0077",
+            "label": "No, I don't want to become pregnant",
+            "description": "Client does not intend to become pregnant"
+          },
+          {
+            "id": "FP.DE.0078",
+            "label": "Unsure",
+            "description": "Client is unsure or undecided about her pregnancy intentions"
+          }
+        ]
+      },
+      "FP.DE.0216": {
+        "sheet": "New DD (Stacked)",
+        "id": "FP.DE.0216",
+        "label": "Issues and concerns",
+        "description": "Side effects or symptoms with current method, administration, missed pills and late injections",
+        "multiple": true,
+        "options": [
+          {
+            "id": "FP.DE.0217",
+            "label": "Heavy or prolonged bleeding",
+            "description": "Twice as much as usual or longer than 8 days"
+          },
+          {
+            "id": "FP.DE.0218",
+            "label": "Irregular bleeding",
+            "description": "Bleeding at unexpected times that bothers the client"
+          },
+          {
+            "id": "FP.DE.0219",
+            "label": "Amenorrhea",
+            "description": "No monthly bleeding. If the woman has never had menses or if the woman has had no menses for 3 cycles over the time span of 6 months"
+          },
+          {
+            "id": "FP.DE.0220",
+            "label": "Unexplained vaginal bleeding",
+            "description": "Bleeding that suggests a medical condition not related to the method"
+          },
+          {
+            "id": "FP.DE.0221",
+            "label": "Cramping and pain",
+            "description": "Client experiences cramping and pain"
+          },
+          {
+            "id": "FP.DE.0222",
+            "label": "Possible anemia",
+            "description": "Inside of eyelids or underneath fingernails look pale, pale skin, fatigue or weakness, dizziness, irritability, headache, ringing in the ears, sore tongue, and brittle nails. If blood testing available, hemoglobin less than 9g/dl or hematocrit less than 30"
+          },
+          {
+            "id": "FP.DE.0223",
+            "label": "Partner can feel IUD strings during intercourse",
+            "description": "The client's partner can feel IUD strings during intercourse. This can happen if the strings are cut too short."
+          },
+          {
+            "id": "FP.DE.0224",
+            "label": "Severe pain in lower abdomen",
+            "description": "Suspected pelvic inflammatory disease (PID) OR suspected ectopic pregnancy OR suspected ovarian cyst"
+          },
+          {
+            "id": "FP.DE.0225",
+            "label": "Suspected perforation",
+            "description": "Suspected uterine puncturing"
+          },
+          {
+            "id": "FP.DE.0226",
+            "label": "IUD partial expulsion",
+            "description": "IUD partially comes out"
+          },
+          {
+            "id": "FP.DE.0227",
+            "label": "IUD complete expulsion",
+            "description": "IUD completely comes out"
+          },
+          {
+            "id": "FP.DE.0228",
+            "label": "Missing strings",
+            "description": "IUD strings are missing. Suggesting possible pregnancy, uterine perforation, or expulsion"
+          },
+          {
+            "id": "FP.DE.0229",
+            "label": "Acne",
+            "description": "Client experiences acne"
+          },
+          {
+            "id": "FP.DE.0230",
+            "label": "Ordinary headaches",
+            "description": "Ordinary, nonmigrainous headaches"
+          },
+          {
+            "id": "FP.DE.0231",
+            "label": "Breast tenderness",
+            "description": "Client has breast tenderness"
+          },
+          {
+            "id": "FP.DE.0232",
+            "label": "Weight change",
+            "description": "Weight gain or loss"
+          },
+          {
+            "id": "FP.DE.0233",
+            "label": "Nausea or dizziness",
+            "description": "Nausea or dizziness"
+          },
+          {
+            "id": "FP.DE.0234",
+            "label": "Ischemic heart disease",
+            "description": "Heart disease due to blocked or narrowed arteries"
+          },
+          {
+            "id": "FP.DE.0235",
+            "label": "Migraine headaches",
+            "description": "Client has migraine headaches with or without aura"
+          },
+          {
+            "id": "FP.DE.0236",
+            "label": "Missed pills",
+            "description": "Client has missed pills"
+          },
+          {
+            "id": "FP.DE.0237",
+            "label": "Late injections",
+            "description": "Client has received injections late"
+          },
+          {
+            "id": "FP.DE.0238",
+            "label": "Mood changes or changes in sex drive",
+            "description": "Client experiences mood changes and/or changes in sex drive"
+          },
+          {
+            "id": "FP.DE.0239",
+            "label": "Suspected pregnancy",
+            "description": "Client suspects pregnancy"
+          },
+          {
+            "id": "FP.DE.0240",
+            "label": "Issues with Combined Contraceptive Patch",
+            "description": "Late replacement or late removal, or if the contraceptive patch comes off"
+          },
+          {
+            "id": "FP.DE.0241",
+            "label": "Issues with vaginal ring",
+            "description": "Late replacement or late removal of the combined contraceptive vaginal ring (CVR) or progesterone-releasing vaginal ring (PVR)"
+          },
+          {
+            "id": "FP.DE.0242",
+            "label": "Change in timing of monthly bleeding",
+            "description": "Timing of monthly bleeding changes"
+          },
+          {
+            "id": "FP.DE.0243",
+            "label": "Bleeding or blood clots",
+            "description": "Bleeding or blood clots"
+          },
+          {
+            "id": "FP.DE.0244",
+            "label": "Pain lasting for months",
+            "description": "Client experiences pain for longer than one month"
+          },
+          {
+            "id": "FP.DE.0245",
+            "label": "Infection at the incision site",
+            "description": "Redness, heat, pain, and/or pus at the puncture or incision site"
+          },
+          {
+            "id": "FP.DE.0246",
+            "label": "Abscess",
+            "description": "A pocket of pus under the skin caused by infection"
+          },
+          {
+            "id": "FP.DE.0247",
+            "label": "Difficulty using the condom",
+            "description": "Difficulties using either male or female condoms"
+          },
+          {
+            "id": "FP.DE.0248",
+            "label": "Irritation",
+            "description": "Method causes mild itching, redness, rash, and/or swelling of genitals, groin, or thighs during or after male or female condom use"
+          },
+          {
+            "id": "FP.DE.0249",
+            "label": "Condom used incorrectly",
+            "description": "Condom breaks, slips, is not used, or is used incorrectly"
+          },
+          {
+            "id": "FP.DE.0250",
+            "label": "Difficulty persuading partner to use method",
+            "description": "Difficulty persuading partner to use method or not able to use every time"
+          },
+          {
+            "id": "FP.DE.0251",
+            "label": "Condom squeaks or makes noise during sex",
+            "description": "Condom squeaks or makes noise during sex"
+          },
+          {
+            "id": "FP.DE.0252",
+            "label": "Deep vein thrombosis",
+            "description": "A blood clot that develops in the deep veins of the body, generally in the legs"
+          },
+          {
+            "id": "FP.DE.0253",
+            "label": "Ectopic pregnancy",
+            "description": "Pregnancy in which the fertilized egg implants in tissue outisde the uterus, most commonly in a fallopian tube but sometimes in the cervix or abdominal cavity"
+          },
+          {
+            "id": "FP.DE.0254",
+            "label": "Heart attack",
+            "description": "Occurs when the blood supply to the heart is blocked, usually due to a build-up of cholesterol and other substances in the coronary arteris"
+          },
+          {
+            "id": "FP.DE.0255",
+            "label": "Liver disorders",
+            "description": "Infection with hepatitis inflames the liver; cirrhosis scars tissue, which blocks blood flow through the liver"
+          },
+          {
+            "id": "FP.DE.0256",
+            "label": "Pelvic inflammatory disease (PID)",
+            "description": "An infection of the upper genital tract, caused by various types of bacteria"
+          },
+          {
+            "id": "FP.DE.0257",
+            "label": "Pulmonary embolism",
+            "description": "A blood clot that travels through the bloodstream to the lungs"
+          },
+          {
+            "id": "FP.DE.0258",
+            "label": "Ruptured ectopic pregnancy",
+            "description": "When a fallopian tube breaks due to an ectopic pregnancy"
+          },
+          {
+            "id": "FP.DE.0259",
+            "label": "Severe allergic reaction to latex",
+            "description": "When a person's body has a strong reaction to contact with latex. Hives or rash over much of body, dizziness, difficulty breathing, or loss of consciousness during or after condom use."
+          },
+          {
+            "id": "FP.DE.0260",
+            "label": "Stroke",
+            "description": "When arteries to the brain become blocked or burst, preventing normal blood flow and leading to the death of brain tissue"
+          },
+          {
+            "id": "FP.DE.0261",
+            "label": "Toxic shock syndrome",
+            "description": "A severe reaction throughout the body to toxins released by bacteria"
+          },
+          {
+            "id": "FP.DE.0262",
+            "label": "Other (Specify)",
+            "description": "If none of the input options above appropriately describe the client's issues and concerns, the issues and concerns should be detailed here."
+          }
+        ]
+      },
+      "FP.DE.0069": {
+        "sheet": "New DD (Stacked)",
+        "id": "FP.DE.0069",
+        "label": "Reason for stopping contraception or method",
+        "description": "If stopping a method, the reason why.",
+        "multiple": true,
+        "options": [
+          {
+            "id": "FP.DE.0070",
+            "label": "Side effects of contraception",
+            "description": "Client is experiencing side effects from use of contraception"
+          },
+          {
+            "id": "FP.DE.0071",
+            "label": "Desire for pregnancy",
+            "description": "Client is has the reproductive intention to become pregnant"
+          },
+          {
+            "id": "FP.DE.0072",
+            "label": "Reported failure",
+            "description": "The client experienced unintentional pregnancy while using the method."
+          },
+          {
+            "id": "FP.DE.0073",
+            "label": "Other (specify)",
+            "description": "Select 'Other (specify)' if the reasons for stopping method are not reflected in any of the input options above. Write in other reasons that are not reflected in the input options above."
+          }
+        ]
+      },
+      "FP.DE.0183": {
+        "sheet": "New DD (Stacked)",
+        "id": "FP.DE.0183",
+        "label": "STI risk assessment factors",
+        "description": "STI risk factors relevant to the population (e.g., sexually active, new partner in the past three months, partner has an STI, etc.)",
+        "multiple": true,
+        "options": [
+          {
+            "id": "FP.DE.0184",
+            "label": "Adolescent Female",
+            "description": "Client is an adolescent woman"
+          },
+          {
+            "id": "FP.DE.0185",
+            "label": "HIV+",
+            "description": "The client is known to be HIV-positive"
+          },
+          {
+            "id": "FP.DE.0186",
+            "label": "Frequent change in sexual partners",
+            "description": "Client changes sexual partners frequently. Client has sex with 'casual' partners"
+          },
+          {
+            "id": "FP.DE.0187",
+            "label": "Multiple sexual partners",
+            "description": "Client has more than one sexual partner"
+          },
+          {
+            "id": "FP.DE.0188",
+            "label": "Sex worker",
+            "description": "Client works as a sex worker"
+          },
+          {
+            "id": "FP.DE.0189",
+            "label": "Sex worker client",
+            "description": "Client has recently and/or frequently had sex with a sex worker"
+          },
+          {
+            "id": "FP.DE.0190",
+            "label": "Separated from regular sex partners for long periods of time",
+            "description": "Men or women whose jobs separate them from their regular sex partners for long periods of time, such as long-distance drivers, soldiers and migrant workers. Specific types of occupation will be context-specific."
+          },
+          {
+            "id": "FP.DE.0191",
+            "label": "No condom use during sex with partner known to have an STI",
+            "description": "Unprotective penetrative sexual intercourse with a partner has an STI"
+          },
+          {
+            "id": "FP.DE.0192",
+            "label": "History of STI in the last year",
+            "description": "Client has had an STI in the last year"
+          },
+          {
+            "id": "FP.DE.0193",
+            "label": "Skin piercing",
+            "description": "Client has skin piercings using unsterile needles that include injections, tattoos, scarification, body piercing, or circumcision using shared knived"
+          },
+          {
+            "id": "FP.DE.0194",
+            "label": "Has partner with risky behavior",
+            "description": "Client's partner has risky behavior that includes: having sex with others; having an STI; injecting drugs; male partner having sex with other men"
+          }
+        ]
+      }
+    }
+  },
+  "ANC": {
+    "title": "WHO Digital Adaptation Kit for antenatal care: data dictionary",
+    "repository": "https://github.com/WorldHealthOrganization/smart-anc",
+    "file": "input/l2/WHO-ANC.xlsx",
+    "commit": "301a6b8b904361315ca38b28ee9fbd133f9d0e94 2026-10-16T13:07:51+05:30",
+    "elements": {
+      "ANC.B5.DE48": {
+        "sheet": "ANC.B5 Quick check",
+        "id": "ANC.B5.DE48",
+        "label": "Danger signs",
+        "description": "Before each contact, the health worker should check whether the woman has any of the danger signs listed here – if yes, she should refer to the hospital urgently; if no, she should continue to the normal contact",
+        "multiple": true,
+        "options": [
+          {
+            "id": "ANC.B5.DE49",
+            "label": "No danger signs",
+            "description": "No danger signs are present"
+          },
+          {
+            "id": "ANC.B5.DE50",
+            "label": "Bleeding vaginally",
+            "description": "Woman is bleeding vaginally"
+          },
+          {
+            "id": "ANC.B5.DE51",
+            "label": "Central cyanosis",
+            "description": "Woman has a bluish discolouration of the skin"
+          },
+          {
+            "id": "ANC.B5.DE52",
+            "label": "Convulsing",
+            "description": "Woman is convulsing"
+          },
+          {
+            "id": "ANC.B5.DE53",
+            "label": "Fever",
+            "description": "Woman has a fever (body temperature greater than or equal to 37°C)"
+          },
+          {
+            "id": "ANC.B5.DE54",
+            "label": "Imminent delivery",
+            "description": "Woman is about to give birth"
+          },
+          {
+            "id": "ANC.B5.DE55",
+            "label": "Labour",
+            "description": "Woman is in labour"
+          },
+          {
+            "id": "ANC.B5.DE56",
+            "label": "Looks very ill",
+            "description": "Woman looks very ill"
+          },
+          {
+            "id": "ANC.B5.DE57",
+            "label": "Severe headache",
+            "description": "Woman has a severe headache"
+          },
+          {
+            "id": "ANC.B5.DE58",
+            "label": "Severe pain",
+            "description": "Woman is in severe pain (not abdominal pain)"
+          },
+          {
+            "id": "ANC.B5.DE59",
+            "label": "Severe vomiting",
+            "description": "Woman is vomiting severely"
+          },
+          {
+            "id": "ANC.B5.DE60",
+            "label": "Severe abdominal pain",
+            "description": "Woman is in severe abdominal pain"
+          },
+          {
+            "id": "ANC.B5.DE61",
+            "label": "Unconscious",
+            "description": "Woman is unconscious"
+          },
+          {
+            "id": "ANC.B5.DE62",
+            "label": "Visual disturbance",
+            "description": "Woman is visually disturbed"
+          }
+        ]
+      }
+    }
+  },
+  "IMMZ": {
+    "title": "Digital adaptation kit for immunizations: core data dictionary",
+    "repository": "https://github.com/WorldHealthOrganization/smart-immunizations",
+    "file": "input/L2/IMMZ DAK_core data dictionary.xlsx",
+    "commit": "bd7fa726706efc92d972d0dcebba9505f386b078 2026-10-01T16:04:31+02:00",
+    "elements": {
+      "IMMZ.D.DE.126": {
+        "sheet": "IMMZ.D Administer vaccine",
+        "id": "IMMZ.D.DE.126",
+        "label": "Disease targeted",
+        "description": "Vaccine-preventable disease being targeted",
+        "multiple": true,
+        "options": [
+          {
+            "id": "IMMZ.D.DE.127",
+            "label": "Typhoid",
+            "description": "The vaccine-preventable disease being targeted is typhoid"
+          },
+          {
+            "id": "IMMZ.D.DE.128",
+            "label": "Influenza",
+            "description": "The vaccine-preventable disease being targeted is influenza"
+          },
+          {
+            "id": "IMMZ.D.DE.129",
+            "label": "Measles",
+            "description": "The vaccine-preventable disease being targeted is measles"
+          },
+          {
+            "id": "IMMZ.D.DE.133",
+            "label": "Pertussis",
+            "description": "The vaccine-preventable disease being targeted is pertussis"
+          },
+          {
+            "id": "IMMZ.D.DE.135",
+            "label": "Mumps",
+            "description": "The vaccine-preventable disease being targeted is mumps"
+          },
+          {
+            "id": "IMMZ.D.DE.136",
+            "label": "Varicella",
+            "description": "The vaccine-preventable disease being targeted is varicella"
+          },
+          {
+            "id": "IMMZ.D.DE.137",
+            "label": "Viral hepatitis A",
+            "description": "The vaccine-preventable disease being targeted is viral hepatitis A"
+          },
+          {
+            "id": "IMMZ.D.DE.139",
+            "label": "Tuberculosis",
+            "description": "The vaccine-preventable disease being targeted is TB"
+          },
+          {
+            "id": "IMMZ.D.DE.140",
+            "label": "Viral hepatitis B",
+            "description": "The vaccine-preventable disease being targeted is viral hepatitis B"
+          },
+          {
+            "id": "IMMZ.D.DE.141",
+            "label": "Haemophilus influenzae type b",
+            "description": "The vaccine-preventable disease being targeted is Haemophilus influenzae type b (Hib)"
+          },
+          {
+            "id": "IMMZ.D.DE.142",
+            "label": "Tetanus",
+            "description": "The vaccine-preventable disease being targeted is tetanus"
+          },
+          {
+            "id": "IMMZ.D.DE.143",
+            "label": "Rotavirus",
+            "description": "The vaccine-preventable disease being targeted is rotavirus"
+          },
+          {
+            "id": "IMMZ.D.DE.144",
+            "label": "Human papillomavirus",
+            "description": "The vaccine-preventable disease being targeted is human papillomavirus (HPV) infection"
+          },
+          {
+            "id": "IMMZ.D.DE.175",
+            "label": "Japanese encephalitis",
+            "description": "The vaccine-preventable disease being targeted is Japanese encephalitis (JE)"
+          },
+          {
+            "id": "IMMZ.D.DE.146",
+            "label": "Poliomyelitis",
+            "description": "The vaccine-preventable disease being targeted is poliomyelitis (polio)"
+          },
+          {
+            "id": "IMMZ.D.DE.176",
+            "label": "Diphtheria",
+            "description": "The vaccine-preventable disease being targeted is diphtheria"
+          },
+          {
+            "id": "IMMZ.D.DE.177",
+            "label": "Pneumococcal disease",
+            "description": "The vaccine-preventable disease being targeted is pneumococcal"
+          },
+          {
+            "id": "IMMZ.D.DE.178",
+            "label": "Rubella",
+            "description": "The vaccine-preventable disease being targeted is rubella"
+          },
+          {
+            "id": "IMMZ.D.DE.179",
+            "label": "Dengue",
+            "description": "The vaccine-preventable disease being targeted is dengue"
+          },
+          {
+            "id": "IMMZ.D.DE.180",
+            "label": "Rabies",
+            "description": "The vaccine-preventable disease being targeted is rabies"
+          },
+          {
+            "id": "IMMZ.D.DE.181",
+            "label": "Meningococcal",
+            "description": "The vaccine-preventable disease being targeted is meningococcal"
+          },
+          {
+            "id": "IMMZ.D.DE.182",
+            "label": "Cholera",
+            "description": "The vaccine-preventable disease being targeted is cholera"
+          },
+          {
+            "id": "IMMZ.D.DE.183",
+            "label": "Tick-borne encephalitis",
+            "description": "The vaccine-preventable disease being targeted is tick-borne encephalitis (TBE)"
+          },
+          {
+            "id": "IMMZ.D.DE.184",
+            "label": "Yellow fever",
+            "description": "The vaccine-preventable disease being targeted is yellow fever"
+          },
+          {
+            "id": "IMMZ.D.DE.148",
+            "label": "COVID-19",
+            "description": "The vaccine-preventable disease being targeted is coronovirus disease (COVID-19)"
+          }
+        ]
+      },
+      "IMMZ.D.DE.258": {
+        "sheet": "IMMZ.D Administer vaccine",
+        "id": "IMMZ.D.DE.258",
+        "label": "Type of dose",
+        "description": "The type of dose in a series that the client received",
+        "multiple": false,
+        "options": [
+          {
+            "id": "IMMZ.D.DE.259",
+            "label": "Primary series",
+            "description": "Indicates that the client received the primary vaccination series of a product/antigen. This is also applicable for antigens with one dose"
+          },
+          {
+            "id": "IMMZ.D.DE.260",
+            "label": "Dose 0",
+            "description": "Indicates that the client received a dose of a product/ antigen that is not a part of the primary vaccination series and is administered before the primary vaccination series is provided"
+          },
+          {
+            "id": "IMMZ.D.DE.261",
+            "label": "Supplementary dose",
+            "description": "Indicates that the client received a supplementary dose of a product/antigen"
+          },
+          {
+            "id": "IMMZ.D.DE.262",
+            "label": "Booster dose",
+            "description": "Indicates that the client received booster dose of a product/antigen"
+          }
+        ]
+      },
+      "IMMZ.D.DE.161": {
+        "sheet": "IMMZ.D Administer vaccine",
+        "id": "IMMZ.D.DE.161",
+        "label": "Potential contraindications",
+        "description": "Specific situations or medical conditions for which it is advised or recommended to avoid or delay administering a particular vaccine",
+        "multiple": true,
+        "options": [
+          {
+            "id": "IMMZ.D.DE.162",
+            "label": "Currently pregnant",
+            "description": "The client is currently pregnant"
+          },
+          {
+            "id": "IMMZ.D.DE.163",
+            "label": "Immunocompromised",
+            "description": "The client is known to be immunocompromised"
+          },
+          {
+            "id": "IMMZ.D.DE.200",
+            "label": "Severely immunocompromised",
+            "description": "The client is known to be severely immunocompromised"
+          },
+          {
+            "id": "IMMZ.D.DE.164",
+            "label": "Exposed to immunosuppressive treatment",
+            "description": "The client is undergoing immunosuppressive treatment or was exposed to immunosuppressive treatment in utero or via breastfeeding."
+          },
+          {
+            "id": "IMMZ.D.DE.165",
+            "label": "Severely immunosuppressed",
+            "description": "The client is known to be severely immunosuppressed"
+          },
+          {
+            "id": "IMMZ.D.DE.187",
+            "label": "Immunodeficiency syndromes",
+            "description": "The client has immunodeficiency syndromes (e.g. HIV/AIDS, known or suspected congenital immunodeficiency, leukaemia, lymphoma or other malignant disease)"
+          },
+          {
+            "id": "IMMZ.D.DE.166",
+            "label": "History of anaphylactic reactions",
+            "description": "The client is known to have history of anaphylaxis in the past"
+          },
+          {
+            "id": "IMMZ.D.DE.167",
+            "label": "Severe allergic reactions",
+            "description": "The client is known to have severe allergic reaction"
+          },
+          {
+            "id": "IMMZ.D.DE.168",
+            "label": "Symptomatic HIV infection",
+            "description": "The client is experiencing HIV-related symptoms"
+          },
+          {
+            "id": "IMMZ.D.DE.169",
+            "label": "Planning to get pregnant in the next month",
+            "description": "The client's intention or desire is to become pregnant in the next month"
+          },
+          {
+            "id": "IMMZ.D.DE.170",
+            "label": "Receiving blood products",
+            "description": "The client is receiving blood or blood-related products as part of a medical treatment."
+          },
+          {
+            "id": "IMMZ.D.DE.188",
+            "label": "Severe acute illness",
+            "description": "The client has a severe acute illness"
+          },
+          {
+            "id": "IMMZ.D.DE.190",
+            "label": "TB disease",
+            "description": "The client has been diagnosed with tuberculosis (TB)"
+          },
+          {
+            "id": "IMMZ.D.DE.191",
+            "label": "Breastfeeding",
+            "description": "The client is currently breastfeeding"
+          },
+          {
+            "id": "IMMZ.D.DE.192",
+            "label": "Spina bifida",
+            "description": "The client has spina bifida"
+          },
+          {
+            "id": "IMMZ.D.DE.193",
+            "label": "Bladder exstrophy",
+            "description": "The client has exstrophy of urinary bladder"
+          },
+          {
+            "id": "IMMZ.D.DE.194",
+            "label": "Acute gastroenteritis",
+            "description": "The client has acute gastroenteritis"
+          },
+          {
+            "id": "IMMZ.D.DE.195",
+            "label": "Moderate to severe fever",
+            "description": "The client has moderate to severe fever"
+          },
+          {
+            "id": "IMMZ.D.DE.196",
+            "label": "Prior history of intussusception",
+            "description": "The client has prior history of intussusception"
+          },
+          {
+            "id": "IMMZ.D.DE.197",
+            "label": "Altered immunocompetence",
+            "description": "The client's immune system is not functioning at its typical capacity"
+          },
+          {
+            "id": "IMMZ.D.DE.198",
+            "label": "Hypersensitivity to vaccine components",
+            "description": "The client has heightened sensitivity or allergic reactions to specific components found in vaccines"
+          },
+          {
+            "id": "IMMZ.D.DE.199",
+            "label": "Taking antibiotics",
+            "description": "The client is currently taking antibiotics to treat certain infections"
+          }
+        ]
+      },
+      "IMMZ.D.DE.1": {
+        "sheet": "IMMZ.D Administer vaccine",
+        "id": "IMMZ.D.DE.1",
+        "label": "Immunization event status",
+        "description": "The current status of the individual immunization event",
+        "multiple": false,
+        "options": [
+          {
+            "id": "IMMZ.D.DE.2",
+            "label": "Completed",
+            "description": "The immunization event was successfully carried out as intended"
+          },
+          {
+            "id": "IMMZ.D.DE.3",
+            "label": "Entered in error",
+            "description": "Immunization event record has been mistakenly created or entered into the system. Recorded information is incorrect or should not have been documented, though it is possible that real-world decisions were based on it"
+          },
+          {
+            "id": "IMMZ.D.DE.4",
+            "label": "Not done",
+            "description": "Planned immunization event was not carried out for some reason"
+          }
+        ]
+      },
+      "IMMZ.D.DE.5": {
+        "sheet": "IMMZ.D Administer vaccine",
+        "id": "IMMZ.D.DE.5",
+        "label": "Reason vaccine was not administered",
+        "description": "The reason this immunization event was not performed",
+        "multiple": false,
+        "options": [
+          {
+            "id": "IMMZ.D.DE.6",
+            "label": "Immunity",
+            "description": "Testing has shown that the client already has immunity to the agent targeted by the immunization"
+          },
+          {
+            "id": "IMMZ.D.DE.7",
+            "label": "Medical precaution",
+            "description": "The client currently has a medical condition for which the vaccine is contraindicated or for which precaution is warranted"
+          },
+          {
+            "id": "IMMZ.D.DE.8",
+            "label": "Product out of stock",
+            "description": "There was no supply of the product on hand to perform the service"
+          },
+          {
+            "id": "IMMZ.D.DE.9",
+            "label": "Client objection",
+            "description": "The client or their guardian objects to receiving the vaccine"
+          },
+          {
+            "id": "IMMZ.D.DE.10",
+            "label": "Caregiver refusal",
+            "description": "The client's caregiver refused the vaccine"
+          },
+          {
+            "id": "IMMZ.D.DE.11",
+            "label": "Unspecified reason",
+            "description": "The immunization event was not carried out for an unspecified reason"
+          },
+          {
+            "id": "IMMZ.D.DE.12",
+            "label": "Client allergy to vaccine or component",
+            "description": "The immunization event was not carried out because of client allergy to vaccine or component"
+          },
+          {
+            "id": "IMMZ.D.DE.13",
+            "label": "Immunocompromised",
+            "description": "The immunization event was not carried out because the client is immunocompromised"
+          },
+          {
+            "id": "IMMZ.D.DE.14",
+            "label": "Chronic illness or condition",
+            "description": "The immunization event was not carried out due a chronic illness or condition of the client"
+          },
+          {
+            "id": "IMMZ.D.DE.15",
+            "label": "Acute illness",
+            "description": "The immunization event was not carried out due to an acute illness present in the client"
+          },
+          {
+            "id": "IMMZ.D.DE.16",
+            "label": "Had the disease",
+            "description": "The immunization event was not carried out due to the client having had the disease"
+          },
+          {
+            "id": "IMMZ.D.DE.17",
+            "label": "Immunization not carried out for other reasons",
+            "description": "The immunization event was not carried out for other reasons"
+          }
+        ]
+      },
+      "IMMZ.D.DE.95": {
+        "sheet": "IMMZ.D Administer vaccine",
+        "id": "IMMZ.D.DE.95",
+        "label": "Reaction manifestation",
+        "description": "The manifestation of the reaction (e.g. infected abscess, swelling, rash, hives, diarrhoea, etc.) observed after administering the vaccine",
+        "multiple": false,
+        "options": [
+          {
+            "id": "IMMZ.D.DE.96",
+            "label": "Severe local reaction",
+            "description": "The client's reaction manifested in severe local reaction"
+          },
+          {
+            "id": "IMMZ.D.DE.98",
+            "label": "Seizures",
+            "description": "The client's reaction manifested in seizures"
+          },
+          {
+            "id": "IMMZ.D.DE.99",
+            "label": "Abscess",
+            "description": "The client's reaction manifested in an abscess"
+          },
+          {
+            "id": "IMMZ.D.DE.100",
+            "label": "Sepsis",
+            "description": "The client's reaction manifested in sepsis"
+          },
+          {
+            "id": "IMMZ.D.DE.101",
+            "label": "Encephalopathy",
+            "description": "The client's reaction manifested in encephalopathy"
+          },
+          {
+            "id": "IMMZ.D.DE.102",
+            "label": "Toxic shock syndrome",
+            "description": "The client's reaction manifested in toxic shock syndrome"
+          },
+          {
+            "id": "IMMZ.D.DE.103",
+            "label": "Anaphylaxis",
+            "description": "The client's reaction manifested in anaphylaxis"
+          },
+          {
+            "id": "IMMZ.D.DE.104",
+            "label": "Fever",
+            "description": "The client's reaction manifested as a fever"
+          },
+          {
+            "id": "IMMZ.D.DE.105",
+            "label": "Other",
+            "description": "The client's reaction manifested in another way"
+          }
+        ]
+      },
+      "IMMZ.D.DE.107": {
+        "sheet": "IMMZ.D Administer vaccine",
+        "id": "IMMZ.D.DE.107",
+        "label": "Type of reaction",
+        "description": "If the event resulted in a reaction, what is the type of reaction",
+        "multiple": false,
+        "options": [
+          {
+            "id": "IMMZ.D.DE.174",
+            "label": "Non serious",
+            "description": "The reaction resulted in a mild or minor response and did not pose a significant threat to client's health"
+          },
+          {
+            "id": "IMMZ.D.DE.108",
+            "label": "Death",
+            "description": "The reaction resulted in the client's death"
+          },
+          {
+            "id": "IMMZ.D.DE.109",
+            "label": "Life threatening",
+            "description": "The reaction threatened the client's life"
+          },
+          {
+            "id": "IMMZ.D.DE.110",
+            "label": "Disability",
+            "description": "The reaction resulted in a disability"
+          },
+          {
+            "id": "IMMZ.D.DE.111",
+            "label": "Hospitalization",
+            "description": "The reaction resulted in a hospitalization"
+          },
+          {
+            "id": "IMMZ.D.DE.112",
+            "label": "Congenital anomaly",
+            "description": "The reaction was a congenital anomaly or birth defect"
+          },
+          {
+            "id": "IMMZ.D.DE.113",
+            "label": "Other important medical event (specify)",
+            "description": "There was another important reaction or medical event"
+          }
+        ]
+      },
+      "IMMZ.D.DE.115": {
+        "sheet": "IMMZ.D Administer vaccine",
+        "id": "IMMZ.D.DE.115",
+        "label": "Reaction outcome",
+        "description": "The outcome of the reaction (e.g. death, recovered, recovering)",
+        "multiple": false,
+        "options": [
+          {
+            "id": "IMMZ.D.DE.116",
+            "label": "Died",
+            "description": "The adverse event resulted in the client's death"
+          },
+          {
+            "id": "IMMZ.D.DE.117",
+            "label": "Recovered",
+            "description": "The client fully recovered"
+          },
+          {
+            "id": "IMMZ.D.DE.118",
+            "label": "Recovered with sequelae",
+            "description": "The client has recovered with sequelae as a consequence of the reaction/vaccination"
+          },
+          {
+            "id": "IMMZ.D.DE.119",
+            "label": "Recovering",
+            "description": "The client is recovering"
+          },
+          {
+            "id": "IMMZ.D.DE.120",
+            "label": "Not recovered",
+            "description": "The client has not recovered"
+          },
+          {
+            "id": "IMMZ.D.DE.121",
+            "label": "Unknown",
+            "description": "The client's reaction outcome is unknown"
+          }
+        ]
+      }
+    }
+  }
+}

@@ -189,32 +189,32 @@ export function drawBrandAlovida(
   doc: PDFKit.PDFDocument,
   options: BrandOptions,
 ): void {
-  const { x, y, ancho, color, opacidad = 1 } = options;
+  const { x, y, ancho: width, color, opacidad: opacity = 1 } = options;
 
   doc.save();
-  if (opacidad < 1) doc.opacity(opacidad);
+  if (opacity < 1) doc.opacity(opacity);
 
   for (const stroke of SUBTRAZOS) {
-    let actualX = x + stroke.inicio[0] * ancho;
-    let actualY = y + stroke.inicio[1] * ancho;
+    let actualX = x + stroke.inicio[0] * width;
+    let actualY = y + stroke.inicio[1] * width;
     doc.moveTo(actualX, actualY);
 
     for (const segment of stroke.segmentos) {
       if (segment.length === 6) {
         const [dx1, dy1, dx2, dy2, dx3, dy3] = segment;
-        const cp1x = actualX + dx1 * ancho;
-        const cp1y = actualY + dy1 * ancho;
-        const cp2x = actualX + dx2 * ancho;
-        const cp2y = actualY + dy2 * ancho;
-        const finX = actualX + dx3 * ancho;
-        const endY = actualY + dy3 * ancho;
+        const cp1x = actualX + dx1 * width;
+        const cp1y = actualY + dy1 * width;
+        const cp2x = actualX + dx2 * width;
+        const cp2y = actualY + dy2 * width;
+        const finX = actualX + dx3 * width;
+        const endY = actualY + dy3 * width;
         doc.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, finX, endY);
         actualX = finX;
         actualY = endY;
       } else {
         const [dx, dy] = segment;
-        actualX += dx * ancho;
-        actualY += dy * ancho;
+        actualX += dx * width;
+        actualY += dy * width;
         doc.lineTo(actualX, actualY);
       }
     }

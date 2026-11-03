@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 04 · schema directory
+-- SALUD v4.2.83 · módulo 04 · schema directory
 -- Generado de diagram_04_directory.puml — NO editar a mano.
 
 
@@ -35,6 +35,8 @@ CREATE TABLE IF NOT EXISTS "directory"."branches" (
     "time_zone" varchar,
     "latitude" numeric,
     "longitude" numeric,
+    "description" text,
+    "location_url" varchar(2000),
     "created_at" timestamptz NOT NULL,
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
@@ -59,6 +61,9 @@ CREATE TABLE IF NOT EXISTS "directory"."tenant_memberships" (
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
+    "workday_concept_id" uuid,
+    "responsible_user_id" uuid,
+    "origin_concept_id" uuid,
     CONSTRAINT "pk_tenant_memberships" PRIMARY KEY ("id")
 );
 
@@ -73,6 +78,8 @@ CREATE TABLE IF NOT EXISTS "directory"."branch_memberships" (
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
+    "workday_concept_id" uuid,
+    "responsible_user_id" uuid,
     CONSTRAINT "pk_branch_memberships" PRIMARY KEY ("id")
 );
 
@@ -143,4 +150,71 @@ CREATE TABLE IF NOT EXISTS "directory"."tenant_web_configs" (
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_tenant_web_configs" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "directory"."affiliation_invitations" (
+    "id" uuid NOT NULL,
+    "tenant_id" uuid NOT NULL,
+    "kind_concept_id" uuid NOT NULL,
+    "target_person_id" uuid,
+    "token_hash" varchar NOT NULL,
+    "max_uses" integer NOT NULL,
+    "uses_count" integer NOT NULL,
+    "expires_at" timestamptz NOT NULL,
+    "role_template_id" uuid,
+    "status_concept_id" uuid NOT NULL,
+    "created_by_user_id" uuid NOT NULL,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_affiliation_invitations" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "directory"."tenant_medical_facilities" (
+    "id" uuid NOT NULL,
+    "tenant_id" uuid NOT NULL,
+    "tax_identifier_number" varchar(20) NOT NULL,
+    "health_facility_registration_number" varchar(50) NOT NULL,
+    "medical_director_name" varchar NOT NULL,
+    "medical_director_middle_name" varchar,
+    "medical_director_last_name" varchar NOT NULL,
+    "medical_director_mother_last_name" varchar,
+    "medical_director_license_number" varchar(50) NOT NULL,
+    "medical_director_email" varchar NOT NULL,
+    "medical_director_phone" varchar,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_tenant_medical_facilities" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "directory"."affiliation_invitation_uses" (
+    "id" uuid NOT NULL,
+    "tenant_id" uuid NOT NULL,
+    "affiliation_invitation_id" uuid NOT NULL,
+    "used_by_user_id" uuid NOT NULL,
+    "occurred_at" timestamptz NOT NULL,
+    "outcome_concept_id" uuid NOT NULL,
+    CONSTRAINT "pk_affiliation_invitation_uses" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "directory"."tenant_medical_facility_sites" (
+    "id" uuid NOT NULL,
+    "tenant_id" uuid NOT NULL,
+    "medical_facility_id" uuid NOT NULL,
+    "site_kind" varchar NOT NULL,
+    "ordinal" integer NOT NULL,
+    "name" varchar(200) NOT NULL,
+    "address_lines" varchar[] NOT NULL,
+    "latitude" numeric,
+    "longitude" numeric,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_tenant_medical_facility_sites" PRIMARY KEY ("id")
 );

@@ -1,0 +1,183 @@
+openapi: 3.0.3
+info:
+  title: Estándar ALOVIDA — sistema de una farmacia
+  version: 1.0.0
+  description: |
+    Lo que una farmacia expone para que ALOVIDA lea su catálogo y su stock
+    (FAR-C9 · C9-3). La farmacia carga en su pestaña Integración la
+    **dirección base** (por ejemplo `https://api.mifarmacia.bo/alovida-standard`),
+    su **código** y su **clave**; la plataforma agrega las rutas de abajo.
+
+    - La clave va en `X-Api-Key`. Una clave equivocada o de otra farmacia
+      responde **401**.
+    - Todas las respuestas son JSON. Una respuesta que no tiene esta forma se
+      trata como sistema caído: no se convierte en stock.
+    - La plataforma no sigue redirecciones.
+    - Las cantidades son enteros ≥ 0 en la unidad que declara el catálogo
+      (`unitCode`). La plataforma no convierte unidades.
+
+    La implementación de referencia es el simulador de
+    `mock-provider-server/` (`/alovida-standard`).
+servers:
+  - url: '{baseUrl}'
+    variables:
+      baseUrl:
+        default: http://localhost:4100/alovida-standard
+        description: Dirección base que carga la farmacia
+security:
+  - apiKey: []
+paths:
+  /v1/pharmacies/{pharmacyCode}/health:
+    get:
+      summary: La farmacia responde y la clave es válida
+      parameters:
+        - $ref: '#/components/parameters/PharmacyCode'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status:
+                    type: string
+                    enum: [OK]
+                  pharmacyCode:
+                    type: string
+                  asOf:
+                    type: string
+                    format: date-time
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /v1/pharmacies/{pharmacyCode}/products:
+    get:
+      summary: Catálogo de la farmacia, con sus propios códigos
+      parameters:
+        - $ref: '#/components/parameters/PharmacyCode'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      required: [code, name]
+                      properties:
+                        code:
+                          type: string
+                          description: Código propio de la farmacia
+                        name:
+                          type: string
+                        presentation:
+                          type: string
+                        unitCode:
+                          type: string
+                          description: Unidad en que se cuenta el stock (BOX, TAB…)
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /v1/pharmacies/{pharmacyCode}/sites/{siteCode}/stock:
+    get:
+      summary: Stock de una sucursal
+      description: |
+        `siteCode` es el código que la farmacia le dio a esa sede en ALOVIDA.
+      parameters:
+        - $ref: '#/components/parameters/PharmacyCode'
+        - name: siteCode
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: codes
+          in: query
+          required: false
+          description: Códigos separados por coma; sin él, todo el catálogo
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  pharmacyCode:
+                    type: string
+                  siteCode:
+                    type: string
+                  asOf:
+                    type: string
+                    format: date-time
+                  validUntil:
+                    type: string
+                    format: date-time
+                    description: Hasta cuándo vale este dato
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      required: [code, quantity]
+                      properties:
+                        code:
+                          type: string
+                        quantity:
+                          type: integer
+                          minimum: 0
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /v1/pharmacies/{pharmacyCode}/prices:
+    get:
+      summary: Precio unitario de cada producto
+      description: La plataforma todavía no lee precios por este camino.
+      parameters:
+        - $ref: '#/components/parameters/PharmacyCode'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [currency, items]
+                properties:
+                  currency:
+                    type: string
+                    example: BOB
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      required: [code, unitPrice]
+                      properties:
+                        code:
+                          type: string
+                        unitPrice:
+                          type: number
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+components:
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      in: header
+      name: X-Api-Key
+  parameters:
+    PharmacyCode:
+      name: pharmacyCode
+      in: path
+      required: true
+      description: Código de la farmacia en su propio sistema
+      schema:
+        type: string
+  responses:
+    Unauthorized:
+      description: Clave ausente, equivocada o de otra farmacia

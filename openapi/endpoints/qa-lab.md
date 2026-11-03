@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `qa_lab`
 
-Referencia exhaustiva de 19 operación(es) del módulo `qa_lab`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 21 operación(es) del módulo `qa_lab`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `qa`, `qa-internal`, `qa-lab-read`
 - **Controladores:** `QaLabController`, `QaLabInternalController`, `QaLabReadController`
@@ -13,23 +13,25 @@ Referencia exhaustiva de 19 operación(es) del módulo `qa_lab`, derivada del co
 
 1. [GET /admin/qa/defects](#1-get-admin-qa-defects) — Defectos deduplicados por firma
 2. [GET /admin/qa/environments](#2-get-admin-qa-environments) — Entornos de prueba
-3. [GET /admin/qa/runs](#3-get-admin-qa-runs) — Corridas recientes
-4. [GET /admin/qa/runs/{runId}](#4-get-admin-qa-runs-runid) — Corrida con resultados por caso y veredicto por aserción (valor observado)
-5. [GET /admin/qa/suites](#5-get-admin-qa-suites) — Suites con conteo de casos y última corrida
-6. [GET /admin/qa/suites/{suiteId}](#6-get-admin-qa-suites-suiteid) — Suite con casos y aserciones
-7. [POST /internal/qa/schedules/run-due](#7-post-internal-qa-schedules-run-due) — Evaluar programaciones vencidas y encolar sus corridas
-8. [POST /qa/case-results/{resultId}/evaluate](#8-post-qa-case-results-resultid-evaluate) — Evaluar las aserciones y fijar el resultado del caso
-9. [POST /qa/defects](#9-post-qa-defects) — Registrar un defecto detectado
-10. [PATCH /qa/defects/{defectId}](#10-patch-qa-defects-defectid) — Triage y transición de estado del defecto
-11. [POST /qa/environments](#11-post-qa-environments) — Registrar un entorno de pruebas gobernado
-12. [POST /qa/runs](#12-post-qa-runs) — Disparar una corrida de pruebas
-13. [POST /qa/runs/{runId}/artifacts](#13-post-qa-runs-runid-artifacts) — Adjuntar un artefacto de evidencia a la corrida
-14. [POST /qa/runs/{runId}/cases/{caseId}/execute](#14-post-qa-runs-runid-cases-caseid-execute) — Registrar la ejecución del caso con sus payloads
-15. [POST /qa/runs/{runId}/finalize](#15-post-qa-runs-runid-finalize) — Cerrar la corrida y consolidar totales
-16. [POST /qa/runs/{runId}/link-release](#16-post-qa-runs-runid-link-release) — Enlazar la evidencia de la corrida a un release
-17. [POST /qa/schedules](#17-post-qa-schedules) — Programar la ejecución automática de la suite
-18. [POST /qa/suites/{suiteId}/cases](#18-post-qa-suites-suiteid-cases) — Definir un caso de prueba con sus aserciones
-19. [POST /qa/suites/{suiteId}/publish](#19-post-qa-suites-suiteid-publish) — Publicar la suite y activar sus casos
+3. [GET /admin/qa/flows](#3-get-admin-qa-flows) — Catálogo de flujos: recorridos del usuario con su cobertura de contrato y de pruebas
+4. [GET /admin/qa/flows/{flowId}](#4-get-admin-qa-flows-flowid) — Árbol de decisión de un flujo: pasos, endpoints (declarado o ausente), ramas válidas, límite e inválidas y su último veredicto
+5. [GET /admin/qa/runs](#5-get-admin-qa-runs) — Corridas recientes
+6. [GET /admin/qa/runs/{runId}](#6-get-admin-qa-runs-runid) — Corrida con resultados por caso y veredicto por aserción (valor observado)
+7. [GET /admin/qa/suites](#7-get-admin-qa-suites) — Suites con conteo de casos y última corrida
+8. [GET /admin/qa/suites/{suiteId}](#8-get-admin-qa-suites-suiteid) — Suite con casos y aserciones
+9. [POST /internal/qa/schedules/run-due](#9-post-internal-qa-schedules-run-due) — Evaluar programaciones vencidas y encolar sus corridas
+10. [POST /qa/case-results/{resultId}/evaluate](#10-post-qa-case-results-resultid-evaluate) — Evaluar las aserciones y fijar el resultado del caso
+11. [POST /qa/defects](#11-post-qa-defects) — Registrar un defecto detectado
+12. [PATCH /qa/defects/{defectId}](#12-patch-qa-defects-defectid) — Triage y transición de estado del defecto
+13. [POST /qa/environments](#13-post-qa-environments) — Registrar un entorno de pruebas gobernado
+14. [POST /qa/runs](#14-post-qa-runs) — Disparar una corrida de pruebas
+15. [POST /qa/runs/{runId}/artifacts](#15-post-qa-runs-runid-artifacts) — Adjuntar un artefacto de evidencia a la corrida
+16. [POST /qa/runs/{runId}/cases/{caseId}/execute](#16-post-qa-runs-runid-cases-caseid-execute) — Registrar la ejecución del caso con sus payloads
+17. [POST /qa/runs/{runId}/finalize](#17-post-qa-runs-runid-finalize) — Cerrar la corrida y consolidar totales
+18. [POST /qa/runs/{runId}/link-release](#18-post-qa-runs-runid-link-release) — Enlazar la evidencia de la corrida a un release
+19. [POST /qa/schedules](#19-post-qa-schedules) — Programar la ejecución automática de la suite
+20. [POST /qa/suites/{suiteId}/cases](#20-post-qa-suites-suiteid-cases) — Definir un caso de prueba con sus aserciones
+21. [POST /qa/suites/{suiteId}/publish](#21-post-qa-suites-suiteid-publish) — Publicar la suite y activar sus casos
 
 ---
 
@@ -40,7 +42,7 @@ Referencia exhaustiva de 19 operación(es) del módulo `qa_lab`, derivada del co
 - **Nombre:** Defectos deduplicados por firma
 - **Operation ID:** `QaLabReadController_defects`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabReadController.defects](../../src/modules/qa_lab/controllers/qa-lab-read.controller.ts)
+- **Implementación:** [QaLabReadController.defects](../../src/modules/qa_lab/presentation/controllers/qa-lab-read.controller.ts)
 
 ### Descripción de negocio
 
@@ -70,7 +72,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `...QA_LAB_READ_ROLES`.
+- Roles admitidos por `@Roles`: `QA_ADMIN`, `QA_ENGINEER`, `RELEASE_MANAGER`, `PLATFORM_ADMIN`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -96,6 +98,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -107,7 +110,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ...QA_LAB_READ_ROLES. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -132,7 +135,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Entornos de prueba
 - **Operation ID:** `QaLabReadController_environments`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabReadController.environments](../../src/modules/qa_lab/controllers/qa-lab-read.controller.ts)
+- **Implementación:** [QaLabReadController.environments](../../src/modules/qa_lab/presentation/controllers/qa-lab-read.controller.ts)
 
 ### Descripción de negocio
 
@@ -160,7 +163,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `...QA_LAB_READ_ROLES`.
+- Roles admitidos por `@Roles`: `QA_ADMIN`, `QA_ENGINEER`, `RELEASE_MANAGER`, `PLATFORM_ADMIN`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -186,6 +189,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -196,7 +200,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ...QA_LAB_READ_ROLES. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -214,14 +218,204 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. GET /admin/qa/runs
+## 3. GET /admin/qa/flows
+
+- **Módulo:** `qa_lab`
+- **Etiqueta OpenAPI:** `qa-lab-read`
+- **Nombre:** Catálogo de flujos: recorridos del usuario con su cobertura de contrato y de pruebas
+- **Operation ID:** `QaLabReadController_listFlows`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [QaLabReadController.listFlows](../../src/modules/qa_lab/presentation/controllers/qa-lab-read.controller.ts)
+
+### Descripción de negocio
+
+Catálogo de flujos: recorridos del usuario con su cobertura de contrato y de pruebas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/qa/flows` en `QaLabReadController_listFlows`. El controlador delega en `QaFlowsService.list`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `module` | query | No | `string` | Sin restricción adicional declarada | Módulo del Registro: «2 · Médico» | `valor-ejemplo` |
+| `search` | query | No | `string` | Sin restricción adicional declarada | Texto en el id, el título o el módulo | `valor-ejemplo` |
+| `coverage` | query | No | `string` | valores: `SEEDED`, `NOT_SEEDED`, `RAN`, `NEVER_RAN` | SEEDED/NOT_SEEDED: la suite FLOW-<id> existe en qa_lab o no. RAN/NEVER_RAN: tuvo alguna corrida o no. | `SEEDED` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/qa/flows HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `QA_ADMIN`, `QA_ENGINEER`, `RELEASE_MANAGER`, `PLATFORM_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/qa/flows?module=valor-ejemplo&search=valor-ejemplo&coverage=SEEDED HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/qa/flows"
+}
+```
+
+---
+
+## 4. GET /admin/qa/flows/{flowId}
+
+- **Módulo:** `qa_lab`
+- **Etiqueta OpenAPI:** `qa-lab-read`
+- **Nombre:** Árbol de decisión de un flujo: pasos, endpoints (declarado o ausente), ramas válidas, límite e inválidas y su último veredicto
+- **Operation ID:** `QaLabReadController_flow`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [QaLabReadController.flow](../../src/modules/qa_lab/presentation/controllers/qa-lab-read.controller.ts)
+
+### Descripción de negocio
+
+Árbol de decisión de un flujo: pasos, endpoints (declarado o ausente), ramas válidas, límite e inválidas y su último veredicto. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/qa/flows/{flowId}` en `QaLabReadController_flow`. El controlador delega en `QaFlowsService.detail`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `flowId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/qa/flows/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `QA_ADMIN`, `QA_ENGINEER`, `RELEASE_MANAGER`, `PLATFORM_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/qa/flows/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 404 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Flujo no encontrado | Excepción explícita en src/modules/qa_lab/application/services/qa-flows.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/qa/flows/{flowId}"
+}
+```
+
+---
+
+## 5. GET /admin/qa/runs
 
 - **Módulo:** `qa_lab`
 - **Etiqueta OpenAPI:** `qa-lab-read`
 - **Nombre:** Corridas recientes
 - **Operation ID:** `QaLabReadController_runs`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabReadController.runs](../../src/modules/qa_lab/controllers/qa-lab-read.controller.ts)
+- **Implementación:** [QaLabReadController.runs](../../src/modules/qa_lab/presentation/controllers/qa-lab-read.controller.ts)
 
 ### Descripción de negocio
 
@@ -252,7 +446,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `...QA_LAB_READ_ROLES`.
+- Roles admitidos por `@Roles`: `QA_ADMIN`, `QA_ENGINEER`, `RELEASE_MANAGER`, `PLATFORM_ADMIN`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -278,6 +472,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -289,7 +484,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ...QA_LAB_READ_ROLES. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -307,14 +502,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. GET /admin/qa/runs/{runId}
+## 6. GET /admin/qa/runs/{runId}
 
 - **Módulo:** `qa_lab`
 - **Etiqueta OpenAPI:** `qa-lab-read`
 - **Nombre:** Corrida con resultados por caso y veredicto por aserción (valor observado)
 - **Operation ID:** `QaLabReadController_run`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabReadController.run](../../src/modules/qa_lab/controllers/qa-lab-read.controller.ts)
+- **Implementación:** [QaLabReadController.run](../../src/modules/qa_lab/presentation/controllers/qa-lab-read.controller.ts)
 
 ### Descripción de negocio
 
@@ -344,7 +539,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `...QA_LAB_READ_ROLES`.
+- Roles admitidos por `@Roles`: `QA_ADMIN`, `QA_ENGINEER`, `RELEASE_MANAGER`, `PLATFORM_ADMIN`.
 - Deben ser UUID válidos: `runId`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
@@ -372,6 +567,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -383,8 +579,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ...QA_LAB_READ_ROLES. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Corrida no encontrada | Excepción explícita en src/modules/qa_lab/services/qa-lab-read.service.ts |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -402,14 +597,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. GET /admin/qa/suites
+## 7. GET /admin/qa/suites
 
 - **Módulo:** `qa_lab`
 - **Etiqueta OpenAPI:** `qa-lab-read`
 - **Nombre:** Suites con conteo de casos y última corrida
 - **Operation ID:** `QaLabReadController_suites`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabReadController.suites](../../src/modules/qa_lab/controllers/qa-lab-read.controller.ts)
+- **Implementación:** [QaLabReadController.suites](../../src/modules/qa_lab/presentation/controllers/qa-lab-read.controller.ts)
 
 ### Descripción de negocio
 
@@ -437,7 +632,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `...QA_LAB_READ_ROLES`.
+- Roles admitidos por `@Roles`: `QA_ADMIN`, `QA_ENGINEER`, `RELEASE_MANAGER`, `PLATFORM_ADMIN`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -463,6 +658,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -473,7 +669,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ...QA_LAB_READ_ROLES. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -491,14 +687,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. GET /admin/qa/suites/{suiteId}
+## 8. GET /admin/qa/suites/{suiteId}
 
 - **Módulo:** `qa_lab`
 - **Etiqueta OpenAPI:** `qa-lab-read`
 - **Nombre:** Suite con casos y aserciones
 - **Operation ID:** `QaLabReadController_suite`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabReadController.suite](../../src/modules/qa_lab/controllers/qa-lab-read.controller.ts)
+- **Implementación:** [QaLabReadController.suite](../../src/modules/qa_lab/presentation/controllers/qa-lab-read.controller.ts)
 
 ### Descripción de negocio
 
@@ -528,7 +724,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `...QA_LAB_READ_ROLES`.
+- Roles admitidos por `@Roles`: `QA_ADMIN`, `QA_ENGINEER`, `RELEASE_MANAGER`, `PLATFORM_ADMIN`.
 - Deben ser UUID válidos: `suiteId`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
@@ -556,6 +752,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -567,8 +764,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ...QA_LAB_READ_ROLES. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Suite no encontrada | Excepción explícita en src/modules/qa_lab/services/qa-lab-read.service.ts |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -586,14 +782,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /internal/qa/schedules/run-due
+## 9. POST /internal/qa/schedules/run-due
 
 - **Módulo:** `qa_lab`
 - **Etiqueta OpenAPI:** `qa-internal`
 - **Nombre:** Evaluar programaciones vencidas y encolar sus corridas
 - **Operation ID:** `QaLabInternalController_runDueSchedules`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabInternalController.runDueSchedules](../../src/modules/qa_lab/controllers/qa-lab-internal.controller.ts)
+- **Implementación:** [QaLabInternalController.runDueSchedules](../../src/modules/qa_lab/presentation/controllers/qa-lab-internal.controller.ts)
 
 ### Descripción de negocio
 
@@ -603,7 +799,7 @@ Contexto declarado en el controlador: Fase 2 del plan de corrección de workers:
 
 ### Descripción del sistema
 
-NestJS resuelve `POST /internal/qa/schedules/run-due` en `QaLabInternalController_runDueSchedules`. El controlador delega en `QaCatalogService.runDueSchedules`. Valida el body como `RunDueSchedulesDto` y consume `application/json`. El tipo de retorno estático es `Promise<RunDueSchedulesResponseDto>`.
+NestJS resuelve `POST /internal/qa/schedules/run-due` en `QaLabInternalController_runDueSchedules`. El controlador delega en `QaCatalogService.runDueSchedules`. Valida el body como `QaLabRunDueSchedulesDto` y consume `application/json`. El tipo de retorno estático es `Promise<RunDueSchedulesResponseDto>`.
 
 ### Parámetros
 
@@ -611,7 +807,7 @@ No hay parámetros de ruta, query ni cabeceras específicos de la operación.
 
 ### Payload mínimo aceptable
 
-Incluye únicamente los campos obligatorios del DTO `RunDueSchedulesDto`; los campos opcionales se omiten.
+Incluye únicamente los campos obligatorios del DTO `QaLabRunDueSchedulesDto`; los campos opcionales se omiten.
 
 ```http
 POST /internal/qa/schedules/run-due HTTP/1.1
@@ -662,6 +858,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RunDueSchedulesResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RunDueSchedulesResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RunDueSchedulesResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RunDueSchedulesResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RunDueSchedulesResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -705,7 +902,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, QA_ADMIN. | Roles/tenant/guards de autorización |
-| 409 | `CONFLICT` | No se pudo asignar número de corrida | Excepción explícita en src/modules/qa_lab/services/qa-catalog.service.ts |
+| 409 | `CONFLICT` | No se pudo asignar número de corrida | Excepción explícita en src/modules/qa_lab/application/services/qa-catalog.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -724,14 +921,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /qa/case-results/{resultId}/evaluate
+## 10. POST /qa/case-results/{resultId}/evaluate
 
 - **Módulo:** `qa_lab`
 - **Etiqueta OpenAPI:** `qa`
 - **Nombre:** Evaluar las aserciones y fijar el resultado del caso
 - **Operation ID:** `QaLabController_evaluateResult`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabController.evaluateResult](../../src/modules/qa_lab/controllers/qa-lab.controller.ts)
+- **Implementación:** [QaLabController.evaluateResult](../../src/modules/qa_lab/presentation/controllers/qa-lab.controller.ts)
 
 ### Descripción de negocio
 
@@ -791,6 +988,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<EvaluateResultResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<EvaluateResultResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<EvaluateResultResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<EvaluateResultResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `EvaluateResultResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -825,10 +1023,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, QA_ENGINEER. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Resultado no encontrado | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
-| 409 | `CONFLICT` | El resultado ya fue evaluado | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
-| 422 | `PRECONDITION_FAILED` | El caso falló en transporte: no hay respuesta que evaluar | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
-| 422 | `PRECONDITION_FAILED` | El caso no tiene aserciones | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
+| 409 | `CONFLICT` | El resultado ya fue evaluado | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
+| 422 | `PRECONDITION_FAILED` | El caso falló en transporte: no hay respuesta que evaluar | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
+| 422 | `PRECONDITION_FAILED` | El caso no tiene aserciones | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -846,14 +1043,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /qa/defects
+## 11. POST /qa/defects
 
 - **Módulo:** `qa_lab`
 - **Etiqueta OpenAPI:** `qa`
 - **Nombre:** Registrar un defecto detectado
 - **Operation ID:** `QaLabController_registerDefect`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabController.registerDefect](../../src/modules/qa_lab/controllers/qa-lab.controller.ts)
+- **Implementación:** [QaLabController.registerDefect](../../src/modules/qa_lab/presentation/controllers/qa-lab.controller.ts)
 
 ### Descripción de negocio
 
@@ -941,6 +1138,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DefectResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DefectResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DefectResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DefectResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DefectResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -973,9 +1171,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, QA_ENGINEER, QA_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Caso no encontrado | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
-| 409 | `CONFLICT` | No se pudo asignar número de defecto | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
+| 409 | `CONFLICT` | No se pudo asignar número de defecto | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El resultado pertenece a otro caso | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -993,14 +1191,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. PATCH /qa/defects/{defectId}
+## 12. PATCH /qa/defects/{defectId}
 
 - **Módulo:** `qa_lab`
 - **Etiqueta OpenAPI:** `qa`
 - **Nombre:** Triage y transición de estado del defecto
 - **Operation ID:** `QaLabController_triageDefect`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabController.triageDefect](../../src/modules/qa_lab/controllers/qa-lab.controller.ts)
+- **Implementación:** [QaLabController.triageDefect](../../src/modules/qa_lab/presentation/controllers/qa-lab.controller.ts)
 
 ### Descripción de negocio
 
@@ -1082,6 +1280,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TriageDefectResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TriageDefectResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TriageDefectResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TriageDefectResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TriageDefectResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1112,11 +1311,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: QA_ADMIN, QA_ENGINEER. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Defecto no encontrado | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | El defecto está en un estado desconocido | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
-| 422 | `PRECONDITION_FAILED` | La transición de estado no está permitida | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
-| 422 | `PRECONDITION_FAILED` | Un defecto en curso necesita responsable | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
+| 422 | `PRECONDITION_FAILED` | El defecto está en un estado desconocido | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
+| 422 | `PRECONDITION_FAILED` | La transición de estado no está permitida | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un defecto en curso necesita responsable | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1134,14 +1332,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /qa/environments
+## 13. POST /qa/environments
 
 - **Módulo:** `qa_lab`
 - **Etiqueta OpenAPI:** `qa`
 - **Nombre:** Registrar un entorno de pruebas gobernado
 - **Operation ID:** `QaLabController_createEnvironment`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabController.createEnvironment](../../src/modules/qa_lab/controllers/qa-lab.controller.ts)
+- **Implementación:** [QaLabController.createEnvironment](../../src/modules/qa_lab/presentation/controllers/qa-lab.controller.ts)
 
 ### Descripción de negocio
 
@@ -1225,6 +1423,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<EnvironmentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<EnvironmentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<EnvironmentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<EnvironmentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `EnvironmentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1255,9 +1454,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: QA_ADMIN. | Roles/tenant/guards de autorización |
-| 409 | `CONFLICT` | Ya existe un entorno con ese código | Excepción explícita en src/modules/qa_lab/services/qa-catalog.service.ts |
+| 409 | `CONFLICT` | Ya existe un entorno con ese código | Excepción explícita en src/modules/qa_lab/application/services/qa-catalog.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Un entorno de producción no puede declararse seguro para capturar payloads | Excepción explícita en src/modules/qa_lab/services/qa-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un entorno de producción no puede declararse seguro para capturar payloads | Excepción explícita en src/modules/qa_lab/application/services/qa-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1275,14 +1474,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /qa/runs
+## 14. POST /qa/runs
 
 - **Módulo:** `qa_lab`
 - **Etiqueta OpenAPI:** `qa`
 - **Nombre:** Disparar una corrida de pruebas
 - **Operation ID:** `QaLabController_createRun`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabController.createRun](../../src/modules/qa_lab/controllers/qa-lab.controller.ts)
+- **Implementación:** [QaLabController.createRun](../../src/modules/qa_lab/presentation/controllers/qa-lab.controller.ts)
 
 ### Descripción de negocio
 
@@ -1364,6 +1563,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RunResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RunResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RunResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RunResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RunResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1394,14 +1594,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: QA_ADMIN, QA_ENGINEER, SYSTEM. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Suite no encontrada | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
-| 404 | `NOT_FOUND` | Entorno no encontrado | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
-| 409 | `CONFLICT` | La suite ya tiene una corrida en marcha | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
-| 409 | `CONFLICT` | No se pudo asignar número de corrida | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
+| 409 | `CONFLICT` | La suite ya tiene una corrida en marcha | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
+| 409 | `CONFLICT` | No se pudo asignar número de corrida | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La suite no está publicada | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
-| 422 | `PRECONDITION_FAILED` | El entorno no está activo | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
-| 422 | `PRECONDITION_FAILED` | La suite no tiene casos activos | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
+| 422 | `PRECONDITION_FAILED` | La suite no está publicada | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
+| 422 | `PRECONDITION_FAILED` | El entorno no está activo | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
+| 422 | `PRECONDITION_FAILED` | La suite no tiene casos activos | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1419,14 +1617,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /qa/runs/{runId}/artifacts
+## 15. POST /qa/runs/{runId}/artifacts
 
 - **Módulo:** `qa_lab`
 - **Etiqueta OpenAPI:** `qa`
 - **Nombre:** Adjuntar un artefacto de evidencia a la corrida
 - **Operation ID:** `QaLabController_attachArtifact`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabController.attachArtifact](../../src/modules/qa_lab/controllers/qa-lab.controller.ts)
+- **Implementación:** [QaLabController.attachArtifact](../../src/modules/qa_lab/presentation/controllers/qa-lab.controller.ts)
 
 ### Descripción de negocio
 
@@ -1507,6 +1705,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ArtifactResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ArtifactResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ArtifactResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ArtifactResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ArtifactResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1535,10 +1734,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, QA_ENGINEER. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Corrida no encontrada | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
-| 404 | `NOT_FOUND` | Resultado no encontrado | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | El resultado pertenece a otra corrida | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
+| 422 | `PRECONDITION_FAILED` | El resultado pertenece a otra corrida | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1556,14 +1753,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /qa/runs/{runId}/cases/{caseId}/execute
+## 16. POST /qa/runs/{runId}/cases/{caseId}/execute
 
 - **Módulo:** `qa_lab`
 - **Etiqueta OpenAPI:** `qa`
 - **Nombre:** Registrar la ejecución del caso con sus payloads
 - **Operation ID:** `QaLabController_executeCase`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabController.executeCase](../../src/modules/qa_lab/controllers/qa-lab.controller.ts)
+- **Implementación:** [QaLabController.executeCase](../../src/modules/qa_lab/presentation/controllers/qa-lab.controller.ts)
 
 ### Descripción de negocio
 
@@ -1653,6 +1850,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ExecuteCaseResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ExecuteCaseResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ExecuteCaseResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ExecuteCaseResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ExecuteCaseResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1685,12 +1883,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, QA_ENGINEER. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Corrida no encontrada | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
-| 404 | `NOT_FOUND` | Caso no encontrado | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
-| 409 | `CONFLICT` | La corrida ya está cerrada | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
-| 409 | `CONFLICT` | El caso ya se ejecutó en esta corrida | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
+| 409 | `CONFLICT` | La corrida ya está cerrada | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
+| 409 | `CONFLICT` | El caso ya se ejecutó en esta corrida | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | El caso pertenece a otra suite | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
+| 422 | `PRECONDITION_FAILED` | El caso pertenece a otra suite | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1708,14 +1904,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /qa/runs/{runId}/finalize
+## 17. POST /qa/runs/{runId}/finalize
 
 - **Módulo:** `qa_lab`
 - **Etiqueta OpenAPI:** `qa`
 - **Nombre:** Cerrar la corrida y consolidar totales
 - **Operation ID:** `QaLabController_finalizeRun`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabController.finalizeRun](../../src/modules/qa_lab/controllers/qa-lab.controller.ts)
+- **Implementación:** [QaLabController.finalizeRun](../../src/modules/qa_lab/presentation/controllers/qa-lab.controller.ts)
 
 ### Descripción de negocio
 
@@ -1775,6 +1971,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<FinalizeRunResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<FinalizeRunResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<FinalizeRunResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<FinalizeRunResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FinalizeRunResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1811,8 +2008,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, QA_ENGINEER. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Corrida no encontrada | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
-| 409 | `CONFLICT` | La corrida ya está cerrada | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
+| 409 | `CONFLICT` | La corrida ya está cerrada | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1830,14 +2026,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /qa/runs/{runId}/link-release
+## 18. POST /qa/runs/{runId}/link-release
 
 - **Módulo:** `qa_lab`
 - **Etiqueta OpenAPI:** `qa`
 - **Nombre:** Enlazar la evidencia de la corrida a un release
 - **Operation ID:** `QaLabController_linkRelease`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabController.linkRelease](../../src/modules/qa_lab/controllers/qa-lab.controller.ts)
+- **Implementación:** [QaLabController.linkRelease](../../src/modules/qa_lab/presentation/controllers/qa-lab.controller.ts)
 
 ### Descripción de negocio
 
@@ -1913,6 +2109,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<LinkReleaseResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<LinkReleaseResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<LinkReleaseResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<LinkReleaseResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LinkReleaseResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1943,10 +2140,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: RELEASE_MANAGER, QA_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Corrida no encontrada | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Sólo una corrida que pasó puede respaldar un release | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
-| 422 | `PRECONDITION_FAILED` | La corrida no tiene evidencia adjunta | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
+| 422 | `PRECONDITION_FAILED` | Sólo una corrida que pasó puede respaldar un release | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
+| 422 | `PRECONDITION_FAILED` | La corrida no tiene evidencia adjunta | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1964,14 +2160,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /qa/schedules
+## 19. POST /qa/schedules
 
 - **Módulo:** `qa_lab`
 - **Etiqueta OpenAPI:** `qa`
 - **Nombre:** Programar la ejecución automática de la suite
 - **Operation ID:** `QaLabController_createSchedule`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabController.createSchedule](../../src/modules/qa_lab/controllers/qa-lab.controller.ts)
+- **Implementación:** [QaLabController.createSchedule](../../src/modules/qa_lab/presentation/controllers/qa-lab.controller.ts)
 
 ### Descripción de negocio
 
@@ -2062,6 +2258,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TestScheduleResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TestScheduleResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TestScheduleResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TestScheduleResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TestScheduleResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2092,12 +2289,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: QA_ADMIN, QA_ENGINEER. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Suite no encontrada | Excepción explícita en src/modules/qa_lab/services/qa-catalog.service.ts |
-| 404 | `NOT_FOUND` | Entorno no encontrado | Excepción explícita en src/modules/qa_lab/services/qa-catalog.service.ts |
-| 409 | `CONFLICT` | Ya existe una programación con ese código para la suite y el entorno | Excepción explícita en src/modules/qa_lab/services/qa-catalog.service.ts |
+| 409 | `CONFLICT` | Ya existe una programación con ese código para la suite y el entorno | Excepción explícita en src/modules/qa_lab/application/services/qa-catalog.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La suite no está publicada | Excepción explícita en src/modules/qa_lab/services/qa-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | El entorno no está activo | Excepción explícita en src/modules/qa_lab/services/qa-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | La suite no está publicada | Excepción explícita en src/modules/qa_lab/application/services/qa-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El entorno no está activo | Excepción explícita en src/modules/qa_lab/application/services/qa-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2115,14 +2310,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /qa/suites/{suiteId}/cases
+## 20. POST /qa/suites/{suiteId}/cases
 
 - **Módulo:** `qa_lab`
 - **Etiqueta OpenAPI:** `qa`
 - **Nombre:** Definir un caso de prueba con sus aserciones
 - **Operation ID:** `QaLabController_createTestCase`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabController.createTestCase](../../src/modules/qa_lab/controllers/qa-lab.controller.ts)
+- **Implementación:** [QaLabController.createTestCase](../../src/modules/qa_lab/presentation/controllers/qa-lab.controller.ts)
 
 ### Descripción de negocio
 
@@ -2235,6 +2430,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TestCaseResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TestCaseResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TestCaseResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TestCaseResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TestCaseResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2269,11 +2465,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: QA_ADMIN, QA_ENGINEER. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Suite no encontrada | Excepción explícita en src/modules/qa_lab/services/qa-catalog.service.ts |
-| 409 | `CONFLICT` | Ya existe un caso con ese código en la suite | Excepción explícita en src/modules/qa_lab/services/qa-catalog.service.ts |
+| 409 | `CONFLICT` | Ya existe un caso con ese código en la suite | Excepción explícita en src/modules/qa_lab/application/services/qa-catalog.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Una aserción JSON_PATH necesita su ruta | Excepción explícita en src/modules/qa_lab/services/qa-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | La aserción necesita valor esperado | Excepción explícita en src/modules/qa_lab/services/qa-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | Una aserción JSON_PATH necesita su ruta | Excepción explícita en src/modules/qa_lab/application/services/qa-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | La aserción necesita valor esperado | Excepción explícita en src/modules/qa_lab/application/services/qa-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2291,14 +2486,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /qa/suites/{suiteId}/publish
+## 21. POST /qa/suites/{suiteId}/publish
 
 - **Módulo:** `qa_lab`
 - **Etiqueta OpenAPI:** `qa`
 - **Nombre:** Publicar la suite y activar sus casos
 - **Operation ID:** `QaLabController_publishSuite`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabController.publishSuite](../../src/modules/qa_lab/controllers/qa-lab.controller.ts)
+- **Implementación:** [QaLabController.publishSuite](../../src/modules/qa_lab/presentation/controllers/qa-lab.controller.ts)
 
 ### Descripción de negocio
 
@@ -2370,6 +2565,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PublishSuiteResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PublishSuiteResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PublishSuiteResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PublishSuiteResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PublishSuiteResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2400,9 +2596,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: QA_ADMIN, QA_ENGINEER. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Suite no encontrada | Excepción explícita en src/modules/qa_lab/services/qa-catalog.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Una suite sin casos no puede publicarse | Excepción explícita en src/modules/qa_lab/services/qa-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | Una suite sin casos no puede publicarse | Excepción explícita en src/modules/qa_lab/application/services/qa-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 

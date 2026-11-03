@@ -12,6 +12,7 @@ import {
 // el mismo hecho.
 import { Persons } from '../../profiles/entities';
 import { createdBy } from '../../../common';
+import { COMM } from '../community.concepts';
 
 /**
  * Describe el contrato estructural de create review data.
@@ -195,14 +196,14 @@ export class ReviewsRepository {
     const output = new Map<string, string>();
     if (personIds.length === 0) return output;
 
-    const personas = await em.find(
+    const persons = await em.find(
       Persons,
       { id: { $in: [...new Set(personIds)] } },
       { fields: ['id', 'displayName'] },
     );
-    for (const persona of personas) {
-      const nombre = persona.displayName?.trim();
-      if (nombre) output.set(persona.id, nombre);
+    for (const persona of persons) {
+      const name = persona.displayName?.trim();
+      if (name) output.set(persona.id, name);
     }
     return output;
   }
@@ -268,10 +269,12 @@ export class ReviewsRepository {
   /**
    * Calificación media publicada de varios perfiles, en una sola consulta.
    *
-   * Se cuentan **sólo las reseñas publicadas**: una reseña retirada por
-   * moderación sigue existiendo en la tabla, y sumarla al promedio dejaría que
-   * un contenido que el producto decidió no mostrar siga pesando en la nota que
-   * sí se muestra.
+   * Se cuentan **sólo las reseñas publicadas y no removidas por moderación**:
+   * una reseña retirada por un moderador sigue existiendo en la tabla, y sumarla
+   * al promedio dejaría que un contenido que el producto decidió no mostrar siga
+   * pesando en la nota que sí se muestra. Es el mismo criterio de
+   * `PublicSearchRepository.ratingsByProfile`, para que la ficha y el buscador
+   * de centros digan el mismo número.
    *
    * Va en lote porque quien la usa es un buscador: pedir la media perfil por
    * perfil convierte un listado de veinte centros en veinte consultas.
@@ -306,6 +309,7 @@ export class ReviewsRepository {
       {
         targetPublicProfileId: { $in: [...targetPublicProfileIds] },
         publicationStatusConceptId,
+        moderationStatusConceptId: { $ne: COMM.MODERATION_REMOVED },
       },
       { fields: ['targetPublicProfileId', 'overallRating'] },
     );

@@ -9,7 +9,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { TimescaleAdminService } from '../services';
 import { ROLLUP_NAMES, TIMESERIES_TABLES, type RollupName } from '../constants';
 import {
@@ -42,6 +47,10 @@ export class TimescaleAdminController {
   constructor(private readonly adminService: TimescaleAdminService) {}
 
   /** UC-58-04. */
+  @Audited({
+    action: 'TIME_SERIES_HYPERTABLE_CONFIGURED',
+    entity: 'hypertable',
+  })
   @Post('hypertables')
   @Roles('DATA_PLATFORM_ADMIN', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -58,6 +67,10 @@ export class TimescaleAdminController {
   }
 
   /** UC-58-04. */
+  @Audited({
+    action: 'TIME_SERIES_HYPERTABLE_UPDATED',
+    entity: 'hypertable',
+  })
   @Patch('hypertables/:table')
   @Roles('DATA_PLATFORM_ADMIN', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -76,6 +89,10 @@ export class TimescaleAdminController {
   }
 
   /** UC-58-05. */
+  @Audited({
+    action: 'TIME_SERIES_COMPRESSION_RUN',
+    entity: 'hypertable',
+  })
   @Post('compression/run')
   @Roles('SYSTEM', 'DATA_PLATFORM_ADMIN', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -92,6 +109,10 @@ export class TimescaleAdminController {
   }
 
   /** UC-58-06. */
+  @Audited({
+    action: 'TIME_SERIES_RETENTION_APPLIED',
+    entity: 'hypertable',
+  })
   @Post('retention/policies')
   @Roles('SYSTEM', 'DATA_PLATFORM_ADMIN', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -111,6 +132,10 @@ export class TimescaleAdminController {
    * UC-58-08. Declarada **antes** que la ruta paramétrica de rollups: un segmento
    * literal que coincide con un parámetro tiene que resolverse primero.
    */
+  @Audited({
+    action: 'AUDIT_DAILY_ROLLUP_REFRESHED',
+    entity: 'audit_access_metric_series',
+  })
   @Post('rollups/audit-daily/refresh')
   @Roles('SYSTEM', 'DATA_PLATFORM_ADMIN', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -131,6 +156,10 @@ export class TimescaleAdminController {
   }
 
   /** UC-58-07. */
+  @Audited({
+    action: 'TIME_SERIES_ROLLUP_REFRESHED',
+    entity: 'hypertable',
+  })
   @Post('rollups/:name/refresh')
   @Roles('SYSTEM', 'DATA_PLATFORM_ADMIN', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)

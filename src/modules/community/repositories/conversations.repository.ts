@@ -280,7 +280,7 @@ export class ConversationsRepository {
     directTypeConceptId: string,
     activeStatusConceptId: string,
   ): Promise<Conversations | null> {
-    const [deA, deB] = await Promise.all([
+    const [membersOfA, membersOfB] = await Promise.all([
       em.find(ConversationParticipants, {
         participantProfileId: profileA,
         statusConceptId: activeStatusConceptId,
@@ -292,9 +292,9 @@ export class ConversationsRepository {
     ]);
 
     const bByConversation = new Set(
-      deB.map((participation) => participation.conversationId),
+      membersOfB.map((participation) => participation.conversationId),
     );
-    const shared = deA
+    const shared = membersOfA
       .map((participation) => participation.conversationId)
       .filter((conversationId) => bByConversation.has(conversationId));
     if (shared.length === 0) return null;
@@ -320,11 +320,13 @@ export class ConversationsRepository {
       // Exactamente los dos: una directa con un tercero adentro no es la
       // conversación privada que se está buscando.
       const profiles = new Set(
-        participants.map(
-          (participation) => participation.participantProfileId,
-        ),
+        participants.map((participation) => participation.participantProfileId),
       );
-      if (profiles.size === 2 && profiles.has(profileA) && profiles.has(profileB))
+      if (
+        profiles.size === 2 &&
+        profiles.has(profileA) &&
+        profiles.has(profileB)
+      )
         return conversation;
     }
     return null;

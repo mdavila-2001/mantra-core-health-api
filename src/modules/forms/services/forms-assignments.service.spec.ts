@@ -53,11 +53,7 @@ function build() {
 }
 
 /** Una asignación propia del tenant A, activa, en la posición dada. */
-function own(
-  id: string,
-  ordinal: number,
-  over: Record<string, unknown> = {},
-) {
+function own(id: string, ordinal: number, over: Record<string, unknown> = {}) {
   return {
     id,
     tenantId: 'tenant-a',
@@ -170,12 +166,7 @@ describe('FormsAssignmentsService', () => {
   });
 
   describe('reorderAssignments (CL-61)', () => {
-    const four = () => [
-      own('A', 0),
-      own('B', 1),
-      own('C', 2),
-      own('D', 3),
-    ];
+    const four = () => [own('A', 0), own('B', 1), own('C', 2), own('D', 3)];
 
     it('aplica el orden entero como ordinal 0..n', async () => {
       const d = build();

@@ -5,7 +5,6 @@ import {
   CONCEPTS,
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -13,6 +12,8 @@ import {
   OpsIncidentsRepository,
   OpsImprovementsRepository,
 } from '../repositories';
+import { PlatformOpsErrorReason } from '../platform_ops.error-reasons';
+import { PlatformOpsScope } from './platform-ops-scope.service';
 import type { HealthIncidents } from '../entities';
 import {
   RecordHealthRunDto,
@@ -139,12 +140,14 @@ export class OpsIncidentsService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param incidentsRepo - Valor de incidents repo requerido por la operación.
    * @param improvementsRepo - Valor de improvements repo requerido por la operación.
+   * @param scope - Alcance de tenant: resuelve cada agregado dentro del tenant activo.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly incidentsRepo: OpsIncidentsRepository,
     private readonly improvementsRepo: OpsImprovementsRepository,
+    private readonly scope: PlatformOpsScope,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(OpsIncidentsService.name);
@@ -165,20 +168,28 @@ export class OpsIncidentsService {
       'Recording health check run',
     );
 
+    const tenantId = this.scope.activeTenantId();
     return this.em.transactional(async (tx) => {
-      const check = await this.incidentsRepo.findHealthCheckById(
+      const foundCheck = await this.incidentsRepo.findHealthCheckById(
         tx,
         healthCheckId,
+        tenantId,
       );
-      if (!check) {
-        throw new ResourceNotFoundException('Health check no encontrado', {
-          healthCheckId,
-        });
+      const check = this.scope.require(foundCheck, foundCheck?.tenantId);
+      // El despliegue que la corrida cita debe ser del mismo tenant.
+      if (dto.deploymentId) {
+        const deployment = await this.incidentsRepo.findDeploymentInTenant(
+          tx,
+          dto.deploymentId,
+          tenantId,
+        );
+        this.scope.require(deployment, deployment?.tenantId);
       }
       if (check.stateConceptId !== CONCEPTS.STATE_ACTIVE) {
         throw new PreconditionFailedException(
           'El health check no está activo',
           { healthCheckId },
+          PlatformOpsErrorReason.HEALTH_CHECK_NOT_ACTIVE,
         );
       }
       if (check.isEnabled === false) {
@@ -187,6 +198,7 @@ export class OpsIncidentsService {
           {
             healthCheckId,
           },
+          PlatformOpsErrorReason.HEALTH_CHECK_DISABLED,
         );
       }
 
@@ -311,20 +323,25 @@ export class OpsIncidentsService {
       'Updating incident',
     );
 
+    const tenantId = this.scope.activeTenantId();
     return this.em.transactional(async (tx) => {
-      const incident = await this.incidentsRepo.findIncidentForUpdate(
+      const foundIncident = await this.incidentsRepo.findIncidentForUpdate(
         tx,
         incidentId,
+        tenantId,
       );
-      if (!incident) {
-        throw new ResourceNotFoundException('Incidente no encontrado', {
-          incidentId,
-        });
-      }
+      const incident = this.scope.require(
+        foundIncident,
+        foundIncident?.tenantId,
+      );
       if (incident.statusConceptId === CONCEPTS.INCIDENT_RESOLVED) {
-        throw new PreconditionFailedException('El incidente ya está resuelto', {
-          incidentId,
-        });
+        throw new PreconditionFailedException(
+          'El incidente ya está resuelto',
+          {
+            incidentId,
+          },
+          PlatformOpsErrorReason.INCIDENT_ALREADY_RESOLVED,
+        );
       }
 
       const timelineEventIds: string[] = [];
@@ -431,16 +448,17 @@ export class OpsIncidentsService {
 
     this.assertUniqueActionCodes(dto, incidentId);
 
+    const tenantId = this.scope.activeTenantId();
     return this.em.transactional(async (tx) => {
-      const incident = await this.incidentsRepo.findIncidentForUpdate(
+      const foundIncident = await this.incidentsRepo.findIncidentForUpdate(
         tx,
         incidentId,
+        tenantId,
       );
-      if (!incident) {
-        throw new ResourceNotFoundException('Incidente no encontrado', {
-          incidentId,
-        });
-      }
+      const incident = this.scope.require(
+        foundIncident,
+        foundIncident?.tenantId,
+      );
       // Un postmortem sobre un incidente vivo describiría algo que aún cambia.
       if (incident.statusConceptId !== CONCEPTS.INCIDENT_RESOLVED) {
         throw new PreconditionFailedException(
@@ -448,6 +466,7 @@ export class OpsIncidentsService {
           {
             incidentId,
           },
+          PlatformOpsErrorReason.INCIDENT_NOT_RESOLVED,
         );
       }
 
@@ -456,10 +475,14 @@ export class OpsIncidentsService {
         incidentId,
       );
       if (previous) {
-        throw new ConflictException('El incidente ya tiene postmortem', {
-          incidentId,
-          postmortemId: previous.id,
-        });
+        throw new ConflictException(
+          'El incidente ya tiene postmortem',
+          {
+            incidentId,
+            postmortemId: previous.id,
+          },
+          PlatformOpsErrorReason.INCIDENT_POSTMORTEM_ALREADY_EXISTS,
+        );
       }
 
       const postmortem = this.incidentsRepo.createPostmortem(tx, {
@@ -556,6 +579,7 @@ export class OpsIncidentsService {
           incidentId: incident.id,
           transition: dto.transition,
         },
+        PlatformOpsErrorReason.INCIDENT_TRANSITION_INVALID,
       );
     }
 
@@ -568,6 +592,7 @@ export class OpsIncidentsService {
         throw new PreconditionFailedException(
           'Resolver exige causa raíz y descripción de la resolución',
           { incidentId: incident.id },
+          PlatformOpsErrorReason.INCIDENT_RESOLVE_MISSING_ROOT_CAUSE,
         );
       }
       incident.rootCauseText = rootCause;
@@ -610,6 +635,7 @@ export class OpsIncidentsService {
             incidentId,
             actionCode: action.actionCode,
           },
+          PlatformOpsErrorReason.POSTMORTEM_ACTION_CODE_DUPLICATE,
         );
       }
       seen.add(action.actionCode);

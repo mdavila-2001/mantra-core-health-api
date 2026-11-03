@@ -1,0 +1,19 @@
+{
+  "source": "ctgov",
+  "name": "ClinicalTrials.gov API v2 (estudios intervencionales)",
+  "publisher": "U.S. National Library of Medicine",
+  "license": "Dominio público (NLM); términos de uso de ClinicalTrials.gov: https://clinicaltrials.gov/about-site/terms-conditions",
+  "licenseUrl": "https://clinicaltrials.gov/about-site/terms-conditions",
+  "homepage": "https://clinicaltrials.gov/",
+  "apiVersion": "2.0.5",
+  "dataTimestamp": "2026-10-23T09:00:04",
+  "retrievedAt": "2026-10-24T16:35:47.062Z",
+  "query": {
+    "filter": "AREA[StudyType]INTERVENTIONAL",
+    "fields": "protocolSection.identificationModule.nctId,protocolSection.designModule.studyType,protocolSection.designModule.phases,protocolSection.statusModule.overallStatus,protocolSection.statusModule.lastUpdatePostDateStruct,protocolSection.armsInterventionsModule.interventions,protocolSection.conditionsModule.conditions,derivedSection.conditionBrowseModule.meshes,derivedSection.interventionBrowseModule.meshes",
+    "pageSize": 1000
+  },
+  "pages": 465,
+  "studies": 464253,
+  "totalCount": 464253
+}

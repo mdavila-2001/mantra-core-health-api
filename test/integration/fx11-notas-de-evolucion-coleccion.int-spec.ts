@@ -4,6 +4,7 @@ import { SEED } from '../../src/common';
 import {
   bootstrapTestApp,
   bearer,
+  camposObligatoriosDePaciente,
   type TestContext,
   identidadProfesional,
 } from './harness';
@@ -103,16 +104,29 @@ describe('FX-11 · la colección de notas de evolución (P18)', () => {
     medicoB.token = b.token;
     medicoB.hpid = b.hpid;
 
-    const paciente = await http()
-      .post('/profiles/patients')
-      .set(bearer(ctx.adminToken))
+    // Desde 764d0d406 (AUTHZ-M01, #735) la huella paciente-tenant sólo cuenta
+    // lo que hace el propio paciente: un perfil dado de alta por un admin, sin
+    // cuenta, no tiene vínculo con el tenant y la relación asistencial
+    // responde 404 AUTHZ_PATIENT_OUT_OF_SCOPE. El paciente se registra solo.
+    const campos = await camposObligatoriosDePaciente(ctx);
+    const nationalId = `FX11-${sufijo}`;
+    await http()
+      .post('/iam/auth/register-patient')
       .send({
-        patientCode: `PAC-FX11-${sufijo}`,
+        ...campos,
+        nationalId,
+        password: PASSWORD,
         displayName: `Paciente FX-11 ${sufijo}`,
-        birthDate: '1990-05-14',
+        email: `fx11-pac-${sufijo}@example.test`,
       })
       .expect(201);
-    patientProfileId = paciente.body.profileId;
+    const loginPaciente = await http()
+      .post('/iam/auth/login')
+      .send({ nationalId, password: PASSWORD })
+      .expect(200);
+    patientProfileId = claims(loginPaciente.body.accessToken as string)[
+      'pid'
+    ] as string;
 
     // Escribir en la historia exige un vínculo asistencial con el paciente
     // (guard de PHI): sin él `POST /charts/notes` responde 403. Ambos médicos

@@ -20,11 +20,11 @@ describe('ClinicalNotesRepository.findHeadersByEncounter', () => {
   }
 
   it('filtra por el encuentro y ordena por createdAt, id', async () => {
-    const { em, llamadas } = rememberingEm();
+    const { em, llamadas: calls } = rememberingEm();
 
     await new ClinicalNotesRepository().findHeadersByEncounter(em, 'enc-1');
 
-    expect(llamadas[0]).toEqual([
+    expect(calls[0]).toEqual([
       ClinicalNoteHeaders,
       { encounterId: 'enc-1' },
       { orderBy: { createdAt: 'ASC', id: 'ASC' } },

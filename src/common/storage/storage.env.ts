@@ -15,7 +15,15 @@ export const storageEnvSchema = Joi.object({
     .integer()
     .min(1)
     .default(DEFAULT_MAX_UPLOAD_BYTES),
-  FILE_STORAGE_S3_BUCKET: Joi.string().allow('').default(''),
+  // Con el adaptador `s3` el bucket es obligatorio: sin él, la API arrancaba y
+  // sólo fallaba en la primera subida (CIF-01). Con `local` se ignora.
+  FILE_STORAGE_S3_BUCKET: Joi.string()
+    .default('')
+    .when('FILE_STORAGE_ADAPTER', {
+      is: 's3',
+      then: Joi.string().trim().min(1).required(),
+      otherwise: Joi.string().allow(''),
+    }),
   FILE_STORAGE_S3_REGION: Joi.string().default('us-east-1'),
   FILE_STORAGE_S3_ENDPOINT: Joi.string().uri().allow('').default(''),
   FILE_STORAGE_S3_FORCE_PATH_STYLE: Joi.boolean().default(false),
@@ -27,7 +35,24 @@ export const storageEnvSchema = Joi.object({
     .max(120)
     .allow('')
     .default(''),
-}).unknown(true);
+})
+  .unknown(true)
+  // Credenciales estáticas: o el par completo, o ninguna (cadena por defecto de
+  // AWS: rol IAM, perfil, identidad de workload). Una sola mitad nunca es un modo
+  // válido y hoy se descartaba en silencio.
+  .custom((value: Record<string, unknown>, helpers) => {
+    const accessKey = value.FILE_STORAGE_S3_ACCESS_KEY_ID;
+    const secret = value.FILE_STORAGE_S3_SECRET_ACCESS_KEY;
+    if (Boolean(accessKey) !== Boolean(secret)) {
+      return helpers.message({
+        custom:
+          'FILE_STORAGE_S3_ACCESS_KEY_ID y FILE_STORAGE_S3_SECRET_ACCESS_KEY ' +
+          'se definen juntas o ninguna (sin ellas se usa la cadena de ' +
+          'credenciales del entorno, p. ej. un rol IAM)',
+      });
+    }
+    return value;
+  });
 
 export interface StorageEnv {
   /** No binding is no proof of identity; it never grants a destructive operation. */
@@ -66,6 +91,31 @@ export function loadStorageEnv(): StorageEnv {
       secretAccessKey: process.env.FILE_STORAGE_S3_SECRET_ACCESS_KEY ?? '',
     },
   };
+}
+
+/**
+ * Falla si el adaptador `s3` está seleccionado sin lo mínimo para operar.
+ *
+ * Es la misma regla que el esquema Joi, pero evaluable sobre `loadStorageEnv()`:
+ * la fábrica de `FileStorageModule` la ejecuta al construir el proveedor, de modo
+ * que los procesos que no pasan por `ConfigModule` (workers, CLI) también
+ * abortan en el arranque y no en la primera operación de un usuario.
+ *
+ * Sólo nombra variables; nunca imprime valores ni credenciales.
+ */
+export function assertStorageEnvConfigured(env: StorageEnv): void {
+  if (env.adapter !== 's3') return;
+  if (!env.s3.bucket.trim()) {
+    throw new Error(
+      'FILE_STORAGE_S3_BUCKET es obligatorio para FILE_STORAGE_ADAPTER=s3',
+    );
+  }
+  if (Boolean(env.s3.accessKeyId) !== Boolean(env.s3.secretAccessKey)) {
+    throw new Error(
+      'FILE_STORAGE_S3_ACCESS_KEY_ID y FILE_STORAGE_S3_SECRET_ACCESS_KEY se ' +
+        'definen juntas o ninguna',
+    );
+  }
 }
 
 function loadPhysicalBinding(): PhysicalStorageBinding | undefined {

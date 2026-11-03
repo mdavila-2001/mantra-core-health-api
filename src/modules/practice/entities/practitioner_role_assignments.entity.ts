@@ -97,6 +97,16 @@ export class PractitionerRoleAssignments {
   validTo?: Date;
 
   /**
+   * Valor de contact phone mantenido por la instancia.
+   */
+  @Property({
+    fieldName: 'contact_phone',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  contactPhone?: string;
+
+  /**
    * Identificador asociado a status concept.
    */
   @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

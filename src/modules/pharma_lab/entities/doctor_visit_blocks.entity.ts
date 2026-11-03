@@ -20,19 +20,19 @@ export class DoctorVisitBlocks {
   /**
    * Doctor que bloquea.
    */
-  @Property({ fieldName: 'doctor_user_id', type: 'uuid' }) // FK → iam.users
+  @Property({ fieldName: 'doctor_user_id', type: 'uuid' }) // FK → iam.users (inferida)
   doctorUserId!: string;
 
   /**
    * Laboratorio bloqueado, si el bloqueo es institucional.
    */
-  @Property({ fieldName: 'pharma_lab_id', type: 'uuid', nullable: true }) // FK → pharma_lab.pharma_labs
+  @Property({ fieldName: 'pharma_lab_id', type: 'uuid', nullable: true }) // FK → pharma_lab.pharma_labs (inferida)
   pharmaLabId?: string;
 
   /**
    * Visitador bloqueado, si el bloqueo es individual.
    */
-  @Property({ fieldName: 'medical_visitor_id', type: 'uuid', nullable: true }) // FK → pharma_lab.medical_visitors
+  @Property({ fieldName: 'medical_visitor_id', type: 'uuid', nullable: true }) // FK → pharma_lab.medical_visitors (inferida)
   medicalVisitorId?: string;
 
   /**
@@ -44,7 +44,7 @@ export class DoctorVisitBlocks {
   /**
    * Estado del bloqueo: vigente o levantado.
    */
-  @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts (inferida)
   statusConceptId!: string;
 
   /**
@@ -72,13 +72,13 @@ export class DoctorVisitBlocks {
   /**
    * Identificador asociado a created by user.
    */
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   createdByUserId?: string;
 
   /**
    * Identificador asociado a updated by user.
    */
-  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   updatedByUserId?: string;
 
   /**

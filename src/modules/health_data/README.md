@@ -119,7 +119,7 @@ deidentification-runs ──> procedencia DEIDENTIFY + linaje versión → manif
 /fhir/r5/Patient/:id/$everything ──> versiones vigentes, expandidas por el clúster del MPI
 ```
 
-## Reglas de negocio
+## Business rules
 
 - **Un lote no se reabre**: el mismo identificador en la misma conexión es el mismo lote, y
   reabrirlo duplicaría todo lo que trae dentro.
@@ -178,7 +178,7 @@ Tipo de recurso, modo de ingesta, formato de payload, tipo y rol de relación, e
 rol de binding, propósito de uso, tipo de exportación, tipo de evento y visibilidad son catálogos
 abiertos y llegan como `*ConceptId`.
 
-## Permisos
+## Permissions
 
 `HEALTH_DATA_ADMIN` cubre el módulo. `INGESTION_WORKER` abre lotes, registra, cierra, proyecta y
 valida. `CLINICAL_INFORMATICIAN` enlaza al dominio y retira. `DATA_STEWARD` relaciona recursos y
@@ -187,7 +187,7 @@ exporta. `INTEROP_CONSUMER` consume `$everything`. `SYSTEM` proyecta la línea d
 
 Ninguna ruta es pública.
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE` sobre la conexión al abrir el lote, sobre el lote al añadir registros y al cerrarlo,
 sobre el registro al proyectarlo, sobre el recurso en todo lo que lo versione, cuarentene, enlace o
@@ -203,12 +203,12 @@ calidad fallida, fusión de perfiles, de-identificación fallida, **toda exporta
 servicio de `$everything`**: los dos últimos son acceso a datos clínicos y quedan siempre
 registrados. No se loguean payloads, valores observados ni resúmenes clínicos.
 
-## Pruebas
+## Tests
 
 `yarn test --testPathPatterns=health_data` — 98 pruebas (82 de servicio + 16 de delegación de los dos
 controladores).
 
-## Pendiente
+## Fuera de este módulo
 
 - **Normalización del payload**: el módulo versiona lo que le entregan normalizado; el mapeo
   terminológico y la normalización viven en el worker de ingesta.
@@ -224,18 +224,12 @@ controladores).
   manifiesto; transformar los datos y escribir el fichero es del worker y del almacenamiento de
   objetos.
 - **OMOP** (`omop_*`): las tablas existen en el esquema pero ningún caso de uso del módulo las opera.
-- **Outbox** (módulo 35): `IngestionBatchOpened/Closed`, `CanonicalResourceVersioned`,
-  `ResourceIdentifiersRegistered`, `CanonicalResourceLinked`, `ResourceBoundToDomain`,
-  `FhirValidationCompleted`, `QualityRunCompleted`, `IdentityResolved`, `TimelineEntryProjected`,
-  `DeidentificationCompleted`, `HealthDataExported`, `EverythingBundleServed`,
-  `CanonicalResourceRetired`.
 - **Proyecciones**: `read_models.*`, índices de `search_platform`, embeddings de `vector_rag`,
-  aristas de `graph_intelligence` y las series de `time_series` los alimenta el outbox.
+  aristas de `graph_intelligence` y las series de `time_series` se alimentan desde el outbox.
 
 ## Revisión backend 2026-10-05
 
-La [revisión estricta](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/health_data.md)
-registra pendientes de alcance para `$everything`, ingesta y liberación de
-datos, más límites de arrays. La corrida dirigida ejecutó 7 suites y 98 tests
+`$everything`, la ingesta y la liberación de datos no acotan el alcance del
+actor, y los arrays de entrada no tienen límite. La corrida dirigida ejecutó 7 suites y 98 tests
 verdes; no reemplaza pruebas con dos tenants, autorización por paciente ni
 consentimiento real.

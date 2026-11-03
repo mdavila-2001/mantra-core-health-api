@@ -15,6 +15,7 @@ import {
   FieldDefinitionsRepository,
   FieldValuesRepository,
 } from '../repositories';
+import { choiceOptionsOf, type DynamicFieldDefinitions } from '../entities';
 import {
   CreateFieldDefinitionDto,
   CreateFieldDependencyDto,
@@ -68,6 +69,84 @@ export class FormsFieldsService {
   }
 
   /**
+   * Las reglas de un campo de elección (`dataType: 'code'`), sean las que
+   * trae el alta o las que resultan de mezclar un `PATCH` sobre lo existente.
+   *
+   * `valueSetId` y `options` resuelven lo mismo —de dónde salen las
+   * opciones— y por eso son mutuamente excluyentes: un campo con las dos
+   * sería ambiguo sobre cuál manda. `allowOther` sólo tiene sentido cuando
+   * las opciones las escribió quien armó el formulario: sobre un `valueSetId`
+   * el catálogo lo administra otro flujo y «Otro» no tiene a dónde ir.
+   */
+  private validateChoiceField(input: {
+    dataType: string;
+    valueSetId?: string;
+    options?: string[];
+    allowOther?: boolean;
+  }): void {
+    if (input.dataType !== 'code') {
+      if (input.options !== undefined) {
+        throw new PreconditionFailedException(
+          '`options` sólo aplica a dataType "code"',
+          { dataType: input.dataType },
+        );
+      }
+      if (input.allowOther) {
+        throw new PreconditionFailedException(
+          '`allowOther` sólo aplica a dataType "code"',
+          { dataType: input.dataType },
+        );
+      }
+      return;
+    }
+
+    if (input.valueSetId !== undefined && input.options !== undefined) {
+      throw new PreconditionFailedException(
+        'Un campo "code" declara valueSetId u options, no los dos',
+        {},
+      );
+    }
+
+    if (input.valueSetId !== undefined) {
+      if (input.allowOther) {
+        throw new PreconditionFailedException(
+          '`allowOther` no aplica sobre un valueSetId: ese catálogo lo administra terminología',
+          {},
+        );
+      }
+      return;
+    }
+
+    // Sin valueSetId: el campo vive de sus propias opciones.
+    const opciones = input.options ?? [];
+    if (opciones.length < 2) {
+      throw new PreconditionFailedException(
+        'Un campo "code" sin valueSetId necesita al menos dos opciones',
+        { count: opciones.length },
+      );
+    }
+    const vistas = new Set<string>();
+    for (const opcionCruda of opciones) {
+      const opcion = opcionCruda.trim();
+      if (opcion === '') {
+        throw new PreconditionFailedException(
+          'Una opción no puede estar vacía',
+          {},
+        );
+      }
+      if (vistas.has(opcion)) {
+        throw new PreconditionFailedException(
+          'Las opciones no pueden repetirse',
+          {
+            opcion,
+          },
+        );
+      }
+      vistas.add(opcion);
+    }
+  }
+
+  /**
    * CL-61 / CL-69: corrige nombre o tipo de un campo **propio**.
    *
    * La definición es global (`dynamic_field_definitions` no tiene `tenant_id`),
@@ -76,6 +155,11 @@ export class FormsFieldsService {
    * asignación global) o de otro tenant responde 403; quien gobierna no tiene
    * techo. Cambiar el tipo con valores ya capturados reescribiría la historia
    * clínica: 409.
+   *
+   * `options` se reemplaza entera (nunca por índice) y no puede quitar una
+   * opción que ya tiene al menos una respuesta capturada: de las salidas que
+   * documenta `docs/pendientes-backend-formularios.md` del frontend, es la
+   * que no exige esquema nuevo.
    */
   async updateFieldDefinition(
     fieldId: string,
@@ -109,6 +193,16 @@ export class FormsFieldsService {
         }
       }
 
+      this.validateChoiceField({
+        dataType: dto.dataType ?? field.dataType,
+        // La base devuelve `null`, no `undefined`, en una columna vacía: sin
+        // normalizar, pasar a un tipo de elección siempre daba 422 («declara
+        // valueSetId u options») contra Postgres, y nunca con los mocks.
+        valueSetId: field.valueSetId ?? undefined,
+        options: dto.options ?? choiceOptionsOf(field.options),
+        allowOther: dto.allowOther ?? field.allowOther,
+      });
+
       if (dto.dataType !== undefined && dto.dataType !== field.dataType) {
         const captured = await this.valuesRepo.countByField(tx, fieldId);
         if (captured > 0) {
@@ -119,7 +213,31 @@ export class FormsFieldsService {
         }
         field.dataType = dto.dataType;
       }
+      if (dto.options !== undefined) {
+        const retiradas = (choiceOptionsOf(field.options) ?? []).filter(
+          (opcion) => !dto.options!.includes(opcion),
+        );
+        const enUso = await this.valuesRepo.findCodesInUseByField(
+          tx,
+          fieldId,
+          retiradas,
+        );
+        if (enUso.length > 0) {
+          throw new PreconditionFailedException(
+            'No se puede quitar una opción que ya tiene respuestas capturadas',
+            { fieldId, opciones: enUso },
+          );
+        }
+        field.options = dto.options;
+      }
+      this.applyCardinality(field, dto);
       if (dto.name !== undefined) field.name = dto.name;
+      if (dto.multiple !== undefined) field.multiple = dto.multiple;
+      if (dto.allowOther !== undefined) field.allowOther = dto.allowOther;
+      // `null` la quita; ausente ("no viene") no la toca.
+      if (dto.description !== undefined) {
+        field.description = dto.description ?? undefined;
+      }
       touch(field, actor.id);
 
       this.logger.info(
@@ -128,6 +246,58 @@ export class FormsFieldsService {
       );
       return { ok: true };
     });
+  }
+
+  /**
+   * Los topes de respuestas de un campo de varias (REQ-27-007).
+   *
+   * Se valida el par **resultante** —lo que llega más lo que ya estaba—,
+   * porque un `PATCH` que sólo baja el máximo puede dejarlo por debajo del
+   * mínimo guardado. Un tope sólo tiene sentido en un campo de elección que
+   * admite varias, y no puede pedir más respuestas que opciones ofrecidas.
+   */
+  private applyCardinality(
+    field: DynamicFieldDefinitions,
+    dto: UpdateFieldDefinitionDto,
+  ): void {
+    if (dto.cardinalityMin === undefined && dto.cardinalityMax === undefined) {
+      return;
+    }
+    // `?? undefined` también sobre lo guardado: la base devuelve `null`.
+    const min =
+      (dto.cardinalityMin === undefined
+        ? field.cardinalityMin
+        : dto.cardinalityMin) ?? undefined;
+    const max =
+      (dto.cardinalityMax === undefined
+        ? field.cardinalityMax
+        : dto.cardinalityMax) ?? undefined;
+
+    if (min !== undefined || max !== undefined) {
+      const multiple = dto.multiple ?? field.multiple;
+      if (field.dataType !== 'code' || multiple !== true) {
+        throw new PreconditionFailedException(
+          'Los topes de respuestas sólo aplican a un campo de elección que admite varias',
+          { dataType: field.dataType },
+        );
+      }
+    }
+    if (min !== undefined && max !== undefined && min > max) {
+      throw new PreconditionFailedException(
+        'El mínimo de respuestas no puede superar al máximo',
+        { cardinalityMin: min, cardinalityMax: max },
+      );
+    }
+    const offered = choiceOptionsOf(field.options)?.length;
+    const highest = max ?? min;
+    if (offered !== undefined && highest !== undefined && highest > offered) {
+      throw new PreconditionFailedException(
+        'El tope de respuestas no puede superar la cantidad de opciones',
+        { tope: highest, opciones: offered },
+      );
+    }
+    field.cardinalityMin = min;
+    field.cardinalityMax = max;
   }
 
   /** UC-09-02: declara una definición de campo con sus reglas de validación. */
@@ -139,6 +309,12 @@ export class FormsFieldsService {
       { operation: 'forms.field.create', code: dto.code },
       'Creating field definition',
     );
+    this.validateChoiceField({
+      dataType: dto.dataType,
+      valueSetId: dto.valueSetId,
+      options: dto.options,
+      allowOther: dto.allowOther,
+    });
     return this.em.transactional(async (tx) => {
       const clash = await this.fieldsRepo.findFieldByCode(tx, dto.code);
       if (clash) {
@@ -159,6 +335,10 @@ export class FormsFieldsService {
         cardinalityMin: dto.cardinalityMin,
         cardinalityMax: dto.cardinalityMax,
         regex: dto.regex,
+        options: dto.options,
+        multiple: dto.multiple,
+        allowOther: dto.allowOther,
+        description: dto.description,
         schemaVersion: 1,
         stateConceptId: FORMS.FIELD_ACTIVE,
         actorUserId: actor.id,

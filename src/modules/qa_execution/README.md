@@ -34,6 +34,35 @@ Entidades (`tableName`, 4 de 4 archivos `*.entity.ts`): `execution_plans`, `exec
 | `POST /admin/qa/plans/:planId/cancel` | ...QA_PLAN_ROLES | `qa-execution` |
 | `POST /admin/qa/run-next` | SYSTEM | `qa-execution` |
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/qa_execution -name '*.controller.ts' | wc -l
+  find src/modules/qa_execution -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/qa_execution -name '*.entity.ts' | wc -l
+  find src/modules/qa_execution -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **1 controller, 9 rutas HTTP, 4 entidades y 1 servicio**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`QaLabModule`).
+
+Entidades (`tableName`, 4 de 4 archivos `*.entity.ts`): `execution_plans`, `execution_targets`, `plan_approvals`, `plan_events`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `GET /admin/qa/targets` | ...QA_READ_ROLES | `qa-execution` |
+| `PUT /admin/qa/environments/:environmentId/target` | ...QA_TARGET_ROLES | `qa-execution` |
+| `POST /admin/qa/plans/preflight` | ...QA_PLAN_ROLES | `qa-execution` |
+| `POST /admin/qa/plans` | ...QA_PLAN_ROLES | `qa-execution` |
+| `GET /admin/qa/plans` | ...QA_READ_ROLES | `qa-execution` |
+| `GET /admin/qa/plans/:planId` | ...QA_READ_ROLES | `qa-execution` |
+| `POST /admin/qa/plans/:planId/approvals` | ...QA_APPROVE_ROLES | `qa-execution` |
+| `POST /admin/qa/plans/:planId/cancel` | ...QA_PLAN_ROLES | `qa-execution` |
+| `POST /admin/qa/run-next` | SYSTEM | `qa-execution` |
+
 ## Endpoints
 
 | Método y ruta | Rol | Descripción |
@@ -67,7 +96,7 @@ para no duplicar mutaciones).
 `execution_targets`, `execution_plans` (job + evidencia de lo aprobado), `plan_approvals`
 (append-only), `plan_events` (bitácora, sin cuerpos ni secretos).
 
-## Pruebas
+## Tests
 
 Dominio (`domain/*.spec.ts`: guarda SSRF con IPv4/IPv6/mapeadas/encoding, plan, aprobación),
 cliente HTTP contra un servidor local real, autorización por handler, y
@@ -76,9 +105,7 @@ cliente HTTP contra un servidor local real, autorización por handler, y
 ## Auditoría vigente
 
 La revisión de octubre de 2026 confirmó las barreras de destino, SSRF, límites y
-segregación de aprobación en el alcance estático revisado. El informe con la
-matriz de regresión está en
-[`docs/revision-backend-2026-10-04/modulos/qa_execution.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/qa_execution.md).
+segregación de aprobación en el alcance estático revisado.
 
 ```bash
 corepack yarn test src/modules/qa_execution --runInBand --silent

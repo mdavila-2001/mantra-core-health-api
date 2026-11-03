@@ -46,7 +46,12 @@ export interface CreateImmunizationScheduleData {
 /** Acceso a datos de `clinical_ext.immunization_schedules`. */
 @Injectable()
 export class ImmunizationSchedulesRepository {
-  /** Calendario activo para una jurisdicción (o global) — base de la proyección. */
+  /**
+   * Calendario activo para una jurisdicción — base de la proyección.
+   *
+   * Con `tenantId` devuelve el calendario propio de ese tenant y el global
+   * (sin tenant), nunca el de otro tenant.
+   */
   findActive(
     em: EntityManager,
     statusConceptId: string,
@@ -58,7 +63,7 @@ export class ImmunizationSchedulesRepository {
       {
         statusConceptId,
         ...(jurisdictionConceptId ? { jurisdictionConceptId } : {}),
-        ...(tenantId ? { tenantId } : {}),
+        ...(tenantId ? { $or: [{ tenantId }, { tenantId: null }] } : {}),
       },
       { orderBy: { doseNumber: 'asc' } },
     );

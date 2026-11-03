@@ -7,8 +7,7 @@ Contiene un **desvío declarado** de [ADR-0021](ADR-0021-fuente-unica-de-ddl.md)
 ## Contexto
 
 El portal administrativo nuevo tiene que responder, con evidencia, qué tablas y columnas existen,
-**por qué existen**, quién responde por ellas y qué cambió. El inventario del backend (ver
-`docs/admin-portal/inventario-y-brechas.md`) encontró:
+**por qué existen**, quién responde por ellas y qué cambió. El inventario del backend encontró:
 
 - `system_ops.entity_registry` / `field_registry` son el registro de **gobierno** (retención,
   políticas, PII/PHI), sin lugar para justificación, grano de fila, revisiones ni evidencia, y sus
@@ -54,12 +53,11 @@ frontend no inventa porcentajes.
 
 ## Desvío de ADR-0021 y su salida
 
-El DDL del módulo 67 está escrito a mano en
+El DDL del módulo 67 nació escrito a mano en
 `database/SQL/patches/2026-09-18_v4219_data_catalog.sql` y reflejado en
-`src/orm/catalog/{indexes,foreign-keys}/data_catalog.*.ts`, porque el módulo todavía no tiene
-`.puml`. Es el mismo caso que v4.2.6 (`medical_groups`). **Pendiente:** declarar
-`diagram_67_data_catalog.puml` con este contenido; entonces `gen_ddl.py` y `yarn orm:catalog`
-deben reproducir exactamente el patch y las tuplas, y el patch pasa a ser salida generada.
+`src/orm/catalog/{indexes,foreign-keys}/data_catalog.*.ts`, porque el módulo no tenía `.puml`
+(el mismo caso que v4.2.6, `medical_groups`). La salida ya se tomó: el módulo está declarado en
+`diagram_67_data_catalog.puml` y su DDL se genera en `database/SQL/67_data_catalog/`.
 
 No hay `CHECK` sobre estados en el patch a propósito: el ORM crea estas tablas en una base vacía
 y no emite CHECKs, así que ponerlos sólo en el patch haría que dos bases "iguales" validen
@@ -69,6 +67,6 @@ distinto. Los estados se validan en el dominio del módulo.
 
 - El catálogo necesita el worker `worker-data_catalog` desplegado; sin él las corridas quedan
   `QUEUED` (visible, no silencioso).
-- Un renombre se ve como baja + alta; reasignar historial es decisión humana (pendiente de UI).
+- Un renombre se ve como baja + alta; reasignar historial es decisión humana y no hay UI para hacerlo.
 - La prueba de integración (`test/integration/data-catalog.int-spec.ts`) corre contra PostgreSQL
   real y aplica el patch; es opt-in por `DATA_CATALOG_IT_DB_URL` y una omisión no es aprobado.

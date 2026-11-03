@@ -5,11 +5,14 @@ import {
   CONCEPTS,
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
+  requireTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { assertResourceInTenant } from '../../../common/tenant/resource-scope';
 import { CrmServiceRepository, CrmSalesRepository } from '../repositories';
+import { CrmErrorReason } from '../crm.error-reasons';
+import { assertBodyTenantMatches, crmNotFound, notFound } from './crm-scope';
 import {
   CreateActivityDto,
   ActivityResponseDto,
@@ -26,6 +29,27 @@ import {
   type ActivityType,
   type ActivitySubject,
 } from '../dto';
+
+const ACCOUNT_NOT_FOUND = crmNotFound(
+  'Cuenta no encontrada',
+  CrmErrorReason.CRM_ACCOUNT_NOT_FOUND,
+);
+const CONTACT_NOT_FOUND = crmNotFound(
+  'Contacto no encontrado',
+  CrmErrorReason.CRM_CONTACT_NOT_FOUND,
+);
+const CASE_NOT_FOUND = crmNotFound(
+  'Caso no encontrado',
+  CrmErrorReason.CRM_CASE_NOT_FOUND,
+);
+const CHANNEL_NOT_FOUND = crmNotFound(
+  'Canal de contacto no encontrado',
+  CrmErrorReason.CRM_CONTACT_CHANNEL_NOT_FOUND,
+);
+const ACTIVITY_SUBJECT_NOT_FOUND = crmNotFound(
+  'Sujeto de la actividad no encontrado',
+  CrmErrorReason.CRM_ACTIVITY_SUBJECT_NOT_FOUND,
+);
 
 const ACTIVITY_TYPE_CONCEPT: Readonly<Record<ActivityType, string>> = {
   TASK: CONCEPTS.ACTIVITY_TASK,
@@ -104,18 +128,23 @@ export class CrmServiceService {
     dto: CreateActivityDto,
     actor: AuthenticatedUser,
   ): Promise<ActivityResponseDto> {
+    const tenantId = requireTenantId();
+    assertBodyTenantMatches(dto.tenantId, tenantId);
     this.logger.info(
       {
         operation: 'crm.activity.create',
-        tenantId: dto.tenantId,
+        tenantId,
         activityType: dto.activityType,
       },
       'Recording CRM activity',
     );
 
     return this.em.transactional(async (tx) => {
+      // Cuenta, contacto y sujeto se resuelven dentro del tenant antes de
+      // persistir: una referencia ajena responde como inexistente.
+      await this.assertActivityReferences(tx, tenantId, dto);
       const activity = this.serviceRepo.createActivity(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         activityTypeConceptId: ACTIVITY_TYPE_CONCEPT[dto.activityType],
         subjectTypeConceptId: SUBJECT_CONCEPT[dto.subjectType],
         subjectRefId: dto.subjectRefId,
@@ -167,19 +196,79 @@ export class CrmServiceService {
     });
   }
 
+  /**
+   * Exige que la cuenta, el contacto y el sujeto de la actividad sean del tenant.
+   *
+   * @param tx - Transacción activa.
+   * @param tenantId - Tenant activo.
+   * @param dto - Cuerpo de la actividad.
+   * @throws ResourceNotFoundException 404 uniforme si alguna referencia no existe o es ajena.
+   */
+  private async assertActivityReferences(
+    tx: EntityManager,
+    tenantId: string,
+    dto: CreateActivityDto,
+  ): Promise<void> {
+    if (dto.crmAccountId) {
+      const account = await this.salesRepo.findAccountById(
+        tx,
+        dto.crmAccountId,
+        tenantId,
+      );
+      assertResourceInTenant(
+        account,
+        account?.tenantId,
+        tenantId,
+        ACCOUNT_NOT_FOUND,
+      );
+    }
+    if (dto.contactId) {
+      const contact = await this.salesRepo.findContactById(
+        tx,
+        dto.contactId,
+        tenantId,
+      );
+      assertResourceInTenant(
+        contact,
+        contact?.tenantId,
+        tenantId,
+        CONTACT_NOT_FOUND,
+      );
+    }
+
+    const subject =
+      dto.subjectType === 'ACCOUNT'
+        ? await this.salesRepo.findAccountById(tx, dto.subjectRefId, tenantId)
+        : dto.subjectType === 'OPPORTUNITY'
+          ? await this.salesRepo.findOpportunityById(
+              tx,
+              dto.subjectRefId,
+              tenantId,
+            )
+          : await this.serviceRepo.findCaseById(tx, dto.subjectRefId, tenantId);
+    assertResourceInTenant(
+      subject,
+      subject?.tenantId,
+      tenantId,
+      ACTIVITY_SUBJECT_NOT_FOUND,
+    );
+  }
+
   /** UC-49-10: registra la alianza y su acuerdo marco. */
   async createPartnership(
     dto: CreatePartnershipDto,
     actor: AuthenticatedUser,
   ): Promise<PartnershipResponseDto> {
+    const tenantId = requireTenantId();
+    assertBodyTenantMatches(dto.tenantId, tenantId);
     this.logger.info(
-      { operation: 'crm.partnership.create', tenantId: dto.tenantId },
+      { operation: 'crm.partnership.create', tenantId },
       'Creating partnership',
     );
 
     return this.em.transactional(async (tx) => {
       const partnership = this.serviceRepo.createPartnership(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         name: dto.name,
         partnershipTypeConceptId:
           dto.partnershipType === 'REFERRAL'
@@ -214,30 +303,54 @@ export class CrmServiceService {
     dto: CreateCaseDto,
     actor: AuthenticatedUser,
   ): Promise<CaseResponseDto> {
+    const tenantId = requireTenantId();
+    assertBodyTenantMatches(dto.tenantId, tenantId);
     this.logger.info(
-      {
-        operation: 'crm.case.create',
-        tenantId: dto.tenantId,
-        caseNumber: dto.caseNumber,
-      },
+      { operation: 'crm.case.create', tenantId, caseNumber: dto.caseNumber },
       'Opening service case',
     );
 
     const duplicate = await this.serviceRepo.findCaseByNumber(
       this.em,
-      dto.tenantId,
+      tenantId,
       dto.caseNumber,
     );
     if (duplicate) {
       throw new ConflictException('Ya existe un caso con ese número', {
-        tenantId: dto.tenantId,
+        tenantId,
         caseNumber: dto.caseNumber,
       });
     }
 
     return this.em.transactional(async (tx) => {
+      if (dto.crmAccountId) {
+        const account = await this.salesRepo.findAccountById(
+          tx,
+          dto.crmAccountId,
+          tenantId,
+        );
+        assertResourceInTenant(
+          account,
+          account?.tenantId,
+          tenantId,
+          ACCOUNT_NOT_FOUND,
+        );
+      }
+      if (dto.primaryContactId) {
+        const contact = await this.salesRepo.findContactById(
+          tx,
+          dto.primaryContactId,
+          tenantId,
+        );
+        assertResourceInTenant(
+          contact,
+          contact?.tenantId,
+          tenantId,
+          CONTACT_NOT_FOUND,
+        );
+      }
       const serviceCase = this.serviceRepo.createCase(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         caseNumber: dto.caseNumber,
         subject: dto.subject,
         description: dto.description,
@@ -284,14 +397,19 @@ export class CrmServiceService {
       'Adding case comment',
     );
 
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const serviceCase = await this.serviceRepo.findCaseByIdForUpdate(
+      const loaded = await this.serviceRepo.findCaseByIdForUpdate(
         tx,
         caseId,
+        tenantId,
       );
-      if (!serviceCase) {
-        throw new ResourceNotFoundException('Caso no encontrado', { caseId });
-      }
+      const serviceCase = assertResourceInTenant(
+        loaded,
+        loaded?.tenantId,
+        tenantId,
+        CASE_NOT_FOUND,
+      );
       if (serviceCase.statusConceptId === CONCEPTS.CASE_CLOSED) {
         throw new PreconditionFailedException('No se comenta un caso cerrado', {
           caseId,
@@ -326,14 +444,19 @@ export class CrmServiceService {
       'Changing case status',
     );
 
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const serviceCase = await this.serviceRepo.findCaseByIdForUpdate(
+      const loaded = await this.serviceRepo.findCaseByIdForUpdate(
         tx,
         caseId,
+        tenantId,
       );
-      if (!serviceCase) {
-        throw new ResourceNotFoundException('Caso no encontrado', { caseId });
-      }
+      const serviceCase = assertResourceInTenant(
+        loaded,
+        loaded?.tenantId,
+        tenantId,
+        CASE_NOT_FOUND,
+      );
 
       const target = CASE_STATUS_CONCEPT[dto.status];
       if (serviceCase.statusConceptId === target) {
@@ -379,21 +502,33 @@ export class CrmServiceService {
    * 35, se compone en caliente desde las tablas fuente.
    */
   async getAccount360(accountId: string): Promise<Account360ResponseDto> {
+    const tenantId = requireTenantId();
     const em = this.em.fork();
-    const account = await this.salesRepo.findAccountById(em, accountId);
-    if (!account) {
-      throw new ResourceNotFoundException('Cuenta no encontrada', {
-        accountId,
-      });
-    }
+    const loaded = await this.salesRepo.findAccountById(
+      em,
+      accountId,
+      tenantId,
+    );
+    const account = assertResourceInTenant(
+      loaded,
+      loaded?.tenantId,
+      tenantId,
+      ACCOUNT_NOT_FOUND,
+    );
 
     const [activities, cases] = await Promise.all([
       this.serviceRepo.findActivitiesByAccount(
         em,
         accountId,
+        tenantId,
         ACCOUNT_360_LIMIT,
       ),
-      this.serviceRepo.findCasesByAccount(em, accountId, ACCOUNT_360_LIMIT),
+      this.serviceRepo.findCasesByAccount(
+        em,
+        accountId,
+        tenantId,
+        ACCOUNT_360_LIMIT,
+      ),
     ]);
 
     return {
@@ -421,30 +556,43 @@ export class CrmServiceService {
       'Updating channel consent',
     );
 
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const contact = await this.salesRepo.findContactById(tx, contactId);
-      if (!contact) {
-        throw new ResourceNotFoundException('Contacto no encontrado', {
-          contactId,
-        });
-      }
+      const contact = await this.salesRepo.findContactById(
+        tx,
+        contactId,
+        tenantId,
+      );
+      assertResourceInTenant(
+        contact,
+        contact?.tenantId,
+        tenantId,
+        CONTACT_NOT_FOUND,
+      );
 
       const endpoint = await this.salesRepo.findChannelEndpointForUpdate(
         tx,
         endpointId,
       );
-      if (!endpoint) {
-        throw new ResourceNotFoundException('Canal de contacto no encontrado', {
-          endpointId,
-        });
+      if (!endpoint) throw notFound(CHANNEL_NOT_FOUND);
+      // El canal declara su tenant (cuando lo tiene) y el de su contacto: uno
+      // de otro tenant responde como inexistente, no como «es de otro contacto».
+      if (endpoint.tenantId && endpoint.tenantId !== tenantId) {
+        throw notFound(CHANNEL_NOT_FOUND);
       }
       if (endpoint.contactId !== contactId) {
+        const owner = endpoint.contactId
+          ? await this.salesRepo.findContactById(
+              tx,
+              endpoint.contactId,
+              tenantId,
+            )
+          : null;
+        if (!owner) throw notFound(CHANNEL_NOT_FOUND);
         throw new PreconditionFailedException(
           'El canal no pertenece a ese contacto',
-          {
-            contactId,
-            endpointId,
-          },
+          undefined,
+          CrmErrorReason.CRM_CHANNEL_CONTACT_MISMATCH,
         );
       }
 

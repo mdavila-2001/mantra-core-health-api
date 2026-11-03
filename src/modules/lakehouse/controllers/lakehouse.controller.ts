@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { LakehouseCatalogService, TransformationService } from '../services';
 import {
   DefineZoneDto,
@@ -44,6 +49,11 @@ export class LakehouseController {
   ) {}
 
   /** UC-63-01. */
+  @Audited({
+    action: 'DATA_LAKE_ZONE_DEFINED',
+    entity: 'data_lake_zone',
+    entityId: 'result.id',
+  })
   @Post('zones')
   @Roles('DATA_PLATFORM_ENGINEER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -60,6 +70,11 @@ export class LakehouseController {
   }
 
   /** UC-63-02. */
+  @Audited({
+    action: 'LAKEHOUSE_CATALOG_REGISTERED',
+    entity: 'lakehouse_catalog',
+    entityId: 'result.id',
+  })
   @Post('catalogs')
   @Roles('DATA_PLATFORM_ENGINEER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -72,6 +87,11 @@ export class LakehouseController {
   }
 
   /** UC-63-03. */
+  @Audited({
+    action: 'DATA_PRODUCT_VERSION_PUBLISHED',
+    entity: 'data_product_version',
+    entityId: 'result.id',
+  })
   @Post('data-products/:id/versions')
   @Roles('DATA_PRODUCT_OWNER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -89,6 +109,11 @@ export class LakehouseController {
   }
 
   /** UC-63-04. */
+  @Audited({
+    action: 'LAKEHOUSE_DATASET_REGISTERED',
+    entity: 'lakehouse_dataset',
+    entityId: 'result.id',
+  })
   @Post('datasets')
   @Roles('DATA_PLATFORM_ENGINEER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -104,6 +129,11 @@ export class LakehouseController {
   }
 
   /** UC-63-05 + UC-63-06. */
+  @Audited({
+    action: 'LAKEHOUSE_TRANSFORMATION_RUN',
+    entity: 'transformation_run',
+    entityId: 'result.id',
+  })
   @Post('transformations/:defId/runs')
   @Roles('SYSTEM', 'TRANSFORMATION_WORKER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -121,6 +151,11 @@ export class LakehouseController {
   }
 
   /** UC-63-07. */
+  @Audited({
+    action: 'LAKEHOUSE_CURATED_INGESTED',
+    entity: 'transformation_run',
+    entityId: 'result.id',
+  })
   @Post('ingestion/curated-runs')
   @Roles('SYSTEM', 'DEIDENTIFICATION_WORKER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -137,6 +172,11 @@ export class LakehouseController {
   }
 
   /** UC-63-08. */
+  @Audited({
+    action: 'LAKEHOUSE_QUALITY_RUN',
+    entity: 'lakehouse_quality_run',
+    entityId: 'result.id',
+  })
   @Post('datasets/:id/quality-runs')
   @Roles('DATA_STEWARD', 'SYSTEM', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)

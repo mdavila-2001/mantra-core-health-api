@@ -12,8 +12,8 @@ import { randomUUID } from 'node:crypto';
  * Sin `custodian_tenant_id` a propósito (N-09): el dato no lo custodia ningún
  * tenant, lo escribe y lo lee el titular desde su cuenta.
  *
- * Tabla pendiente en el modelo (`diagram_08_clinical.puml`): la agrega M1; ver
- * `docs/progress/DECISIONS.md` § D-B y el reporte del carril M3 § «Pedidos a M1».
+ * La tabla no está declarada en el modelo (`diagram_08_clinical.puml`) ni en
+ * `database/SQL/`: sólo existe en esta entidad.
  */
 @Entity({ schema: 'clinical', tableName: 'patient_reported_health_statements' })
 export class PatientReportedHealthStatements {

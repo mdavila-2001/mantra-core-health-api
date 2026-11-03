@@ -10,16 +10,16 @@ import { AuthzMeController } from '../authz/controllers';
  * Importar un controlador no lo publica: si no entra en `controllers`, Nest no
  * mapea sus rutas (ver `community.module.spec.ts`).
  */
-function controllers(modulo: unknown): readonly unknown[] {
-  return (Reflect.getMetadata('controllers', modulo as object) ??
+function controllers(module: unknown): readonly unknown[] {
+  return (Reflect.getMetadata('controllers', module as object) ??
     []) as readonly unknown[];
 }
 
 describe('ConsentModule / AuthzModule (BR-20)', () => {
   it('publica las lecturas del titular y la ruta del consentimiento informado del médico', () => {
-    const controladores = controllers(ConsentModule);
-    expect(controladores).toContain(ConsentMeController);
-    expect(controladores).toContain(EncounterInformedConsentsController);
+    const declaredControllers = controllers(ConsentModule);
+    expect(declaredControllers).toContain(ConsentMeController);
+    expect(declaredControllers).toContain(EncounterInformedConsentsController);
   });
 
   it('publica «Quién ve mi historia»', () => {

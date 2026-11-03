@@ -1,11 +1,12 @@
 ---
 name: milestone-planning
-description: Cómo descomponer un trabajo en hitos, subtareas y microtareas con criterio de aceptación y Definition of Done en cada capa — cortar por resultado observable, el test de la microtarea (una sola verificación, sin la palabra "y"), elegir el comando que demuestra cada una, estimar sin inventar porcentajes y mantener el plan vivo. Usar antes de escribir la primera línea de código, al armar el PLAN.md, al partir un pedido grande, o cuando aparece trabajo no previsto a mitad de camino.
+description: Cómo descomponer un trabajo en hitos, subtareas y microtareas con criterio de aceptación y Definition of Done en cada capa — cortar por resultado observable, el test de la microtarea (una sola verificación, sin la palabra "y"), elegir el comando que demuestra cada una, estimar sin inventar porcentajes y mantener el plan vivo. Usar antes de escribir la primera línea de código, al armar el plan en el issue o en el PR, al partir un pedido grande, o cuando aparece trabajo no previsto a mitad de camino.
 ---
 
 # Planificación por hitos, subtareas y microtareas
 
-La regla `20-plan-obligatorio` fija que **ningún trabajo empieza sin plan en disco**. Esta skill
+La regla `20-plan-obligatorio` fija que **ningún trabajo empieza sin plan escrito**, en el issue
+que origina el trabajo o en la descripción del PR — nunca en un archivo del repo. Esta skill
 enseña a escribirlo bien: dónde cortar, cómo redactar el criterio de aceptación de cada pieza y
 cómo elegir el comando que la demuestra.
 
@@ -21,8 +22,8 @@ porque no se puede responder "¿esto está hecho?" sin abrir el código.
 
 El corte **vertical vs horizontal** está en `vertical-slicing`; el oficio general de redactar
 criterios y registrar ambigüedades, en `requirements-and-acceptance`. Si el trabajo es un carril
-que cruza varios repos, su estructura documental la define `lane-authoring` y este plan vive
-adentro. Acá va lo específico de las tres capas y de la microtarea como unidad de verificación.
+que cruza varios repos, su estructura la define `lane-authoring` y este plan vive en su issue
+padre. Acá va lo específico de las tres capas y de la microtarea como unidad de verificación.
 
 ## 1. Encontrar los hitos: cortar por resultado, no por capa
 
@@ -138,10 +139,11 @@ el resultado, y eso no es verificar. Correrlo y pegar su salida es lo que habili
 
 **Trabajo no previsto.** Se agrega al plan como microtarea nueva con su CA y su DoD, y recién
 después se ejecuta. Hacerlo "de paso" rompe el alcance (ver `scope-discipline`) y deja un cambio
-sin verificación asociada. Si es urgente y chico, el costo de agregarlo son treinta segundos.
+sin verificación asociada. Si es urgente y chico, el costo de agregarlo son treinta segundos. Si
+queda fuera de alcance, no entra al plan: va a un issue.
 
 **Plan equivocado.** Pasa y no es un problema. Lo que no se hace es ejecutar algo distinto sin
-tocar el archivo. Corregí el plan, dejá constancia de qué cambió y por qué, y seguí. El plan tiene
+tocar el plan. Corregí el plan, dejá constancia de qué cambió y por qué, y seguí. El plan tiene
 que poder leerse al final y explicar lo que realmente ocurrió.
 
 **Actualización en el momento.** El estado se cambia cuando cambia, no al cierre. Un plan que se
@@ -149,7 +151,7 @@ actualiza al final es un plan que se inventó al final.
 
 ## 8. Ejemplo completo
 
-En [references/ejemplo-plan.md](references/ejemplo-plan.md) hay un `PLAN.md` entero de un
+En [references/ejemplo-plan.md](references/ejemplo-plan.md) hay un plan entero de un
 trabajo full-stack chico (impedir doble reserva de turno): un hito, tres subtareas y sus
 microtareas con CA y DoD. Abrilo cuando necesites ver la forma completa del artefacto.
 
@@ -162,13 +164,14 @@ microtareas con CA y DoD. Abrilo cuando necesites ver la forma completa del arte
 | CA que describe implementación | Muere al cambiar de estrategia | Reescribir en dado/cuando/entonces |
 | DoD sin comando | Se tilda sin correr nada | Nombrar la verificación exacta |
 | DoD genérico compartido | No distingue si tu cambio anduvo | El más barato que fallaría sin la microtarea |
-| Plan que nadie actualiza | El archivo miente | Cambiar el estado en el momento |
+| Plan que nadie actualiza | El plan miente | Cambiar el estado en el momento |
+| Plan versionado en el repo | El repo pasa a declarar pendientes | El plan va en el issue o en el PR |
 | Trabajo "de paso" | Cambio sin verificación ni rastro | Agregarlo como microtarea |
 | Porcentaje a ojo | Oculta el estado real | `HECHO / total` |
 
 ## Checklist
 
-- [ ] Existe `PLAN.md` en disco **antes** del primer cambio de código.
+- [ ] El plan está escrito en el issue o en el PR **antes** del primer cambio de código.
 - [ ] Cada hito se puede demostrar a alguien que no programó.
 - [ ] Las tres capas están: ningún hito sin subtareas, ninguna subtarea sin microtareas.
 - [ ] Cada microtarea pasa los cuatro filtros (una verificación, sin "y", reversible, un cambio).
@@ -177,4 +180,4 @@ microtareas con CA y DoD. Abrilo cuando necesites ver la forma completa del arte
 - [ ] Alcance IN/OUT explícito y ambigüedades registradas con su supuesto.
 - [ ] Kill-test declarado (ver `outcome-first`).
 - [ ] El avance sale de `microtareas HECHO / total`, no de una sensación.
-- [ ] Al cerrar, el estado del plan coincide con el `REPORTE.md` (ver `work-report-md`).
+- [ ] Al cerrar, el estado del plan coincide con el reporte del PR (ver `work-report-md`).

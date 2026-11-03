@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `common`.
- * 52 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 55 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const commonIndexes: readonly IndexTuple[] = [
@@ -11,24 +11,18 @@ export const commonIndexes: readonly IndexTuple[] = [
   ['addresses', 'ix_addresses_use_concept_id', ['use_concept_id'], false, 'btree'],
   ['addresses', 'ix_addresses_type_concept_id', ['type_concept_id'], false, 'btree'],
   ['addresses', 'ix_addresses_administrative_area_concept_id', ['administrative_area_concept_id'], false, 'btree'],
+  ['addresses', 'ix_addresses_administrative_area_2_concept_id', ['administrative_area_2_concept_id'], false, 'btree'],
   ['addresses', 'ix_addresses_municipality_concept_id', ['municipality_concept_id'], false, 'btree'],
   ['addresses', 'ix_addresses_country_concept_id', ['country_concept_id'], false, 'btree'],
   ['addresses', 'ix_addresses_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['addresses', 'ix_addresses_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['addresses', 'ix_addresses_owner_current', ['owner_type_concept_id', 'owner_id'], false, 'btree', 'valid_to IS NULL'],
+  ['addresses', 'uq_addresses_owner_preferred', ['owner_type_concept_id', 'owner_id'], true, 'btree', 'is_preferred AND valid_to IS NULL'],
   ['contact_points', 'ix_contact_points_owner_type_concept_id', ['owner_type_concept_id'], false, 'btree'],
   ['contact_points', 'ix_contact_points_system_concept_id', ['system_concept_id'], false, 'btree'],
   ['contact_points', 'ix_contact_points_use_concept_id', ['use_concept_id'], false, 'btree'],
   ['contact_points', 'ix_contact_points_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['contact_points', 'ix_contact_points_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
-  ['files', 'ix_files_tenant_id', ['tenant_id'], false, 'btree'],
-  ['files', 'ix_files_category_concept_id', ['category_concept_id'], false, 'btree'],
-  ['files', 'ix_files_sensitivity_concept_id', ['sensitivity_concept_id'], false, 'btree'],
-  ['files', 'ix_files_lifecycle_status_concept_id', ['lifecycle_status_concept_id'], false, 'btree'],
-  ['files', 'ix_files_current_version_id', ['current_version_id'], false, 'btree'],
-  ['files', 'ix_files_retention_class_concept_id', ['retention_class_concept_id'], false, 'btree'],
-  ['files', 'ix_files_created_by_user_id', ['created_by_user_id'], false, 'btree'],
-  ['files', 'ix_files_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
-  ['files', 'ix_files_tenant_id_lifecycle_status_concept_id', ['tenant_id', 'lifecycle_status_concept_id', 'updated_at desc'], false, 'btree'],
   ['file_derivatives', 'ix_file_derivatives_source_file_version_id', ['source_file_version_id'], false, 'btree'],
   ['file_derivatives', 'ix_file_derivatives_derivative_file_version_id', ['derivative_file_version_id'], false, 'btree'],
   ['file_derivatives', 'ix_file_derivatives_derivative_type_concept_id', ['derivative_type_concept_id'], false, 'btree'],
@@ -49,6 +43,15 @@ export const commonIndexes: readonly IndexTuple[] = [
   ['file_versions', 'ix_file_versions_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
   ['file_versions', 'uq_file_versions_file_id_version_number', ['file_id', 'version_number'], true, 'btree'],
   ['file_versions', 'brin_file_versions_recorded_at', ['recorded_at'], false, 'brin'],
+  ['files', 'ix_files_tenant_id', ['tenant_id'], false, 'btree'],
+  ['files', 'ix_files_category_concept_id', ['category_concept_id'], false, 'btree'],
+  ['files', 'ix_files_sensitivity_concept_id', ['sensitivity_concept_id'], false, 'btree'],
+  ['files', 'ix_files_lifecycle_status_concept_id', ['lifecycle_status_concept_id'], false, 'btree'],
+  ['files', 'ix_files_current_version_id', ['current_version_id'], false, 'btree'],
+  ['files', 'ix_files_retention_class_concept_id', ['retention_class_concept_id'], false, 'btree'],
+  ['files', 'ix_files_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['files', 'ix_files_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['files', 'ix_files_tenant_id_lifecycle_status_concept_id', ['tenant_id', 'lifecycle_status_concept_id', 'updated_at desc'], false, 'btree'],
   ['identifiers', 'ix_identifiers_owner_type_concept_id', ['owner_type_concept_id'], false, 'btree'],
   ['identifiers', 'ix_identifiers_use_concept_id', ['use_concept_id'], false, 'btree'],
   ['identifiers', 'ix_identifiers_type_concept_id', ['type_concept_id'], false, 'btree'],

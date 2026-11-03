@@ -14,6 +14,8 @@ import {
   OpsIncidentsRepository,
   OpsImprovementsRepository,
 } from '../repositories';
+import { PlatformOpsErrorReason } from '../platform_ops.error-reasons';
+import { PlatformOpsScope } from './platform-ops-scope.service';
 import {
   CompleteReadinessReviewDto,
   ReadinessReviewResponseDto,
@@ -60,6 +62,7 @@ export class OpsPracticesService {
    * @param practicesRepo - Valor de practices repo requerido por la operación.
    * @param incidentsRepo - Valor de incidents repo requerido por la operación.
    * @param improvementsRepo - Valor de improvements repo requerido por la operación.
+   * @param scope - Alcance de tenant: resuelve cada agregado dentro del tenant activo.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -67,6 +70,7 @@ export class OpsPracticesService {
     private readonly practicesRepo: OpsPracticesRepository,
     private readonly incidentsRepo: OpsIncidentsRepository,
     private readonly improvementsRepo: OpsImprovementsRepository,
+    private readonly scope: PlatformOpsScope,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(OpsPracticesService.name);
@@ -87,18 +91,26 @@ export class OpsPracticesService {
       'Completing readiness review',
     );
 
+    const tenantId = this.scope.activeTenantId();
     return this.em.transactional(async (tx) => {
-      const review = await this.practicesRepo.findReviewForUpdate(tx, reviewId);
-      if (!review) {
-        throw new ResourceNotFoundException(
-          'Revisión de preparación no encontrada',
-          { reviewId },
-        );
-      }
+      const foundReview = await this.practicesRepo.findReviewForUpdate(
+        tx,
+        reviewId,
+      );
+      // La revisión hereda el tenant de su componente.
+      const review = await this.scope.viaComponent(
+        tx,
+        foundReview,
+        foundReview?.serviceComponentId ?? reviewId,
+      );
       if (review.statusConceptId !== CONCEPTS.ORR_IN_PROGRESS) {
-        throw new PreconditionFailedException('La revisión no está en curso', {
-          reviewId,
-        });
+        throw new PreconditionFailedException(
+          'La revisión no está en curso',
+          {
+            reviewId,
+          },
+          PlatformOpsErrorReason.READINESS_REVIEW_NOT_IN_PROGRESS,
+        );
       }
 
       const findings = await this.practicesRepo.findFindingsForUpdate(
@@ -117,13 +129,18 @@ export class OpsPracticesService {
               reviewId,
               findingId: resolved.findingId,
             },
+            PlatformOpsErrorReason.READINESS_FINDING_NOT_IN_REVIEW,
           );
         }
         if (finding.statusConceptId !== CONCEPTS.FINDING_OPEN) {
-          throw new ConflictException('El hallazgo ya no está abierto', {
-            reviewId,
-            findingId: resolved.findingId,
-          });
+          throw new ConflictException(
+            'El hallazgo ya no está abierto',
+            {
+              reviewId,
+              findingId: resolved.findingId,
+            },
+            PlatformOpsErrorReason.READINESS_FINDING_NOT_OPEN,
+          );
         }
         finding.statusConceptId = CONCEPTS.FINDING_RESOLVED;
         finding.resolvedAt = new Date();
@@ -143,6 +160,7 @@ export class OpsPracticesService {
           throw new PreconditionFailedException(
             'Quedan hallazgos críticos o altos sin resolver',
             { reviewId, findingId: blocking.id },
+            PlatformOpsErrorReason.READINESS_BLOCKING_FINDINGS_OPEN,
           );
         }
       }
@@ -152,6 +170,7 @@ export class OpsPracticesService {
       const improvementItemIds = stillOpen.map(
         (finding) =>
           this.improvementsRepo.createImprovementItem(tx, {
+            tenantId,
             serviceComponentId: review.serviceComponentId,
             readinessReviewFindingId: finding.id,
             sourceTypeConceptId: CONCEPTS.IMPROVEMENT_SOURCE_READINESS,
@@ -214,20 +233,22 @@ export class OpsPracticesService {
       'Publishing runbook version',
     );
 
+    const tenantId = this.scope.activeTenantId();
     return this.em.transactional(async (tx) => {
-      const runbook = await this.practicesRepo.findRunbookForUpdate(
+      const foundRunbook = await this.practicesRepo.findRunbookForUpdate(
         tx,
         runbookId,
+        tenantId,
       );
-      if (!runbook) {
-        throw new ResourceNotFoundException('Runbook no encontrado', {
-          runbookId,
-        });
-      }
+      const runbook = this.scope.require(foundRunbook, foundRunbook?.tenantId);
       if (runbook.stateConceptId !== CONCEPTS.STATE_ACTIVE) {
-        throw new PreconditionFailedException('El runbook no está activo', {
-          runbookId,
-        });
+        throw new PreconditionFailedException(
+          'El runbook no está activo',
+          {
+            runbookId,
+          },
+          PlatformOpsErrorReason.RUNBOOK_NOT_ACTIVE,
+        );
       }
 
       const latest = await this.practicesRepo.findLatestRunbookVersion(
@@ -241,10 +262,14 @@ export class OpsPracticesService {
         versionNumber,
       );
       if (taken) {
-        throw new ConflictException('Esa versión del runbook ya existe', {
-          runbookId,
-          versionNumber,
-        });
+        throw new ConflictException(
+          'Esa versión del runbook ya existe',
+          {
+            runbookId,
+            versionNumber,
+          },
+          PlatformOpsErrorReason.RUNBOOK_VERSION_DUPLICATE,
+        );
       }
 
       const version = this.practicesRepo.createRunbookVersion(tx, {
@@ -287,33 +312,38 @@ export class OpsPracticesService {
         {
           runbookVersionId: dto.runbookVersionId,
         },
+        PlatformOpsErrorReason.RUNBOOK_EXECUTION_WINDOW_INVERTED,
       );
     }
 
+    const tenantId = this.scope.activeTenantId();
     return this.em.transactional(async (tx) => {
-      const version = await this.practicesRepo.findRunbookVersionById(
+      // La versión hereda el tenant de su runbook.
+      const foundVersion = await this.practicesRepo.findRunbookVersionById(
         tx,
         dto.runbookVersionId,
       );
-      if (!version) {
-        throw new ResourceNotFoundException(
-          'Versión de runbook no encontrada',
-          {
-            runbookVersionId: dto.runbookVersionId,
-          },
-        );
-      }
+      const version = await this.scope.viaRunbook(
+        tx,
+        foundVersion,
+        foundVersion?.runbookId ?? dto.runbookVersionId,
+      );
 
       if (dto.healthIncidentId) {
         const incident = await this.incidentsRepo.findIncidentById(
           tx,
           dto.healthIncidentId,
+          tenantId,
         );
-        if (!incident) {
-          throw new ResourceNotFoundException('Incidente no encontrado', {
-            healthIncidentId: dto.healthIncidentId,
-          });
-        }
+        this.scope.require(incident, incident?.tenantId);
+      }
+      if (dto.changeRequestId) {
+        const change = await this.practicesRepo.findChangeRequestInTenant(
+          tx,
+          dto.changeRequestId,
+          tenantId,
+        );
+        this.scope.require(change, change?.tenantId);
       }
 
       const resultConceptId = EXECUTION_RESULT_CONCEPT[dto.result];
@@ -379,26 +409,29 @@ export class OpsPracticesService {
         {
           exerciseId,
         },
+        PlatformOpsErrorReason.RESILIENCE_EXERCISE_WINDOW_INVERTED,
       );
     }
 
+    const tenantId = this.scope.activeTenantId();
     return this.em.transactional(async (tx) => {
-      const exercise = await this.practicesRepo.findExerciseForUpdate(
+      const foundExercise = await this.practicesRepo.findExerciseForUpdate(
         tx,
         exerciseId,
+        tenantId,
       );
-      if (!exercise) {
-        throw new ResourceNotFoundException(
-          'Ejercicio de resiliencia no encontrado',
+      const exercise = this.scope.require(
+        foundExercise,
+        foundExercise?.tenantId,
+      );
+      if (exercise.resultConceptId) {
+        throw new ConflictException(
+          'El ejercicio ya está cerrado',
           {
             exerciseId,
           },
+          PlatformOpsErrorReason.RESILIENCE_EXERCISE_ALREADY_CLOSED,
         );
-      }
-      if (exercise.resultConceptId) {
-        throw new ConflictException('El ejercicio ya está cerrado', {
-          exerciseId,
-        });
       }
 
       const objective = await this.practicesRepo.findRecoveryObjectiveForUpdate(
@@ -412,6 +445,7 @@ export class OpsPracticesService {
         throw new PreconditionFailedException(
           'El componente no tiene objetivo de recuperación vigente',
           { exerciseId, serviceComponentId: exercise.serviceComponentId },
+          PlatformOpsErrorReason.RECOVERY_OBJECTIVE_NOT_FOUND,
         );
       }
 

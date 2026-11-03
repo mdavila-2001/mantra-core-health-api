@@ -51,8 +51,9 @@ describe('Catálogo en castellano', () => {
 
   it('ninguna traducción queda a medias', () => {
     const incomplete = [...SPANISH_DESIGNATIONS.entries()].filter(
-      ([, traduccion]) =>
-        traduccion.display.trim() === '' || traduccion.definition.trim() === '',
+      ([, translation]) =>
+        translation.display.trim() === '' ||
+        translation.definition.trim() === '',
     );
 
     expect(incomplete).toEqual([]);

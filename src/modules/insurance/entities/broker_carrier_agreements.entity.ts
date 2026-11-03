@@ -93,4 +93,56 @@ export class BrokerCarrierAgreements {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  /**
+   * Identificador asociado a representation mode concept.
+   */
+  @Property({
+    fieldName: 'representation_mode_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  representationModeConceptId?: string;
+
+  /**
+   * Identificador asociado a relationship type concept.
+   */
+  @Property({
+    fieldName: 'relationship_type_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  relationshipTypeConceptId?: string;
+
+  /**
+   * Identificador asociado a branch.
+   */
+  @Property({ fieldName: 'branch_id', type: 'uuid', nullable: true }) // FK → directory.branches (inferida)
+  branchId?: string;
+
+  /**
+   * Valor de commercial area mantenido por la instancia.
+   */
+  @Property({
+    fieldName: 'commercial_area',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  commercialArea?: string;
+
+  /**
+   * Identificador asociado a supervisor user.
+   */
+  @Property({ fieldName: 'supervisor_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
+  supervisorUserId?: string;
+
+  /**
+   * Valor de assigned zone mantenido por la instancia.
+   */
+  @Property({
+    fieldName: 'assigned_zone',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  assignedZone?: string;
 }

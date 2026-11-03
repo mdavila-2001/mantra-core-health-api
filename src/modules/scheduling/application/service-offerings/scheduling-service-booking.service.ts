@@ -8,6 +8,7 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
   getCurrentTenantId,
+  roleAuthorizesInTenant,
   touch,
   type AuthenticatedUser,
 } from '../../../../common';
@@ -29,7 +30,6 @@ import {
   proposeServiceTimes,
   busySpan,
   type ServiceDuration,
-  type Interval,
 } from '../../domain/time/service-availability';
 import type {
   CreateServiceHoldDto,
@@ -278,14 +278,16 @@ export class SchedulingServiceBookingService {
         endAt,
         now,
       );
-      const bands: Interval[] = groups.flatMap((group) => [...group.bands]);
-      if (!serviceFits(bands, busy, service, startAt)) {
+      const availableGroup = groups.find((group) =>
+        serviceFits(group.bands, busy, service, startAt),
+      );
+      if (availableGroup === undefined) {
         throw new ConflictException(
           'Ese horario ya no está disponible para este servicio. Elija otro.',
           { offeringId, startAt: startAt.toISOString() },
         );
       }
-      this.assertPolicy(groups, startAt, endAt, now);
+      this.assertPolicy(availableGroup, startAt, now);
 
       const catalog = await this.offeringsRepo.findCatalogItem(
         tx,
@@ -339,20 +341,7 @@ export class SchedulingServiceBookingService {
   }
 
   /** La política de la plantilla que ofrece ese rato: aviso mínimo y anticipación máxima. */
-  private assertPolicy(
-    groups: readonly ServiceBands[],
-    startAt: Date,
-    endAt: Date,
-    now: Date,
-  ): void {
-    const group = groups.find((g) =>
-      g.bands.some(
-        (band) =>
-          band.startAt.getTime() <= startAt.getTime() &&
-          band.endAt.getTime() >= endAt.getTime(),
-      ),
-    );
-    if (group === undefined) return;
+  private assertPolicy(group: ServiceBands, startAt: Date, now: Date): void {
     if (
       startAt.getTime() <
       now.getTime() + group.minNoticeMinutes * MS_PER_MINUTE
@@ -426,7 +415,8 @@ export class SchedulingServiceBookingService {
     site: SchedulableResources,
     actor: AuthenticatedUser,
   ): boolean {
-    if (actor.roles.includes('SUPERADMIN')) return true;
+    // `SUPERADMIN` global: cualquier sede; acotado (`scopedRoles`): sólo las de su tenant (#1241).
+    if (roleAuthorizesInTenant(actor, 'SUPERADMIN', site.tenantId)) return true;
     const active = getCurrentTenantId();
     return active
       ? active === site.tenantId

@@ -1,0 +1,118 @@
+{
+  "region": "eu",
+  "generatedAt": "2026-10-24T17:54:51Z",
+  "formatVersion": 1,
+  "files": [
+    {
+      "path": "eudamed-udi-0001.ndjson.gz",
+      "source": "eudamed-udi",
+      "sourceVersion": "eudamed-public-api-v1.0,eudamed-portal-api",
+      "rows": 197009,
+      "sha256": "93a9ba3dd9eda6d0547788991d7a409ac5dbe6ef50afa29107c8830d8b780395"
+    },
+    {
+      "path": "eudamed-udi-0002.ndjson.gz",
+      "source": "eudamed-udi",
+      "sourceVersion": "eudamed-public-api-v1.0,eudamed-portal-api",
+      "rows": 106076,
+      "sha256": "c9ca7f869d03e769a693e6001a0498c034a326fb8c66f8f7397f138be5642a2d"
+    },
+    {
+      "path": "it-salute-bdrdm-0001.ndjson.gz",
+      "source": "it-salute-bdrdm",
+      "sourceVersion": "DISPO_RDM_1_20261019",
+      "rows": 200563,
+      "sha256": "b4ec495bd43032b1c3f1650dabd09eff92ffe5de40ebd2debd119aae994b2c63"
+    }
+  ],
+  "classifications": [
+    {
+      "path": "emdn/ec-emdn-0001.ndjson.gz",
+      "system": "emdn",
+      "sourceVersion": "v2026;sha256:a973dcdd8ae2",
+      "rows": 8516,
+      "sha256": "cab9a88064a6c159c4639e9bb559d2b708772c1343cdb3306433005e3d3c1a9b"
+    }
+  ],
+  "actors": [
+    {
+      "path": "actors/eudamed-actors-0001.ndjson.gz",
+      "source": "eudamed-actors",
+      "rows": 32753,
+      "sha256": "d6e12eb4b596b548c8af89d05b97741cab0d55c2e4b77be85a4d8519bd77f938",
+      "note": "Actores fabricantes de EUDAMED (no son filas de equipos): source, sourceRecordId (SRN), sourceUrl, sourceVersion, retrievedAt, manufacturerName, manufacturerCountry, manufacturerRegistryId y extra."
+    }
+  ],
+  "mirrors": [
+    {
+      "id": "batirmedical-emdn",
+      "repo": "https://github.com/BatirMedical/nomenclature-emdn",
+      "commit": "e0131762b3385c1085b97da9c5f74d32edb89df3",
+      "path": "EMDN_BatirMedical.csv",
+      "files": 1,
+      "sha256": "7972865360a3d8d61dcf6b2e4969e107a0413768febfd3f24ec00302d954e379"
+    },
+    {
+      "id": "zdavatz-eudamed2firstbase",
+      "repo": "https://github.com/zdavatz/eudamed2firstbase",
+      "commit": "48f93836f8ef89ba1ce8d0852de86b271d08b81b",
+      "path": "firstbase_json/processed",
+      "files": 22865,
+      "sha256": "ebc22a2dc938b62304a7a80ad6433ab81164d2abc7ab927b95e7b99dc3909e02"
+    },
+    {
+      "id": "dlinrt-eudamed-emdn-discovery",
+      "repo": "https://github.com/DLinRT-eu/dlinrteu-website",
+      "commit": "f096a477301c8c30c870f69daaedbda87c28e173",
+      "path": "docs/audits/eudamed/2026-09-22-eudamed-emdn-discovery.csv",
+      "files": 1,
+      "sha256": "69d6e067a99df53dfdb94f3d506cb5efa729a940e35ee2bb4891fb028977b1ad"
+    },
+    {
+      "id": "longtran-eudamed-manufacturers",
+      "repo": "https://github.com/longtran00/EUDAMED_ManufacturersScraper",
+      "commit": "44ff9f90fb70f561094f324571e0bddd7c85721c",
+      "path": "Eudamed_Manufacturers.xlsx",
+      "files": 1,
+      "sha256": "a4137691826ef13a7997e504c2e15b786b8c8cee889da2f73dc40c66d0ef60fe"
+    }
+  ],
+  "scope": "Recorte por código EMDN (lib/emdn-scope.mjs): categoría W entera y, fuera de W, solo los tipos listados uno por uno contra la EMDN V2 (imagenología, monitorización, exploración funcional, endoscopía diagnóstica, termometría y medición, electrodos diagnósticos, urodinamia). extra.dxScope dice qué regla incluyó cada fila.",
+  "gaps": [
+    {
+      "source": "eudamed-certificates",
+      "reason": "sin descarga automática: Sin términos específicos leídos para la API interna. No se descarga en bloque hasta verificar el aviso legal del portal; el Data Lake es la vía oficial.",
+      "url": "https://ec.europa.eu/tools/eudamed/"
+    },
+    {
+      "source": "mhra-pard",
+      "reason": "sin descarga automática: Leído en vivo el 2026-10-24: pard.mhra.gov.uk solo muestra «© Crown Copyright» y no declara la Open Government Licence; los términos de GOV.UK (gov.uk/help/terms-conditions) dicen que la mayoría, no todo, del contenido de GOV.UK va bajo OGL, y PARD no está en GOV.UK. Además, los nombres de tipo GMDN son propiedad de la GMDN Agency con uso comercial restringido. Sin licencia abierta explícita: no se descarga (hueco).",
+      "url": "https://pard.mhra.gov.uk/"
+    },
+    {
+      "source": "swissmedic-swissdamed",
+      "reason": "sin descarga automática: Leído en vivo el 2026-10-24: las condiciones de uso de Swissmedic prohíben reproducir la información del sitio sin autorización expresa e incluyen expresamente toda extracción y almacenamiento automatizado (scraping/data mining), salvo las áreas pensadas para eso (RSS). No hay términos de reutilización propios de swissdamed. Sin autorización de Swissmedic NO se descarga ni se usa ningún dato derivado de swissdamed (incluido csv/srn_unique.csv de swissdamed2sqlite).",
+      "url": "https://swissdamed.ch/"
+    },
+    {
+      "source": "ec-nando",
+      "reason": "sin descarga automática: Reutilización con atribución (Decisión 2011/833/UE), pendiente confirmar en el aviso legal del sitio.",
+      "url": "https://webgate.ec.europa.eu/single-market-compliance-space/notified-bodies"
+    },
+    {
+      "source": "de-bfarm",
+      "reason": "sin descarga automática: No evaluado: no hay descarga pública.",
+      "url": "https://www.bfarm.de/EN/Medical-devices/_node.html"
+    },
+    {
+      "source": "es-aemps-ccps",
+      "reason": "sin descarga automática: No evaluado: no hay descarga pública.",
+      "url": "https://www.aemps.gob.es/"
+    },
+    {
+      "source": "fr-ansm",
+      "reason": "sin descarga automática: No aplica.",
+      "url": "https://ansm.sante.fr/"
+    }
+  ]
+}

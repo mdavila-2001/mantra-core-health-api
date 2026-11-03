@@ -16,7 +16,12 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { TransitionExecutionService } from '../services';
 import {
   TriggerTransitionDto,
@@ -65,6 +70,11 @@ export class WorkflowTransitionsController {
    * aparte porque `path-to-regexp` v8 trata `:` como inicio de parámetro en
    * cualquier posición del segmento.
    */
+  @Audited({
+    action: 'STATE_TRANSITION_TRIGGERED',
+    entity: 'state_transition_event',
+    entityId: 'result.id',
+  })
   @Post(':aggregateId/transitions/:commandCode')
   @Roles('CLINICIAN', 'BILLING_AGENT', 'SCHEDULER', 'SYSTEM', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -95,6 +105,11 @@ export class WorkflowTransitionsController {
   }
 
   /** UC-32-08. */
+  @Audited({
+    action: 'STATE_TRANSITION_COMPENSATED',
+    entity: 'state_transition_event',
+    entityId: 'param:eventId',
+  })
   @Post(':aggregateId/transitions/:eventId/compensate')
   @Roles('SYSTEM', 'SAGA_ORCHESTRATOR', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -118,6 +133,11 @@ export class WorkflowTransitionsController {
   }
 
   /** UC-32-09. */
+  @Audited({
+    action: 'STATE_TRANSITION_RETRIED',
+    entity: 'state_transition_event',
+    entityId: 'param:eventId',
+  })
   @Post(':aggregateId/transitions/:eventId/retry')
   @Roles('SYSTEM', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)

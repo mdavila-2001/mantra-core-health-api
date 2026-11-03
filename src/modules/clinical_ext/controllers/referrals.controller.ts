@@ -10,19 +10,42 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
+import {
+  Audited,
   CurrentUser,
   Roles,
-  type AuthenticatedUser,
   AccessLogged,
+  type AuthenticatedUser,
 } from '../../../common';
 import { ReferralsService } from '../services';
+
+/**
+ * Tope de las búsquedas de destino: el mismo que el directorio público
+ * (`community-public.controller.ts`). Son lecturas de directorio, no de
+ * historia clínica —no llevan `@AccessLogged`, que es para datos de paciente—,
+ * pero sí un techo para que no se usen para volcar el padrón.
+ */
+const REFERRAL_TARGETS_RATE_LIMIT = { default: { limit: 60, ttl: 60_000 } };
 import {
+  CounterReferralDto,
   CreateReferralDto,
+  ListReferralTargetServicesQueryDto,
   RespondReferralDto,
+  RespondReferralResultDto,
+  ReferralArrivalDto,
+  ReferralListItemDto,
   ReferralResponseDto,
-  StatusResultDto,
+  ReferralTransferDto,
+  ReferralTargetListDto,
+  ReferralTargetServiceListDto,
+  SearchReferralTargetsQueryDto,
 } from '../dto';
 
 /**
@@ -42,6 +65,11 @@ export class ReferralsController {
   constructor(private readonly referralsService: ReferralsService) {}
 
   /** UC-18-07. */
+  @Audited({
+    action: 'REFERRAL_CREATED',
+    entity: 'referral',
+    entityId: 'result.id',
+  })
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Emitir una referencia desde un encuentro' })
@@ -52,7 +80,38 @@ export class ReferralsController {
     return this.referralsService.create(dto, actor);
   }
 
+  /**
+   * Destinos posibles de una derivación (profesionales y organizaciones).
+   *
+   * Va antes de cualquier ruta con `:id` para que `targets` no se lea como id.
+   */
+  @Get('targets')
+  @Throttle(REFERRAL_TARGETS_RATE_LIMIT)
+  @ApiOperation({ summary: 'Buscar destinos de derivación' })
+  @ApiOkResponse({ type: ReferralTargetListDto })
+  searchTargets(
+    @Query() query: SearchReferralTargetsQueryDto,
+  ): Promise<ReferralTargetListDto> {
+    return this.referralsService.searchTargets(query);
+  }
+
+  /** Servicios activos de un profesional u organización destino. */
+  @Get('target-services')
+  @Throttle(REFERRAL_TARGETS_RATE_LIMIT)
+  @ApiOperation({ summary: 'Servicios activos de un destino de derivación' })
+  @ApiOkResponse({ type: ReferralTargetServiceListDto })
+  listTargetServices(
+    @Query() query: ListReferralTargetServicesQueryDto,
+  ): Promise<ReferralTargetServiceListDto> {
+    return this.referralsService.listTargetServices(query);
+  }
+
   /** UC-18-08. */
+  @Audited({
+    action: 'REFERRAL_RESPONDED',
+    entity: 'referral',
+    entityId: 'param:id',
+  })
   @Patch(':id/respond')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Responder / aceptar una referencia inter-tenant' })
@@ -60,8 +119,79 @@ export class ReferralsController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: RespondReferralDto,
     @CurrentUser() actor: AuthenticatedUser,
-  ): Promise<StatusResultDto> {
+  ): Promise<RespondReferralResultDto> {
     return this.referralsService.respond(id, dto, actor);
+  }
+
+  /** v4266: contrarreferencia del destino; cierra la derivación. */
+  @Audited({
+    action: 'REFERRAL_COUNTER_REFERRAL_RECORDED',
+    entity: 'referral',
+    entityId: 'param:id',
+  })
+  @Patch(':id/counter-referral')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Registrar la contrarreferencia de una derivación' })
+  counterReferral(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: CounterReferralDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ReferralResponseDto> {
+    return this.referralsService.counterReferral(id, dto, actor);
+  }
+
+  /** v4274: quien deriva completa o corrige los datos de salida del traslado. */
+  @Audited({
+    action: 'REFERRAL_TRANSFER_UPDATED',
+    entity: 'referral',
+    entityId: 'param:id',
+  })
+  @Patch(':id/transfer')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Completar o corregir el traslado de una derivación',
+  })
+  @ApiOkResponse({ type: ReferralResponseDto })
+  updateTransfer(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ReferralTransferDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ReferralResponseDto> {
+    return this.referralsService.updateTransfer(id, dto, actor);
+  }
+
+  /** v4274: el destino registra la llegada del paciente. */
+  @Audited({
+    action: 'REFERRAL_ARRIVAL_RECORDED',
+    entity: 'referral',
+    entityId: 'param:id',
+  })
+  @Patch(':id/arrival')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Registrar la llegada del paciente derivado' })
+  @ApiOkResponse({ type: ReferralResponseDto })
+  recordArrival(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ReferralArrivalDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ReferralResponseDto> {
+    return this.referralsService.recordArrival(id, dto, actor);
+  }
+
+  /** v4266: anula una derivación pendiente o aceptada. */
+  @Audited({
+    action: 'REFERRAL_CANCELLED',
+    entity: 'referral',
+    entityId: 'param:id',
+  })
+  @Patch(':id/cancel')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Anular una derivación' })
+  cancel(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ReferralResponseDto> {
+    return this.referralsService.cancel(id, actor);
   }
   /**
    * La lectura que faltaba: derivaciones de un paciente.
@@ -72,10 +202,12 @@ export class ReferralsController {
   @Get()
   @AccessLogged({ resourceType: 'REFERRALS' })
   @ApiOperation({ summary: 'Listar derivaciones de un paciente' })
+  @ApiOkResponse({ type: [ReferralListItemDto] })
   listByPatient(
     @Query('patientProfileId', ParseUUIDPipe) patientProfileId: string,
-  ) {
-    return this.referralsService.listByPatient(patientProfileId);
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ReferralListItemDto[]> {
+    return this.referralsService.listByPatient(patientProfileId, actor);
   }
 
   /**
@@ -87,7 +219,24 @@ export class ReferralsController {
   @AccessLogged({ resourceType: 'REFERRALS', patient: 'actor' })
   @Roles('PATIENT')
   @ApiOperation({ summary: 'Mis derivaciones' })
-  listMine(@CurrentUser() actor: AuthenticatedUser) {
+  @ApiOkResponse({ type: [ReferralListItemDto] })
+  listMine(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ReferralListItemDto[]> {
     return this.referralsService.listMine(actor);
+  }
+
+  /**
+   * v4266: una derivación por id. Declarada después de `me` para que esa ruta
+   * no caiga acá. La lee quien puede leer la historia o el destino.
+   */
+  @Get(':id')
+  @AccessLogged({ resourceType: 'REFERRALS', resourceId: 'param:id' })
+  @ApiOperation({ summary: 'Leer una derivación' })
+  get(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ReferralResponseDto> {
+    return this.referralsService.get(id, actor);
   }
 }

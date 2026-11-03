@@ -9,15 +9,23 @@ import {
   decodeKeysetCursor,
   encodeKeysetCursor,
   PreconditionFailedException,
-  ResourceNotFoundException,
+  requireTenantId,
+  roleAuthorizesInTenant,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { PromotionsErrorReason } from '../promotions.error-reasons';
 import { PromotionsLoyaltyRepository } from '../repositories';
 import { WalletsService } from '../../payments/services';
 import {
+  assertPromotionsScope,
+  promotionsOutOfScope,
+  resolvePromotionsScope,
+} from './promotions-scope';
+import {
   LoyaltyTiers,
   LoyaltyMemberships,
+  LoyaltyPrograms,
   PointsLedgerEntries,
 } from '../entities';
 import {
@@ -126,7 +134,7 @@ const CONCEPT_CODE: Readonly<Record<string, string>> = Object.freeze(
         'REASON_REFERRAL',
         'REASON_MANUAL',
       ] as const
-    ).map((nombre) => [CONCEPTS[nombre], CONCEPT_DEFS[nombre].code]),
+    ).map((name) => [CONCEPTS[name], CONCEPT_DEFS[name].code]),
   ),
 );
 
@@ -181,10 +189,12 @@ export class PromotionsLoyaltyService {
     dto: CreateLoyaltyProgramDto,
     actor: AuthenticatedUser,
   ): Promise<LoyaltyProgramResponseDto> {
+    // El tenant sale del contexto verificado; el del cuerpo no es fuente de verdad.
+    const tenantId = requireTenantId();
     this.logger.info(
       {
         operation: 'promotions.loyalty.program.create',
-        tenantId: dto.tenantId,
+        tenantId,
         code: dto.code,
       },
       'Creating loyalty program',
@@ -192,14 +202,18 @@ export class PromotionsLoyaltyService {
 
     const duplicate = await this.loyaltyRepo.findProgramByCode(
       this.em,
-      dto.tenantId,
+      tenantId,
       dto.code,
     );
     if (duplicate) {
-      throw new ConflictException('Ya existe un programa con ese código', {
-        tenantId: dto.tenantId,
-        code: dto.code,
-      });
+      throw new ConflictException(
+        'Ya existe un programa con ese código',
+        {
+          tenantId,
+          code: dto.code,
+        },
+        PromotionsErrorReason.PROGRAM_CODE_ALREADY_EXISTS,
+      );
     }
 
     const expiryPolicy = dto.expiryPolicy ?? 'NEVER';
@@ -207,6 +221,7 @@ export class PromotionsLoyaltyService {
       throw new PreconditionFailedException(
         'Una política de vencimiento ROLLING necesita días de vigencia',
         { code: dto.code },
+        PromotionsErrorReason.ROLLING_EXPIRY_REQUIRES_DAYS,
       );
     }
     for (const rule of dto.earningRules ?? []) {
@@ -220,7 +235,7 @@ export class PromotionsLoyaltyService {
 
     return this.em.transactional(async (tx) => {
       const program = this.loyaltyRepo.createProgram(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         code: dto.code,
         name: dto.name,
         programTypeConceptId: PROGRAM_TYPE_CONCEPT[dto.programType],
@@ -296,24 +311,31 @@ export class PromotionsLoyaltyService {
     dto: EnrollMemberDto,
     actor: AuthenticatedUser,
   ): Promise<MembershipResponseDto> {
+    const scope = resolvePromotionsScope(actor);
     this.logger.info(
       { operation: 'promotions.loyalty.membership.enroll', programId },
       'Enrolling loyalty member',
     );
 
     return this.em.transactional(async (tx) => {
-      const program = await this.loyaltyRepo.findProgramById(tx, programId);
-      if (!program) {
-        throw new ResourceNotFoundException(
-          'Programa de lealtad no encontrado',
-          { programId },
-        );
-      }
+      const program = await this.loadProgramInScope(tx, programId, scope);
+
+      // Un `MEMBER` sólo inscribe a sí mismo y no fija su propio bono: el
+      // programa no define bono de bienvenida, así que para él es 0. Quien
+      // administra el programa inscribe a cualquiera y puede otorgarlo.
+      const staff = this.mayActOnAnyMembership(actor, scope);
+      if (!staff) this.assertOwnMemberRef(dto, actor);
+      const signupBonusPoints = staff ? dto.signupBonusPoints : undefined;
+
       if (program.stateConceptId !== CONCEPTS.LOYALTY_ACTIVE) {
-        throw new PreconditionFailedException('El programa no está activo', {
-          programId,
-          stateConceptId: program.stateConceptId,
-        });
+        throw new PreconditionFailedException(
+          'El programa no está activo',
+          {
+            programId,
+            stateConceptId: program.stateConceptId,
+          },
+          PromotionsErrorReason.PROGRAM_NOT_ACTIVE,
+        );
       }
 
       const memberTypeConceptId = REWARD_MEMBER_CONCEPT[dto.memberType];
@@ -340,6 +362,7 @@ export class PromotionsLoyaltyService {
           {
             programId,
           },
+          PromotionsErrorReason.PROGRAM_HAS_NO_TIERS,
         );
       }
 
@@ -352,24 +375,21 @@ export class PromotionsLoyaltyService {
         actorUserId: actor.id,
       });
 
-      if (dto.signupBonusPoints && Number(dto.signupBonusPoints) > 0) {
+      if (signupBonusPoints && Number(signupBonusPoints) > 0) {
         this.loyaltyRepo.createLedgerEntry(tx, {
           loyaltyMembershipId: membership.id,
           directionConceptId: CONCEPTS.POINTS_EARN,
-          points: dto.signupBonusPoints,
+          points: signupBonusPoints,
           reasonConceptId: CONCEPTS.REASON_SIGNUP,
-          balanceAfter: dto.signupBonusPoints,
+          balanceAfter: signupBonusPoints,
           // La clave sale de la propia membresía: el bono de bienvenida es único
           // por definición, así que no hace falta que el cliente la aporte.
           idempotencyKey: `signup:${membership.id}`,
           recordedByUserId: actor.id,
         });
-        membership.pointsBalance = dto.signupBonusPoints;
-        membership.lifetimePoints = dto.signupBonusPoints;
-        membership.currentTierId = this.tierFor(
-          tiers,
-          dto.signupBonusPoints,
-        )?.id;
+        membership.pointsBalance = signupBonusPoints;
+        membership.lifetimePoints = signupBonusPoints;
+        membership.currentTierId = this.tierFor(tiers, signupBonusPoints)?.id;
       }
 
       return {
@@ -388,6 +408,7 @@ export class PromotionsLoyaltyService {
     dto: EarnPointsDto,
     actor: AuthenticatedUser,
   ): Promise<PointsLedgerResponseDto> {
+    const scope = resolvePromotionsScope(actor);
     this.logger.info(
       {
         operation: 'promotions.loyalty.points.earn',
@@ -398,6 +419,14 @@ export class PromotionsLoyaltyService {
     );
 
     return this.em.transactional(async (tx) => {
+      // La membresía se resuelve hasta su programa y se compara con el tenant
+      // activo antes de bloquearla y antes de mirar la clave de idempotencia.
+      const { membership, program } = await this.lockMembershipInScope(
+        tx,
+        membershipId,
+        scope,
+      );
+
       // El reintento se resuelve antes de tocar nada: devolver el resultado
       // anterior es lo que hace segura la reentrega de un evento.
       const previous = await this.loyaltyRepo.findLedgerEntryByKey(
@@ -405,26 +434,17 @@ export class PromotionsLoyaltyService {
         dto.idempotencyKey,
       );
       if (previous) {
-        const membership = await this.loyaltyRepo.findMembershipForUpdate(
-          tx,
-          previous.loyaltyMembershipId,
-        );
-        return this.ledgerResponse(previous, membership, true);
+        return this.replayLedgerEntry(previous, membership);
       }
 
-      const membership = await this.loyaltyRepo.findMembershipForUpdate(
-        tx,
-        membershipId,
-      );
-      if (!membership) {
-        throw new ResourceNotFoundException('Membresía no encontrada', {
-          membershipId,
-        });
-      }
       if (membership.statusConceptId !== CONCEPTS.MEMBERSHIP_ACTIVE) {
-        throw new PreconditionFailedException('La membresía no está activa', {
-          membershipId,
-        });
+        throw new PreconditionFailedException(
+          'La membresía no está activa',
+          {
+            membershipId,
+          },
+          PromotionsErrorReason.MEMBERSHIP_NOT_ACTIVE,
+        );
       }
 
       const rule = await this.loyaltyRepo.findEarningRuleById(
@@ -432,19 +452,23 @@ export class PromotionsLoyaltyService {
         dto.earningRuleId,
       );
       if (!rule) {
-        throw new ResourceNotFoundException(
-          'Regla de acumulación no encontrada',
-          {
-            earningRuleId: dto.earningRuleId,
-          },
-        );
+        throw promotionsOutOfScope('Regla de acumulación no encontrada');
       }
       if (rule.loyaltyProgramId !== membership.loyaltyProgramId) {
+        // «Es de otro programa» sólo se revela si ese programa es del tenant
+        // activo; la regla de otro tenant es, para este actor, inexistente.
+        await this.loadProgramInScope(
+          tx,
+          rule.loyaltyProgramId,
+          scope,
+          'Regla de acumulación no encontrada',
+        );
         throw new PreconditionFailedException(
           'La regla pertenece a otro programa',
           {
             earningRuleId: dto.earningRuleId,
           },
+          PromotionsErrorReason.EARNING_RULE_WRONG_PROGRAM,
         );
       }
       const now = new Date();
@@ -454,6 +478,7 @@ export class PromotionsLoyaltyService {
           {
             earningRuleId: dto.earningRuleId,
           },
+          PromotionsErrorReason.EARNING_RULE_NOT_ACTIVE,
         );
       }
       if (
@@ -465,12 +490,17 @@ export class PromotionsLoyaltyService {
           {
             earningRuleId: dto.earningRuleId,
           },
+          PromotionsErrorReason.EARNING_RULE_OUT_OF_VALIDITY,
         );
       }
       if (!rule.pointsAmount || Number(rule.pointsAmount) <= 0) {
-        throw new PreconditionFailedException('La regla no otorga puntos', {
-          earningRuleId: dto.earningRuleId,
-        });
+        throw new PreconditionFailedException(
+          'La regla no otorga puntos',
+          {
+            earningRuleId: dto.earningRuleId,
+          },
+          PromotionsErrorReason.EARNING_RULE_GRANTS_NO_POINTS,
+        );
       }
 
       await this.assertUnderCap(
@@ -481,10 +511,6 @@ export class PromotionsLoyaltyService {
         rule.periodConceptId,
       );
 
-      const program = await this.loyaltyRepo.findProgramById(
-        tx,
-        membership.loyaltyProgramId,
-      );
       const tiers = await this.loyaltyRepo.findTiersByProgram(
         tx,
         membership.loyaltyProgramId,
@@ -512,8 +538,8 @@ export class PromotionsLoyaltyService {
         sourceRefId: dto.sourceRefId,
         earningRuleId: rule.id,
         expiresAt: this.expiryFor(
-          program?.expiryPolicyConceptId,
-          program?.pointsExpiryDays,
+          program.expiryPolicyConceptId,
+          program.pointsExpiryDays,
           now,
         ),
         idempotencyKey: dto.idempotencyKey,
@@ -537,6 +563,7 @@ export class PromotionsLoyaltyService {
     dto: RedeemPointsDto,
     actor: AuthenticatedUser,
   ): Promise<PointsLedgerResponseDto> {
+    const scope = resolvePromotionsScope(actor);
     this.logger.info(
       { operation: 'promotions.loyalty.points.redeem', membershipId },
       'Redeeming loyalty points',
@@ -548,44 +575,56 @@ export class PromotionsLoyaltyService {
         {
           points: dto.points,
         },
+        PromotionsErrorReason.REDEMPTION_POINTS_MUST_BE_POSITIVE,
       );
     }
 
     return this.em.transactional(async (tx) => {
+      // La membresía se resuelve hasta su programa y se compara con el tenant
+      // activo antes de bloquearla y antes de mirar la clave de idempotencia.
+      const { membership } = await this.lockMembershipInScope(
+        tx,
+        membershipId,
+        scope,
+      );
+
+      // Dentro del mismo tenant, un `MEMBER` sólo canjea su propia membresía:
+      // el rol no dice de quién es el saldo. Quien administra el programa sí
+      // puede canjear en nombre de un miembro. Una membresía ajena responde
+      // como inexistente.
+      if (!this.mayActOnAnyMembership(actor, scope)) {
+        this.assertOwnMembership(membership, actor);
+      }
+
       const previous = await this.loyaltyRepo.findLedgerEntryByKey(
         tx,
         dto.idempotencyKey,
       );
       if (previous) {
-        const membership = await this.loyaltyRepo.findMembershipForUpdate(
-          tx,
-          previous.loyaltyMembershipId,
-        );
-        return this.ledgerResponse(previous, membership, true);
+        return this.replayLedgerEntry(previous, membership);
       }
 
-      const membership = await this.loyaltyRepo.findMembershipForUpdate(
-        tx,
-        membershipId,
-      );
-      if (!membership) {
-        throw new ResourceNotFoundException('Membresía no encontrada', {
-          membershipId,
-        });
-      }
       if (membership.statusConceptId !== CONCEPTS.MEMBERSHIP_ACTIVE) {
-        throw new PreconditionFailedException('La membresía no está activa', {
-          membershipId,
-        });
+        throw new PreconditionFailedException(
+          'La membresía no está activa',
+          {
+            membershipId,
+          },
+          PromotionsErrorReason.MEMBERSHIP_NOT_ACTIVE,
+        );
       }
 
       const balance = Number(membership.pointsBalance ?? '0');
       if (balance < Number(dto.points)) {
-        throw new PreconditionFailedException('Saldo de puntos insuficiente', {
-          membershipId,
-          pointsBalance: membership.pointsBalance,
-          requested: dto.points,
-        });
+        throw new PreconditionFailedException(
+          'Saldo de puntos insuficiente',
+          {
+            membershipId,
+            pointsBalance: membership.pointsBalance,
+            requested: dto.points,
+          },
+          PromotionsErrorReason.INSUFFICIENT_POINTS_BALANCE,
+        );
       }
 
       const balanceAfter = this.round(balance - Number(dto.points));
@@ -613,21 +652,18 @@ export class PromotionsLoyaltyService {
     membershipId: string,
     actor: AuthenticatedUser,
   ): Promise<RecomputeBalanceResponseDto> {
+    const scope = resolvePromotionsScope(actor);
     this.logger.info(
       { operation: 'promotions.loyalty.membership.recompute', membershipId },
       'Recomputing membership balance',
     );
 
     return this.em.transactional(async (tx) => {
-      const membership = await this.loyaltyRepo.findMembershipForUpdate(
+      const { membership } = await this.lockMembershipInScope(
         tx,
         membershipId,
+        scope,
       );
-      if (!membership) {
-        throw new ResourceNotFoundException('Membresía no encontrada', {
-          membershipId,
-        });
-      }
 
       const ledger = await this.loyaltyRepo.findLedgerByMembership(
         tx,
@@ -689,6 +725,7 @@ export class PromotionsLoyaltyService {
     dto: ExpirePointsDto,
     actor: AuthenticatedUser,
   ): Promise<ExpirePointsResponseDto> {
+    const scope = resolvePromotionsScope(actor);
     this.logger.info(
       {
         operation: 'promotions.loyalty.points.expire',
@@ -698,6 +735,11 @@ export class PromotionsLoyaltyService {
     );
 
     return this.em.transactional(async (tx) => {
+      // El barrido global (SYSTEM sin tenant) recorre cualquier programa; con
+      // tenant en el contexto, sólo los de ese tenant.
+      if (scope !== undefined) {
+        await this.loadProgramInScope(tx, dto.loyaltyProgramId, scope);
+      }
       const memberships = await this.loyaltyRepo.findMembershipsForSweep(
         tx,
         dto.loyaltyProgramId,
@@ -770,30 +812,30 @@ export class PromotionsLoyaltyService {
     dto: CreateReferralDto,
     actor: AuthenticatedUser,
   ): Promise<ReferralResponseDto> {
+    const scope = resolvePromotionsScope(actor);
     this.logger.info(
       { operation: 'promotions.referral.create', referralProgramId },
       'Creating member referral',
     );
 
     return this.em.transactional(async (tx) => {
-      const program = await this.loyaltyRepo.findReferralProgramById(
+      const found = await this.loyaltyRepo.findReferralProgramById(
         tx,
         referralProgramId,
       );
-      if (!program) {
-        throw new ResourceNotFoundException(
-          'Programa de referidos no encontrado',
-          {
-            referralProgramId,
-          },
-        );
-      }
+      const program = assertPromotionsScope(
+        found,
+        found?.tenantId,
+        scope,
+        'Programa de referidos no encontrado',
+      );
       if (program.stateConceptId !== CONCEPTS.STATE_ACTIVE) {
         throw new PreconditionFailedException(
           'El programa de referidos no está activo',
           {
             referralProgramId,
           },
+          PromotionsErrorReason.REFERRAL_PROGRAM_NOT_ACTIVE,
         );
       }
       const now = new Date();
@@ -806,6 +848,7 @@ export class PromotionsLoyaltyService {
           {
             referralProgramId,
           },
+          PromotionsErrorReason.REFERRAL_PROGRAM_OUT_OF_VALIDITY,
         );
       }
 
@@ -822,6 +865,7 @@ export class PromotionsLoyaltyService {
               referralProgramId,
               maxReferralsPerUser: program.maxReferralsPerUser,
             },
+            PromotionsErrorReason.REFERRAL_LIMIT_REACHED,
           );
         }
       }
@@ -854,6 +898,7 @@ export class PromotionsLoyaltyService {
     dto: QualifyReferralDto,
     actor: AuthenticatedUser,
   ): Promise<QualifyReferralResponseDto> {
+    const scope = resolvePromotionsScope(actor);
     this.logger.info(
       {
         operation: 'promotions.referral.qualify',
@@ -864,20 +909,37 @@ export class PromotionsLoyaltyService {
     );
 
     return this.em.transactional(async (tx) => {
+      // El referido se resuelve hasta su programa y se compara con el tenant
+      // activo antes de bloquearlo.
+      const unlocked = await this.loyaltyRepo.findReferralById(tx, referralId);
+      const referralProgram = unlocked
+        ? await this.loyaltyRepo.findReferralProgramById(
+            tx,
+            unlocked.referralProgramId,
+          )
+        : null;
+      assertPromotionsScope(
+        unlocked && referralProgram ? unlocked : null,
+        referralProgram?.tenantId,
+        scope,
+        'Referido no encontrado',
+      );
       const referral = await this.loyaltyRepo.findReferralForUpdate(
         tx,
         referralId,
       );
       if (!referral) {
-        throw new ResourceNotFoundException('Referido no encontrado', {
-          referralId,
-        });
+        throw promotionsOutOfScope('Referido no encontrado');
       }
       if (referral.statusConceptId !== CONCEPTS.REFERRAL_PENDING) {
-        throw new ConflictException('El referido ya fue calificado', {
-          referralId,
-          statusConceptId: referral.statusConceptId,
-        });
+        throw new ConflictException(
+          'El referido ya fue calificado',
+          {
+            referralId,
+            statusConceptId: referral.statusConceptId,
+          },
+          PromotionsErrorReason.REFERRAL_ALREADY_QUALIFIED,
+        );
       }
       // Auto-referirse convertiría el programa en una fuente de puntos gratis.
       if (referral.referrerUserId === dto.refereeUserId) {
@@ -886,20 +948,14 @@ export class PromotionsLoyaltyService {
           {
             referralId,
           },
+          PromotionsErrorReason.REFERRAL_SELF_NOT_ALLOWED,
         );
       }
 
-      const program = await this.loyaltyRepo.findReferralProgramById(
-        tx,
-        referral.referralProgramId,
-      );
+      // Ya resuelto y acotado arriba: es el programa del referido.
+      const program = referralProgram;
       if (!program) {
-        throw new ResourceNotFoundException(
-          'Programa de referidos no encontrado',
-          {
-            referralProgramId: referral.referralProgramId,
-          },
-        );
+        throw promotionsOutOfScope('Programa de referidos no encontrado');
       }
       const eventConceptId = QUALIFYING_EVENT_CONCEPT[dto.qualifyingEvent];
       if (
@@ -909,6 +965,7 @@ export class PromotionsLoyaltyService {
         throw new PreconditionFailedException(
           'El evento recibido no es el que califica en este programa',
           { referralId, qualifyingEvent: dto.qualifyingEvent },
+          PromotionsErrorReason.REFERRAL_EVENT_MISMATCH,
         );
       }
 
@@ -949,6 +1006,134 @@ export class PromotionsLoyaltyService {
     });
   }
 
+  // --- Alcance de tenant ---
+
+  /**
+   * Carga un programa de lealtad por UUID y exige que sea del tenant activo.
+   *
+   * @throws ResourceNotFoundException (`PROMOTIONS_RESOURCE_OUT_OF_SCOPE`) si no
+   * existe o es de otro tenant.
+   */
+  private async loadProgramInScope(
+    tx: EntityManager,
+    programId: string,
+    scope: string | undefined,
+    message = 'Programa de lealtad no encontrado',
+  ): Promise<LoyaltyPrograms> {
+    const program = await this.loyaltyRepo.findProgramById(tx, programId);
+    return assertPromotionsScope(program, program?.tenantId, scope, message);
+  }
+
+  /**
+   * Resuelve una membresía hasta su programa, compara el tenant y **después**
+   * la bloquea para escribir. La membresía no lleva tenant: es el de su programa.
+   *
+   * @throws ResourceNotFoundException (`PROMOTIONS_RESOURCE_OUT_OF_SCOPE`) si la
+   * membresía o su programa no existen, o son de otro tenant.
+   */
+  private async lockMembershipInScope(
+    tx: EntityManager,
+    membershipId: string,
+    scope: string | undefined,
+    message = 'Membresía no encontrada',
+  ): Promise<{ membership: LoyaltyMemberships; program: LoyaltyPrograms }> {
+    const unlocked = await this.loyaltyRepo.findMembershipById(
+      tx,
+      membershipId,
+    );
+    const program = unlocked
+      ? await this.loyaltyRepo.findProgramById(tx, unlocked.loyaltyProgramId)
+      : null;
+    if (!unlocked || !program) {
+      throw promotionsOutOfScope(message);
+    }
+    assertPromotionsScope(unlocked, program.tenantId, scope, message);
+
+    const membership = await this.loyaltyRepo.findMembershipForUpdate(
+      tx,
+      membershipId,
+    );
+    if (!membership) {
+      throw promotionsOutOfScope(message);
+    }
+    return { membership, program };
+  }
+
+  /**
+   * Si el actor puede operar sobre la membresía de cualquier miembro del
+   * tenant: administra el programa, es el worker `SYSTEM` global o `SUPERADMIN`.
+   */
+  private mayActOnAnyMembership(
+    actor: AuthenticatedUser,
+    scope: string | undefined,
+  ): boolean {
+    return (
+      roleAuthorizesInTenant(actor, 'PROMOTIONS_ADMIN', scope) ||
+      roleAuthorizesInTenant(actor, 'SUPERADMIN', undefined) ||
+      roleAuthorizesInTenant(actor, 'SYSTEM', undefined)
+    );
+  }
+
+  /**
+   * Exige que el miembro que se inscribe sea el propio actor: su usuario
+   * (`USER`) o su perfil de paciente (`PATIENT`, claim `pid`).
+   *
+   * @throws ResourceNotFoundException uniforme si es otra persona.
+   */
+  private assertOwnMemberRef(
+    dto: { memberType: RewardMemberType; memberRefId: string },
+    actor: AuthenticatedUser,
+  ): void {
+    const owner =
+      (dto.memberType === 'USER' && dto.memberRefId === actor.id) ||
+      (dto.memberType === 'PATIENT' &&
+        actor.patientProfileId !== undefined &&
+        dto.memberRefId === actor.patientProfileId);
+    if (!owner) {
+      throw promotionsOutOfScope('Membresía no encontrada');
+    }
+  }
+
+  /**
+   * Exige que la membresía sea del actor: la de su usuario (`memberType`
+   * `USER`) o la de su perfil de paciente (`PATIENT`, claim `pid`).
+   *
+   * @throws ResourceNotFoundException uniforme si es de otro miembro.
+   */
+  private assertOwnMembership(
+    membership: LoyaltyMemberships,
+    actor: AuthenticatedUser,
+  ): void {
+    const owner =
+      (membership.memberTypeConceptId === CONCEPTS.REWARD_MEMBER_USER &&
+        membership.memberRefId === actor.id) ||
+      (membership.memberTypeConceptId === CONCEPTS.REWARD_MEMBER_PATIENT &&
+        actor.patientProfileId !== undefined &&
+        membership.memberRefId === actor.patientProfileId);
+    if (!owner) {
+      throw promotionsOutOfScope('Membresía no encontrada');
+    }
+  }
+
+  /**
+   * Reentrega de un movimiento ya registrado con la misma clave de idempotencia.
+   * La clave es global: si respalda un movimiento de otra membresía, no se
+   * devuelve ese movimiento —sería datos ajenos— sino un conflicto.
+   */
+  private replayLedgerEntry(
+    previous: PointsLedgerEntries,
+    membership: LoyaltyMemberships,
+  ): PointsLedgerResponseDto {
+    if (previous.loyaltyMembershipId !== membership.id) {
+      throw new ConflictException(
+        'La clave de idempotencia pertenece a otro movimiento',
+        undefined,
+        PromotionsErrorReason.IDEMPOTENCY_KEY_IN_USE,
+      );
+    }
+    return this.ledgerResponse(previous, membership, true);
+  }
+
   // --- Apoyo ---
 
   /**
@@ -978,6 +1163,7 @@ export class PromotionsLoyaltyService {
         idempotencyKey,
         referralId,
         actor,
+        tenantId,
       );
     }
     if (awardTypeConceptId === CONCEPTS.AWARD_WALLET_CREDIT) {
@@ -1003,6 +1189,7 @@ export class PromotionsLoyaltyService {
     idempotencyKey: string,
     referralId: string,
     actor: AuthenticatedUser,
+    tenantId: string,
   ): Promise<string | undefined> {
     const existing = await this.loyaltyRepo.findLedgerEntryByKey(
       tx,
@@ -1010,18 +1197,13 @@ export class PromotionsLoyaltyService {
     );
     if (existing) return existing.id;
 
-    const membership = await this.loyaltyRepo.findMembershipForUpdate(
+    // La membresía premiada debe ser del mismo tenant que el programa de referidos.
+    const { membership } = await this.lockMembershipInScope(
       tx,
       membershipId,
+      tenantId,
+      'Membresía de la recompensa no encontrada',
     );
-    if (!membership) {
-      throw new ResourceNotFoundException(
-        'Membresía de la recompensa no encontrada',
-        {
-          membershipId,
-        },
-      );
-    }
 
     const balanceAfter = this.round(
       Number(membership.pointsBalance ?? '0') + Number(awardAmount),
@@ -1076,21 +1258,17 @@ export class PromotionsLoyaltyService {
       throw new PreconditionFailedException(
         'El programa de referidos no define moneda para el crédito de billetera',
         { referralId },
+        PromotionsErrorReason.REFERRAL_WALLET_CREDIT_MISSING_CURRENCY,
       );
     }
 
-    const membership = await this.loyaltyRepo.findMembershipForUpdate(
+    // La membresía premiada debe ser del mismo tenant que el programa de referidos.
+    const { membership } = await this.lockMembershipInScope(
       tx,
       membershipId,
+      tenantId,
+      'Membresía de la recompensa no encontrada',
     );
-    if (!membership) {
-      throw new ResourceNotFoundException(
-        'Membresía de la recompensa no encontrada',
-        {
-          membershipId,
-        },
-      );
-    }
 
     const ownerTypeConceptId =
       WALLET_OWNER_CONCEPT[membership.memberTypeConceptId] ??
@@ -1146,6 +1324,7 @@ export class PromotionsLoyaltyService {
           earningRuleId,
           capPerPeriod,
         },
+        PromotionsErrorReason.EARNING_RULE_CAP_REACHED,
       );
     }
   }
@@ -1249,6 +1428,7 @@ export class PromotionsLoyaltyService {
         {
           ruleCode,
         },
+        PromotionsErrorReason.POINTS_RULE_REQUIRES_AMOUNT,
       );
     }
     if (awardType === 'WALLET_CREDIT' && !creditAmount) {
@@ -1257,6 +1437,7 @@ export class PromotionsLoyaltyService {
         {
           ruleCode,
         },
+        PromotionsErrorReason.CREDIT_RULE_REQUIRES_AMOUNT,
       );
     }
   }
@@ -1384,16 +1565,16 @@ export class PromotionsLoyaltyService {
       after,
     );
     const hasMore = rows.length > limit;
-    const pagina = hasMore ? rows.slice(0, limit) : rows;
-    const ultima = pagina.at(-1);
+    const page = hasMore ? rows.slice(0, limit) : rows;
+    const last = page.at(-1);
 
     return {
-      entries: pagina.map((entry) => this.myLedgerEntry(entry)),
-      ...(hasMore && ultima
+      entries: page.map((entry) => this.myLedgerEntry(entry)),
+      ...(hasMore && last
         ? {
             nextCursor: encodeKeysetCursor({
-              recordedAt: ultima.recordedAt.toISOString(),
-              id: ultima.id,
+              recordedAt: last.recordedAt.toISOString(),
+              id: last.id,
             }),
           }
         : {}),
@@ -1529,9 +1710,9 @@ export class PromotionsLoyaltyService {
    * ordena, porque un cursor a medias produciría una ventana arbitraria.
    */
   private decodeLedgerCursor(cursor: string): { recordedAt: Date; id: string } {
-    const clave = decodeKeysetCursor(cursor);
-    const recordedAt = clave['recordedAt'];
-    const id = clave['id'];
+    const key = decodeKeysetCursor(cursor);
+    const recordedAt = key['recordedAt'];
+    const id = key['id'];
     if (typeof recordedAt !== 'string' || typeof id !== 'string') {
       throw new PreconditionFailedException('Cursor de movimientos inválido');
     }
@@ -1557,6 +1738,7 @@ export class PromotionsLoyaltyService {
     throw new ConflictException(
       'No se pudo generar un código de referido libre',
       {},
+      PromotionsErrorReason.REFERRAL_CODE_GENERATION_EXHAUSTED,
     );
   }
 }

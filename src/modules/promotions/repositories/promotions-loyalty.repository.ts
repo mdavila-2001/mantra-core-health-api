@@ -504,6 +504,17 @@ export class PromotionsLoyaltyRepository {
     });
   }
 
+  /**
+   * Membresía por id, sin bloquear: sirve para resolver su programa (y con él
+   * su tenant) **antes** de bloquear la fila.
+   */
+  findMembershipById(
+    em: EntityManager,
+    id: string,
+  ): Promise<LoyaltyMemberships | null> {
+    return em.findOne(LoyaltyMemberships, { id });
+  }
+
   /** Toda mutación de saldo bloquea la membresía: el balance es un contador compartido. */
   findMembershipForUpdate(
     em: EntityManager,
@@ -740,6 +751,17 @@ export class PromotionsLoyaltyRepository {
     referralCode: string,
   ): Promise<MemberReferrals | null> {
     return em.findOne(MemberReferrals, { referralCode });
+  }
+
+  /**
+   * Referido por id, sin bloquear: sirve para resolver su programa (y con él
+   * su tenant) **antes** de bloquear la fila.
+   */
+  findReferralById(
+    em: EntityManager,
+    id: string,
+  ): Promise<MemberReferrals | null> {
+    return em.findOne(MemberReferrals, { id });
   }
 
   /**

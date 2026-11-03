@@ -18,11 +18,11 @@ async function errors<T extends object>(
   body: unknown,
 ): Promise<string[]> {
   const dto = plainToInstance(classKey, body);
-  const errores = await validate(dto, {
+  const validationErrors = await validate(dto, {
     whitelist: true,
     forbidNonWhitelisted: true,
   });
-  return errores.map((e) => e.property).sort();
+  return validationErrors.map((e) => e.property).sort();
 }
 
 describe('CreateConditionDto · estado de verificación del alta (Hito 4 §B)', () => {

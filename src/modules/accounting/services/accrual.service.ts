@@ -4,13 +4,14 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
 import { ACCT } from '../accounting.concepts';
+import { AccountingErrorReason } from '../accounting.error-reasons';
 import { AccrualRepository } from '../repositories';
 import { PostingHelper } from './posting.helper';
+import { AccountingScopeService } from './accounting-scope.service';
 import { sumCents, toCents, fromCents } from './money';
 import {
   CreateAccrualObjectDto,
@@ -33,12 +34,14 @@ export class AccrualService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param accrualRepo - Valor de accrual repo requerido por la operación.
    * @param posting - Valor de posting requerido por la operación.
+   * @param scope - Política de alcance de tenant (ACC-01).
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly accrualRepo: AccrualRepository,
     private readonly posting: PostingHelper,
+    private readonly scope: AccountingScopeService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(AccrualService.name);
@@ -64,13 +67,32 @@ export class AccrualService {
           total: dto.totalAmount,
           planned: fromCents(plannedTotal),
         },
+        AccountingErrorReason.ACCRUAL_SCHEDULE_TOTAL_MISMATCH,
       );
     }
 
     return this.em.transactional(async (tx) => {
+      // ACC-01: el objeto es del tenant de la sesión, no del que declare el
+      // cuerpo, y lo que referencia (cuentas, dimensiones, periodos) también.
+      const tenantId = this.scope.activeTenantFor(
+        dto.tenantId,
+        'accrualObject',
+      );
+      await this.scope.accountsInTenant(tx, [
+        dto.expenseAccountId,
+        dto.accrualAccountId,
+      ]);
+      await this.scope.costCentersInTenant(tx, [dto.costCenterId]);
+      await this.scope.profitCentersInTenant(tx, [dto.profitCenterId]);
+      for (const periodId of new Set(
+        dto.schedule.map((s) => s.fiscalPeriodId),
+      )) {
+        await this.scope.periodInTenant(tx, periodId);
+      }
+
       const clash = await this.accrualRepo.findObjectByNumber(
         tx,
-        dto.tenantId,
+        tenantId,
         dto.objectNumber,
       );
       if (clash) {
@@ -79,11 +101,12 @@ export class AccrualService {
           {
             objectNumber: dto.objectNumber,
           },
+          AccountingErrorReason.ACCRUAL_OBJECT_NUMBER_ALREADY_EXISTS,
         );
       }
 
       const object = this.accrualRepo.createObject(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         objectNumber: dto.objectNumber,
         accrualTypeConceptId: ACCT.ACCRUAL_TYPE_DEFAULT,
         statusConceptId: ACCT.ACCRUAL_ACTIVE,
@@ -138,21 +161,18 @@ export class AccrualService {
       'Running accrual batch',
     );
     return this.em.transactional(async (tx) => {
-      const object = await this.accrualRepo.findObjectById(
-        tx,
-        dto.accrualObjectId,
-      );
-      if (!object) {
-        throw new ResourceNotFoundException('Objeto de devengo no encontrado', {
-          accrualObjectId: dto.accrualObjectId,
-        });
-      }
+      // ACC-01: práctica, objeto y periodo son del tenant activo y el periodo
+      // es de esa práctica; lo ajeno responde 404 idéntico a lo inexistente.
+      await this.scope.practice(dto.practiceId);
+      const object = await this.scope.accrualObject(tx, dto.accrualObjectId);
+      await this.scope.periodInPractice(tx, dto.fiscalPeriodId, dto.practiceId);
       if (!object.expenseAccountId || !object.accrualAccountId) {
         throw new PreconditionFailedException(
           'El objeto de devengo no define cuentas',
           {
             accrualObjectId: dto.accrualObjectId,
           },
+          AccountingErrorReason.ACCRUAL_OBJECT_ACCOUNTS_MISSING,
         );
       }
 
@@ -169,6 +189,7 @@ export class AccrualService {
             accrualObjectId: dto.accrualObjectId,
             fiscalPeriodId: dto.fiscalPeriodId,
           },
+          AccountingErrorReason.ACCRUAL_NO_PENDING_LINES_IN_PERIOD,
         );
       }
 

@@ -43,12 +43,63 @@ export const { seeds: DELEGATED_ACCESS_CONCEPT_SEEDS, ids: DELEG } =
       code: 'DA_ASSIGN_BILLING',
       display: 'Billing assignment',
     },
+    // Roles de infraestructura hospitalaria (CONTRATO-F2-F5 §0.3). La clave
+    // `ASSIGN_ROLE_UNIT_HEAD` la fija el modelo por literal
+    // (`ex_org_user_assignments_unit_head`, «Desvíos» M-F5-ops).
+    ASSIGN_ROLE_NURSE_SUPERVISOR: {
+      code: 'DA_ASSIGN_NURSE_SUPERVISOR',
+      display: 'Nursing supervision assignment',
+    },
+    ASSIGN_ROLE_ADMISSION: {
+      code: 'DA_ASSIGN_ADMISSION',
+      display: 'Admission assignment',
+    },
+    ASSIGN_ROLE_HOUSEKEEPING: {
+      code: 'DA_ASSIGN_HOUSEKEEPING',
+      display: 'Housekeeping assignment',
+    },
+    ASSIGN_ROLE_HOUSEKEEPING_SUPERVISOR: {
+      code: 'DA_ASSIGN_HOUSEKEEPING_SUPERVISOR',
+      display: 'Housekeeping supervision assignment',
+    },
+    ASSIGN_ROLE_MAINTENANCE: {
+      code: 'DA_ASSIGN_MAINTENANCE',
+      display: 'Maintenance (incl. biomedical) assignment',
+    },
+    ASSIGN_ROLE_OR_MANAGER: {
+      code: 'DA_ASSIGN_OR_MANAGER',
+      display: 'Operating room manager assignment',
+    },
+    ASSIGN_ROLE_INFECTION_CONTROL: {
+      code: 'DA_ASSIGN_INFECTION_CONTROL',
+      display: 'Infection control assignment',
+    },
+    ASSIGN_ROLE_UNIT_HEAD: {
+      code: 'DA_ASSIGN_UNIT_HEAD',
+      display: 'Clinical unit head assignment',
+    },
 
     // --- Alcance de acceso (access_scope_concept_id) ---
     SCOPE_TENANT: { code: 'DA_SCOPE_TENANT', display: 'Tenant scope' },
     SCOPE_PRACTICE: { code: 'DA_SCOPE_PRACTICE', display: 'Practice scope' },
     SCOPE_SITE: { code: 'DA_SCOPE_SITE', display: 'Site scope' },
     SCOPE_UNIT: { code: 'DA_SCOPE_UNIT', display: 'Clinical unit scope' },
+    // F2–F5 §0.3: alcance de un espacio (`organization_user_assignments.care_space_id`).
+    SCOPE_SPACE: { code: 'DA_SCOPE_SPACE', display: 'Care space scope' },
+    // Quién inició un vínculo de secretaria (`initiated_by_party_concept_id`).
+    // Se escribe al crear el vínculo y nunca se infiere de quién escribió la fila.
+    INITIATOR_SUPPORT_STAFF: {
+      code: 'DA_INITIATOR_SUPPORT_STAFF',
+      display: 'Initiated by the support staff member',
+    },
+    INITIATOR_ORGANIZATION: {
+      code: 'DA_INITIATOR_ORGANIZATION',
+      display: 'Initiated by an organization administrator',
+    },
+    INITIATOR_PRACTITIONER: {
+      code: 'DA_INITIATOR_PRACTITIONER',
+      display: 'Initiated by the practitioner',
+    },
 
     // --- Tipo de delegado del set de permisos (delegate_type_concept_id) ---
     DELEGATE_TYPE_SECRETARY: {
@@ -182,4 +233,32 @@ export const { seeds: DELEGATED_ACCESS_CONCEPT_SEEDS, ids: DELEG } =
       display: 'Administrative suspension',
     },
     REASON_EXPIRED: { code: 'DA_RSN_EXPIRED', display: 'Expired by sweep' },
+
+    // --- Enlace compartido de receta (shared_access_links / _uses) ---
+    // El estado del enlace usa `CONCEPTS.STATE_ACTIVE/REVOKED/EXPIRED`.
+    // Tipo de recurso (resource_type_concept_id): la receta de una consulta o
+    // un fármaco suelto.
+    SHARE_RESOURCE_PRESCRIPTION_ENCOUNTER: {
+      code: 'DA_SHARE_RES_PRESCRIPTION_ENCOUNTER',
+      display: 'Prescription of an encounter',
+    },
+    SHARE_RESOURCE_MEDICATION_REQUEST: {
+      code: 'DA_SHARE_RES_MEDICATION_REQUEST',
+      display: 'Single medication request',
+    },
+    // Alcance (scope_concept_id): lo que deja hacer el enlace.
+    SHARE_SCOPE_PHARMACY_DISPENSE: {
+      code: 'DA_SHARE_SCOPE_PHARMACY_DISPENSE',
+      display: 'Pharmacy dispense',
+    },
+    // Acción y resultado de cada uso (action_concept_id / outcome_concept_id).
+    SHARE_ACTION_OPEN: { code: 'DA_SHARE_ACT_OPEN', display: 'Open' },
+    // La vista sin sesión (`GET /public/prescription-shares/:token`): queda
+    // registrada, pero no es una apertura de farmacia ni cuenta como tal.
+    SHARE_ACTION_PUBLIC_VIEW: {
+      code: 'DA_SHARE_ACT_PUBLIC_VIEW',
+      display: 'Public view',
+    },
+    SHARE_OUTCOME_OPENED: { code: 'DA_SHARE_OUT_OPENED', display: 'Opened' },
+    SHARE_OUTCOME_DENIED: { code: 'DA_SHARE_OUT_DENIED', display: 'Denied' },
   });

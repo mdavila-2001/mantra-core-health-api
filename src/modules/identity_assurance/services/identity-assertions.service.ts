@@ -4,18 +4,20 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
+  requireTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
 import { IDA } from '../identity_assurance.concepts';
 import {
   IdentityAssertionsRepository,
-  IdentityVerificationCasesRepository,
   IdentityFraudSignalsRepository,
 } from '../repositories';
 import { RevokeAssertionDto, AssertionRevokedResponseDto } from '../dto';
 import { IdentityVerificationEffectsService } from './identity-verification-effects.service';
+import { IdentityCaseScope } from './identity-case-scope.service';
+import { IdentityAssuranceErrorReason } from '../identity_assurance.error-reasons';
+import { assertResourceInTenant } from '../../../common/tenant/resource-scope';
 
 /**
  * UC-27-11: revocación de una aserción de identidad. Única mutación permitida en
@@ -29,16 +31,17 @@ export class IdentityAssertionsService {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param assertionsRepo - Valor de assertions repo requerido por la operación.
-   * @param casesRepo - Valor de cases repo requerido por la operación.
    * @param fraudRepo - Valor de fraud repo requerido por la operación.
+   * @param effects - Efectos de dominio al revocar.
+   * @param scope - Alcance por tenant de los casos.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly assertionsRepo: IdentityAssertionsRepository,
-    private readonly casesRepo: IdentityVerificationCasesRepository,
     private readonly fraudRepo: IdentityFraudSignalsRepository,
     private readonly effects: IdentityVerificationEffectsService,
+    private readonly scope: IdentityCaseScope,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(IdentityAssertionsService.name);
@@ -54,14 +57,27 @@ export class IdentityAssertionsService {
       { operation: 'ida.assertion.revoke', actorId: actor.id, assertionId },
       'Revoking identity assertion',
     );
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const assertion = await this.assertionsRepo.findById(tx, assertionId);
-      if (!assertion) {
-        throw new ResourceNotFoundException(
-          'Aserción de identidad no encontrada',
-          { assertionId },
-        );
-      }
+      // La aserción no lleva tenant: lo hereda del sujeto de su caso. Ajena e
+      // inexistente responden igual y la aserción no se toca.
+      const found = await this.assertionsRepo.findById(tx, assertionId);
+      const ownCase = found
+        ? await this.scope.findAuthorizedCase(
+            tx,
+            found.identityVerificationCaseId,
+            tenantId,
+          )
+        : null;
+      const assertion = assertResourceInTenant(
+        found,
+        ownCase ? tenantId : null,
+        tenantId,
+        {
+          message: 'Aserción de identidad no encontrada',
+          reason: IdentityAssuranceErrorReason.ASSERTION_NOT_AVAILABLE,
+        },
+      );
       if (assertion.revokedAt) {
         throw new ConflictException('La aserción ya está revocada', {
           assertionId,
@@ -73,18 +89,10 @@ export class IdentityAssertionsService {
       assertion.revocationReasonConceptId =
         dto.revocationReasonConceptId ?? IDA.REVOCATION_FRAUD;
 
-      const kase = await this.casesRepo.findById(
-        tx,
-        assertion.identityVerificationCaseId,
-      );
-      if (!kase) {
-        throw new ResourceNotFoundException(
-          'Caso de verificación no encontrado',
-          {
-            caseId: assertion.identityVerificationCaseId,
-          },
-        );
-      }
+      const kase = assertResourceInTenant(ownCase, tenantId, tenantId, {
+        message: 'Caso de verificación no encontrado',
+        reason: IdentityAssuranceErrorReason.CASE_NOT_AVAILABLE,
+      });
       kase.statusConceptId = IDA.CASE_REVOKED;
       touch(kase, actor.id);
 

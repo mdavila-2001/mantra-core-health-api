@@ -6,12 +6,14 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
   type AuthenticatedUser,
+  CONCEPTS,
 } from '../../../common';
+import { FilesRepository } from '../../common/repositories';
 import {
   HealthPractitionerProfilesRepository,
   JurisdictionAuthorizationsRepository,
   PersonAccountLinksRepository,
-} from '../../profiles/repositories';
+} from '../../profiles/infrastructure/repositories';
 import { TenantMembershipsRepository } from '../../directory/repositories';
 import { DIR } from '../../directory/directory.concepts';
 import { IDA } from '../identity_assurance.concepts';
@@ -29,6 +31,12 @@ import {
   IdentityManualReviewCasesRepository,
   IdentityVerificationCasesRepository,
 } from '../repositories';
+import { NotificationsService } from '../../messaging/services';
+import { MESSAGING_SEED } from '../../../common/seed/messaging-seed.service';
+import {
+  AuthenticationCredentials,
+  EmailVerifications,
+} from '../../iam/entities';
 import type { IdentityVerificationCases } from '../entities';
 import type {
   CaseCheckDto,
@@ -38,6 +46,7 @@ import type {
   VerificationStatusResponseDto,
   VerificationTypeDto,
   VerificationTypesResponseDto,
+  VerificationEvidenceDto,
 } from '../dto';
 
 /**
@@ -114,6 +123,8 @@ export class IdentitySelfServiceService {
     private readonly membershipsRepo: TenantMembershipsRepository,
     private readonly manualReviewRepo: IdentityManualReviewCasesRepository,
     private readonly checkResultsRepo: IdentityCheckResultsRepository,
+    private readonly filesRepo: FilesRepository,
+    private readonly notificationsService: NotificationsService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(IdentitySelfServiceService.name);
@@ -130,7 +141,7 @@ export class IdentitySelfServiceService {
         tx,
         IDENTITY_CARD_VERTICAL,
         personId,
-        dto.evidenceFileId,
+        dto,
         actor,
       );
     });
@@ -148,7 +159,7 @@ export class IdentitySelfServiceService {
         tx,
         PRACTITIONER_IDENTITY_VERTICAL,
         personId,
-        dto.evidenceFileId,
+        dto,
         actor,
       );
     });
@@ -194,7 +205,7 @@ export class IdentitySelfServiceService {
         tx,
         MEDICAL_LICENSE_VERTICAL,
         authorization.id,
-        dto.evidenceFileId,
+        dto,
         actor,
       );
     });
@@ -234,7 +245,7 @@ export class IdentitySelfServiceService {
         tx,
         INSTITUTION_DOCUMENT_VERTICAL,
         tenantId,
-        dto.evidenceFileId,
+        dto,
         actor,
       );
     });
@@ -389,7 +400,18 @@ export class IdentitySelfServiceService {
     kase: IdentityVerificationCases,
     detailed: boolean,
   ): Promise<VerificationStatusResponseDto> {
-    const evidence = await this.evidenceRepo.findLatestByCase(em, kase.id);
+    const records = await this.evidenceRepo.findByCase(em, kase.id);
+    const evidence: VerificationEvidenceDto[] = records.map(
+      (record, index) => ({
+        id: record.id,
+        evidenceTypeConceptId: record.evidenceTypeConceptId,
+        ...(record.evidenceFileId
+          ? { evidenceFileId: record.evidenceFileId }
+          : {}),
+        createdAt: record.createdAt,
+        sequence: index + 1,
+      }),
+    );
 
     const base: VerificationStatusResponseDto = {
       id: kase.id,
@@ -397,8 +419,9 @@ export class IdentitySelfServiceService {
       type: typeCodeForSubject(kase.subjectTypeConceptId),
       ...(kase.openedAt ? { openedAt: kase.openedAt } : {}),
       ...(kase.completedAt ? { completedAt: kase.completedAt } : {}),
-      ...(evidence?.evidenceFileId
-        ? { evidenceFileId: evidence.evidenceFileId }
+      ...(evidence.length ? { evidence } : {}),
+      ...(evidence.at(-1)?.evidenceFileId
+        ? { evidenceFileId: evidence.at(-1)!.evidenceFileId }
         : {}),
     };
     if (!detailed) return base;
@@ -450,9 +473,28 @@ export class IdentitySelfServiceService {
     tx: EntityManager,
     vertical: IdentityVerificationVertical,
     subjectEntityId: string,
-    evidenceFileId: string,
+    dto: RequestVerificationDto,
     actor: AuthenticatedUser,
   ): Promise<VerificationRequestResponseDto> {
+    const evidence = this.resolveEvidence(dto, vertical.evidenceTypeConceptId);
+    if (!evidence.length) {
+      throw new PreconditionFailedException(
+        'Adjunta el frente, el reverso y las tres capturas de prueba de vida',
+      );
+    }
+    for (const item of evidence) {
+      const file = await this.filesRepo.findById(tx, item.fileId);
+      if (
+        !file ||
+        file.createdByUserId !== actor.id ||
+        file.sensitivityConceptId !== CONCEPTS.SENSITIVITY_PHI ||
+        file.deletedAt
+      ) {
+        throw new PreconditionFailedException(
+          'Una evidencia no existe, no pertenece a esta cuenta o no está protegida',
+        );
+      }
+    }
     const live = await this.casesRepo.countLiveForSubject(
       tx,
       vertical.subjectTypeConceptId,
@@ -481,13 +523,15 @@ export class IdentitySelfServiceService {
     // Las FK son columnas uuid planas: persistir el caso antes de sus hijos.
     await tx.flush();
 
-    await this.evidenceRepo.create(tx, {
-      identityVerificationCaseId: kase.id,
-      evidenceTypeConceptId: vertical.evidenceTypeConceptId,
-      evidenceFileId,
-      verificationStatusConceptId: IDA.EVIDENCE_PENDING,
-      actorUserId: actor.id,
-    });
+    for (const item of evidence) {
+      await this.evidenceRepo.create(tx, {
+        identityVerificationCaseId: kase.id,
+        evidenceTypeConceptId: item.typeId,
+        evidenceFileId: item.fileId,
+        verificationStatusConceptId: IDA.EVIDENCE_PENDING,
+        actorUserId: actor.id,
+      });
+    }
 
     const check = this.checksRepo.create(tx, {
       identityVerificationCaseId: kase.id,
@@ -512,6 +556,9 @@ export class IdentitySelfServiceService {
       },
       'Verification requested by its own subject',
     );
+
+    await this.sendConfirmationEmail(tx, kase, actor);
+
     return {
       caseId: kase.id,
       checkId: check.id,
@@ -593,5 +640,139 @@ export class IdentitySelfServiceService {
       DIR.MEMBERSHIP_ACTIVE,
     );
     return membership !== null;
+  }
+
+  /** Convierte el contrato nuevo de cinco evidencias o el contrato histórico. */
+  private resolveEvidence(
+    dto: RequestVerificationDto,
+    legacyTypeId: string,
+  ): Array<{ fileId: string; typeId: string }> {
+    const values = [
+      dto.documentFrontFileId,
+      dto.documentBackFileId,
+      dto.livenessCenterFileId,
+      dto.livenessTurnLeftFileId,
+      dto.livenessTurnRightFileId,
+    ];
+    const supplied = values.filter((value): value is string => Boolean(value));
+    if (dto.evidenceFileId && supplied.length) {
+      throw new PreconditionFailedException(
+        'Envía el archivo histórico o las cinco evidencias nuevas, no ambos',
+      );
+    }
+    if (dto.evidenceFileId) {
+      return [{ fileId: dto.evidenceFileId, typeId: legacyTypeId }];
+    }
+    if (supplied.length === 0) return [];
+    if (supplied.length !== values.length) {
+      throw new PreconditionFailedException(
+        'La verificación requiere las cinco evidencias en el orden solicitado',
+      );
+    }
+    return [
+      { fileId: values[0]!, typeId: IDA.EVIDENCE_TYPE_IDENTITY_DOCUMENT_FRONT },
+      { fileId: values[1]!, typeId: IDA.EVIDENCE_TYPE_IDENTITY_DOCUMENT_BACK },
+      { fileId: values[2]!, typeId: IDA.EVIDENCE_TYPE_LIVENESS_CENTER },
+      { fileId: values[3]!, typeId: IDA.EVIDENCE_TYPE_LIVENESS_TURN_LEFT },
+      { fileId: values[4]!, typeId: IDA.EVIDENCE_TYPE_LIVENESS_TURN_RIGHT },
+    ];
+  }
+
+  /**
+   * Envía un correo de confirmación de solicitud de verificación si el usuario
+   * tiene una dirección de correo electrónico registrada.
+   *
+   * @param tx - Transacción o EntityManager activo.
+   * @param kase - Caso de verificación recién abierto.
+   * @param actor - Usuario solicitante.
+   */
+  private async sendConfirmationEmail(
+    tx: EntityManager,
+    kase: IdentityVerificationCases,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    try {
+      const email = await this.findEmailForUser(tx, actor.id);
+      if (!email) {
+        this.logger.info(
+          {
+            operation: 'ida.self-service.confirm-email',
+            caseId: kase.id,
+            userId: actor.id,
+          },
+          'El usuario no tiene correo registrado; no se envió confirmación',
+        );
+        return;
+      }
+
+      await this.notificationsService.createRequest(
+        {
+          channelId: MESSAGING_SEED.emailChannelId,
+          recipientUserId: actor.id,
+          recipientAddress: email,
+          payloadJson: {
+            subject: 'Confirmación de solicitud de verificación - AloVida',
+            bodyText:
+              'Estimado/a usuario/a,\n\n' +
+              'Hemos recibido su solicitud de verificación de identidad.\n\n' +
+              `Código de solicitud: ${kase.id}\n` +
+              'Estado: En verificación\n\n' +
+              'Nuestro equipo y el sistema revisarán la documentación aportada. ' +
+              'Le notificaremos cuando el proceso haya concluido.\n\n' +
+              'Atentamente,\n' +
+              'Equipo de AloVida',
+          },
+        },
+        actor,
+      );
+
+      this.logger.info(
+        {
+          operation: 'ida.self-service.confirm-email',
+          caseId: kase.id,
+          userId: actor.id,
+          email,
+        },
+        'Correo de confirmación de verificación encolado exitosamente',
+      );
+    } catch (error) {
+      this.logger.warn(
+        {
+          operation: 'ida.self-service.confirm-email',
+          caseId: kase.id,
+          userId: actor.id,
+          err: error,
+        },
+        'No se pudo encolar el correo de confirmación de verificación',
+      );
+    }
+  }
+
+  /**
+   * Resuelve la dirección de correo electrónico vinculada a un usuario.
+   *
+   * @param em - Contexto de persistencia.
+   * @param userId - Identificador del usuario.
+   */
+  private async findEmailForUser(
+    em: EntityManager,
+    userId: string,
+  ): Promise<string | null> {
+    const credentials = await em.find(AuthenticationCredentials, { userId });
+    const byCredential = credentials
+      .map((credential) => credential.externalSubject)
+      .find(
+        (subject): subject is string =>
+          typeof subject === 'string' && subject.includes('@'),
+      );
+    if (byCredential !== undefined) return byCredential.trim();
+
+    const verification = await em.findOne(
+      EmailVerifications,
+      { userId },
+      { orderBy: { createdAt: 'desc' } },
+    );
+    const declared = verification?.email?.trim();
+    return declared === undefined || declared === '' ? null : declared;
   }
 }

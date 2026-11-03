@@ -1,0 +1,95 @@
+{
+  "lab-tests-cdisc-sdtm": {
+    "sha256": "5df67fcf2218f6a04b74a703ca2bdc63b80c39093e233242a88716c52e6a080c",
+    "lines": 4721,
+    "files": [
+      "lab-tests-cdisc-sdtm.ndjson.gz"
+    ]
+  },
+  "lab-tests-cups-co": {
+    "sha256": "848e985544d738797878fe739024e810a2f79f099fa10560b21885e5779ccf9c",
+    "lines": 2158,
+    "files": [
+      "lab-tests-cups-co.ndjson.gz"
+    ]
+  },
+  "lab-tests-fonasa-mle": {
+    "sha256": "1e5df212c836debbf8d155a069e7cf37d5310de1498974f548af2fbe225d3c15",
+    "lines": 648,
+    "files": [
+      "lab-tests-fonasa-mle.ndjson.gz"
+    ]
+  },
+  "lab-tests-gtr-ncbi": {
+    "sha256": "51f72f5cc578c32281d26dabcfef13bdb282b3b5d00e90c08c090939384282d8",
+    "lines": 63919,
+    "files": [
+      "lab-tests-gtr-ncbi.part01.ndjson.gz",
+      "lab-tests-gtr-ncbi.part02.ndjson.gz",
+      "lab-tests-gtr-ncbi.part03.ndjson.gz",
+      "lab-tests-gtr-ncbi.part04.ndjson.gz",
+      "lab-tests-gtr-ncbi.part05.ndjson.gz"
+    ]
+  },
+  "lab-tests-hl7-tho": {
+    "sha256": "5de7f408dd229c0c4e6d3a3a1fa63f46b410eaf146425a2df85a4f87bbf0f2ad",
+    "lines": 479,
+    "files": [
+      "lab-tests-hl7-tho.ndjson.gz"
+    ]
+  },
+  "lab-tests-icd10pcs-cms": {
+    "sha256": "e390e722018e39a5efef5a4ea6f66e60f7e601b9767004225211e1d1e9ca2f34",
+    "lines": 4402,
+    "files": [
+      "lab-tests-icd10pcs-cms.ndjson.gz"
+    ]
+  },
+  "lab-tests-loinc": {
+    "sha256": "cc02119685ed099d31e35259c6da1143413aa38d236d56f63eb9fb415f5cd9ab",
+    "lines": 79462,
+    "files": [
+      "lab-tests-loinc.part01.ndjson.gz",
+      "lab-tests-loinc.part02.ndjson.gz",
+      "lab-tests-loinc.part03.ndjson.gz",
+      "lab-tests-loinc.part04.ndjson.gz",
+      "lab-tests-loinc.part05.ndjson.gz"
+    ]
+  },
+  "lab-tests-npu-ifcc": {
+    "sha256": "3678d4c5ff4cc2642a68f3203d0f9b527ec44fed6d3ff24adaa1597fa914c8e0",
+    "lines": 25699,
+    "files": [
+      "lab-tests-npu-ifcc.part01.ndjson.gz",
+      "lab-tests-npu-ifcc.part02.ndjson.gz"
+    ]
+  },
+  "lab-tests-pami-nomenclador": {
+    "sha256": "2e3e9855da64fd9ef3e0d589935d479123a60463891a36c8212bcc3139c3acb9",
+    "lines": 3034,
+    "files": [
+      "lab-tests-pami-nomenclador.ndjson.gz"
+    ]
+  },
+  "lab-tests-sigtap-sus": {
+    "sha256": "8f301cfdf24cfb4b276e3b5f3ba73d63b9ec876351e1ac346bf6503fe784ad79",
+    "lines": 1108,
+    "files": [
+      "lab-tests-sigtap-sus.ndjson.gz"
+    ]
+  },
+  "lab-tests-tuss-ans": {
+    "sha256": "3627fc8b076bfd19824ceaf08ca5c99097f51759cf7ced95296129165cc8bbd7",
+    "lines": 2211,
+    "files": [
+      "lab-tests-tuss-ans.ndjson.gz"
+    ]
+  },
+  "lab-tests-ucum": {
+    "sha256": "c1e047a0e4192edb636601ed8730311c9270355f35cd1f1299c2e38ee556df42",
+    "lines": 888,
+    "files": [
+      "lab-tests-ucum.ndjson.gz"
+    ]
+  }
+}

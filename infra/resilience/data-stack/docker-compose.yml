@@ -1,0 +1,130 @@
+# Bases de la API, FUERA del despliegue de Coolify.
+#
+# Coolify nombra cada contenedor `<servicio>-<uuid>-<fecha>`, así que cada
+# despliegue de la API recreaba también postgres, mongo, redis, opensearch y
+# minio. Medido el 25/10/2026: la API tardaba ~20 min en volver y el front daba
+# 502 en toda llamada. Acá viven aparte: un despliegue ya no las toca.
+#
+# Las definiciones son las de `docker-compose.coolify.yml` (mismas imágenes,
+# healthchecks y comandos). En ese compose estos servicios quedaron detrás del
+# perfil `embedded-data`, que Coolify no activa. Los servicios se llaman igual,
+# así que en la red compartida la API y las init los encuentran por los mismos
+# nombres (`postgres`, `mongodb`, `redis`, `opensearch`, `minio`).
+#
+# Volúmenes PROPIOS (`alovida-data-<entorno>_*`), copiados de los de Coolify en
+# el cambio (switchover.sh). No se reusan los de Coolify a propósito: si alguna
+# vez Coolify volviera a levantar su postgres, lo haría sobre su volumen viejo y
+# no sobre éste. Dos postgres sobre el mismo directorio de datos lo corrompen.
+#
+# Uso (en el VPS): docker compose -p alovida-data-test --env-file /etc/alovida-resilience/data-test.env up -d
+name: alovida-data-${DATA_ENV:-test}
+
+x-logging: &logging
+  driver: json-file
+  options: { max-size: "10m", max-file: "3" }
+
+services:
+  postgres:
+    image: timescale/timescaledb-ha:pg18
+    restart: always
+    logging: *logging
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "127.0.0.1:${POSTGRES_PUBLIC_PORT:-15433}:5432"
+    volumes:
+      - postgres_data:/home/postgres/pgdata
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks: [alovida]
+
+  mongodb:
+    image: mongo:8.2.12
+    restart: always
+    logging: *logging
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --eval 'db.runCommand(\"ping\").ok' --quiet"]
+      interval: 15s
+      timeout: 30s
+      retries: 5
+      start_period: 40s
+    networks: [alovida]
+
+  redis:
+    image: redis:8.10-alpine
+    restart: always
+    logging: *logging
+    command: redis-server --save 60 1 --loglevel notice
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [alovida]
+
+  opensearch:
+    image: opensearchproject/opensearch:3.8.0
+    restart: always
+    logging: *logging
+    environment:
+      - cluster.name=alovida-cluster
+      - node.name=alovida-node1
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+      - DISABLE_INSTALL_DEMO_CONFIG=true
+      - DISABLE_SECURITY_PLUGIN=true
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile: { soft: 65536, hard: 65536 }
+    volumes:
+      - opensearch_data:/usr/share/opensearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+    networks: [alovida]
+
+  minio:
+    image: bitnamilegacy/minio:2025.4.22
+    user: "0:0"
+    entrypoint: ["minio"]
+    pull_policy: missing
+    restart: always
+    logging: *logging
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [alovida]
+
+volumes:
+  postgres_data:
+  mongodb_data:
+  redis_data:
+  opensearch_data:
+  minio_data:
+
+networks:
+  alovida:
+    external: true
+    name: ${ALOVIDA_NETWORK:-alovida-test}

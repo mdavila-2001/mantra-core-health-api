@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `community`
 
-Referencia exhaustiva de 92 operación(es) del módulo `community`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 100 operación(es) del módulo `community`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `community`, `community-feed`, `community-groups`, `community-messaging`, `community-moderation`, `community-polls`, `community-public`, `community-reviews`, `community-social`, `community-timeline`
-- **Controladores:** `CommunityFeedController`, `CommunityGroupsController`, `CommunityMessagingController`, `CommunityModerationController`, `CommunityPollsController`, `CommunityPublicController`, `CommunityReviewsController`, `CommunitySearchIndexController`, `CommunitySocialController`, `CommunityTimelineController`, `CommunityTopicsController`, `CommunityVerificationController`, `PatientReviewsController`
+- **Etiquetas OpenAPI:** `community`, `community-feed`, `community-groups`, `community-messaging`, `community-moderation`, `community-polls`, `community-public`, `community-ratings`, `community-reviews`, `community-social`, `community-timeline`
+- **Controladores:** `CommunityFeedController`, `CommunityGroupsController`, `CommunityMessagingController`, `CommunityModerationController`, `CommunityPollsController`, `CommunityPublicController`, `CommunityReviewsController`, `CommunitySearchIndexController`, `CommunitySocialController`, `CommunityTimelineController`, `CommunityTopicsController`, `CommunityVerificationController`, `PartyRatingsController`, `PatientReviewsController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -71,38 +71,46 @@ Referencia exhaustiva de 92 operación(es) del módulo `community`, derivada del
 58. [GET /community/profiles/me](#58-get-community-profiles-me) — Consultar la vitrina pública propia
 59. [PUT /community/profiles/me](#59-put-community-profiles-me) — Crear o actualizar la vitrina pública propia
 60. [GET /community/profiles/me/stats](#60-get-community-profiles-me-stats) — Estadísticas de la vitrina pública propia
-61. [POST /community/public-profiles](#61-post-community-public-profiles) — Crear un perfil público (bootstrap del grafo social)
-62. [PUT /community/reactions](#62-put-community-reactions) — Reaccionar a contenido (upsert una reacción por actor/objeto)
-63. [POST /community/reports](#63-post-community-reports) — Reportar contenido y encolar moderación
-64. [GET /community/topics](#64-get-community-topics) — Temas de la comunidad
-65. [GET /f/{slug}](#65-get-f-slug) — Ficha pública de una farmacia
-66. [GET /internal/community/feed/pending](#66-get-internal-community-feed-pending) — Publicaciones publicadas sin fan-out
-67. [POST /internal/community/feed/rebuild](#67-post-internal-community-feed-rebuild) — Generar feed (fan-out y ranking)
-68. [GET /internal/community/search/health](#68-get-internal-community-search-health) — Estado del índice del directorio público
-69. [POST /internal/community/search/reindex](#69-post-internal-community-search-reindex) — Reindexar el directorio público
-70. [POST /internal/community/verification/badges](#70-post-internal-community-verification-badges) — Emitir un sello a mano (auditado)
-71. [POST /internal/community/verification/badges/{targetId}/revoke](#71-post-internal-community-verification-badges-targetid-revoke) — Bajar los sellos de un sujeto (auditado)
-72. [POST /internal/community/verification/badges/expire-sweep](#72-post-internal-community-verification-badges-expire-sweep) — Bajar los sellos cuya vigencia ya venció
-73. [GET /l/{slug}](#73-get-l-slug) — Ficha pública de un laboratorio
-74. [GET /o/{slug}](#74-get-o-slug) — Ficha pública de una organización
-75. [GET /p/{slug}](#75-get-p-slug) — Ficha pública de un profesional
-76. [POST /patients/me/reviews](#76-post-patients-me-reviews) — Calificar una atención recibida
-77. [GET /public/comments/{commentId}/replies](#77-get-public-comments-commentid-replies) — Respuestas de un comentario público
-78. [GET /public/media/{id}](#78-get-public-media-id) — Servir una imagen pública (avatar, portada o post)
-79. [GET /public/nearby](#79-get-public-nearby) — Prestadores cercanos, en línea recta
-80. [GET /public/posts](#80-get-public-posts) — Últimas publicaciones de todos los profesionales
-81. [GET /public/posts/{postId}/comments](#81-get-public-posts-postid-comments) — Comentarios raíz de una publicación pública
-82. [GET /public/posts/{postId}/reactions](#82-get-public-posts-postid-reactions) — Quiénes reaccionaron a una publicación pública
-83. [GET /public/profiles/{prefijo}/{slug}](#83-get-public-profiles-prefijo-slug) — Ficha pública por prefijo de vertical
-84. [GET /public/profiles/{prefijo}/{slug}/reviews](#84-get-public-profiles-prefijo-slug-reviews) — Opiniones publicadas de una ficha pública
-85. [GET /public/search](#85-get-public-search) — Buscador público unificado
-86. [GET /public/search/diagnostic-units](#86-get-public-search-diagnostic-units) — Laboratorios y centros de diagnóstico
-87. [GET /public/search/insurers](#87-get-public-search-insurers) — Aseguradoras en el directorio público
-88. [GET /public/search/medications](#88-get-public-search-medications) — Medicamentos ofertados públicamente
-89. [GET /public/search/organizations](#89-get-public-search-organizations) — Organizaciones en el directorio público
-90. [GET /public/search/pharmacies](#90-get-public-search-pharmacies) — Farmacias en el directorio público
-91. [GET /public/search/practitioners](#91-get-public-search-practitioners) — Profesionales en el directorio público
-92. [GET /s/{slug}](#92-get-s-slug) — Ficha pública de una aseguradora
+61. [GET /community/profiles/organization-showcases/me](#61-get-community-profiles-organization-showcases-me) — Vitrinas de organización que la sesión puede atender en el chat
+62. [POST /community/public-profiles](#62-post-community-public-profiles) — Crear un perfil público (bootstrap del grafo social)
+63. [GET /community/ratings](#63-get-community-ratings) — Calificaciones de un médico, paciente u organización
+64. [PUT /community/ratings](#64-put-community-ratings) — Calificar con estrellas a un médico, paciente u organización
+65. [GET /community/ratings/mine](#65-get-community-ratings-mine) — Mis calificaciones
+66. [GET /community/ratings/summary](#66-get-community-ratings-summary) — Nota media de un médico, paciente u organización
+67. [PUT /community/reactions](#67-put-community-reactions) — Reaccionar a contenido (upsert una reacción por actor/objeto)
+68. [POST /community/reports](#68-post-community-reports) — Reportar contenido y encolar moderación
+69. [GET /community/topics](#69-get-community-topics) — Temas de la comunidad
+70. [GET /f/{slug}](#70-get-f-slug) — Ficha pública de una farmacia
+71. [GET /internal/community/feed/pending](#71-get-internal-community-feed-pending) — Publicaciones publicadas sin fan-out
+72. [POST /internal/community/feed/ranking/apply](#72-post-internal-community-feed-ranking-apply) — Aplicar rank_score recalculado
+73. [GET /internal/community/feed/ranking/pending](#73-get-internal-community-feed-ranking-pending) — Items de feed pendientes de puntuar
+74. [POST /internal/community/feed/rebuild](#74-post-internal-community-feed-rebuild) — Generar feed (fan-out y ranking)
+75. [GET /internal/community/search/health](#75-get-internal-community-search-health) — Estado del índice del directorio público
+76. [POST /internal/community/search/reindex](#76-post-internal-community-search-reindex) — Reindexar el directorio público
+77. [POST /internal/community/verification/badges](#77-post-internal-community-verification-badges) — Emitir un sello a mano (auditado)
+78. [POST /internal/community/verification/badges/{targetId}/revoke](#78-post-internal-community-verification-badges-targetid-revoke) — Bajar los sellos de un sujeto (auditado)
+79. [POST /internal/community/verification/badges/expire-sweep](#79-post-internal-community-verification-badges-expire-sweep) — Bajar los sellos cuya vigencia ya venció
+80. [GET /l/{slug}](#80-get-l-slug) — Ficha pública de un laboratorio
+81. [GET /o/{slug}](#81-get-o-slug) — Ficha pública de una organización
+82. [GET /p/{slug}](#82-get-p-slug) — Ficha pública de un profesional
+83. [GET /patients/me/reviewable-care](#83-get-patients-me-reviewable-care) — Consultar si una atención recibida se puede calificar
+84. [POST /patients/me/reviews](#84-post-patients-me-reviews) — Calificar una atención recibida
+85. [GET /public/comments/{commentId}/replies](#85-get-public-comments-commentid-replies) — Respuestas de un comentario público
+86. [GET /public/media/{id}](#86-get-public-media-id) — Servir una imagen pública (avatar, portada o post)
+87. [GET /public/nearby](#87-get-public-nearby) — Prestadores cercanos, en línea recta
+88. [GET /public/posts](#88-get-public-posts) — Últimas publicaciones de todos los profesionales
+89. [GET /public/posts/{postId}/comments](#89-get-public-posts-postid-comments) — Comentarios raíz de una publicación pública
+90. [GET /public/posts/{postId}/reactions](#90-get-public-posts-postid-reactions) — Quiénes reaccionaron a una publicación pública
+91. [GET /public/profiles/{prefijo}/{slug}](#91-get-public-profiles-prefijo-slug) — Ficha pública por prefijo de vertical
+92. [GET /public/profiles/{prefijo}/{slug}/reviews](#92-get-public-profiles-prefijo-slug-reviews) — Opiniones publicadas de una ficha pública
+93. [GET /public/search](#93-get-public-search) — Buscador público unificado
+94. [GET /public/search/diagnostic-units](#94-get-public-search-diagnostic-units) — Laboratorios y centros de diagnóstico
+95. [GET /public/search/insurers](#95-get-public-search-insurers) — Aseguradoras en el directorio público
+96. [GET /public/search/medications](#96-get-public-search-medications) — Medicamentos ofertados públicamente
+97. [GET /public/search/organizations](#97-get-public-search-organizations) — Organizaciones en el directorio público
+98. [GET /public/search/pharmacies](#98-get-public-search-pharmacies) — Farmacias en el directorio público
+99. [GET /public/search/practitioners](#99-get-public-search-practitioners) — Profesionales en el directorio público
+100. [GET /s/{slug}](#100-get-s-slug) — Ficha pública de una aseguradora
 
 ---
 
@@ -172,6 +180,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<SocialRemovalResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<SocialRemovalResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<SocialRemovalResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SocialRemovalResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SocialRemovalResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -279,6 +288,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<BlockPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<BlockPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<BlockPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<BlockPageDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `BlockPageDto`. Ejemplo completo derivado de ese DTO:
 
@@ -419,6 +429,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -532,6 +543,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<SocialRemovalResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<SocialRemovalResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<SocialRemovalResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SocialRemovalResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SocialRemovalResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -640,6 +652,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<BookmarkPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<BookmarkPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<BookmarkPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<BookmarkPageDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `BookmarkPageDto`. Ejemplo completo derivado de ese DTO:
 
@@ -785,6 +798,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -940,6 +954,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CommentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CommentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CommentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CommentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CommentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1061,6 +1076,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<void>` | No |
 | 429 | Consulta completada correctamente. | `Promise<void>` | No |
 | 500 | Consulta completada correctamente. | `Promise<void>` | No |
+| 504 | Consulta completada correctamente. | `Promise<void>` | No |
 
 La operación no devuelve body según el tipo TypeScript del controlador.
 
@@ -1163,6 +1179,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<ConversationPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ConversationPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ConversationPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ConversationPageDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ConversationPageDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1194,7 +1211,12 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
         {
           "profileId": "00000000-0000-4000-8000-000000000001",
           "displayName": "Nombre de ejemplo",
-          "avatarUrl": "valor-ejemplo"
+          "avatarUrl": "valor-ejemplo",
+          "verification": {
+            "status": "VERIFIED",
+            "verifiedAt": "2026-07-31T12:00:00.000Z",
+            "validUntil": "valor-ejemplo"
+          }
         }
       ]
     }
@@ -1209,7 +1231,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<ConversationListItemDto>` | Sin restricción adicional declarada | Conversaciones de la página. | `[{"id":"00000000-0000-4000-8000-000000000001","conversationTypeConceptId":"00000000-0000-4000-8000-000000000001","groupId":"00000000-0000-4000-8000-000000000001","lastMessageAt":"2026-07-31T12:00:00.000Z","messageCount":1,"lastMessage":{"id":"00000000-0000-4000-8000-000000000001","senderProfileId":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","contentTypeConceptId":"00000000-0000-4000-8000-000000000001","attachmentFileId":"00000000-0000-4000-8000-000000000001","deletedAt":"2026-07-31T12:00:00.000Z","sentAt":"2026-07-31T12:00:00.000Z"},"unreadCount":1,"lastMessageReadByPeer":true,"isFavorite":true,"isPinned":true,"archivedAt":"2026-07-31T12:00:00.000Z","pinnedMessageId":"00000000-0000-4000-8000-000000000001","peers":[{"profileId":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","avatarUrl":"valor-ejemplo"}]}]` |
+| `items` | Sí | `array<ConversationListItemDto>` | Sin restricción adicional declarada | Conversaciones de la página. | `[{"id":"00000000-0000-4000-8000-000000000001","conversationTypeConceptId":"00000000-0000-4000-8000-000000000001","groupId":"00000000-0000-4000-8000-000000000001","lastMessageAt":"2026-07-31T12:00:00.000Z","messageCount":1,"lastMessage":{"id":"00000000-0000-4000-8000-000000000001","senderProfileId":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","contentTypeConceptId":"00000000-0000-4000-8000-000000000001","attachmentFileId":"00000000-0000-4000-8000-000000000001","deletedAt":"2026-07-31T12:00:00.000Z","sentAt":"2026-07-31T12:00:00.000Z"},"unreadCount":1,"lastMessageReadByPeer":true,"isFavorite":true,"isPinned":true,"archivedAt":"2026-07-31T12:00:00.000Z","pinnedMessageId":"00000000-0000-4000-8000-000000000001","peers":[{"profileId":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","avatarUrl":"valor-ejemplo","verification":{"status":"VERIFIED","verifiedAt":"2026-07-31T12:00:00.000Z","validUntil":"valor-ejemplo"}}]}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Identificador de la conversación. | `00000000-0000-4000-8000-000000000001` |
 | `items[].conversationTypeConceptId` | Sí | `string` | formato `uuid` | Concept id del tipo de conversación (directa, grupal). | `00000000-0000-4000-8000-000000000001` |
 | `items[].groupId` | No | `string` | formato `uuid`; admite null | Grupo al que pertenece, si es de grupo. | `00000000-0000-4000-8000-000000000001` |
@@ -1229,10 +1251,14 @@ Campos de la respuesta:
 | `items[].isPinned` | Sí | `boolean` | Sin restricción adicional declarada | Fijada arriba de la bandeja del actor (F4.4). Las fijadas van primero. | `true` |
 | `items[].archivedAt` | No | `string` | formato `date-time`; admite null | Desde cuándo la archivó el actor; `null` si no está archivada (F4.4). | `2026-07-31T12:00:00.000Z` |
 | `items[].pinnedMessageId` | No | `string` | formato `uuid`; admite null | El mensaje fijado en la barra superior, si hay uno (F4.6). | `00000000-0000-4000-8000-000000000001` |
-| `items[].peers` | Sí | `array<ConversationPeerDto>` | Sin restricción adicional declarada | Los demás participantes, sin el propio. Sin el propio porque la bandeja se lee desde un lado: incluirse a uno mismo obligaría a cada pantalla a filtrarse, y la que se olvide muestra «Conversación con vos». | `[{"profileId":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","avatarUrl":"valor-ejemplo"}]` |
+| `items[].peers` | Sí | `array<ConversationPeerDto>` | Sin restricción adicional declarada | Los demás participantes, sin el propio. Sin el propio porque la bandeja se lee desde un lado: incluirse a uno mismo obligaría a cada pantalla a filtrarse, y la que se olvide muestra «Conversación con vos». | `[{"profileId":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","avatarUrl":"valor-ejemplo","verification":{"status":"VERIFIED","verifiedAt":"2026-07-31T12:00:00.000Z","validUntil":"valor-ejemplo"}}]` |
 | `items[].peers[].profileId` | Sí | `string` | formato `uuid` | Perfil público del participante. | `00000000-0000-4000-8000-000000000001` |
 | `items[].peers[].displayName` | No | `string` | admite null | Cómo se llama, para poder pintar la fila. | `Nombre de ejemplo` |
 | `items[].peers[].avatarUrl` | No | `string` | admite null | Su avatar público, o `null` si no subió ninguno. Misma regla que la ficha pública. | `valor-ejemplo` |
+| `items[].peers[].verification` | No | `PractitionerVerificationDto` | Sin restricción adicional declarada | El sello de verificación del participante cuando es un profesional; `null` para pacientes, organizaciones y cualquier otro perfil. Es la misma forma y la misma proyección de la admisión que muestran la Guía y el buscador (`VERIFIED`, `IN_REVIEW`, `UNVERIFIED`, `SUSPENDED`, `EXPIRED`): el chat no interpreta el estado por su cuenta. Aditivo. | `{"status":"VERIFIED","verifiedAt":"2026-07-31T12:00:00.000Z","validUntil":"valor-ejemplo"}` |
+| `items[].peers[].verification.status` | No | `string` | valores: `VERIFIED`, `IN_REVIEW`, `UNVERIFIED`, `SUSPENDED`, `EXPIRED` | Sin descripción específica en el contrato OpenAPI. | `VERIFIED` |
+| `items[].peers[].verification.verifiedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].peers[].verification.validUntil` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `count` | Sí | `number` | Sin restricción adicional declarada | Cuántas trae esta página. | `1` |
 | `limit` | Sí | `number` | Sin restricción adicional declarada | Tope pedido. | `1` |
 | `nextCursor` | No | `string` | admite null | Cursor de la página siguiente, o `null` si no hay más (F4.3). Se pagina sobre el orden de la bandeja —fijadas primero, después por último mensaje— y dentro del mismo recorte que aplique `q`. | `valor-ejemplo` |
@@ -1349,6 +1375,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1373,6 +1400,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Una organización no inicia conversaciones por este canal | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
 | 403 | `FORBIDDEN` | No se puede escribir en el grafo social con un perfil ajeno | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Las conversaciones grupales se crean desde el flujo de grupos | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
@@ -1464,6 +1492,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<void>` | No |
 | 429 | Consulta completada correctamente. | `Promise<void>` | No |
 | 500 | Consulta completada correctamente. | `Promise<void>` | No |
+| 504 | Consulta completada correctamente. | `Promise<void>` | No |
 
 La operación no devuelve body según el tipo TypeScript del controlador.
 
@@ -1569,6 +1598,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<DirectMessagePageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<DirectMessagePageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<DirectMessagePageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<DirectMessagePageDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DirectMessagePageDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1603,7 +1633,19 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "isEdited": true,
     "deletedAt": "2026-07-31T12:00:00.000Z",
     "sentAt": "2026-07-31T12:00:00.000Z"
-  }
+  },
+  "peers": [
+    {
+      "profileId": "00000000-0000-4000-8000-000000000001",
+      "displayName": "Nombre de ejemplo",
+      "avatarUrl": "valor-ejemplo",
+      "verification": {
+        "status": "VERIFIED",
+        "verifiedAt": "2026-07-31T12:00:00.000Z",
+        "validUntil": "valor-ejemplo"
+      }
+    }
+  ]
 }
 ```
 
@@ -1637,6 +1679,14 @@ Campos de la respuesta:
 | `pinnedMessage.isEdited` | No | `boolean` | admite null | Si fue editado (F4.5). | `true` |
 | `pinnedMessage.deletedAt` | No | `string` | formato `date-time`; admite null | Cuándo se eliminó (F4.5). Un mensaje eliminado **sigue viajando** —con `bodyText` y `attachmentFileId` en `null`— para que el hilo muestre «Se eliminó este mensaje» en su lugar y no un hueco que descoloca las citas. | `2026-07-31T12:00:00.000Z` |
 | `pinnedMessage.sentAt` | No | `string` | formato `date-time`; admite null | Cuándo se envió. | `2026-07-31T12:00:00.000Z` |
+| `peers` | No | `array<ConversationPeerDto>` | Sin restricción adicional declarada | Los demás participantes con su sello, como en la bandeja. Viaja sólo con la primera página (la cabecera del hilo se pinta al abrir y no en cada página de historia). Es el «detalle» de la conversación: no hay `GET :id`. | `[{"profileId":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","avatarUrl":"valor-ejemplo","verification":{"status":"VERIFIED","verifiedAt":"2026-07-31T12:00:00.000Z","validUntil":"valor-ejemplo"}}]` |
+| `peers[].profileId` | No | `string` | formato `uuid` | Perfil público del participante. | `00000000-0000-4000-8000-000000000001` |
+| `peers[].displayName` | No | `string` | admite null | Cómo se llama, para poder pintar la fila. | `Nombre de ejemplo` |
+| `peers[].avatarUrl` | No | `string` | admite null | Su avatar público, o `null` si no subió ninguno. Misma regla que la ficha pública. | `valor-ejemplo` |
+| `peers[].verification` | No | `PractitionerVerificationDto` | Sin restricción adicional declarada | El sello de verificación del participante cuando es un profesional; `null` para pacientes, organizaciones y cualquier otro perfil. Es la misma forma y la misma proyección de la admisión que muestran la Guía y el buscador (`VERIFIED`, `IN_REVIEW`, `UNVERIFIED`, `SUSPENDED`, `EXPIRED`): el chat no interpreta el estado por su cuenta. Aditivo. | `{"status":"VERIFIED","verifiedAt":"2026-07-31T12:00:00.000Z","validUntil":"valor-ejemplo"}` |
+| `peers[].verification.status` | No | `string` | valores: `VERIFIED`, `IN_REVIEW`, `UNVERIFIED`, `SUSPENDED`, `EXPIRED` | Sin descripción específica en el contrato OpenAPI. | `VERIFIED` |
+| `peers[].verification.verifiedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `peers[].verification.validUntil` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -1754,6 +1804,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<MessageResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<MessageResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<MessageResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MessageResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MessageResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1884,6 +1935,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<DeletedMessageResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DeletedMessageResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DeletedMessageResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DeletedMessageResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DeletedMessageResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2019,6 +2071,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DirectMessageDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DirectMessageDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DirectMessageDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DirectMessageDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DirectMessageDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2173,6 +2226,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ParticipantPreferencesDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ParticipantPreferencesDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ParticipantPreferencesDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ParticipantPreferencesDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ParticipantPreferencesDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2291,6 +2345,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<PinnedMessageResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PinnedMessageResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PinnedMessageResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PinnedMessageResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PinnedMessageResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2420,6 +2475,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PinnedMessageResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PinnedMessageResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PinnedMessageResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PinnedMessageResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PinnedMessageResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2533,6 +2589,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<ConversationPresenceDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ConversationPresenceDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ConversationPresenceDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ConversationPresenceDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ConversationPresenceDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2669,6 +2726,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ReadReceiptResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ReadReceiptResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ReadReceiptResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReadReceiptResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReadReceiptResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2798,6 +2856,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ChatContactPageDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ChatContactPageDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ChatContactPageDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ChatContactPageDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ChatContactPageDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2917,6 +2976,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<FeedPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<FeedPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<FeedPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<FeedPageDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FeedPageDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3092,6 +3152,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<SocialRemovalResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<SocialRemovalResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<SocialRemovalResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SocialRemovalResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SocialRemovalResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3199,6 +3260,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<FollowPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<FollowPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<FollowPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<FollowPageDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FollowPageDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3346,6 +3408,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3458,6 +3521,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<GroupPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<GroupPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<GroupPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<GroupPageDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GroupPageDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3581,7 +3645,7 @@ Content-Type: application/json
 | `slug` | Sí | `string` | longitud mínima 1; longitud máxima 120 | Slug único | `valor-ejemplo` |
 | `name` | Sí | `string` | longitud mínima 1; longitud máxima 200 | Nombre del grupo | `Nombre de ejemplo` |
 | `description` | No | `string` | longitud máxima 2000 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
-| `visibility` | No | `string` | valores: `PUBLIC`, `PRIVATE`, `SECRET` | Visibilidad | `PUBLIC` |
+| `visibility` | No | `string` | valores: `PUBLIC`, `PRIVATE`, `SECRET`, `VERIFIED_DOCTORS`, `ORGANIZATION_STAFF`, `ATTENDED_PATIENTS` | Visibilidad y público autorizado. `PUBLIC` es el público general y `PRIVATE` el ingreso por invitación o aprobación; `VERIFIED_DOCTORS`, `ORGANIZATION_STAFF` y `ATTENDED_PATIENTS` restringen el foro a ese público: quien no pertenece a él no lo ve (404). | `PUBLIC` |
 | `groupType` | No | `string` | valores: `GENERAL`, `SUPPORT` | Tipo de grupo | `GENERAL` |
 | `topicId` | No | `string` | formato `uuid` | Tema del grupo | `00000000-0000-4000-8000-000000000001` |
 | `ownerProfileId` | No | `string` | formato `uuid` | Perfil propietario | `00000000-0000-4000-8000-000000000001` |
@@ -3620,6 +3684,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3734,6 +3799,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<GroupDetailDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<GroupDetailDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<GroupDetailDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<GroupDetailDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GroupDetailDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3887,6 +3953,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<GroupMemberPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<GroupMemberPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<GroupMemberPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<GroupMemberPageDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GroupMemberPageDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3933,7 +4000,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | Sólo el titular del perfil puede leer su contenido privado | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
-| 404 | `NOT_FOUND` | Grupo no encontrado | Excepción explícita en src/modules/community/services/community-groups-read.service.ts |
+| 404 | `NOT_FOUND` | Grupo no encontrado | Excepción explícita en src/modules/community/services/community-group-access.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -4033,6 +4100,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<GroupMembershipResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<GroupMembershipResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<GroupMembershipResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<GroupMembershipResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GroupMembershipResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4059,7 +4127,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Grupo no encontrado | Excepción explícita en src/modules/community/services/community-groups.service.ts |
+| 403 | `FORBIDDEN` | Sólo el titular del perfil puede leer su contenido privado | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
+| 404 | `NOT_FOUND` | Grupo no encontrado | Excepción explícita en src/modules/community/services/community-group-access.service.ts |
 | 409 | `CONFLICT` | El perfil ya es miembro del grupo | Excepción explícita en src/modules/community/services/community-groups.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -4147,6 +4216,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GroupMemberUpdatedDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4281,6 +4351,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GroupMemberUpdatedDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4318,7 +4389,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Hay que indicar una decisión o un rol | Excepción explícita en src/modules/community/services/community-groups.service.ts |
 | 422 | `PRECONDITION_FAILED` | La solicitud de ingreso ya estaba resuelta | Excepción explícita en src/modules/community/services/community-groups.service.ts |
-| 422 | `PRECONDITION_FAILED` | La notificación necesita destinatario interno o dirección de destino | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | dto.recipientAddress           ? 'La notificación a una dirección externa también necesita el usuario destinatario'           : 'La notificación necesita el usuario destinatario' | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
@@ -4407,6 +4478,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<GroupWallPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<GroupWallPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<GroupWallPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<GroupWallPageDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GroupWallPageDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4564,6 +4636,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<GroupWallItemDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<GroupWallItemDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<GroupWallItemDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<GroupWallItemDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GroupWallItemDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4612,7 +4685,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Canal no encontrado | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La notificación necesita destinatario interno o dirección de destino | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | dto.recipientAddress           ? 'La notificación a una dirección externa también necesita el usuario destinatario'           : 'La notificación necesita el usuario destinatario' | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
@@ -4700,6 +4773,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<ModerationAppealPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ModerationAppealPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ModerationAppealPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ModerationAppealPageDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ModerationAppealPageDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4869,6 +4943,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4980,6 +5055,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<ModerationDecisionPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ModerationDecisionPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ModerationDecisionPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ModerationDecisionPageDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ModerationDecisionPageDto`. Ejemplo completo derivado de ese DTO:
 
@@ -5129,6 +5205,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -5240,6 +5317,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<MyModerationDecisionPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<MyModerationDecisionPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<MyModerationDecisionPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MyModerationDecisionPageDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyModerationDecisionPageDto`. Ejemplo completo derivado de ese DTO:
 
@@ -5372,6 +5450,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<ModerationQueuePageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ModerationQueuePageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ModerationQueuePageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ModerationQueuePageDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ModerationQueuePageDto`. Ejemplo completo derivado de ese DTO:
 
@@ -5540,6 +5619,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ModerationDecisionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ModerationDecisionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ModerationDecisionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ModerationDecisionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ModerationDecisionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -5653,6 +5733,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<NotificationPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<NotificationPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<NotificationPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<NotificationPageDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `NotificationPageDto`. Ejemplo completo derivado de ese DTO:
 
@@ -5790,6 +5871,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<PollDetailDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PollDetailDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PollDetailDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PollDetailDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PollDetailDto`. Ejemplo completo derivado de ese DTO:
 
@@ -5945,6 +6027,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<VoteResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<VoteResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<VoteResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<VoteResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `VoteResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -5969,6 +6052,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | No se puede escribir en el grafo social con un perfil ajeno | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
 | 404 | `NOT_FOUND` | Encuesta no encontrada | Excepción explícita en src/modules/community/services/community-polls.service.ts |
 | 404 | `NOT_FOUND` | La opción no pertenece a la encuesta | Excepción explícita en src/modules/community/services/community-polls.service.ts |
 | 409 | `CONFLICT` | Ya votó por esta opción | Excepción explícita en src/modules/community/services/community-polls.service.ts |
@@ -6058,6 +6142,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<PostDetailDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PostDetailDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PostDetailDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PostDetailDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PostDetailDto`. Ejemplo completo derivado de ese DTO:
 
@@ -6204,6 +6289,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<CommentThreadPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<CommentThreadPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<CommentThreadPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<CommentThreadPageDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CommentThreadPageDto`. Ejemplo completo derivado de ese DTO:
 
@@ -6383,6 +6469,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PollResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PollResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PollResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PollResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PollResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -6411,6 +6498,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | No se puede escribir en el grafo social con un perfil ajeno | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
 | 404 | `NOT_FOUND` | Post no encontrado | Excepción explícita en src/modules/community/services/community-polls.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -6496,6 +6584,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<ReactionSummaryDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ReactionSummaryDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ReactionSummaryDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ReactionSummaryDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReactionSummaryDto`. Ejemplo completo derivado de ese DTO:
 
@@ -6619,6 +6708,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<PublicProfileDetailDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PublicProfileDetailDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PublicProfileDetailDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PublicProfileDetailDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PublicProfileDetailDto`. Ejemplo completo derivado de ese DTO:
 
@@ -6777,6 +6867,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<ChatAutoReplyDto | null>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ChatAutoReplyDto | null>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ChatAutoReplyDto | null>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ChatAutoReplyDto | null>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ChatAutoReplyDto | null`. Ejemplo completo derivado de ese DTO:
 
@@ -6896,8 +6987,8 @@ Content-Type: application/json
 | `bodyText` | Sí | `string` | longitud mínima 1; longitud máxima 4000 | Texto de la respuesta | `valor-ejemplo` |
 | `cooldownHours` | Sí | `number` | mínimo 1; máximo 168 | Horas de descanso antes de repetirle a la misma conversación | `1` |
 | `onlyOutsideBusinessHours` | Sí | `boolean` | Sin restricción adicional declarada | Contestar sólo fuera del horario de atención | `true` |
-| `businessHoursFrom` | No | `string` | patrón runtime `HORA` | Inicio del horario de atención | `08:00` |
-| `businessHoursTo` | No | `string` | patrón runtime `HORA` | Fin del horario de atención | `18:00` |
+| `businessHoursFrom` | No | `string` | patrón runtime `HOUR` | Inicio del horario de atención | `08:00` |
+| `businessHoursTo` | No | `string` | patrón runtime `HOUR` | Fin del horario de atención | `18:00` |
 
 ### Payload completo de ejemplo
 
@@ -6934,6 +7025,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ChatAutoReplyDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ChatAutoReplyDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ChatAutoReplyDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ChatAutoReplyDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ChatAutoReplyDto`. Ejemplo completo derivado de ese DTO:
 
@@ -7063,6 +7155,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<PostPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PostPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PostPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PostPageDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PostPageDto`. Ejemplo completo derivado de ese DTO:
 
@@ -7266,6 +7359,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PostResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PostResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PostResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PostResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PostResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -7393,6 +7487,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<ServiceReviewPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ServiceReviewPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ServiceReviewPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ServiceReviewPageDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ServiceReviewPageDto`. Ejemplo completo derivado de ese DTO:
 
@@ -7537,7 +7632,7 @@ Content-Type: application/json
 | `verifiedEncounterId` | Sí | `string` | formato `uuid` | Atención que respalda la reseña (nunca se expone) | `00000000-0000-4000-8000-000000000001` |
 | `overallRating` | Sí | `number` | mínimo 1; máximo 5 | Calificación global 1..5 | `1` |
 | `reviewText` | No | `string` | longitud máxima 4000 | Texto de la review | `valor-ejemplo` |
-| `displayMode` | No | `string` | valores: `REAL_NAME`, `ANONYMOUS` | Modo de visualización del reviewer | `REAL_NAME` |
+| `displayMode` | No | `string` | valores: `REAL_NAME`, `ANONYMOUS` | Modo de visualización del reviewer. Si no se envía, la reseña es ANONYMOUS (privacidad por defecto); el nombre real se muestra sólo si se pide REAL_NAME | `ANONYMOUS` |
 | `dimensions` | No | `array<ReviewDimensionInputDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"dimension":"COMMUNICATION","score":1}]` |
 | `dimensions[].dimension` | No | `string` | valores: `COMMUNICATION`, `PUNCTUALITY`, `CLEANLINESS`, `OUTCOME` | Dimensión | `COMMUNICATION` |
 | `dimensions[].score` | No | `number` | mínimo 1; máximo 5 | Puntuación 1..5 | `1` |
@@ -7556,7 +7651,7 @@ Content-Type: application/json
   "verifiedEncounterId": "00000000-0000-4000-8000-000000000001",
   "overallRating": 1,
   "reviewText": "valor-ejemplo",
-  "displayMode": "REAL_NAME",
+  "displayMode": "ANONYMOUS",
   "dimensions": [
     {
       "dimension": "COMMUNICATION",
@@ -7580,6 +7675,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ReviewResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ReviewResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ReviewResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReviewResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReviewResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -7717,6 +7813,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -7827,6 +7924,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<PublicProfileDetailDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PublicProfileDetailDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PublicProfileDetailDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PublicProfileDetailDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PublicProfileDetailDto`. Ejemplo completo derivado de ese DTO:
 
@@ -7982,6 +8080,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<OwnPublicProfileDto | null>` | No |
 | 429 | Consulta completada correctamente. | `Promise<OwnPublicProfileDto | null>` | No |
 | 500 | Consulta completada correctamente. | `Promise<OwnPublicProfileDto | null>` | No |
+| 504 | Consulta completada correctamente. | `Promise<OwnPublicProfileDto | null>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OwnPublicProfileDto | null`. Ejemplo completo derivado de ese DTO:
 
@@ -8141,6 +8240,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<OwnPublicProfileDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<OwnPublicProfileDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<OwnPublicProfileDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OwnPublicProfileDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OwnPublicProfileDto`. Ejemplo completo derivado de ese DTO:
 
@@ -8276,6 +8376,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<ProfileStatsDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ProfileStatsDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ProfileStatsDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ProfileStatsDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ProfileStatsDto`. Ejemplo completo derivado de ese DTO:
 
@@ -8333,7 +8434,124 @@ Ejemplo de error normalizado:
 
 ---
 
-## 61. POST /community/public-profiles
+## 61. GET /community/profiles/organization-showcases/me
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-social`
+- **Nombre:** Vitrinas de organización que la sesión puede atender en el chat
+- **Operation ID:** `CommunitySocialController_listOwnOrganizationShowcases`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunitySocialController.listOwnOrganizationShowcases](../../src/modules/community/controllers/community-social.controller.ts)
+
+### Descripción de negocio
+
+Vitrinas de organización que la sesión puede atender en el chat. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Las vitrinas de organización (farmacia, clínica) con las que la sesión puede atender la mensajería: lo que ofrece el selector «Escribiendo como». Va declarado **antes** que toda ruta `profiles/:profileId…` y que `profiles/by-slug/:slug`, como `profiles/me`: Nest resuelve por orden de declaración. Sin `@Roles`: el sujeto lo resuelve el servidor desde la sesión, con la misma regla que autoriza actuar como la vitrina (`canAttend`). Sin `@AccessLogged`: no lee datos de salud de nadie, sólo vitrinas públicas de organizaciones. Sin `@Audited`: es un `GET`.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /community/profiles/organization-showcases/me` en `CommunitySocialController_listOwnOrganizationShowcases`. El controlador delega en `CommunitySocialReadService.listAttendableOrganizationShowcases`. No recibe body. El tipo de retorno estático es `Promise<OrganizationShowcasesDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /community/profiles/organization-showcases/me HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /community/profiles/organization-showcases/me HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OrganizationShowcasesDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<OrganizationShowcasesDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<OrganizationShowcasesDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<OrganizationShowcasesDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<OrganizationShowcasesDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<OrganizationShowcasesDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<OrganizationShowcasesDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OrganizationShowcasesDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "profileId": "00000000-0000-4000-8000-000000000001",
+      "slug": "valor-ejemplo",
+      "displayName": "Nombre de ejemplo",
+      "avatarFileId": "00000000-0000-4000-8000-000000000001",
+      "targetTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "kind": {}
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<OrganizationShowcaseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"profileId":"00000000-0000-4000-8000-000000000001","slug":"valor-ejemplo","displayName":"Nombre de ejemplo","avatarFileId":"00000000-0000-4000-8000-000000000001","targetTypeConceptId":"00000000-0000-4000-8000-000000000001","kind":{}}]` |
+| `items[].profileId` | Sí | `string` | formato `uuid` | Identificador de la vitrina: el `profileId` con el que se actúa. | `00000000-0000-4000-8000-000000000001` |
+| `items[].slug` | Sí | `string` | Sin restricción adicional declarada | Ruta pública de la vitrina. | `valor-ejemplo` |
+| `items[].displayName` | Sí | `string` | Sin restricción adicional declarada | Nombre visible. | `Nombre de ejemplo` |
+| `items[].avatarFileId` | Sí | `string` | formato `uuid`; admite null | Archivo del avatar, si tiene. | `00000000-0000-4000-8000-000000000001` |
+| `items[].targetTypeConceptId` | Sí | `string` | formato `uuid` | Concept id del tipo de sujeto (organización o farmacia). | `00000000-0000-4000-8000-000000000001` |
+| `items[].kind` | Sí | `object` | valores: `ORGANIZATION`, `PHARMACY` | La vertical en claro (`PHARMACY`, `ORGANIZATION`). | `{}` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/profiles/organization-showcases/me"
+}
+```
+
+---
+
+## 62. POST /community/public-profiles
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -8430,6 +8648,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PublicProfileResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PublicProfileResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PublicProfileResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PublicProfileResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PublicProfileResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -8478,7 +8697,504 @@ Ejemplo de error normalizado:
 
 ---
 
-## 62. PUT /community/reactions
+## 63. GET /community/ratings
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-ratings`
+- **Nombre:** Calificaciones de un médico, paciente u organización
+- **Operation ID:** `PartyRatingsController_list`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PartyRatingsController.list](../../src/modules/community/controllers/party-ratings.controller.ts)
+
+### Descripción de negocio
+
+Calificaciones de un médico, paciente u organización. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Nota media y calificaciones individuales de una parte.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /community/ratings` en `PartyRatingsController_list`. El controlador delega en `PartyRatingsReadService.list`. No recibe body. El tipo de retorno estático es `Promise<RatingListDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `targetType` | query | Sí | `string` | valores: `PATIENT`, `PRACTITIONER`, `ORGANIZATION` | Sin descripción específica en OpenAPI. | `PATIENT` |
+| `targetId` | query | Sí | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /community/ratings?targetType=PATIENT&targetId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /community/ratings?targetType=PATIENT&targetId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<RatingListDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<RatingListDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<RatingListDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<RatingListDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<RatingListDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<RatingListDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<RatingListDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RatingListDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "reviewerType": {},
+      "overallRating": 1,
+      "commentText": "valor-ejemplo",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<RatingItemDto>` | Sin restricción adicional declarada | Calificaciones individuales (hasta 50, las más recientes). | `[{"id":"00000000-0000-4000-8000-000000000001","reviewerType":{},"overallRating":1,"commentText":"valor-ejemplo","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Identificador de la calificación. | `00000000-0000-4000-8000-000000000001` |
+| `items[].reviewerType` | Sí | `object` | Sin restricción adicional declarada | Qué tipo de parte calificó. | `{}` |
+| `items[].overallRating` | Sí | `number` | Sin restricción adicional declarada | Estrellas. | `1` |
+| `items[].commentText` | No | `string` | Sin restricción adicional declarada | Comentario, si lo dejó. | `valor-ejemplo` |
+| `items[].updatedAt` | Sí | `string` | formato `date-time` | Cuándo se calificó por última vez. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | La calificación de un paciente sólo la ven los profesionales que lo atienden | Excepción explícita en src/modules/community/services/rating-parties.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/ratings"
+}
+```
+
+---
+
+## 64. PUT /community/ratings
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-ratings`
+- **Nombre:** Calificar con estrellas a un médico, paciente u organización
+- **Operation ID:** `PartyRatingsController_rate`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PartyRatingsController.rate](../../src/modules/community/controllers/party-ratings.controller.ts)
+
+### Descripción de negocio
+
+Exige una atención terminada cuando hay un paciente de por medio, y el vínculo de trabajo entre médico y organización. Volver a calificar el mismo respaldo actualiza la calificación.
+
+Contexto declarado en el controlador: Califico (o recalifico) a una parte. Idempotente por respaldo.
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /community/ratings` en `PartyRatingsController_rate`. El controlador delega en `PartyRatingsService.rate`. Valida el body como `CommunityRatePartyDto` y consume `application/json`. El tipo de retorno estático es `Promise<PartyRatingResultDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CommunityRatePartyDto`; los campos opcionales se omiten.
+
+```http
+PUT /community/ratings HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reviewerType": "PATIENT",
+  "targetType": "PATIENT",
+  "targetId": "00000000-0000-4000-8000-000000000001",
+  "overallRating": 1
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `reviewerType` | Sí | `string` | valores: `PATIENT`, `PRACTITIONER`, `ORGANIZATION` | Sin descripción específica en el contrato OpenAPI. | `PATIENT` |
+| `reviewerOrganizationId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `targetType` | Sí | `string` | valores: `PATIENT`, `PRACTITIONER`, `ORGANIZATION` | Sin descripción específica en el contrato OpenAPI. | `PATIENT` |
+| `targetId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `encounterId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `roleAssignmentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `overallRating` | Sí | `number` | mínimo 1; máximo 5 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `commentText` | No | `string` | longitud máxima 1000 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PUT /community/ratings HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reviewerType": "PATIENT",
+  "reviewerOrganizationId": "00000000-0000-4000-8000-000000000001",
+  "targetType": "PATIENT",
+  "targetId": "00000000-0000-4000-8000-000000000001",
+  "encounterId": "00000000-0000-4000-8000-000000000001",
+  "roleAssignmentId": "00000000-0000-4000-8000-000000000001",
+  "overallRating": 1,
+  "commentText": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PartyRatingResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<PartyRatingResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<PartyRatingResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<PartyRatingResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<PartyRatingResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<PartyRatingResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<PartyRatingResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<PartyRatingResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<PartyRatingResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PartyRatingResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PartyRatingResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "overallRating": 1,
+  "created": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador de la calificación. | `00000000-0000-4000-8000-000000000001` |
+| `overallRating` | Sí | `number` | Sin restricción adicional declarada | Estrellas guardadas. | `1` |
+| `created` | Sí | `boolean` | Sin restricción adicional declarada | `true` si se creó; `false` si se actualizó una calificación previa. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 400 | `VALIDATION_FAILED` | Indique la atención terminada que respalda la calificación | Excepción explícita en src/modules/community/services/party-ratings.service.ts |
+| 400 | `VALIDATION_FAILED` | Indique el vínculo de trabajo que respalda la calificación | Excepción explícita en src/modules/community/services/party-ratings.service.ts |
+| 400 | `VALIDATION_FAILED` | Indique en nombre de qué organización califica | Excepción explícita en src/modules/community/services/rating-parties.service.ts |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | No puede calificar a una organización que usted administra | Excepción explícita en src/modules/community/services/party-ratings.service.ts |
+| 403 | `FORBIDDEN` | Su cuenta no tiene un perfil de paciente con el cual calificar | Excepción explícita en src/modules/community/services/rating-parties.service.ts |
+| 403 | `FORBIDDEN` | Su cuenta no tiene un perfil profesional con el cual calificar | Excepción explícita en src/modules/community/services/rating-parties.service.ts |
+| 403 | `FORBIDDEN` | Sólo quien administra la organización puede calificar en su nombre | Excepción explícita en src/modules/community/services/rating-parties.service.ts |
+| 409 | `CONFLICT` | Esta calificación se está guardando en otro pedido; vuelva a intentarlo | Excepción explícita en src/modules/community/services/party-ratings.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | BASIS_REJECTED | Excepción explícita en src/modules/community/services/party-ratings.service.ts |
+| 422 | `PRECONDITION_FAILED` | La atención todavía no terminó | Excepción explícita en src/modules/community/services/party-ratings.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/ratings"
+}
+```
+
+---
+
+## 65. GET /community/ratings/mine
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-ratings`
+- **Nombre:** Mis calificaciones
+- **Operation ID:** `PartyRatingsController_mine`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PartyRatingsController.mine](../../src/modules/community/controllers/party-ratings.controller.ts)
+
+### Descripción de negocio
+
+Mis calificaciones. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Las calificaciones que hice, para precargar el formulario.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /community/ratings/mine` en `PartyRatingsController_mine`. El controlador delega en `PartyRatingsReadService.mine`. No recibe body. El tipo de retorno estático es `Promise<MyRatingDto[]>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `reviewerType` | query | Sí | `string` | valores: `PATIENT`, `PRACTITIONER`, `ORGANIZATION` | Sin descripción específica en OpenAPI. | `PATIENT` |
+| `reviewerOrganizationId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /community/ratings/mine?reviewerType=PATIENT HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /community/ratings/mine?reviewerType=PATIENT&reviewerOrganizationId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MyRatingDto[]>` | No |
+| 400 | Consulta completada correctamente. | `Promise<MyRatingDto[]>` | No |
+| 401 | Consulta completada correctamente. | `Promise<MyRatingDto[]>` | No |
+| 403 | Consulta completada correctamente. | `Promise<MyRatingDto[]>` | No |
+| 429 | Consulta completada correctamente. | `Promise<MyRatingDto[]>` | No |
+| 500 | Consulta completada correctamente. | `Promise<MyRatingDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MyRatingDto[]>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyRatingDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "reviewerType": {},
+    "targetType": {},
+    "targetId": "00000000-0000-4000-8000-000000000001",
+    "encounterId": "00000000-0000-4000-8000-000000000001",
+    "roleAssignmentId": "00000000-0000-4000-8000-000000000001",
+    "overallRating": 1,
+    "commentText": "valor-ejemplo"
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 400 | `VALIDATION_FAILED` | Indique en nombre de qué organización califica | Excepción explícita en src/modules/community/services/rating-parties.service.ts |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Su cuenta no tiene un perfil de paciente con el cual calificar | Excepción explícita en src/modules/community/services/rating-parties.service.ts |
+| 403 | `FORBIDDEN` | Su cuenta no tiene un perfil profesional con el cual calificar | Excepción explícita en src/modules/community/services/rating-parties.service.ts |
+| 403 | `FORBIDDEN` | Sólo quien administra la organización puede calificar en su nombre | Excepción explícita en src/modules/community/services/rating-parties.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/ratings/mine"
+}
+```
+
+---
+
+## 66. GET /community/ratings/summary
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-ratings`
+- **Nombre:** Nota media de un médico, paciente u organización
+- **Operation ID:** `PartyRatingsController_summary`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PartyRatingsController.summary](../../src/modules/community/controllers/party-ratings.controller.ts)
+
+### Descripción de negocio
+
+Nota media de un médico, paciente u organización. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Nota media de una parte.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /community/ratings/summary` en `PartyRatingsController_summary`. El controlador delega en `PartyRatingsReadService.summary`. No recibe body. El tipo de retorno estático es `Promise<RatingSummaryDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `targetType` | query | Sí | `string` | valores: `PATIENT`, `PRACTITIONER`, `ORGANIZATION` | Sin descripción específica en OpenAPI. | `PATIENT` |
+| `targetId` | query | Sí | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /community/ratings/summary?targetType=PATIENT&targetId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /community/ratings/summary?targetType=PATIENT&targetId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<RatingSummaryDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<RatingSummaryDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<RatingSummaryDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<RatingSummaryDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<RatingSummaryDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<RatingSummaryDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<RatingSummaryDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RatingSummaryDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "average": 1,
+  "count": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `average` | Sí | `number` | admite null | Media de estrellas, con un decimal; `null` si nadie la calificó. | `1` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cuántas calificaciones la componen. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | La calificación de un paciente sólo la ven los profesionales que lo atienden | Excepción explícita en src/modules/community/services/rating-parties.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/ratings/summary"
+}
+```
+
+---
+
+## 67. PUT /community/reactions
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -8563,6 +9279,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ReactionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ReactionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ReactionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReactionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReactionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -8610,7 +9327,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 63. POST /community/reports
+## 68. POST /community/reports
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-moderation`
@@ -8695,6 +9412,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ReportResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ReportResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ReportResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReportResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReportResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -8739,7 +9457,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 64. GET /community/topics
+## 69. GET /community/topics
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -8800,6 +9518,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<TopicPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<TopicPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<TopicPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<TopicPageDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TopicPageDto`. Ejemplo completo derivado de ese DTO:
 
@@ -8857,7 +9576,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 65. GET /f/{slug}
+## 70. GET /f/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -8917,6 +9636,7 @@ Host: localhost:3000
 | 404 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PublicDirectoryProfileDto`. Ejemplo completo derivado de ese DTO:
 
@@ -8968,6 +9688,11 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "badgeTypeConceptId": "00000000-0000-4000-8000-000000000001",
     "verificationMethodConceptId": "00000000-0000-4000-8000-000000000001",
     "verifiedAt": "valor-ejemplo",
+    "validUntil": "valor-ejemplo"
+  },
+  "verification": {
+    "status": "VERIFIED",
+    "verifiedAt": "2026-07-31T12:00:00.000Z",
     "validUntil": "valor-ejemplo"
   },
   "hasPublishedAgenda": true,
@@ -9024,11 +9749,15 @@ Campos de la respuesta:
 | `ratingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `acceptsReviews` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 | `verifiedBadge` | Sí | `PublicVerifiedBadgeDto` | Sin restricción adicional declarada | El mismo sello y la misma semántica que en el buscador | `{"status":"VERIFIED","badgeTypeConceptId":"00000000-0000-4000-8000-000000000001","verificationMethodConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"valor-ejemplo","validUntil":"valor-ejemplo"}` |
-| `verifiedBadge.status` | Sí | `string` | valores: `VERIFIED`, `EXPIRED`, `NONE` | `VERIFIED` sólo con respaldo vigente; `EXPIRED` si lo hubo y venció | `VERIFIED` |
+| `verifiedBadge.status` | Sí | `string` | valores: `VERIFIED`, `IN_REVIEW`, `EXPIRED`, `NONE` | `VERIFIED` sólo con respaldo vigente; `IN_REVIEW` si pidió la verificación y | `VERIFIED` |
 | `verifiedBadge.badgeTypeConceptId` | Sí | `string` | admite null | Qué se verificó | `00000000-0000-4000-8000-000000000001` |
 | `verifiedBadge.verificationMethodConceptId` | Sí | `string` | admite null | Cómo se verificó (autoridad externa, alta manual auditada) | `00000000-0000-4000-8000-000000000001` |
 | `verifiedBadge.verifiedAt` | Sí | `string` | admite null | Desde cuándo vale, ISO | `valor-ejemplo` |
 | `verifiedBadge.validUntil` | Sí | `string` | admite null | Hasta cuándo vale, ISO | `valor-ejemplo` |
+| `verification` | Sí | `PractitionerVerificationDto` | Sin restricción adicional declarada | El mismo sello en la forma `verification`, derivado de `verifiedBadge`. | `{"status":"VERIFIED","verifiedAt":"2026-07-31T12:00:00.000Z","validUntil":"valor-ejemplo"}` |
+| `verification.status` | Sí | `string` | valores: `VERIFIED`, `IN_REVIEW`, `UNVERIFIED`, `SUSPENDED`, `EXPIRED` | Sin descripción específica en el contrato OpenAPI. | `VERIFIED` |
+| `verification.verifiedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `verification.validUntil` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `hasPublishedAgenda` | Sí | `boolean` | Sin restricción adicional declarada | Si tiene agenda publicada | `true` |
 | `nextAvailableDate` | Sí | `string` | admite null | Primer día con hueco (YYYY-MM-DD) | `valor-ejemplo` |
 | `posts` | Sí | `array<PublicPostSummaryDto>` | Sin restricción adicional declarada | Máx. 20 | `[{"id":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","publishedAt":"valor-ejemplo","mediaUrls":["valor-ejemplo"],"reactionCount":1,"commentCount":1}]` |
@@ -9067,7 +9796,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 66. GET /internal/community/feed/pending
+## 71. GET /internal/community/feed/pending
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-feed`
@@ -9131,6 +9860,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<FeedPendingResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<FeedPendingResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<FeedPendingResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<FeedPendingResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FeedPendingResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -9183,7 +9913,265 @@ Ejemplo de error normalizado:
 
 ---
 
-## 67. POST /internal/community/feed/rebuild
+## 72. POST /internal/community/feed/ranking/apply
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-feed`
+- **Nombre:** Aplicar rank_score recalculado
+- **Operation ID:** `CommunityFeedController_rankingApply`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunityFeedController.rankingApply](../../src/modules/community/controllers/community-feed.controller.ts)
+
+### Descripción de negocio
+
+Aplicar rank_score recalculado. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Aplica los rank_score recalculados por el worker (UC-19-16).
+
+### Descripción del sistema
+
+NestJS resuelve `POST /internal/community/feed/ranking/apply` en `CommunityFeedController_rankingApply`. El controlador delega en `CommunityFeedService.applyRanking`. Valida el body como `ApplyFeedRankingDto` y consume `application/json`. El tipo de retorno estático es `Promise<FeedRankingApplyResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ApplyFeedRankingDto`; los campos opcionales se omiten.
+
+```http
+POST /internal/community/feed/ranking/apply HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "updates": [
+    {
+      "feedItemId": "00000000-0000-4000-8000-000000000001",
+      "rankScore": "valor-ejemplo"
+    }
+  ]
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`, `SECURITY_ADMIN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `updates` | Sí | `array<FeedRankingUpdateDto>` | máximo 500 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"feedItemId":"00000000-0000-4000-8000-000000000001","rankScore":"valor-ejemplo"}]` |
+| `updates[].feedItemId` | Sí | `string` | formato `uuid` | Ítem de feed | `00000000-0000-4000-8000-000000000001` |
+| `updates[].rankScore` | Sí | `string` | Sin restricción adicional declarada | Nuevo rank_score, como texto decimal | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /internal/community/feed/ranking/apply HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "updates": [
+    {
+      "feedItemId": "00000000-0000-4000-8000-000000000001",
+      "rankScore": "valor-ejemplo"
+    }
+  ]
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<FeedRankingApplyResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<FeedRankingApplyResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<FeedRankingApplyResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<FeedRankingApplyResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<FeedRankingApplyResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<FeedRankingApplyResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<FeedRankingApplyResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<FeedRankingApplyResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<FeedRankingApplyResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<FeedRankingApplyResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FeedRankingApplyResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "updated": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `updated` | Sí | `number` | Sin restricción adicional declarada | Ítems actualizados | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/internal/community/feed/ranking/apply"
+}
+```
+
+---
+
+## 73. GET /internal/community/feed/ranking/pending
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-feed`
+- **Nombre:** Items de feed pendientes de puntuar
+- **Operation ID:** `CommunityFeedController_rankingPending`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunityFeedController.rankingPending](../../src/modules/community/controllers/community-feed.controller.ts)
+
+### Descripción de negocio
+
+Items de feed pendientes de puntuar. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Lote de ítems de feed pendientes de recalcular su rank_score (UC-19-16). Descubre-y-actúa como `pending`/`rebuild`: este endpoint junta las señales crudas (recencia, interacción) y `ranking/apply` persiste el puntaje que el worker calculó con ellas.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /internal/community/feed/ranking/pending` en `CommunityFeedController_rankingPending`. El controlador delega en `CommunityFeedService.pendingRanking`. No recibe body. El tipo de retorno estático es `Promise<FeedRankingPendingResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `limit` | query | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /internal/community/feed/ranking/pending?limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`, `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /internal/community/feed/ranking/pending?limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<FeedRankingPendingResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<FeedRankingPendingResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<FeedRankingPendingResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<FeedRankingPendingResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<FeedRankingPendingResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<FeedRankingPendingResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<FeedRankingPendingResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FeedRankingPendingResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "feedItemId": "00000000-0000-4000-8000-000000000001",
+      "postId": "00000000-0000-4000-8000-000000000001",
+      "ownerProfileId": "00000000-0000-4000-8000-000000000001",
+      "authorProfileId": "00000000-0000-4000-8000-000000000001",
+      "itemCreatedAt": "valor-ejemplo",
+      "postPublishedAt": "valor-ejemplo",
+      "reactionCount": 1,
+      "commentCount": 1
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<FeedRankingPendingItemDto>` | Sin restricción adicional declarada | Lote de ítems a puntuar. | `[{"feedItemId":"00000000-0000-4000-8000-000000000001","postId":"00000000-0000-4000-8000-000000000001","ownerProfileId":"00000000-0000-4000-8000-000000000001","authorProfileId":"00000000-0000-4000-8000-000000000001","itemCreatedAt":"valor-ejemplo","postPublishedAt":"valor-ejemplo","reactionCount":1,"commentCount":1}]` |
+| `items[].feedItemId` | Sí | `string` | formato `uuid` | Ítem de feed | `00000000-0000-4000-8000-000000000001` |
+| `items[].postId` | Sí | `string` | formato `uuid` | Post fuente | `00000000-0000-4000-8000-000000000001` |
+| `items[].ownerProfileId` | Sí | `string` | formato `uuid` | Perfil dueño del feed | `00000000-0000-4000-8000-000000000001` |
+| `items[].authorProfileId` | Sí | `string` | formato `uuid` | Perfil autor | `00000000-0000-4000-8000-000000000001` |
+| `items[].itemCreatedAt` | Sí | `string` | Sin restricción adicional declarada | Alta del ítem | `valor-ejemplo` |
+| `items[].postPublishedAt` | Sí | `string` | admite null | Publicación del post fuente | `valor-ejemplo` |
+| `items[].reactionCount` | Sí | `number` | Sin restricción adicional declarada | Reacciones del post | `1` |
+| `items[].commentCount` | Sí | `number` | Sin restricción adicional declarada | Comentarios del post | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/internal/community/feed/ranking/pending"
+}
+```
+
+---
+
+## 74. POST /internal/community/feed/rebuild
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-feed`
@@ -9269,6 +10257,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<FeedRebuildResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<FeedRebuildResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<FeedRebuildResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<FeedRebuildResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FeedRebuildResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -9311,7 +10300,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 68. GET /internal/community/search/health
+## 75. GET /internal/community/search/health
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -9373,6 +10362,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<SearchIndexHealthDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<SearchIndexHealthDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<SearchIndexHealthDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<SearchIndexHealthDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SearchIndexHealthDto`. Ejemplo completo derivado de ese DTO:
 
@@ -9421,7 +10411,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 69. POST /internal/community/search/reindex
+## 76. POST /internal/community/search/reindex
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -9497,6 +10487,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ReindexResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ReindexResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ReindexResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReindexResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReindexResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -9550,7 +10541,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 70. POST /internal/community/verification/badges
+## 77. POST /internal/community/verification/badges
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -9632,6 +10623,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<GrantBadgeResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<GrantBadgeResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<GrantBadgeResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<GrantBadgeResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GrantBadgeResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -9674,7 +10666,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 71. POST /internal/community/verification/badges/{targetId}/revoke
+## 78. POST /internal/community/verification/badges/{targetId}/revoke
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -9753,6 +10745,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<{ revoked: number }>` | No |
 | 429 | Operación completada correctamente. | `Promise<{ revoked: number }>` | No |
 | 500 | Operación completada correctamente. | `Promise<{ revoked: number }>` | No |
+| 504 | Operación completada correctamente. | `Promise<{ revoked: number }>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `{ revoked: number }`. Ejemplo completo derivado de ese DTO:
 
@@ -9795,7 +10788,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 72. POST /internal/community/verification/badges/expire-sweep
+## 79. POST /internal/community/verification/badges/expire-sweep
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -9859,6 +10852,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<BadgeSweepResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<BadgeSweepResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<BadgeSweepResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<BadgeSweepResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `BadgeSweepResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -9901,7 +10895,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 73. GET /l/{slug}
+## 80. GET /l/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -9961,6 +10955,7 @@ Host: localhost:3000
 | 404 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PublicDirectoryProfileDto`. Ejemplo completo derivado de ese DTO:
 
@@ -10012,6 +11007,11 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "badgeTypeConceptId": "00000000-0000-4000-8000-000000000001",
     "verificationMethodConceptId": "00000000-0000-4000-8000-000000000001",
     "verifiedAt": "valor-ejemplo",
+    "validUntil": "valor-ejemplo"
+  },
+  "verification": {
+    "status": "VERIFIED",
+    "verifiedAt": "2026-07-31T12:00:00.000Z",
     "validUntil": "valor-ejemplo"
   },
   "hasPublishedAgenda": true,
@@ -10068,11 +11068,15 @@ Campos de la respuesta:
 | `ratingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `acceptsReviews` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 | `verifiedBadge` | Sí | `PublicVerifiedBadgeDto` | Sin restricción adicional declarada | El mismo sello y la misma semántica que en el buscador | `{"status":"VERIFIED","badgeTypeConceptId":"00000000-0000-4000-8000-000000000001","verificationMethodConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"valor-ejemplo","validUntil":"valor-ejemplo"}` |
-| `verifiedBadge.status` | Sí | `string` | valores: `VERIFIED`, `EXPIRED`, `NONE` | `VERIFIED` sólo con respaldo vigente; `EXPIRED` si lo hubo y venció | `VERIFIED` |
+| `verifiedBadge.status` | Sí | `string` | valores: `VERIFIED`, `IN_REVIEW`, `EXPIRED`, `NONE` | `VERIFIED` sólo con respaldo vigente; `IN_REVIEW` si pidió la verificación y | `VERIFIED` |
 | `verifiedBadge.badgeTypeConceptId` | Sí | `string` | admite null | Qué se verificó | `00000000-0000-4000-8000-000000000001` |
 | `verifiedBadge.verificationMethodConceptId` | Sí | `string` | admite null | Cómo se verificó (autoridad externa, alta manual auditada) | `00000000-0000-4000-8000-000000000001` |
 | `verifiedBadge.verifiedAt` | Sí | `string` | admite null | Desde cuándo vale, ISO | `valor-ejemplo` |
 | `verifiedBadge.validUntil` | Sí | `string` | admite null | Hasta cuándo vale, ISO | `valor-ejemplo` |
+| `verification` | Sí | `PractitionerVerificationDto` | Sin restricción adicional declarada | El mismo sello en la forma `verification`, derivado de `verifiedBadge`. | `{"status":"VERIFIED","verifiedAt":"2026-07-31T12:00:00.000Z","validUntil":"valor-ejemplo"}` |
+| `verification.status` | Sí | `string` | valores: `VERIFIED`, `IN_REVIEW`, `UNVERIFIED`, `SUSPENDED`, `EXPIRED` | Sin descripción específica en el contrato OpenAPI. | `VERIFIED` |
+| `verification.verifiedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `verification.validUntil` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `hasPublishedAgenda` | Sí | `boolean` | Sin restricción adicional declarada | Si tiene agenda publicada | `true` |
 | `nextAvailableDate` | Sí | `string` | admite null | Primer día con hueco (YYYY-MM-DD) | `valor-ejemplo` |
 | `posts` | Sí | `array<PublicPostSummaryDto>` | Sin restricción adicional declarada | Máx. 20 | `[{"id":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","publishedAt":"valor-ejemplo","mediaUrls":["valor-ejemplo"],"reactionCount":1,"commentCount":1}]` |
@@ -10111,7 +11115,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 74. GET /o/{slug}
+## 81. GET /o/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -10171,6 +11175,7 @@ Host: localhost:3000
 | 404 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PublicDirectoryProfileDto`. Ejemplo completo derivado de ese DTO:
 
@@ -10222,6 +11227,11 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "badgeTypeConceptId": "00000000-0000-4000-8000-000000000001",
     "verificationMethodConceptId": "00000000-0000-4000-8000-000000000001",
     "verifiedAt": "valor-ejemplo",
+    "validUntil": "valor-ejemplo"
+  },
+  "verification": {
+    "status": "VERIFIED",
+    "verifiedAt": "2026-07-31T12:00:00.000Z",
     "validUntil": "valor-ejemplo"
   },
   "hasPublishedAgenda": true,
@@ -10278,11 +11288,15 @@ Campos de la respuesta:
 | `ratingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `acceptsReviews` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 | `verifiedBadge` | Sí | `PublicVerifiedBadgeDto` | Sin restricción adicional declarada | El mismo sello y la misma semántica que en el buscador | `{"status":"VERIFIED","badgeTypeConceptId":"00000000-0000-4000-8000-000000000001","verificationMethodConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"valor-ejemplo","validUntil":"valor-ejemplo"}` |
-| `verifiedBadge.status` | Sí | `string` | valores: `VERIFIED`, `EXPIRED`, `NONE` | `VERIFIED` sólo con respaldo vigente; `EXPIRED` si lo hubo y venció | `VERIFIED` |
+| `verifiedBadge.status` | Sí | `string` | valores: `VERIFIED`, `IN_REVIEW`, `EXPIRED`, `NONE` | `VERIFIED` sólo con respaldo vigente; `IN_REVIEW` si pidió la verificación y | `VERIFIED` |
 | `verifiedBadge.badgeTypeConceptId` | Sí | `string` | admite null | Qué se verificó | `00000000-0000-4000-8000-000000000001` |
 | `verifiedBadge.verificationMethodConceptId` | Sí | `string` | admite null | Cómo se verificó (autoridad externa, alta manual auditada) | `00000000-0000-4000-8000-000000000001` |
 | `verifiedBadge.verifiedAt` | Sí | `string` | admite null | Desde cuándo vale, ISO | `valor-ejemplo` |
 | `verifiedBadge.validUntil` | Sí | `string` | admite null | Hasta cuándo vale, ISO | `valor-ejemplo` |
+| `verification` | Sí | `PractitionerVerificationDto` | Sin restricción adicional declarada | El mismo sello en la forma `verification`, derivado de `verifiedBadge`. | `{"status":"VERIFIED","verifiedAt":"2026-07-31T12:00:00.000Z","validUntil":"valor-ejemplo"}` |
+| `verification.status` | Sí | `string` | valores: `VERIFIED`, `IN_REVIEW`, `UNVERIFIED`, `SUSPENDED`, `EXPIRED` | Sin descripción específica en el contrato OpenAPI. | `VERIFIED` |
+| `verification.verifiedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `verification.validUntil` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `hasPublishedAgenda` | Sí | `boolean` | Sin restricción adicional declarada | Si tiene agenda publicada | `true` |
 | `nextAvailableDate` | Sí | `string` | admite null | Primer día con hueco (YYYY-MM-DD) | `valor-ejemplo` |
 | `posts` | Sí | `array<PublicPostSummaryDto>` | Sin restricción adicional declarada | Máx. 20 | `[{"id":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","publishedAt":"valor-ejemplo","mediaUrls":["valor-ejemplo"],"reactionCount":1,"commentCount":1}]` |
@@ -10321,7 +11335,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 75. GET /p/{slug}
+## 82. GET /p/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -10381,6 +11395,7 @@ Host: localhost:3000
 | 404 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PublicDirectoryProfileDto`. Ejemplo completo derivado de ese DTO:
 
@@ -10432,6 +11447,11 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "badgeTypeConceptId": "00000000-0000-4000-8000-000000000001",
     "verificationMethodConceptId": "00000000-0000-4000-8000-000000000001",
     "verifiedAt": "valor-ejemplo",
+    "validUntil": "valor-ejemplo"
+  },
+  "verification": {
+    "status": "VERIFIED",
+    "verifiedAt": "2026-07-31T12:00:00.000Z",
     "validUntil": "valor-ejemplo"
   },
   "hasPublishedAgenda": true,
@@ -10488,11 +11508,15 @@ Campos de la respuesta:
 | `ratingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `acceptsReviews` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 | `verifiedBadge` | Sí | `PublicVerifiedBadgeDto` | Sin restricción adicional declarada | El mismo sello y la misma semántica que en el buscador | `{"status":"VERIFIED","badgeTypeConceptId":"00000000-0000-4000-8000-000000000001","verificationMethodConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"valor-ejemplo","validUntil":"valor-ejemplo"}` |
-| `verifiedBadge.status` | Sí | `string` | valores: `VERIFIED`, `EXPIRED`, `NONE` | `VERIFIED` sólo con respaldo vigente; `EXPIRED` si lo hubo y venció | `VERIFIED` |
+| `verifiedBadge.status` | Sí | `string` | valores: `VERIFIED`, `IN_REVIEW`, `EXPIRED`, `NONE` | `VERIFIED` sólo con respaldo vigente; `IN_REVIEW` si pidió la verificación y | `VERIFIED` |
 | `verifiedBadge.badgeTypeConceptId` | Sí | `string` | admite null | Qué se verificó | `00000000-0000-4000-8000-000000000001` |
 | `verifiedBadge.verificationMethodConceptId` | Sí | `string` | admite null | Cómo se verificó (autoridad externa, alta manual auditada) | `00000000-0000-4000-8000-000000000001` |
 | `verifiedBadge.verifiedAt` | Sí | `string` | admite null | Desde cuándo vale, ISO | `valor-ejemplo` |
 | `verifiedBadge.validUntil` | Sí | `string` | admite null | Hasta cuándo vale, ISO | `valor-ejemplo` |
+| `verification` | Sí | `PractitionerVerificationDto` | Sin restricción adicional declarada | El mismo sello en la forma `verification`, derivado de `verifiedBadge`. | `{"status":"VERIFIED","verifiedAt":"2026-07-31T12:00:00.000Z","validUntil":"valor-ejemplo"}` |
+| `verification.status` | Sí | `string` | valores: `VERIFIED`, `IN_REVIEW`, `UNVERIFIED`, `SUSPENDED`, `EXPIRED` | Sin descripción específica en el contrato OpenAPI. | `VERIFIED` |
+| `verification.verifiedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `verification.validUntil` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `hasPublishedAgenda` | Sí | `boolean` | Sin restricción adicional declarada | Si tiene agenda publicada | `true` |
 | `nextAvailableDate` | Sí | `string` | admite null | Primer día con hueco (YYYY-MM-DD) | `valor-ejemplo` |
 | `posts` | Sí | `array<PublicPostSummaryDto>` | Sin restricción adicional declarada | Máx. 20 | `[{"id":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","publishedAt":"valor-ejemplo","mediaUrls":["valor-ejemplo"],"reactionCount":1,"commentCount":1}]` |
@@ -10531,7 +11555,125 @@ Ejemplo de error normalizado:
 
 ---
 
-## 76. POST /patients/me/reviews
+## 83. GET /patients/me/reviewable-care
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-reviews`
+- **Nombre:** Consultar si una atención recibida se puede calificar
+- **Operation ID:** `PatientReviewsController_getReviewableCare`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PatientReviewsController.getReviewableCare](../../src/modules/community/controllers/patient-reviews.controller.ts)
+
+### Descripción de negocio
+
+Parte de la reserva (la misma de la encuesta) y devuelve el encuentro que respalda la reseña pública, el nombre público del profesional, y `alreadyReviewed` / `canReview`. Una reserva ajena o inexistente responde 404 igual.
+
+Contexto declarado en el controlador: ¿Puedo calificar la atención de esta reserva? Devuelve el encuentro que la respalda y si la reseña sería aceptada.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /patients/me/reviewable-care` en `PatientReviewsController_getReviewableCare`. El controlador delega en `CommunityReviewableCareService.getReviewableCare`. No recibe body. El tipo de retorno estático es `Promise<ReviewableCareDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `appointmentBookingId` | query | Sí | `string` | formato `uuid` | Reserva de la atención recibida (la misma de la encuesta) | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /patients/me/reviewable-care?appointmentBookingId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PATIENT`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /patients/me/reviewable-care?appointmentBookingId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ReviewableCareDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ReviewableCareDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ReviewableCareDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ReviewableCareDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ReviewableCareDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ReviewableCareDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ReviewableCareDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReviewableCareDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "encounterId": "00000000-0000-4000-8000-000000000001",
+  "appointmentBookingId": "00000000-0000-4000-8000-000000000001",
+  "practitionerDisplayName": "Nombre de ejemplo",
+  "startAt": "2026-07-31T12:00:00.000Z",
+  "alreadyReviewed": true,
+  "canReview": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `encounterId` | Sí | `string` | formato `uuid`; admite null | Encuentro que respalda la reseña. `null` si la atención todavía no tiene uno. | `00000000-0000-4000-8000-000000000001` |
+| `appointmentBookingId` | Sí | `string` | formato `uuid` | La reserva consultada. | `00000000-0000-4000-8000-000000000001` |
+| `practitionerDisplayName` | Sí | `string` | admite null | Nombre público del profesional que atendió. `null` si no tiene vitrina. | `Nombre de ejemplo` |
+| `startAt` | Sí | `string` | formato `date-time`; admite null | Inicio de la atención. `null` si no hay encuentro. | `2026-07-31T12:00:00.000Z` |
+| `alreadyReviewed` | Sí | `boolean` | Sin restricción adicional declarada | Si este paciente ya reseñó este encuentro. | `true` |
+| `canReview` | Sí | `boolean` | Sin restricción adicional declarada | Si `POST /patients/me/reviews` aceptaría una reseña de este encuentro: encuentro terminado, vitrina del profesional que acepta reseñas y sin reseña previa. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo un paciente puede consultar sus atenciones | Excepción explícita en src/modules/community/services/community-reviewable-care.service.ts |
+| 404 | `NOT_FOUND` | Atención no encontrada | Excepción explícita en src/modules/community/services/community-reviewable-care.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/patients/me/reviewable-care"
+}
+```
+
+---
+
+## 84. POST /patients/me/reviews
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-reviews`
@@ -10583,7 +11725,7 @@ Content-Type: application/json
 | `verifiedEncounterId` | Sí | `string` | formato `uuid` | Atención que respalda la reseña (nunca se expone) | `00000000-0000-4000-8000-000000000001` |
 | `overallRating` | Sí | `number` | mínimo 1; máximo 5 | Calificación global 1..5 | `1` |
 | `reviewText` | No | `string` | longitud máxima 4000 | Texto de la review | `valor-ejemplo` |
-| `displayMode` | No | `string` | valores: `REAL_NAME`, `ANONYMOUS` | Modo de visualización del reviewer | `REAL_NAME` |
+| `displayMode` | No | `string` | valores: `REAL_NAME`, `ANONYMOUS` | Modo de visualización del reviewer. Si no se envía, la reseña es ANONYMOUS (privacidad por defecto); el nombre real se muestra sólo si se pide REAL_NAME | `ANONYMOUS` |
 | `dimensions` | No | `array<ReviewDimensionInputDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"dimension":"COMMUNICATION","score":1}]` |
 | `dimensions[].dimension` | No | `string` | valores: `COMMUNICATION`, `PUNCTUALITY`, `CLEANLINESS`, `OUTCOME` | Dimensión | `COMMUNICATION` |
 | `dimensions[].score` | No | `number` | mínimo 1; máximo 5 | Puntuación 1..5 | `1` |
@@ -10602,7 +11744,7 @@ Content-Type: application/json
   "verifiedEncounterId": "00000000-0000-4000-8000-000000000001",
   "overallRating": 1,
   "reviewText": "valor-ejemplo",
-  "displayMode": "REAL_NAME",
+  "displayMode": "ANONYMOUS",
   "dimensions": [
     {
       "dimension": "COMMUNICATION",
@@ -10625,6 +11767,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ReviewResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ReviewResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ReviewResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReviewResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReviewResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -10680,7 +11823,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 77. GET /public/comments/{commentId}/replies
+## 85. GET /public/comments/{commentId}/replies
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -10743,6 +11886,7 @@ Host: localhost:3000
 | 404 | Consulta completada correctamente. | `Promise<PublicCommentPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PublicCommentPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PublicCommentPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PublicCommentPageDto>` | No |
 
 El controlador declara `PublicCommentPageDto`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -10772,7 +11916,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 78. GET /public/media/{id}
+## 86. GET /public/media/{id}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -10833,6 +11977,7 @@ Host: localhost:3000
 | 404 | Consulta completada correctamente. | `Promise<void>` | No |
 | 429 | Consulta completada correctamente. | `Promise<void>` | No |
 | 500 | Consulta completada correctamente. | `Promise<void>` | No |
+| 504 | Consulta completada correctamente. | `Promise<void>` | No |
 
 La operación no devuelve body según el tipo TypeScript del controlador.
 
@@ -10865,7 +12010,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 79. GET /public/nearby
+## 87. GET /public/nearby
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -10928,6 +12073,7 @@ Host: localhost:3000
 | 400 | Consulta completada correctamente. | `Promise<PublicNearbyPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PublicNearbyPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PublicNearbyPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PublicNearbyPageDto>` | No |
 
 El controlador declara `PublicNearbyPageDto`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -10959,7 +12105,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 80. GET /public/posts
+## 88. GET /public/posts
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -10976,7 +12122,7 @@ Contexto declarado en el controlador: El feed de la portada: lo último de todas
 
 ### Descripción del sistema
 
-NestJS resuelve `GET /public/posts` en `CommunityPublicController_feedPublico`. El controlador delega en `CommunityPublicService.feedPublico`. No recibe body. El tipo de retorno estático es `Promise<PublicFeedPageDto>`.
+NestJS resuelve `GET /public/posts` en `CommunityPublicController_feedPublico`. El controlador delega en `CommunityPublicService.feedPublic`. No recibe body. El tipo de retorno estático es `Promise<PublicFeedPageDto>`.
 
 ### Parámetros
 
@@ -11019,6 +12165,7 @@ Host: localhost:3000
 | 400 | Consulta completada correctamente. | `Promise<PublicFeedPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PublicFeedPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PublicFeedPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PublicFeedPageDto>` | No |
 
 El controlador declara `PublicFeedPageDto`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -11046,7 +12193,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 81. GET /public/posts/{postId}/comments
+## 89. GET /public/posts/{postId}/comments
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11109,6 +12256,7 @@ Host: localhost:3000
 | 404 | Consulta completada correctamente. | `Promise<PublicCommentPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PublicCommentPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PublicCommentPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PublicCommentPageDto>` | No |
 
 El controlador declara `PublicCommentPageDto`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -11137,7 +12285,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 82. GET /public/posts/{postId}/reactions
+## 90. GET /public/posts/{postId}/reactions
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11200,6 +12348,7 @@ Host: localhost:3000
 | 404 | Consulta completada correctamente. | `Promise<PublicPostReactionPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PublicPostReactionPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PublicPostReactionPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PublicPostReactionPageDto>` | No |
 
 El controlador declara `PublicPostReactionPageDto`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -11228,7 +12377,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 83. GET /public/profiles/{prefijo}/{slug}
+## 91. GET /public/profiles/{prefijo}/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11289,6 +12438,7 @@ Host: localhost:3000
 | 404 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PublicDirectoryProfileDto`. Ejemplo completo derivado de ese DTO:
 
@@ -11340,6 +12490,11 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "badgeTypeConceptId": "00000000-0000-4000-8000-000000000001",
     "verificationMethodConceptId": "00000000-0000-4000-8000-000000000001",
     "verifiedAt": "valor-ejemplo",
+    "validUntil": "valor-ejemplo"
+  },
+  "verification": {
+    "status": "VERIFIED",
+    "verifiedAt": "2026-07-31T12:00:00.000Z",
     "validUntil": "valor-ejemplo"
   },
   "hasPublishedAgenda": true,
@@ -11396,11 +12551,15 @@ Campos de la respuesta:
 | `ratingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `acceptsReviews` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 | `verifiedBadge` | Sí | `PublicVerifiedBadgeDto` | Sin restricción adicional declarada | El mismo sello y la misma semántica que en el buscador | `{"status":"VERIFIED","badgeTypeConceptId":"00000000-0000-4000-8000-000000000001","verificationMethodConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"valor-ejemplo","validUntil":"valor-ejemplo"}` |
-| `verifiedBadge.status` | Sí | `string` | valores: `VERIFIED`, `EXPIRED`, `NONE` | `VERIFIED` sólo con respaldo vigente; `EXPIRED` si lo hubo y venció | `VERIFIED` |
+| `verifiedBadge.status` | Sí | `string` | valores: `VERIFIED`, `IN_REVIEW`, `EXPIRED`, `NONE` | `VERIFIED` sólo con respaldo vigente; `IN_REVIEW` si pidió la verificación y | `VERIFIED` |
 | `verifiedBadge.badgeTypeConceptId` | Sí | `string` | admite null | Qué se verificó | `00000000-0000-4000-8000-000000000001` |
 | `verifiedBadge.verificationMethodConceptId` | Sí | `string` | admite null | Cómo se verificó (autoridad externa, alta manual auditada) | `00000000-0000-4000-8000-000000000001` |
 | `verifiedBadge.verifiedAt` | Sí | `string` | admite null | Desde cuándo vale, ISO | `valor-ejemplo` |
 | `verifiedBadge.validUntil` | Sí | `string` | admite null | Hasta cuándo vale, ISO | `valor-ejemplo` |
+| `verification` | Sí | `PractitionerVerificationDto` | Sin restricción adicional declarada | El mismo sello en la forma `verification`, derivado de `verifiedBadge`. | `{"status":"VERIFIED","verifiedAt":"2026-07-31T12:00:00.000Z","validUntil":"valor-ejemplo"}` |
+| `verification.status` | Sí | `string` | valores: `VERIFIED`, `IN_REVIEW`, `UNVERIFIED`, `SUSPENDED`, `EXPIRED` | Sin descripción específica en el contrato OpenAPI. | `VERIFIED` |
+| `verification.verifiedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `verification.validUntil` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `hasPublishedAgenda` | Sí | `boolean` | Sin restricción adicional declarada | Si tiene agenda publicada | `true` |
 | `nextAvailableDate` | Sí | `string` | admite null | Primer día con hueco (YYYY-MM-DD) | `valor-ejemplo` |
 | `posts` | Sí | `array<PublicPostSummaryDto>` | Sin restricción adicional declarada | Máx. 20 | `[{"id":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","publishedAt":"valor-ejemplo","mediaUrls":["valor-ejemplo"],"reactionCount":1,"commentCount":1}]` |
@@ -11439,7 +12598,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 84. GET /public/profiles/{prefijo}/{slug}/reviews
+## 92. GET /public/profiles/{prefijo}/{slug}/reviews
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11502,6 +12661,7 @@ Host: localhost:3000
 | 404 | Consulta completada correctamente. | `Promise<PublicProfileReviewsDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PublicProfileReviewsDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PublicProfileReviewsDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PublicProfileReviewsDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PublicProfileReviewsDto`. Ejemplo completo derivado de ese DTO:
 
@@ -11544,7 +12704,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 85. GET /public/search
+## 93. GET /public/search
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11605,6 +12765,7 @@ Host: localhost:3000
 | 400 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
 
 El controlador declara `PublicSearchPageDto`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -11618,12 +12779,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Índice de búsqueda no reconocido | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Falta el tenant de contexto para la operación de búsqueda | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Campo de ${kind} no permitido para el índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
-| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | El departamento no tiene una sigla reconocible en el catálogo | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El municipio no pertenece al departamento elegido | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo territorial no está disponible | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
-| 422 | `PRECONDITION_FAILED` | opciones.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | options.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
@@ -11643,7 +12804,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 86. GET /public/search/diagnostic-units
+## 94. GET /public/search/diagnostic-units
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11704,6 +12865,7 @@ Host: localhost:3000
 | 400 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
 
 El controlador declara `PublicSearchPageDto`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -11717,12 +12879,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Índice de búsqueda no reconocido | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Falta el tenant de contexto para la operación de búsqueda | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Campo de ${kind} no permitido para el índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
-| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | El departamento no tiene una sigla reconocible en el catálogo | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El municipio no pertenece al departamento elegido | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo territorial no está disponible | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
-| 422 | `PRECONDITION_FAILED` | opciones.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | options.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
@@ -11742,7 +12904,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 87. GET /public/search/insurers
+## 95. GET /public/search/insurers
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11803,6 +12965,7 @@ Host: localhost:3000
 | 400 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
 
 El controlador declara `PublicSearchPageDto`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -11816,12 +12979,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Índice de búsqueda no reconocido | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Falta el tenant de contexto para la operación de búsqueda | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Campo de ${kind} no permitido para el índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
-| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | El departamento no tiene una sigla reconocible en el catálogo | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El municipio no pertenece al departamento elegido | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo territorial no está disponible | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
-| 422 | `PRECONDITION_FAILED` | opciones.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | options.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
@@ -11841,7 +13004,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 88. GET /public/search/medications
+## 96. GET /public/search/medications
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11902,6 +13065,7 @@ Host: localhost:3000
 | 400 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
 
 El controlador declara `PublicSearchPageDto`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -11915,12 +13079,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Índice de búsqueda no reconocido | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Falta el tenant de contexto para la operación de búsqueda | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Campo de ${kind} no permitido para el índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
-| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | El departamento no tiene una sigla reconocible en el catálogo | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El municipio no pertenece al departamento elegido | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo territorial no está disponible | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
-| 422 | `PRECONDITION_FAILED` | opciones.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | options.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
@@ -11940,7 +13104,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 89. GET /public/search/organizations
+## 97. GET /public/search/organizations
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12004,6 +13168,7 @@ Host: localhost:3000
 | 400 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
 
 El controlador declara `PublicSearchPageDto`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -12017,12 +13182,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Índice de búsqueda no reconocido | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Falta el tenant de contexto para la operación de búsqueda | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Campo de ${kind} no permitido para el índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
-| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | El departamento no tiene una sigla reconocible en el catálogo | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El municipio no pertenece al departamento elegido | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo territorial no está disponible | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
-| 422 | `PRECONDITION_FAILED` | opciones.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | options.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
@@ -12042,7 +13207,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 90. GET /public/search/pharmacies
+## 98. GET /public/search/pharmacies
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12103,6 +13268,7 @@ Host: localhost:3000
 | 400 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
 
 El controlador declara `PublicSearchPageDto`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -12116,12 +13282,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Índice de búsqueda no reconocido | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Falta el tenant de contexto para la operación de búsqueda | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Campo de ${kind} no permitido para el índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
-| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | El departamento no tiene una sigla reconocible en el catálogo | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El municipio no pertenece al departamento elegido | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo territorial no está disponible | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
-| 422 | `PRECONDITION_FAILED` | opciones.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | options.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
@@ -12141,7 +13307,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 91. GET /public/search/practitioners
+## 99. GET /public/search/practitioners
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12206,6 +13372,7 @@ Host: localhost:3000
 | 400 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
 
 El controlador declara `PublicSearchPageDto`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -12219,12 +13386,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Índice de búsqueda no reconocido | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Falta el tenant de contexto para la operación de búsqueda | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Campo de ${kind} no permitido para el índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
-| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | El departamento no tiene una sigla reconocible en el catálogo | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El municipio no pertenece al departamento elegido | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo territorial no está disponible | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
-| 422 | `PRECONDITION_FAILED` | opciones.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | options.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
@@ -12244,7 +13411,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 92. GET /s/{slug}
+## 100. GET /s/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12304,6 +13471,7 @@ Host: localhost:3000
 | 404 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PublicDirectoryProfileDto`. Ejemplo completo derivado de ese DTO:
 
@@ -12355,6 +13523,11 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "badgeTypeConceptId": "00000000-0000-4000-8000-000000000001",
     "verificationMethodConceptId": "00000000-0000-4000-8000-000000000001",
     "verifiedAt": "valor-ejemplo",
+    "validUntil": "valor-ejemplo"
+  },
+  "verification": {
+    "status": "VERIFIED",
+    "verifiedAt": "2026-07-31T12:00:00.000Z",
     "validUntil": "valor-ejemplo"
   },
   "hasPublishedAgenda": true,
@@ -12411,11 +13584,15 @@ Campos de la respuesta:
 | `ratingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `acceptsReviews` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 | `verifiedBadge` | Sí | `PublicVerifiedBadgeDto` | Sin restricción adicional declarada | El mismo sello y la misma semántica que en el buscador | `{"status":"VERIFIED","badgeTypeConceptId":"00000000-0000-4000-8000-000000000001","verificationMethodConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"valor-ejemplo","validUntil":"valor-ejemplo"}` |
-| `verifiedBadge.status` | Sí | `string` | valores: `VERIFIED`, `EXPIRED`, `NONE` | `VERIFIED` sólo con respaldo vigente; `EXPIRED` si lo hubo y venció | `VERIFIED` |
+| `verifiedBadge.status` | Sí | `string` | valores: `VERIFIED`, `IN_REVIEW`, `EXPIRED`, `NONE` | `VERIFIED` sólo con respaldo vigente; `IN_REVIEW` si pidió la verificación y | `VERIFIED` |
 | `verifiedBadge.badgeTypeConceptId` | Sí | `string` | admite null | Qué se verificó | `00000000-0000-4000-8000-000000000001` |
 | `verifiedBadge.verificationMethodConceptId` | Sí | `string` | admite null | Cómo se verificó (autoridad externa, alta manual auditada) | `00000000-0000-4000-8000-000000000001` |
 | `verifiedBadge.verifiedAt` | Sí | `string` | admite null | Desde cuándo vale, ISO | `valor-ejemplo` |
 | `verifiedBadge.validUntil` | Sí | `string` | admite null | Hasta cuándo vale, ISO | `valor-ejemplo` |
+| `verification` | Sí | `PractitionerVerificationDto` | Sin restricción adicional declarada | El mismo sello en la forma `verification`, derivado de `verifiedBadge`. | `{"status":"VERIFIED","verifiedAt":"2026-07-31T12:00:00.000Z","validUntil":"valor-ejemplo"}` |
+| `verification.status` | Sí | `string` | valores: `VERIFIED`, `IN_REVIEW`, `UNVERIFIED`, `SUSPENDED`, `EXPIRED` | Sin descripción específica en el contrato OpenAPI. | `VERIFIED` |
+| `verification.verifiedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `verification.validUntil` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `hasPublishedAgenda` | Sí | `boolean` | Sin restricción adicional declarada | Si tiene agenda publicada | `true` |
 | `nextAvailableDate` | Sí | `string` | admite null | Primer día con hueco (YYYY-MM-DD) | `valor-ejemplo` |
 | `posts` | Sí | `array<PublicPostSummaryDto>` | Sin restricción adicional declarada | Máx. 20 | `[{"id":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","publishedAt":"valor-ejemplo","mediaUrls":["valor-ejemplo"],"reactionCount":1,"commentCount":1}]` |

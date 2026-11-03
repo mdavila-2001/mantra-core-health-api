@@ -84,7 +84,7 @@ export class CommunityEngagementService {
   ): Promise<Map<string, PostEngagement>> {
     if (postIds.length === 0) return new Map();
 
-    const [tallies, comentarios, propias] = await Promise.all([
+    const [tallies, comments, own] = await Promise.all([
       this.reactionsRepo.summarizeByTargets(
         em,
         SOCIAL_OBJECT_CONCEPT_BY_CODE.POST,
@@ -107,13 +107,13 @@ export class CommunityEngagementService {
     ]);
 
     const ownBy = new Map(
-      propias.map((reaction) => [
+      own.map((reaction) => [
         reaction.reactableRefId,
         reaction.reactionTypeConceptId,
       ]),
     );
     const commentsBy = new Map(
-      comentarios.map((row) => [row.commentableRefId, row.count]),
+      comments.map((row) => [row.commentableRefId, row.count]),
     );
 
     return new Map(

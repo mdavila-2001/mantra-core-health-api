@@ -429,6 +429,32 @@ export const { seeds: COMMUNITY_CONCEPT_SEEDS, ids: COMM } =
       code: 'GROUP_VISIBILITY_SECRET',
       display: 'Secret group',
     },
+    /**
+     * Público autorizado del foro (ORG-FOR-002 / DOC-SOC-015, API#837).
+     *
+     * ALOVIDA enumera cinco públicos: solo doctores verificados, personal de la
+     * organización, pacientes atendidos, invitados y público general. Los dos
+     * últimos ya los expresan `GROUP_VISIBILITY_PRIVATE` (ingreso por
+     * invitación o aprobación) y `GROUP_VISIBILITY_PUBLIC`; estos tres son los
+     * que faltaban. Viven en la misma columna (`visibility_concept_id`) porque
+     * los cinco son valores excluyentes de una sola pregunta —quién puede ver
+     * este foro— y el modelo no tiene otra columna para guardarla.
+     *
+     * Para quien no está en el público, el foro no existe: responde 404 igual
+     * que uno inexistente.
+     */
+    GROUP_VISIBILITY_VERIFIED_DOCTORS: {
+      code: 'GROUP_VISIBILITY_VERIFIED_DOCTORS',
+      display: 'Group restricted to verified practitioners',
+    },
+    GROUP_VISIBILITY_ORGANIZATION_STAFF: {
+      code: 'GROUP_VISIBILITY_ORGANIZATION_STAFF',
+      display: 'Group restricted to the organization staff',
+    },
+    GROUP_VISIBILITY_ATTENDED_PATIENTS: {
+      code: 'GROUP_VISIBILITY_ATTENDED_PATIENTS',
+      display: 'Group restricted to patients attended by the organization',
+    },
     GROUP_TYPE_GENERAL: {
       code: 'GROUP_TYPE_GENERAL',
       display: 'General group',

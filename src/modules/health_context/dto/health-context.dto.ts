@@ -526,7 +526,8 @@ export class StartCollectionRunDto {
    */
   @ApiPropertyOptional({
     format: 'uuid',
-    description: 'Agente; por defecto, el de la programación',
+    description:
+      'Agente. Con `scheduleId` sale de la programación y, si se envía, debe coincidir (422 HEALTH_CONTEXT_SCHEDULE_BINDING_MISMATCH)',
   })
   @IsOptional()
   @IsUUID()
@@ -537,7 +538,8 @@ export class StartCollectionRunDto {
    */
   @ApiPropertyOptional({
     format: 'uuid',
-    description: 'País; por defecto, el de la programación',
+    description:
+      'País. Con `scheduleId` sale de la programación y, si se envía, debe coincidir (422 HEALTH_CONTEXT_SCHEDULE_BINDING_MISMATCH)',
   })
   @IsOptional()
   @IsUUID()

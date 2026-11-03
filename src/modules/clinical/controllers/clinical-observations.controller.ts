@@ -10,7 +10,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { ClinicalRecordAccessGuard } from '../guards';
 import { ObservationsService } from '../services';
 import {
@@ -39,6 +44,11 @@ export class ClinicalObservationsController {
   constructor(private readonly observationsService: ObservationsService) {}
 
   /** UC-08-03. */
+  @Audited({
+    action: 'OBSERVATION_RECORDED',
+    entity: 'observation',
+    entityId: 'result.id',
+  })
   @Post()
   @UseGuards(ClinicalRecordAccessGuard)
   @HttpCode(HttpStatus.CREATED)
@@ -53,6 +63,11 @@ export class ClinicalObservationsController {
   }
 
   /** UC-08-04. */
+  @Audited({
+    action: 'OBSERVATION_AMENDED',
+    entity: 'observation',
+    entityId: 'param:id',
+  })
   @Patch(':id/amend')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({

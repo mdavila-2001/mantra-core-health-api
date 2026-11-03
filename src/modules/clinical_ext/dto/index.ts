@@ -4,6 +4,7 @@ export * from './cds.dto';
 export * from './clinical-alert.dto';
 export * from './order-set.dto';
 export * from './referral.dto';
+export * from './referral-transfer.dto';
 export * from './care-gap.dto';
 export * from './virtual-encounter.dto';
 export * from './prescription-favorite.dto';

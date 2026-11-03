@@ -20,7 +20,7 @@ function responseStub() {
   };
 }
 
-/** TX-28: las variables `AUTH_REFRESH_COOKIE_NAME/PATH/SAMESITE` se honran. */
+/** TX-28: nombre y ruta configurables; cookie habilitada endurece sus flags. */
 describe('refresh-cookie: variables de entorno (TX-28)', () => {
   it('sin declarar nada conserva el nombre, la ruta y el SameSite de siempre', () => {
     const env = loadRefreshCookieEnv({});
@@ -30,15 +30,16 @@ describe('refresh-cookie: variables de entorno (TX-28)', () => {
     expect(env.sameSite).toBe('strict');
   });
 
-  it('lee nombre, ruta y SameSite del entorno', () => {
+  it('lee nombre y ruta, y mantiene SameSite estricto si está activa', () => {
     const env = loadRefreshCookieEnv({
+      AUTH_REFRESH_COOKIE_ENABLED: 'true',
       AUTH_REFRESH_COOKIE_NAME: 'mch_refresh',
       AUTH_REFRESH_COOKIE_PATH: '/api/iam/auth/token/refresh',
       AUTH_REFRESH_COOKIE_SAMESITE: 'lax',
     });
     expect(env.name).toBe('mch_refresh');
     expect(env.path).toBe('/api/iam/auth/token/refresh');
-    expect(env.sameSite).toBe('lax');
+    expect(env.sameSite).toBe('strict');
   });
 
   it('un SameSite fuera de la lista vuelve a strict', () => {
@@ -63,7 +64,8 @@ describe('refresh-cookie: variables de entorno (TX-28)', () => {
     ];
     expect(name).toBe('mch_refresh');
     expect(value).toBe('tok');
-    expect(options.sameSite).toBe('lax');
+    expect(options.sameSite).toBe('strict');
+    expect(options.secure).toBe(true);
     expect(options.httpOnly).toBe(true);
 
     clearRefreshCookie(res, env);

@@ -9,7 +9,16 @@ import { MessagingModule } from '../messaging/messaging.module';
 // El vínculo persona ↔ cuenta, para resolver a qué usuario avisarle. Se provee
 // el repositorio suelto y no se importa `ProfilesModule`, por lo mismo que hace
 // `clinical`: es una clase sin estado que recibe el `EntityManager`.
-import { PersonAccountLinksRepository } from '../profiles/repositories';
+import {
+  PersonAccountLinksRepository,
+  PractitionerAdmissionsRepository,
+} from '../profiles/infrastructure/repositories';
+// El sello de verificación del profesional que aparece junto al nombre de cada
+// participante de una conversación: la MISMA proyección que la Guía y el
+// buscador de profesionales (`verificationOf`), sin la lectura completa de
+// admisiones. Mismo motivo que arriba para proveerla suelta: sólo depende de
+// un repositorio sin estado.
+import { PractitionerVerificationReader } from '../profiles/application/services/practitioner-verification-reader.service';
 // El filtro por especialidad del directorio público valida contra el value set
 // `VS_MEDICAL_SPECIALTY` con **el mismo servicio** que el alta de profesional.
 // Se provee la clase suelta y no se importa `ProfilesModule` por el mismo
@@ -17,7 +26,9 @@ import { PersonAccountLinksRepository } from '../profiles/repositories';
 // `ProfilesModule` importa `DirectoryModule`, que importa este módulo. La clase
 // no tiene estado —no cachea, y su propio TSDoc explica por qué— así que una
 // segunda instancia responde exactamente lo mismo que la de `profiles`.
-import { MedicalSpecialtyCatalogService } from '../profiles/services/medical-specialty-catalog.service';
+import { ProfilesTerminologyAdapter } from '../profiles/infrastructure/adapters/profiles-terminology.adapter';
+import { PROFILES_TERMINOLOGY_PORT } from '../profiles/application/ports/profiles-terminology.port';
+import { MedicalSpecialtyCatalogService } from '../profiles/application/services/medical-specialty-catalog.service';
 // De acá sale `ValueSetsRepository`, que es de donde el servicio de arriba lee
 // los 36 conceptos, y `CatalogConceptsRepository`, que da el rótulo con el que
 // el índice de búsqueda guarda la especialidad. `terminology` no importa ningún
@@ -26,11 +37,17 @@ import { TerminologyModule } from '../terminology/terminology.module';
 import { ClinicalModule } from '../clinical/clinical.module';
 import { SearchPlatformModule } from '../search_platform/search_platform.module';
 import { RedisRuntimeModule } from '../redis_runtime/redis_runtime.module';
+// Membresías de tenant: quién atiende la bandeja de una vitrina de
+// organización. Es el módulo de autorización suelto de `directory`, sin
+// imports propios, así que no cierra el ciclo con `DirectoryModule` (que sí
+// importa a `community`).
+import { DirectoryAuthorizationModule } from '../directory/directory-authorization.module';
 import { WsJwtGuard } from '../../common';
 import {
   CommunitySocialController,
   CommunityMessagingController,
   CommunityModerationController,
+  PartyRatingsController,
   CommunityReviewsController,
   PatientReviewsController,
   CommunityGroupsController,
@@ -46,11 +63,17 @@ import {
   CommunitySocialService,
   CommunityChatAutoReplyService,
   CommunityMessagingService,
+  CommunityBookingChatService,
   CommunityModerationService,
+  PartyRatingsService,
+  PartyRatingsReadService,
+  RatingPartiesService,
   CommunityReviewsService,
+  CommunityReviewableCareService,
   CommunityGroupsService,
   CommunityGroupWallService,
   CommunityGroupAccessService,
+  CommunityGroupAudienceService,
   CommunityGroupNotificationsService,
   CommunityPollsService,
   CommunityFeedService,
@@ -72,6 +95,8 @@ import {
   CommunitySearchIndexService,
   CommunityVerificationService,
   CommunityProfileStatsService,
+  CommunityOrganizationStaffService,
+  CommunityOrderChatService,
 } from './services';
 import { CommunityMessagingGateway } from './gateways';
 import {
@@ -84,6 +109,7 @@ import {
   BlocksRepository,
   ConversationsRepository,
   ModerationRepository,
+  PartyRatingsRepository,
   ReviewsRepository,
   PollsRepository,
   GroupsRepository,
@@ -127,6 +153,7 @@ import {
     RedisRuntimeModule,
     MessagingModule,
     TerminologyModule,
+    DirectoryAuthorizationModule,
   ],
   controllers: [
     CommunitySocialController,
@@ -137,6 +164,8 @@ import {
     // identifica lo que califica por su atención, no por el uuid de la
     // vitrina — que la ficha pública no publica.
     PatientReviewsController,
+    // v4.2.42 · calificación en malla médico ↔ paciente ↔ organización.
+    PartyRatingsController,
     CommunityGroupsController,
     CommunityTopicsController,
     CommunityPollsController,
@@ -160,6 +189,7 @@ import {
     ConversationsRepository,
     ModerationRepository,
     ReviewsRepository,
+    PartyRatingsRepository,
     PollsRepository,
     GroupsRepository,
     FeedRepository,
@@ -169,9 +199,17 @@ import {
     PublicSearchRepository,
     VerifiedBadgesRepository,
     PersonAccountLinksRepository,
+    PractitionerAdmissionsRepository,
+    PractitionerVerificationReader,
     // La regla de «qué uuid es una especialidad médica», compartida con el alta
     // de profesional. Ver la nota del import.
     MedicalSpecialtyCatalogService,
+    // El servicio de arriba lee el catálogo por el puerto de terminología de
+    // `profiles`; se provee su adaptador por la misma razón que la clase.
+    {
+      provide: PROFILES_TERMINOLOGY_PORT,
+      useClass: ProfilesTerminologyAdapter,
+    },
     // Filtro territorial en dos pasos del directorio (subtarea 2.3); lee los
     // mismos repositorios de `TerminologyModule`.
     PublicTerritoryFilterService,
@@ -183,12 +221,19 @@ import {
     CommunitySocialService,
     CommunityChatAutoReplyService,
     CommunityMessagingService,
+    CommunityBookingChatService,
+    CommunityOrganizationStaffService,
+    CommunityOrderChatService,
     CommunityMessagingGateway,
     CommunityMessageNotificationsService,
     // F4.2 · presencia del chat sobre el Redis compartido del módulo.
     CommunityPresenceService,
     CommunityModerationService,
     CommunityReviewsService,
+    CommunityReviewableCareService,
+    RatingPartiesService,
+    PartyRatingsService,
+    PartyRatingsReadService,
     CommunityGroupsService,
     CommunityGroupWallService,
     CommunityGroupNotificationsService,
@@ -203,6 +248,7 @@ import {
     CommunityVisibilityService,
     CommunityEngagementService,
     CommunityGroupAccessService,
+    CommunityGroupAudienceService,
     CommunitySocialReadService,
     CommunityTimelineReadService,
     CommunityMessagingReadService,
@@ -229,6 +275,14 @@ import {
     // sistema de chat. No hay ciclo — `community` no importa `scheduling`.
     CommunityChatAutoReplyService,
     CommunityMessagingService,
+    // La agenda deja la confirmación de una cita en el chat (hilo profesional-paciente).
+    CommunityBookingChatService,
+    // El pedido de farmacia abre el hilo paciente ↔ vitrina de la farmacia.
+    CommunityOrderChatService,
+    // Los seeds crean la vitrina de un profesional por el mismo caso de uso que la API.
+    CommunitySocialService,
+    // El reindexado del buscador al final de la carga.
+    CommunitySearchIndexService,
   ],
 })
 export class CommunityModule {}

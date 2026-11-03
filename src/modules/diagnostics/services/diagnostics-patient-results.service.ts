@@ -1,5 +1,9 @@
-import { PatientSettlementService } from '../../insurance/services/patient-settlement.service';
-import { unavailableSettlement } from '../../insurance/dto/patient-settlement.dto';
+import { PatientSettlementService } from '../../insurance/application/services/patient-settlement.service';
+import { SuggestedSiteNamesReader } from '../../clinical/services/suggested-site-names.reader';
+import { ServiceRequestDetailService } from '../../clinical/services/service-request-detail.service';
+import { summaryOf } from './diagnostics-reception.service';
+import { analysisCategoryOf } from '../../clinical/service-request-category';
+import { unavailableSettlement } from '../../insurance/presentation/dto/patient-settlement.dto';
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
@@ -14,8 +18,8 @@ import {
 import {
   PatientProfilesRepository,
   PersonAccountLinksRepository,
-} from '../../profiles/repositories';
-import { findPractitionerNames } from '../../profiles/read/practitioner-names';
+} from '../../profiles/infrastructure/repositories';
+import { findPractitionerNames } from '../../profiles/infrastructure/read-models/practitioner-names';
 import {
   CareRelationshipsRepository,
   ResourceScopeGrantsRepository,
@@ -28,7 +32,11 @@ import {
 import { FileUploadService } from '../../common/services';
 import type { FileContentDto } from '../../common/dto';
 import { DiagnosticOrdersRepository, ReportsRepository } from '../repositories';
-import { DIAGNOSTIC_CATEGORIES, DIAG } from '../diagnostics.concepts';
+import {
+  DIAGNOSTIC_CATEGORIES,
+  DIAG,
+  PATIENT_PORTAL_CATEGORIES,
+} from '../diagnostics.concepts';
 import type {
   DiagnosticResultShareDto,
   DiagnosticResultSharesResponseDto,
@@ -94,6 +102,9 @@ export class DiagnosticsPatientResultsService {
    * @param grantsRepo - Grants sujeto→recurso: los resultados compartidos.
    * @param careRepo - Relaciones asistenciales, para exigir vínculo vigente al compartir (CL-48).
    * @param logger - Registro estructurado.
+   * @param settlements - Liquidación del seguro de cada orden diagnóstica.
+   * @param siteNames - Nombre de la sede que el médico sugirió, para mostrarle al paciente un nombre y no un uuid.
+   * @param detail - Detalle de la orden (muestra, componentes, imagen): el mismo que ve el receptor.
    * @param fileUpload - Bytes de un archivo ya autorizado por contexto (CL-40).
    */
   constructor(
@@ -106,6 +117,8 @@ export class DiagnosticsPatientResultsService {
     private readonly careRepo: CareRelationshipsRepository,
     private readonly logger: PinoLogger,
     private readonly settlements: PatientSettlementService,
+    private readonly siteNames: SuggestedSiteNamesReader,
+    private readonly detail: ServiceRequestDetailService,
     private readonly fileUpload?: FileUploadService,
   ) {
     this.logger.setContext(DiagnosticsPatientResultsService.name);
@@ -175,18 +188,30 @@ export class DiagnosticsPatientResultsService {
     const rows = await this.ordersRepo.findOrdersForPatientPortal(
       em,
       patientProfileId,
-      DIAGNOSTIC_CATEGORIES,
+      PATIENT_PORTAL_CATEGORIES,
       limit + 1,
     );
     const truncated = rows.length > limit;
     const page = rows.slice(0, limit);
 
-    const [settlements, preparacion, informePorOrden] = await Promise.all([
+    const [
+      settlements,
+      preparation,
+      reportByOrder,
+      suggestedSiteNames,
+      details,
+    ] = await Promise.all([
+      // La liquidación del seguro es de las órdenes diagnósticas: una orden de
+      // procedimiento no tiene reclamo y no se le inventa una liquidación.
       this.settlements.forOrders(
         em,
         actor.id,
         'DIAGNOSTIC',
-        page.map((order) => order.id),
+        page
+          .filter((order) =>
+            DIAGNOSTIC_CATEGORIES.includes(order.categoryConceptId ?? ''),
+          )
+          .map((order) => order.id),
       ),
       this.preparationByConcept(
         em,
@@ -196,20 +221,45 @@ export class DiagnosticsPatientResultsService {
         em,
         page.map((order) => order.id),
       ),
+      // Una sola lectura por página: el paciente ve el nombre, no el uuid.
+      this.siteNames.namesFor(
+        em,
+        page.map((order) => order.suggestedPracticeSiteId),
+      ),
+      // Mismo detalle que ve el receptor: muestra, componentes, imagen.
+      this.detail.describe(em, page),
     ]);
 
     const items: PatientOrderSummaryDto[] = page.map((order) => {
-      const reportId = informePorOrden.get(order.id);
+      const reportId = reportByOrder.get(order.id);
+      const view = details.get(order.id);
+      const codeDisplay = view?.codeDisplay ?? null;
       return {
         id: order.id,
+        requisitionId: order.requisitionId ?? null,
+        codeDisplay,
+        specimenTypeConceptId: order.specimenTypeConceptId ?? null,
+        specimenTypeDisplay: view?.specimenTypeDisplay ?? null,
+        components: view?.components ?? [],
+        componentsSpecified: view?.componentsSpecified ?? false,
+        imaging: view?.imaging ?? null,
+        summary: summaryOf(codeDisplay, view),
         ...(settlements.get(order.id) ?? unavailableSettlement()),
         encounterId: order.encounterId,
         codeConceptId: order.codeConceptId,
         categoryConceptId: order.categoryConceptId,
+        category: analysisCategoryOf(order.categoryConceptId),
         statusConceptId: order.statusConceptId,
         priorityConceptId: order.priorityConceptId,
+        performerSelectionConceptId: order.performerSelectionConceptId ?? null,
+        performerPractitionerProfileId:
+          order.performerPractitionerProfileId ?? null,
+        suggestedPracticeSiteId: order.suggestedPracticeSiteId ?? null,
+        suggestedPracticeSiteName: order.suggestedPracticeSiteId
+          ? (suggestedSiteNames.get(order.suggestedPracticeSiteId) ?? null)
+          : null,
         createdAt: order.createdAt,
-        preparationInstructions: preparacion.get(order.codeConceptId),
+        preparationInstructions: preparation.get(order.codeConceptId),
         hasReleasedResult: reportId !== undefined,
         reportId,
       };
@@ -279,7 +329,7 @@ export class DiagnosticsPatientResultsService {
       em,
       orderIds,
     );
-    const visibles = await this.projectReleasedResults(em, reports);
+    const visible = await this.projectReleasedResults(em, reports);
 
     // Una orden puede tener más de un informe visible: un estudio que se repite
     // por muestra insuficiente deja el primero liberado y agrega el segundo.
@@ -287,7 +337,7 @@ export class DiagnosticsPatientResultsService {
     // ver; quedarse con el último que apareció en la lista sería resolver un
     // empate clínico por orden de iteración.
     const byOrder = new Map<string, { reportId: string; releasedAt: Date }>();
-    for (const result of visibles) {
+    for (const result of visible) {
       const orderId = result.serviceRequestId;
       if (orderId === undefined) {
         continue;
@@ -304,7 +354,7 @@ export class DiagnosticsPatientResultsService {
       }
     }
     return new Map(
-      [...byOrder].map(([ordenId, elegido]) => [ordenId, elegido.reportId]),
+      [...byOrder].map(([orderId, chosen]) => [orderId, chosen.reportId]),
     );
   }
 
@@ -758,14 +808,14 @@ export class DiagnosticsPatientResultsService {
       string,
       { visibilityConceptId: string; recordedAt: Date }
     >();
-    for (const evento of releases) {
-      const versionId = evento.diagnosticReportVersionId;
+    for (const event of releases) {
+      const versionId = event.diagnosticReportVersionId;
       if (versionId === undefined || lastEvent.has(versionId)) {
         continue;
       }
       lastEvent.set(versionId, {
-        visibilityConceptId: evento.patientVisibilityConceptId,
-        recordedAt: evento.recordedAt,
+        visibilityConceptId: event.patientVisibilityConceptId,
+        recordedAt: event.recordedAt,
       });
     }
 
@@ -900,13 +950,11 @@ export class DiagnosticsPatientResultsService {
       const link = await this.accountLinksRepo.findActiveByUser(em, userId);
       if (link) personIdByUser.set(userId, link.personId);
     }
-    const names = await findPractitionerNames(em, [
-      ...personIdByUser.values(),
-    ]);
+    const names = await findPractitionerNames(em, [...personIdByUser.values()]);
     const result = new Map<string, string>();
     for (const [userId, personId] of personIdByUser) {
-      const nombre = names.get(personId);
-      if (nombre !== undefined) result.set(userId, nombre);
+      const name = names.get(personId);
+      if (name !== undefined) result.set(userId, name);
     }
     return result;
   }

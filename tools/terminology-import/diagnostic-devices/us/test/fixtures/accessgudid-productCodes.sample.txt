@@ -1,0 +1,2 @@
+PrimaryDI|productCode|productCodeName
+00192896007024|GCJ|Laparoscope, General & Plastic Surgery

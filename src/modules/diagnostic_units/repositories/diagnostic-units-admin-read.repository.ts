@@ -4,7 +4,7 @@ import {
   PracticeSites,
   PractitionerRoleAssignments,
 } from '../../practice/entities';
-import { findPractitionerNames } from '../../profiles/read/practitioner-names';
+import { findPractitionerNames } from '../../profiles/infrastructure/read-models/practitioner-names';
 import { CatalogConcepts } from '../../terminology/entities';
 import {
   DiagnosticEquipment,

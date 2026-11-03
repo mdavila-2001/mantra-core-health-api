@@ -59,9 +59,13 @@ export interface CreateHospitalData {
  */
 @Injectable()
 export class HospitalsRepository {
-  /** Busca un hospital por id; `null` si no existe. */
-  findById(em: EntityManager, id: string): Promise<Hospitals | null> {
-    return em.findOne(Hospitals, { id });
+  /** Busca un hospital por id dentro de un tenant; `null` si no existe o es de otro tenant. */
+  findByIdInTenant(
+    em: EntityManager,
+    id: string,
+    tenantId: string,
+  ): Promise<Hospitals | null> {
+    return em.findOne(Hospitals, { id, tenantId });
   }
 
   /**

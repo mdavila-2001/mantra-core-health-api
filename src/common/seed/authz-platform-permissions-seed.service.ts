@@ -4,6 +4,7 @@ import { PinoLogger } from 'nestjs-pino';
 import { Permissions } from '../../modules/authz/entities';
 import { AUTHZ } from '../../modules/authz/authz.concepts';
 import { PLATFORM_PERMISSION_SEED } from '../../modules/authz/authz.seed';
+import { seedPermissionRoleGrants } from '../../modules/authz/authz.permission-role-grants.seed';
 import { CONCEPTS } from '../constants/concepts';
 
 /** Acción declarada en la semilla → concepto de `authz`. */
@@ -81,13 +82,15 @@ export class AuthzPlatformPermissionsSeedService {
           actionConceptId: ACTION_CONCEPT[seed.action],
           defaultScopeConceptId: SCOPE_CONCEPT[seed.scope],
           stateConceptId: CONCEPTS.STATE_ACTIVE,
-          // No se restringe por rol ni se concede directo a un usuario: el
-          // único camino a este permiso es un grant sobre un recurso concreto,
-          // que es justamente lo que lo hace acotado y temporal.
+          // Por omisión no se restringe por rol ni se concede directo a un
+          // usuario: el único camino a este permiso es un grant sobre un
+          // recurso concreto, que es justamente lo que lo hace acotado y
+          // temporal. Un permiso que sí se concede directo (los del motor de
+          // cargas masivas) lo declara en su semilla.
           isRoleRestricted: false,
-          allowDirectUserGrant: false,
+          allowDirectUserGrant: seed.allowDirectUserGrant ?? false,
           isFieldLevel: false,
-          isDangerous: false,
+          isDangerous: seed.isDangerous ?? false,
           createdAt: now,
           updatedAt: now,
         },
@@ -101,6 +104,19 @@ export class AuthzPlatformPermissionsSeedService {
       this.logger.info(
         { operation: 'seed.authz.permissions', inserted },
         'Permisos de plataforma sembrados',
+      );
+    }
+
+    // Concesión de los permisos a los roles que la semilla declara (idempotente).
+    const grants = await seedPermissionRoleGrants(em, now);
+    if (grants.inserted > 0 || grants.skippedMissingRole.length > 0) {
+      this.logger.info(
+        {
+          operation: 'seed.authz.permission-role-grants',
+          inserted: grants.inserted,
+          skippedMissingRole: grants.skippedMissingRole,
+        },
+        'Concesiones de permisos de plataforma a roles',
       );
     }
     return { inserted };

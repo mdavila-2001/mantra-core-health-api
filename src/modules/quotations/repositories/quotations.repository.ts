@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { Quotations } from '../../billing/entities';
+import { Appointments } from '../../clinical/entities';
 import { createdBy } from '../../../common';
 
 /** Cotización a crear (FT-24). */
@@ -79,6 +80,21 @@ export class QuotationsRepository {
    */
   findById(em: EntityManager, id: string): Promise<Quotations | null> {
     return em.findOne(Quotations, { id });
+  }
+
+  /**
+   * Cita clínica por id, para comprobar que es del paciente y del tenant de la
+   * cotización antes de referenciarla.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Cita a buscar.
+   * @returns La cita, o `null` si no existe.
+   */
+  findAppointmentById(
+    em: EntityManager,
+    id: string,
+  ): Promise<Appointments | null> {
+    return em.findOne(Appointments, { id });
   }
 
   /**

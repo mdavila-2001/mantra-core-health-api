@@ -1,6 +1,11 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { ModerationService } from '../services';
 import {
   CreateModerationDecisionDto,
@@ -20,6 +25,11 @@ export class ModerationController {
   constructor(private readonly moderationService: ModerationService) {}
 
   /** UC-10-11. */
+  @Audited({
+    action: 'MODERATION_DECISION',
+    entity: 'moderation_event',
+    entityId: 'result.id',
+  })
   @Post('decisions')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

@@ -11,6 +11,7 @@ import {
   IsUUID,
   Matches,
   MaxLength,
+  MinLength,
   ValidateNested,
 } from 'class-validator';
 
@@ -110,6 +111,48 @@ export class CreateMedicalGroupDto {
   members!: MedicalGroupMemberInputDto[];
 }
 
+/** Cuerpo de `PATCH /medical-groups/:id`: lo que el creador puede corregir. */
+export class UpdateMedicalGroupDto {
+  @ApiPropertyOptional({ description: 'Lugar de realización' })
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(300)
+  locationText?: string;
+
+  @ApiPropertyOptional({
+    description: 'Notas adicionales; una cadena vacía las borra',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(4000)
+  notesText?: string;
+}
+
+/** Cuerpo de `PATCH /medical-groups/:id/members/:memberId`. */
+export class UpdateMedicalGroupMemberDto {
+  @ApiPropertyOptional({ description: 'Cargo/función dentro del grupo' })
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(120)
+  roleTitle?: string;
+
+  @ApiPropertyOptional({ example: '500.00' })
+  @IsOptional()
+  @IsNumberString()
+  @Matches(PRICE_PATTERN, { message: PRICE_PATTERN_MESSAGE })
+  agreedPaymentAmount?: string;
+
+  @ApiPropertyOptional({
+    description: 'Términos adicionales del cargo; una cadena vacía los borra',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(4000)
+  additionalTermsText?: string;
+}
+
 /** Cuerpo de `POST /medical-groups/:id/reschedule-requests`. */
 export class RequestMedicalGroupRescheduleDto {
   @ApiProperty({ description: 'Nueva fecha propuesta, ISO 8601' })
@@ -147,6 +190,14 @@ export class MedicalGroupMemberDto {
   @ApiProperty({ format: 'uuid' })
   practitionerProfileId!: string;
 
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    description:
+      'Nombre del profesional; null si su persona no tiene nombre cargado',
+  })
+  practitionerName!: string | null;
+
   @ApiProperty()
   roleTitle!: string;
 
@@ -177,11 +228,26 @@ export class MedicalGroupDto {
   @ApiProperty({ format: 'uuid' })
   serviceCatalogId!: string;
 
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    description: 'Nombre del servicio del catálogo; null si ya no existe',
+  })
+  serviceName!: string | null;
+
   @ApiProperty({ format: 'uuid' })
   requestingPractitionerId!: string;
 
   @ApiPropertyOptional({ format: 'uuid' })
   patientProfileId?: string;
+
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    description:
+      'Nombre del paciente asociado; null si no hay paciente o no tiene nombre',
+  })
+  patientName!: string | null;
 
   @ApiPropertyOptional({ format: 'uuid' })
   conditionId?: string;
@@ -242,6 +308,13 @@ export class MedicalGroupListItemDto {
   @ApiProperty({ format: 'uuid' })
   serviceCatalogId!: string;
 
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    description: 'Nombre del servicio del catálogo; null si ya no existe',
+  })
+  serviceName!: string | null;
+
   @ApiProperty({ type: String, format: 'date-time' })
   scheduledAt!: Date;
 
@@ -289,4 +362,18 @@ export class MedicalGroupConditionOptionDto {
   /** `true` en la más reciente: es la que el formulario preselecciona (AC-21-07). */
   @ApiProperty()
   isMostRecent!: boolean;
+}
+
+/** Un colega que se puede invitar al grupo (misma organización del servicio). */
+export class MedicalGroupEligibleMemberDto {
+  @ApiProperty({ format: 'uuid' })
+  practitionerProfileId!: string;
+
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    description:
+      'Nombre del profesional; null si su persona no tiene nombre cargado',
+  })
+  name!: string | null;
 }

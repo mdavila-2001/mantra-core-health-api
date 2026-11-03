@@ -95,9 +95,10 @@ export class CreateMedicationRequestDto {
   /**
    * Valor de dose text mantenido por la instancia.
    */
-  @ApiPropertyOptional({ description: 'Dosis en texto libre' })
+  @ApiPropertyOptional({ description: 'Dosis en texto libre', maxLength: 500 })
   @IsOptional()
   @IsString()
+  @MaxLength(500)
   doseText?: string;
 
   /**
@@ -114,9 +115,13 @@ export class CreateMedicationRequestDto {
   /**
    * Valor de frequency text mantenido por la instancia.
    */
-  @ApiPropertyOptional({ description: 'Frecuencia en texto libre' })
+  @ApiPropertyOptional({
+    description: 'Frecuencia en texto libre',
+    maxLength: 500,
+  })
   @IsOptional()
   @IsString()
+  @MaxLength(500)
   frequencyText?: string;
 
   /**
@@ -160,9 +165,11 @@ export class CreateMedicationRequestDto {
   @ApiPropertyOptional({
     description:
       'Indicaciones al paciente impresas en la receta, separadas de la posología (Patch v4.1.3)',
+    maxLength: 2000,
   })
   @IsOptional()
   @IsString()
+  @MaxLength(2000)
   patientInstructionsText?: string;
 
   /**
@@ -325,9 +332,10 @@ export class EditMedicationRequestDraftDto {
   /**
    * Valor de dose text mantenido por la instancia.
    */
-  @ApiPropertyOptional({ description: 'Dosis en texto libre' })
+  @ApiPropertyOptional({ description: 'Dosis en texto libre', maxLength: 500 })
   @IsOptional()
   @IsString()
+  @MaxLength(500)
   doseText?: string;
 
   /**
@@ -344,9 +352,13 @@ export class EditMedicationRequestDraftDto {
   /**
    * Valor de frequency text mantenido por la instancia.
    */
-  @ApiPropertyOptional({ description: 'Frecuencia en texto libre' })
+  @ApiPropertyOptional({
+    description: 'Frecuencia en texto libre',
+    maxLength: 500,
+  })
   @IsOptional()
   @IsString()
+  @MaxLength(500)
   frequencyText?: string;
 
   /**
@@ -416,9 +428,11 @@ export class EditMedicationRequestDraftDto {
   @ApiPropertyOptional({
     description:
       'Indicaciones al paciente impresas en la receta (Patch v4.1.3)',
+    maxLength: 2000,
   })
   @IsOptional()
   @IsString()
+  @MaxLength(2000)
   patientInstructionsText?: string;
 }
 
@@ -427,8 +441,12 @@ export class InvalidateMedicationRequestDto {
   /**
    * Valor de reason text mantenido por la instancia.
    */
-  @ApiProperty({ description: 'Motivo de la invalidación (obligatorio)' })
+  @ApiProperty({
+    description: 'Motivo de la invalidación (obligatorio)',
+    maxLength: 1000,
+  })
   @IsString()
+  @MaxLength(1000)
   reasonText!: string;
 }
 
@@ -443,8 +461,10 @@ export class ReplaceMedicationRequestDto {
    */
   @ApiProperty({
     description: 'Motivo de la corrección/reemplazo (obligatorio)',
+    maxLength: 1000,
   })
   @IsString()
+  @MaxLength(1000)
   reasonText!: string;
 
   /**
@@ -472,9 +492,10 @@ export class ReplaceMedicationRequestDto {
   /**
    * Valor de dose text mantenido por la instancia.
    */
-  @ApiPropertyOptional({ description: 'Dosis en texto libre' })
+  @ApiPropertyOptional({ description: 'Dosis en texto libre', maxLength: 500 })
   @IsOptional()
   @IsString()
+  @MaxLength(500)
   doseText?: string;
 
   /**
@@ -491,9 +512,13 @@ export class ReplaceMedicationRequestDto {
   /**
    * Valor de frequency text mantenido por la instancia.
    */
-  @ApiPropertyOptional({ description: 'Frecuencia en texto libre' })
+  @ApiPropertyOptional({
+    description: 'Frecuencia en texto libre',
+    maxLength: 500,
+  })
   @IsOptional()
   @IsString()
+  @MaxLength(500)
   frequencyText?: string;
 
   /**
@@ -541,17 +566,22 @@ export class RenewMedicationRequestDto {
   /**
    * Valor de dose text mantenido por la instancia.
    */
-  @ApiPropertyOptional({ description: 'Dosis en texto libre' })
+  @ApiPropertyOptional({ description: 'Dosis en texto libre', maxLength: 500 })
   @IsOptional()
   @IsString()
+  @MaxLength(500)
   doseText?: string;
 
   /**
    * Valor de frequency text mantenido por la instancia.
    */
-  @ApiPropertyOptional({ description: 'Frecuencia en texto libre' })
+  @ApiPropertyOptional({
+    description: 'Frecuencia en texto libre',
+    maxLength: 500,
+  })
   @IsOptional()
   @IsString()
+  @MaxLength(500)
   frequencyText?: string;
 
   /**

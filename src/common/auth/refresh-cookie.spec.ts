@@ -57,15 +57,21 @@ describe('refresh-cookie', () => {
       ).toBe(false);
     });
 
-    it('la declaración explícita gana sobre el entorno', () => {
-      // Hace falta para las pruebas y para un despliegue tras un proxy que
-      // termina TLS; sin esta salida, una cookie `Secure` nunca vuelve por HTTP.
+    it('mantiene Secure y SameSite=Strict cuando la cookie está habilitada', () => {
       expect(
         loadRefreshCookieEnv({
-          NODE_ENV: 'production',
+          NODE_ENV: 'development',
+          AUTH_REFRESH_COOKIE_ENABLED: 'true',
           AUTH_REFRESH_COOKIE_SECURE: 'false',
+          AUTH_REFRESH_COOKIE_SAMESITE: 'lax',
         }).secure,
-      ).toBe(false);
+      ).toBe(true);
+      expect(
+        loadRefreshCookieEnv({
+          AUTH_REFRESH_COOKIE_ENABLED: 'true',
+          AUTH_REFRESH_COOKIE_SAMESITE: 'lax',
+        }).sameSite,
+      ).toBe('strict');
     });
 
     it('la vida de la cookie sigue a la del refresh token', () => {

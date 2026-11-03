@@ -2,35 +2,49 @@ import { Entity, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 import { randomUUID } from 'node:crypto';
 
 /**
- * Evidencia que respalda una ficha (`data_catalog.catalog_evidence_items`):
- * una referencia verificable (nota de la bóveda, migración, archivo de código,
- * declaración del owner) con su procedencia. Nunca contiene secretos ni filas
- * de producción; el extracto se limita en el DTO.
+ * Mapea la entidad persistente asociada a `catalog_evidence_items`.
  */
 @Entity({ schema: 'data_catalog', tableName: 'catalog_evidence_items' })
 export class CatalogEvidenceItems {
+  /**
+   * Identificador único de la instancia.
+   */
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
+  /**
+   * Identificador asociado a object.
+   */
   @Property({ fieldName: 'object_id', type: 'uuid' }) // FK → data_catalog.catalog_objects
   objectId!: string;
 
-  /** Null si la evidencia es de la tabla entera. */
+  /**
+   * Identificador asociado a column.
+   */
   @Property({ fieldName: 'column_id', type: 'uuid', nullable: true }) // FK → data_catalog.catalog_columns
   columnId?: string;
 
-  /** SCHEMA_COMMENT | VAULT_NOTE | MIGRATION | CODE_REFERENCE | OPENAPI | OWNER_STATEMENT | DOCUMENT. */
+  /**
+   * Valor de kind mantenido por la instancia.
+   */
   @Property({ columnType: 'varchar' })
   kind!: string;
 
-  /** Ruta, URL o identificador verificable de la fuente. */
+  /**
+   * Valor de reference mantenido por la instancia.
+   */
   @Property({ columnType: 'text' })
   reference!: string;
 
+  /**
+   * Valor de excerpt mantenido por la instancia.
+   */
   @Property({ columnType: 'text', nullable: true })
   excerpt?: string;
 
-  /** Commit o hash de la fuente citada, si se conoce. */
+  /**
+   * Valor de source revision mantenido por la instancia.
+   */
   @Property({
     fieldName: 'source_revision',
     columnType: 'varchar',
@@ -38,9 +52,15 @@ export class CatalogEvidenceItems {
   })
   sourceRevision?: string;
 
-  @Property({ fieldName: 'added_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  /**
+   * Identificador asociado a added by user.
+   */
+  @Property({ fieldName: 'added_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   addedByUserId?: string;
 
+  /**
+   * Fecha y hora en que se creó el registro.
+   */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
   createdAt!: Date;
 }

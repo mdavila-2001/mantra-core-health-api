@@ -1,10 +1,17 @@
--- SALUD v4.0.10 · módulo 31 · schema integration_contracts
+-- SALUD v4.2.83 · módulo 31 · schema integration_contracts
 -- Generado de diagram_31_integration_contracts.puml — NO editar a mano.
 
 
 -- FK sin destino canónico (no forzadas, temperatura-0):
 --   integration_contracts.data_use_agreement_id
 
+
+-- destino: directory.tenants (requiere schema directory)
+DO $$ BEGIN
+    ALTER TABLE "integration_contracts"."integration_contracts"
+        ADD CONSTRAINT "fk_integration_contracts_tenant_id" FOREIGN KEY ("tenant_id")
+        REFERENCES "directory"."tenants" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: integrations.external_providers (requiere schema integrations)
 DO $$ BEGIN

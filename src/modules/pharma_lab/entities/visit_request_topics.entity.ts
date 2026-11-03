@@ -18,13 +18,13 @@ export class VisitRequestTopics {
   /**
    * Solicitud a la que pertenece el tema.
    */
-  @Property({ fieldName: 'visit_request_id', type: 'uuid' }) // FK → pharma_lab.visit_requests
+  @Property({ fieldName: 'visit_request_id', type: 'uuid' }) // FK → pharma_lab.visit_requests (inferida)
   visitRequestId!: string;
 
   /**
    * Producto del catálogo, cuando el tema es un medicamento concreto.
    */
-  @Property({ fieldName: 'pharma_product_id', type: 'uuid', nullable: true }) // FK → pharma_lab.pharma_products
+  @Property({ fieldName: 'pharma_product_id', type: 'uuid', nullable: true }) // FK → pharma_lab.pharma_products (inferida)
   pharmaProductId?: string;
 
   /**
@@ -42,6 +42,6 @@ export class VisitRequestTopics {
   /**
    * Identificador asociado a created by user.
    */
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   createdByUserId?: string;
 }

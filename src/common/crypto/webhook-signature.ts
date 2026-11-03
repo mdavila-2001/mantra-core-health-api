@@ -56,10 +56,9 @@ export function verifySignature(
 /**
  * Deriva un secreto determinista para una conexión/proveedor.
  *
- * // TODO secreto por conexión: derivación puente mientras el esquema no tenga
- * una columna de secreto por conexión/proveedor. En producción debe sustituirse
- * por el secreto real almacenado y rotado por conexión, servido desde el gestor
- * de secretos (misma raíz `WEBHOOK_SIGNING_KEY`).
+ * El esquema no guarda un secreto propio por conexión ni por proveedor, así que
+ * el secreto se deriva con HMAC de la raíz `WEBHOOK_SIGNING_KEY` y del par
+ * `namespace:id`. Rotar la raíz rota a la vez todos los secretos derivados.
  */
 export function deriveWebhookSecret(namespace: string, id: string): string {
   const rootKey = resolveSecret(

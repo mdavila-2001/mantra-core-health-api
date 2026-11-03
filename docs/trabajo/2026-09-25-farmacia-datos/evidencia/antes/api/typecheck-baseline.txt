@@ -1,4 +1,0 @@
-=== yarn typecheck ===
-EXIT:0
-
-[exited with code 0]

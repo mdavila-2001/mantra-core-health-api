@@ -1,3 +1,6 @@
+import { AuthzModulesCatalogController } from './controllers/authz-modules-catalog.controller';
+import { AuthzModulesCatalogService } from './services/authz-modules-catalog.service';
+import { AuthzModulesRouteInventory } from './services/authz-modules-route-inventory';
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
@@ -10,17 +13,25 @@ import {
   AuthzCareRelationshipsController,
   AuthzPdpController,
   AuthzMeController,
+  AuthzAdminController,
+  AuthzGovernanceController,
+  AuthzGovernanceExtController,
 } from './controllers';
 import {
   AuthzCatalogService,
   AuthzPoliciesService,
   AuthzRolesService,
   AuthzGrantsService,
+  AuthzClinicalScopeService,
   AuthzClinicalService,
   AuthzCareRelationshipsService,
   AuthzPdpService,
   AuthzEffectiveRolesService,
   AuthzMeService,
+  AuthzAdminReadService,
+  AuthzAssignmentRevocationService,
+  AuthzGovernanceService,
+  AuthzGovernanceExtService,
 } from './services';
 import {
   PermissionCategoriesRepository,
@@ -37,6 +48,9 @@ import {
   FieldPermissionsRepository,
   ResourceScopeGrantsRepository,
   AuthzServicePrincipalsRepository,
+  AuthzAdminReadRepository,
+  AuthzGovernanceReadRepository,
+  AuthzClinicalScopeRepository,
 } from './repositories';
 import { DataAccessLogRepository } from '../audit/repositories';
 import { AuditModule } from '../audit/audit.module';
@@ -48,7 +62,7 @@ import { MessagingModule } from '../messaging/messaging.module';
 import {
   PatientProfilesRepository,
   PersonAccountLinksRepository,
-} from '../profiles/repositories';
+} from '../profiles/infrastructure/repositories';
 
 /**
  * Módulo 06 — Authorization, Purpose of Use and Field Masking.
@@ -73,8 +87,14 @@ import {
     AuthzCareRelationshipsController,
     AuthzPdpController,
     AuthzMeController,
+    AuthzAdminController,
+    AuthzGovernanceController,
+    AuthzGovernanceExtController,
+    AuthzModulesCatalogController,
   ],
   providers: [
+    AuthzModulesCatalogService,
+    AuthzModulesRouteInventory,
     // Repositorios
     PermissionCategoriesRepository,
     PermissionsRepository,
@@ -90,6 +110,10 @@ import {
     FieldPermissionsRepository,
     ResourceScopeGrantsRepository,
     AuthzServicePrincipalsRepository,
+    AuthzAdminReadRepository,
+    AuthzGovernanceReadRepository,
+    // Lecturas de alcance (paciente, encuentro, consentimiento) de otros módulos.
+    AuthzClinicalScopeRepository,
     // Repositorio de auditoría reutilizado para el evento de acceso de emergencia
     DataAccessLogRepository,
     PersonAccountLinksRepository,
@@ -97,6 +121,7 @@ import {
     // estado sobre el `EntityManager`, como `PersonAccountLinksRepository`.
     PatientProfilesRepository,
     // Servicios
+    AuthzClinicalScopeService,
     AuthzCatalogService,
     AuthzPoliciesService,
     AuthzRolesService,
@@ -106,6 +131,10 @@ import {
     AuthzPdpService,
     AuthzEffectiveRolesService,
     AuthzMeService,
+    AuthzAdminReadService,
+    AuthzAssignmentRevocationService,
+    AuthzGovernanceService,
+    AuthzGovernanceExtService,
   ],
   // `iam` consume el primero al emitir y refrescar el token: es la única forma
   // de que un rol asistencial llegue al `RolesGuard`. El segundo lo consume
@@ -122,6 +151,9 @@ import {
     // para exigir una relación asistencial ACTIVE antes de compartir un
     // resultado con un profesional.
     CareRelationshipsRepository,
+    // El check-in de un encuentro deja constancia de la relación asistencial que
+    // exige el cobro con seguro (REQ-16-035), en la transacción del encuentro.
+    AuthzCareRelationshipsService,
     AuthzPdpService,
     // AG-31 (BR-26): `pharma_lab` necesita asignar/consultar MEDICAL_VISITOR al
     // vincular o desvincular un visitador, en la misma transacción del caso de
@@ -132,6 +164,9 @@ import {
     AuthzGrantsService,
     RolesRepository,
     UserRoleAssignmentsRepository,
+    // #893: `procedures_perioperative` prueba con la misma regla que los accesos
+    // clínicos que el paciente del caso quirúrgico pertenece al tenant.
+    AuthzClinicalScopeService,
   ],
 })
 export class AuthzModule {}

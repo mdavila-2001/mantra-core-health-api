@@ -15,7 +15,12 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../../common';
 import { SchedulingConfirmationService } from '../../application';
 import {
   CreateConfirmationRuleDto,
@@ -46,6 +51,11 @@ export class SchedulingConfirmationController {
    * @param actor - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de create conforme al contrato `Promise<ConfirmationRuleResponseDto>`.
    */
+  @Audited({
+    action: 'CONFIRMATION_RULE_CREATED',
+    entity: 'booking_confirmation_rule',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('SCHEDULING_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -83,6 +93,11 @@ export class SchedulingConfirmationController {
    * @param actor - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de activate conforme al contrato `Promise<ConfirmationRuleResponseDto>`.
    */
+  @Audited({
+    action: 'CONFIRMATION_RULE_ACTIVATED',
+    entity: 'booking_confirmation_rule',
+    entityId: 'param:id',
+  })
   @Post(':id/activate')
   @Roles('SCHEDULING_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -101,6 +116,11 @@ export class SchedulingConfirmationController {
    * @param actor - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de deactivate conforme al contrato `Promise<ConfirmationRuleResponseDto>`.
    */
+  @Audited({
+    action: 'CONFIRMATION_RULE_DEACTIVATED',
+    entity: 'booking_confirmation_rule',
+    entityId: 'param:id',
+  })
   @Post(':id/deactivate')
   @Roles('SCHEDULING_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -118,6 +138,11 @@ export class SchedulingConfirmationController {
    * @param dto - Datos validados de la operación.
    * @returns Resultado de evaluate conforme al contrato `Promise<EvaluateBookingResultDto>`.
    */
+  @Audited({
+    action: 'CONFIRMATION_RULES_EVALUATED',
+    entity: 'booking_confirmation_rule',
+    entityId: 'result.id',
+  })
   @Post('evaluate')
   @Roles('SCHEDULING_ADMIN')
   @HttpCode(HttpStatus.OK)

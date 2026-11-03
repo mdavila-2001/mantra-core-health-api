@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { IdentityAssertionsService } from '../services';
 import { RevokeAssertionDto, AssertionRevokedResponseDto } from '../dto';
 
@@ -25,6 +30,11 @@ export class IdentityAssertionsController {
   constructor(private readonly assertionsService: IdentityAssertionsService) {}
 
   /** UC-27-11. */
+  @Audited({
+    action: 'IDENTITY_ASSERTION_REVOKED',
+    entity: 'identity_assertion',
+    entityId: 'param:id',
+  })
   @Post(':id/revoke')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

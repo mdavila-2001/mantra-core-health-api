@@ -18,13 +18,13 @@ export class VisitSurveyAnswers {
   /**
    * Envío al que pertenece.
    */
-  @Property({ fieldName: 'visit_survey_response_id', type: 'uuid' }) // FK → pharma_lab.visit_survey_responses
+  @Property({ fieldName: 'visit_survey_response_id', type: 'uuid' }) // FK → pharma_lab.visit_survey_responses (inferida)
   visitSurveyResponseId!: string;
 
   /**
    * Pregunta respondida.
    */
-  @Property({ fieldName: 'visit_survey_question_id', type: 'uuid' }) // FK → pharma_lab.visit_survey_questions
+  @Property({ fieldName: 'visit_survey_question_id', type: 'uuid' }) // FK → pharma_lab.visit_survey_questions (inferida)
   visitSurveyQuestionId!: string;
 
   /**
@@ -54,6 +54,6 @@ export class VisitSurveyAnswers {
   /**
    * Identificador asociado a created by user.
    */
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   createdByUserId?: string;
 }

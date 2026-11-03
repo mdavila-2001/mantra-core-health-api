@@ -83,7 +83,11 @@ describe('EncounterInformedConsentsService (CL-77)', () => {
 
     const withoutAccess = build({ allowed: false });
     await expect(
-      withoutAccess.service.register('e1', { decision: 'ACCEPTED' } as any, ACTOR),
+      withoutAccess.service.register(
+        'e1',
+        { decision: 'ACCEPTED' } as any,
+        ACTOR,
+      ),
     ).rejects.toBeInstanceOf(ForbiddenException);
     expect(withoutAccess.treatment.sign).not.toHaveBeenCalled();
   });

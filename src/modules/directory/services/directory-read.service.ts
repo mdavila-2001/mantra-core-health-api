@@ -21,7 +21,7 @@ import {
   ContactPointsRepository,
   IdentifiersRepository,
 } from '../../common/repositories';
-import { CatalogRepository } from '../../insurance/repositories';
+import { CatalogRepository } from '../../insurance/infrastructure/repositories';
 import { DIR, TENANT_TYPE_CONCEPT_BY_CODE } from '../directory.concepts';
 import {
   EXECUTIVE_DTO_KEYS,
@@ -30,6 +30,11 @@ import {
   type RepresentativeRole,
 } from '../legal-representatives';
 import { AffiliationDocumentConceptsService } from './affiliation-document-concepts.service';
+import {
+  AFFILIATION_DOCUMENT_ROLES,
+  DOCUMENT_TYPE_CODE_BY_ROLE,
+} from '../affiliation-documents';
+import { LEGAL_ENTITY_TYPE_BY_CONCEPT_ID } from '../../../common/constants/legal-entity-types';
 
 import type {
   ListBranchAssignmentsResponseDto,
@@ -254,9 +259,9 @@ export class DirectoryReadService {
         if (carrier) {
           // La casa matriz georreferenciada (subtarea 1.3) vive en
           // `common.addresses`, no en el carrier: `owner_id` es el tenant y
-          // `findVigenteByOwnerAndUse` no distingue por `owner_type`, pero
+          // `findCurrentByOwnerAndUse` no distingue por `owner_type`, pero
           // un uuid de tenant no colisiona con uno de persona o de usuario.
-          const parentHome = await this.addressesRepo.findVigenteByOwnerAndUse(
+          const parentHome = await this.addressesRepo.findCurrentByOwnerAndUse(
             em,
             tenant.id,
             CONCEPTS.ADDR_USE_WORK,
@@ -279,7 +284,11 @@ export class DirectoryReadService {
         }
       }
 
-      const representation = await this.leerRepresentacion(em, tenant.id);
+      const representation = await this.loadRepresentation(em, tenant.id);
+      const legalFolder = await this.loadLegalDocuments(em, tenant.id);
+      const legalEntityType = LEGAL_ENTITY_TYPE_BY_CONCEPT_ID.get(
+        tenant.legalEntityTypeConceptId,
+      )?.code;
 
       items.push({
         id: tenant.id,
@@ -299,13 +308,13 @@ export class DirectoryReadService {
         timeZone: tenant.timeZone,
         updatedAt: tenant.updatedAt,
         myRoleConceptId: membership.tenantRoleConceptId,
-        canAdminister: ROLES_THAT_MANAGE.has(
-          membership.tenantRoleConceptId,
-        ),
+        canAdminister: ROLES_THAT_MANAGE.has(membership.tenantRoleConceptId),
         isVerified:
           tenant.verificationStatusConceptId === CONCEPTS.TENANT_VERIFIED,
         ...(payer ? { payer } : {}),
         ...representation,
+        ...(legalEntityType ? { legalEntityType } : {}),
+        ...legalFolder,
       });
     }
 
@@ -399,6 +408,11 @@ export class DirectoryReadService {
       branchTypeConceptId: branch.branchTypeConceptId,
       statusConceptId: branch.statusConceptId,
       timeZone: branch.timeZone,
+      description: branch.description ?? undefined,
+      locationUrl: branch.locationUrl ?? undefined,
+      latitude: branch.latitude == null ? undefined : Number(branch.latitude),
+      longitude:
+        branch.longitude == null ? undefined : Number(branch.longitude),
       createdAt: branch.createdAt,
     }));
     return { items, count: items.length };
@@ -547,7 +561,7 @@ export class DirectoryReadService {
   async readRepresentation(
     tenantId: string,
   ): Promise<Pick<MyOrganizationDto, 'legalRepresentative' | 'executives'>> {
-    return this.leerRepresentacion(this.em.fork(), tenantId);
+    return this.loadRepresentation(this.em.fork(), tenantId);
   }
 
   /**
@@ -568,7 +582,7 @@ export class DirectoryReadService {
    * @param tenantId - La organización.
    * @returns Las claves a mezclar en la ficha; vacío si no hay vínculos.
    */
-  private async leerRepresentacion(
+  private async loadRepresentation(
     em: EntityManager,
     tenantId: string,
   ): Promise<
@@ -591,14 +605,14 @@ export class DirectoryReadService {
       .map((v) => v.ciIdentifierId)
       .filter((id): id is string => Boolean(id));
 
-    const personas = await this.legalRepo.findPersonsByIds(em, personIds);
+    const persons = await this.legalRepo.findPersonsByIds(em, personIds);
     const documents = await this.identifiersRepo.findByIds(em, ciIds);
-    const contacts = await this.contactPointsRepo.findVigentesByOwners(
+    const contacts = await this.contactPointsRepo.findAllCurrentByOwners(
       em,
       personIds,
     );
 
-    // `findVigentesByOwners` ya viene ordenado por preferencia: el primero de
+    // `findAllCurrentByOwners` ya viene ordenado por preferencia: el primero de
     // cada sistema es el que la organización quiere que se use.
     const contact = (personId: string, systemConceptIds: string[]) =>
       contacts.find(
@@ -607,11 +621,8 @@ export class DirectoryReadService {
           systemConceptIds.includes(c.systemConceptId),
       )?.value;
 
-    const record = (
-      link: (typeof links)[number],
-      role: RepresentativeRole,
-    ) => {
-      const persona = personas.get(link.personId);
+    const record = (link: (typeof links)[number], role: RepresentativeRole) => {
+      const persona = persons.get(link.personId);
       if (!persona) return undefined;
       return {
         role: role,
@@ -661,11 +672,80 @@ export class DirectoryReadService {
       const role = EXECUTIVE_ROLE_BY_DTO_KEY[key];
       const link = byRole.get(role);
       return link ? record(link, role) : undefined;
-    }).filter((ficha): ficha is NonNullable<typeof ficha> => Boolean(ficha));
+    }).filter((sheet): sheet is NonNullable<typeof sheet> => Boolean(sheet));
 
     return {
       ...(legalRepresentative ? { legalRepresentative } : {}),
       ...(executives.length > 0 ? { executives } : {}),
+    };
+  }
+  /**
+   * La carpeta legal de la organización: qué papeles presentó y en qué estado
+   * está cada uno, más el NIT que declaró con el suyo.
+   *
+   * Uno por rol: ante dos filas del mismo tipo —un papel rechazado y su
+   * reemplazo— gana la más reciente, que es la que la plataforma revisa. Las
+   * filas dadas de baja no se cuentan. Un tipo de documento que el catálogo
+   * no reconoce se omite en vez de romper la ficha.
+   *
+   * @param em - Contexto de persistencia de esta lectura.
+   * @param tenantId - La organización.
+   * @returns Las claves a mezclar en la ficha; vacío si no hay papeles.
+   */
+  private async loadLegalDocuments(
+    em: EntityManager,
+    tenantId: string,
+  ): Promise<Pick<MyOrganizationDto, 'legalDocuments' | 'taxIdentifier'>> {
+    const rows = await this.legalRepo.listAffiliationDocsByTenant(em, tenantId);
+    const live = rows.filter(
+      (row) => row.statusConceptId === CONCEPTS.STATE_ACTIVE,
+    );
+    if (live.length === 0) return {};
+
+    const concepts = await this.concepts.resolve(em);
+    const roleByConcept = new Map<string, string>();
+    for (const role of AFFILIATION_DOCUMENT_ROLES) {
+      const conceptId = concepts.documentType.get(
+        DOCUMENT_TYPE_CODE_BY_ROLE[role],
+      );
+      if (conceptId) roleByConcept.set(conceptId, role);
+    }
+    const verificationByConcept = new Map<string, string>();
+    for (const [code, conceptId] of concepts.verificationStatus) {
+      verificationByConcept.set(conceptId, code);
+    }
+
+    const newest = new Map<string, (typeof live)[number]>();
+    for (const row of live) {
+      const role = roleByConcept.get(row.documentTypeConceptId);
+      if (!role) continue;
+      const previous = newest.get(role);
+      if (previous && previous.createdAt >= row.createdAt) continue;
+      newest.set(role, row);
+    }
+    if (newest.size === 0) return {};
+
+    const legalDocuments = AFFILIATION_DOCUMENT_ROLES.filter((role) =>
+      newest.has(role),
+    ).map((role) => {
+      const row = newest.get(role)!;
+      return {
+        role,
+        verificationStatus:
+          verificationByConcept.get(row.verificationStatusConceptId) ??
+          'PENDIENTE',
+        ...(row.documentNumber == null
+          ? {}
+          : { documentNumber: row.documentNumber }),
+        ...(row.registeredAt == null ? {} : { registeredAt: row.registeredAt }),
+        ...(row.validTo == null ? {} : { validTo: row.validTo }),
+      };
+    });
+    const taxIdentifier = newest.get('TAX_IDENTIFIER_DOC')?.documentNumber;
+
+    return {
+      legalDocuments,
+      ...(taxIdentifier ? { taxIdentifier } : {}),
     };
   }
 }

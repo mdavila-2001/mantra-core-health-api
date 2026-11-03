@@ -10,3 +10,4 @@ export * from './immunization-schedules.repository';
 export * from './virtual-encounters.repository';
 export * from './reference-ranges.repository';
 export * from './prescription-favorites.repository';
+export * from './referral-targets.repository';

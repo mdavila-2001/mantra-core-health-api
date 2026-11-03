@@ -9,10 +9,10 @@ PostgreSQL, schema `promotions`. Entidades generadas por introspección. Las alt
 
 ## Repositorios
 
-| Repositorio | Tablas | Métodos destacados |
-| --- | --- | --- |
-| `PromotionsLoyaltyRepository` | `loyalty_programs`, `loyalty_tiers`, `earning_rules`, `loyalty_memberships`, `points_ledger_entries`, `referral_programs`, `member_referrals` | `createProgram`, `findProgramByCode`, `createTier`, `findTiersByProgram`, `createEarningRule`, `createMembership`, `findMembershipByMember`, `findMembershipForUpdate`, `findMembershipsForSweep`, `createLedgerEntry`, `findLedgerEntryByKey`, `findLedgerByMembership`, `findEarnEntriesInPeriod`, `findExpirableEntries`, `createReferral`, `findReferralByCode`, `findReferralForUpdate`, `findReferralsByReferrer` |
-| `PromotionsDiscountsRepository` | `promotions`, `discount_rules`, `coupons`, `redemptions` | `createPromotion`, `findPromotionForUpdate`, `findPromotionByCode`, `createDiscountRule`, `findRulesByPromotion`, `createCoupon`, `findCouponByCodeForUpdate`, `findCouponsByCodes`, `createRedemption`, `findRedemptionForUpdate`, `findRedemptionsByRedeemer`, `findAppliedRedemptions`, `findRedemptionByIntent` |
+| Repositorio                     | Tablas                                                                                                                                        | Métodos destacados                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PromotionsLoyaltyRepository`   | `loyalty_programs`, `loyalty_tiers`, `earning_rules`, `loyalty_memberships`, `points_ledger_entries`, `referral_programs`, `member_referrals` | `createProgram`, `findProgramByCode`, `createTier`, `findTiersByProgram`, `createEarningRule`, `createMembership`, `findMembershipByMember`, `findMembershipForUpdate`, `findMembershipsForSweep`, `createLedgerEntry`, `findLedgerEntryByKey`, `findLedgerByMembership`, `findEarnEntriesInPeriod`, `findExpirableEntries`, `createReferral`, `findReferralByCode`, `findReferralForUpdate`, `findReferralsByReferrer` |
+| `PromotionsDiscountsRepository` | `promotions`, `discount_rules`, `coupons`, `redemptions`                                                                                      | `createPromotion`, `findPromotionForUpdate`, `findPromotionByCode`, `createDiscountRule`, `findRulesByPromotion`, `createCoupon`, `findCouponByCodeForUpdate`, `findCouponsByCodes`, `createRedemption`, `findRedemptionForUpdate`, `findRedemptionsByRedeemer`, `findAppliedRedemptions`, `findRedemptionByIntent`                                                                                                     |
 
 La división separa lo que el miembro **acumula** de lo que el negocio **descuenta**: comparten
 tenant y miembro, pero no ciclo de vida.
@@ -56,7 +56,7 @@ desde la fuente de verdad.
 Consultas por PK, FK, clave natural o clave de idempotencia, todas indexadas. Sin N+1: nada recorre
 relaciones fila por fila.
 
-## Pruebas
+## Tests
 
 Se ejercitan desde los specs de servicio, donde van mockeados. La cobertura real de los bloqueos,
 del SKIP LOCKED y de las UNIQUE llega con las pruebas de integración.

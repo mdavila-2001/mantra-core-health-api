@@ -8,7 +8,12 @@ import {
   Patch,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { ClinicalAlertsService } from '../services';
 import { OverrideAlertDto, ClinicalAlertResponseDto } from '../dto';
 
@@ -29,6 +34,11 @@ export class ClinicalAlertsController {
   constructor(private readonly alertsService: ClinicalAlertsService) {}
 
   /** UC-18-05 (acknowledge). */
+  @Audited({
+    action: 'CLINICAL_ALERT_ACKNOWLEDGED',
+    entity: 'clinical_alert',
+    entityId: 'param:id',
+  })
   @Patch(':id/acknowledge')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Reconocer una alerta clínica' })
@@ -40,6 +50,11 @@ export class ClinicalAlertsController {
   }
 
   /** UC-18-05 (override). */
+  @Audited({
+    action: 'CLINICAL_ALERT_OVERRIDDEN',
+    entity: 'clinical_alert',
+    entityId: 'param:id',
+  })
   @Patch(':id/override')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Override (sobreescribir) una alerta clínica' })

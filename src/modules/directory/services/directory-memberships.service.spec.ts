@@ -111,6 +111,21 @@ describe('DirectoryMembershipsService', () => {
     });
   });
 
+  describe('invite con id fijo', () => {
+    it('un proceso interno puede fijar el id de la membresía', async () => {
+      const d = build();
+      d.membershipsRepo.findActiveByUserTenant.mockResolvedValue(null);
+      d.membershipsRepo.create.mockReturnValue(activeMembership());
+
+      await d.service.invite('t1', { userId: 'u1' }, actor, 'fijo-m1');
+
+      expect(d.membershipsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ id: 'fijo-m1' }),
+      );
+    });
+  });
+
   describe('assignBranch (UC-04-06)', () => {
     it('throws when the membership is missing', async () => {
       const d = build();
@@ -424,10 +439,7 @@ describe('DirectoryMembershipsService', () => {
       d.membershipsRepo.findActiveByUserTenant.mockResolvedValue(null);
       d.membershipsRepo.create.mockReturnValue({ id: 'm-nueva' });
 
-      const res = await d.service.ensureCareMembership(
-        d.tx as any,
-        params,
-      );
+      const res = await d.service.ensureCareMembership(d.tx as any, params);
 
       expect(res).toEqual({ membership: { id: 'm-nueva' }, creada: true });
       const [, data] = d.membershipsRepo.create.mock.calls.at(-1);
@@ -454,10 +466,7 @@ describe('DirectoryMembershipsService', () => {
       };
       d.membershipsRepo.findActiveByUserTenant.mockResolvedValue(existing);
 
-      const res = await d.service.ensureCareMembership(
-        d.tx as any,
-        params,
-      );
+      const res = await d.service.ensureCareMembership(d.tx as any, params);
 
       expect(res).toEqual({ membership: existing, creada: false });
       expect(d.membershipsRepo.create).not.toHaveBeenCalled();

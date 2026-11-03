@@ -4,7 +4,7 @@ import { ReleaseExpiryJob } from './release-expiry.job';
 export { ReleaseExpiryJob } from './release-expiry.job';
 
 /**
- * Cierra el "bucle del worker" que `lakehouse/README.md` deja pendiente para
+ * El "bucle del worker" que el módulo `lakehouse` no corre por sí mismo, para
  * la caducidad de releases de investigación (UC-63-12). Las corridas de
  * transformación, la ingesta curada y las corridas de calidad no entran aquí:
  * necesitan un `defId`/`inputManifestFileId` que viene de otro módulo o de un

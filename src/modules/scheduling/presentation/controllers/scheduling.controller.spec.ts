@@ -210,6 +210,7 @@ describe('SchedulingBookingsController', () => {
       bookingsService as any,
       waitlistService as any,
       delayService as any,
+      {} as any,
     );
     return { controller, bookingsService, waitlistService, delayService };
   }

@@ -8,7 +8,12 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { CommunityVerificationService } from '../services';
 import {
   BadgeSweepResponseDto,
@@ -58,6 +63,11 @@ export class CommunityVerificationController {
    * @param actor - Administrador que lo registra.
    * @returns Qué pasó con el sello.
    */
+  @Audited({
+    action: 'VERIFIED_BADGE_GRANTED',
+    entity: 'verified_badge',
+    entityId: 'result.id',
+  })
   @Post('badges')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -91,6 +101,10 @@ export class CommunityVerificationController {
    * @param actor - Administrador que lo registra.
    * @returns Cuántos sellos cayeron.
    */
+  @Audited({
+    action: 'VERIFIED_BADGE_REVOKED',
+    entity: 'verified_badge',
+  })
   @Post('badges/:targetId/revoke')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -116,6 +130,10 @@ export class CommunityVerificationController {
    * @param actor - Quién lo corre (el worker de sistema).
    * @returns Cuántos sellos y perfiles cayeron.
    */
+  @Audited({
+    action: 'VERIFIED_BADGES_EXPIRY_SWEPT',
+    entity: 'verified_badge',
+  })
   @Post('badges/expire-sweep')
   @Roles('SYSTEM', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

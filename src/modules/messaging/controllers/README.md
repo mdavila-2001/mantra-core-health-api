@@ -18,20 +18,20 @@ Tres, porque tienen tres públicos distintos:
 
 ## Rutas
 
-| Método | Ruta | UC |
-| --- | --- | --- |
-| `POST` | `/queues/:code/jobs` | 05 |
-| `POST` | `/queues/dead-letter/:deadLetterJobId/redrive` | 09 |
-| `POST` | `/notifications/requests` | 10 |
-| `POST` | `/notifications/in-app/:id/read` | 13 |
-| `POST` | `/internal/outbox/relay/run` | 02 |
-| `POST` | `/internal/events/:domainEventId/dispatch` | 03 |
-| `POST` | `/internal/event-deliveries/:id/ack` | 04 |
-| `POST` | `/internal/queues/:code/claim` | 06 |
-| `POST` | `/internal/jobs/:id/complete` | 07 |
-| `POST` | `/internal/jobs/:id/fail` | 08 |
-| `POST` | `/internal/notifications/:requestId/deliver` | 11 |
-| `POST` | `/webhooks/providers/:providerCode/receipts` | 12 |
+| Método | Ruta                                           | UC  |
+| ------ | ---------------------------------------------- | --- |
+| `POST` | `/queues/:code/jobs`                           | 05  |
+| `POST` | `/queues/dead-letter/:deadLetterJobId/redrive` | 09  |
+| `POST` | `/notifications/requests`                      | 10  |
+| `POST` | `/notifications/in-app/:id/read`               | 13  |
+| `POST` | `/internal/outbox/relay/run`                   | 02  |
+| `POST` | `/internal/events/:domainEventId/dispatch`     | 03  |
+| `POST` | `/internal/event-deliveries/:id/ack`           | 04  |
+| `POST` | `/internal/queues/:code/claim`                 | 06  |
+| `POST` | `/internal/jobs/:id/complete`                  | 07  |
+| `POST` | `/internal/jobs/:id/fail`                      | 08  |
+| `POST` | `/internal/notifications/:requestId/deliver`   | 11  |
+| `POST` | `/webhooks/providers/:providerCode/receipts`   | 12  |
 
 UC-35-01 no aparece: no es un endpoint. Ver el README del módulo.
 
@@ -51,16 +51,16 @@ o devuelve un lote (02, 03, 04, 06, 07, 08, 12, 13).
 
 Las respuestas con `duplicate: true` también son `2xx`: lo repetido no es un error en este módulo.
 
-## Permisos
+## Permissions
 
 `MESSAGING_ADMIN` en todo. `SYSTEM` en lo que operan los workers (02–08, 11) y en el encolado y la
 solicitud de notificación (05, 10). `USER` sólo en 13, y el servicio comprueba además que la
 notificación sea suya.
 
 `/webhooks/providers/:providerCode/receipts` es `@Public()`: quien llama es un proveedor externo sin
-sesión. La verificación de firma está pendiente (ver README del módulo).
+sesión. La ruta verifica la firma HMAC antes de conciliar (ver README del módulo).
 
-## Pruebas
+## Tests
 
 - `messaging.controller.spec.ts` (4)
 - `messaging-internal.controller.spec.ts` (7)

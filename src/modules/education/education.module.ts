@@ -2,7 +2,11 @@ import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
 import { EducationController } from './controllers';
-import { EducationCatalogService, EducationLearningService } from './services';
+import {
+  EducationCatalogService,
+  EducationLearningService,
+  EducationScopeService,
+} from './services';
 import {
   EducationCatalogRepository,
   EducationLearningRepository,
@@ -20,6 +24,7 @@ import {
     EducationCatalogRepository,
     EducationLearningRepository,
     EducationCatalogService,
+    EducationScopeService,
     EducationLearningService,
   ],
 })

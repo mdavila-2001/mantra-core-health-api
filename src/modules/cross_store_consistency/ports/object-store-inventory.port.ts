@@ -59,7 +59,7 @@ export interface InventoryScope {
 
 /** Recorre el almacén de objetos. */
 export interface ObjectStoreInventory {
-  list(alcance: InventoryScope): Promise<ObjectInventory>;
+  list(scope: InventoryScope): Promise<ObjectInventory>;
 }
 
 /** Token de inyección del inventario activo. */

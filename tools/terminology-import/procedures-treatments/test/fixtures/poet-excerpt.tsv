@@ -1,0 +1,5 @@
+disease_id	disease_name	source_id	maxo_id	maxo_name	hpo_id	relation	evidence	extension_id	extension_name	comment	other	author	last_updated	created
+MONDO:0008854	Bardet-biedl Syndrome 1	PMID:20301537	MAXO:0000011	physical therapy	HP:0002141	TREATS	TAS					ORCID:0000-0001-7941-2961	2023-01-31	2022-01-06
+MONDO:0010156	Spastic Paraplegia 20, Autosomal Recessive	PMID:20301556	MAXO:0000011	physical therapy	HP:0002355	PREVENTS	TAS					ORCID:0000-0002-4142-7153	2022-02-14	2022-02-14
+MONDO:0009959	Refsum Disease, Infantile Form	PMID:34664020	MAXO:0001255	cholic acid supplementation	MONDO:0009959	TREATS	TAS					ORCID:0000-0002-0736-9199	2023-02-07	2023-02-07
+MONDO:0007510	Clouston Syndrome	PMID:20301379	MAXO:0000159	analgesic therapy	HP:0000972	TREATS	TAS					ORCID:0000-0001-5208-3432	2022-05-16	2022-04-27

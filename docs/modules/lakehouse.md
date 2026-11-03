@@ -3,7 +3,7 @@
   Fuente real: src/modules/lakehouse/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `lakehouse`
@@ -213,18 +213,43 @@ pacientes. No se loguean valores de partición, contratos ni expresiones de coho
 corepack yarn test src/modules/lakehouse --runInBand --silent
 ```
 
-Revisión 2026-10-05: 4 suites y 73 pruebas aprobadas. La cobertura actual verifica reglas de
-estado, idempotencia y delegación de controladores; no cubre aislamiento entre tenants ni la
-persistencia real de los payloads mínimos frente al DDL.
+La cobertura verifica reglas de estado, idempotencia, delegación de controladores, el aislamiento
+entre tenants y el contrato mínimo de cada payload. Son pruebas con dobles de repositorio y
+EntityManager: no persisten contra PostgreSQL.
 
-## Límites conocidos de la implementación revisada
+## Alcance por tenant
 
-- Las consultas por UUID de producto, dataset, definición, proyecto y release no reciben el tenant
-  resuelto ni lo filtran. Los roles y el interceptor que compara `tenantId` de entrada no sustituyen
-  esa comprobación; ver [informe de revisión](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/lakehouse.md#lake-01--crítica--búsquedas-por-uuid-sin-tenant-permiten-cruzar-recursos-y-releases-entre-tenants).
-- Varios DTO permiten omitir campos que las tablas del lakehouse declaran `NOT NULL`; el payload
-  aceptado por validación puede fallar al persistir. Ver [LAKE-02](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/lakehouse.md#lake-02--alta--contratos-opcionales-contra-columnas-not-null-producen-errores-de-orm).
-- Las respuestas de error usan códigos genéricos sin `reason` estable. Ver [LAKE-03](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/lakehouse.md#lake-03--media--el-módulo-no-expone-reasons-estables-por-fallo-de-negocio).
+- **El tenant sale del contexto.** `tenantId` en el cuerpo es opcional en la práctica: si llega debe
+  coincidir con el activo (`412 LAKEHOUSE_TENANT_MISMATCH`); sin tenant activo se responde
+  `412 TENANT_REQUIRED`.
+- **Consultas por `id + tenantId`.** Producto, dataset, definición de transformación, corrida,
+  proyecto y solicitud de release se buscan (y se bloquean) dentro del tenant. La versión de producto
+  y la cohorte se resuelven por su producto y su proyecto. Los datasets de origen, las particiones de
+  origen, las particiones de un hallazgo y los perfiles de de-identificación deben ser del mismo
+  tenant antes de crear relaciones o mutar estado.
+- **404 uniforme.** Un recurso de otro tenant responde igual que uno inexistente: `404`, mismo
+  mensaje y `reason` `LAKEHOUSE_RESOURCE_OUTSIDE_TENANT`, sin `details`. En los upserts por id
+  (`data-products/:id/versions`, `projects/:id/cohorts`) un id ocupado por otro tenant responde del
+  mismo modo.
+- **Cierre y descubrimiento de vencidos.** Con tenant en el contexto sólo alcanzan las solicitudes de
+  ese tenant. Sin tenant, sólo el worker `SYSTEM` revoca y lista los vencidos de todas las
+  organizaciones.
+
+## Contrato mínimo de los payloads
+
+La tabla exige estos valores y no tienen default de negocio, así que el servicio responde
+`400 VALIDATION_FAILED` con `reason` `LAKEHOUSE_REQUIRED_FIELD_MISSING` (y `details.fields`) antes de
+persistir: zona (`namespaceId`, `encryptionProfileCode`, `retentionPolicyCode`), contrato de la
+versión (`contractSchemaJson`), alta de producto (`ownerTeamId`, `businessPurpose`,
+`classificationCode`), cohorte (`inclusionExpression`), partición nueva (`minEventAt`, `maxEventAt`),
+archivo nuevo (`objectManifestId`), linaje (`sourcePartitionIds` cuando la definición tiene
+orígenes), corrida de calidad (`transformationRunId`), hallazgo (`partitionId`,
+`sampleObjectManifestId`) y aprobación (`objectManifestId`, `schemaVersion`).
+
+Tienen default de negocio: formato `parquet` y compresión `snappy` del catálogo,
+`partitionSpecJson` y `partitionValuesJson` `{}` (tabla sin particionar), `sourceDatasetCode` `''`,
+`qualitySloJson` `{}`, `expression` `''` y `threshold` `'0'` de la regla, `sourceCheckpoint` `''`,
+`minMaxStatisticsJson` `{}` y `exclusionExpression` `''`.
 
 ## Divergencias con el caso de uso v3.9
 
@@ -232,17 +257,16 @@ persistencia real de los payloads mínimos frente al DDL.
   y así está: el linaje se registra dentro de `runTransformation`.
 - **UC-63-03 y UC-63-09 crean el agregado si no existe.** Ver "El upsert con id en la ruta".
 
-## Pendiente
+## Fuera de este módulo
 
 - **Ejecución real de la transformación y de la de-identificación**: las hacen los workers. Este
   módulo registra lo que ya ocurrió.
 - **`authz.resource_scope_grants` (UC-63-10) y `authz.clinical_access_grants` (UC-63-11, 12)**: el
-  caso de uso pide crear y revocar el permiso temporal del investigador. Se publica por outbox —
-  `DatasetReleaseMaterialized` lleva `grantToUserId` y `expiresAt`, y `DatasetReleaseRevoked` lleva el
-  manifiesto— pero el alta y la baja del permiso son del módulo 05, que es de la parte de Pablo.
-- **`health_data.health_ingestion_batches` (UC-63-07)**: el caso de uso lo toma con `SKIP LOCKED`
-  para saber qué lote de-identificar. Aquí el worker lo indica; encadenarlo al batch pendiente exige
-  coordinar con el módulo 52.
+  permiso temporal del investigador se publica por outbox —`DatasetReleaseMaterialized` lleva
+  `grantToUserId` y `expiresAt`, y `DatasetReleaseRevoked` lleva el manifiesto—; el alta y la baja
+  del permiso son del módulo 05.
+- **`health_data.health_ingestion_batches` (UC-63-07)**: el worker indica qué lote de-identificar; el
+  módulo no lo toma de `health_ingestion_batches`.
 - **Barrido de releases vencidos (UC-63-12)**: el índice por `expires_at` está pensado para que un
   worker cierre los caducados. El endpoint existe y es idempotente; quien lo llama en bucle es el
   worker.

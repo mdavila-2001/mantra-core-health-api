@@ -1,12 +1,14 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
-import { PlatformOpsController } from './controllers';
+import { PlatformOpsController, OpsToolsController } from './controllers';
 import {
   OpsReleasesService,
   OpsIncidentsService,
   OpsReliabilityService,
   OpsPracticesService,
+  OpsToolsService,
+  PlatformOpsScope,
 } from './services';
 import {
   OpsReleasesRepository,
@@ -14,6 +16,7 @@ import {
   OpsReliabilityRepository,
   OpsPracticesRepository,
   OpsImprovementsRepository,
+  OpsToolsRepository,
 } from './repositories';
 
 /**
@@ -24,17 +27,20 @@ import {
  */
 @Module({
   imports: [MikroOrmModule.forFeature(Object.values(entities))],
-  controllers: [PlatformOpsController],
+  controllers: [PlatformOpsController, OpsToolsController],
   providers: [
     OpsReleasesRepository,
     OpsIncidentsRepository,
     OpsReliabilityRepository,
     OpsPracticesRepository,
     OpsImprovementsRepository,
+    OpsToolsRepository,
     OpsReleasesService,
     OpsIncidentsService,
     OpsReliabilityService,
     OpsPracticesService,
+    OpsToolsService,
+    PlatformOpsScope,
   ],
 })
 export class PlatformOpsModule {}

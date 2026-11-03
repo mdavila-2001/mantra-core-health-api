@@ -9,6 +9,7 @@ import {
   TENANT_DIRECTORY_PORT,
   type TenantDirectoryPort,
 } from '../ports/tenant-directory.port';
+import { SchedulingErrorReason } from '../../scheduling.error-reasons';
 // Se importa la ENTIDAD de `profiles` y no su módulo —el mismo criterio que ya
 // usa la agenda del profesional para resolver nombres—: traer el módulo entero
 // para leer una columna abriría una dependencia que hoy no existe.
@@ -105,18 +106,21 @@ export class SchedulingTenantAgendaService {
           from: query.from,
           to: query.to,
         },
+        SchedulingErrorReason.AGENDA_WINDOW_INVALID,
       );
     }
     if (from >= to) {
       throw new PreconditionFailedException(
         'La ventana debe empezar antes de terminar',
         { from: query.from, to: query.to },
+        SchedulingErrorReason.AGENDA_WINDOW_INVERTED,
       );
     }
     if (to.getTime() - from.getTime() > MAX_AGENDA_RANGE_DAYS * ONE_DAY_MS) {
       throw new PreconditionFailedException(
         `El rango no puede superar los ${MAX_AGENDA_RANGE_DAYS} días`,
         { from: query.from, to: query.to },
+        SchedulingErrorReason.AGENDA_WINDOW_TOO_WIDE,
       );
     }
 

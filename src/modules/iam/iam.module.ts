@@ -17,11 +17,15 @@ import { TerminologyModule } from '../terminology/terminology.module';
 // transacción; `practice` no importa `iam`, así que la dependencia no cierra
 // ciclo.
 import { PracticeModule } from '../practice/practice.module';
+// El alta pública de farmacia (P50) provisiona la farmacia, su central y sus
+// sucursales con `PharmacyProvisioningService`; `pharmacy` no importa `iam`.
+import { PharmacyModule } from '../pharmacy/pharmacy.module';
 import {
   IamUsersController,
   IamAuthController,
   IamAccountSecurityController,
-} from './controllers';
+  IamOnboardingDraftsController,
+} from './presentation/controllers';
 import {
   IamUsersService,
   IamUsersReadService,
@@ -31,6 +35,7 @@ import {
   IamAuthService,
   IamAssistedRegistrationService,
   IamPatientSelfRegistrationService,
+  IamSupportStaffSelfRegistrationService,
   IamOrganizationRepresentativesService,
   IamOrganizationSelfRegistrationService,
   IamRegistrationDocumentUploadService,
@@ -38,7 +43,8 @@ import {
   IamPasswordResetService,
   IamEmailVerificationService,
   IamAccountSecurityService,
-} from './services';
+  IamOnboardingDraftsService,
+} from './application/services';
 import {
   UsersRepository,
   CredentialsRepository,
@@ -53,7 +59,31 @@ import {
   EmailVerificationsRepository,
   IamApiKeysRepository,
   PasswordResetsRepository,
-} from './repositories';
+} from './infrastructure/repositories';
+import { AuthzBusinessRolesAdapter } from './infrastructure/adapters/authz-business-roles.adapter';
+import { CommonRecordsAdapter } from './infrastructure/adapters/common-records.adapter';
+import { CommonRegistrationFilesAdapter } from './infrastructure/adapters/common-registration-files.adapter';
+import { DirectoryRegistrationAdapter } from './infrastructure/adapters/directory-registration.adapter';
+import { DirectoryTenantClaimsAdapter } from './infrastructure/adapters/directory-tenant-claims.adapter';
+import { InsuranceDeclaredCoverageAdapter } from './infrastructure/adapters/insurance-declared-coverage.adapter';
+import { MessagingEmailNoticeAdapter } from './infrastructure/adapters/messaging-email-notice.adapter';
+import { PharmacyRegistrationAdapter } from './infrastructure/adapters/pharmacy-registration.adapter';
+import { PracticeOwnSiteProvisioningAdapter } from './infrastructure/adapters/practice-own-site-provisioning.adapter';
+import { WorkplaceRequestsAdapter } from './infrastructure/adapters/workplace-requests.adapter';
+import { ProfilesAccountProfileIdsAdapter } from './infrastructure/adapters/profiles-account-profile-ids.adapter';
+import { ProfilesRegistrationAdapter } from './infrastructure/adapters/profiles-registration.adapter';
+import { ACCOUNT_PROFILE_IDS_PORT } from './application/ports/account-profile-ids.port';
+import { BUSINESS_ROLES_PORT } from './application/ports/business-roles.port';
+import { COMMON_RECORDS_PORT } from './application/ports/common-records.port';
+import { DECLARED_COVERAGE_PORT } from './application/ports/declared-coverage.port';
+import { DIRECTORY_REGISTRATION_PORT } from './application/ports/directory-registration.port';
+import { EMAIL_NOTICE_PORT } from './application/ports/email-notice.port';
+import { OWN_SITE_PROVISIONING_PORT } from './application/ports/own-site.port';
+import { WORKPLACE_REQUESTS_PORT } from './application/ports/workplace-requests.port';
+import { PHARMACY_REGISTRATION_PORT } from './application/ports/pharmacy-registration.port';
+import { PROFILE_REGISTRATION_PORT } from './application/ports/profile-registration.port';
+import { REGISTRATION_FILES_PORT } from './application/ports/registration-files.port';
+import { TENANT_CLAIMS_PORT } from './application/ports/tenant-claims.port';
 
 /**
  * Módulo IAM: identidad, credenciales, sesiones, MFA, dispositivos, roles
@@ -79,11 +109,13 @@ import {
     InsuranceModule,
     TerminologyModule,
     PracticeModule,
+    PharmacyModule,
   ],
   controllers: [
     IamUsersController,
     IamAuthController,
     IamAccountSecurityController,
+    IamOnboardingDraftsController,
   ],
   providers: [
     // Repositorios
@@ -100,6 +132,52 @@ import {
     EmailVerificationsRepository,
     IamApiKeysRepository,
     PasswordResetsRepository,
+    // Adaptadores a otros contextos (uno por puerto)
+    AuthzBusinessRolesAdapter,
+    CommonRecordsAdapter,
+    CommonRegistrationFilesAdapter,
+    DirectoryRegistrationAdapter,
+    DirectoryTenantClaimsAdapter,
+    InsuranceDeclaredCoverageAdapter,
+    MessagingEmailNoticeAdapter,
+    PharmacyRegistrationAdapter,
+    PracticeOwnSiteProvisioningAdapter,
+    WorkplaceRequestsAdapter,
+    ProfilesAccountProfileIdsAdapter,
+    ProfilesRegistrationAdapter,
+    { provide: BUSINESS_ROLES_PORT, useExisting: AuthzBusinessRolesAdapter },
+    { provide: COMMON_RECORDS_PORT, useExisting: CommonRecordsAdapter },
+    {
+      provide: REGISTRATION_FILES_PORT,
+      useExisting: CommonRegistrationFilesAdapter,
+    },
+    {
+      provide: DIRECTORY_REGISTRATION_PORT,
+      useExisting: DirectoryRegistrationAdapter,
+    },
+    { provide: TENANT_CLAIMS_PORT, useExisting: DirectoryTenantClaimsAdapter },
+    {
+      provide: DECLARED_COVERAGE_PORT,
+      useExisting: InsuranceDeclaredCoverageAdapter,
+    },
+    { provide: EMAIL_NOTICE_PORT, useExisting: MessagingEmailNoticeAdapter },
+    {
+      provide: PHARMACY_REGISTRATION_PORT,
+      useExisting: PharmacyRegistrationAdapter,
+    },
+    {
+      provide: OWN_SITE_PROVISIONING_PORT,
+      useExisting: PracticeOwnSiteProvisioningAdapter,
+    },
+    { provide: WORKPLACE_REQUESTS_PORT, useExisting: WorkplaceRequestsAdapter },
+    {
+      provide: ACCOUNT_PROFILE_IDS_PORT,
+      useExisting: ProfilesAccountProfileIdsAdapter,
+    },
+    {
+      provide: PROFILE_REGISTRATION_PORT,
+      useExisting: ProfilesRegistrationAdapter,
+    },
     // Servicios
     IamUsersService,
     IamUsersReadService,
@@ -109,6 +187,7 @@ import {
     IamAuthService,
     IamAssistedRegistrationService,
     IamPatientSelfRegistrationService,
+    IamSupportStaffSelfRegistrationService,
     IamOrganizationRepresentativesService,
     IamOrganizationSelfRegistrationService,
     IamRegistrationDocumentUploadService,
@@ -116,6 +195,7 @@ import {
     IamPasswordResetService,
     IamEmailVerificationService,
     IamAccountSecurityService,
+    IamOnboardingDraftsService,
   ],
   // `IamUsersService` se exporta para el seed de arranque (`SeedModule`), que
   // necesita crear el primer `SECURITY_ADMIN` con el mismo hasheo que la API.
@@ -126,6 +206,8 @@ import {
     IamUsersService,
     IamPractitionerSelfRegistrationService,
     IamPatientSelfRegistrationService,
+    IamSupportStaffSelfRegistrationService,
+    IamOnboardingDraftsService,
   ],
 })
 export class IamModule {}

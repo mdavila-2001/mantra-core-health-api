@@ -139,6 +139,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ArtifactResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ArtifactResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ArtifactResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ArtifactResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ArtifactResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -167,8 +168,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: DEPLOY_PIPELINE, RELEASE_MANAGER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Componente no encontrado | Excepción explícita en src/modules/platform_ops/services/ops-releases.service.ts |
-| 404 | `NOT_FOUND` | Herramienta no encontrada | Excepción explícita en src/modules/platform_ops/services/ops-releases.service.ts |
 | 409 | `CONFLICT` | Ya existe un artefacto con esa referencia | Excepción explícita en src/modules/platform_ops/services/ops-releases.service.ts |
 | 409 | `CONFLICT` | El componente ya publicó esa versión | Excepción explícita en src/modules/platform_ops/services/ops-releases.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -285,6 +284,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CapacityMeasurementResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CapacityMeasurementResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CapacityMeasurementResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CapacityMeasurementResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CapacityMeasurementResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -315,7 +315,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CAPACITY_PLANNER, SRE, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Plan de capacidad no encontrado | Excepción explícita en src/modules/platform_ops/services/ops-reliability.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La capacidad debe ser mayor que cero | Excepción explícita en src/modules/platform_ops/services/ops-reliability.service.ts |
 | 422 | `PRECONDITION_FAILED` | El plan de capacidad no está activo | Excepción explícita en src/modules/platform_ops/services/ops-reliability.service.ts |
@@ -437,6 +436,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ChangeRequestResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ChangeRequestResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ChangeRequestResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ChangeRequestResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ChangeRequestResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -465,8 +465,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: RELEASE_MANAGER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Componente no encontrado | Excepción explícita en src/modules/platform_ops/services/ops-releases.service.ts |
-| 404 | `NOT_FOUND` | Ventana de mantenimiento no encontrada | Excepción explícita en src/modules/platform_ops/services/ops-releases.service.ts |
 | 409 | `CONFLICT` | No se pudo asignar un número de cambio libre | Excepción explícita en src/modules/platform_ops/services/ops-releases.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La ventana planificada está invertida | Excepción explícita en src/modules/platform_ops/services/ops-releases.service.ts |
@@ -579,6 +577,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ApprovalResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ApprovalResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ApprovalResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ApprovalResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ApprovalResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -609,7 +608,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CHANGE_APPROVER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Solicitud de cambio no encontrada | Excepción explícita en src/modules/platform_ops/services/ops-releases.service.ts |
 | 409 | `CONFLICT` | Ese aprobador ya votó en este paso | Excepción explícita en src/modules/platform_ops/services/ops-releases.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La solicitud ya no admite decisiones | Excepción explícita en src/modules/platform_ops/services/ops-releases.service.ts |
@@ -722,6 +720,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DeploymentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DeploymentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DeploymentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DeploymentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DeploymentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -754,8 +753,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: RELEASE_MANAGER, DEPLOY_PIPELINE, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Solicitud de cambio no encontrada | Excepción explícita en src/modules/platform_ops/services/ops-releases.service.ts |
-| 404 | `NOT_FOUND` | Artefacto no encontrado | Excepción explícita en src/modules/platform_ops/services/ops-releases.service.ts |
 | 409 | `CONFLICT` | No se pudo asignar un número de despliegue libre | Excepción explícita en src/modules/platform_ops/services/ops-releases.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El cambio no está aprobado | Excepción explícita en src/modules/platform_ops/services/ops-releases.service.ts |
@@ -863,6 +860,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RollbackResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RollbackResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RollbackResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RollbackResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RollbackResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -893,7 +891,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SRE, RELEASE_MANAGER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Despliegue no encontrado | Excepción explícita en src/modules/platform_ops/services/ops-releases.service.ts |
 | 409 | `CONFLICT` | No se pudo asignar un número de despliegue libre | Excepción explícita en src/modules/platform_ops/services/ops-releases.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El despliegue no está en un estado reversible | Excepción explícita en src/modules/platform_ops/services/ops-releases.service.ts |
@@ -1008,6 +1005,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<BurnEventResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<BurnEventResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<BurnEventResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<BurnEventResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `BurnEventResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1036,7 +1034,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, SRE, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Política de error budget no encontrada | Excepción explícita en src/modules/platform_ops/services/ops-reliability.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La política no está activa | Excepción explícita en src/modules/platform_ops/services/ops-reliability.service.ts |
 | 422 | `PRECONDITION_FAILED` | La política no tiene ninguna medición del objetivo sobre la que evaluar | Excepción explícita en src/modules/platform_ops/services/ops-reliability.service.ts |
@@ -1156,6 +1153,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<HealthRunResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<HealthRunResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<HealthRunResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<HealthRunResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `HealthRunResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1188,7 +1186,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, SRE, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Health check no encontrado | Excepción explícita en src/modules/platform_ops/services/ops-incidents.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El health check no está activo | Excepción explícita en src/modules/platform_ops/services/ops-incidents.service.ts |
 | 422 | `PRECONDITION_FAILED` | El health check está deshabilitado | Excepción explícita en src/modules/platform_ops/services/ops-incidents.service.ts |
@@ -1320,6 +1317,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IncidentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IncidentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IncidentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IncidentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IncidentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1358,7 +1356,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: INCIDENT_COMMANDER, SRE, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Incidente no encontrado | Excepción explícita en src/modules/platform_ops/services/ops-incidents.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El incidente ya está resuelto | Excepción explícita en src/modules/platform_ops/services/ops-incidents.service.ts |
 | 422 | `PRECONDITION_FAILED` | La transición no es válida desde el estado actual | Excepción explícita en src/modules/platform_ops/services/ops-incidents.service.ts |
@@ -1501,6 +1498,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PostmortemResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PostmortemResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PostmortemResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PostmortemResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PostmortemResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1535,7 +1533,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SRE, INCIDENT_COMMANDER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Incidente no encontrado | Excepción explícita en src/modules/platform_ops/services/ops-incidents.service.ts |
 | 409 | `CONFLICT` | El incidente ya tiene postmortem | Excepción explícita en src/modules/platform_ops/services/ops-incidents.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El incidente todavía no está resuelto | Excepción explícita en src/modules/platform_ops/services/ops-incidents.service.ts |
@@ -1652,6 +1649,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ReadinessReviewResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ReadinessReviewResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ReadinessReviewResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReadinessReviewResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReadinessReviewResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1686,7 +1684,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: RELEASE_MANAGER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Revisión de preparación no encontrada | Excepción explícita en src/modules/platform_ops/services/ops-practices.service.ts |
 | 404 | `NOT_FOUND` | El hallazgo no pertenece a esta revisión | Excepción explícita en src/modules/platform_ops/services/ops-practices.service.ts |
 | 409 | `CONFLICT` | El hallazgo ya no está abierto | Excepción explícita en src/modules/platform_ops/services/ops-practices.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -1805,6 +1802,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ResilienceExerciseResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ResilienceExerciseResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ResilienceExerciseResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ResilienceExerciseResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResilienceExerciseResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1837,7 +1835,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SRE, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Ejercicio de resiliencia no encontrado | Excepción explícita en src/modules/platform_ops/services/ops-practices.service.ts |
 | 409 | `CONFLICT` | El ejercicio ya está cerrado | Excepción explícita en src/modules/platform_ops/services/ops-practices.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El ejercicio termina antes de empezar | Excepción explícita en src/modules/platform_ops/services/ops-practices.service.ts |
@@ -1955,6 +1952,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RunbookExecutionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RunbookExecutionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RunbookExecutionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RunbookExecutionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RunbookExecutionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1983,8 +1981,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SRE, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Versión de runbook no encontrada | Excepción explícita en src/modules/platform_ops/services/ops-practices.service.ts |
-| 404 | `NOT_FOUND` | Incidente no encontrado | Excepción explícita en src/modules/platform_ops/services/ops-practices.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La ejecución termina antes de empezar | Excepción explícita en src/modules/platform_ops/services/ops-practices.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -2087,6 +2083,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RunbookVersionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RunbookVersionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RunbookVersionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RunbookVersionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RunbookVersionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2115,7 +2112,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SRE, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Runbook no encontrado | Excepción explícita en src/modules/platform_ops/services/ops-practices.service.ts |
 | 409 | `CONFLICT` | Esa versión del runbook ya existe | Excepción explícita en src/modules/platform_ops/services/ops-practices.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El runbook no está activo | Excepción explícita en src/modules/platform_ops/services/ops-practices.service.ts |
@@ -2228,6 +2224,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<SloMeasurementResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<SloMeasurementResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<SloMeasurementResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SloMeasurementResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SloMeasurementResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2258,7 +2255,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, SRE, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Objetivo de nivel de servicio no encontrado | Excepción explícita en src/modules/platform_ops/services/ops-reliability.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La ventana de medición está invertida | Excepción explícita en src/modules/platform_ops/services/ops-reliability.service.ts |
 | 422 | `PRECONDITION_FAILED` | Una ventana sin eventos no mide nada | Excepción explícita en src/modules/platform_ops/services/ops-reliability.service.ts |

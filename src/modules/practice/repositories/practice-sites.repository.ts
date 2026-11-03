@@ -53,6 +53,11 @@ export interface CreateSiteData {
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
+  /**
+   * Tenant dueño de la sede: el de su práctica (F1). Obligatorio: la columna
+   * es NOT NULL desde el patch v4.2.67 y el RLS filtra por ella.
+   */
+  tenantId: string;
 }
 
 /** Acceso a datos de `practice.practice_sites` (stateless). */
@@ -122,6 +127,7 @@ export class PracticeSitesRepository {
         branchId: data.branchId,
         managingTenantId: data.managingTenantId,
         statusConceptId: data.statusConceptId,
+        tenantId: data.tenantId,
         ...createdBy(data.actorUserId),
       },
       { partial: true },

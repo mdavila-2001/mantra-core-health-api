@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `identity_assurance`
 
-Referencia exhaustiva de 27 operación(es) del módulo `identity_assurance`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 28 operación(es) del módulo `identity_assurance`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `identity-assertions`, `identity-authorities`, `identity-checks`, `identity-manual-review`, `identity-policies`, `identity-self-service`, `identity-verification-cases`, `identity_assurance`
 - **Controladores:** `IdentityAssertionsController`, `IdentityAuthoritiesController`, `IdentityCasesController`, `IdentityChecksController`, `IdentityManualReviewController`, `IdentityPoliciesController`, `IdentitySelfServiceController`, `IdentityWorkerController`
@@ -26,18 +26,19 @@ Referencia exhaustiva de 27 operación(es) del módulo `identity_assurance`, der
 13. [GET /identity/me/verification-types](#13-get-identity-me-verification-types) — Listar los tipos de solicitud de verificación disponibles
 14. [GET /identity/verification-cases](#14-get-identity-verification-cases) — Listar los casos que esperan revisión
 15. [POST /identity/verification-cases](#15-post-identity-verification-cases) — Iniciar un caso de verificación de identidad
-16. [POST /identity/verification-cases/{id}/assertions](#16-post-identity-verification-cases-id-assertions) — Emitir una aserción de identidad con nivel de aseguramiento
-17. [POST /identity/verification-cases/{id}/checks:plan](#17-post-identity-verification-cases-id-checks-plan) — Planificar los checks requeridos del caso
-18. [POST /identity/verification-cases/{id}/evidence](#18-post-identity-verification-cases-id-evidence) — Aportar evidencia documental bajo consentimiento
-19. [POST /identity/verification-cases/{id}/fraud-signals](#19-post-identity-verification-cases-id-fraud-signals) — Detectar y registrar una señal de fraude
-20. [POST /identity/verification-cases/{id}/manual-review](#20-post-identity-verification-cases-id-manual-review) — Escalar el caso a revisión manual
-21. [POST /identity/verification-cases/expire-sweep](#21-post-identity-verification-cases-expire-sweep) — Expirar por lote los casos vencidos (job programado)
-22. [POST /identity/verification-policies](#22-post-identity-verification-policies) — Crear una política de verificación de identidad (IAL/AAL)
-23. [POST /internal/identity/checks/{id}/attempts](#23-post-internal-identity-checks-id-attempts) — Registrar el intento del worker contra la autoridad externa
-24. [POST /internal/identity/checks/{id}/results](#24-post-internal-identity-checks-id-results) — Registrar el veredicto que devolvió la autoridad externa
-25. [GET /internal/identity/checks/dispatchable](#25-get-internal-identity-checks-dispatchable) — Listar los checks que el worker debe atender en este tick
-26. [POST /internal/identity/evidence/lifecycle-scan](#26-post-internal-identity-evidence-lifecycle-scan) — Evaluate configured evidence lifecycle; destructive runtime remains blocked
-27. [POST /internal/identity/evidence/storage-purge-review](#27-post-internal-identity-evidence-storage-purge-review) — Recheck retired evidence objects; never grants physical delete
+16. [GET /identity/verification-cases/{id}](#16-get-identity-verification-cases-id) — Consultar expediente y evidencias de un caso
+17. [POST /identity/verification-cases/{id}/assertions](#17-post-identity-verification-cases-id-assertions) — Emitir una aserción de identidad con nivel de aseguramiento
+18. [POST /identity/verification-cases/{id}/checks:plan](#18-post-identity-verification-cases-id-checks-plan) — Planificar los checks requeridos del caso
+19. [POST /identity/verification-cases/{id}/evidence](#19-post-identity-verification-cases-id-evidence) — Aportar evidencia documental bajo consentimiento
+20. [POST /identity/verification-cases/{id}/fraud-signals](#20-post-identity-verification-cases-id-fraud-signals) — Detectar y registrar una señal de fraude
+21. [POST /identity/verification-cases/{id}/manual-review](#21-post-identity-verification-cases-id-manual-review) — Escalar el caso a revisión manual
+22. [POST /identity/verification-cases/expire-sweep](#22-post-identity-verification-cases-expire-sweep) — Expirar por lote los casos vencidos (job programado)
+23. [POST /identity/verification-policies](#23-post-identity-verification-policies) — Crear una política de verificación de identidad (IAL/AAL)
+24. [POST /internal/identity/checks/{id}/attempts](#24-post-internal-identity-checks-id-attempts) — Registrar el intento del worker contra la autoridad externa
+25. [POST /internal/identity/checks/{id}/results](#25-post-internal-identity-checks-id-results) — Registrar el veredicto que devolvió la autoridad externa
+26. [GET /internal/identity/checks/dispatchable](#26-get-internal-identity-checks-dispatchable) — Listar los checks que el worker debe atender en este tick
+27. [POST /internal/identity/evidence/lifecycle-scan](#27-post-internal-identity-evidence-lifecycle-scan) — Evaluate configured evidence lifecycle; destructive runtime remains blocked
+28. [POST /internal/identity/evidence/storage-purge-review](#28-post-internal-identity-evidence-storage-purge-review) — Recheck retired evidence objects; never grants physical delete
 
 ---
 
@@ -126,6 +127,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AssertionRevokedResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AssertionRevokedResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AssertionRevokedResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AssertionRevokedResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AssertionRevokedResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -154,8 +156,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Aserción de identidad no encontrada | Excepción explícita en src/modules/identity_assurance/services/identity-assertions.service.ts |
-| 404 | `NOT_FOUND` | Caso de verificación no encontrado | Excepción explícita en src/modules/identity_assurance/services/identity-assertions.service.ts |
 | 409 | `CONFLICT` | La aserción ya está revocada | Excepción explícita en src/modules/identity_assurance/services/identity-assertions.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Para derivar una señal de fraude se requieren tipo y severidad | Excepción explícita en src/modules/identity_assurance/services/identity-assertions.service.ts |
@@ -209,7 +209,6 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "tenantId": "00000000-0000-4000-8000-000000000001",
   "authorityCode": "CODIGO_EJEMPLO",
   "name": "Nombre de ejemplo",
   "authorityTypeConceptId": "00000000-0000-4000-8000-000000000001"
@@ -226,7 +225,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `tenantId` | Sí | `string` | formato `uuid` | Tenant propietario de la autoridad | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | No | `string` | formato `uuid` | Obsoleto: el tenant se deriva de la sesión (X-Tenant-Id). Si llega, debe coincidir con él; el servidor nunca lo toma como fuente de verdad. | `00000000-0000-4000-8000-000000000001` |
 | `authorityCode` | Sí | `string` | longitud mínima 1; longitud máxima 100 | Código único de la autoridad | `CODIGO_EJEMPLO` |
 | `name` | Sí | `string` | longitud mínima 1; longitud máxima 200 | Nombre legible de la autoridad | `Nombre de ejemplo` |
 | `authorityTypeConceptId` | Sí | `string` | formato `uuid` | Concepto: tipo de autoridad | `00000000-0000-4000-8000-000000000001` |
@@ -266,6 +265,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AuthorityResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthorityResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthorityResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthorityResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthorityResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -404,6 +404,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AuthorityEndpointResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthorityEndpointResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthorityEndpointResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthorityEndpointResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthorityEndpointResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -434,7 +435,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Autoridad de identidad no encontrada | Excepción explícita en src/modules/identity_assurance/services/identity-authorities.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -546,6 +546,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AttemptResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AttemptResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AttemptResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AttemptResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AttemptResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -684,6 +685,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CheckResultResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CheckResultResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CheckResultResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CheckResultResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CheckResultResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -820,6 +822,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ReviewDecisionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ReviewDecisionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ReviewDecisionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReviewDecisionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReviewDecisionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -848,8 +851,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Revisión manual no encontrada | Excepción explícita en src/modules/identity_assurance/services/identity-manual-review.service.ts |
-| 404 | `NOT_FOUND` | Caso de verificación no encontrado | Excepción explícita en src/modules/identity_assurance/services/identity-manual-review.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La revisión ya fue decidida | Excepción explícita en src/modules/identity_assurance/services/identity-manual-review.service.ts |
 | 422 | `PRECONDITION_FAILED` | La revisión está asignada a otro revisor | Excepción explícita en src/modules/identity_assurance/services/identity-manual-review.service.ts |
@@ -905,9 +906,7 @@ Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
-{
-  "evidenceFileId": "00000000-0000-4000-8000-000000000001"
-}
+{}
 ```
 
 ### Restricciones a considerar
@@ -919,7 +918,12 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `evidenceFileId` | Sí | `string` | formato `uuid` | Archivo de evidencia ya subido a POST /common/files/upload | `00000000-0000-4000-8000-000000000001` |
+| `evidenceFileId` | No | `string` | formato `uuid` | Archivo único para clientes anteriores. Los clientes nuevos envían frente, reverso y tres capturas del reto de vida. | `00000000-0000-4000-8000-000000000001` |
+| `documentFrontFileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `documentBackFileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `livenessCenterFileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `livenessTurnLeftFileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `livenessTurnRightFileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload completo de ejemplo
 
@@ -932,7 +936,12 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "evidenceFileId": "00000000-0000-4000-8000-000000000001"
+  "evidenceFileId": "00000000-0000-4000-8000-000000000001",
+  "documentFrontFileId": "00000000-0000-4000-8000-000000000001",
+  "documentBackFileId": "00000000-0000-4000-8000-000000000001",
+  "livenessCenterFileId": "00000000-0000-4000-8000-000000000001",
+  "livenessTurnLeftFileId": "00000000-0000-4000-8000-000000000001",
+  "livenessTurnRightFileId": "00000000-0000-4000-8000-000000000001"
 }
 ```
 
@@ -949,6 +958,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<VerificationRequestResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<VerificationRequestResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<VerificationRequestResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<VerificationRequestResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `VerificationRequestResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -977,9 +987,19 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Canal no encontrado | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 409 | `CONFLICT` | Ya hay una verificación en curso para este sujeto | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
+| 422 | `PRECONDITION_FAILED` | Adjunta el frente, el reverso y las tres capturas de prueba de vida | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
+| 422 | `PRECONDITION_FAILED` | Una evidencia no existe, no pertenece a esta cuenta o no está protegida | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
+| 422 | `PRECONDITION_FAILED` | Envía el archivo histórico o las cinco evidencias nuevas, no ambos | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
+| 422 | `PRECONDITION_FAILED` | La verificación requiere las cinco evidencias en el orden solicitado | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
+| 422 | `PRECONDITION_FAILED` | dto.recipientAddress           ? 'La notificación a una dirección externa también necesita el usuario destinatario'           : 'La notificación necesita el usuario destinatario' | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1030,9 +1050,7 @@ Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
-{
-  "evidenceFileId": "00000000-0000-4000-8000-000000000001"
-}
+{}
 ```
 
 ### Restricciones a considerar
@@ -1044,7 +1062,12 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `evidenceFileId` | Sí | `string` | formato `uuid` | Archivo de evidencia ya subido a POST /common/files/upload | `00000000-0000-4000-8000-000000000001` |
+| `evidenceFileId` | No | `string` | formato `uuid` | Archivo único para clientes anteriores. Los clientes nuevos envían frente, reverso y tres capturas del reto de vida. | `00000000-0000-4000-8000-000000000001` |
+| `documentFrontFileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `documentBackFileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `livenessCenterFileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `livenessTurnLeftFileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `livenessTurnRightFileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload completo de ejemplo
 
@@ -1057,7 +1080,12 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "evidenceFileId": "00000000-0000-4000-8000-000000000001"
+  "evidenceFileId": "00000000-0000-4000-8000-000000000001",
+  "documentFrontFileId": "00000000-0000-4000-8000-000000000001",
+  "documentBackFileId": "00000000-0000-4000-8000-000000000001",
+  "livenessCenterFileId": "00000000-0000-4000-8000-000000000001",
+  "livenessTurnLeftFileId": "00000000-0000-4000-8000-000000000001",
+  "livenessTurnRightFileId": "00000000-0000-4000-8000-000000000001"
 }
 ```
 
@@ -1074,6 +1102,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<VerificationRequestResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<VerificationRequestResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<VerificationRequestResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<VerificationRequestResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `VerificationRequestResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1102,10 +1131,20 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Canal no encontrado | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 409 | `CONFLICT` | Ya hay una verificación en curso para este sujeto | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
 | 422 | `PRECONDITION_FAILED` | La cuenta no tiene un perfil profesional | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
+| 422 | `PRECONDITION_FAILED` | Adjunta el frente, el reverso y las tres capturas de prueba de vida | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
+| 422 | `PRECONDITION_FAILED` | Una evidencia no existe, no pertenece a esta cuenta o no está protegida | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
+| 422 | `PRECONDITION_FAILED` | Envía el archivo histórico o las cinco evidencias nuevas, no ambos | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
+| 422 | `PRECONDITION_FAILED` | La verificación requiere las cinco evidencias en el orden solicitado | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
+| 422 | `PRECONDITION_FAILED` | dto.recipientAddress           ? 'La notificación a una dirección externa también necesita el usuario destinatario'           : 'La notificación necesita el usuario destinatario' | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1156,9 +1195,7 @@ Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
-{
-  "evidenceFileId": "00000000-0000-4000-8000-000000000001"
-}
+{}
 ```
 
 ### Restricciones a considerar
@@ -1170,7 +1207,12 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `evidenceFileId` | Sí | `string` | formato `uuid` | Archivo de evidencia ya subido a POST /common/files/upload | `00000000-0000-4000-8000-000000000001` |
+| `evidenceFileId` | No | `string` | formato `uuid` | Archivo único para clientes anteriores. Los clientes nuevos envían frente, reverso y tres capturas del reto de vida. | `00000000-0000-4000-8000-000000000001` |
+| `documentFrontFileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `documentBackFileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `livenessCenterFileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `livenessTurnLeftFileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `livenessTurnRightFileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `jurisdictionAuthorizationId` | No | `string` | formato `uuid` | Matrícula a verificar. Si se omite se usa la única del profesional. | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload completo de ejemplo
@@ -1185,6 +1227,11 @@ Content-Type: application/json
 
 {
   "evidenceFileId": "00000000-0000-4000-8000-000000000001",
+  "documentFrontFileId": "00000000-0000-4000-8000-000000000001",
+  "documentBackFileId": "00000000-0000-4000-8000-000000000001",
+  "livenessCenterFileId": "00000000-0000-4000-8000-000000000001",
+  "livenessTurnLeftFileId": "00000000-0000-4000-8000-000000000001",
+  "livenessTurnRightFileId": "00000000-0000-4000-8000-000000000001",
   "jurisdictionAuthorizationId": "00000000-0000-4000-8000-000000000001"
 }
 ```
@@ -1202,6 +1249,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<VerificationRequestResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<VerificationRequestResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<VerificationRequestResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<VerificationRequestResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `VerificationRequestResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1231,12 +1279,22 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Matrícula no encontrada | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
+| 404 | `NOT_FOUND` | Canal no encontrado | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 409 | `CONFLICT` | Ya hay una verificación en curso para este sujeto | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Indique qué matrícula quiere verificar | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
 | 422 | `PRECONDITION_FAILED` | La matrícula pertenece a otro profesional | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
 | 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
 | 422 | `PRECONDITION_FAILED` | La cuenta no tiene un perfil profesional | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
+| 422 | `PRECONDITION_FAILED` | Adjunta el frente, el reverso y las tres capturas de prueba de vida | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
+| 422 | `PRECONDITION_FAILED` | Una evidencia no existe, no pertenece a esta cuenta o no está protegida | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
+| 422 | `PRECONDITION_FAILED` | Envía el archivo histórico o las cinco evidencias nuevas, no ambos | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
+| 422 | `PRECONDITION_FAILED` | La verificación requiere las cinco evidencias en el orden solicitado | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
+| 422 | `PRECONDITION_FAILED` | dto.recipientAddress           ? 'La notificación a una dirección externa también necesita el usuario destinatario'           : 'La notificación necesita el usuario destinatario' | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1289,9 +1347,7 @@ Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
-{
-  "evidenceFileId": "00000000-0000-4000-8000-000000000001"
-}
+{}
 ```
 
 ### Restricciones a considerar
@@ -1304,7 +1360,12 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `evidenceFileId` | Sí | `string` | formato `uuid` | Archivo de evidencia ya subido a POST /common/files/upload | `00000000-0000-4000-8000-000000000001` |
+| `evidenceFileId` | No | `string` | formato `uuid` | Archivo único para clientes anteriores. Los clientes nuevos envían frente, reverso y tres capturas del reto de vida. | `00000000-0000-4000-8000-000000000001` |
+| `documentFrontFileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `documentBackFileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `livenessCenterFileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `livenessTurnLeftFileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `livenessTurnRightFileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload completo de ejemplo
 
@@ -1317,7 +1378,12 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "evidenceFileId": "00000000-0000-4000-8000-000000000001"
+  "evidenceFileId": "00000000-0000-4000-8000-000000000001",
+  "documentFrontFileId": "00000000-0000-4000-8000-000000000001",
+  "documentBackFileId": "00000000-0000-4000-8000-000000000001",
+  "livenessCenterFileId": "00000000-0000-4000-8000-000000000001",
+  "livenessTurnLeftFileId": "00000000-0000-4000-8000-000000000001",
+  "livenessTurnRightFileId": "00000000-0000-4000-8000-000000000001"
 }
 ```
 
@@ -1335,6 +1401,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<VerificationRequestResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<VerificationRequestResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<VerificationRequestResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<VerificationRequestResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `VerificationRequestResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1363,10 +1430,20 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Canal no encontrado | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 409 | `CONFLICT` | Ya hay una verificación en curso para este sujeto | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | No pertenece a esa institución | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
 | 422 | `PRECONDITION_FAILED` | Sólo el titular o un administrador de la institución puede pedir su verificación | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
+| 422 | `PRECONDITION_FAILED` | Adjunta el frente, el reverso y las tres capturas de prueba de vida | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
+| 422 | `PRECONDITION_FAILED` | Una evidencia no existe, no pertenece a esta cuenta o no está protegida | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
+| 422 | `PRECONDITION_FAILED` | Envía el archivo histórico o las cinco evidencias nuevas, no ambos | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
+| 422 | `PRECONDITION_FAILED` | La verificación requiere las cinco evidencias en el orden solicitado | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
+| 422 | `PRECONDITION_FAILED` | dto.recipientAddress           ? 'La notificación a una dirección externa también necesita el usuario destinatario'           : 'La notificación necesita el usuario destinatario' | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1445,6 +1522,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<VerificationStatusResponseDto[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<VerificationStatusResponseDto[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<VerificationStatusResponseDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<VerificationStatusResponseDto[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `VerificationStatusResponseDto[]`. Ejemplo completo derivado de ese DTO:
 
@@ -1455,6 +1533,15 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "status": "00000000-0000-4000-8000-000000000001",
     "type": "valor-ejemplo",
     "evidenceFileId": "00000000-0000-4000-8000-000000000001",
+    "evidence": [
+      {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "evidenceTypeConceptId": "00000000-0000-4000-8000-000000000001",
+        "evidenceFileId": "00000000-0000-4000-8000-000000000001",
+        "createdAt": "2026-07-31T12:00:00.000Z",
+        "sequence": 1
+      }
+    ],
     "reasonText": "Texto descriptivo de ejemplo",
     "checks": [
       {
@@ -1563,6 +1650,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<VerificationStatusResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<VerificationStatusResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<VerificationStatusResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<VerificationStatusResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `VerificationStatusResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1572,6 +1660,15 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "status": "00000000-0000-4000-8000-000000000001",
   "type": "valor-ejemplo",
   "evidenceFileId": "00000000-0000-4000-8000-000000000001",
+  "evidence": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "evidenceTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "evidenceFileId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "sequence": 1
+    }
+  ],
   "reasonText": "Texto descriptivo de ejemplo",
   "checks": [
     {
@@ -1594,6 +1691,12 @@ Campos de la respuesta:
 | `status` | Sí | `string` | formato `uuid` | Identificador asociado a status concept. | `00000000-0000-4000-8000-000000000001` |
 | `type` | Sí | `string` | Sin restricción adicional declarada | Tipo de solicitud, derivado del sujeto del caso | `valor-ejemplo` |
 | `evidenceFileId` | No | `string` | formato `uuid` | Archivo de evidencia aportado con la solicitud (`common.files`). Se descarga con `GET /common/files/:id/content`, que ya exige ser quien lo subió o tener un rol revisor: no hace falta un endpoint de descarga propio. | `00000000-0000-4000-8000-000000000001` |
+| `evidence` | No | `array<VerificationEvidenceDto>` | Sin restricción adicional declarada | Evidencias asociadas al expediente, en el orden de captura. | `[{"id":"00000000-0000-4000-8000-000000000001","evidenceTypeConceptId":"00000000-0000-4000-8000-000000000001","evidenceFileId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","sequence":1}]` |
+| `evidence[].id` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `evidence[].evidenceTypeConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `evidence[].evidenceFileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `evidence[].createdAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `evidence[].sequence` | No | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `reasonText` | No | `string` | Sin restricción adicional declarada | Motivo registrado por quien decidió el caso en revisión manual, cuando lo hubo. Un caso resuelto automáticamente (sin escalar) no tiene motivo de texto: el trace de `checks` es la explicación disponible en ese caso. | `Texto descriptivo de ejemplo` |
 | `checks` | No | `array<CaseCheckDto>` | Sin restricción adicional declarada | Traza de los checks del caso, del planificado al más reciente. Sólo se completa en la consulta de detalle (`getOwnCaseStatus`); la lista no la trae para no pagar N+1 por fila que nadie mira. | `[{"checkTypeConceptId":"00000000-0000-4000-8000-000000000001","status":"00000000-0000-4000-8000-000000000001","resultConceptId":"00000000-0000-4000-8000-000000000001","checkedAt":"2026-07-31T12:00:00.000Z"}]` |
 | `checks[].checkTypeConceptId` | No | `string` | formato `uuid` | Identificador asociado a check type concept. | `00000000-0000-4000-8000-000000000001` |
@@ -1691,6 +1794,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<VerificationTypesResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<VerificationTypesResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<VerificationTypesResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<VerificationTypesResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `VerificationTypesResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1807,6 +1911,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<CaseQueueResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<CaseQueueResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<CaseQueueResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<CaseQueueResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CaseQueueResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1956,6 +2061,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CaseResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CaseResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CaseResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CaseResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CaseResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2007,7 +2113,128 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /identity/verification-cases/{id}/assertions
+## 16. GET /identity/verification-cases/{id}
+
+- **Módulo:** `identity_assurance`
+- **Etiqueta OpenAPI:** `identity-verification-cases`
+- **Nombre:** Consultar expediente y evidencias de un caso
+- **Operation ID:** `IdentityCasesController_getCaseDetail`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IdentityCasesController.getCaseDetail](../../src/modules/identity_assurance/controllers/identity-cases.controller.ts)
+
+### Descripción de negocio
+
+Consultar expediente y evidencias de un caso. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Lee expediente y evidencias; los bytes se descargan por Common Files con auditoría.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /identity/verification-cases/{id}` en `IdentityCasesController_getCaseDetail`. El controlador delega en `IdentityCasesService.getCaseDetail`. No recibe body. El tipo de retorno estático es `Promise<VerificationCaseDetailDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /identity/verification-cases/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /identity/verification-cases/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<VerificationCaseDetailDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<VerificationCaseDetailDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<VerificationCaseDetailDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<VerificationCaseDetailDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<VerificationCaseDetailDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<VerificationCaseDetailDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<VerificationCaseDetailDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<VerificationCaseDetailDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `VerificationCaseDetailDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "evidence": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "evidenceTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "evidenceFileId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "sequence": 1
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `evidence` | Sí | `array<VerificationEvidenceDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","evidenceTypeConceptId":"00000000-0000-4000-8000-000000000001","evidenceFileId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","sequence":1}]` |
+| `evidence[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `evidence[].evidenceTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `evidence[].evidenceFileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `evidence[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `evidence[].sequence` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/identity/verification-cases/{id}"
+}
+```
+
+---
+
+## 17. POST /identity/verification-cases/{id}/assertions
 
 - **Módulo:** `identity_assurance`
 - **Etiqueta OpenAPI:** `identity-verification-cases`
@@ -2094,6 +2321,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AssertionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AssertionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AssertionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AssertionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AssertionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2126,7 +2354,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Caso de verificación no encontrado | Excepción explícita en src/modules/identity_assurance/services/identity-cases.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Solo un caso verificado puede emitir una aserción | Excepción explícita en src/modules/identity_assurance/services/identity-cases.service.ts |
 | 422 | `PRECONDITION_FAILED` | No hay checks completados que sustenten la aserción | Excepción explícita en src/modules/identity_assurance/services/identity-cases.service.ts |
@@ -2148,7 +2375,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /identity/verification-cases/{id}/checks:plan
+## 18. POST /identity/verification-cases/{id}/checks:plan
 
 - **Módulo:** `identity_assurance`
 - **Etiqueta OpenAPI:** `identity-verification-cases`
@@ -2242,6 +2469,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ChecksPlannedResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ChecksPlannedResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ChecksPlannedResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ChecksPlannedResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ChecksPlannedResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2272,7 +2500,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Caso de verificación no encontrado | Excepción explícita en src/modules/identity_assurance/services/identity-cases.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Solo un caso abierto puede planificar checks | Excepción explícita en src/modules/identity_assurance/services/identity-cases.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -2292,7 +2519,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /identity/verification-cases/{id}/evidence
+## 19. POST /identity/verification-cases/{id}/evidence
 
 - **Módulo:** `identity_assurance`
 - **Etiqueta OpenAPI:** `identity-verification-cases`
@@ -2385,6 +2612,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<EvidenceResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<EvidenceResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<EvidenceResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<EvidenceResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `EvidenceResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2413,7 +2641,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Caso de verificación no encontrado | Excepción explícita en src/modules/identity_assurance/services/identity-cases.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El caso no admite evidencia en su estado actual | Excepción explícita en src/modules/identity_assurance/services/identity-cases.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -2433,7 +2660,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /identity/verification-cases/{id}/fraud-signals
+## 20. POST /identity/verification-cases/{id}/fraud-signals
 
 - **Módulo:** `identity_assurance`
 - **Etiqueta OpenAPI:** `identity-verification-cases`
@@ -2523,6 +2750,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<FraudSignalResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<FraudSignalResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<FraudSignalResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<FraudSignalResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FraudSignalResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2551,7 +2779,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Caso de verificación no encontrado | Excepción explícita en src/modules/identity_assurance/services/identity-cases.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -2570,7 +2797,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /identity/verification-cases/{id}/manual-review
+## 21. POST /identity/verification-cases/{id}/manual-review
 
 - **Módulo:** `identity_assurance`
 - **Etiqueta OpenAPI:** `identity-verification-cases`
@@ -2653,6 +2880,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ManualReviewResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ManualReviewResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ManualReviewResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ManualReviewResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ManualReviewResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2681,7 +2909,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Caso de verificación no encontrado | Excepción explícita en src/modules/identity_assurance/services/identity-cases.service.ts |
 | 409 | `CONFLICT` | El caso ya tiene una revisión manual abierta | Excepción explícita en src/modules/identity_assurance/services/identity-cases.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El caso no es escalable a revisión manual | Excepción explícita en src/modules/identity_assurance/services/identity-cases.service.ts |
@@ -2702,7 +2929,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /identity/verification-cases/expire-sweep
+## 22. POST /identity/verification-cases/expire-sweep
 
 - **Módulo:** `identity_assurance`
 - **Etiqueta OpenAPI:** `identity-verification-cases`
@@ -2766,6 +2993,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<ExpireSweepResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ExpireSweepResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ExpireSweepResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ExpireSweepResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ExpireSweepResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2810,7 +3038,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /identity/verification-policies
+## 23. POST /identity/verification-policies
 
 - **Módulo:** `identity_assurance`
 - **Etiqueta OpenAPI:** `identity-policies`
@@ -2907,6 +3135,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PolicyResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PolicyResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PolicyResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PolicyResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PolicyResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2953,7 +3182,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. POST /internal/identity/checks/{id}/attempts
+## 24. POST /internal/identity/checks/{id}/attempts
 
 - **Módulo:** `identity_assurance`
 - **Etiqueta OpenAPI:** `identity_assurance`
@@ -3047,6 +3276,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AttemptResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AttemptResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AttemptResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AttemptResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AttemptResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3096,7 +3326,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /internal/identity/checks/{id}/results
+## 25. POST /internal/identity/checks/{id}/results
 
 - **Módulo:** `identity_assurance`
 - **Etiqueta OpenAPI:** `identity_assurance`
@@ -3186,6 +3416,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CheckResultResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CheckResultResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CheckResultResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CheckResultResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CheckResultResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3239,7 +3470,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. GET /internal/identity/checks/dispatchable
+## 26. GET /internal/identity/checks/dispatchable
 
 - **Módulo:** `identity_assurance`
 - **Etiqueta OpenAPI:** `identity_assurance`
@@ -3303,6 +3534,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<DispatchableChecksResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<DispatchableChecksResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<DispatchableChecksResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<DispatchableChecksResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DispatchableChecksResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3359,7 +3591,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. POST /internal/identity/evidence/lifecycle-scan
+## 27. POST /internal/identity/evidence/lifecycle-scan
 
 - **Módulo:** `identity_assurance`
 - **Etiqueta OpenAPI:** `identity_assurance`
@@ -3430,6 +3662,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `no declarado` | No |
 | 429 | Operación completada correctamente. | `no declarado` | No |
 | 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -3460,7 +3693,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. POST /internal/identity/evidence/storage-purge-review
+## 28. POST /internal/identity/evidence/storage-purge-review
 
 - **Módulo:** `identity_assurance`
 - **Etiqueta OpenAPI:** `identity_assurance`
@@ -3523,6 +3756,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `no declarado` | No |
 | 429 | Operación completada correctamente. | `no declarado` | No |
 | 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 

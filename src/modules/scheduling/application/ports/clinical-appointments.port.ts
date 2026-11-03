@@ -21,6 +21,8 @@ export interface NewClinicalAppointment {
   channelConceptId?: string;
   /** Tipología (P42: la reconsulta nace `ACT_FOLLOW_UP`). Ausente = NULL. */
   typeConceptId?: string;
+  /** F5d: consultorio que ocupa la cita (de la plantilla del cupo o del recurso ROOM). */
+  careSpaceId?: string;
   actorUserId?: string;
 }
 
@@ -57,6 +59,12 @@ export interface ClinicalAppointmentsPort {
     uow: UnitOfWork,
     appointmentIds: readonly string[],
   ): Promise<Map<string, string>>;
+
+  /** F5d: consultorio de cada cita, `appointmentId → {id, code, name}`. */
+  findCareSpaces?(
+    uow: UnitOfWork,
+    appointmentIds: readonly string[],
+  ): Promise<Map<string, { id: string; code: string; name: string }>>;
 
   /** Mapa `appointmentId → todos sus encuentros`, del más nuevo al más viejo. */
   findEncounterIds(

@@ -105,7 +105,7 @@ CONSULTA
                        bucket múltiplo de 1 h / 1 día  ──> continuous_sli_hourly / _daily
 ```
 
-## Reglas de negocio
+## Business rules
 
 - **Nada se actualiza en su sitio.** Una corrección es un evento nuevo con `source_version` mayor y
   `quality_state = backfill`. Un histórico reescribible deja de servir para responder "qué se sabía
@@ -124,9 +124,14 @@ CONSULTA
   historial del paciente mostraría dos tomas donde hubo una.
 - **La vital y su observación clínica se confirman juntas.** Si no, quedaría una vital marcada como
   promovida apuntando a una observación que no existe.
-- **La ubicación exige consentimiento** como campo obligatorio de la petición, no como comprobación
-  aparte. Es el dato más fácil de recoger sin darse cuenta de que hace falta permiso, y el permiso
-  viaja en el evento para que quien proyecte pueda comprobarlo.
+- **La ubicación exige un consentimiento verificado.** `consentId` es obligatorio y además se
+  contrasta con `consent.consents` antes de insertar (`LocationConsentPolicy`): del tenant del
+  contexto, `ACTIVE` y no retirado, con vigencia `[valid_from, valid_to)` que cubre el instante de
+  ingesta y cada ping (`valid_to` es exclusivo), de un propósito con `code` `LOCATION_TRACKING`
+  activo, y con todos los sujetos del lote siendo el titular (su perfil de paciente) o un
+  dispositivo de una cuenta con vínculo vigente a él. Cualquier fallo es `403 FORBIDDEN /
+  TIME_SERIES_LOCATION_CONSENT_INVALID`, idéntico para todas las causas y sin persistir nada. El
+  tenant sale del contexto autenticado, no del cuerpo. El permiso además viaja en el evento.
 - **El backfill exige justificación y ventana.** Una corrección sin motivo declarado es
   indistinguible de una manipulación, y una corrección fuera de la ventana aprobada no es la
   corrección que se aprobó.
@@ -173,7 +178,7 @@ listas cerradas del módulo (`TIMESERIES_TABLES`, `ROLLUPS`, `VALUE_COLUMN`, `AG
 `COMPRESSION_SEGMENTS`) antes de entrar en la sentencia. Los valores —intervalos, rangos, tenant,
 serie, límites— sí van parametrizados.
 
-## Permisos
+## Permissions
 
 `INGEST_GATEWAY`, `DEVICE` y `SYSTEM` ingieren. `SYSTEM` normaliza. `DATA_PLATFORM_ADMIN` administra
 particiones, compresión, retención y rollups, y es el único que puede hacer backfill.
@@ -181,7 +186,7 @@ particiones, compresión, retención y rollups, y es el único que puede hacer b
 
 Ninguna ruta es pública.
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE` sólo en un sitio: la lectura cruda que se va a normalizar, para no promoverla dos veces.
 El resto de la ingesta es `INSERT` puro sobre el chunk activo, sin bloqueos: es lo que permite que
@@ -193,7 +198,7 @@ varios colectores escriban a la vez.
 momentos en que se altera o se pierde histórico—. No se loguean valores de medición, ni coordenadas,
 ni `raw_value`.
 
-## Pruebas
+## Tests
 
 `corepack yarn test src/modules/time_series --runInBand --silent` — 6 suites y 89 pruebas
 aprobadas durante la revisión.
@@ -213,21 +218,18 @@ aprobadas durante la revisión.
   ejecuta el descarte con la ventana recibida y lo registra; la política vigente no se guarda porque
   no hay dónde.
 
-## Pendiente
+## Fuera de este módulo
 
-- **Tabla de catálogo de políticas** de retención y compresión: no existe en el modelo, así que hoy
-  cada llamada lleva su umbral. Cuando se declare, estos endpoints pasarían a leerla en vez de
-  recibirla.
+- **Tabla de catálogo de políticas** de retención y compresión: no existe en el modelo, así que cada
+  llamada lleva su umbral.
 - **Definición de los agregados continuos en el modelo**: `continuous_sli_hourly`,
-  `continuous_sli_daily` y `continuous_audit_daily` sólo están descritos en el texto del caso de uso.
-  Aquí viven en `ROLLUPS`, dentro del módulo. Si el modelo los declara como objetos, esa constante
-  sobra.
+  `continuous_sli_daily` y `continuous_audit_daily` sólo están descritos en el texto del caso de uso;
+  aquí viven en `ROLLUPS`, dentro del módulo.
 - **`redis_runtime.idempotency_entries` y `distributed_lock_entries`** (UC-58-01, 05, 12): aquí lo
-  cubren las claves naturales y la clave de idempotencia del outbox. Ese esquema es del módulo 56,
-  **sin asignar**.
-- **Comprobación de consentimiento contra `consent.consents`** (UC-58-09, 13): el consentimiento se
-  exige y se propaga, pero no se contrasta contra el módulo 07. Esa comprobación es de `authz` y
-  `consent`, que son de la parte de Pablo.
+  cubren las claves naturales y la clave de idempotencia del outbox.
+- **Consentimiento en la lectura** (UC-58-09): la consulta de rango no contrasta consentimiento; sólo
+  la ingesta de ubicación (UC-58-13) lo hace. El propósito `LOCATION_TRACKING` debe existir en
+  `consent.processing_purposes` (no hay semilla): sin él, la ingesta de ubicación se rechaza.
 - **`audit.audit_events` en la lectura de datos sensibles** (UC-58-09): el caso de uso pide registrar
   la consulta. El registro de auditoría es del módulo 06.
 - **Re-materialización automática de los rollups afectados por un backfill** (UC-58-12): el evento
@@ -237,5 +239,5 @@ aprobadas durante la revisión.
 
 ## Revisión ALOVIDA
 
-La referencia de consentimiento de ubicación se exige pero todavía no se verifica contra la
-política canónica; ver [el informe](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/time_series.md).
+La referencia de consentimiento de ubicación se verifica contra `consent.consents` (TS-01); ver
+«Reglas de negocio».

@@ -218,6 +218,24 @@ export class FieldValues {
   supersedesValueId?: string;
 
   /**
+   * La opción elegida de un campo `code` **sin** `valueSetId`: texto libre
+   * tecleado por quien armó el formulario (o lo que el paciente escribió al
+   * elegir «Otro»), no un concepto del catálogo.
+   *
+   * No reusa `value_concept_id` a propósito: esa columna es `uuid` con FK a
+   * `terminology.catalog_concepts`, y una opción como «Ex fumador» no es un
+   * concepto — insertarla ahí violaría el tipo y la FK. Exclusiva con
+   * `value_concept_id` dentro del mismo `value[x]`: un campo `code` llena una
+   * u otra según declare `valueSetId` u {@link DynamicFieldDefinitions.options},
+   * nunca las dos.
+   *
+   * Declarada en el modelo canónico (`diagram_09_forms.puml`); parche para
+   * bases ya pobladas: `2026-10-05_v4238_forms_choice_field_options.sql`.
+   */
+  @Property({ fieldName: 'value_code', columnType: 'text', nullable: true })
+  valueCode?: string;
+
+  /**
    * Fecha y hora en que se creó el registro.
    */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { AgentCatalogService } from '../services';
 import {
   RegisterAgentDto,
@@ -40,6 +45,11 @@ export class AgentCatalogController {
   constructor(private readonly catalogService: AgentCatalogService) {}
 
   /** UC-48-01. */
+  @Audited({
+    action: 'AGENT_REGISTERED',
+    entity: 'agent',
+    entityId: 'result.id',
+  })
   @Post('agents')
   @Roles('AUTOMATION_ENGINEER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -56,6 +66,11 @@ export class AgentCatalogController {
   }
 
   /** UC-48-02. */
+  @Audited({
+    action: 'AGENT_VERSION_PUBLISHED',
+    entity: 'agent_version',
+    entityId: 'result.id',
+  })
   @Post('agents/:id/versions/publish')
   @Roles('AUTOMATION_ENGINEER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -73,6 +88,11 @@ export class AgentCatalogController {
   }
 
   /** UC-48-03. */
+  @Audited({
+    action: 'AGENT_TOOL_REGISTERED',
+    entity: 'agent_tool',
+    entityId: 'result.id',
+  })
   @Post('tools')
   @Roles('AUTOMATION_ENGINEER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -89,6 +109,11 @@ export class AgentCatalogController {
   }
 
   /** UC-48-04. */
+  @Audited({
+    action: 'AGENT_TOOLS_BOUND',
+    entity: 'agent_version',
+    entityId: 'param:versionId',
+  })
   @Post('agents/:id/versions/:versionId/tool-bindings')
   @Roles('AUTOMATION_ENGINEER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -107,6 +132,11 @@ export class AgentCatalogController {
   }
 
   /** UC-48-05 (política). */
+  @Audited({
+    action: 'GUARDRAIL_POLICY_DEFINED',
+    entity: 'guardrail_policy',
+    entityId: 'result.id',
+  })
   @Post('guardrails')
   @Roles('AI_GOVERNANCE_OFFICER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -123,6 +153,11 @@ export class AgentCatalogController {
   }
 
   /** UC-48-05 (adjunción). */
+  @Audited({
+    action: 'AGENT_GUARDRAIL_ATTACHED',
+    entity: 'agent_guardrail',
+    entityId: 'result.id',
+  })
   @Post('agents/:id/guardrails')
   @Roles('AI_GOVERNANCE_OFFICER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -136,6 +171,11 @@ export class AgentCatalogController {
   }
 
   /** UC-48-12. */
+  @Audited({
+    action: 'AGENT_MEMORY_UPSERTED',
+    entity: 'agent_memory',
+    entityId: 'result.id',
+  })
   @Post('agents/:id/memory')
   @Roles('SYSTEM', 'AGENT_RUNTIME', 'AUTOMATION_ENGINEER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)

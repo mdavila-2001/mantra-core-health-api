@@ -8,6 +8,7 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
+import { UniqueConstraintViolationException } from '@mikro-orm/core';
 import { CountryContextService } from './country-context.service';
 import {
   CONCEPTS,
@@ -31,7 +32,7 @@ const REVIEW_TYPE = '77777777-7777-7777-7777-777777777777';
  */
 function build() {
   const tx = { flush: mockFn() };
-  const em = { transactional: mockFn((cb: any) => cb(tx)) };
+  const em: any = { transactional: mockFn((cb: any) => cb(tx)) };
   let factSeq = 0;
   const contextRepo = {
     createContext: mockFn(() => ({ id: CONTEXT })),
@@ -61,7 +62,7 @@ function build() {
     contextRepo as any,
     logger as any,
   );
-  return { service, tx, contextRepo, logger };
+  return { service, tx, em, contextRepo, logger };
 }
 
 /**
@@ -114,6 +115,33 @@ describe('CountryContextService', () => {
       await expect(
         d.service.createContext(dto, actor as any),
       ).rejects.toBeInstanceOf(ConflictException);
+    });
+  });
+
+  describe('createContext: carrera entre dos altas (HC-03)', () => {
+    it('la alta que pierde el único recibe el mismo conflicto de negocio', async () => {
+      const d = build();
+      d.em.transactional.mockImplementationOnce(async (cb: any) => {
+        await cb(d.tx);
+        throw new UniqueConstraintViolationException(new Error('dup') as any);
+      });
+
+      await expect(
+        d.service.createContext(
+          {
+            countryConceptId: COUNTRY,
+            contextDomainConceptId: DOMAIN,
+            contextKey: 'inmunizacion',
+            title: 'x',
+          } as any,
+          actor as any,
+        ),
+      ).rejects.toMatchObject({
+        status: 409,
+        response: {
+          message: 'Ya existe ese contexto para el país y el dominio',
+        },
+      });
     });
   });
 

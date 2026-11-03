@@ -8,9 +8,50 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { PatientStatementsService } from './patient-statements.service';
-import { ConflictException, ResourceNotFoundException } from '../../../common';
+import {
+  ConflictException,
+  ResourceNotFoundException,
+  runWithTenant,
+} from '../../../common';
+import { BillingErrorReason } from '../billing.error-reasons';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
+
+const TENANT_A = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+const TENANT_B = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+
+/**
+ * Ejecuta cada método del servicio dentro del contexto de tenant dado, como lo
+ * hace `TenantContextInterceptor` en una petición real.
+ *
+ * @param service - Servicio bajo prueba.
+ * @param tenantId - Tenant del contexto de la petición.
+ * @returns Un proxy que ejecuta cada método dentro de `runWithTenant`.
+ */
+function inTenant<T extends object>(service: T, tenantId: string): T {
+  return new Proxy(service, {
+    get(target, property, receiver) {
+      const value = Reflect.get(target, property, receiver);
+      if (typeof value !== 'function') return value;
+      return (...args: unknown[]) =>
+        runWithTenant(tenantId, () => value.apply(target, args));
+    },
+  });
+}
+
+/**
+ * Puerto de `practice` de prueba: la práctica `pr1` es del tenant A y `pr-b`
+ * del tenant B; cualquier otra no existe.
+ *
+ * @returns Doble de `PracticeTenantLookupService`.
+ */
+function buildLookup() {
+  return {
+    findTenantOfPractice: mockFn(async (practiceId: string) =>
+      practiceId === 'pr1' ? TENANT_A : practiceId === 'pr-b' ? TENANT_B : null,
+    ),
+  };
+}
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -31,7 +72,7 @@ function build() {
     findTenantOfPractice: mockFn().mockResolvedValue('tenant-1'),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new PatientStatementsService(
+  const raw = new PatientStatementsService(
     em as any,
     statementsRepo,
     invoicesRepo as any,
@@ -40,7 +81,9 @@ function build() {
     logger as any,
   );
   return {
-    service,
+    service: inTenant(raw, 'tenant-1'),
+    raw,
+    asTenantB: inTenant(raw, 'tenant-b'),
     em,
     statementsRepo,
     invoicesRepo,
@@ -138,5 +181,61 @@ describe('PatientStatementsService (UC-17-09)', () => {
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
       expect(d.statementsRepo.findByPracticePage).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe('PatientStatementsService.generate · alcance de tenant (BILL-01)', () => {
+  const dto = (practiceId: string) =>
+    ({
+      practiceId,
+      patientProfileId: 'p1',
+      periodStart: '2026-01-01',
+      periodEnd: '2026-01-31',
+      tenantId: 'tenant-b',
+    }) as any;
+
+  it('el estado de cuenta de una práctica de otro tenant responde como práctica inexistente y no lee sus facturas', async () => {
+    const d = build();
+    d.practiceTenantLookup.findTenantOfPractice.mockImplementation(
+      async (practiceId: string) => (practiceId === 'pr-b' ? 'tenant-b' : null),
+    );
+
+    const foreign = await d.service
+      .generate(dto('pr-b'), actor)
+      .catch((e: any) => e);
+    const missing = await d.service
+      .generate(dto('pr-x'), actor)
+      .catch((e: any) => e);
+
+    expect(foreign).toBeInstanceOf(ResourceNotFoundException);
+    expect(foreign.reason).toBe(BillingErrorReason.BILLING_PRACTICE_NOT_FOUND);
+    expect(foreign.getResponse()).toEqual(missing.getResponse());
+    expect(d.invoicesRepo.findByPatientInRange).not.toHaveBeenCalled();
+    expect(d.statementsRepo.create).not.toHaveBeenCalled();
+  });
+
+  it('los vínculos de las facturas incluidas llevan el tenant del contexto, no el del cuerpo', async () => {
+    const d = build();
+    d.statementsRepo.findByPeriod.mockResolvedValue(null);
+    d.invoicesRepo.findByPatientInRange.mockResolvedValue([
+      { id: 'i1', total: '10.00', paidTotal: '0.00' },
+    ]);
+    d.statementsRepo.create.mockImplementation((_tx: any, data: any) => ({
+      id: 's1',
+      ...data,
+    }));
+
+    await d.service.generate(dto('pr1'), actor);
+
+    expect(d.linksRepo.create.mock.calls[0][1].tenantId).toBe('tenant-1');
+  });
+
+  it('sin tenant en el contexto no genera nada (denegar por defecto)', async () => {
+    const d = build();
+
+    const error = await d.raw.generate(dto('pr1'), actor).catch((e: any) => e);
+
+    expect(error.details).toEqual({ reason: 'TENANT_REQUIRED' });
+    expect(d.statementsRepo.create).not.toHaveBeenCalled();
   });
 });

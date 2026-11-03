@@ -19,6 +19,7 @@ import {
   ReviewResponseDto,
 } from '../dto';
 import { CommunityVisibilityService } from './community-visibility.service';
+import { CommunityErrorReason } from '../community.error-reasons';
 
 /**
  * Reviews verificadas de servicio (UC-19-11).
@@ -109,25 +110,31 @@ export class CommunityReviewsService {
     patientProfileId: string,
     targetSubjectId: string,
   ): Promise<void> {
-    const encuentro = await this.encountersRepo.findById(em, encounterId);
-    if (!encuentro) {
+    const encounter = await this.encountersRepo.findById(em, encounterId);
+    if (!encounter) {
       // El mismo mensaje que los demás casos: decir «ese encuentro no existe»
       // le confirmaría a quien prueba uuids cuáles sí existen.
       throw new PreconditionFailedException(
         'La atención declarada no habilita una reseña',
         { encounterId },
+        CommunityErrorReason.ENCOUNTER_NOT_FOUND_FOR_REVIEW,
       );
     }
-    if (encuentro.patientProfileId !== patientProfileId) {
+    if (encounter.patientProfileId !== patientProfileId) {
       throw new PreconditionFailedException(
         'La atención declarada no habilita una reseña',
         { encounterId },
+        CommunityErrorReason.ENCOUNTER_NOT_OWNED_BY_PATIENT,
       );
     }
-    if (encuentro.statusConceptId !== CLIN.ENCOUNTER_FINISHED) {
-      throw new PreconditionFailedException('La atención todavía no terminó', {
-        encounterId,
-      });
+    if (encounter.statusConceptId !== CLIN.ENCOUNTER_FINISHED) {
+      throw new PreconditionFailedException(
+        'La atención todavía no terminó',
+        {
+          encounterId,
+        },
+        CommunityErrorReason.ENCOUNTER_NOT_FINISHED,
+      );
     }
 
     // Se consulta la entidad de participantes directamente y **sin filtrar por
@@ -140,11 +147,12 @@ export class CommunityReviewsService {
         practitionerProfileId: targetSubjectId,
       })) !== null;
     const attended =
-      encuentro.primaryPractitionerId === targetSubjectId || participated;
+      encounter.primaryPractitionerId === targetSubjectId || participated;
     if (!attended) {
       throw new PreconditionFailedException(
         'La atención declarada no fue con este profesional',
         { encounterId },
+        CommunityErrorReason.ENCOUNTER_PRACTITIONER_MISMATCH,
       );
     }
   }
@@ -200,18 +208,18 @@ export class CommunityReviewsService {
    */
   private async resolveTargetOfEncounter(encounterId: string): Promise<string> {
     const em = this.em.fork();
-    const encuentro = await this.encountersRepo.findById(em, encounterId);
-    const practitionerId = encuentro?.primaryPractitionerId;
-    const vitrina = practitionerId
+    const encounter = await this.encountersRepo.findById(em, encounterId);
+    const practitionerId = encounter?.primaryPractitionerId;
+    const showcase = practitionerId
       ? await this.profilesRepo.findByTarget(em, practitionerId)
       : null;
-    if (!vitrina) {
+    if (!showcase) {
       throw new PreconditionFailedException(
         'La atención declarada no habilita una reseña',
         { encounterId },
       );
     }
-    return vitrina.id;
+    return showcase.id;
   }
 
   /** UC-19-11: publica una review verificada con puntuaciones por dimensión. */
@@ -227,13 +235,21 @@ export class CommunityReviewsService {
     return this.em.transactional(async (tx) => {
       const target = await this.profilesRepo.findById(tx, profileId);
       if (!target)
-        throw new ResourceNotFoundException('Perfil objetivo no encontrado', {
-          profileId,
-        });
+        throw new ResourceNotFoundException(
+          'Perfil objetivo no encontrado',
+          {
+            profileId,
+          },
+          CommunityErrorReason.REVIEW_TARGET_PROFILE_NOT_FOUND,
+        );
       if (target.acceptsReviews === false) {
-        throw new PreconditionFailedException('El perfil no acepta reviews', {
-          profileId,
-        });
+        throw new PreconditionFailedException(
+          'El perfil no acepta reviews',
+          {
+            profileId,
+          },
+          CommunityErrorReason.REVIEW_TARGET_NOT_ACCEPTING_REVIEWS,
+        );
       }
 
       // Quién reseña lo dice el token, no el cuerpo. Una sesión sin perfil de
@@ -266,6 +282,7 @@ export class CommunityReviewsService {
           {
             profileId,
           },
+          CommunityErrorReason.DUPLICATE_VERIFIED_REVIEW,
         );
       }
 
@@ -278,10 +295,12 @@ export class CommunityReviewsService {
         verifiedEncounterId: dto.verifiedEncounterId,
         overallRating: dto.overallRating,
         reviewText: dto.reviewText,
+        // Privacidad por defecto: sin `displayMode` la reseña es anónima. Sólo
+        // se muestra el nombre si el paciente lo pide explícitamente.
         reviewerDisplayModeConceptId:
-          dto.displayMode === 'ANONYMOUS'
-            ? COMM.REVIEW_DISPLAY_ANONYMOUS
-            : COMM.REVIEW_DISPLAY_REAL_NAME,
+          dto.displayMode === 'REAL_NAME'
+            ? COMM.REVIEW_DISPLAY_REAL_NAME
+            : COMM.REVIEW_DISPLAY_ANONYMOUS,
         verificationStatusConceptId: verified
           ? COMM.REVIEW_VERIFIED
           : COMM.REVIEW_UNVERIFIED,
@@ -354,9 +373,13 @@ export class CommunityReviewsService {
     return this.em.transactional(async (tx) => {
       const target = await this.profilesRepo.findById(tx, profileId);
       if (!target)
-        throw new ResourceNotFoundException('Perfil objetivo no encontrado', {
-          profileId,
-        });
+        throw new ResourceNotFoundException(
+          'Perfil objetivo no encontrado',
+          {
+            profileId,
+          },
+          CommunityErrorReason.REVIEW_TARGET_PROFILE_NOT_FOUND,
+        );
 
       // Titularidad estricta, sin atajo de rol: ver la reseña ajena es una cosa
       // —trabajo de un moderador—, contestarla en nombre de otro es otra, y no
@@ -368,9 +391,13 @@ export class CommunityReviewsService {
       // «No es de esta vitrina» y «no existe» dan lo mismo: distinguirlos
       // confirmaría la existencia de reseñas de otros perfiles.
       if (!review || review.targetPublicProfileId !== profileId) {
-        throw new ResourceNotFoundException('Reseña no encontrada', {
-          reviewId,
-        });
+        throw new ResourceNotFoundException(
+          'Reseña no encontrada',
+          {
+            reviewId,
+          },
+          CommunityErrorReason.REVIEW_NOT_FOUND,
+        );
       }
 
       const previous = await this.reviewsRepo.findResponseByResponder(
@@ -379,7 +406,11 @@ export class CommunityReviewsService {
         profileId,
       );
       if (previous) {
-        throw new ConflictException('Ya respondiste esta reseña', { reviewId });
+        throw new ConflictException(
+          'Ya respondiste esta reseña',
+          { reviewId },
+          CommunityErrorReason.REVIEW_ALREADY_RESPONDED,
+        );
       }
 
       const response = this.reviewsRepo.createResponse(tx, {

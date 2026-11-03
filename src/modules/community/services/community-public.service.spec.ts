@@ -26,7 +26,7 @@ import {
   CONCEPTS,
 } from '../../../common';
 import { COMM } from '../community.concepts';
-import { MedicalSpecialtyCatalogService } from '../../profiles/services/medical-specialty-catalog.service';
+import { MedicalSpecialtyCatalogService } from '../../profiles/application/services/medical-specialty-catalog.service';
 import { PublicTerritoryFilterService } from './public-territory-filter.service';
 
 /** Un concepto de `VS_MEDICAL_SPECIALTY`, el que el catálogo doble declara. */
@@ -92,12 +92,14 @@ function build(options?: {
     isPublicCommentMedia: mockFn().mockResolvedValue(false),
     countPublishedReviews: mockFn().mockResolvedValue(0),
     nearbyProfiles: mockFn().mockResolvedValue([]),
+    practitionersInReview: mockFn().mockResolvedValue(new Set<string>()),
     badgesByProfiles: mockFn().mockResolvedValue(new Map()),
     agendaByPractitioner: mockFn().mockResolvedValue(new Map()),
     locationsByOwner: mockFn().mockResolvedValue(new Map()),
     specialtiesByPractitioner: mockFn().mockResolvedValue(new Map()),
     affiliationsByPractitioner: mockFn().mockResolvedValue(new Map()),
     practiceSitesByPractitioner: mockFn().mockResolvedValue(new Map()),
+    practiceIdByTenant: mockFn().mockResolvedValue(null),
     practitionerIdsBySpecialty: mockFn().mockResolvedValue([]),
     isPostPublic: mockFn().mockResolvedValue(true),
     listPostReactors: mockFn().mockResolvedValue([]),
@@ -325,6 +327,33 @@ describe('CommunityPublicService', () => {
       expect(d.repo.affiliationsByPractitioner).not.toHaveBeenCalled();
     });
 
+    it('la ficha de una organización trae el practiceId de su tenant', async () => {
+      const d = build();
+      d.repo.findPublicBySlug.mockResolvedValue({
+        ...completeProfile,
+        targetTypeConceptId: COMM.PROFILE_TARGET_ORGANIZATION,
+      });
+      d.repo.practiceIdByTenant.mockResolvedValue('practica-1');
+
+      const res = await d.service.getBySlug('clinica-del-sur');
+
+      expect(res.practiceId).toBe('practica-1');
+      expect(d.repo.practiceIdByTenant).toHaveBeenCalledWith(
+        expect.anything(),
+        completeProfile.targetId,
+      );
+    });
+
+    it('la ficha de un profesional no pide ni trae practiceId', async () => {
+      const d = build();
+      d.repo.findPublicBySlug.mockResolvedValue(completeProfile);
+
+      const res = await d.service.getBySlug('dra-quispe');
+
+      expect(res.practiceId).toBeNull();
+      expect(d.repo.practiceIdByTenant).not.toHaveBeenCalled();
+    });
+
     // 2.1 — dónde atiende. Qué asignación cuenta y qué sede es propia se prueba
     // contra la regla en `public-search.repository.spec.ts`; acá, que la ficha
     // la sirva sólo para un profesional, con sus cinco campos y sin tocar el
@@ -412,13 +441,14 @@ describe('CommunityPublicService', () => {
       expect(d.repo.practiceSitesByPractitioner).not.toHaveBeenCalled();
     });
 
-    it('J · la lista blanca de la ficha sumó practiceSites y ninguna otra clave', () => {
+    it('J · la lista blanca de la ficha sumó practiceSites y practiceId, y ninguna otra clave', () => {
       // Literal a propósito: comparar la salida contra `PUBLIC_PROFILE_KEYS`
       // prueba que coinciden, no qué contienen. Abrir otra clave obliga a
       // editar esta lista, que es el momento de pensarlo.
       expect([...PUBLIC_PROFILE_KEYS].sort()).toEqual(
         [
           'kind',
+          'practiceId',
           'slug',
           'displayName',
           'headline',
@@ -436,6 +466,7 @@ describe('CommunityPublicService', () => {
           'ratingCount',
           'acceptsReviews',
           'verifiedBadge',
+          'verification',
           'hasPublishedAgenda',
           'nextAvailableDate',
           'posts',
@@ -494,13 +525,13 @@ describe('CommunityPublicService', () => {
       'createdByUserId',
       'updatedByUserId',
       'rowVersion',
-    ])('la ficha pública no expone %s', async (clave) => {
+    ])('la ficha pública no expone %s', async (key) => {
       const d = build();
       d.repo.findPublicBySlug.mockResolvedValue(completeProfile);
 
       const res = await d.service.getBySlug('dra-quispe');
 
-      expect(res).not.toHaveProperty(clave);
+      expect(res).not.toHaveProperty(key);
     });
 
     // El identificador aparece *dentro* de la URL, y eso está bien: así se
@@ -574,7 +605,10 @@ describe('CommunityPublicService', () => {
     // en «Dra.» y saltaba a un lugar equivocado del listado.
     it('el cursor sobrevive a un nombre con espacios', async () => {
       const d = build();
-      d.repo.searchProfiles.mockResolvedValue([completeProfile, completeProfile]);
+      d.repo.searchProfiles.mockResolvedValue([
+        completeProfile,
+        completeProfile,
+      ]);
 
       const first = await d.service.search({ limit: 1 });
       expect(first.nextCursor).not.toBeNull();
@@ -616,11 +650,11 @@ describe('CommunityPublicService', () => {
       // poder cometerlo.
       repo.searchProfiles.mockResolvedValue([completeProfile]);
 
-      const pagina = await service.search({ kind: 'MEDICATION' });
+      const page = await service.search({ kind: 'MEDICATION' });
 
-      expect(pagina.items).toEqual([]);
-      expect(pagina.nextCursor).toBeNull();
-      expect(pagina.totalHint).toBe(0);
+      expect(page.items).toEqual([]);
+      expect(page.nextCursor).toBeNull();
+      expect(page.totalHint).toBe(0);
     });
 
     it('no llega a consultar el directorio', async () => {
@@ -653,8 +687,8 @@ describe('CommunityPublicService', () => {
       await service.search({});
 
       expect(repo.searchProfiles).toHaveBeenCalled();
-      const filtros = repo.searchProfiles.mock.calls[0][1];
-      expect(filtros.targetTypeConceptId).toBeUndefined();
+      const filters = repo.searchProfiles.mock.calls[0][1];
+      expect(filters.targetTypeConceptId).toBeUndefined();
     });
   });
 
@@ -664,7 +698,7 @@ describe('CommunityPublicService', () => {
       ['latitud fuera de rango', { lat: 91, lng: 0 }],
       ['longitud fuera de rango', { lat: 0, lng: 181 }],
       ['sólo latitud', { lat: -17.8 }],
-    ])('da 400 %s', async (_caso, params) => {
+    ])('da 400 %s', async (_case, params) => {
       const d = build();
       await expect(d.service.nearby(params)).rejects.toBeInstanceOf(
         BadRequestException,
@@ -805,8 +839,8 @@ describe('CommunityPublicService · P10', () => {
         radiusKm: 3,
       });
 
-      const [[indice, params]] = d.searchIndex.search.mock.calls;
-      expect(indice).toBe('community_public_profiles');
+      const [[index, params]] = d.searchIndex.search.mock.calls;
+      expect(index).toBe('community_public_profiles');
       expect(params.geo).toEqual({
         field: 'location',
         lat: -16.5,

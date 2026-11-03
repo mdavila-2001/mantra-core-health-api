@@ -80,6 +80,10 @@ export interface CreateNoteVersionData {
    */
   planText?: string;
   /**
+   * P39: filas campo/valor ya armadas para `entries_json` (`null` sin filas).
+   */
+  entriesJson?: { label: string; value: string }[] | null;
+  /**
    * Identificador asociado a supersedes version.
    */
   supersedesVersionId?: string;
@@ -445,6 +449,7 @@ export class ClinicalNotesRepository {
         objectiveText: data.objectiveText,
         assessmentText: data.assessmentText,
         planText: data.planText,
+        entriesJson: data.entriesJson ?? undefined,
         supersedesVersionId: data.supersedesVersionId,
         amendmentReasonConceptId: data.amendmentReasonConceptId,
         amendmentReasonText: data.amendmentReasonText,

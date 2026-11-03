@@ -1,6 +1,11 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { AuthzCatalogService } from '../services';
 import {
   CreatePermissionCategoryDto,
@@ -21,6 +26,11 @@ export class AuthzCatalogController {
   constructor(private readonly catalogService: AuthzCatalogService) {}
 
   /** UC-06-01. */
+  @Audited({
+    action: 'PERMISSION_CATEGORY_CREATED',
+    entity: 'permission_category',
+    entityId: 'result.id',
+  })
   @Post('permission-categories')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -33,6 +43,11 @@ export class AuthzCatalogController {
   }
 
   /** UC-06-01. */
+  @Audited({
+    action: 'PERMISSION_CREATED',
+    entity: 'permission',
+    entityId: 'result.id',
+  })
   @Post('permissions')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

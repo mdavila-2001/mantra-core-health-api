@@ -59,7 +59,7 @@ Contratos de entrada y salida. La validación vive en `class-validator`; la docu
 - **`RequestDeletionDto.reason` es obligatorio**: un borrado sin motivo declarado no se puede
   defender después.
 
-## Pruebas
+## Tests
 
 Sin suite propia: los DTOs se validan por el `ValidationPipe` global y se ejercitan desde las
 pruebas de servicio y de controlador.

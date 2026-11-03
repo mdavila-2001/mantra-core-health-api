@@ -9,8 +9,34 @@ import {
 } from '../repositories';
 import { COMM } from '../community.concepts';
 
+/**
+ * La insignia en la forma `verification` que consumen las pantallas (la misma
+ * de los DTO de profesional): `NONE` se dice `UNVERIFIED`. Una derivación, no
+ * una segunda verdad: el sello manda.
+ */
+export function verificationFromBadge(badge: {
+  status: VerifiedBadgeStatus;
+  verifiedAt: string | null;
+  validUntil: string | null;
+}): {
+  status: 'VERIFIED' | 'IN_REVIEW' | 'UNVERIFIED' | 'EXPIRED';
+  verifiedAt: string | null;
+  validUntil: string | null;
+} {
+  return {
+    status: badge.status === 'NONE' ? 'UNVERIFIED' : badge.status,
+    verifiedAt: badge.verifiedAt,
+    validUntil: badge.validUntil,
+  };
+}
+
 /** Lo que la pantalla necesita saber del sello, en un solo campo. */
-export type VerifiedBadgeStatus = 'VERIFIED' | 'EXPIRED' | 'NONE';
+export type VerifiedBadgeStatus =
+  | 'VERIFIED'
+  /** Hay una solicitud de verificación abierta y no hay un sello vigente. */
+  | 'IN_REVIEW'
+  | 'EXPIRED'
+  | 'NONE';
 
 /**
  * El sello, tal como se sirve en TODAS las superficies.
@@ -352,11 +378,15 @@ export class CommunityVerificationService {
    *
    * @param profile - Perfil público.
    * @param badges - Sus sellos (vigentes y caídos).
+   * @param inReview - El profesional tiene una solicitud de verificación
+   *   abierta. Sólo cuenta si no hay un sello vigente: «En verificación» nunca
+   *   tapa un «Verificado», y un padrón sin solicitud no llega acá como true.
    * @returns El campo `verifiedBadge` del contrato.
    */
   readBadge(
     profile: Pick<PublicProfiles, 'verificationStatusConceptId'>,
     badges: readonly VerifiedBadges[],
+    inReview = false,
   ): VerifiedBadgeDto {
     const now = Date.now();
     const current = badges.find(
@@ -373,6 +403,16 @@ export class CommunityVerificationService {
         verificationMethodConceptId: current.verificationMethodConceptId,
         verifiedAt: current.validFrom?.toISOString() ?? null,
         validUntil: current.validTo?.toISOString() ?? null,
+      };
+    }
+
+    if (inReview) {
+      return {
+        status: 'IN_REVIEW',
+        badgeTypeConceptId: null,
+        verificationMethodConceptId: null,
+        verifiedAt: null,
+        validUntil: null,
       };
     }
 

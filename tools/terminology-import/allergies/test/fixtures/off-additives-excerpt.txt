@@ -1,0 +1,79 @@
+en: E100, Curcumin, Turmeric extract, curcuma extract, turmeric color
+xx: E100
+ar: E100, كركومين
+bg: E100, куркумин
+bs: E100, kurkumin
+ca: E100, curcumina
+cs: E100, kurkumin
+da: E100, curcumin, gurkemejeekstrakt
+de: E100, Kurkumin, Kurkumaextrakt
+el: E100, κουρκουμινη
+es: E100, curcumina, extracto de cúrcuma
+et: E100, kurkumiin
+fa: E100, کورکومین
+fi: E100, kurkumiini, kurkumiinia, kurkumiiniuutetta
+fr: E100, curcumine, extrait de curcuma
+ga: E100, curcumina
+he: E100, כורכומין
+hr: E100, kurkumin, ekstrakt kurkume, curcumin
+hu: E100, kurkumin
+id: E100, kurkumin
+it: E100, curcumina, estratto di curcuma
+ja: E100, クルクミン
+kn: E100, ಕರ್ಕ್ಯುಮಿನ್
+ko: E100, 커큐민
+lt: E100, kurkuminas
+lv: E100, kurkumīns, kurkuma ekstrakts
+mt: E100, kurkumina
+nb: E100, kurkumin
+nl: E100, curcumine, kurkuma extract, kurkuma-extract
+nl_be: E100, curcumine
+pl: E100, kurkumina, ekstrakt z kurkumy, ekstrakt kurkumy, barwiący wyciąg z kurkumy, wyciąg z kurkumy
+pt: E100, curcumina
+ro: E100, curcumină
+ru: E100, куркумины
+sk: E100, kurkumín
+sl: E100, kurkumin
+sv: E100, kurkumin, gurkmejaextrakt
+ta: E100, குர்க்குமின்
+th: E100, เคอร์คูมิน
+tr: E100, kurkumin
+uk: E100, куркумін
+vi: E100, curcumin
+zh: E100, 姜黄素
+additives_classes:en: en:colour
+anses_additives_of_interest:en: yes
+# fr:curcumin 80 products in 2 languages @2018-10-11
+e_number:en: 100
+efsa_evaluation:en: Scientific Opinion on the re-evaluation of curcumin (E 100) as a food additive
+efsa_evaluation_date:en: 2010-09-06
+efsa_evaluation_url:en: http://dx.doi.org/10.2903/j.efsa.2010.1679
+vegan:en: yes
+vegetarian:en: yes
+# azb:E100, کورکومین
+# en-ca:E100, curcumin
+# en-gb:E100, curcumin
+# sr-ec:E100, куркумин
+# sr-el:E100, kurkumin
+# yue:E100, 薑黃素
+# zh-cn:E100, 姜黄素
+# zh-hans:E100, 姜黄素
+# zh-hant:E100, 薑黃素
+# zh-hk:E100, 薑黃素
+# zh-mo:E100, 薑黃素
+# zh-sg:E100, 姜黄素
+# zh-my:E100, 姜黄素
+# zh-tw:E100, 薑黃素
+wikidata:en: Q312266
+wikipedia:en: https://en.wikipedia.org/wiki/Curcumin
+
+< en: E100
+en: E100(i)
+xx: E100(i)
+e_number:en: 100
+
+< en: E100
+en: E100(ii)
+xx: E100(ii)
+e_number:en: 100
+

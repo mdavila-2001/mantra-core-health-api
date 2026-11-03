@@ -95,8 +95,8 @@ es el segundo criterio de precedencia, por delante del valor por defecto.
 - **El piloto es un único módulo.** El resto sigue con el acoplamiento anterior; este ADR describe
   la dirección, no un estado alcanzado.
 - **Los roles nuevos no se usan todavía en runtime.** Están creados y verificados, pero
-  `DB_READ_USER` no está fijado en ningún despliegue: activarlo es una decisión operativa
-  pendiente, y hasta que se tome, la separación es una capacidad y no un hecho.
+  `DB_READ_USER` no está fijado en ningún despliegue, así que la separación es una capacidad y no
+  un hecho.
 - El desvío `fallback-to-primary` ejecutaría lecturas con la credencial de escritura. Por eso el
   valor por defecto es `fail-fast`.
 

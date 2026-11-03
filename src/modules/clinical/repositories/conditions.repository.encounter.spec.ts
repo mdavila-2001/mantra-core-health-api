@@ -20,11 +20,11 @@ describe('ConditionsRepository.findByEncounter', () => {
   }
 
   it('filtra por el encuentro y ordena por createdAt, id', async () => {
-    const { em, llamadas } = rememberingEm();
+    const { em, llamadas: calls } = rememberingEm();
 
     await new ConditionsRepository().findByEncounter(em, 'enc-1');
 
-    expect(llamadas[0]).toEqual([
+    expect(calls[0]).toEqual([
       Conditions,
       { encounterId: 'enc-1' },
       { orderBy: { createdAt: 'ASC', id: 'ASC' } },

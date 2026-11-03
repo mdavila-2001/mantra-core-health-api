@@ -18,14 +18,22 @@ export class DomainException extends HttpException {
    * @param code - Valor de code requerido por la operación.
    * @param message - Valor de message requerido por la operación.
    * @param details - Valor de details requerido por la operación.
+   * @param reason - Sub-código de negocio estable, propio del módulo que lanza
+   *                 (ej. `ACCOUNTING_PERIOD_NOT_OPEN`). `code` dice el tipo HTTP
+   *                 del error (uno de ~15 valores, compartido por todo el API);
+   *                 `reason` dice **cuál** error de ese tipo fue, dentro del
+   *                 catálogo del módulo (`<modulo>.error-reasons.ts`). Un cliente
+   *                 puede ramificar sobre `reason` sin parsear `message`, que
+   *                 sigue siendo sólo para humanos.
    */
   constructor(
     status: HttpStatus,
     public readonly code: ErrorCode,
     message: string,
     public readonly details?: Record<string, unknown>,
+    public readonly reason?: string,
   ) {
-    super({ code, message, details }, status);
+    super({ code, message, details, reason }, status);
   }
 }
 
@@ -37,8 +45,18 @@ export class UnauthorizedException extends DomainException {
    * @param message - Valor de message requerido por la operación.
    * @param details - Valor de details requerido por la operación.
    */
-  constructor(message = 'No autenticado', details?: Record<string, unknown>) {
-    super(HttpStatus.UNAUTHORIZED, ErrorCode.UNAUTHENTICATED, message, details);
+  constructor(
+    message = 'No autenticado',
+    details?: Record<string, unknown>,
+    reason?: string,
+  ) {
+    super(
+      HttpStatus.UNAUTHORIZED,
+      ErrorCode.UNAUTHENTICATED,
+      message,
+      details,
+      reason,
+    );
   }
 }
 
@@ -60,13 +78,26 @@ export class IdentityVerificationRequiredException extends DomainException {
   constructor(
     message = 'Se requiere una identidad verificada',
     details?: Record<string, unknown>,
+    reason?: string,
   ) {
     super(
       HttpStatus.FORBIDDEN,
       ErrorCode.IDENTITY_VERIFICATION_REQUIRED,
       message,
       details,
+      reason,
     );
+  }
+}
+
+/** 403 por rol insuficiente: la identidad está verificada pero el rol no autoriza. */
+export class InsufficientRoleException extends DomainException {
+  constructor(
+    message = 'El rol no tiene permiso para esta operación',
+    details?: Record<string, unknown>,
+    reason?: string,
+  ) {
+    super(HttpStatus.FORBIDDEN, ErrorCode.FORBIDDEN, message, details, reason);
   }
 }
 
@@ -81,8 +112,9 @@ export class ResourceNotFoundException extends DomainException {
   constructor(
     message = 'Recurso no encontrado',
     details?: Record<string, unknown>,
+    reason?: string,
   ) {
-    super(HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND, message, details);
+    super(HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND, message, details, reason);
   }
 }
 
@@ -97,8 +129,9 @@ export class ConflictException extends DomainException {
   constructor(
     message = 'Conflicto de estado',
     details?: Record<string, unknown>,
+    reason?: string,
   ) {
-    super(HttpStatus.CONFLICT, ErrorCode.CONFLICT, message, details);
+    super(HttpStatus.CONFLICT, ErrorCode.CONFLICT, message, details, reason);
   }
 }
 
@@ -113,12 +146,14 @@ export class PreconditionFailedException extends DomainException {
   constructor(
     message = 'Precondición no satisfecha',
     details?: Record<string, unknown>,
+    reason?: string,
   ) {
     super(
       HttpStatus.UNPROCESSABLE_ENTITY,
       ErrorCode.PRECONDITION_FAILED,
       message,
       details,
+      reason,
     );
   }
 }
@@ -134,12 +169,31 @@ export class ConcurrencyConflictException extends DomainException {
   constructor(
     message = 'Conflicto de concurrencia',
     details?: Record<string, unknown>,
+    reason?: string,
   ) {
     super(
       HttpStatus.CONFLICT,
       ErrorCode.CONCURRENCY_CONFLICT,
       message,
       details,
+      reason,
+    );
+  }
+}
+
+/** Cuota o límite de negocio excedido (no es rate limiting de infraestructura). */
+export class QuotaExceededException extends DomainException {
+  constructor(
+    message = 'Se superó el límite permitido para esta operación',
+    details?: Record<string, unknown>,
+    reason?: string,
+  ) {
+    super(
+      HttpStatus.UNPROCESSABLE_ENTITY,
+      ErrorCode.PRECONDITION_FAILED,
+      message,
+      details,
+      reason,
     );
   }
 }

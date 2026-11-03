@@ -225,14 +225,20 @@ export class ReportingDefinitionsRepository {
     return em.findOne(ReportDefinitions, { id });
   }
 
-  /** Publicar versión y deprecar exigen la cabecera bloqueada. */
+  /**
+   * Publicar versión y deprecar exigen la cabecera bloqueada.
+   *
+   * Con `tenantId` el filtro va en la consulta: no se bloquea (ni se espera el
+   * bloqueo de) una definición de otro tenant.
+   */
   findDefinitionForUpdate(
     em: EntityManager,
     id: string,
+    tenantId?: string,
   ): Promise<ReportDefinitions | null> {
     return em.findOne(
       ReportDefinitions,
-      { id },
+      tenantId === undefined ? { id } : { id, tenantId },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
   }

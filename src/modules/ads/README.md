@@ -113,7 +113,7 @@ review event ── approved ──> efectivo activo + infracciones cerradas
 lead form ── submission (idempotente por lead externo) ── respuestas cifradas ──> entrega a CRM
 ```
 
-## Reglas de negocio
+## Business rules
 
 - **Todo nace pausado y en revisión**: la jerarquía completa se crea en una transacción, pero no
   entrega hasta que se active y la plataforma la apruebe. Una jerarquía a medias no debe gastar.
@@ -141,7 +141,7 @@ lead form ── submission (idempotente por lead externo) ── respuestas cif
 - **Los webhooks son idempotentes** por identificador externo: revisión y lead reentregados no
   duplican efectos.
 
-## Permisos
+## Permissions
 
 `ADS_ADMIN` cubre el módulo. `BUSINESS_ADMIN` provisiona cuentas, vincula socios y conecta
 plataformas. `AD_OPS` lanza campañas, define segmentación, sube conversiones offline, crea
@@ -149,7 +149,7 @@ experimentos y programa presupuesto. `DATA_PRIVACY_OFFICER` publica la política
 `POLICY_REVIEWER` registra revisiones y apela. `FINANCE` emite facturas. `SYSTEM` ejecuta la
 ingesta, la evaluación de reglas, el feed del catálogo, las conversiones y los leads.
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE` sobre cuenta publicitaria (el gasto es un contador compartido), campaña, conjunto,
 anuncio, conexión, relación de socio vigente, asignación de identidad vigente, catálogo, feed,
@@ -162,24 +162,23 @@ una regla. `row_version` aporta bloqueo optimista automático.
 la política bloquea un evento y cuando la plataforma rechaza un anuncio. Nunca se loguean payloads
 de conversión, respuestas de leads ni identificadores de usuario.
 
-## Pruebas
+## Tests
 
-`corepack yarn test src/modules/ads --runInBand --silent` — 5 suites y 115 pruebas aprobadas durante la revisión. Falta integración que demuestre aislamiento multitenant en las cadenas de cuenta, datos y leads; ver [auditoría backend](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/ads.md).
+`corepack yarn test src/modules/ads --runInBand --silent` — 5 suites y 115 pruebas aprobadas durante la revisión. No hay integración que demuestre aislamiento multitenant en las cadenas de cuenta, datos y leads.
 
-## Pendiente
+## Fuera de este módulo
 
-- **Empuje a la plataforma**: `ad_sync_runs` registra la importación, pero el *export* de la
-  jerarquía (`CampaignLaunchRequested`, `AutomatedActionApplied`, `BudgetScheduleApplied`) se
-  emitirá por outbox cuando exista el módulo 35. `external_campaign_ref`, `external_adset_ref` y
-  `external_ad_ref` quedan sin poblar hasta que la plataforma responda.
-- **Intento de pago de la factura**: `ad_invoices.payment_intent_id` queda sin poblar; crear el
-  intento pertenece a payments, y el asiento contable al módulo 16 (misma frontera que el
+- **Empuje a la plataforma**: `ad_sync_runs` registra la importación; el *export* de la jerarquía
+  a la plataforma no lo hace este módulo. `external_campaign_ref`, `external_adset_ref` y
+  `external_ad_ref` sólo se llenan con la respuesta de la plataforma.
+- **Intento de pago de la factura**: `ad_invoices.payment_intent_id` no lo escribe este módulo:
+  crear el intento es de payments, y el asiento contable del módulo 16 (misma frontera que el
   `journal_transaction_id` de ERP).
-- **Entrega del lead al CRM**: se encola el intento (`lead_delivery_events` en `queued`) y
-  `crm_lead_id` queda sin poblar hasta que el outbox cree el lead.
+- **Entrega del lead al CRM**: se encola el intento (`lead_delivery_events` en `queued`);
+  `crm_lead_id` lo llena quien crea el lead.
 - **Entrega efectiva de conversiones**: `conversion_event_delivery_attempts` registra el primer
-  intento en `queued`; el reintento con `retry_at` lo gobernará el worker de entrega.
+  intento en `queued`; el reintento con `retry_at` es del worker de entrega.
 - **Tamaño de audiencias**: `approximate_count` y `approximate_reach` nacen en cero; los publica la
   plataforma.
-- **Localizaciones de producto**: `product_localizations` se poblará cuando el feed traiga
+- **Localizaciones de producto**: `product_localizations` sólo tiene filas si el feed trae
   variantes por idioma y país.

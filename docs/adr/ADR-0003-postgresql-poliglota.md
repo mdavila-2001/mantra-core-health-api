@@ -36,8 +36,8 @@ accidental.
 - Cinco motores de datos que operar, respaldar y monitorear en vez de uno.
 
 ## Riesgos
-Consistencia eventual entre PostgreSQL y los almacenes secundarios; sin `cross_store_consistency`
-funcionando completamente (ver `docs/progress/ESTADO-Y-PENDIENTES.md`), hay ventana de divergencia posible.
+Consistencia eventual entre PostgreSQL y los almacenes secundarios: entre la escritura y la
+reconciliación de `cross_store_consistency` hay ventana de divergencia posible.
 
 ## Evidencia
 `docker-compose.yml`, `docs/architecture/integration-map.md` §2, módulos
@@ -45,4 +45,4 @@ funcionando completamente (ver `docs/progress/ESTADO-Y-PENDIENTES.md`), hay vent
 confirmado en [system-inventory.md](../reports/system-inventory.md)).
 
 ## Plan de revisión
-Revisar cuando `cross_store_consistency` complete su implementación (`OPS-001`).
+Revisar si la ventana de divergencia entre PostgreSQL y los almacenes secundarios deja de ser aceptable.

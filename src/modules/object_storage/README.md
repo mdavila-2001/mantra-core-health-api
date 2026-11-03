@@ -103,7 +103,7 @@ versions/:id/signed-url ──────> URI + versión de clave + caducidad
                                  [frío exige rehidratación; corrupto y borrado no se sirven]
 ```
 
-## Reglas de negocio
+## Business rules
 
 - **La clave de destino es opaca**: no lleva datos del paciente. Una clave que dejara deducir de
   quién es el estudio sería una fuga por sí sola, aunque el objeto esté cifrado.
@@ -136,7 +136,7 @@ versions/:id/signed-url ──────> URI + versión de clave + caducidad
 - **El borrado es lógico**: se marca la intención y el worker la ejecuta después contra el proveedor.
   Dos guardas lo abortan, y las dos son deliberadas.
 
-## Permisos
+## Permissions
 
 `STORAGE_ADMIN` cubre el módulo. `STORAGE_CLIENT` sube. `PACS_GATEWAY` cataloga DICOM.
 `COMPLIANCE_OFFICER` retiene y solicita borrados. `LEGAL_COUNSEL` coloca y libera retenciones
@@ -145,7 +145,7 @@ verifica integridad y archiva.
 
 Ninguna ruta es pública.
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE` sobre la carga al completarla, sobre el manifiesto en todo lo que lo versione, retenga,
 archive o borre, sobre el estudio y la serie DICOM al recalcular contadores, sobre la retención
@@ -162,9 +162,9 @@ todo acceso DICOMweb** —son el momento en que el dato sale de nuestro control�
 aplicación de retención, colocación y liberación de retención legal, corrupción detectada y solicitud
 de borrado. No se loguean claves de objeto ni metadatos DICOM.
 
-## Pruebas
+## Tests
 
-`corepack yarn test src/modules/object_storage --runInBand --silent` — 5 suites y 110 pruebas aprobadas durante la revisión (con dos advertencias preexistentes de imports JSON). La URL firmada aplica política clínica; DICOMweb todavía debe aplicar la misma política, como detalla la [auditoría backend](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/object_storage.md).
+`corepack yarn test src/modules/object_storage --runInBand --silent` — 5 suites y 110 pruebas aprobadas durante la revisión (con dos advertencias preexistentes de imports JSON). La URL firmada aplica política clínica; DICOMweb no la aplica.
 
 ## Divergencias con el caso de uso v3.9
 
@@ -177,7 +177,7 @@ de borrado. No se loguean claves de objeto ni metadatos DICOM.
   proveedor, la versión de clave y la caducidad. Firmar es del adaptador de almacenamiento; este
   módulo autoriza y deja el rastro.
 
-## Pendiente
+## Fuera de este módulo
 
 - **Adaptador del proveedor**: subir las partes, firmar la URL, recomputar el hash y ejecutar el
   borrado son operaciones contra S3/MinIO/Azure. El módulo registra y gobierna; el adaptador
@@ -185,14 +185,8 @@ de borrado. No se loguean claves de objeto ni metadatos DICOM.
 - **Rehidratación desde frío**: se detecta y se rechaza; encolar la rehidratación corresponde al
   worker de ciclo de vida.
 - **Autorización y consentimiento** (`authz.*`, `consent.*`): la emisión y canje de URLs firmadas
-  ya reutilizan la política clínica; DICOMweb requiere el mismo control antes de exponer referencias.
+  reutilizan la política clínica; DICOMweb expone referencias sin ese control.
 - **Bloqueo distribuido** (`redis_runtime.distributed_lock_entries`) para las verificaciones de
-  integridad concurrentes: aquí lo cubre el `FOR UPDATE` sobre el manifiesto; el lock externo llegará
-  con el módulo 54.
-- **Caché de URLs firmadas** (`redis_runtime.signed_url_cache_entries`): la respuesta ya lleva la
-  caducidad; cachearla es del módulo 54.
-- **Outbox** (módulo 35, ya disponible): `MultipartUploadInitiated`, `ObjectVersionCommitted`,
-  `ObjectVersionSuperseded`, `DicomStudyCatalogued`, `DicomWebAccessRecorded`,
-  `LargePayloadRegistered`, `ObjectRetentionApplied`, `LegalHoldPlaced/Released`, `SignedUrlIssued`,
-  `ObjectIntegrityVerified`, `ObjectCorruptionDetected`, `ObjectsArchived`,
-  `ObjectDeletionRequested`. Quedan por cablear a `OutboxService.publishDomainEvent()`.
+  integridad concurrentes: aquí lo cubre el `FOR UPDATE` sobre el manifiesto.
+- **Caché de URLs firmadas** (`redis_runtime.signed_url_cache_entries`): la respuesta lleva la
+  caducidad; este módulo no la cachea.

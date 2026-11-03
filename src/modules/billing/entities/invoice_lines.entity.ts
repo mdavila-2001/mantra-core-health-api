@@ -25,6 +25,16 @@ export class InvoiceLines {
   serviceId?: string;
 
   /**
+   * Identificador asociado a insurance claim line.
+   */
+  @Property({
+    fieldName: 'insurance_claim_line_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → insurance.insurance_claim_lines
+  insuranceClaimLineId?: string;
+
+  /**
    * Valor de description mantenido por la instancia.
    */
   @Property({ columnType: 'varchar', nullable: true })

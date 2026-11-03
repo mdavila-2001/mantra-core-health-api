@@ -72,6 +72,18 @@ describe('AuthzRolesService', () => {
       expect(res.permissionCount).toBe(0);
     });
 
+    it.each(['SYSTEM', 'SUPERADMIN', 'security_admin', ' System '])(
+      'rechaza el código reservado de plataforma %p sin tocar la base',
+      async (code) => {
+        const d = build();
+        await expect(
+          d.service.createRole({ code, name: 'X' } as any, actor),
+        ).rejects.toBeInstanceOf(ConflictException);
+        expect(d.rolesRepo.findByCode).not.toHaveBeenCalled();
+        expect(d.rolesRepo.create).not.toHaveBeenCalled();
+      },
+    );
+
     it('rejects a duplicated role code', async () => {
       const d = build();
       d.rolesRepo.findByCode.mockResolvedValue({ id: 'role-x' });

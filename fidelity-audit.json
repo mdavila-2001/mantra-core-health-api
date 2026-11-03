@@ -1,19 +1,19 @@
 {
   "resumen": {
-    "entidadesBoveda": 1353,
-    "conjuntosDeIndicesBoveda": 1242,
-    "entidadesMapeadas": 1246,
+    "entidadesBoveda": 1419,
+    "conjuntosDeIndicesBoveda": 1249,
+    "entidadesMapeadas": 1405,
     "entidadesFaltantes": 3,
-    "entidadesSobrantes": 41,
+    "entidadesSobrantes": 134,
     "columnasFaltantes": 6,
-    "columnasSobrantes": 4,
+    "columnasSobrantes": 233,
     "tiposDivergentes": 0,
-    "obligatoriedadDivergente": 23,
+    "obligatoriedadDivergente": 26,
     "vistasNoMaterializadas": 78,
-    "indicesDeclarados": 7838,
-    "indicesEnCatalogo": 7770,
-    "fkDeclaradas": 6689,
-    "fkEnCatalogo": 6689
+    "indicesDeclarados": 7917,
+    "indicesEnCatalogo": 7849,
+    "fkDeclaradas": 6806,
+    "fkEnCatalogo": 6806
   },
   "entidadesFaltantes": [
     {
@@ -34,168 +34,540 @@
   ],
   "entidadesSobrantes": [
     {
-      "key": "audit.informational_materials_history",
-      "archivo": "audit/entities/informational_materials_history.entity.ts"
+      "key": "accounting.practitioner_simple_accounts",
+      "archivo": "accounting/entities/practitioner_simple_accounts.entity.ts"
     },
     {
-      "key": "audit.medical_visitors_history",
-      "archivo": "audit/entities/medical_visitors_history.entity.ts"
+      "key": "accounting.practitioner_simple_records",
+      "archivo": "accounting/entities/practitioner_simple_records.entity.ts"
     },
     {
-      "key": "audit.pharmacovigilance_reports_history",
-      "archivo": "audit/entities/pharmacovigilance_reports_history.entity.ts"
+      "key": "accounting.practitioner_simple_transactions",
+      "archivo": "accounting/entities/practitioner_simple_transactions.entity.ts"
     },
     {
-      "key": "audit.pharma_labs_history",
-      "archivo": "audit/entities/pharma_labs_history.entity.ts"
+      "key": "audit.care_space_blocks_history",
+      "archivo": "audit/entities/care_space_blocks_history.entity.ts"
     },
     {
-      "key": "audit.pharma_lab_staff_history",
-      "archivo": "audit/entities/pharma_lab_staff_history.entity.ts"
+      "key": "audit.care_space_category_periods_history",
+      "archivo": "audit/entities/care_space_category_periods_history.entity.ts"
     },
     {
-      "key": "audit.pharma_products_history",
-      "archivo": "audit/entities/pharma_products_history.entity.ts"
+      "key": "audit.charge_captures_history",
+      "archivo": "audit/entities/charge_captures_history.entity.ts"
     },
     {
-      "key": "audit.regulatory_documents_history",
-      "archivo": "audit/entities/regulatory_documents_history.entity.ts"
+      "key": "audit.cleaning_orders_history",
+      "archivo": "audit/entities/cleaning_orders_history.entity.ts"
     },
     {
-      "key": "audit.visit_requests_history",
-      "archivo": "audit/entities/visit_requests_history.entity.ts"
+      "key": "audit.encounter_locations_history",
+      "archivo": "audit/entities/encounter_locations_history.entity.ts"
     },
     {
-      "key": "community.chat_auto_replies",
-      "archivo": "community/entities/chat_auto_replies.entity.ts"
+      "key": "audit.insurance_products_history",
+      "archivo": "audit/entities/insurance_products_history.entity.ts"
     },
     {
-      "key": "pharma_lab.doctor_visit_blocks",
-      "archivo": "pharma_lab/entities/doctor_visit_blocks.entity.ts"
+      "key": "audit.operating_room_block_series_history",
+      "archivo": "audit/entities/operating_room_block_series_history.entity.ts"
     },
     {
-      "key": "pharma_lab.doctor_visit_policies",
-      "archivo": "pharma_lab/entities/doctor_visit_policies.entity.ts"
+      "key": "audit.operating_room_blocks_history",
+      "archivo": "audit/entities/operating_room_blocks_history.entity.ts"
     },
     {
-      "key": "pharma_lab.doctor_visit_windows",
-      "archivo": "pharma_lab/entities/doctor_visit_windows.entity.ts"
+      "key": "audit.placement_incidents_history",
+      "archivo": "audit/entities/placement_incidents_history.entity.ts"
     },
     {
-      "key": "pharma_lab.informational_materials",
-      "archivo": "pharma_lab/entities/informational_materials.entity.ts"
+      "key": "audit.procedure_cases_history",
+      "archivo": "audit/entities/procedure_cases_history.entity.ts"
     },
     {
-      "key": "pharma_lab.material_approvals",
-      "archivo": "pharma_lab/entities/material_approvals.entity.ts"
+      "key": "audit.space_tariffs_history",
+      "archivo": "audit/entities/space_tariffs_history.entity.ts"
     },
     {
-      "key": "pharma_lab.material_assets",
-      "archivo": "pharma_lab/entities/material_assets.entity.ts"
+      "key": "billing.charge_captures",
+      "archivo": "billing/entities/charge_captures.entity.ts"
     },
     {
-      "key": "pharma_lab.medical_visitors",
-      "archivo": "pharma_lab/entities/medical_visitors.entity.ts"
+      "key": "billing.siat_simulated_invoices",
+      "archivo": "billing/entities/siat_simulated_invoices.entity.ts"
     },
     {
-      "key": "pharma_lab.medical_visitor_products",
-      "archivo": "pharma_lab/entities/medical_visitor_products.entity.ts"
+      "key": "billing.siat_simulated_outbox",
+      "archivo": "billing/entities/siat_simulated_outbox.entity.ts"
     },
     {
-      "key": "pharma_lab.medical_visitor_specialties",
-      "archivo": "pharma_lab/entities/medical_visitor_specialties.entity.ts"
+      "key": "billing.space_tariffs",
+      "archivo": "billing/entities/space_tariffs.entity.ts"
     },
     {
-      "key": "pharma_lab.pharmacovigilance_actions",
-      "archivo": "pharma_lab/entities/pharmacovigilance_actions.entity.ts"
+      "key": "clinical.inpatient_census_adjustments",
+      "archivo": "clinical/entities/inpatient_census_adjustments.entity.ts"
     },
     {
-      "key": "pharma_lab.pharmacovigilance_reports",
-      "archivo": "pharma_lab/entities/pharmacovigilance_reports.entity.ts"
+      "key": "clinical.inpatient_census_days",
+      "archivo": "clinical/entities/inpatient_census_days.entity.ts"
     },
     {
-      "key": "pharma_lab.pharma_cost_allocations",
-      "archivo": "pharma_lab/entities/pharma_cost_allocations.entity.ts"
+      "key": "clinical.inpatient_census_entries",
+      "archivo": "clinical/entities/inpatient_census_entries.entity.ts"
     },
     {
-      "key": "pharma_lab.pharma_labs",
-      "archivo": "pharma_lab/entities/pharma_labs.entity.ts"
+      "key": "clinical.patient_admission_footprints",
+      "archivo": "clinical/entities/patient_admission_footprints.entity.ts"
     },
     {
-      "key": "pharma_lab.pharma_lab_link_events",
-      "archivo": "pharma_lab/entities/pharma_lab_link_events.entity.ts"
+      "key": "clinical.patient_reported_health_statements",
+      "archivo": "clinical/entities/patient_reported_health_statements.entity.ts"
     },
     {
-      "key": "pharma_lab.pharma_lab_notices",
-      "archivo": "pharma_lab/entities/pharma_lab_notices.entity.ts"
+      "key": "clinical.placement_incidents",
+      "archivo": "clinical/entities/placement_incidents.entity.ts"
     },
     {
-      "key": "pharma_lab.pharma_lab_staff",
-      "archivo": "pharma_lab/entities/pharma_lab_staff.entity.ts"
+      "key": "clinical.service_request_components",
+      "archivo": "clinical/entities/service_request_components.entity.ts"
     },
     {
-      "key": "pharma_lab.pharma_products",
-      "archivo": "pharma_lab/entities/pharma_products.entity.ts"
+      "key": "clinical.service_request_notes",
+      "archivo": "clinical/entities/service_request_notes.entity.ts"
     },
     {
-      "key": "pharma_lab.regulatory_documents",
-      "archivo": "pharma_lab/entities/regulatory_documents.entity.ts"
+      "key": "clinical_ext.cds_rule_versions",
+      "archivo": "clinical_ext/entities/cds_rule_versions.entity.ts"
     },
     {
-      "key": "pharma_lab.regulatory_document_access_log",
-      "archivo": "pharma_lab/entities/regulatory_document_access_log.entity.ts"
+      "key": "community.conversation_assignments",
+      "archivo": "community/entities/conversation_assignments.entity.ts"
     },
     {
-      "key": "pharma_lab.regulatory_document_versions",
-      "archivo": "pharma_lab/entities/regulatory_document_versions.entity.ts"
+      "key": "community.conversation_internal_notes",
+      "archivo": "community/entities/conversation_internal_notes.entity.ts"
     },
     {
-      "key": "pharma_lab.visitor_post_submissions",
-      "archivo": "pharma_lab/entities/visitor_post_submissions.entity.ts"
+      "key": "community.reply_templates",
+      "archivo": "community/entities/reply_templates.entity.ts"
     },
     {
-      "key": "pharma_lab.visit_ratings",
-      "archivo": "pharma_lab/entities/visit_ratings.entity.ts"
+      "key": "crm.crm_case_owner_history",
+      "archivo": "crm/entities/crm_case_owner_history.entity.ts"
     },
     {
-      "key": "pharma_lab.visit_records",
-      "archivo": "pharma_lab/entities/visit_records.entity.ts"
+      "key": "data_catalog.catalog_certifications",
+      "archivo": "data_catalog/entities/catalog_certifications.entity.ts"
     },
     {
-      "key": "pharma_lab.visit_record_materials",
-      "archivo": "pharma_lab/entities/visit_record_materials.entity.ts"
+      "key": "data_catalog.catalog_change_acknowledgements",
+      "archivo": "data_catalog/entities/catalog_change_acknowledgements.entity.ts"
     },
     {
-      "key": "pharma_lab.visit_requests",
-      "archivo": "pharma_lab/entities/visit_requests.entity.ts"
+      "key": "data_catalog.catalog_glossary_term_links",
+      "archivo": "data_catalog/entities/catalog_glossary_term_links.entity.ts"
     },
     {
-      "key": "pharma_lab.visit_request_events",
-      "archivo": "pharma_lab/entities/visit_request_events.entity.ts"
+      "key": "data_catalog.catalog_glossary_term_revisions",
+      "archivo": "data_catalog/entities/catalog_glossary_term_revisions.entity.ts"
     },
     {
-      "key": "pharma_lab.visit_request_topics",
-      "archivo": "pharma_lab/entities/visit_request_topics.entity.ts"
+      "key": "data_catalog.catalog_glossary_terms",
+      "archivo": "data_catalog/entities/catalog_glossary_terms.entity.ts"
     },
     {
-      "key": "pharma_lab.visit_surveys",
-      "archivo": "pharma_lab/entities/visit_surveys.entity.ts"
+      "key": "data_catalog.catalog_lineage_edges",
+      "archivo": "data_catalog/entities/catalog_lineage_edges.entity.ts"
     },
     {
-      "key": "pharma_lab.visit_survey_answers",
-      "archivo": "pharma_lab/entities/visit_survey_answers.entity.ts"
+      "key": "data_catalog.catalog_stewardships",
+      "archivo": "data_catalog/entities/catalog_stewardships.entity.ts"
     },
     {
-      "key": "pharma_lab.visit_survey_questions",
-      "archivo": "pharma_lab/entities/visit_survey_questions.entity.ts"
+      "key": "data_catalog.quality_issue_events",
+      "archivo": "data_catalog/entities/quality_issue_events.entity.ts"
     },
     {
-      "key": "pharma_lab.visit_survey_responses",
-      "archivo": "pharma_lab/entities/visit_survey_responses.entity.ts"
+      "key": "data_catalog.quality_issues",
+      "archivo": "data_catalog/entities/quality_issues.entity.ts"
     },
     {
-      "key": "scheduling.appointment_payment_states",
-      "archivo": "scheduling/entities/appointment_payment_states.entity.ts"
+      "key": "data_catalog.quality_rule_runs",
+      "archivo": "data_catalog/entities/quality_rule_runs.entity.ts"
+    },
+    {
+      "key": "data_catalog.quality_rules",
+      "archivo": "data_catalog/entities/quality_rules.entity.ts"
+    },
+    {
+      "key": "data_catalog.quality_score_snapshots",
+      "archivo": "data_catalog/entities/quality_score_snapshots.entity.ts"
+    },
+    {
+      "key": "delegated_access.access_anomalies",
+      "archivo": "delegated_access/entities/access_anomalies.entity.ts"
+    },
+    {
+      "key": "delegated_access.access_decision_log",
+      "archivo": "delegated_access/entities/access_decision_log.entity.ts"
+    },
+    {
+      "key": "delegated_access.access_review_campaigns",
+      "archivo": "delegated_access/entities/access_review_campaigns.entity.ts"
+    },
+    {
+      "key": "delegated_access.access_review_items",
+      "archivo": "delegated_access/entities/access_review_items.entity.ts"
+    },
+    {
+      "key": "delegated_access.effective_support_access",
+      "archivo": "delegated_access/entities/effective_support_access.entity.ts"
+    },
+    {
+      "key": "delegated_access.engagement_request_items",
+      "archivo": "delegated_access/entities/engagement_request_items.entity.ts"
+    },
+    {
+      "key": "delegated_access.engagement_requests",
+      "archivo": "delegated_access/entities/engagement_requests.entity.ts"
+    },
+    {
+      "key": "delegated_access.four_eyes_requests",
+      "archivo": "delegated_access/entities/four_eyes_requests.entity.ts"
+    },
+    {
+      "key": "delegated_access.governance_rules",
+      "archivo": "delegated_access/entities/governance_rules.entity.ts"
+    },
+    {
+      "key": "delegated_access.grant_usage_stats",
+      "archivo": "delegated_access/entities/grant_usage_stats.entity.ts"
+    },
+    {
+      "key": "delegated_access.handover_items",
+      "archivo": "delegated_access/entities/handover_items.entity.ts"
+    },
+    {
+      "key": "delegated_access.lifecycle_cases",
+      "archivo": "delegated_access/entities/lifecycle_cases.entity.ts"
+    },
+    {
+      "key": "delegated_access.patient_restriction_flags",
+      "archivo": "delegated_access/entities/patient_restriction_flags.entity.ts"
+    },
+    {
+      "key": "delegated_access.role_templates",
+      "archivo": "delegated_access/entities/role_templates.entity.ts"
+    },
+    {
+      "key": "delegated_access.shared_access_link_uses",
+      "archivo": "delegated_access/entities/shared_access_link_uses.entity.ts"
+    },
+    {
+      "key": "delegated_access.shared_access_links",
+      "archivo": "delegated_access/entities/shared_access_links.entity.ts"
+    },
+    {
+      "key": "delegated_access.sod_exceptions",
+      "archivo": "delegated_access/entities/sod_exceptions.entity.ts"
+    },
+    {
+      "key": "delegated_access.sod_rules",
+      "archivo": "delegated_access/entities/sod_rules.entity.ts"
+    },
+    {
+      "key": "delegated_access.support_grant_actions",
+      "archivo": "delegated_access/entities/support_grant_actions.entity.ts"
+    },
+    {
+      "key": "delegated_access.support_scope_grants",
+      "archivo": "delegated_access/entities/support_scope_grants.entity.ts"
+    },
+    {
+      "key": "diagnostic_units.unit_medical_visitors",
+      "archivo": "diagnostic_units/entities/unit_medical_visitors.entity.ts"
+    },
+    {
+      "key": "diagnostic_units.unit_visit_ratings",
+      "archivo": "diagnostic_units/entities/unit_visit_ratings.entity.ts"
+    },
+    {
+      "key": "diagnostic_units.unit_visit_records",
+      "archivo": "diagnostic_units/entities/unit_visit_records.entity.ts"
+    },
+    {
+      "key": "diagnostic_units.unit_visit_request_events",
+      "archivo": "diagnostic_units/entities/unit_visit_request_events.entity.ts"
+    },
+    {
+      "key": "diagnostic_units.unit_visit_requests",
+      "archivo": "diagnostic_units/entities/unit_visit_requests.entity.ts"
+    },
+    {
+      "key": "directory.affiliation_invitation_uses",
+      "archivo": "directory/entities/affiliation_invitation_uses.entity.ts"
+    },
+    {
+      "key": "directory.affiliation_invitations",
+      "archivo": "directory/entities/affiliation_invitations.entity.ts"
+    },
+    {
+      "key": "iam.session_policies",
+      "archivo": "iam/entities/session_policies.entity.ts"
+    },
+    {
+      "key": "insurance.insurance_terms_conditions",
+      "archivo": "insurance/entities/insurance_terms_conditions.entity.ts"
+    },
+    {
+      "key": "insurance.practitioner_insurer_requests",
+      "archivo": "insurance/entities/practitioner_insurer_requests.entity.ts"
+    },
+    {
+      "key": "marketing.insights_alert_rules",
+      "archivo": "marketing/entities/insights_alert_rules.entity.ts"
+    },
+    {
+      "key": "marketing.insights_alert_transitions",
+      "archivo": "marketing/entities/insights_alert_transitions.entity.ts"
+    },
+    {
+      "key": "marketing.insights_alerts",
+      "archivo": "marketing/entities/insights_alerts.entity.ts"
+    },
+    {
+      "key": "marketing.insights_app_daily_facts",
+      "archivo": "marketing/entities/insights_app_daily_facts.entity.ts"
+    },
+    {
+      "key": "marketing.insights_app_onboarding_facts",
+      "archivo": "marketing/entities/insights_app_onboarding_facts.entity.ts"
+    },
+    {
+      "key": "marketing.insights_app_screen_daily_facts",
+      "archivo": "marketing/entities/insights_app_screen_daily_facts.entity.ts"
+    },
+    {
+      "key": "marketing.insights_campaign_daily_facts",
+      "archivo": "marketing/entities/insights_campaign_daily_facts.entity.ts"
+    },
+    {
+      "key": "marketing.insights_campaign_hourly_facts",
+      "archivo": "marketing/entities/insights_campaign_hourly_facts.entity.ts"
+    },
+    {
+      "key": "marketing.insights_campaigns",
+      "archivo": "marketing/entities/insights_campaigns.entity.ts"
+    },
+    {
+      "key": "marketing.insights_creatives",
+      "archivo": "marketing/entities/insights_creatives.entity.ts"
+    },
+    {
+      "key": "marketing.insights_data_sources",
+      "archivo": "marketing/entities/insights_data_sources.entity.ts"
+    },
+    {
+      "key": "marketing.insights_environment_items",
+      "archivo": "marketing/entities/insights_environment_items.entity.ts"
+    },
+    {
+      "key": "marketing.insights_mentions",
+      "archivo": "marketing/entities/insights_mentions.entity.ts"
+    },
+    {
+      "key": "marketing.insights_milestones",
+      "archivo": "marketing/entities/insights_milestones.entity.ts"
+    },
+    {
+      "key": "marketing.insights_notification_preferences",
+      "archivo": "marketing/entities/insights_notification_preferences.entity.ts"
+    },
+    {
+      "key": "marketing.insights_reports",
+      "archivo": "marketing/entities/insights_reports.entity.ts"
+    },
+    {
+      "key": "marketing.insights_saved_views",
+      "archivo": "marketing/entities/insights_saved_views.entity.ts"
+    },
+    {
+      "key": "marketing.insights_search_signals",
+      "archivo": "marketing/entities/insights_search_signals.entity.ts"
+    },
+    {
+      "key": "marketing.insights_sector_trends",
+      "archivo": "marketing/entities/insights_sector_trends.entity.ts"
+    },
+    {
+      "key": "marketing.insights_social_daily_facts",
+      "archivo": "marketing/entities/insights_social_daily_facts.entity.ts"
+    },
+    {
+      "key": "marketing.insights_social_posts",
+      "archivo": "marketing/entities/insights_social_posts.entity.ts"
+    },
+    {
+      "key": "marketing.insights_user_preferences",
+      "archivo": "marketing/entities/insights_user_preferences.entity.ts"
+    },
+    {
+      "key": "observability.alert_evaluations",
+      "archivo": "observability/entities/alert_evaluations.entity.ts"
+    },
+    {
+      "key": "observability.alert_rules",
+      "archivo": "observability/entities/alert_rules.entity.ts"
+    },
+    {
+      "key": "observability.dependency_probe_runs",
+      "archivo": "observability/entities/dependency_probe_runs.entity.ts"
+    },
+    {
+      "key": "observability.error_events",
+      "archivo": "observability/entities/error_events.entity.ts"
+    },
+    {
+      "key": "observability.error_groups",
+      "archivo": "observability/entities/error_groups.entity.ts"
+    },
+    {
+      "key": "observability.http_request_minute_series",
+      "archivo": "observability/entities/http_request_minute_series.entity.ts"
+    },
+    {
+      "key": "observability.instances",
+      "archivo": "observability/entities/instances.entity.ts"
+    },
+    {
+      "key": "observability.rollup_watermarks",
+      "archivo": "observability/entities/rollup_watermarks.entity.ts"
+    },
+    {
+      "key": "observability.slow_request_samples",
+      "archivo": "observability/entities/slow_request_samples.entity.ts"
+    },
+    {
+      "key": "observability.sql_statement_minute_series",
+      "archivo": "observability/entities/sql_statement_minute_series.entity.ts"
+    },
+    {
+      "key": "observability.sql_statements",
+      "archivo": "observability/entities/sql_statements.entity.ts"
+    },
+    {
+      "key": "observability.worker_tick_minute_series",
+      "archivo": "observability/entities/worker_tick_minute_series.entity.ts"
+    },
+    {
+      "key": "pharmacy.pharmacy_on_call_shifts",
+      "archivo": "pharmacy/entities/pharmacy_on_call_shifts.entity.ts"
+    },
+    {
+      "key": "pharmacy.pharmacy_product_categories",
+      "archivo": "pharmacy/entities/pharmacy_product_categories.entity.ts"
+    },
+    {
+      "key": "pharmacy.pharmacy_product_images",
+      "archivo": "pharmacy/entities/pharmacy_product_images.entity.ts"
+    },
+    {
+      "key": "practice.care_space_blocks",
+      "archivo": "practice/entities/care_space_blocks.entity.ts"
+    },
+    {
+      "key": "practice.care_space_category_periods",
+      "archivo": "practice/entities/care_space_category_periods.entity.ts"
+    },
+    {
+      "key": "practice.care_space_status_events",
+      "archivo": "practice/entities/care_space_status_events.entity.ts"
+    },
+    {
+      "key": "practice.cleaning_orders",
+      "archivo": "practice/entities/cleaning_orders.entity.ts"
+    },
+    {
+      "key": "practice.facility_typology_rules",
+      "archivo": "practice/entities/facility_typology_rules.entity.ts"
+    },
+    {
+      "key": "practice.practitioner_location_assignments",
+      "archivo": "practice/entities/practitioner_location_assignments.entity.ts"
+    },
+    {
+      "key": "practice.site_declared_capacities",
+      "archivo": "practice/entities/site_declared_capacities.entity.ts"
+    },
+    {
+      "key": "practice.space_form_parent_rules",
+      "archivo": "practice/entities/space_form_parent_rules.entity.ts"
+    },
+    {
+      "key": "practice.space_unit_assignments",
+      "archivo": "practice/entities/space_unit_assignments.entity.ts"
+    },
+    {
+      "key": "procedures_perioperative.operating_room_block_series",
+      "archivo": "procedures_perioperative/entities/operating_room_block_series.entity.ts"
+    },
+    {
+      "key": "procedures_perioperative.operating_room_blocks",
+      "archivo": "procedures_perioperative/entities/operating_room_blocks.entity.ts"
+    },
+    {
+      "key": "profiles.admission_requirements",
+      "archivo": "profiles/entities/admission_requirements.entity.ts"
+    },
+    {
+      "key": "profiles.patient_primary_practitioners",
+      "archivo": "profiles/entities/patient_primary_practitioners.entity.ts"
+    },
+    {
+      "key": "profiles.practitioner_admission_events",
+      "archivo": "profiles/entities/practitioner_admission_events.entity.ts"
+    },
+    {
+      "key": "profiles.practitioner_admission_reviews",
+      "archivo": "profiles/entities/practitioner_admission_reviews.entity.ts"
+    },
+    {
+      "key": "profiles.practitioner_admissions",
+      "archivo": "profiles/entities/practitioner_admissions.entity.ts"
+    },
+    {
+      "key": "scheduling.appointment_payment_receipts",
+      "archivo": "scheduling/entities/appointment_payment_receipts.entity.ts"
+    },
+    {
+      "key": "surveys.survey_invitation_reminders",
+      "archivo": "surveys/entities/survey_invitation_reminders.entity.ts"
+    },
+    {
+      "key": "system_ops.bulk_import_batch_rows",
+      "archivo": "system_ops/entities/bulk_import_batch_rows.entity.ts"
+    },
+    {
+      "key": "system_ops.bulk_import_batches",
+      "archivo": "system_ops/entities/bulk_import_batches.entity.ts"
+    },
+    {
+      "key": "system_ops.governance_policy_revisions",
+      "archivo": "system_ops/entities/governance_policy_revisions.entity.ts"
+    },
+    {
+      "key": "telemetry.client_error_events",
+      "archivo": "telemetry/entities/client_error_events.entity.ts"
+    },
+    {
+      "key": "authz.ui_visibility_elements",
+      "archivo": "ui_visibility/entities/ui_visibility_elements.entity.ts"
+    },
+    {
+      "key": "authz.ui_visibility_rules",
+      "archivo": "ui_visibility/entities/ui_visibility_rules.entity.ts"
     }
   ],
   "columnasFaltantes": [
@@ -203,6 +575,16 @@
       "key": "directory.tenants",
       "columna": "is_platform_house",
       "archivo": "directory/entities/tenants.entity.ts"
+    },
+    {
+      "key": "payments.subscription_plans",
+      "columna": "audience_concept_id",
+      "archivo": "payments/entities/subscription_plans.entity.ts"
+    },
+    {
+      "key": "payments.subscription_plans",
+      "columna": "revenue_account_role_concept_id",
+      "archivo": "payments/entities/subscription_plans.entity.ts"
     },
     {
       "key": "payments.subscriptions",
@@ -218,19 +600,279 @@
       "key": "payments.subscriptions",
       "columna": "provider_tenant_id",
       "archivo": "payments/entities/subscriptions.entity.ts"
-    },
-    {
-      "key": "payments.subscription_plans",
-      "columna": "audience_concept_id",
-      "archivo": "payments/entities/subscription_plans.entity.ts"
-    },
-    {
-      "key": "payments.subscription_plans",
-      "columna": "revenue_account_role_concept_id",
-      "archivo": "payments/entities/subscription_plans.entity.ts"
     }
   ],
   "columnasSobrantes": [
+    {
+      "key": "accounting.cost_centers",
+      "columna": "tenant_id",
+      "archivo": "accounting/entities/cost_centers.entity.ts"
+    },
+    {
+      "key": "accounting.cost_centers",
+      "columna": "clinical_unit_id",
+      "archivo": "accounting/entities/cost_centers.entity.ts"
+    },
+    {
+      "key": "accounting.infrastructure_items",
+      "columna": "tenant_id",
+      "archivo": "accounting/entities/infrastructure_items.entity.ts"
+    },
+    {
+      "key": "accounting.infrastructure_items",
+      "columna": "care_space_id",
+      "archivo": "accounting/entities/infrastructure_items.entity.ts"
+    },
+    {
+      "key": "ads.campaigns",
+      "columna": "version_number",
+      "archivo": "ads/entities/campaigns.entity.ts"
+    },
+    {
+      "key": "ads.custom_audiences",
+      "columna": "version_number",
+      "archivo": "ads/entities/custom_audiences.entity.ts"
+    },
+    {
+      "key": "ads.saved_audiences",
+      "columna": "version_number",
+      "archivo": "ads/entities/saved_audiences.entity.ts"
+    },
+    {
+      "key": "audit.audit_log",
+      "columna": "session_id",
+      "archivo": "audit/entities/audit_log.entity.ts"
+    },
+    {
+      "key": "audit.audit_log",
+      "columna": "correlation_id",
+      "archivo": "audit/entities/audit_log.entity.ts"
+    },
+    {
+      "key": "audit.audit_log",
+      "columna": "actor_role_snapshot",
+      "archivo": "audit/entities/audit_log.entity.ts"
+    },
+    {
+      "key": "audit.care_spaces_history",
+      "columna": "tenant_id",
+      "archivo": "audit/entities/care_spaces_history.entity.ts"
+    },
+    {
+      "key": "audit.clinical_units_history",
+      "columna": "tenant_id",
+      "archivo": "audit/entities/clinical_units_history.entity.ts"
+    },
+    {
+      "key": "audit.practice_sites_history",
+      "columna": "tenant_id",
+      "archivo": "audit/entities/practice_sites_history.entity.ts"
+    },
+    {
+      "key": "authz.permissions",
+      "columna": "sensitivity_concept_id",
+      "archivo": "authz/entities/permissions.entity.ts"
+    },
+    {
+      "key": "authz.permissions",
+      "columna": "requires_reason",
+      "archivo": "authz/entities/permissions.entity.ts"
+    },
+    {
+      "key": "authz.permissions",
+      "columna": "requires_step_up",
+      "archivo": "authz/entities/permissions.entity.ts"
+    },
+    {
+      "key": "authz.permissions",
+      "columna": "approval_mode_concept_id",
+      "archivo": "authz/entities/permissions.entity.ts"
+    },
+    {
+      "key": "authz.permissions",
+      "columna": "purpose_of_use_concept_id",
+      "archivo": "authz/entities/permissions.entity.ts"
+    },
+    {
+      "key": "authz.permissions",
+      "columna": "legal_basis_concept_id",
+      "archivo": "authz/entities/permissions.entity.ts"
+    },
+    {
+      "key": "authz.permissions",
+      "columna": "touches_clinical_data",
+      "archivo": "authz/entities/permissions.entity.ts"
+    },
+    {
+      "key": "authz.permissions",
+      "columna": "support_assignable",
+      "archivo": "authz/entities/permissions.entity.ts"
+    },
+    {
+      "key": "authz.resource_scope_grants",
+      "columna": "reason_text",
+      "archivo": "authz/entities/resource_scope_grants.entity.ts"
+    },
+    {
+      "key": "billing.service_catalog",
+      "columna": "terms_text",
+      "archivo": "billing/entities/service_catalog.entity.ts"
+    },
+    {
+      "key": "chart.care_plans",
+      "columna": "form_instance_id",
+      "archivo": "chart/entities/care_plans.entity.ts"
+    },
+    {
+      "key": "chart.clinical_note_versions",
+      "columna": "entries_json",
+      "archivo": "chart/entities/clinical_note_versions.entity.ts"
+    },
+    {
+      "key": "clinical.allergy_intolerances",
+      "columna": "encounter_id",
+      "archivo": "clinical/entities/allergy_intolerances.entity.ts"
+    },
+    {
+      "key": "clinical.appointments",
+      "columna": "care_space_id",
+      "archivo": "clinical/entities/appointments.entity.ts"
+    },
+    {
+      "key": "clinical.encounter_locations",
+      "columna": "tenant_id",
+      "archivo": "clinical/entities/encounter_locations.entity.ts"
+    },
+    {
+      "key": "clinical.encounter_locations",
+      "columna": "is_bed_assignment",
+      "archivo": "clinical/entities/encounter_locations.entity.ts"
+    },
+    {
+      "key": "clinical.encounter_locations",
+      "columna": "movement_type_concept_id",
+      "archivo": "clinical/entities/encounter_locations.entity.ts"
+    },
+    {
+      "key": "clinical.encounter_locations",
+      "columna": "previous_encounter_location_id",
+      "archivo": "clinical/entities/encounter_locations.entity.ts"
+    },
+    {
+      "key": "clinical.encounter_locations",
+      "columna": "end_reason_concept_id",
+      "archivo": "clinical/entities/encounter_locations.entity.ts"
+    },
+    {
+      "key": "clinical.encounter_locations",
+      "columna": "bed_category_concept_id",
+      "archivo": "clinical/entities/encounter_locations.entity.ts"
+    },
+    {
+      "key": "clinical.encounter_locations",
+      "columna": "placement_incident_id",
+      "archivo": "clinical/entities/encounter_locations.entity.ts"
+    },
+    {
+      "key": "clinical.encounters",
+      "columna": "content_hash",
+      "archivo": "clinical/entities/encounters.entity.ts"
+    },
+    {
+      "key": "clinical.encounters",
+      "columna": "sealed_at",
+      "archivo": "clinical/entities/encounters.entity.ts"
+    },
+    {
+      "key": "clinical.encounters",
+      "columna": "level_of_care_concept_id",
+      "archivo": "clinical/entities/encounters.entity.ts"
+    },
+    {
+      "key": "clinical.encounters",
+      "columna": "admission_source_concept_id",
+      "archivo": "clinical/entities/encounters.entity.ts"
+    },
+    {
+      "key": "clinical.encounters",
+      "columna": "discharge_disposition_concept_id",
+      "archivo": "clinical/entities/encounters.entity.ts"
+    },
+    {
+      "key": "clinical.encounters",
+      "columna": "isolation_precaution_concept_id",
+      "archivo": "clinical/entities/encounters.entity.ts"
+    },
+    {
+      "key": "clinical.encounters",
+      "columna": "isolation_organism_text",
+      "archivo": "clinical/entities/encounters.entity.ts"
+    },
+    {
+      "key": "clinical.encounters",
+      "columna": "expected_discharge_at",
+      "archivo": "clinical/entities/encounters.entity.ts"
+    },
+    {
+      "key": "clinical.medication_requests",
+      "columna": "indication_text",
+      "archivo": "clinical/entities/medication_requests.entity.ts"
+    },
+    {
+      "key": "clinical.medication_requests",
+      "columna": "form_instance_id",
+      "archivo": "clinical/entities/medication_requests.entity.ts"
+    },
+    {
+      "key": "clinical.service_requests",
+      "columna": "form_instance_id",
+      "archivo": "clinical/entities/service_requests.entity.ts"
+    },
+    {
+      "key": "clinical.service_requests",
+      "columna": "suggested_care_space_id",
+      "archivo": "clinical/entities/service_requests.entity.ts"
+    },
+    {
+      "key": "clinical.service_requests",
+      "columna": "requisition_id",
+      "archivo": "clinical/entities/service_requests.entity.ts"
+    },
+    {
+      "key": "clinical.service_requests",
+      "columna": "specimen_type_concept_id",
+      "archivo": "clinical/entities/service_requests.entity.ts"
+    },
+    {
+      "key": "clinical.service_requests",
+      "columna": "modality_concept_id",
+      "archivo": "clinical/entities/service_requests.entity.ts"
+    },
+    {
+      "key": "clinical.service_requests",
+      "columna": "body_site_concept_id",
+      "archivo": "clinical/entities/service_requests.entity.ts"
+    },
+    {
+      "key": "clinical.service_requests",
+      "columna": "laterality_concept_id",
+      "archivo": "clinical/entities/service_requests.entity.ts"
+    },
+    {
+      "key": "clinical.service_requests",
+      "columna": "contrast_concept_id",
+      "archivo": "clinical/entities/service_requests.entity.ts"
+    },
+    {
+      "key": "common.addresses",
+      "columna": "label",
+      "archivo": "common/entities/addresses.entity.ts"
+    },
+    {
+      "key": "common.addresses",
+      "columna": "is_preferred",
+      "archivo": "common/entities/addresses.entity.ts"
+    },
     {
       "key": "common.identifiers",
       "columna": "holder_name",
@@ -242,6 +884,726 @@
       "archivo": "community/entities/conversation_participants.entity.ts"
     },
     {
+      "key": "community.direct_messages",
+      "columna": "authored_by_user_id",
+      "archivo": "community/entities/direct_messages.entity.ts"
+    },
+    {
+      "key": "community.direct_messages",
+      "columna": "on_behalf_of_profile_id",
+      "archivo": "community/entities/direct_messages.entity.ts"
+    },
+    {
+      "key": "community.direct_messages",
+      "columna": "delegate_assignment_id",
+      "archivo": "community/entities/direct_messages.entity.ts"
+    },
+    {
+      "key": "community.direct_messages",
+      "columna": "disclosure_shown",
+      "archivo": "community/entities/direct_messages.entity.ts"
+    },
+    {
+      "key": "community.service_reviews",
+      "columna": "verified_crm_case_id",
+      "archivo": "community/entities/service_reviews.entity.ts"
+    },
+    {
+      "key": "crm.crm_cases",
+      "columna": "insurance_claim_id",
+      "archivo": "crm/entities/crm_cases.entity.ts"
+    },
+    {
+      "key": "data_catalog.catalog_objects",
+      "columna": "domain_id",
+      "archivo": "data_catalog/entities/catalog_objects.entity.ts"
+    },
+    {
+      "key": "delegated_access.organization_user_assignments",
+      "columna": "tenant_id",
+      "archivo": "delegated_access/entities/organization_user_assignments.entity.ts"
+    },
+    {
+      "key": "delegated_access.organization_user_assignments",
+      "columna": "origin_concept_id",
+      "archivo": "delegated_access/entities/organization_user_assignments.entity.ts"
+    },
+    {
+      "key": "delegated_access.organization_user_assignments",
+      "columna": "owner_kind_concept_id",
+      "archivo": "delegated_access/entities/organization_user_assignments.entity.ts"
+    },
+    {
+      "key": "delegated_access.organization_user_assignments",
+      "columna": "role_template_id",
+      "archivo": "delegated_access/entities/organization_user_assignments.entity.ts"
+    },
+    {
+      "key": "delegated_access.organization_user_assignments",
+      "columna": "recertify_every_months",
+      "archivo": "delegated_access/entities/organization_user_assignments.entity.ts"
+    },
+    {
+      "key": "delegated_access.organization_user_assignments",
+      "columna": "next_recertification_at",
+      "archivo": "delegated_access/entities/organization_user_assignments.entity.ts"
+    },
+    {
+      "key": "delegated_access.organization_user_assignments",
+      "columna": "ended_reason_text",
+      "archivo": "delegated_access/entities/organization_user_assignments.entity.ts"
+    },
+    {
+      "key": "delegated_access.organization_user_assignments",
+      "columna": "initiated_by_party_concept_id",
+      "archivo": "delegated_access/entities/organization_user_assignments.entity.ts"
+    },
+    {
+      "key": "delegated_access.organization_user_assignments",
+      "columna": "identity_verified_at",
+      "archivo": "delegated_access/entities/organization_user_assignments.entity.ts"
+    },
+    {
+      "key": "delegated_access.organization_user_assignments",
+      "columna": "identity_verified_by_user_id",
+      "archivo": "delegated_access/entities/organization_user_assignments.entity.ts"
+    },
+    {
+      "key": "delegated_access.organization_user_assignments",
+      "columna": "identity_method_concept_id",
+      "archivo": "delegated_access/entities/organization_user_assignments.entity.ts"
+    },
+    {
+      "key": "delegated_access.organization_user_assignments",
+      "columna": "suspended_at",
+      "archivo": "delegated_access/entities/organization_user_assignments.entity.ts"
+    },
+    {
+      "key": "delegated_access.organization_user_assignments",
+      "columna": "suspension_reason_concept_id",
+      "archivo": "delegated_access/entities/organization_user_assignments.entity.ts"
+    },
+    {
+      "key": "delegated_access.organization_user_assignments",
+      "columna": "suspension_note_text",
+      "archivo": "delegated_access/entities/organization_user_assignments.entity.ts"
+    },
+    {
+      "key": "delegated_access.organization_user_assignments",
+      "columna": "onboarding_completed_at",
+      "archivo": "delegated_access/entities/organization_user_assignments.entity.ts"
+    },
+    {
+      "key": "delegated_access.organization_user_assignments",
+      "columna": "last_certified_at",
+      "archivo": "delegated_access/entities/organization_user_assignments.entity.ts"
+    },
+    {
+      "key": "delegated_access.organization_user_assignments",
+      "columna": "last_active_at",
+      "archivo": "delegated_access/entities/organization_user_assignments.entity.ts"
+    },
+    {
+      "key": "delegated_access.practitioner_delegate_assignments",
+      "columna": "tenant_id",
+      "archivo": "delegated_access/entities/practitioner_delegate_assignments.entity.ts"
+    },
+    {
+      "key": "delegated_access.practitioner_delegate_assignments",
+      "columna": "may_reply_on_behalf",
+      "archivo": "delegated_access/entities/practitioner_delegate_assignments.entity.ts"
+    },
+    {
+      "key": "delegated_access.practitioner_delegate_assignments",
+      "columna": "reply_disclosure_concept_id",
+      "archivo": "delegated_access/entities/practitioner_delegate_assignments.entity.ts"
+    },
+    {
+      "key": "delegated_access.practitioner_delegate_assignments",
+      "columna": "accepted_at",
+      "archivo": "delegated_access/entities/practitioner_delegate_assignments.entity.ts"
+    },
+    {
+      "key": "diagnostic_units.diagnostic_equipment",
+      "columna": "care_space_id",
+      "archivo": "diagnostic_units/entities/diagnostic_equipment.entity.ts"
+    },
+    {
+      "key": "diagnostic_units.diagnostic_equipment",
+      "columna": "ae_title",
+      "archivo": "diagnostic_units/entities/diagnostic_equipment.entity.ts"
+    },
+    {
+      "key": "diagnostic_units.diagnostic_equipment",
+      "columna": "station_name",
+      "archivo": "diagnostic_units/entities/diagnostic_equipment.entity.ts"
+    },
+    {
+      "key": "diagnostic_units.diagnostic_equipment",
+      "columna": "schedulable_resource_id",
+      "archivo": "diagnostic_units/entities/diagnostic_equipment.entity.ts"
+    },
+    {
+      "key": "diagnostics.imaging_procedure_steps",
+      "columna": "scheduled_equipment_id",
+      "archivo": "diagnostics/entities/imaging_procedure_steps.entity.ts"
+    },
+    {
+      "key": "diagnostics.imaging_procedure_steps",
+      "columna": "scheduled_care_space_id",
+      "archivo": "diagnostics/entities/imaging_procedure_steps.entity.ts"
+    },
+    {
+      "key": "diagnostics.imaging_procedure_steps",
+      "columna": "scheduled_start_at",
+      "archivo": "diagnostics/entities/imaging_procedure_steps.entity.ts"
+    },
+    {
+      "key": "diagnostics.specimen_collection_events",
+      "columna": "collection_care_space_id",
+      "archivo": "diagnostics/entities/specimen_collection_events.entity.ts"
+    },
+    {
+      "key": "directory.branch_memberships",
+      "columna": "workday_concept_id",
+      "archivo": "directory/entities/branch_memberships.entity.ts"
+    },
+    {
+      "key": "directory.branch_memberships",
+      "columna": "responsible_user_id",
+      "archivo": "directory/entities/branch_memberships.entity.ts"
+    },
+    {
+      "key": "directory.branches",
+      "columna": "description",
+      "archivo": "directory/entities/branches.entity.ts"
+    },
+    {
+      "key": "directory.branches",
+      "columna": "location_url",
+      "archivo": "directory/entities/branches.entity.ts"
+    },
+    {
+      "key": "directory.tenant_memberships",
+      "columna": "workday_concept_id",
+      "archivo": "directory/entities/tenant_memberships.entity.ts"
+    },
+    {
+      "key": "directory.tenant_memberships",
+      "columna": "responsible_user_id",
+      "archivo": "directory/entities/tenant_memberships.entity.ts"
+    },
+    {
+      "key": "directory.tenant_memberships",
+      "columna": "origin_concept_id",
+      "archivo": "directory/entities/tenant_memberships.entity.ts"
+    },
+    {
+      "key": "forms.dynamic_field_definitions",
+      "columna": "options",
+      "archivo": "forms/entities/dynamic_field_definitions.entity.ts"
+    },
+    {
+      "key": "forms.dynamic_field_definitions",
+      "columna": "multiple",
+      "archivo": "forms/entities/dynamic_field_definitions.entity.ts"
+    },
+    {
+      "key": "forms.dynamic_field_definitions",
+      "columna": "allow_other",
+      "archivo": "forms/entities/dynamic_field_definitions.entity.ts"
+    },
+    {
+      "key": "forms.dynamic_field_definitions",
+      "columna": "description",
+      "archivo": "forms/entities/dynamic_field_definitions.entity.ts"
+    },
+    {
+      "key": "forms.field_values",
+      "columna": "value_code",
+      "archivo": "forms/entities/field_values.entity.ts"
+    },
+    {
+      "key": "identity_assurance.identity_verification_cases",
+      "columna": "tenant_id",
+      "archivo": "identity_assurance/entities/identity_verification_cases.entity.ts"
+    },
+    {
+      "key": "insurance.broker_carrier_agreements",
+      "columna": "representation_mode_concept_id",
+      "archivo": "insurance/entities/broker_carrier_agreements.entity.ts"
+    },
+    {
+      "key": "insurance.broker_carrier_agreements",
+      "columna": "relationship_type_concept_id",
+      "archivo": "insurance/entities/broker_carrier_agreements.entity.ts"
+    },
+    {
+      "key": "insurance.broker_carrier_agreements",
+      "columna": "branch_id",
+      "archivo": "insurance/entities/broker_carrier_agreements.entity.ts"
+    },
+    {
+      "key": "insurance.broker_carrier_agreements",
+      "columna": "commercial_area",
+      "archivo": "insurance/entities/broker_carrier_agreements.entity.ts"
+    },
+    {
+      "key": "insurance.broker_carrier_agreements",
+      "columna": "supervisor_user_id",
+      "archivo": "insurance/entities/broker_carrier_agreements.entity.ts"
+    },
+    {
+      "key": "insurance.broker_carrier_agreements",
+      "columna": "assigned_zone",
+      "archivo": "insurance/entities/broker_carrier_agreements.entity.ts"
+    },
+    {
+      "key": "insurance.insurance_products",
+      "columna": "version_number",
+      "archivo": "insurance/entities/insurance_products.entity.ts"
+    },
+    {
+      "key": "insurance.insurance_products",
+      "columna": "effective_from",
+      "archivo": "insurance/entities/insurance_products.entity.ts"
+    },
+    {
+      "key": "insurance.insurance_products",
+      "columna": "effective_to",
+      "archivo": "insurance/entities/insurance_products.entity.ts"
+    },
+    {
+      "key": "insurance.insurance_products",
+      "columna": "min_age_years",
+      "archivo": "insurance/entities/insurance_products.entity.ts"
+    },
+    {
+      "key": "insurance.insurance_products",
+      "columna": "max_age_years",
+      "archivo": "insurance/entities/insurance_products.entity.ts"
+    },
+    {
+      "key": "insurance.insurance_products",
+      "columna": "eligibility_requirements",
+      "archivo": "insurance/entities/insurance_products.entity.ts"
+    },
+    {
+      "key": "insurance.prior_authorization_determinations",
+      "columna": "policy_clause_reference",
+      "archivo": "insurance/entities/prior_authorization_determinations.entity.ts"
+    },
+    {
+      "key": "insurance.prior_authorization_determinations",
+      "columna": "denial_rationale",
+      "archivo": "insurance/entities/prior_authorization_determinations.entity.ts"
+    },
+    {
+      "key": "integration_contracts.integration_contracts",
+      "columna": "tenant_id",
+      "archivo": "integration_contracts/entities/integration_contracts.entity.ts"
+    },
+    {
+      "key": "marketing.segments",
+      "columna": "version_number",
+      "archivo": "marketing/entities/segments.entity.ts"
+    },
+    {
+      "key": "organization_extensions.facility_licenses",
+      "columna": "clinical_unit_id",
+      "archivo": "organization_extensions/entities/facility_licenses.entity.ts"
+    },
+    {
+      "key": "organization_extensions.facility_licenses",
+      "columna": "healthcare_service_id",
+      "archivo": "organization_extensions/entities/facility_licenses.entity.ts"
+    },
+    {
+      "key": "pharmacy.pharmacies",
+      "columna": "primary_practice_site_id",
+      "archivo": "pharmacy/entities/pharmacies.entity.ts"
+    },
+    {
+      "key": "pharmacy.pharmacy_products",
+      "columna": "catalog_product_concept_id",
+      "archivo": "pharmacy/entities/pharmacy_products.entity.ts"
+    },
+    {
+      "key": "pharmacy.pharmacy_products",
+      "columna": "catalog_presentation_code",
+      "archivo": "pharmacy/entities/pharmacy_products.entity.ts"
+    },
+    {
+      "key": "pharmacy.pharmacy_products",
+      "columna": "pharmacy_product_category_id",
+      "archivo": "pharmacy/entities/pharmacy_products.entity.ts"
+    },
+    {
+      "key": "pharmacy.pharmacy_products",
+      "columna": "description_text",
+      "archivo": "pharmacy/entities/pharmacy_products.entity.ts"
+    },
+    {
+      "key": "pharmacy.pharmacy_products",
+      "columna": "stock_quantity",
+      "archivo": "pharmacy/entities/pharmacy_products.entity.ts"
+    },
+    {
+      "key": "pharmacy.pharmacy_products",
+      "columna": "min_stock_quantity",
+      "archivo": "pharmacy/entities/pharmacy_products.entity.ts"
+    },
+    {
+      "key": "pharmacy.pharmacy_products",
+      "columna": "out_of_stock_declared",
+      "archivo": "pharmacy/entities/pharmacy_products.entity.ts"
+    },
+    {
+      "key": "pharmacy.pharmacy_sites",
+      "columna": "open_24h",
+      "archivo": "pharmacy/entities/pharmacy_sites.entity.ts"
+    },
+    {
+      "key": "pharmacy_inventory.inventory_locations",
+      "columna": "care_space_id",
+      "archivo": "pharmacy_inventory/entities/inventory_locations.entity.ts"
+    },
+    {
+      "key": "pharmacy_inventory.inventory_locations",
+      "columna": "clinical_unit_id",
+      "archivo": "pharmacy_inventory/entities/inventory_locations.entity.ts"
+    },
+    {
+      "key": "practice.care_spaces",
+      "columna": "prep_minutes",
+      "archivo": "practice/entities/care_spaces.entity.ts"
+    },
+    {
+      "key": "practice.care_spaces",
+      "columna": "cleanup_minutes",
+      "archivo": "practice/entities/care_spaces.entity.ts"
+    },
+    {
+      "key": "practice.care_spaces",
+      "columna": "tenant_id",
+      "archivo": "practice/entities/care_spaces.entity.ts"
+    },
+    {
+      "key": "practice.care_spaces",
+      "columna": "form_concept_id",
+      "archivo": "practice/entities/care_spaces.entity.ts"
+    },
+    {
+      "key": "practice.care_spaces",
+      "columna": "description",
+      "archivo": "practice/entities/care_spaces.entity.ts"
+    },
+    {
+      "key": "practice.care_spaces",
+      "columna": "floor_number",
+      "archivo": "practice/entities/care_spaces.entity.ts"
+    },
+    {
+      "key": "practice.care_spaces",
+      "columna": "area_m2",
+      "archivo": "practice/entities/care_spaces.entity.ts"
+    },
+    {
+      "key": "practice.care_spaces",
+      "columna": "asepsis_concept_id",
+      "archivo": "practice/entities/care_spaces.entity.ts"
+    },
+    {
+      "key": "practice.care_spaces",
+      "columna": "pressure_concept_id",
+      "archivo": "practice/entities/care_spaces.entity.ts"
+    },
+    {
+      "key": "practice.care_spaces",
+      "columna": "air_changes_per_hour",
+      "archivo": "practice/entities/care_spaces.entity.ts"
+    },
+    {
+      "key": "practice.care_spaces",
+      "columna": "hvac_validated_on",
+      "archivo": "practice/entities/care_spaces.entity.ts"
+    },
+    {
+      "key": "practice.care_spaces",
+      "columna": "sex_restriction_concept_id",
+      "archivo": "practice/entities/care_spaces.entity.ts"
+    },
+    {
+      "key": "practice.care_spaces",
+      "columna": "age_group_concept_id",
+      "archivo": "practice/entities/care_spaces.entity.ts"
+    },
+    {
+      "key": "practice.care_spaces",
+      "columna": "bed_category_concept_id",
+      "archivo": "practice/entities/care_spaces.entity.ts"
+    },
+    {
+      "key": "practice.care_spaces",
+      "columna": "censable",
+      "archivo": "practice/entities/care_spaces.entity.ts"
+    },
+    {
+      "key": "practice.care_spaces",
+      "columna": "gln",
+      "archivo": "practice/entities/care_spaces.entity.ts"
+    },
+    {
+      "key": "practice.care_spaces",
+      "columna": "valid_from",
+      "archivo": "practice/entities/care_spaces.entity.ts"
+    },
+    {
+      "key": "practice.care_spaces",
+      "columna": "valid_to",
+      "archivo": "practice/entities/care_spaces.entity.ts"
+    },
+    {
+      "key": "practice.care_spaces",
+      "columna": "location_path",
+      "archivo": "practice/entities/care_spaces.entity.ts"
+    },
+    {
+      "key": "practice.care_spaces",
+      "columna": "availability_reason_concept_id",
+      "archivo": "practice/entities/care_spaces.entity.ts"
+    },
+    {
+      "key": "practice.care_spaces",
+      "columna": "availability_expected_until",
+      "archivo": "practice/entities/care_spaces.entity.ts"
+    },
+    {
+      "key": "practice.care_spaces",
+      "columna": "availability_changed_at",
+      "archivo": "practice/entities/care_spaces.entity.ts"
+    },
+    {
+      "key": "practice.care_spaces",
+      "columna": "hygiene_status_concept_id",
+      "archivo": "practice/entities/care_spaces.entity.ts"
+    },
+    {
+      "key": "practice.care_spaces",
+      "columna": "hygiene_changed_at",
+      "archivo": "practice/entities/care_spaces.entity.ts"
+    },
+    {
+      "key": "practice.care_spaces",
+      "columna": "terminal_cleaning_required",
+      "archivo": "practice/entities/care_spaces.entity.ts"
+    },
+    {
+      "key": "practice.care_spaces",
+      "columna": "isolation_concept_id",
+      "archivo": "practice/entities/care_spaces.entity.ts"
+    },
+    {
+      "key": "practice.care_spaces",
+      "columna": "isolation_organism_text",
+      "archivo": "practice/entities/care_spaces.entity.ts"
+    },
+    {
+      "key": "practice.care_spaces",
+      "columna": "isolation_changed_at",
+      "archivo": "practice/entities/care_spaces.entity.ts"
+    },
+    {
+      "key": "practice.care_spaces",
+      "columna": "ops_version",
+      "archivo": "practice/entities/care_spaces.entity.ts"
+    },
+    {
+      "key": "practice.clinical_units",
+      "columna": "responsible_user_id",
+      "archivo": "practice/entities/clinical_units.entity.ts"
+    },
+    {
+      "key": "practice.clinical_units",
+      "columna": "tenant_id",
+      "archivo": "practice/entities/clinical_units.entity.ts"
+    },
+    {
+      "key": "practice.clinical_units",
+      "columna": "description",
+      "archivo": "practice/entities/clinical_units.entity.ts"
+    },
+    {
+      "key": "practice.clinical_units",
+      "columna": "valid_from",
+      "archivo": "practice/entities/clinical_units.entity.ts"
+    },
+    {
+      "key": "practice.clinical_units",
+      "columna": "valid_to",
+      "archivo": "practice/entities/clinical_units.entity.ts"
+    },
+    {
+      "key": "practice.healthcare_services",
+      "columna": "tenant_id",
+      "archivo": "practice/entities/healthcare_services.entity.ts"
+    },
+    {
+      "key": "practice.practice_sites",
+      "columna": "logo_file_id",
+      "archivo": "practice/entities/practice_sites.entity.ts"
+    },
+    {
+      "key": "practice.practice_sites",
+      "columna": "tenant_id",
+      "archivo": "practice/entities/practice_sites.entity.ts"
+    },
+    {
+      "key": "practice.practice_sites",
+      "columna": "snis_code",
+      "archivo": "practice/entities/practice_sites.entity.ts"
+    },
+    {
+      "key": "practice.practice_sites",
+      "columna": "subsector_concept_id",
+      "archivo": "practice/entities/practice_sites.entity.ts"
+    },
+    {
+      "key": "practice.practice_sites",
+      "columna": "care_level_concept_id",
+      "archivo": "practice/entities/practice_sites.entity.ts"
+    },
+    {
+      "key": "practice.practice_sites",
+      "columna": "facility_typology_concept_id",
+      "archivo": "practice/entities/practice_sites.entity.ts"
+    },
+    {
+      "key": "practice.practice_sites",
+      "columna": "managing_entity_name",
+      "archivo": "practice/entities/practice_sites.entity.ts"
+    },
+    {
+      "key": "practice.practice_sites",
+      "columna": "health_network_name",
+      "archivo": "practice/entities/practice_sites.entity.ts"
+    },
+    {
+      "key": "practice.practice_sites",
+      "columna": "sedes_department_concept_id",
+      "archivo": "practice/entities/practice_sites.entity.ts"
+    },
+    {
+      "key": "practice.practice_sites",
+      "columna": "municipality_name",
+      "archivo": "practice/entities/practice_sites.entity.ts"
+    },
+    {
+      "key": "practice.practice_sites",
+      "columna": "snis_verified_at",
+      "archivo": "practice/entities/practice_sites.entity.ts"
+    },
+    {
+      "key": "practice.practice_sites",
+      "columna": "snis_verified_by_user_id",
+      "archivo": "practice/entities/practice_sites.entity.ts"
+    },
+    {
+      "key": "practice.practitioner_role_assignments",
+      "columna": "contact_phone",
+      "archivo": "practice/entities/practitioner_role_assignments.entity.ts"
+    },
+    {
+      "key": "practice.practitioner_support_assignments",
+      "columna": "initiated_by_party_concept_id",
+      "archivo": "practice/entities/practitioner_support_assignments.entity.ts"
+    },
+    {
+      "key": "procedures_perioperative.operating_room_utilization_events",
+      "columna": "tenant_id",
+      "archivo": "procedures_perioperative/entities/operating_room_utilization_events.entity.ts"
+    },
+    {
+      "key": "procedures_perioperative.operating_room_utilization_events",
+      "columna": "operating_room_block_id",
+      "archivo": "procedures_perioperative/entities/operating_room_utilization_events.entity.ts"
+    },
+    {
+      "key": "procedures_perioperative.procedure_case_team_members",
+      "columna": "accepted_version_number",
+      "archivo": "procedures_perioperative/entities/procedure_case_team_members.entity.ts"
+    },
+    {
+      "key": "procedures_perioperative.procedure_cases",
+      "columna": "prep_minutes",
+      "archivo": "procedures_perioperative/entities/procedure_cases.entity.ts"
+    },
+    {
+      "key": "procedures_perioperative.procedure_cases",
+      "columna": "cleanup_minutes",
+      "archivo": "procedures_perioperative/entities/procedure_cases.entity.ts"
+    },
+    {
+      "key": "procedures_perioperative.procedure_cases",
+      "columna": "version_number",
+      "archivo": "procedures_perioperative/entities/procedure_cases.entity.ts"
+    },
+    {
+      "key": "procedures_perioperative.procedure_cases",
+      "columna": "schedulable_resource_id",
+      "archivo": "procedures_perioperative/entities/procedure_cases.entity.ts"
+    },
+    {
+      "key": "procedures_perioperative.procedure_cases",
+      "columna": "operating_room_block_id",
+      "archivo": "procedures_perioperative/entities/procedure_cases.entity.ts"
+    },
+    {
+      "key": "procedures_perioperative.procedure_cases",
+      "columna": "reserved_start_at",
+      "archivo": "procedures_perioperative/entities/procedure_cases.entity.ts"
+    },
+    {
+      "key": "procedures_perioperative.procedure_cases",
+      "columna": "reserved_end_at",
+      "archivo": "procedures_perioperative/entities/procedure_cases.entity.ts"
+    },
+    {
+      "key": "profiles.health_practitioner_profiles",
+      "columna": "signature_file_id",
+      "archivo": "profiles/entities/health_practitioner_profiles.entity.ts"
+    },
+    {
+      "key": "profiles.health_practitioner_profiles",
+      "columna": "seal_file_id",
+      "archivo": "profiles/entities/health_practitioner_profiles.entity.ts"
+    },
+    {
+      "key": "profiles.jurisdiction_authorizations",
+      "columna": "file_id",
+      "archivo": "profiles/entities/jurisdiction_authorizations.entity.ts"
+    },
+    {
+      "key": "profiles.jurisdiction_authorizations",
+      "columna": "verified_by_user_id",
+      "archivo": "profiles/entities/jurisdiction_authorizations.entity.ts"
+    },
+    {
+      "key": "profiles.jurisdiction_authorizations",
+      "columna": "verified_at",
+      "archivo": "profiles/entities/jurisdiction_authorizations.entity.ts"
+    },
+    {
+      "key": "profiles.jurisdiction_authorizations",
+      "columna": "verification_source_uri",
+      "archivo": "profiles/entities/jurisdiction_authorizations.entity.ts"
+    },
+    {
+      "key": "profiles.jurisdiction_authorizations",
+      "columna": "rejection_reason_text",
+      "archivo": "profiles/entities/jurisdiction_authorizations.entity.ts"
+    },
+    {
       "key": "profiles.persons",
       "columna": "work_employer_concept_id",
       "archivo": "profiles/entities/persons.entity.ts"
@@ -250,6 +1612,161 @@
       "key": "profiles.persons",
       "columna": "work_employer_free_text",
       "archivo": "profiles/entities/persons.entity.ts"
+    },
+    {
+      "key": "profiles.practitioner_specialties",
+      "columna": "verified_at",
+      "archivo": "profiles/entities/practitioner_specialties.entity.ts"
+    },
+    {
+      "key": "profiles.professional_credentials",
+      "columna": "issuing_city_text",
+      "archivo": "profiles/entities/professional_credentials.entity.ts"
+    },
+    {
+      "key": "profiles.professional_credentials",
+      "columna": "issuing_country_text",
+      "archivo": "profiles/entities/professional_credentials.entity.ts"
+    },
+    {
+      "key": "profiles.professional_credentials",
+      "columna": "profession_concept_id",
+      "archivo": "profiles/entities/professional_credentials.entity.ts"
+    },
+    {
+      "key": "profiles.professional_credentials",
+      "columna": "title_text",
+      "archivo": "profiles/entities/professional_credentials.entity.ts"
+    },
+    {
+      "key": "profiles.professional_credentials",
+      "columna": "rejection_reason_text",
+      "archivo": "profiles/entities/professional_credentials.entity.ts"
+    },
+    {
+      "key": "scheduling.appointment_bookings",
+      "columna": "pre_visit_instructions_snapshot",
+      "archivo": "scheduling/entities/appointment_bookings.entity.ts"
+    },
+    {
+      "key": "scheduling.appointment_bookings",
+      "columna": "follow_up_of_booking_id",
+      "archivo": "scheduling/entities/appointment_bookings.entity.ts"
+    },
+    {
+      "key": "scheduling.appointment_bookings",
+      "columna": "form_instance_id",
+      "archivo": "scheduling/entities/appointment_bookings.entity.ts"
+    },
+    {
+      "key": "scheduling.appointment_bookings",
+      "columna": "care_space_id",
+      "archivo": "scheduling/entities/appointment_bookings.entity.ts"
+    },
+    {
+      "key": "scheduling.appointment_bookings",
+      "columna": "healthcare_service_id",
+      "archivo": "scheduling/entities/appointment_bookings.entity.ts"
+    },
+    {
+      "key": "scheduling.appointment_bookings",
+      "columna": "booked_via_grant_id",
+      "archivo": "scheduling/entities/appointment_bookings.entity.ts"
+    },
+    {
+      "key": "scheduling.appointment_payment_states",
+      "columna": "invoice_id",
+      "archivo": "scheduling/entities/appointment_payment_states.entity.ts"
+    },
+    {
+      "key": "scheduling.availability_exceptions",
+      "columna": "source_kind_concept_id",
+      "archivo": "scheduling/entities/availability_exceptions.entity.ts"
+    },
+    {
+      "key": "scheduling.availability_exceptions",
+      "columna": "source_ref_id",
+      "archivo": "scheduling/entities/availability_exceptions.entity.ts"
+    },
+    {
+      "key": "scheduling.bookable_slots",
+      "columna": "care_space_id",
+      "archivo": "scheduling/entities/bookable_slots.entity.ts"
+    },
+    {
+      "key": "scheduling.bookable_slots",
+      "columna": "healthcare_service_id",
+      "archivo": "scheduling/entities/bookable_slots.entity.ts"
+    },
+    {
+      "key": "scheduling.booking_policies",
+      "columna": "no_show_fee_percentage",
+      "archivo": "scheduling/entities/booking_policies.entity.ts"
+    },
+    {
+      "key": "scheduling.booking_policies",
+      "columna": "no_show_retains_deposit",
+      "archivo": "scheduling/entities/booking_policies.entity.ts"
+    },
+    {
+      "key": "scheduling.practitioner_service_offerings",
+      "columna": "pre_visit_instructions",
+      "archivo": "scheduling/entities/practitioner_service_offerings.entity.ts"
+    },
+    {
+      "key": "scheduling.schedulable_resources",
+      "columna": "care_space_id",
+      "archivo": "scheduling/entities/schedulable_resources.entity.ts"
+    },
+    {
+      "key": "scheduling.schedule_rules",
+      "columna": "flexible_hours",
+      "archivo": "scheduling/entities/schedule_rules.entity.ts"
+    },
+    {
+      "key": "scheduling.schedule_templates",
+      "columna": "flexible_hours",
+      "archivo": "scheduling/entities/schedule_templates.entity.ts"
+    },
+    {
+      "key": "scheduling.schedule_templates",
+      "columna": "care_space_id",
+      "archivo": "scheduling/entities/schedule_templates.entity.ts"
+    },
+    {
+      "key": "surveys.survey_invitations",
+      "columna": "extension_survey_version_id",
+      "archivo": "surveys/entities/survey_invitations.entity.ts"
+    },
+    {
+      "key": "surveys.survey_invitations",
+      "columna": "subject_type_concept_id",
+      "archivo": "surveys/entities/survey_invitations.entity.ts"
+    },
+    {
+      "key": "surveys.survey_invitations",
+      "columna": "subject_id",
+      "archivo": "surveys/entities/survey_invitations.entity.ts"
+    },
+    {
+      "key": "surveys.survey_templates",
+      "columna": "owner_type_concept_id",
+      "archivo": "surveys/entities/survey_templates.entity.ts"
+    },
+    {
+      "key": "surveys.survey_templates",
+      "columna": "owner_id",
+      "archivo": "surveys/entities/survey_templates.entity.ts"
+    },
+    {
+      "key": "surveys.survey_versions",
+      "columna": "max_reminders",
+      "archivo": "surveys/entities/survey_versions.entity.ts"
+    },
+    {
+      "key": "system_ops.restore_test_runs",
+      "columna": "objective_status",
+      "archivo": "system_ops/entities/restore_test_runs.entity.ts"
     }
   ],
   "tiposDivergentes": [],
@@ -340,6 +1857,11 @@
       "detalle": "bóveda NOT NULL, entidad opcional"
     },
     {
+      "key": "pharmacy.pharmacy_integration_connections",
+      "columna": "connection_id",
+      "detalle": "bóveda NOT NULL, entidad opcional"
+    },
+    {
       "key": "polyglot_storage.collection_definitions",
       "columna": "routing_key_expression",
       "detalle": "bóveda NOT NULL, entidad opcional"
@@ -367,6 +1889,16 @@
     {
       "key": "polyglot_storage.storage_capabilities",
       "columna": "verified_at",
+      "detalle": "bóveda NOT NULL, entidad opcional"
+    },
+    {
+      "key": "surveys.survey_invitations",
+      "columna": "appointment_booking_id",
+      "detalle": "bóveda NOT NULL, entidad opcional"
+    },
+    {
+      "key": "surveys.survey_templates",
+      "columna": "owner_practitioner_id",
       "detalle": "bóveda NOT NULL, entidad opcional"
     }
   ],

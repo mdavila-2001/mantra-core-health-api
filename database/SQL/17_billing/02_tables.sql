@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 17 · schema billing
+-- SALUD v4.2.83 · módulo 17 · schema billing
 -- Generado de diagram_17_billing.puml — NO editar a mano.
 
 
@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS "billing"."service_catalog" (
     "code" varchar NOT NULL,
     "name" varchar NOT NULL,
     "description_text" text,
+    "terms_text" text,
     "image_file_id" uuid,
     "service_concept_id" uuid,
     "default_price" numeric NOT NULL,
@@ -21,6 +22,58 @@ CREATE TABLE IF NOT EXISTS "billing"."service_catalog" (
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_service_catalog" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "billing"."space_tariffs" (
+    "id" uuid NOT NULL,
+    "tenant_id" uuid NOT NULL,
+    "practice_id" uuid NOT NULL,
+    "tariff_kind_concept_id" uuid NOT NULL,
+    "bed_category_concept_id" uuid,
+    "care_space_id" uuid,
+    "service_catalog_id" uuid NOT NULL,
+    "unit_minutes" integer,
+    "minimum_units" integer,
+    "unit_price" numeric(20,6),
+    "currency_concept_id" uuid,
+    "valid_from" date NOT NULL,
+    "valid_to" date,
+    "status_concept_id" uuid NOT NULL,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_space_tariffs" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "billing"."charge_captures" (
+    "id" uuid NOT NULL,
+    "tenant_id" uuid NOT NULL,
+    "practice_id" uuid NOT NULL,
+    "patient_profile_id" uuid NOT NULL,
+    "encounter_id" uuid,
+    "source_kind_concept_id" uuid NOT NULL,
+    "source_ref_id" uuid NOT NULL,
+    "service_date" date NOT NULL,
+    "care_space_id" uuid,
+    "bed_category_concept_id" uuid,
+    "space_tariff_id" uuid,
+    "service_catalog_id" uuid,
+    "quantity" numeric NOT NULL,
+    "unit_price" numeric(20,6),
+    "currency_concept_id" uuid,
+    "cost_center_id" uuid,
+    "status_concept_id" uuid NOT NULL,
+    "invoice_line_id" uuid,
+    "void_reason" varchar,
+    "idempotency_key" varchar NOT NULL,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_charge_captures" PRIMARY KEY ("id")
 );
 
 CREATE TABLE IF NOT EXISTS "billing"."invoices" (
@@ -56,6 +109,7 @@ CREATE TABLE IF NOT EXISTS "billing"."invoice_lines" (
     "id" uuid NOT NULL,
     "invoice_id" uuid NOT NULL,
     "service_id" uuid,
+    "insurance_claim_line_id" uuid,
     "description" varchar,
     "quantity" numeric NOT NULL,
     "unit_price" numeric NOT NULL,
@@ -202,6 +256,48 @@ CREATE TABLE IF NOT EXISTS "billing"."payments_made" (
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_payments_made" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "billing"."siat_simulated_invoices" (
+    "id" uuid NOT NULL,
+    "invoice_id" uuid NOT NULL,
+    "encounter_id" uuid,
+    "practice_id" uuid NOT NULL,
+    "patient_profile_id" uuid NOT NULL,
+    "issuer_nit" varchar(20) NOT NULL,
+    "invoice_number" integer NOT NULL,
+    "cuf" varchar(200) NOT NULL,
+    "cufd" varchar(200) NOT NULL,
+    "issued_at_text" varchar(23) NOT NULL,
+    "cabecera" jsonb NOT NULL,
+    "detalle" jsonb NOT NULL,
+    "xml" text NOT NULL,
+    "hash_archivo" varchar(64) NOT NULL,
+    "compressed_bytes" integer NOT NULL,
+    "status" varchar(12) NOT NULL,
+    "status_at_reception" varchar(12) NOT NULL,
+    "siat_response" jsonb NOT NULL,
+    "events" jsonb NOT NULL,
+    "simulated" boolean NOT NULL DEFAULT true,
+    "siat_mode" varchar(12) NOT NULL DEFAULT 'simulated',
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_siat_simulated_invoices" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "billing"."siat_simulated_outbox" (
+    "id" uuid NOT NULL,
+    "siat_invoice_id" uuid NOT NULL,
+    "to_email" varchar(320) NOT NULL,
+    "attachments" jsonb NOT NULL,
+    "status" varchar(24) NOT NULL,
+    "siat_mode" varchar(12) NOT NULL DEFAULT 'simulated',
+    "queued_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    CONSTRAINT "pk_siat_simulated_outbox" PRIMARY KEY ("id")
 );
 
 CREATE TABLE IF NOT EXISTS "billing"."reimbursements" (

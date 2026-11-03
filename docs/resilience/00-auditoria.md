@@ -27,9 +27,9 @@ defecto vuelve.
 | A-07 | Los 20 workers no tenían `healthcheck` en `docker-compose.yml` | Media | ✅ Corregido |
 | A-08 | `stop_grace_period` por defecto (10 s) cortaba lotes a la mitad en cada despliegue | Media | ✅ Corregido |
 | A-09 | El servidor HTTP no declaraba `keepAliveTimeout`/`headersTimeout`/`requestTimeout` | Media | ✅ Corregido |
-| A-10 | El rate limiting es en memoria por instancia: no acota nada en multi-réplica | Media | 🔵 Requiere decisión |
+| A-10 | El rate limiting es en memoria por instancia: no acota nada en multi-réplica | Media | 🔵 Sin mitigar |
 | A-11 | La sonda de readiness de la API usa `Promise.race` sin cancelar la sonda perdedora | Baja | 🟡 Aceptado, documentado |
-| A-12 | No hay endpoint de métricas Prometheus; la observabilidad es sólo por trazas y logs | Media | 🔵 Requiere decisión |
+| A-12 | No hay endpoint de métricas Prometheus; la observabilidad es sólo por trazas y logs | Media | 🔵 Sin mitigar |
 
 ---
 
@@ -322,7 +322,7 @@ y recortarlo a ciegas rompería funcionalidad real. Acota el abuso, no el uso.
 
 ---
 
-## Hallazgos abiertos
+## Hallazgos sin mitigar
 
 ### A-10 · Rate limiting en memoria por instancia 🔵
 
@@ -330,11 +330,10 @@ y recortarlo a ciegas rompería funcionalidad real. Acota el abuso, no el uso.
 almacenamiento en memoria por defecto. Con N réplicas, el límite efectivo es
 N × 300: no acota nada frente a un atacante que reparte sus peticiones.
 
-Requiere `@nest-lab/throttler-storage-redis` (o equivalente) apuntando al Redis
-que ya corre en el compose. **Es una decisión de despliegue, no de código**: con
-una sola instancia el comportamiento actual es correcto, y añadir una dependencia
-de Redis al camino de toda petición tiene su propio coste de disponibilidad que
-debe aceptarse explícitamente.
+Un almacenamiento compartido (p. ej. `@nest-lab/throttler-storage-redis` sobre el
+Redis del compose) lo resolvería, a costa de poner Redis en el camino de toda
+petición. **Es una decisión de despliegue, no de código**: con una sola instancia
+el comportamiento actual es correcto.
 
 ### A-11 · La readiness de la API no cancela sus sondas 🟡
 
@@ -342,8 +341,8 @@ debe aceptarse explícitamente.
 la operación perdedora — el mismo patrón que `withTimeout` corrige. **Se acepta
 conscientemente**: son cuatro `ping` de 3 s como máximo, contra dependencias que
 la propia sonda declara caídas, y el volumen es el de las peticiones del
-orquestador (una cada pocos segundos), no el de tráfico de negocio. Migrarlo a
-`withTimeout` es trivial y está anotado, pero no es una corrección urgente.
+orquestador (una cada pocos segundos), no el de tráfico de negocio. Los `ping`
+tampoco aceptan un `AbortSignal`, así que `withTimeout` no cancelaría nada más.
 
 ### A-12 · No hay métricas Prometheus 🔵
 
@@ -357,8 +356,8 @@ contadores acumulados (`runs`, `failures`, `timeouts`, `skipped`,
 `consecutiveFailures`) y el estado de los cortacircuitos, que es suficiente para
 un diagnóstico puntual pero no para una alerta. Ver
 [04-chaos-engineering.md](04-chaos-engineering.md) y
-[07-manual-de-incidentes.md](07-manual-de-incidentes.md) para cómo se opera
-mientras tanto.
+[07-manual-de-incidentes.md](07-manual-de-incidentes.md) para cómo se opera sin
+métricas.
 
 ## Lo que la auditoría revisó y encontró correcto
 

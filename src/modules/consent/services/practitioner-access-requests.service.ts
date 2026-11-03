@@ -19,7 +19,7 @@ import { AUTHZ } from '../../authz/authz.concepts';
 import {
   PatientProfilesRepository,
   PersonAccountLinksRepository,
-} from '../../profiles/repositories';
+} from '../../profiles/infrastructure/repositories';
 import { AuditTrailService } from '../../audit/services';
 import { CONS } from '../consent.concepts';
 import {
@@ -178,7 +178,7 @@ export class PractitionerAccessRequestsService {
     const profile = await this.patientProfilesRepo.findById(em, link.personId);
     if (!profile) return [];
 
-    const pendientes = await this.consentsRepo.findPendingForPatient(
+    const pending = await this.consentsRepo.findPendingForPatient(
       em,
       profile.profileId,
       CONS.CATEGORY_PRACTITIONER_ACCESS,
@@ -186,7 +186,7 @@ export class PractitionerAccessRequestsService {
     );
 
     const results: PractitionerAccessRequestResponseDto[] = [];
-    for (const consent of pendientes) {
+    for (const consent of pending) {
       const provisions = await this.provisionsRepo.findOpenByConsent(
         em,
         consent.id,
@@ -214,7 +214,11 @@ export class PractitionerAccessRequestsService {
       'Patient deciding practitioner access request',
     );
 
-    return this.em.transactional(async (tx) => {
+    // El aviso se arma dentro de la transacción y se emite DESPUÉS del commit,
+    // como en `request()`: si no, el socket anuncia una decisión que todavía
+    // puede revertirse.
+    let notice: Parameters<typeof this.notices.emit>[0] | undefined;
+    const response = await this.em.transactional(async (tx) => {
       const consent = await this.consentsRepo.findById(tx, id);
       if (
         !consent ||
@@ -281,13 +285,13 @@ export class PractitionerAccessRequestsService {
           entityId: id,
         });
 
-        await this.notices.emit({
+        notice = {
           kind: 'ACCESS_DECLINED',
           recipientUserId: practitionerUserId,
           subject: 'El paciente no autorizó el acceso',
           bodyText: 'El paciente decidió no darle acceso a su expediente.',
           requestId: id,
-        });
+        };
 
         return this.toResponse(consent, [...requestedSpecialties], []);
       }
@@ -296,9 +300,7 @@ export class PractitionerAccessRequestsService {
       // acá se comprueba además que sea subconjunto de lo pedido: el paciente
       // no puede "autorizar" una especialidad que nadie le pidió.
       const authorized = dto.authorizedSpecialtyConceptIds ?? [];
-      const invalid = authorized.filter(
-        (id) => !requestedSpecialties.has(id),
-      );
+      const invalid = authorized.filter((id) => !requestedSpecialties.has(id));
       if (invalid.length > 0) {
         throw new PreconditionFailedException(
           'Sólo se pueden autorizar especialidades que el profesional pidió',
@@ -312,9 +314,9 @@ export class PractitionerAccessRequestsService {
         );
       }
 
-      const meses = dto.validityMonths ?? DEFAULT_VALIDITY_MONTHS;
+      const months = dto.validityMonths ?? DEFAULT_VALIDITY_MONTHS;
       const validTo = new Date(now);
-      validTo.setMonth(validTo.getMonth() + meses);
+      validTo.setMonth(validTo.getMonth() + months);
 
       consent.statusConceptId = CONS.CONSENT_ACTIVE;
       consent.grantedByUserId = actor.id;
@@ -372,16 +374,19 @@ export class PractitionerAccessRequestsService {
         entityId: id,
       });
 
-      await this.notices.emit({
+      notice = {
         kind: 'ACCESS_ACCEPTED',
         recipientUserId: practitionerUserId,
         subject: 'El paciente autorizó el acceso',
         bodyText: `El paciente autorizó su acceso para ${authorized.length} de ${requestedSpecialties.size} área(s) pedida(s).`,
         requestId: id,
-      });
+      };
 
       return this.toResponse(consent, [...requestedSpecialties], authorized);
     });
+
+    if (notice) await this.notices.emit(notice);
+    return response;
   }
 
   /** El `userId` de la cuenta dueña de este perfil de paciente, si existe. */

@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { GeoTripsService } from '../services';
 import { StartTripDto, CloseTripDto, TripResponseDto } from '../dto';
 
@@ -27,6 +32,11 @@ export class GeoTripsController {
   constructor(private readonly service: GeoTripsService) {}
 
   /** UC-13-06. */
+  @Audited({
+    action: 'TRIP_STARTED',
+    entity: 'trip',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -39,6 +49,11 @@ export class GeoTripsController {
   }
 
   /** UC-13-07. */
+  @Audited({
+    action: 'TRIP_CLOSED',
+    entity: 'trip',
+    entityId: 'param:id',
+  })
   @Post(':id/close')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

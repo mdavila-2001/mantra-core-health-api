@@ -11,7 +11,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { getCurrentTenantId, Roles } from '../../../common';
+import { Audited, getCurrentTenantId, Roles } from '../../../common';
 import { RedisRuntimeService } from '../services';
 import {
   AcquireLockDto,
@@ -61,6 +61,10 @@ export class RedisRuntimeController {
    * @param dto - Datos validados de la operación.
    * @returns Resultado de set cache conforme al contrato `Promise<CacheWriteResponseDto>`.
    */
+  @Audited({
+    action: 'REDIS_CACHE_ENTRY_SET',
+    entity: 'cache_entry',
+  })
   @Post('cache')
   @Roles('PLATFORM_OPERATOR')
   @HttpCode(HttpStatus.OK)
@@ -96,6 +100,10 @@ export class RedisRuntimeController {
    * @param key - Valor de key requerido por la operación.
    * @returns Resultado de delete cache conforme al contrato `Promise<CacheDeleteResponseDto>`.
    */
+  @Audited({
+    action: 'REDIS_CACHE_ENTRY_DELETED',
+    entity: 'cache_entry',
+  })
   @Delete('cache/:key')
   @Roles('PLATFORM_OPERATOR')
   @ApiOperation({
@@ -117,6 +125,10 @@ export class RedisRuntimeController {
    * @param dto - Datos validados de la operación.
    * @returns Resultado de acquire lock conforme al contrato `Promise<LockAcquireResponseDto>`.
    */
+  @Audited({
+    action: 'REDIS_LOCK_ACQUIRED',
+    entity: 'distributed_lock',
+  })
   @Post('locks')
   @Roles('PLATFORM_OPERATOR')
   @HttpCode(HttpStatus.OK)
@@ -140,6 +152,10 @@ export class RedisRuntimeController {
    * @param query - Valor de query requerido por la operación.
    * @returns Resultado de release lock conforme al contrato `Promise<LockReleaseResponseDto>`.
    */
+  @Audited({
+    action: 'REDIS_LOCK_RELEASED',
+    entity: 'distributed_lock',
+  })
   @Delete('locks/:key')
   @Roles('PLATFORM_OPERATOR')
   @ApiOperation({ summary: 'Liberar un lock si el token coincide (CAS)' })

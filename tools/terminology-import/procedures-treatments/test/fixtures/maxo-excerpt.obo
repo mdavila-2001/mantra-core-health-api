@@ -1,0 +1,275 @@
+format-version: 1.2
+data-version: releases/2026-01-15
+ontology: maxo
+property_value: owl:versionInfo "2026-01-15" xsd:string
+
+[Term]
+id: MAXO:0000019
+name: esophography with contrast
+def: "A radiographic examination of the esophagus in which the esophagusis made visible by barium or a water-soluble contrast administered orally prior to the examination." []
+synonym: "barrium swallow test of the esophagus" NARROW []
+synonym: "contrast examination of the esophagus" EXACT []
+is_a: MAXO:0000007 ! radiograph imaging with contrast dye
+is_a: MAXO:0001212 ! clinical imaging procedure by system
+is_a: MAXO:0001396 ! diagnostic procedure of digestive system
+is_a: MAXO:0001467 ! diagnostic procedure of organ
+relationship: RO:0002233 UBERON:0001043 ! has input esophagus
+property_value: dce:date "2023-02-22T20:53:16Z" xsd:dateTime
+property_value: dcterms:creator https://orcid.org/0000-0001-7941-2961
+
+[Term]
+id: MAXO:0000007
+name: radiograph imaging with contrast dye
+def: "A test that involves the administration of contrast dye  and X-ray imaging in order to be able to see soft tissue within the body. Dye can be added intravenously, ingested, or other methods." []
+synonym: "radiographic imaging with contrast dye" EXACT []
+synonym: "radiography with contrast dye" EXACT []
+is_a: MAXO:0000595 ! radiograph imaging procedure
+property_value: dce:date "2023-02-22T20:05:27Z" xsd:dateTime
+property_value: dcterms:creator https://orcid.org/0000-0001-7941-2961
+
+[Term]
+id: MAXO:0000595
+name: radiograph imaging procedure
+def: "A procedure producing an image on a radiosensitive surface by x-ray radiation that has penetrated and passed through a structure in order to diagnose or treat a patient." []
+synonym: "radiogram imaging procedure" EXACT []
+synonym: "radiographic imaging procedure" EXACT []
+synonym: "radiographic procedure" EXACT []
+synonym: "radiography" EXACT []
+synonym: "radiography imaging procedure" EXACT []
+synonym: "X-ray imaging procedure" EXACT []
+xref: NCIT:C38101
+xref: NCIT:C60727
+is_a: MAXO:0000005 ! clinical imaging procedure
+property_value: dce:date "2020-04-07T15:49:43Z" xsd:string
+property_value: dcterms:creator http://orcid.org/0000-0001-7941-2961
+
+[Term]
+id: MAXO:0000005
+name: clinical imaging procedure
+def: "Any technology or method that aids in the visualization of any biological process, cell, tissue or organ for use in screening, diagnosis, surgical procedures or therapy." [NCIT:C17369]
+synonym: "imaging procedure" EXACT []
+synonym: "medical imaging" EXACT []
+synonym: "therapeutic imaging procedure" NARROW []
+synonym: "therapeutic imaging technique" NARROW []
+xref: NCIT:C17369
+is_a: MAXO:0000003 ! diagnostic procedure
+property_value: dce:date "2018-11-16T20:10:50Z" xsd:dateTime
+
+[Term]
+id: MAXO:0000003
+name: diagnostic procedure
+def: "Any procedure or test to diagnose a disease or disorder." [NCIT:C18020]
+synonym: "diagnostic technique procedure" EXACT []
+synonym: "diagnostic testing" EXACT []
+xref: NCIT:C18020
+xref: OGMS:0000104
+is_a: MAXO:0000001 ! medical action
+property_value: dce:date "2018-11-16T20:10:20Z" xsd:dateTime
+property_value: dcterms:creator http://orcid.org/0000-0001-7941-2961
+
+[Term]
+id: MAXO:0000001
+name: medical action
+def: "A clinically prescribed procedure, therapy, intervention, or recommendation." []
+synonym: "health care process" NARROW [OGMS:0000096]
+xref: OGMS:0000096
+is_a: COB:0000082 ! planned process
+property_value: dce:date "2018-11-16T20:07:28Z" xsd:dateTime
+property_value: dcterms:creator http://orcid.org/0000-0001-7941-2961
+
+[Term]
+id: COB:0000082
+name: planned process
+def: "A process that is initiated by an agent who intends to carry out a plan to achieve an objective through one or more actions as described in a plan specification." []
+is_a: BFO:0000015 ! process
+
+[Term]
+id: BFO:0000015
+name: process
+is_a: BFO:0000003 ! occurrent
+
+[Term]
+id: BFO:0000003
+name: occurrent
+is_a: BFO:0000001 ! entity
+relationship: BFO:0000050 BFO:0000003 {all_only="true"} ! part of occurrent
+
+[Term]
+id: BFO:0000001
+name: entity
+
+[Term]
+id: MAXO:0001212
+name: clinical imaging procedure by system
+def: "Visualization of a particular body system, organ, or cell type using a variety of imaging techniques for use in screening, diagnosis, surgical procedures or therapy." []
+is_a: MAXO:0000005 ! clinical imaging procedure
+is_a: MAXO:0000988 ! diagnostic procedure by site
+property_value: dce:date "2023-02-21T18:01:42Z" xsd:dateTime
+property_value: dcterms:creator https://orcid.org/0000-0001-7941-2961
+
+[Term]
+id: MAXO:0000988
+name: diagnostic procedure by site
+def: "Procedure to evaluate the structure and/or function of a particular by part or system." []
+synonym: "diagnostic procedure by body location" EXACT []
+is_a: MAXO:0000003 ! diagnostic procedure
+property_value: dce:date "2023-03-29T20:10:49Z" xsd:dateTime
+property_value: dcterms:creator https://orcid.org/0000-0001-7941-2961
+
+[Term]
+id: MAXO:0001396
+name: diagnostic procedure of digestive system
+def: "Procedure to evaluate the structure and/or function of the digestive system." []
+synonym: "digestive system diagnostic procedure" EXACT []
+synonym: "digestive system testing" EXACT []
+is_a: MAXO:0000988 ! diagnostic procedure by site
+property_value: dce:date "2019-01-15T19:35:36Z" xsd:string
+property_value: dcterms:creator "http://orcid.org/0000-0001-7941-2961" xsd:string
+
+[Term]
+id: MAXO:0001467
+name: diagnostic procedure of organ
+def: "Procedure to evaluate the structure and/or function of the organ." []
+synonym: "organ diagnostic procedure" EXACT []
+is_a: MAXO:0000988 ! diagnostic procedure by site
+property_value: dce:date "2023-03-30T20:39:14Z" xsd:string
+property_value: dcterms:creator "http://orcid.org/0000-0001-7941-2961" xsd:string
+
+[Term]
+id: MAXO:0000011
+name: physical therapy
+def: "The treatment of deformity or disease through mechanical force and movement, including both active and passive exercises, intended to ameliorate injury, increase mobility, and improve overall function." [NCIT:C15302]
+synonym: "physiatric procedure" EXACT []
+synonym: "physical medicine procedure" EXACT []
+synonym: "physical therapeutics" EXACT []
+synonym: "physical therapy procedure" EXACT []
+synonym: "physiotherapy" EXACT []
+synonym: "physiotherapy procedure" EXACT []
+synonym: "PT" EXACT OMO:0003000 []
+xref: NCIT:C15302
+xref: OGMS:0000115
+is_a: MAXO:0001298 ! therapy
+property_value: dce:date "2018-11-16T20:12:31Z" xsd:dateTime
+property_value: dcterms:creator http://orcid.org/0000-0001-7941-2961
+
+[Term]
+id: MAXO:0001298
+name: therapy
+def: "A treatment that helps someone feel better, grow stronger, etc., especially after an illness." []
+is_a: MAXO:0000002 ! therapeutic procedure
+property_value: dce:date "2023-04-13T17:54:15Z" xsd:dateTime
+property_value: dcterms:creator https://orcid.org/0000-0001-7941-2961
+
+[Term]
+id: MAXO:0000002
+name: therapeutic procedure
+def: "All manners of treatment, be they pharmaceuticals, invasive procedures, etc. to relieve illness and injury in attempts to bring the body back to its normal state." [ISBN-10:0124105165]
+comment: An action or administration of therapeutic agents to produce an effect that is intended to alter or stop a pathologic process. {xref="NCIT:C49236"}
+xref: NCIT:C25218
+xref: NCIT:C49236
+xref: OAE:0000094
+xref: OGMS:0000112
+is_a: MAXO:0000001 ! medical action
+property_value: dce:date "2018-11-16T20:08:29Z" xsd:dateTime
+property_value: dcterms:creator http://orcid.org/0000-0001-7941-2961
+
+[Term]
+id: MAXO:0001255
+name: cholic acid supplementation
+def: "Addition of cholic acid to a diet for complete nutrition support." []
+synonym: "cholic acid supplemental intake" EXACT []
+synonym: "dietary supplementation of cholic acid" EXACT []
+synonym: "supplementation of cholic acid" EXACT []
+is_a: MAXO:0000106 ! nutritional supplementation
+intersection_of: MAXO:0000106 ! nutritional supplementation
+intersection_of: RO:0002233 CHEBI:16359 ! has input cholic acid
+relationship: RO:0002233 CHEBI:16359 ! has input cholic acid
+property_value: dce:date "2022-08-25T09:00:01Z" xsd:string
+property_value: dcterms:creator "http://orcid.org/0000-0001-7941-2961" xsd:string
+
+[Term]
+id: MAXO:0000106
+name: nutritional supplementation
+def: "The addition of one or more elements and/or chemical compounds that are either absent or deficient in an individual's daily diet." [NCIT:C15425]
+xref: NCIT:C15425
+is_a: MAXO:0000088 ! dietary intervention
+property_value: dce:date "2019-01-19T21:07:25Z" xsd:dateTime
+property_value: dcterms:creator http://orcid.org/0000-0001-7941-2961
+
+[Term]
+id: MAXO:0000088
+name: dietary intervention
+def: "Any alteration or treatment in an individual's diet with a planned goal, usually designed to improve the individual's overall health." [NCIT:C15447]
+synonym: "behavioral nutritional intervention" RELATED []
+synonym: "diet" NARROW []
+xref: NCIT:C15447
+is_a: MAXO:0000009 ! nutrition intervention
+property_value: dce:date "2019-01-19T20:39:14Z" xsd:dateTime
+property_value: dcterms:creator http://orcid.org/0000-0001-7941-2961
+
+[Term]
+id: MAXO:0000009
+name: nutrition intervention
+def: "Behavioral or regulatory nutritional interventions aim at modifying nutritional intake which have an impact on health outcomes." [https://orcid.org/0000-0001-7941-2961]
+synonym: "nutritional intervention" EXACT []
+is_a: MAXO:0000002 ! therapeutic procedure
+property_value: dce:date "2018-11-16T20:12:00Z" xsd:dateTime
+property_value: dcterms:creator http://orcid.org/0000-0001-7941-2961
+
+[Term]
+id: MAXO:0000058
+name: pharmacotherapy
+def: "Use of a substance introduced into a living organism with therapeutic or diagnostic purpose." []
+comment: Medical treatment by means of drugs. {xref="https://orcid.org/0000-0001-7941-2961"}
+synonym: "drug treatment" EXACT []
+synonym: "medication therapy" EXACT []
+synonym: "pharmaceutical drug" EXACT []
+synonym: "pharmaceutical treatment" EXACT []
+synonym: "pharmacological treatment" EXACT []
+xref: CHEBI:52217
+is_a: MAXO:0000002 ! therapeutic procedure
+property_value: dce:date "2019-01-15T18:20:06Z" xsd:dateTime
+property_value: dcterms:creator http://orcid.org/0000-0001-7941-2961
+
+[Term]
+id: MAXO:0000004
+name: surgical procedure
+def: "A diagnostic or treatment procedure performed by manual and/or instrumental means, often involving an incision and the removal or replacement of a diseased organ or tissue; of or relating to or involving or used in surgery or requiring or amenable to treatment by surgery." [NCIT:C15329]
+synonym: "operation" EXACT []
+synonym: "surgery" EXACT []
+synonym: "surgical intervention" EXACT []
+synonym: "surgical operation" EXACT []
+xref: ERO:0000378
+xref: NCIT:C15329
+xref: NCIT:C17173
+xref: NCRO:0000228
+xref: OAE:0000067
+xref: SCDO:1000017
+is_a: MAXO:0000002 ! therapeutic procedure
+property_value: dce:date "2018-11-16T20:10:35Z" xsd:dateTime
+property_value: dcterms:creator http://orcid.org/0000-0001-7941-2961
+
+[Term]
+id: MAXO:0000023
+name: mood and behavior-altering agent therapy
+def: "Treatment with an agent that can alter brain chemistry leading to mood and/or behaviorial changes." []
+synonym: "mood altering drug therapy" NARROW []
+is_a: MAXO:0000058 ! pharmacotherapy
+property_value: dce:date "2023-02-23T18:26:42Z" xsd:dateTime
+property_value: dcterms:creator https://orcid.org/0000-0001-7941-2961
+
+[Term]
+id: MAXO:0000159
+name: analgesic agent therapy
+def: "A therapy capable of relieving pain without the loss of consciousness or without producing anaesthesia. In addition, analgesic is a role played by a compound which is exhibited by a capability to cause a reduction of pain symptoms." []
+synonym: "analgesic drug therapy" EXACT []
+synonym: "analgesic medication therapy" EXACT []
+synonym: "analgesic pharmacotherapeutic agent therapy" EXACT []
+synonym: "Analgesics therapy" EXACT []
+synonym: "treatment with analgesic" EXACT []
+xref: CHEBI:35480
+xref: NCIT:C241
+is_a: MAXO:0000058 ! pharmacotherapy
+is_a: MAXO:0000457 ! pain management
+property_value: dce:date "2019-01-22T17:53:16Z" xsd:dateTime
+property_value: dcterms:creator http://orcid.org/0000-0001-7941-2961

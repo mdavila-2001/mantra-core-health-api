@@ -18,7 +18,7 @@ import { FileVersions } from '../../modules/common/entities/file_versions.entity
  */
 function build(existing: Set<string> = new Set()) {
   const created: any[] = [];
-  const pendientes = new Set<string>();
+  const pending = new Set<string>();
   const flushed = new Set<string>(existing);
   const em: any = {
     findOne: mockFn((entity: any, where: { id: string }) =>
@@ -31,7 +31,7 @@ function build(existing: Set<string> = new Set()) {
     ),
     create: mockFn((entity: any, data: any) => {
       created.push({ entity, data });
-      if (entity === Files) pendientes.add(data.id);
+      if (entity === Files) pending.add(data.id);
       if (entity === FileVersions && !flushed.has(data.fileId)) {
         throw new Error(
           `fk_file_versions_file_id: "${data.fileId}" no está en "files" todavía (faltó flushear Files antes)`,
@@ -40,8 +40,8 @@ function build(existing: Set<string> = new Set()) {
       return data;
     }),
     flush: mockFn(() => {
-      for (const id of pendientes) flushed.add(id);
-      pendientes.clear();
+      for (const id of pending) flushed.add(id);
+      pending.clear();
       return Promise.resolve();
     }),
   };

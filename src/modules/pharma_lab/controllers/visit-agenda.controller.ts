@@ -10,7 +10,12 @@ import {
   Put,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   CreateVisitBlockDto,
   CreatedResourceDto,
@@ -36,6 +41,11 @@ export class VisitAgendaController {
   constructor(private readonly service: VisitAgendaService) {}
 
   /** UC-17-11. */
+  @Audited({
+    action: 'DOCTOR_VISIT_POLICY_SET',
+    entity: 'doctor_visit_policy',
+    entityId: 'result.id',
+  })
   @Put('me')
   @Roles('PRACTITIONER', 'CLINICIAN')
   @ApiOperation({ summary: 'Configurar la agenda de visitas del doctor' })
@@ -68,6 +78,11 @@ export class VisitAgendaController {
   }
 
   /** UC-17-12. */
+  @Audited({
+    action: 'DOCTOR_VISIT_BLOCK_CREATED',
+    entity: 'doctor_visit_block',
+    entityId: 'result.id',
+  })
   @Post('blocks')
   @HttpCode(HttpStatus.CREATED)
   @Roles('PRACTITIONER', 'CLINICIAN')
@@ -90,6 +105,11 @@ export class VisitAgendaController {
   }
 
   /** Levantar un bloqueo. */
+  @Audited({
+    action: 'DOCTOR_VISIT_BLOCK_LIFTED',
+    entity: 'doctor_visit_block',
+    entityId: 'param:blockId',
+  })
   @Post('blocks/:blockId/lift')
   @Roles('PRACTITIONER', 'CLINICIAN')
   @ApiOperation({ summary: 'Levantar un bloqueo' })

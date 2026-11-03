@@ -8,11 +8,34 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
-import { CONCEPTS } from '../../../common';
+import { CONCEPTS, runWithTenant } from '../../../common';
 import { ResearchReleaseService } from './research-release.service';
+import { LakehouseErrorReason } from '../lakehouse.error-reasons';
 
 const actor = { id: 'user-1', roles: ['PRINCIPAL_INVESTIGATOR'] } as any;
+const systemActor = { id: 'system', roles: ['SYSTEM'] } as any;
 const TENANT_ID = '11111111-1111-1111-1111-111111111111';
+const OTHER_TENANT_ID = '99999999-9999-9999-9999-999999999999';
+const OBJECT_ID = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+/**
+ * Ejecuta cada método del servicio con `tenant` como tenant activo del
+ * contexto, igual que lo deja el interceptor en una petición real.
+ *
+ * @param service - Servicio bajo prueba.
+ * @param tenant - Tenant activo.
+ * @returns Proxy que fija el contexto en cada llamada.
+ */
+function inTenant<T extends object>(service: T, tenant: string): T {
+  return new Proxy(service, {
+    get(target, prop, receiver) {
+      const value = Reflect.get(target, prop, receiver);
+      if (typeof value !== 'function') return value;
+      return (...args: unknown[]) =>
+        runWithTenant(tenant, () => value.apply(target, args));
+    },
+  });
+}
+
 const PROJECT_ID = '22222222-2222-2222-2222-222222222222';
 const COHORT_ID = '33333333-3333-3333-3333-333333333333';
 const VERSION_ID = '44444444-4444-4444-4444-444444444444';
@@ -52,6 +75,7 @@ function build() {
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const researchRepo = {
     findProjectForUpdate: mockFn(async () => null),
+    findProjectByIdAnyTenant: mockFn(async () => null),
     findProjectById: mockFn(async () => project()),
     findProjectByCode: mockFn(async () => null),
     createProject: mockFn((_tx: any, data: any) => ({
@@ -74,6 +98,7 @@ function build() {
     findReleaseRequestForUpdate: mockFn(async () => null),
     findReleaseRequestById: mockFn(async () => null),
     findExpiredManifests: mockFn(async () => []),
+    findOpenRequestIds: mockFn(async () => [REQUEST_ID]),
     findManifestByRequestForUpdate: mockFn(async () => null),
     createManifest: mockFn((_tx: any, data: any) => ({
       id: 'manifest-1',
@@ -81,7 +106,7 @@ function build() {
     })),
   };
   const catalogRepo = {
-    findProductVersionById: mockFn(async () => ({
+    findProductVersionInTenant: mockFn(async () => ({
       id: VERSION_ID,
       dataProductId: 'prod-1',
     })),
@@ -91,6 +116,15 @@ function build() {
     })),
   };
   const dataReleaseRepo = {
+    findDeidProfileById: mockFn(async () => ({
+      id: PROFILE_ID,
+      tenantId: TENANT_ID,
+    })),
+    createDeidProfile: mockFn((_tx: any, data: any) => ({
+      id: 'profile-1',
+      stateConceptId: 'state-1',
+      ...data,
+    })),
     createDeidRun: mockFn((_tx: any, data: any) => ({ id: 'deid-1', ...data })),
   };
   const outbox = {
@@ -107,7 +141,8 @@ function build() {
     logger as any,
   );
   return {
-    service,
+    service: inTenant(service, TENANT_ID),
+    raw: service,
     em,
     tx,
     researchRepo,
@@ -128,6 +163,7 @@ const COHORT_DTO = {
   approvedTo: FUTURE.toISOString(),
   cohortCode: 'c1',
   cohortVersion: '1',
+  inclusionExpression: 'edad >= 18',
   deidentificationProfileId: PROFILE_ID,
 } as any;
 
@@ -278,6 +314,8 @@ describe('ResearchReleaseService', () => {
       purposeConceptId: PURPOSE_ID,
       recordCount: '5000',
       contentHash: 'ch-1',
+      objectManifestId: OBJECT_ID,
+      schemaVersion: '1.0.0',
     } as any;
 
     /**
@@ -482,7 +520,7 @@ describe('ResearchReleaseService', () => {
         status: 'released',
       });
 
-      const res = await d.service.listExpiredReleases(10);
+      const res = await d.service.listExpiredReleases(actor, 10);
 
       expect(res.releases).toEqual([{ requestId: REQUEST_ID, expiresAt }]);
     });
@@ -497,7 +535,7 @@ describe('ResearchReleaseService', () => {
         status: 'revoked',
       });
 
-      const res = await d.service.listExpiredReleases(10);
+      const res = await d.service.listExpiredReleases(actor, 10);
 
       expect(res.releases).toEqual([]);
     });
@@ -505,12 +543,370 @@ describe('ResearchReleaseService', () => {
     it('usa el tamaño de lote por defecto si no se declara límite', async () => {
       const d = build();
 
-      await d.service.listExpiredReleases();
+      await d.service.listExpiredReleases(actor);
 
       expect(d.researchRepo.findExpiredManifests).toHaveBeenCalledWith(
         d.em,
         expect.any(Date),
         50,
+        [REQUEST_ID],
+      );
+    });
+  });
+  describe('aislamiento por tenant (LAKE-01)', () => {
+    const requestDto = {
+      tenantId: TENANT_ID,
+      researchProjectId: PROJECT_ID,
+      dataProductVersionId: VERSION_ID,
+      cohortDefinitionId: COHORT_ID,
+      purposeOfUseCode: 'RESEARCH',
+    } as any;
+    const approveDto = {
+      purposeConceptId: PURPOSE_ID,
+      recordCount: '5000',
+      contentHash: 'ch-1',
+      objectManifestId: OBJECT_ID,
+      schemaVersion: '1.0.0',
+    } as any;
+
+    const outside = async (attempt: Promise<unknown>) => {
+      const error: any = await attempt.catch((e) => e);
+      expect(error.getStatus()).toBe(404);
+      expect(error.reason).toBe(
+        LakehouseErrorReason.LAKEHOUSE_RESOURCE_OUTSIDE_TENANT,
+      );
+      expect(error.details).toBeUndefined();
+      return error;
+    };
+
+    it('solicitar con el proyecto de otro tenant responde 404 uniforme, sin fila ni evento', async () => {
+      const d = build();
+      d.researchRepo.findProjectById.mockResolvedValue(
+        project({ tenantId: OTHER_TENANT_ID }),
+      );
+      const foreign = await outside(
+        d.service.requestRelease(requestDto, actor),
+      );
+      d.researchRepo.findProjectById.mockResolvedValue(null);
+      const missing = await outside(
+        d.service.requestRelease(requestDto, actor),
+      );
+
+      expect(foreign.getResponse()).toEqual(missing.getResponse());
+      expect(d.researchRepo.createReleaseRequest).not.toHaveBeenCalled();
+      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      expect(d.researchRepo.findProjectById).toHaveBeenCalledWith(
+        d.tx,
+        TENANT_ID,
+        PROJECT_ID,
+      );
+    });
+
+    it('solicitar con una versión de producto de otro tenant responde 404 uniforme', async () => {
+      const d = build();
+      d.catalogRepo.findProductVersionInTenant.mockResolvedValue(null);
+      await outside(d.service.requestRelease(requestDto, actor));
+      expect(d.researchRepo.createReleaseRequest).not.toHaveBeenCalled();
+      expect(d.catalogRepo.findProductVersionInTenant).toHaveBeenCalledWith(
+        d.tx,
+        TENANT_ID,
+        VERSION_ID,
+      );
+    });
+
+    it('solicitar con una cohorte de otro proyecto responde 404 uniforme', async () => {
+      const d = build();
+      d.researchRepo.findCohortById.mockResolvedValue({
+        id: COHORT_ID,
+        researchProjectId: 'proyecto-de-otro-tenant',
+        state: 'active',
+        deidentificationProfileId: PROFILE_ID,
+      });
+      await outside(d.service.requestRelease(requestDto, actor));
+      expect(d.researchRepo.createReleaseRequest).not.toHaveBeenCalled();
+    });
+
+    it('la solicitud se crea en el tenant del contexto y rechaza un tenantId ajeno en el cuerpo', async () => {
+      const d = build();
+      await d.service.requestRelease(requestDto, actor);
+      expect(d.researchRepo.createReleaseRequest).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ tenantId: TENANT_ID }),
+      );
+      await expect(
+        d.service.requestRelease(
+          { ...requestDto, tenantId: OTHER_TENANT_ID },
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        reason: LakehouseErrorReason.LAKEHOUSE_TENANT_MISMATCH,
+      });
+    });
+
+    it('aprobar la solicitud de otro tenant responde 404 uniforme, sin manifiesto, corrida ni evento', async () => {
+      const d = build();
+      const foreign = {
+        id: REQUEST_ID,
+        tenantId: OTHER_TENANT_ID,
+        researchProjectId: PROJECT_ID,
+        cohortDefinitionId: COHORT_ID,
+        status: 'submitted',
+      };
+      d.researchRepo.findReleaseRequestForUpdate.mockResolvedValue(foreign);
+      const error = await outside(
+        d.service.approveRelease(REQUEST_ID, approveDto, actor),
+      );
+      d.researchRepo.findReleaseRequestForUpdate.mockResolvedValue(null);
+      const missing = await outside(
+        d.service.approveRelease(REQUEST_ID, approveDto, actor),
+      );
+
+      expect(error.getResponse()).toEqual(missing.getResponse());
+      expect(foreign.status).toBe('submitted');
+      expect(d.researchRepo.createManifest).not.toHaveBeenCalled();
+      expect(d.dataReleaseRepo.createDeidRun).not.toHaveBeenCalled();
+      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      expect(d.researchRepo.findReleaseRequestForUpdate).toHaveBeenCalledWith(
+        d.tx,
+        TENANT_ID,
+        REQUEST_ID,
+      );
+    });
+
+    it('revocar la solicitud de otro tenant responde 404 uniforme y no cierra ni adelanta el manifiesto', async () => {
+      const d = build();
+      const foreign = {
+        id: REQUEST_ID,
+        tenantId: OTHER_TENANT_ID,
+        status: 'released',
+      };
+      d.researchRepo.findReleaseRequestForUpdate.mockResolvedValue(foreign);
+      const manifest = { id: 'manifest-1', expiresAt: FUTURE };
+      d.researchRepo.findManifestByRequestForUpdate.mockResolvedValue(manifest);
+
+      await outside(d.service.revokeRelease(REQUEST_ID, {}, actor));
+
+      expect(foreign.status).toBe('released');
+      expect(manifest.expiresAt).toBe(FUTURE);
+      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+    });
+
+    it('define la cohorte en el tenant del contexto y no acepta un perfil de otro tenant', async () => {
+      const d = build();
+      d.dataReleaseRepo.findDeidProfileById.mockResolvedValue({
+        id: PROFILE_ID,
+        tenantId: OTHER_TENANT_ID,
+      });
+      await outside(d.service.defineCohort(PROJECT_ID, COHORT_DTO, actor));
+      expect(d.researchRepo.createProject).not.toHaveBeenCalled();
+      expect(d.researchRepo.createCohort).not.toHaveBeenCalled();
+    });
+
+    it('definir la cohorte sobre el id de un proyecto de otro tenant responde 404 uniforme y no lo modifica', async () => {
+      const d = build();
+      const foreign = project({ tenantId: OTHER_TENANT_ID, title: 'ajeno' });
+      d.researchRepo.findProjectByIdAnyTenant.mockResolvedValue(foreign);
+
+      await outside(d.service.defineCohort(PROJECT_ID, COHORT_DTO, actor));
+
+      expect(foreign.title).toBe('ajeno');
+      expect(d.researchRepo.findProjectForUpdate).not.toHaveBeenCalled();
+      expect(d.researchRepo.createProject).not.toHaveBeenCalled();
+      expect(d.researchRepo.createCohort).not.toHaveBeenCalled();
+    });
+
+    it('el proyecto propio se busca y se bloquea con el tenant activo', async () => {
+      const d = build();
+      await d.service.defineCohort(PROJECT_ID, COHORT_DTO, actor);
+      expect(d.researchRepo.findProjectForUpdate).toHaveBeenCalledWith(
+        d.tx,
+        TENANT_ID,
+        PROJECT_ID,
+      );
+      expect(d.researchRepo.createProject).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ tenantId: TENANT_ID }),
+      );
+    });
+
+    it('el perfil de de-identificación se crea en el tenant del contexto', async () => {
+      const d = build();
+      await d.service.createDeidentificationProfile(
+        {
+          tenantId: TENANT_ID,
+          code: 'perfil-1',
+          name: 'Perfil',
+          methodologyConceptId: PURPOSE_ID,
+        } as any,
+        actor,
+      );
+      expect(d.dataReleaseRepo.createDeidProfile).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ tenantId: TENANT_ID }),
+      );
+      await expect(
+        d.service.createDeidentificationProfile(
+          {
+            tenantId: OTHER_TENANT_ID,
+            code: 'perfil-2',
+            name: 'Perfil',
+            methodologyConceptId: PURPOSE_ID,
+          } as any,
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        reason: LakehouseErrorReason.LAKEHOUSE_TENANT_MISMATCH,
+      });
+    });
+
+    it('sin tenant activo un actor que no es SYSTEM no aprueba ni cierra nada (TENANT_REQUIRED)', async () => {
+      const d = build();
+      await expect(
+        d.raw.approveRelease(REQUEST_ID, approveDto, actor),
+      ).rejects.toMatchObject({ details: { reason: 'TENANT_REQUIRED' } });
+      await expect(
+        d.raw.revokeRelease(REQUEST_ID, {}, actor),
+      ).rejects.toMatchObject({ details: { reason: 'TENANT_REQUIRED' } });
+      await expect(d.raw.listExpiredReleases(actor)).rejects.toMatchObject({
+        details: { reason: 'TENANT_REQUIRED' },
+      });
+      expect(d.researchRepo.findReleaseRequestForUpdate).not.toHaveBeenCalled();
+    });
+
+    it('límite: el worker SYSTEM sin tenant cierra el vencido de cualquier tenant', async () => {
+      const d = build();
+      const request = {
+        id: REQUEST_ID,
+        tenantId: OTHER_TENANT_ID,
+        status: 'released',
+      };
+      d.researchRepo.findReleaseRequestForUpdate.mockResolvedValue(request);
+
+      const result = await d.raw.revokeRelease(
+        REQUEST_ID,
+        { expired: true },
+        systemActor,
+      );
+
+      expect(result.alreadyClosed).toBe(false);
+      expect(request.status).toBe('expired');
+      expect(d.researchRepo.findReleaseRequestForUpdate).toHaveBeenCalledWith(
+        d.tx,
+        undefined,
+        REQUEST_ID,
+      );
+    });
+
+    it('el barrido de vencidos de SYSTEM sin tenant recorre todos; con tenant se acota a sus solicitudes', async () => {
+      const d = build();
+      await d.raw.listExpiredReleases(systemActor, 7);
+      expect(d.researchRepo.findOpenRequestIds).not.toHaveBeenCalled();
+      expect(d.researchRepo.findExpiredManifests).toHaveBeenCalledWith(
+        d.em,
+        expect.any(Date),
+        7,
+        undefined,
+      );
+
+      d.researchRepo.findExpiredManifests.mockClear();
+      await d.service.listExpiredReleases(actor, 7);
+      expect(d.researchRepo.findOpenRequestIds).toHaveBeenCalledWith(
+        d.em,
+        TENANT_ID,
+        ['released'],
+      );
+      expect(d.researchRepo.findExpiredManifests).toHaveBeenCalledWith(
+        d.em,
+        expect.any(Date),
+        7,
+        [REQUEST_ID],
+      );
+    });
+
+    it('un tenant sin solicitudes abiertas no consulta los manifiestos', async () => {
+      const d = build();
+      d.researchRepo.findOpenRequestIds.mockResolvedValue([]);
+      const res = await d.service.listExpiredReleases(actor);
+      expect(res).toEqual({ releases: [] });
+      expect(d.researchRepo.findExpiredManifests).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('contrato mínimo (LAKE-02)', () => {
+    it('definir la cohorte sin criterio de inclusión responde 400 catalogado y no persiste', async () => {
+      const d = build();
+      await expect(
+        d.service.defineCohort(
+          PROJECT_ID,
+          { ...COHORT_DTO, inclusionExpression: undefined },
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        response: {
+          code: 'VALIDATION_FAILED',
+          reason: LakehouseErrorReason.LAKEHOUSE_REQUIRED_FIELD_MISSING,
+          details: { fields: ['inclusionExpression'] },
+        },
+      });
+      expect(d.researchRepo.createProject).not.toHaveBeenCalled();
+      expect(d.researchRepo.createCohort).not.toHaveBeenCalled();
+    });
+
+    it('aprobar sin objectManifestId ni schemaVersion responde 400 catalogado y no materializa', async () => {
+      const d = build();
+      d.researchRepo.findReleaseRequestForUpdate.mockResolvedValue({
+        id: REQUEST_ID,
+        tenantId: TENANT_ID,
+        researchProjectId: PROJECT_ID,
+        cohortDefinitionId: COHORT_ID,
+        status: 'submitted',
+      });
+      await expect(
+        d.service.approveRelease(
+          REQUEST_ID,
+          {
+            purposeConceptId: PURPOSE_ID,
+            recordCount: '1',
+            contentHash: 'h',
+          } as any,
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        response: {
+          reason: LakehouseErrorReason.LAKEHOUSE_REQUIRED_FIELD_MISSING,
+          details: { fields: ['objectManifestId', 'schemaVersion'] },
+        },
+      });
+      expect(d.dataReleaseRepo.createDeidRun).not.toHaveBeenCalled();
+      expect(d.researchRepo.createManifest).not.toHaveBeenCalled();
+    });
+
+    it('la aprobación completa persiste el manifiesto con todos los campos NOT NULL', async () => {
+      const d = build();
+      d.researchRepo.findReleaseRequestForUpdate.mockResolvedValue({
+        id: REQUEST_ID,
+        tenantId: TENANT_ID,
+        researchProjectId: PROJECT_ID,
+        cohortDefinitionId: COHORT_ID,
+        status: 'submitted',
+      });
+      await d.service.approveRelease(
+        REQUEST_ID,
+        {
+          purposeConceptId: PURPOSE_ID,
+          recordCount: '1',
+          contentHash: 'h',
+          objectManifestId: OBJECT_ID,
+          schemaVersion: '1.0.0',
+        } as any,
+        actor,
+      );
+      expect(d.researchRepo.createManifest).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          objectManifestId: OBJECT_ID,
+          schemaVersion: '1.0.0',
+        }),
       );
     });
   });

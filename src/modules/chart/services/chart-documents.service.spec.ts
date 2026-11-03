@@ -9,9 +9,36 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { ChartDocumentsService } from './chart-documents.service';
 import { CHART } from '../chart.concepts';
-import { PreconditionFailedException } from '../../../common';
+import {
+  PreconditionFailedException,
+  ResourceNotFoundException,
+  runWithTenant,
+} from '../../../common';
+import { ChartEncounterScopeService } from './chart-encounter-scope.service';
+import { ChartErrorReason } from '../chart.error-reasons';
+
+const TENANT_A = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+const TENANT_B = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
 
 const actor = { id: 'clin-1', roles: [] } as any;
+
+/**
+ * Ejecuta cada método del servicio dentro del contexto de tenant A, como lo hace
+ * `TenantContextInterceptor` en una petición real.
+ *
+ * @param service - Servicio bajo prueba.
+ * @returns Un proxy que ejecuta cada método dentro de `runWithTenant`.
+ */
+function inTenantA<T extends object>(service: T): T {
+  return new Proxy(service, {
+    get(target, property, receiver) {
+      const value = Reflect.get(target, property, receiver);
+      if (typeof value !== 'function') return value;
+      return (...args: unknown[]) =>
+        runWithTenant(TENANT_A, () => value.apply(target, args));
+    },
+  });
+}
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -50,6 +77,26 @@ function build() {
   const encounterSealGuard = {
     assertEncounterWritable: mockFn().mockResolvedValue(undefined),
   };
+  // CHART-01: el alcance real, con repositorios de prueba. Por defecto el
+  // encuentro `enc-1` existe, está abierto y es del paciente `p1`.
+  const encountersRepo = {
+    findById: mockFn(async (_tx: unknown, id: string) => ({
+      id,
+      patientProfileId: 'p1',
+      tenantId: TENANT_A,
+      sealedAt: undefined,
+    })),
+  };
+  const conditionsRepo = {
+    findById: mockFn(async (_tx: unknown, id: string) => ({
+      id,
+      patientProfileId: 'p1',
+    })),
+  };
+  const encounterScope = new ChartEncounterScopeService(
+    encountersRepo as any,
+    conditionsRepo as any,
+  );
   const service = new ChartDocumentsService(
     em as any,
     documentsRepo,
@@ -58,9 +105,10 @@ function build() {
     clinicalRead as any,
     fileUpload as any,
     encounterSealGuard as any,
+    encounterScope,
   );
   return {
-    service,
+    service: inTenantA(service),
     tx,
     em,
     emFork,
@@ -69,6 +117,7 @@ function build() {
     clinicalRead,
     fileUpload,
     encounterSealGuard,
+    encountersRepo,
   };
 }
 
@@ -296,5 +345,128 @@ describe('ChartDocumentsService', () => {
       );
       expect(content.mimeType).toBe('application/pdf');
     });
+  });
+});
+
+/**
+ * Captura el rechazo para inspeccionar status, reason y details.
+ *
+ * @param promise - Operación que debe fallar.
+ * @returns La excepción lanzada.
+ */
+async function rejection(promise: Promise<unknown>): Promise<any> {
+  try {
+    await promise;
+  } catch (error) {
+    return error;
+  }
+  throw new Error('Se esperaba un rechazo');
+}
+
+describe('ChartDocumentsService.createDocument · encuentro del paciente (CHART-01)', () => {
+  const dto = (extra: Record<string, unknown> = {}) =>
+    ({
+      patientProfileId: 'p1',
+      tenantId: TENANT_A,
+      title: 'Lab result',
+      files: [{ fileId: 'f1' }],
+      ...extra,
+    }) as any;
+
+  it('correcto: el documento de A con un encuentro abierto de A conserva la relación', async () => {
+    const d = build();
+    d.documentsRepo.createRecord.mockReturnValue({
+      id: 'doc1',
+      statusConceptId: CHART.DOC_STATUS_ACTIVE,
+      createdAt: new Date(),
+    });
+
+    const res = await d.service.createDocument(
+      dto({ encounterId: 'enc-1' }),
+      actor,
+    );
+
+    expect(res.id).toBe('doc1');
+    expect(d.documentsRepo.createRecord.mock.calls[0][1]).toMatchObject({
+      patientProfileId: 'p1',
+      encounterId: 'enc-1',
+    });
+  });
+
+  it('límite: sin encounterId el documento se crea sin consultar encuentros', async () => {
+    const d = build();
+    d.documentsRepo.createRecord.mockReturnValue({
+      id: 'doc1',
+      statusConceptId: CHART.DOC_STATUS_ACTIVE,
+      createdAt: new Date(),
+    });
+
+    await d.service.createDocument(dto(), actor);
+
+    expect(d.encountersRepo.findById).not.toHaveBeenCalled();
+  });
+
+  it('error: el encuentro abierto de B usado desde A responde como inexistente, sin registro ni archivos vinculados', async () => {
+    const foreign = build();
+    foreign.encountersRepo.findById.mockResolvedValue({
+      id: 'enc-b',
+      patientProfileId: 'p2',
+      tenantId: TENANT_A,
+    });
+    const absent = build();
+    absent.encountersRepo.findById.mockResolvedValue(null);
+
+    const a = await rejection(
+      foreign.service.createDocument(dto({ encounterId: 'enc-b' }), actor),
+    );
+    const b = await rejection(
+      absent.service.createDocument(dto({ encounterId: 'enc-b' }), actor),
+    );
+
+    expect(a).toBeInstanceOf(ResourceNotFoundException);
+    expect(a.reason).toBe(ChartErrorReason.CHART_ENCOUNTER_OUT_OF_SCOPE);
+    expect(a.details).toBeUndefined();
+    expect(a.getResponse()).toEqual(b.getResponse());
+    expect(foreign.documentsRepo.createRecord).not.toHaveBeenCalled();
+    expect(foreign.documentsRepo.createFile).not.toHaveBeenCalled();
+    expect(foreign.attachableFiles.assertUsableBy).not.toHaveBeenCalled();
+  });
+
+  it('un encuentro del mismo paciente pero de otro tenant también es ajeno', async () => {
+    const d = build();
+    d.encountersRepo.findById.mockResolvedValue({
+      id: 'enc-1',
+      patientProfileId: 'p1',
+      tenantId: TENANT_B,
+    });
+
+    const error = await rejection(
+      runWithTenant(TENANT_A, () =>
+        d.service.createDocument(dto({ encounterId: 'enc-1' }), actor),
+      ),
+    );
+
+    expect(error.reason).toBe(ChartErrorReason.CHART_ENCOUNTER_OUT_OF_SCOPE);
+    expect(d.documentsRepo.createRecord).not.toHaveBeenCalled();
+  });
+
+  it('falla catalogada: un encuentro sellado responde 422 CHART_ENCOUNTER_SEALED y no escribe', async () => {
+    const d = build();
+    d.encountersRepo.findById.mockResolvedValue({
+      id: 'enc-1',
+      patientProfileId: 'p1',
+      tenantId: TENANT_A,
+      sealedAt: new Date(),
+    });
+
+    const error = await rejection(
+      d.service.createDocument(dto({ encounterId: 'enc-1' }), actor),
+    );
+
+    expect(error).toBeInstanceOf(PreconditionFailedException);
+    expect(error.getStatus()).toBe(422);
+    expect(error.reason).toBe(ChartErrorReason.CHART_ENCOUNTER_SEALED);
+    expect(d.documentsRepo.createRecord).not.toHaveBeenCalled();
+    expect(d.attachableFiles.assertUsableBy).not.toHaveBeenCalled();
   });
 });

@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 07 · schema consent
+-- SALUD v4.2.83 · módulo 07 · schema consent
 -- Generado de diagram_07_consent.puml — NO editar a mano.
 
 
@@ -133,6 +133,10 @@ CREATE INDEX IF NOT EXISTS "ix_treatment_informed_consents_updated_by_user_id" O
 CREATE INDEX IF NOT EXISTS "ix_treatment_informed_consents_tenant_id_status_concept_id" ON "consent"."treatment_informed_consents" ("tenant_id", "status_concept_id", "updated_at" DESC);
 
 CREATE INDEX IF NOT EXISTS "ix_treatment_informed_consents_patient_profile_id_updated_at" ON "consent"."treatment_informed_consents" ("tenant_id", "patient_profile_id", "updated_at" DESC);
+
+CREATE INDEX IF NOT EXISTS "ix_treatment_informed_consents_target" ON "consent"."treatment_informed_consents" ("target_type", "target_id");
+
+CREATE INDEX IF NOT EXISTS "ix_treatment_informed_consents_patient_target" ON "consent"."treatment_informed_consents" ("patient_profile_id", "target_type");
 
 CREATE INDEX IF NOT EXISTS "ix_privacy_restrictions_patient_profile_id" ON "consent"."privacy_restrictions" ("patient_profile_id");
 

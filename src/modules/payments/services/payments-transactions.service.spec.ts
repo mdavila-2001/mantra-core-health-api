@@ -25,7 +25,11 @@ import { GatewayConnections } from '../entities';
  * estas pruebas la intención apunta a `conn-1`, cuya referencia es esta variable.
  */
 const CONNECTION_SECRET = 'secreto-de-prueba-de-la-conexion-conn-1';
-process.env.WEBHOOK_SECRET_UNIT_CONN_1 = CONNECTION_SECRET;
+const UNIT_TENANT = '11111111-1111-1111-1111-111111111111';
+// El secreto de una conexión vive en el espacio de nombres de su tenant.
+const CONNECTION_SECRET_VAR =
+  'WEBHOOK_SECRET_11111111111111111111111111111111_UNIT_CONN_1';
+process.env[CONNECTION_SECRET_VAR] = CONNECTION_SECRET;
 
 /** Firma un callback de gateway como lo haría el proveedor (secreto de la conexión). */
 function signCallback(
@@ -71,9 +75,14 @@ function build() {
           ? {
               id: 'conn-1',
               gatewayId: 'gw-1',
-              webhookSecretRef: 'env:WEBHOOK_SECRET_UNIT_CONN_1',
+              tenantId: UNIT_TENANT,
+              webhookSecretRef: `env:${CONNECTION_SECRET_VAR}`,
             }
-          : { id: 'intent-1', gatewayConnectionId: 'conn-1' },
+          : {
+              id: 'intent-1',
+              tenantId: UNIT_TENANT,
+              gatewayConnectionId: 'conn-1',
+            },
       ),
     ),
   };
@@ -91,6 +100,7 @@ function build() {
     createCancellation: mockFn(),
     findWebhookEventByRef: mockFn().mockResolvedValue(null),
     recordWebhookEvent: mockFn(),
+    findCallbackEndpoints: mockFn().mockResolvedValue([]),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
@@ -832,7 +842,7 @@ describe('PaymentsTransactionsService', () => {
         });
         d.transactionsRepo.createRefund.mockReturnValue({ id: 'refund-n' });
       }
-      const pendiente = (amount: string) => ({
+      const pending = (amount: string) => ({
         amount,
         statusConceptId: CONCEPTS.REFUND_PENDING,
       });
@@ -841,7 +851,7 @@ describe('PaymentsTransactionsService', () => {
         const d = build();
         captured(d, '0.30');
         d.transactionsRepo.findRefundsByTransaction.mockResolvedValue([
-          pendiente('0.10'),
+          pending('0.10'),
         ]);
 
         const res = await d.service.refund('txn-1', { amount: '0.20' }, actor);
@@ -854,7 +864,7 @@ describe('PaymentsTransactionsService', () => {
         const d = build();
         captured(d, '0.30');
         d.transactionsRepo.findRefundsByTransaction.mockResolvedValue([
-          pendiente('0.10'),
+          pending('0.10'),
         ]);
 
         await expect(
@@ -869,7 +879,7 @@ describe('PaymentsTransactionsService', () => {
         const d = build();
         captured(d, '2.00');
         d.transactionsRepo.findRefundsByTransaction.mockResolvedValue(
-          Array.from({ length: 19 }, () => pendiente('0.10')),
+          Array.from({ length: 19 }, () => pending('0.10')),
         );
 
         const res = await d.service.refund('txn-1', { amount: '0.10' }, actor);
@@ -883,7 +893,7 @@ describe('PaymentsTransactionsService', () => {
         // decimales llega como entero.
         captured(d, '0.3');
         d.transactionsRepo.findRefundsByTransaction.mockResolvedValue([
-          pendiente('0.1'),
+          pending('0.1'),
         ]);
         await expect(
           d.service.refund('txn-1', { amount: '0.20' }, actor),
@@ -892,7 +902,7 @@ describe('PaymentsTransactionsService', () => {
         const e = build();
         captured(e, '300');
         e.transactionsRepo.findRefundsByTransaction.mockResolvedValue([
-          pendiente('100'),
+          pending('100'),
         ]);
         await expect(
           e.service.refund('txn-1', { amount: '200.01' }, actor),

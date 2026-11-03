@@ -40,7 +40,9 @@ function bodyFront(over: Record<string, unknown> = {}) {
   };
 }
 
-async function validateRegistration(registration: Record<string, unknown>): Promise<string[]> {
+async function validateRegistration(
+  registration: Record<string, unknown>,
+): Promise<string[]> {
   const dto = plainToInstance(CreateAllergyIntoleranceDto, registration);
   const errors = await validate(dto, {
     whitelist: true,
@@ -55,9 +57,9 @@ describe('CreateAllergyIntoleranceDto — alergia desde la consulta (CL-01 / P26
   });
 
   it('sigue aceptando el alta sin encuentro (desde el expediente)', async () => {
-    const { encounterId: _omitido, ...sinEncuentro } = bodyFront();
-    void _omitido;
-    expect(await validateRegistration(sinEncuentro)).toEqual([]);
+    const { encounterId: _skipped, ...withoutEncounter } = bodyFront();
+    void _skipped;
+    expect(await validateRegistration(withoutEncounter)).toEqual([]);
   });
 
   it('rechaza un encounterId que no es uuid', async () => {

@@ -1,8 +1,9 @@
 # IAM
 
 Identidad y acceso de ALOVIDA: cuentas, credenciales, sesiones y refresh tokens,
-MFA, dispositivos, roles globales, bloqueos y eventos de seguridad. La revisión de
-esta unidad está en [el informe de IAM](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/iam.md).
+MFA, dispositivos, roles globales, bloqueos y eventos de seguridad.
+
+## Rutas HTTP y alcance (medido)
 
 ## Rutas HTTP y alcance (medido)
 
@@ -13,7 +14,7 @@ esta unidad está en [el informe de IAM](https://github.com/mdavila-2001/mantra-
   find src/modules/iam -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **3 controllers, 35 rutas HTTP, 14 entidades y 15 servicios** (incluye los ya documentados más abajo). La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso (propiedad, tenant, vínculo) puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **3 controllers, 34 rutas HTTP, 14 entidades y 15 servicios** (incluye los ya documentados más abajo). La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso (propiedad, tenant, vínculo) puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
@@ -26,7 +27,6 @@ Importa (`iam.module.ts`): `ProfilesModule`, `CommonModule`, `MessagingModule`, 
 | `POST /iam/me/sessions/:id/revoke` | sesión | `iam-account-security` |
 | `POST /iam/auth/register-patient` | pública | `iam-auth` |
 | `POST /iam/auth/register-organization` | pública | `iam-auth` |
-| `POST /iam/auth/upload-registration-signature-image` | pública | `iam-auth` |
 | `POST /iam/auth/upload-registration-document` | pública | `iam-auth` |
 | `POST /iam/auth/register-practitioner` | pública | `iam-auth` |
 | `POST /iam/auth/resend-verification` | pública | `iam-auth` |
@@ -39,7 +39,8 @@ Importa (`iam.module.ts`): `ProfilesModule`, `CommonModule`, `MessagingModule`, 
 | `POST /iam/auth/logout` | sesión | `iam-auth` |
 | `POST /iam/auth/logout-all` | sesión | `iam-auth` |
 | `POST /iam/auth/sessions/purge` | SECURITY_ADMIN | `iam-auth` |
-| `GET /iam/users` | SECURITY_ADMIN | `iam-users` |
+| `GET /iam/users` (obsoleto: usar `POST /iam/users/search`) | SECURITY_ADMIN | `iam-users` |
+| `POST /iam/users/search` | SECURITY_ADMIN | `iam-users` |
 | `GET /iam/users/:id` | SECURITY_ADMIN | `iam-users` |
 | `GET /iam/users/:id/credentials` | SECURITY_ADMIN | `iam-users` |
 | `GET /iam/users/:id/devices` | SECURITY_ADMIN | `iam-users` |
@@ -130,6 +131,30 @@ credentials (`method = FEDERATED`) keyed by `(user, identityProvider, externalSu
   revoke credentials, sessions, refresh tokens and roles.
 - Every mutating operation records a `security_events` row.
 
+### Borradores de alta (`/iam/onboarding-drafts`)
+
+Rutas públicas (el alta ocurre antes de tener cuenta) que guardan el avance del
+formulario en la memoria del proceso (`IamOnboardingDraftsService`).
+
+- **Acceso por secreto.** El primer `PUT` crea el borrador y devuelve una sola vez
+  `draftSecret` (256 bits aleatorios; el servidor guarda su SHA-256). `GET`, `PUT` y
+  `DELETE` lo exigen en la cabecera `X-Onboarding-Draft-Secret`, comparado en tiempo
+  constante. Secreto ausente o erróneo, borrador inexistente, vencido o id mal formado
+  responden el mismo 404.
+- **Vigencia.** Un borrador nuevo vive 1 hora. Sólo una segunda escritura con el
+  secreto hecha al menos 60 s después de crearlo lo confirma y extiende su vida a
+  30 días. Un barrido cada 10 minutos libera los vencidos.
+- **Topes.** 64 KiB por borrador; 2000 borradores en el proceso; 25 por origen (IPv4
+  por dirección, IPv6 por prefijo /64) y 100 por prefijo agregado (/48 en IPv6).
+  Con el almacén lleno, un origen sólo desaloja su propio borrador no confirmado más
+  antiguo; nunca el de otro origen. Si no tiene ninguno, 503 con `Retry-After`.
+- **Límite que no cubre el código.** El almacén es por proceso (con más de una
+  instancia, el borrador sólo existe en la que lo recibió) y un atacante con muchos
+  prefijos distintos (botnet) todavía puede agotar el cupo global y dejar sin alta a
+  quien llegue después. La mitigación de fondo es limitar la tasa en el borde
+  (gateway o WAF) y mover el almacén a Redis cuando haya más de una instancia
+  (ver #875).
+
 ## Permissions
 
 Admin operations require the `SECURITY_ADMIN` global role (`RolesGuard`). `login`
@@ -149,7 +174,7 @@ each operation. Secrets, password hashes, raw tokens and PHI are never logged.
 - `services/` — business logic, transaction owners.
 - `controllers/` — thin HTTP layer.
 
-## Pruebas
+## Tests
 
 Ejecutar `corepack yarn test src/modules/iam --runInBand --silent`. El 2026-10-05
 pasaron 22 suites y 359 pruebas. Son principalmente unitarias con repositorios y

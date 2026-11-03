@@ -65,9 +65,9 @@ describe('ChartMeReadService (BR-15)', () => {
   describe('listMyNotes (CL-30)', () => {
     it('412 si la sesión no tiene perfil de paciente', async () => {
       const d = build();
-      await expect(d.service.listMyNotes(withoutProfile, 50)).rejects.toBeInstanceOf(
-        PreconditionFailedException,
-      );
+      await expect(
+        d.service.listMyNotes(withoutProfile, 50),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
     it('sólo incluye notas con versión liberada; nunca un borrador ni una retenida', async () => {

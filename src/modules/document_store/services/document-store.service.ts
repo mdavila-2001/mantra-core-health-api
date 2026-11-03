@@ -5,10 +5,12 @@ import {
   ConcurrencyConflictException,
   PageResponseDto,
   PreconditionFailedException,
+  requireTenantId,
   ResourceNotFoundException,
   type AuthenticatedUser,
 } from '../../../common';
 import { DocumentStoreRepository } from '../repositories';
+import { DocumentStoreErrorReason } from '../document_store.error-reasons';
 import {
   CreateFlexibleDocumentDto,
   DocumentResponseDto,
@@ -21,6 +23,11 @@ import {
  * reglas de gobierno -aislamiento por `tenantId`, concurrencia optimista por
  * `version` y borrado lógico- y traduce las condiciones de datos a excepciones
  * de dominio homogéneas. La colección ya llega validada por el guard de nombres.
+ *
+ * El tenant sale siempre del contexto verificado (`requireTenantId()`), nunca de
+ * la query o del cuerpo: un `tenantId` declarado por el cliente solo se acepta
+ * si coincide con el activo, y un documento de otro tenant responde exactamente
+ * igual que uno inexistente.
  */
 @Injectable()
 export class DocumentStoreService {
@@ -48,18 +55,19 @@ export class DocumentStoreService {
     dto: CreateFlexibleDocumentDto,
     actor: AuthenticatedUser,
   ): Promise<DocumentResponseDto> {
+    const tenantId = this.scopedTenant(dto.tenantId);
     this.logger.info(
       {
         operation: 'document_store.document.create',
         collection,
-        tenantId: dto.tenantId,
+        tenantId,
         documentType: dto.documentType,
         actorId: actor.id,
       },
       'Creando documento en el almacén flexible',
     );
     const doc = await this.repo.insert(collection, {
-      tenantId: dto.tenantId,
+      tenantId,
       documentType: dto.documentType,
       payload: dto.payload,
     });
@@ -70,12 +78,13 @@ export class DocumentStoreService {
   async findOne(
     collection: string,
     id: string,
-    tenantId: string,
+    declaredTenantId?: string,
   ): Promise<DocumentResponseDto> {
+    const tenantId = this.scopedTenant(declaredTenantId);
     const objectId = this.toObjectId(id);
     const doc = await this.repo.findById(collection, objectId, tenantId);
     if (!doc) {
-      throw new ResourceNotFoundException('Documento no encontrado');
+      throw this.notAvailable();
     }
     return DocumentResponseDto.from(doc);
   }
@@ -86,7 +95,7 @@ export class DocumentStoreService {
     query: ListDocumentsQueryDto,
   ): Promise<PageResponseDto<DocumentResponseDto>> {
     const { items, total } = await this.repo.list(collection, {
-      tenantId: query.tenantId,
+      tenantId: this.scopedTenant(query.tenantId),
       documentType: query.documentType,
       offset: query.offset,
       limit: query.pageSize,
@@ -113,15 +122,12 @@ export class DocumentStoreService {
         'Nada que actualizar: indica payload y/o documentType',
       );
     }
+    const tenantId = this.scopedTenant(dto.tenantId);
     const objectId = this.toObjectId(id);
     // Se distingue "no existe" de "versión desfasada" para dar un error preciso.
-    const current = await this.repo.findById(
-      collection,
-      objectId,
-      dto.tenantId,
-    );
+    const current = await this.repo.findById(collection, objectId, tenantId);
     if (!current) {
-      throw new ResourceNotFoundException('Documento no encontrado');
+      throw this.notAvailable();
     }
     if (current.version !== dto.expectedVersion) {
       throw new ConcurrencyConflictException(
@@ -134,7 +140,7 @@ export class DocumentStoreService {
         operation: 'document_store.document.update',
         collection,
         id,
-        tenantId: dto.tenantId,
+        tenantId,
         actorId: actor.id,
       },
       'Actualizando documento',
@@ -142,7 +148,7 @@ export class DocumentStoreService {
     const updated = await this.repo.updateWithVersion(
       collection,
       objectId,
-      dto.tenantId,
+      tenantId,
       dto.expectedVersion,
       { payload: dto.payload, documentType: dto.documentType },
     );
@@ -159,9 +165,10 @@ export class DocumentStoreService {
   async softDelete(
     collection: string,
     id: string,
-    tenantId: string,
+    declaredTenantId: string | undefined,
     actor: AuthenticatedUser,
   ): Promise<DocumentResponseDto> {
+    const tenantId = this.scopedTenant(declaredTenantId);
     const objectId = this.toObjectId(id);
     this.logger.info(
       {
@@ -175,15 +182,39 @@ export class DocumentStoreService {
     );
     const deleted = await this.repo.softDelete(collection, objectId, tenantId);
     if (!deleted) {
-      throw new ResourceNotFoundException('Documento no encontrado');
+      throw this.notAvailable();
     }
     return DocumentResponseDto.from(deleted);
+  }
+
+  /**
+   * Tenant sobre el que opera la petición: el del contexto.
+   *
+   * @param declaredTenantId - Tenant que declaró el cliente en la query o el cuerpo.
+   * @returns El tenant activo.
+   * @throws ResourceNotFoundException si el cliente declaró otro tenant.
+   */
+  private scopedTenant(declaredTenantId?: string): string {
+    const tenantId = requireTenantId();
+    if (declaredTenantId !== undefined && declaredTenantId !== tenantId) {
+      throw this.notAvailable();
+    }
+    return tenantId;
+  }
+
+  /** El 404 uniforme del módulo: mismo mensaje y `reason`, sin `details`. */
+  private notAvailable(): ResourceNotFoundException {
+    return new ResourceNotFoundException(
+      'Documento no encontrado',
+      undefined,
+      DocumentStoreErrorReason.DOCUMENT_NOT_AVAILABLE,
+    );
   }
 
   /** Convierte el id de ruta a `ObjectId`; un id inválido es un recurso ausente. */
   private toObjectId(id: string): ObjectId {
     if (!ObjectId.isValid(id)) {
-      throw new ResourceNotFoundException('Documento no encontrado');
+      throw this.notAvailable();
     }
     return new ObjectId(id);
   }

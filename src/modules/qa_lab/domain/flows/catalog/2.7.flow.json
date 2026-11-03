@@ -1,0 +1,374 @@
+{
+  "id": "2.7",
+  "version": 1,
+  "module": "2 · Médico",
+  "title": "Facturación y/o pago por la consulta médica",
+  "source": {
+    "document": "SALUD/📋 Registro de procesos por módulo.md",
+    "section": "2.7 · Facturación y/o pago por la consulta medica"
+  },
+  "actors": ["PRACTITIONER", "PATIENT", "INSURER"],
+  "frontRoutes": ["/medical-records/:profileId/consultation"],
+  "root": "decidir-seguro",
+  "nodes": [
+    {
+      "id": "decidir-seguro",
+      "kind": "DECISION",
+      "title": "¿El paciente tiene seguro?",
+      "actor": "PRACTITIONER",
+      "sourceRef": "ítems 1 y 2",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "El paciente no tiene seguro (simulación 1)",
+          "expected": "El QR es por el monto total de la consulta",
+          "next": "qr-monto-total",
+          "reason": "Decisión del recorrido: no llama a la API; sus caminos se prueban en los nodos a los que lleva."
+        },
+        {
+          "kind": "EDGE",
+          "condition": "El paciente tiene seguro (simulación 2)",
+          "expected": "El QR es sólo por el coaseguro",
+          "next": "qr-coaseguro",
+          "reason": "Decisión del recorrido: no llama a la API; sus caminos se prueban en los nodos a los que lleva."
+        }
+      ]
+    },
+    {
+      "id": "qr-monto-total",
+      "kind": "API_CALL",
+      "title": "Emitir un QR por el monto total",
+      "actor": "PRACTITIONER",
+      "gap": "No se encontró un endpoint que emita un QR por un monto de consulta. Lo más cercano: `POST /payments/checkout-sessions` (sesión de cobro de caja) y `PUT /practitioners/me/sites/{siteId}/bank-qr` (QR bancario fijo del consultorio).",
+      "sourceRef": "ítem 1.1",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "El médico emite el cobro",
+          "expected": "El paciente ve un QR por el monto total",
+          "next": "registrar-pago",
+          "reason": "Sin endpoint en el contrato: no hay qué probar."
+        }
+      ]
+    },
+    {
+      "id": "qr-coaseguro",
+      "kind": "API_CALL",
+      "title": "Emitir un QR por el monto del coaseguro",
+      "actor": "PRACTITIONER",
+      "gap": "No se encontró un endpoint que emita un QR por un monto de consulta. Lo más cercano: `POST /payments/checkout-sessions` (sesión de cobro de caja) y `PUT /practitioners/me/sites/{siteId}/bank-qr` (QR bancario fijo del consultorio).",
+      "sourceRef": "ítem 2.1",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "El médico emite el cobro",
+          "expected": "El paciente ve un QR por el coaseguro",
+          "next": "registrar-pago",
+          "reason": "Sin endpoint en el contrato: no hay qué probar."
+        }
+      ]
+    },
+    {
+      "id": "registrar-pago",
+      "kind": "API_CALL",
+      "title": "Registrar el pago del paciente",
+      "actor": "PATIENT",
+      "endpoint": {
+        "method": "POST",
+        "path": "/billing/simulated/charges/{chargeId}/payment"
+      },
+      "effects": [
+        "El aviso al paciente («TOUS» en la fuente) informa el pago realizado"
+      ],
+      "sourceRef": "ítems 1.2 y 2.2",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "El cobro existe y el paciente pagó",
+          "expected": "Queda el pago y el paciente recibe un aviso del monto pagado",
+          "next": "quiere-factura",
+          "reason": "Journey con variable: necesita un identificador producido por el paso anterior y el runner aún no encadena respuestas (pendiente #5 del portal)."
+        },
+        {
+          "kind": "NEGATIVE",
+          "condition": "Falta el cuerpo del pago",
+          "expected": "Rechaza la petición (400)",
+          "loopsTo": "registrar-pago",
+          "qaCase": {
+            "method": "POST",
+            "path": "/billing/simulated/charges/00000000-0000-4000-8000-0000000000aa/payment",
+            "expectedStatus": 400,
+            "observedOn": "2026-10-17",
+            "body": {},
+            "headers": {
+              "x-tenant-id": "1befcfea-44c0-563a-81cd-337ec6acc840"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "quiere-factura",
+      "kind": "DECISION",
+      "title": "¿El paciente quiere factura?",
+      "actor": "PATIENT",
+      "sourceRef": "ítems 1.2 y 1.3",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "No quiere factura",
+          "expected": "Recibe sólo un comprobante de pago en su app",
+          "next": "comprobante-pago",
+          "reason": "Decisión del recorrido: no llama a la API; sus caminos se prueban en los nodos a los que lleva."
+        },
+        {
+          "kind": "EDGE",
+          "condition": "Quiere factura",
+          "expected": "Se piden NIT y razón social",
+          "next": "datos-facturacion",
+          "reason": "Decisión del recorrido: no llama a la API; sus caminos se prueban en los nodos a los que lleva."
+        }
+      ]
+    },
+    {
+      "id": "comprobante-pago",
+      "kind": "API_CALL",
+      "title": "Enviar el comprobante de pago a la app del paciente",
+      "actor": "SYSTEM",
+      "gap": "No se encontró un endpoint específico de comprobante de pago al paciente; `/notifications/requests` envía avisos, pero el contrato no define un comprobante.",
+      "sourceRef": "ítems 1.2 y 2.2",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "El paciente no quiso factura",
+          "expected": "Recibe el comprobante directamente en su app",
+          "next": "tiene-seguro",
+          "reason": "Sin endpoint en el contrato: no hay qué probar."
+        }
+      ]
+    },
+    {
+      "id": "datos-facturacion",
+      "kind": "API_CALL",
+      "title": "Pedir y reutilizar NIT y razón social",
+      "actor": "PRACTITIONER",
+      "gap": "No se encontró un endpoint que guarde los datos de facturación del paciente ni que complete la razón social a partir del NIT.",
+      "sourceRef": "ítems 1.3.1 y 1.3.2",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "El paciente da su NIT",
+          "expected": "Si ya estaba guardado, la app completa la razón social; si no, queda guardado",
+          "next": "emitir-factura",
+          "reason": "Sin endpoint en el contrato: no hay qué probar."
+        }
+      ]
+    },
+    {
+      "id": "emitir-factura",
+      "kind": "API_CALL",
+      "title": "Emitir la factura",
+      "actor": "PRACTITIONER",
+      "endpoint": {
+        "method": "POST",
+        "path": "/billing/simulated/charges/{chargeId}/invoices"
+      },
+      "sourceRef": "ítem 1.3.3",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "Hay NIT y razón social",
+          "expected": "Emite la factura al NIT",
+          "next": "enviar-factura",
+          "reason": "Journey con variable: necesita un identificador producido por el paso anterior y el runner aún no encadena respuestas (pendiente #5 del portal)."
+        },
+        {
+          "kind": "NEGATIVE",
+          "condition": "Falta el cuerpo de la factura",
+          "expected": "Rechaza la petición (400)",
+          "loopsTo": "datos-facturacion",
+          "qaCase": {
+            "method": "POST",
+            "path": "/billing/simulated/charges/00000000-0000-4000-8000-0000000000aa/invoices",
+            "expectedStatus": 400,
+            "observedOn": "2026-10-17",
+            "body": {},
+            "headers": {
+              "x-tenant-id": "1befcfea-44c0-563a-81cd-337ec6acc840"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "enviar-factura",
+      "kind": "API_CALL",
+      "title": "Enviar la factura al paciente",
+      "actor": "SYSTEM",
+      "endpoint": {
+        "method": "POST",
+        "path": "/billing/simulated/invoices/{invoiceId}/email"
+      },
+      "sourceRef": "ítem 1.3.2.1",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "La factura se emitió",
+          "expected": "El paciente la recibe en la app, sin costo de envío por mensajería",
+          "next": "tiene-seguro",
+          "reason": "Journey con variable: necesita un identificador producido por el paso anterior y el runner aún no encadena respuestas (pendiente #5 del portal)."
+        },
+        {
+          "kind": "NEGATIVE",
+          "condition": "Falta el cuerpo del envío",
+          "expected": "Rechaza la petición (400)",
+          "loopsTo": "enviar-factura",
+          "qaCase": {
+            "method": "POST",
+            "path": "/billing/simulated/invoices/00000000-0000-4000-8000-0000000000aa/email",
+            "expectedStatus": 400,
+            "observedOn": "2026-10-17",
+            "body": {},
+            "headers": {
+              "x-tenant-id": "1befcfea-44c0-563a-81cd-337ec6acc840"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "tiene-seguro",
+      "kind": "DECISION",
+      "title": "¿Falta cobrar a la aseguradora?",
+      "actor": "PRACTITIONER",
+      "sourceRef": "ítem 2.4",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "El paciente no tiene seguro",
+          "expected": "No hay nada más que cobrar",
+          "next": "fin-sin-seguro",
+          "reason": "Decisión del recorrido: no llama a la API; sus caminos se prueban en los nodos a los que lleva."
+        },
+        {
+          "kind": "EDGE",
+          "condition": "El paciente tiene seguro",
+          "expected": "Se factura a la aseguradora el monto restante, con el nombre del paciente",
+          "next": "reclamo-aseguradora",
+          "reason": "Decisión del recorrido: no llama a la API; sus caminos se prueban en los nodos a los que lleva."
+        }
+      ]
+    },
+    {
+      "id": "reclamo-aseguradora",
+      "kind": "API_CALL",
+      "title": "Facturar el monto restante a la aseguradora",
+      "actor": "PRACTITIONER",
+      "endpoint": {
+        "method": "POST",
+        "path": "/insurance-claims"
+      },
+      "sourceRef": "ítem 2.4",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "Hay coaseguro pagado y monto restante",
+          "expected": "Crea el reclamo a la aseguradora con el detalle del paciente",
+          "next": "programar-facturacion",
+          "reason": "Journey con variable: necesita un identificador producido por el paso anterior y el runner aún no encadena respuestas (pendiente #5 del portal)."
+        },
+        {
+          "kind": "NEGATIVE",
+          "condition": "Falta el cuerpo del reclamo",
+          "expected": "Rechaza la petición (400)",
+          "loopsTo": "reclamo-aseguradora",
+          "qaCase": {
+            "method": "POST",
+            "path": "/insurance-claims",
+            "expectedStatus": 400,
+            "observedOn": "2026-10-17",
+            "body": {},
+            "headers": {
+              "x-tenant-id": "1befcfea-44c0-563a-81cd-337ec6acc840"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "programar-facturacion",
+      "kind": "API_CALL",
+      "title": "Programar la periodicidad de la facturación a la aseguradora",
+      "actor": "PRACTITIONER",
+      "gap": "No se encontró un endpoint que configure la periodicidad (semanal, quincenal, mensual) de la facturación a la aseguradora.",
+      "sourceRef": "ítem 2.4.1",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "El médico elige semanal, quincenal o mensual",
+          "expected": "La facturación sale en el plazo que recibe el seguro",
+          "next": "informe-medico",
+          "reason": "Sin endpoint en el contrato: no hay qué probar."
+        }
+      ]
+    },
+    {
+      "id": "informe-medico",
+      "kind": "API_CALL",
+      "title": "Sacar el informe de lo facturado al seguro, con deducible y a pacientes sin seguro",
+      "actor": "PRACTITIONER",
+      "endpoint": {
+        "method": "GET",
+        "path": "/accounting/practitioner/paid-consultations"
+      },
+      "sourceRef": "ítem 2.4.2",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "El médico pide el informe de una práctica",
+          "expected": "Devuelve las consultas pagadas",
+          "next": "fin-con-seguro",
+          "reason": "Journey con variable: necesita un identificador producido por el paso anterior y el runner aún no encadena respuestas (pendiente #5 del portal)."
+        },
+        {
+          "kind": "NEGATIVE",
+          "condition": "Falta practiceId",
+          "expected": "Rechaza la petición (400)",
+          "loopsTo": "informe-medico",
+          "qaCase": {
+            "method": "GET",
+            "path": "/accounting/practitioner/paid-consultations",
+            "expectedStatus": 400,
+            "observedOn": "2026-10-17",
+            "headers": {
+              "x-tenant-id": "1befcfea-44c0-563a-81cd-337ec6acc840"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "fin-sin-seguro",
+      "kind": "OUTCOME",
+      "title": "Consulta cobrada (paciente sin seguro)",
+      "actor": "PRACTITIONER",
+      "sourceRef": "ítem 1",
+      "branches": []
+    },
+    {
+      "id": "fin-con-seguro",
+      "kind": "OUTCOME",
+      "title": "Consulta cobrada y facturada a la aseguradora",
+      "actor": "PRACTITIONER",
+      "sourceRef": "ítem 2",
+      "branches": []
+    }
+  ],
+  "openQuestions": [
+    "Quién adjudica la autorización del seguro y si AloVida es la pasarela de pagos son decisiones que no son del equipo; el QR depende de la segunda.",
+    "La fuente no dice cómo la app sabe si el paciente tiene seguro ni de dónde sale el monto del coaseguro.",
+    "La fuente no distingue qué hace el médico y qué hace el paciente al «pagar»: se asumió que el pago lo registra el paciente al escanear el QR.",
+    "El «TOUS» no está definido en la fuente; se leyó como aviso al paciente.",
+    "Las ramas con `reason` «Journey con variable» no corren hasta que el runner de QA encadene respuestas."
+  ]
+}

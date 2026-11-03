@@ -7,7 +7,7 @@
 | **PHI** | Protected Health Information — dato de salud identificable. El PDP clínico (`authz`) exige rol **y** alcance clínico vigente para acceder a PHI, no basta con el rol (ver [autorización](../api/authorization.md)). |
 | **PDP** | Policy Decision Point — el punto que decide si una petición de acceso clínico se concede, implementado en `src/modules/authz/services/authz-pdp.service.ts`. |
 | **RBAC** | Role-Based Access Control — autorización por rol global (`RolesGuard`, `@Roles(...)`), 120 roles distintos en uso (ver [actores y roles](actors-and-roles.md)). |
-| **RLS** | Row-Level Security — aislamiento de filas por tenant a nivel de PostgreSQL, controlado por `RLS_ENFORCE` (ver `SEC-001` en la [matriz de trazabilidad](../governance/traceability-matrix.md)). |
+| **RLS** | Row-Level Security — aislamiento de filas por tenant a nivel de PostgreSQL, controlado por `RLS_ENFORCE` (ver [aislamiento por tenant](../security/tenant-isolation.md)). |
 | **Tenant** | Unidad de aislamiento multi-organización del sistema (una clínica, cadena o red de salud). |
 | **Outbox** | Patrón de mensajería transaccional propio sobre PostgreSQL (`messaging.message_queues`); un cambio de dominio y su evento se escriben en la misma transacción, y `worker-messaging` los despacha después. |
 | **`row_version`** | Columna de bloqueo optimista presente en el modelo de datos (`version: true` en MikroORM); dos escrituras concurrentes sobre la misma fila se detectan en vez de pisarse silenciosamente. |

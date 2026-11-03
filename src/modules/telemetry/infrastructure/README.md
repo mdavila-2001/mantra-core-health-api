@@ -2,14 +2,16 @@
 
 Adaptadores que implementan los puertos del dominio y su selección por entorno.
 
-## Contenido
+## Contents
 
-### Subcarpetas
+### Subdirectories
 
-- [`google-analytics/`](./google-analytics/README.md): adaptador del Measurement
-  Protocol de Google Analytics 4.
+- `repositories/`: acceso a datos propio del módulo.
+- `adapters/`: implementaciones del puerto de analítica web.
+  - [`google-analytics/`](./adapters/google-analytics/README.md): adaptador del
+    Measurement Protocol de Google Analytics 4.
 
-### Archivos
+### Archivos de `adapters/`
 
 | Archivo | Responsabilidad |
 | --- | --- |
@@ -18,7 +20,7 @@ Adaptadores que implementan los puertos del dominio y su selección por entorno.
 | `web-analytics.factory.spec.ts` | Pruebas unitarias de la selección y del adaptador deshabilitado. |
 | `web-analytics.wiring.spec.ts` | Comprueba que el contenedor de NestJS construye el grafo real, sin levantar el ORM. |
 
-## Criterios de mantenimiento
+## Maintenance guidelines
 
 - Un adaptador nuevo se añade aquí, se declara en `WEB_ANALYTICS_PROVIDERS` y se
   cablea en `web-analytics.factory.ts`; ningún servicio de dominio cambia.

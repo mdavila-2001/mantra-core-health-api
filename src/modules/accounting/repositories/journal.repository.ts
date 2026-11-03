@@ -216,6 +216,21 @@ export class JournalRepository {
   }
 
   /**
+   * Una línea del mayor por id, sin acotar: quien la usa la contrasta contra el
+   * tenant activo a través de la práctica de su asiento.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de la línea.
+   * @returns La línea, o `null` si no existe.
+   */
+  findLedgerEntryById(
+    em: EntityManager,
+    id: string,
+  ): Promise<LedgerEntries | null> {
+    return em.findOne(LedgerEntries, { id });
+  }
+
+  /**
    * Obtiene find by transaction number.
    *
    * @param em - Contexto de persistencia o transacción activa.
@@ -240,13 +255,13 @@ export class JournalRepository {
    * enseña el diario no es contabilidad, es un buzón.
    *
    * @param em - Contexto de persistencia o transacción activa.
-   * @param filtros - Práctica (obligatoria), ventana y período.
+   * @param filters - Práctica (obligatoria), ventana y período.
    * @param limit - Tope de filas.
    * @returns Los asientos, del más reciente al más antiguo.
    */
   findTransactions(
     em: EntityManager,
-    filtros: {
+    filters: {
       practiceId: string;
       fiscalPeriodId?: string;
       statusConceptId?: string;
@@ -255,14 +270,14 @@ export class JournalRepository {
     },
     limit: number,
   ): Promise<JournalTransactions[]> {
-    const where: Record<string, unknown> = { practiceId: filtros.practiceId };
-    if (filtros.fiscalPeriodId) where.fiscalPeriodId = filtros.fiscalPeriodId;
-    if (filtros.statusConceptId)
-      where.statusConceptId = filtros.statusConceptId;
-    if (filtros.from || filtros.to) {
+    const where: Record<string, unknown> = { practiceId: filters.practiceId };
+    if (filters.fiscalPeriodId) where.fiscalPeriodId = filters.fiscalPeriodId;
+    if (filters.statusConceptId)
+      where.statusConceptId = filters.statusConceptId;
+    if (filters.from || filters.to) {
       where.transactionDate = {
-        ...(filtros.from ? { $gte: filtros.from } : {}),
-        ...(filtros.to ? { $lte: filtros.to } : {}),
+        ...(filters.from ? { $gte: filters.from } : {}),
+        ...(filters.to ? { $lte: filters.to } : {}),
       };
     }
 
@@ -549,15 +564,15 @@ export class JournalRepository {
       segmentId: string | null;
     }>
   > {
-    const asientos = await em.find(
+    const journalEntries = await em.find(
       JournalTransactions,
       { practiceId, statusConceptId: postedStatusConceptId },
       { limit },
     );
-    if (asientos.length === 0) return [];
+    if (journalEntries.length === 0) return [];
 
     const entries = await em.find(LedgerEntries, {
-      transactionId: { $in: asientos.map((a) => a.id) },
+      transactionId: { $in: journalEntries.map((a) => a.id) },
     });
     if (entries.length === 0) return [];
 
@@ -611,6 +626,25 @@ export class JournalRepository {
     ledgerEntryId: string,
   ): Promise<JournalEntryAssignments | null> {
     return em.findOne(JournalEntryAssignments, { ledgerEntryId });
+  }
+
+  /**
+   * Imputaciones (centro de costo, de beneficio, activo…) de varias líneas en
+   * una sola consulta: la lectura del detalle de un asiento las devuelve junto
+   * a cada línea sin una consulta por fila.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ledgerEntryIds - Líneas del mayor cuyas imputaciones se piden.
+   * @returns Las imputaciones encontradas, sin orden garantizado.
+   */
+  assignmentsForEntries(
+    em: EntityManager,
+    ledgerEntryIds: readonly string[],
+  ): Promise<JournalEntryAssignments[]> {
+    if (ledgerEntryIds.length === 0) return Promise.resolve([]);
+    return em.find(JournalEntryAssignments, {
+      ledgerEntryId: { $in: [...ledgerEntryIds] },
+    });
   }
 
   /**

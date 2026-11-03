@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 17 · schema billing
+-- SALUD v4.2.83 · módulo 17 · schema billing
 -- Generado de diagram_17_billing.puml — NO editar a mano.
 
 
@@ -6,6 +6,18 @@ DO $$ BEGIN
     ALTER TABLE "billing"."service_catalog"
         ADD CONSTRAINT "fk_service_catalog_tax_code_id" FOREIGN KEY ("tax_code_id")
         REFERENCES "billing"."tax_codes" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "billing"."charge_captures"
+        ADD CONSTRAINT "fk_charge_captures_space_tariff_id" FOREIGN KEY ("space_tariff_id")
+        REFERENCES "billing"."space_tariffs" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "billing"."charge_captures"
+        ADD CONSTRAINT "fk_charge_captures_invoice_line_id" FOREIGN KEY ("invoice_line_id")
+        REFERENCES "billing"."invoice_lines" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -48,6 +60,18 @@ DO $$ BEGIN
     ALTER TABLE "billing"."payments_made"
         ADD CONSTRAINT "fk_payments_made_vendor_id" FOREIGN KEY ("vendor_id")
         REFERENCES "billing"."vendors" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "billing"."siat_simulated_invoices"
+        ADD CONSTRAINT "fk_siat_simulated_invoices_invoice_id" FOREIGN KEY ("invoice_id")
+        REFERENCES "billing"."invoices" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "billing"."siat_simulated_outbox"
+        ADD CONSTRAINT "fk_siat_simulated_outbox_siat_invoice_id" FOREIGN KEY ("siat_invoice_id")
+        REFERENCES "billing"."siat_simulated_invoices" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN

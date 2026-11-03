@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   Roles,
   getCurrentTenantId,
@@ -54,6 +55,11 @@ export class AuthzRolesController {
   }
 
   /** UC-06-03. */
+  @Audited({
+    action: 'ROLE_CREATED',
+    entity: 'role',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -66,6 +72,11 @@ export class AuthzRolesController {
   }
 
   /** UC-06-03. */
+  @Audited({
+    action: 'ROLE_PERMISSIONS_SET',
+    entity: 'role',
+    entityId: 'param:roleId',
+  })
   @Put(':roleId/permissions')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -79,6 +90,11 @@ export class AuthzRolesController {
   }
 
   /** UC-06-08. */
+  @Audited({
+    action: 'ROLE_FIELD_PERMISSIONS_SET',
+    entity: 'role',
+    entityId: 'param:roleId',
+  })
   @Put(':roleId/field-permissions')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

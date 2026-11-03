@@ -7,6 +7,7 @@ como `@IsDateString`. Los DTOs de respuesta exponen solo campos seguros.
 | Archivo | DTOs |
 |---------|------|
 | `account.dto.ts` | `CreateAccountDto`, `AccountResponseDto` |
+| `practitioner-simple-accounting.dto.ts` | Contabilidad simple del doctor (P49): `SimplePractitionerSummaryDto`, `SimpleAccountDto`, `SimpleRecordDto`, `SimpleTransactionDto`, sus entradas `Create*`/`*InputDto` y las consultas |
 | `journal.dto.ts` | `LedgerLineDto`, `PostJournalDto`, `ReverseJournalDto`, `DetermineAccountsDto`, `AttachFileDto`, respuestas + `AccountingStatusDto` |
 | `fiscal.dto.ts` | `FiscalPeriodInputDto`, `CreateFiscalYearDto`, `LockPeriodDto`, `FiscalYearResponseDto` |
 | `accrual.dto.ts` | `AccrualScheduleInputDto`, `CreateAccrualObjectDto`, `RunAccrualsDto`, respuestas |

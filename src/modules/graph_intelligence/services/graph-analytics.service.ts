@@ -5,6 +5,7 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  requireTenantId,
   type AuthenticatedUser,
 } from '../../../common';
 import { OutboxService } from '../../messaging/services';
@@ -30,6 +31,7 @@ import {
   RequestGraphDeletionDto,
   GraphDeletionResponseDto,
 } from '../dto';
+import { assertGraphResourceInTenant } from '../graph-scope';
 
 const DEFAULT_ALERT_THRESHOLD = 0.8;
 
@@ -256,19 +258,13 @@ export class GraphAnalyticsService {
     dto: EvaluateRuleDto,
     actor: AuthenticatedUser,
   ): Promise<EvaluateRuleResponseDto> {
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const rule = await this.analyticsRepo.findRuleDefinitionById(
-        tx,
-        ruleDefinitionId,
+      const rule = assertGraphResourceInTenant(
+        await this.analyticsRepo.findRuleDefinitionById(tx, ruleDefinitionId),
+        'Definición de regla no encontrada.',
+        tenantId,
       );
-      if (!rule) {
-        throw new ResourceNotFoundException(
-          'Definición de regla no encontrada.',
-          {
-            ruleDefinitionId,
-          },
-        );
-      }
       if (rule.state !== 'active') {
         throw new PreconditionFailedException(
           'La definición de regla no está activa.',
@@ -368,13 +364,13 @@ export class GraphAnalyticsService {
     dto: TriageRuleHitDto,
     actor: AuthenticatedUser,
   ): Promise<RuleHitResponseDto> {
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const hit = await this.analyticsRepo.findHitForUpdate(tx, hitId);
-      if (!hit) {
-        throw new ResourceNotFoundException('Hallazgo no encontrado.', {
-          hitId,
-        });
-      }
+      const hit = assertGraphResourceInTenant(
+        await this.analyticsRepo.findHitForUpdate(tx, hitId),
+        'Hallazgo no encontrado.',
+        tenantId,
+      );
 
       if (hit.status === dto.status) {
         return {

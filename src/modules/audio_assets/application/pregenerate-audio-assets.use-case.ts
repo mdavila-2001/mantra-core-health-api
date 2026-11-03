@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { AuthenticatedUser } from '../../../common';
 import type { AudioDynamicField } from '../domain/audio.types';
-import { AudioAssetsRepository } from '../repositories/audio-assets.repository';
+import { AudioAssetsRepository } from '../infrastructure/repositories/audio-assets.repository';
 import { ResolveAudioAssetUseCase } from './resolve-audio-asset.use-case';
 
 const MAX_ENUMERATED_COMBINATIONS = 500;

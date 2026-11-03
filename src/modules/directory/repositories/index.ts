@@ -3,3 +3,4 @@ export * from './branches.repository';
 export * from './tenant-memberships.repository';
 export * from './branch-memberships.repository';
 export * from './directory-tenant-legal.repository';
+export * from './tenant-medical-facilities.repository';

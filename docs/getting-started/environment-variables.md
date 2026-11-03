@@ -11,7 +11,7 @@
 | `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` | Conexión administrativa (DDL/migraciones/seed) — ver `docs/security/tenant-isolation.md` sobre por qué deben ser roles distintos |
 | `MIKRO_ORM_DEBUG` | Log de queries SQL |
 | `ORM_SCHEMA_SYNC` | `off` \| `dry-run` \| `safe` — ver `src/orm/README.md`. `off` es obligatorio al generar documentación (`tools/openapi/generate-openapi.mjs`) para no mutar el esquema de una base compartida |
-| `RLS_ENFORCE` | Activa Row-Level Security por tenant — **verificar por entorno**, ver `SEC-001` en `docs/governance/traceability-matrix.md` |
+| `RLS_ENFORCE` | Activa Row-Level Security por tenant — **verificar por entorno**, ver `docs/security/tenant-isolation.md` |
 
 ## Otros almacenes
 
@@ -40,6 +40,7 @@
 | `WORKER_HTTP_TIMEOUT_MS` | Timeout HTTP del cliente interno de los workers (default `30000`) |
 | `MESSAGING_QUEUE_CODES` | Códigos de `messaging.message_queues` que `worker-messaging` drena |
 | `MOCK_PROVIDER_BASE_URL`, `MOCK_PROVIDER_API_KEY` | `mock-provider-server` para el adapter mock de proveedores (notificaciones, borrado cross-store, embeddings) |
+| `EMAIL_ALLOWED_RECIPIENT_DOMAINS` | Guarda opt-in para dev/test: lista de dominios separada por comas (p. ej. `alovida.test`). Con valor, el canal EMAIL solo entrega a esos dominios (dominio exacto, sin distinguir mayúsculas; subdominios solo si se listan); el resto se suprime sin llamar al proveedor y la entrega queda `FAILED` con `RECIPIENT_DOMAIN_NOT_ALLOWED` (no reintentable). Vacía = sin restricción (producción) |
 | `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_REFRESH_TOKEN`, `GOOGLE_SENDER_EMAIL` | Proveedor real de email (Gmail API) del canal EMAIL de `messaging`, gana sobre el mock si ambos están configurados — ver [guía de configuración](../operations/gmail-provider-setup.md) |
 
 ## Otras

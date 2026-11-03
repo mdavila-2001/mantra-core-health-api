@@ -165,7 +165,7 @@ for (const [schema, list] of [...bySchema.entries()].sort((a, b) =>
 const tsKeys = new Set(ts.keys());
 const vaultOnly = [...vault.keys()].filter((k) => !tsKeys.has(k)).sort();
 md += `## Entidades diseñadas, no implementadas\n\n`;
-md += `${vaultOnly.length} entidades existen en la bóveda de diseño pero no tienen entidad MikroORM real en \`src/modules/**/entities\` al momento de esta generación. No se documentan como catálogo activo — es trabajo de modelo pendiente de materializar, no una entidad utilizable hoy.\n\n`;
+md += `${vaultOnly.length} entidades existen en la bóveda de diseño pero no tienen entidad MikroORM real en \`src/modules/**/entities\` al momento de esta generación. No se documentan como catálogo activo: son diseño del modelo sin materializar, no entidades utilizables.\n\n`;
 md += '<details><summary>Ver lista completa</summary>\n\n';
 md += vaultOnly.map((k) => `- \`${k}\``).join('\n');
 md += '\n\n</details>\n';

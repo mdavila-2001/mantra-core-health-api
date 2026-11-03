@@ -10,7 +10,12 @@ import {
   Put,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { AssessmentService } from '../services';
 import {
   CreateFindingDto,
@@ -44,6 +49,11 @@ export class AssessmentController {
   constructor(private readonly service: AssessmentService) {}
 
   /** UC-11-11. */
+  @Audited({
+    action: 'OPERATIONAL_FRAMEWORK_PUBLISHED',
+    entity: 'operational_framework',
+    entityId: 'result.id',
+  })
   @Post('operational-frameworks')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -58,6 +68,11 @@ export class AssessmentController {
   }
 
   /** UC-11-12. */
+  @Audited({
+    action: 'WORKLOAD_ASSESSMENT_CREATED',
+    entity: 'workload_assessment',
+    entityId: 'result.id',
+  })
   @Post('workload-assessments')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -70,6 +85,11 @@ export class AssessmentController {
   }
 
   /** UC-11-12. */
+  @Audited({
+    action: 'WORKLOAD_ASSESSMENT_CONTROL_RESULTS_SET',
+    entity: 'workload_assessment',
+    entityId: 'param:id',
+  })
   @Put('workload-assessments/:id/control-results')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -85,6 +105,11 @@ export class AssessmentController {
   }
 
   /** UC-11-13. */
+  @Audited({
+    action: 'ASSESSMENT_FINDING_CREATED',
+    entity: 'assessment_finding',
+    entityId: 'result.id',
+  })
   @Post('assessments/:id/findings')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -98,6 +123,11 @@ export class AssessmentController {
   }
 
   /** UC-11-13. */
+  @Audited({
+    action: 'REMEDIATION_PLAN_CREATED',
+    entity: 'remediation_plan',
+    entityId: 'result.id',
+  })
   @Post('assessments/:id/remediation-plans')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -111,6 +141,11 @@ export class AssessmentController {
   }
 
   /** UC-11-14. */
+  @Audited({
+    action: 'REMEDIATION_ACTION_VERIFIED',
+    entity: 'remediation_action',
+    entityId: 'param:id',
+  })
   @Post('remediation-actions/:id/verify')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -124,6 +159,11 @@ export class AssessmentController {
   }
 
   /** UC-11-14. */
+  @Audited({
+    action: 'ASSESSMENT_FINDING_UPDATED',
+    entity: 'assessment_finding',
+    entityId: 'param:id',
+  })
   @Patch('findings/:id')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

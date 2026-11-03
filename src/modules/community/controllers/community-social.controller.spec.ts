@@ -7,6 +7,10 @@ import { jest } from '@jest/globals';
  * @returns Resultado de mock fn conforme al contrato `any`.
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
+import 'reflect-metadata';
+import { RequestMethod } from '@nestjs/common';
+import { ROLES_KEY } from '../../../common/auth/roles.decorator';
+import { AUDITED_KEY } from '../../../common/audit-trail/audit-trail.decorators';
 import { CommunitySocialController } from './community-social.controller';
 
 const actor = { id: 'u1', roles: [] } as any;
@@ -29,6 +33,7 @@ function build() {
     unblock: mockFn(),
   };
   const readService = {
+    listAttendableOrganizationShowcases: mockFn(),
     getProfile: mockFn(),
     listProfilePosts: mockFn(),
     getPost: mockFn(),
@@ -151,5 +156,47 @@ describe('CommunitySocialController', () => {
     const query = { blockerProfileId: 'p1', blockedProfileId: 'p2' };
     await d.controller.unblock(query as any, actor);
     expect(d.service.unblock).toHaveBeenCalledWith(query, actor);
+  });
+
+  describe('GET profiles/organization-showcases/me', () => {
+    it('delega en la lectura con la sesión, sin parámetros del cliente', async () => {
+      const d = build();
+      const page = { items: [] };
+      d.readService.listAttendableOrganizationShowcases.mockResolvedValue(page);
+      await expect(
+        d.controller.listOwnOrganizationShowcases(actor),
+      ).resolves.toBe(page);
+      expect(
+        d.readService.listAttendableOrganizationShowcases,
+      ).toHaveBeenCalledWith(actor);
+    });
+
+    it('se declara antes que by-slug y que toda ruta profiles/:profileId (el router prueba en orden)', () => {
+      const proto = CommunitySocialController.prototype as any;
+      const getPaths = Object.getOwnPropertyNames(proto)
+        .filter(
+          (name) =>
+            name !== 'constructor' &&
+            Reflect.getMetadata('method', proto[name]) === RequestMethod.GET,
+        )
+        .map((name) => Reflect.getMetadata('path', proto[name]) as string);
+      const own = getPaths.indexOf('profiles/organization-showcases/me');
+      expect(own).toBeGreaterThanOrEqual(0);
+      const generic = getPaths.findIndex(
+        (path) =>
+          path.startsWith('profiles/:profileId') ||
+          path === 'profiles/by-slug/:slug',
+      );
+      expect(own).toBeLessThan(generic);
+    });
+
+    it('es un GET sin @Roles ni @Audited', () => {
+      const handler = Object.getOwnPropertyDescriptor(
+        CommunitySocialController.prototype,
+        'listOwnOrganizationShowcases',
+      )?.value as object;
+      expect(Reflect.getMetadata(ROLES_KEY, handler)).toBeUndefined();
+      expect(Reflect.getMetadata(AUDITED_KEY, handler)).toBeUndefined();
+    });
   });
 });

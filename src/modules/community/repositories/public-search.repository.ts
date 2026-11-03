@@ -9,6 +9,7 @@ import {
 } from '../entities';
 import { COMM } from '../community.concepts';
 import { PROF } from '../../profiles/profiles.concepts';
+import { PractitionerAdmissions } from '../../profiles/entities';
 import { PRAC } from '../../practice/practice.concepts';
 import type { PublicTerritoryFilter } from '../services/public-territory-filter.service';
 
@@ -234,6 +235,8 @@ export interface SitePublicRow {
   readonly practice_type_concept_id: string;
   readonly practice_admin_user_id: string;
   readonly lines: string | null;
+  /** Distrito o zona, aparte de las líneas desde ADR-0028. */
+  readonly district_text: string | null;
   readonly city: string | null;
   readonly postal_code: string | null;
   readonly latitude: string | null;
@@ -321,10 +324,10 @@ export function publicSitesOf(
   }
 
   const output = new Map<string, ProfilePracticeSite[]>();
-  for (const [practitionerProfileId, sedes] of byProfessional) {
+  for (const [practitionerProfileId, sites] of byProfessional) {
     output.set(
       practitionerProfileId,
-      [...sedes.values()].sort(
+      [...sites.values()].sort(
         (a, b) => Number(b.isOwn) - Number(a.isOwn) || compareIds(a.id, b.id),
       ),
     );
@@ -340,7 +343,7 @@ export function publicSitesOf(
  * lectura de sedes con sesión.
  */
 function addressText(row: SitePublicRow): string | null {
-  const parts = [row.lines, row.city, row.postal_code]
+  const parts = [row.lines, row.district_text, row.city, row.postal_code]
     .map((part) => part?.trim())
     .filter((part): part is string => Boolean(part));
   return parts.length === 0 ? null : parts.join(', ');
@@ -374,16 +377,36 @@ function compareIds(a: string, b: string): number {
 @Injectable()
 export class PublicSearchRepository {
   /**
+   * Si la base tiene `unaccent`. Se pregunta UNA vez a `pg_extension` en vez de
+   * intentar cada consulta con la función y reintentarla sin ella: ese
+   * `try/catch` ocultaba la extensión faltante y, dentro de una transacción,
+   * el primer intento fallido deja la transacción abortada.
+   */
+  private unaccentAvailable: Promise<boolean> | null = null;
+
+  private async normalizer(em: EntityManager): Promise<string> {
+    this.unaccentAvailable ??= em
+      .getConnection()
+      .execute<{ present: boolean }[]>(
+        `SELECT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'unaccent') AS present`,
+        [],
+        'all',
+      )
+      .then((rows) => rows[0]?.present === true);
+    return (await this.unaccentAvailable) ? 'unaccent' : '';
+  }
+
+  /**
    * Página del directorio público, filtrada por texto, ciudad, especialidad y tipo.
    *
    * @param em - Contexto de persistencia o transacción activa.
-   * @param filtros - Texto, ciudad, especialidad, tipo de sujeto y verificación.
+   * @param filters - Texto, ciudad, especialidad, tipo de sujeto y verificación.
    * @param limit - Tope de filas; se pide una de más para saber si hay página.
    * @returns Los perfiles públicos que coinciden.
    */
   async searchProfiles(
     em: EntityManager,
-    filtros: {
+    filters: {
       /** Texto libre, ya recortado. */
       q?: string;
       /** Tipo de sujeto al que acotar. */
@@ -405,9 +428,9 @@ export class PublicSearchRepository {
       visibilityConceptId: COMM.PROFILE_VISIBILITY_PUBLIC,
       statusConceptId: CONCEPTS.STATE_ACTIVE,
     };
-    if (filtros.targetTypeConceptId)
-      where.targetTypeConceptId = filtros.targetTypeConceptId;
-    if (filtros.verified)
+    if (filters.targetTypeConceptId)
+      where.targetTypeConceptId = filters.targetTypeConceptId;
+    if (filters.verified)
       where.verificationStatusConceptId = CONCEPTS.STATE_ACTIVE;
 
     // La ciudad vive en `common.addresses`, no en el perfil: se resuelve a
@@ -427,19 +450,17 @@ export class PublicSearchRepository {
     // pisarse: con el segundo sobreescribiendo al primero, «cardiólogos en
     // Cochabamba» habría devuelto los cardiólogos del país entero.
     const subjectsSets: string[][] = [];
-    if (filtros.city) {
-      subjectsSets.push(await this.targetIdsByCity(em, filtros.city));
+    if (filters.city) {
+      subjectsSets.push(await this.targetIdsByCity(em, filters.city));
     }
     // El lugar del catálogo acota el mismo eje —el sujeto— y por la misma
     // puerta que la ciudad: «cardiólogos en Cochabamba» interseca, no pisa.
-    if (filtros.territory) {
-      subjectsSets.push(
-        await this.targetIdsByTerritory(em, filtros.territory),
-      );
+    if (filters.territory) {
+      subjectsSets.push(await this.targetIdsByTerritory(em, filters.territory));
     }
-    if (filtros.specialtyConceptId) {
+    if (filters.specialtyConceptId) {
       subjectsSets.push(
-        await this.practitionerIdsBySpecialty(em, filtros.specialtyConceptId),
+        await this.practitionerIdsBySpecialty(em, filters.specialtyConceptId),
       );
     }
     if (subjectsSets.length > 0) {
@@ -453,12 +474,12 @@ export class PublicSearchRepository {
 
     // El keyset va sobre `(display_name, id)`: `display_name` solo no es único
     // —hay homónimos— y una página que empieza en un empate se saltea filas.
-    if (filtros.after) {
+    if (filters.after) {
       where.$or = [
-        { displayName: { $gt: filtros.after.displayName } },
+        { displayName: { $gt: filters.after.displayName } },
         {
-          displayName: filtros.after.displayName,
-          id: { $gt: filtros.after.id },
+          displayName: filters.after.displayName,
+          id: { $gt: filters.after.id },
         },
       ];
     }
@@ -468,11 +489,11 @@ export class PublicSearchRepository {
       limit,
     });
 
-    if (!filtros.q) return rows;
+    if (!filters.q) return rows;
 
     // El filtro de texto se aplica sobre los ids candidatos y no en memoria
     // sobre la página: filtrar después de paginar devolvería páginas de menos.
-    const ids = await this.matchIdsByText(em, filtros.q, where, limit);
+    const ids = await this.matchIdsByText(em, filters.q, where, limit);
     const allowed = new Set(ids);
     return rows.filter((row) => allowed.has(row.id));
   }
@@ -507,25 +528,15 @@ export class PublicSearchRepository {
     // grande. Es holgado a propósito: por debajo del tamaño de cualquier
     // directorio de una ciudad real, y muy por encima del de éste.
     const params = [city, 5000];
-    try {
-      const rows = await em
-        .getConnection()
-        .execute<{ owner_id: string }[]>(
-          base.replace(/%NORM%/g, 'unaccent'),
-          params,
-          'all',
-        );
-      return rows.map((f) => f.owner_id);
-    } catch {
-      const rows = await em
-        .getConnection()
-        .execute<{ owner_id: string }[]>(
-          base.replace(/%NORM%/g, ''),
-          params,
-          'all',
-        );
-      return rows.map((f) => f.owner_id);
-    }
+    const norm = await this.normalizer(em);
+    const rows = await em
+      .getConnection()
+      .execute<{ owner_id: string }[]>(
+        base.replace(/%NORM%/g, norm),
+        params,
+        'all',
+      );
+    return rows.map((f) => f.owner_id);
   }
 
   /**
@@ -570,9 +581,7 @@ export class PublicSearchRepository {
               LIMIT ?`,
             [
               territory.departmentConceptId,
-              territory.municipalityCodePrefixes.map(
-                (prefix) => `${prefix}%`,
-              ),
+              territory.municipalityCodePrefixes.map((prefix) => `${prefix}%`),
               tope,
             ],
             'all',
@@ -593,7 +602,7 @@ export class PublicSearchRepository {
     where: Record<string, unknown>,
     limit: number,
   ): Promise<string[]> {
-    const patron = `%${q.toLowerCase()}%`;
+    const pattern = `%${q.toLowerCase()}%`;
     const base = `
       SELECT id FROM community.public_profiles
       WHERE visibility_concept_id = ? AND status_concept_id = ?
@@ -604,25 +613,15 @@ export class PublicSearchRepository {
     const params = [
       where.visibilityConceptId,
       where.statusConceptId,
-      patron,
-      patron,
+      pattern,
+      pattern,
       limit,
     ];
-    try {
-      const rows = await em
-        .getConnection()
-        .execute<{ id: string }[]>(
-          base.replace(/%NORM%/g, 'unaccent'),
-          params,
-          'all',
-        );
-      return rows.map((f) => f.id);
-    } catch {
-      const rows = await em
-        .getConnection()
-        .execute<{ id: string }[]>(base.replace(/%NORM%/g, ''), params, 'all');
-      return rows.map((f) => f.id);
-    }
+    const norm = await this.normalizer(em);
+    const rows = await em
+      .getConnection()
+      .execute<{ id: string }[]>(base.replace(/%NORM%/g, norm), params, 'all');
+    return rows.map((f) => f.id);
   }
 
   /**
@@ -770,6 +769,11 @@ export class PublicSearchRepository {
    * Se descartan las direcciones cuya vigencia ya venció y se queda la más
    * reciente por sujeto: un profesional que se mudó aparece donde atiende hoy.
    *
+   * **Sólo direcciones de trabajo.** Lo que sale de acá se publica (calle,
+   * distrito y punto), y un sujeto `USER` puede tener su domicilio en
+   * `common.addresses` con su propio id: sin este filtro el buscador público
+   * mostraba dónde vive alguien en vez de dónde atiende.
+   *
    * @param em - Contexto de persistencia o transacción activa.
    * @param ownerIds - Sujetos de los perfiles del lote (`target_id`).
    * @returns Mapa `ownerId → { city, lat, lng }`; sin dirección, no aparece.
@@ -785,17 +789,19 @@ export class PublicSearchRepository {
       {
         owner_id: string;
         lines: string | null;
+        district_text: string | null;
         city: string | null;
         latitude: string | null;
         longitude: string | null;
       }[]
     >(
-      `SELECT DISTINCT ON (owner_id) owner_id, lines, city, latitude, longitude
+      `SELECT DISTINCT ON (owner_id) owner_id, lines, district_text, city, latitude, longitude
            FROM common.addresses
           WHERE owner_id IN (?)
+            AND use_concept_id = ?
             AND (valid_to IS NULL OR valid_to >= CURRENT_DATE)
           ORDER BY owner_id, valid_from DESC NULLS LAST, updated_at DESC`,
-      [ownerIds],
+      [ownerIds, CONCEPTS.ADDR_USE_WORK],
       'all',
     );
 
@@ -809,12 +815,19 @@ export class PublicSearchRepository {
         lng !== null &&
         Number.isFinite(lat) &&
         Number.isFinite(lng);
+      // La calle con su distrito: desde ADR-0028 el distrito va en su propia
+      // columna, y la ficha lo sigue mostrando como cuando venía pegado.
+      const address =
+        [row.lines, row.district_text]
+          .map((part) => part?.trim())
+          .filter((part): part is string => Boolean(part))
+          .join(', ') || null;
       if (!geoValid) {
         // Sin punto pero con texto la dirección **sigue sirviendo**: la ficha
         // escribe dónde atiende aunque no pueda dibujar el mapa.
-        if (row.city || row.lines) {
+        if (row.city || address) {
           output.set(row.owner_id, {
-            address: row.lines,
+            address,
             city: row.city,
             lat: null,
             lng: null,
@@ -823,7 +836,7 @@ export class PublicSearchRepository {
         continue;
       }
       output.set(row.owner_id, {
-        address: row.lines,
+        address,
         city: row.city,
         lat,
         lng,
@@ -952,7 +965,7 @@ export class PublicSearchRepository {
               ps.name AS site_name,
               p.type_concept_id AS practice_type_concept_id,
               p.admin_user_id AS practice_admin_user_id,
-              a.lines, a.city, a.postal_code, a.latitude, a.longitude,
+              a.lines, a.district_text, a.city, a.postal_code, a.latitude, a.longitude,
               pal.user_id AS link_user_id,
               pal.status_concept_id AS link_status_concept_id
          FROM practice.practitioner_role_assignments pra
@@ -966,6 +979,35 @@ export class PublicSearchRepository {
       'all',
     );
     return publicSitesOf(rows);
+  }
+
+  /**
+   * La práctica (`practice.practices`) detrás de la ficha de una organización.
+   *
+   * La ficha pública de una organización apunta a su **tenant**
+   * (`public_profiles.target_id = tenant.id`), pero quien pide pertenecer a ella
+   * (`POST /practices/:practiceId/role-assignments/self-request`) necesita el
+   * identificador de la práctica. Si el tenant tiene exactamente una, ese es; con
+   * cero o con varias no hay una respuesta inequívoca y se devuelve `null`: es
+   * preferible que el cliente no ofrezca pedir a que mande la solicitud a una
+   * práctica que el profesional no eligió.
+   *
+   * @param em - Gestor de entidades de la lectura.
+   * @param tenantId - Tenant al que apunta la ficha.
+   * @returns Identificador de la única práctica del tenant, o `null`.
+   */
+  async practiceIdByTenant(
+    em: EntityManager,
+    tenantId: string,
+  ): Promise<string | null> {
+    const rows = await em
+      .getConnection()
+      .execute<{ id: string }[]>(
+        `SELECT id FROM practice.practices WHERE tenant_id = ? LIMIT 2`,
+        [tenantId],
+        'all',
+      );
+    return rows.length === 1 ? rows[0].id : null;
   }
 
   /**
@@ -1090,6 +1132,39 @@ export class PublicSearchRepository {
       output.set(badge.subjectRefId, previous);
     }
     return output;
+  }
+
+  /**
+   * Profesionales con una solicitud de verificación abierta (enviada, en
+   * revisión o con información pedida): los que el sello público muestra «En
+   * verificación». Un padrón sin solicitud NO está acá: nunca se ve «en
+   * verificación» quien no pidió nada.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practitionerIds - Profesionales de la página (`target_id`).
+   * @returns Los ids con solicitud abierta.
+   */
+  async practitionersInReview(
+    em: EntityManager,
+    practitionerIds: string[],
+  ): Promise<Set<string>> {
+    if (practitionerIds.length === 0) return new Set();
+    const rows = await em.find(
+      PractitionerAdmissions,
+      {
+        practitionerProfileId: { $in: practitionerIds },
+        closedAt: null,
+        statusConceptId: {
+          $in: [
+            PROF.ADMISSION_STATUS_SUBMITTED,
+            PROF.ADMISSION_STATUS_IN_REVIEW,
+            PROF.ADMISSION_STATUS_INFO_REQUIRED,
+          ],
+        },
+      },
+      { fields: ['practitionerProfileId'] },
+    );
+    return new Set(rows.map((row) => row.practitionerProfileId));
   }
 
   /** El perfil público de ese slug, o `null` si no existe **o no es público**. */
@@ -1303,7 +1378,7 @@ export class PublicSearchRepository {
 
     const conn = em.getConnection();
 
-    const medios = await conn.execute<{ post_id: string; file_id: string }[]>(
+    const media = await conn.execute<{ post_id: string; file_id: string }[]>(
       `SELECT post_id, file_id
          FROM community.post_media
         WHERE post_id IN (?)
@@ -1312,8 +1387,7 @@ export class PublicSearchRepository {
       [postIds, COMM.MEDIA_ROLE_IMAGE],
       'all',
     );
-    for (const row of medios)
-      ensure(row.post_id).imageFileIds.push(row.file_id);
+    for (const row of media) ensure(row.post_id).imageFileIds.push(row.file_id);
 
     const reactions = await conn.execute<
       { reactable_ref_id: string; total: string }[]

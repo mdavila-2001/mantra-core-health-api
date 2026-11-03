@@ -1,0 +1,89 @@
+{
+  "partMaxUncompressedBytes": 41943040,
+  "datasets": {
+    "openehr-ckm": {
+      "source": "openehr-ckm.ndjson",
+      "rows": 8015,
+      "parts": [
+        {
+          "file": "openehr-ckm.part-001.ndjson.gz",
+          "rows": 8015,
+          "bytes": 28736689,
+          "sha256": "b97e732ee5c9773aa60b79e6546abcac3653f528d4b3201da53ec8774c6ecd53",
+          "gzBytes": 1197315,
+          "gzSha256": "135a850ca4b29ebccca9af0c43ad7b55b5084b78271656ca5b4966ebd3ef7407"
+        }
+      ]
+    },
+    "es-msssi-cmdic-13606": {
+      "source": "es-msssi-cmdic-13606.ndjson",
+      "rows": 617,
+      "parts": [
+        {
+          "file": "es-msssi-cmdic-13606.part-001.ndjson.gz",
+          "rows": 617,
+          "bytes": 1726251,
+          "sha256": "d8c12d4163f1bac4f24f0a1536f948178770645916e01f9fccf4700810d98f24",
+          "gzBytes": 40663,
+          "gzSha256": "4a008e64d08d46309333ee59aff26628b060f704d5effd06dadcb7f5b3934bc9"
+        }
+      ]
+    },
+    "nursing-terminology-registry": {
+      "source": "nursing-terminology-registry.ndjson",
+      "rows": 12,
+      "parts": [
+        {
+          "file": "nursing-terminology-registry.part-001.ndjson.gz",
+          "rows": 12,
+          "bytes": 30403,
+          "sha256": "5f8890de75aa2b84473d95ed47ecd0fd24634b47e1e7dc07944925d8134087df",
+          "gzBytes": 5902,
+          "gzSha256": "51715721df4b5a80af92f458abdb9db66e5e78d63f064a745853f4eb64ee4d9a"
+        }
+      ]
+    },
+    "coverage": {
+      "source": "coverage.json",
+      "rows": null,
+      "parts": [
+        {
+          "file": "coverage.json.gz",
+          "rows": null,
+          "bytes": 15820,
+          "sha256": "b23c6291db6ee11f47980eb994b89ff7556d48a3f286d6199ec836e6b862fc19",
+          "gzBytes": 3632,
+          "gzSha256": "a43afa8708e970469686129bd0b46bc8b16dad8bb85a2aff4335cf3d2ff2cae3"
+        }
+      ]
+    },
+    "link-check": {
+      "source": "link-check.json",
+      "rows": null,
+      "parts": [
+        {
+          "file": "link-check.json.gz",
+          "rows": null,
+          "bytes": 727,
+          "sha256": "bf31ddec4ac91a2e2b95e004423697a546487730ee70d4f8653e08bbbc62547f",
+          "gzBytes": 301,
+          "gzSha256": "f609d3e8ea6d4ef8e0278a9c41971e837bc8177a2fc68c3d438db1c29689432d"
+        }
+      ]
+    },
+    "sources-meta": {
+      "source": "sources.meta.json",
+      "rows": null,
+      "parts": [
+        {
+          "file": "sources-meta.json.gz",
+          "rows": null,
+          "bytes": 999,
+          "sha256": "3f0d7559063ae61b64add111252d0207231c62487d3caae42954762e5e72fcc8",
+          "gzBytes": 533,
+          "gzSha256": "43d82fb9e7e199aace24d08029bf66661492900f664232e462d6cb7efcf876bf"
+        }
+      ]
+    }
+  }
+}

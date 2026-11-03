@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { PracticeRoleAssignmentItemDto } from './role-assignment-row.dto';
 
 /** Respuesta de creación de una práctica (bootstrap). */
 export class PracticeResponseDto {
@@ -196,8 +197,8 @@ export class ListPracticeRoleAssignmentsResponseDto {
   /**
    * Vinculaciones de esta página, ordenadas por `id`.
    */
-  @ApiProperty({ type: [RoleAssignmentResponseDto] })
-  items!: RoleAssignmentResponseDto[];
+  @ApiProperty({ type: [PracticeRoleAssignmentItemDto] })
+  items!: PracticeRoleAssignmentItemDto[];
 
   /**
    * Cantidad devuelta en esta página.
@@ -356,6 +357,9 @@ export class PractitionerSiteDto {
   /** Longitud del punto de la sede. Va siempre junto a `latitude`. */
   @ApiPropertyOptional({ nullable: true })
   longitude!: number | null;
+  /** Teléfono de este profesional en esta sede, si lo declaró. */
+  @ApiPropertyOptional({ nullable: true, example: '+591 72123456' })
+  contactPhone!: string | null;
   /**
    * Si la sede es el consultorio **propio** del profesional —su práctica
    * personal— y no la de otra organización donde atiende (P32-a).
@@ -379,6 +383,12 @@ export class PractitionerSiteDto {
    */
   @ApiPropertyOptional({ format: 'uuid', nullable: true })
   bankQrFileId!: string | null;
+  /**
+   * Logo del consultorio, el que sale en el membrete de sus PDF, o `null` si
+   * no tiene. Se lee con `GET /common/files/:id/content`.
+   */
+  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  logoFileId!: string | null;
   /** Concepto de estado. */
   @ApiProperty({ format: 'uuid' }) status!: string;
 }

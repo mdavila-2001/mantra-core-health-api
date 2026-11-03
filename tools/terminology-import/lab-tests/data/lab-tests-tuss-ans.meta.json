@@ -1,0 +1,874 @@
+{
+  "layer": "tuss-ans",
+  "builtAt": "2026-10-24T17:56:43.955Z",
+  "records": 2211,
+  "source": {
+    "name": "@br-health-kit/tuss",
+    "version": "1.0.0"
+  },
+  "packageMetadata": {
+    "checksum": "8d3bc59ee7814042c8ba7cb6d2a4cd13e0ab4bb53933eb726ee856b14c5bd8d7",
+    "dataChecksum": "34e2e69dbde6e9f2671215f81e7949e480f1f550a4b92cd47bd64c136cb4b08b",
+    "dataset": "tuss",
+    "downloadedAt": "2026-08-26T00:10:56.434Z",
+    "generatedBy": "br-health-kit-pipeline@0.1.0",
+    "license": "Dados abertos da ANS, redistribuidos sem modificacao de conteudo.",
+    "publishedAt": "2026-06-26T15:09:08.000Z",
+    "records": 67884,
+    "source": "ANS - Terminologia Unificada da Saude Suplementar (Dados Abertos, PDA 049)",
+    "sourceUrl": "https://dadosabertos.ans.gov.br/FTP/PDA/terminologia_unificada_saude_suplementar_TUSS-049/pda-049-tuss.zip",
+    "tables": {
+      "dailyRates": 10,
+      "materials": 48122,
+      "medications": 13451,
+      "occupations": 168,
+      "procedures": 5966,
+      "terminologies": 167
+    },
+    "version": "2026.06.26"
+  },
+  "codeSystems": [
+    {
+      "internalCode": "tuss-ans",
+      "name": "TUSS — Terminologia Unificada da Saúde Suplementar, tabela 22 (Brasil)",
+      "canonicalUrl": "https://mantracore.health/fhir/CodeSystem/tuss-ans",
+      "version": "2026.06.26",
+      "sourceKey": "tuss-ans",
+      "records": 2211
+    }
+  ],
+  "files": {
+    "procedures.json": {
+      "file": "lab-tests-sources/br-health-kit-tuss/package/data/2026.06.26/tables/procedures.json",
+      "sha256": "b2663e51d1a188ba1d44a7b449589d68ef3dbb741bf1373ef865fd45a5f52410"
+    }
+  },
+  "rules": [
+    {
+      "prefix": "401",
+      "domain": "functional",
+      "evidence": "4.01: 123 ítems (ECG convencional, ECG de alta resolução, teste ergométrico…)"
+    },
+    {
+      "prefix": "403",
+      "domain": "laboratory",
+      "evidence": "4.03: 1456 ítems «pesquisa e/ou dosagem» (medicina laboratorial)"
+    },
+    {
+      "prefix": "405",
+      "domain": "genetics",
+      "evidence": "4.05: 145 ítems, cariótipos y estudios moleculares"
+    },
+    {
+      "prefix": "406",
+      "domain": "pathology",
+      "evidence": "4.06: 44 ítems, procedimiento diagnóstico peroperatorio, necropsia, anatomía patológica"
+    },
+    {
+      "prefix": "408",
+      "domain": "imaging",
+      "evidence": "4.08: 295 ítems «RX - …»"
+    },
+    {
+      "prefix": "409",
+      "domain": "imaging",
+      "evidence": "4.09: 95 ítems «US - …»"
+    },
+    {
+      "prefix": "410",
+      "domain": "imaging",
+      "evidence": "4.10: 58 ítems «TC - …»"
+    },
+    {
+      "prefix": "411",
+      "domain": "imaging",
+      "evidence": "4.11: 62 ítems «RM - …»"
+    },
+    {
+      "prefix": "414",
+      "domain": "functional",
+      "evidence": "4.14: 75 ítems, testes diagnósticos (función muscular, pruebas cutáneas, metabolismo de repouso…)"
+    }
+  ],
+  "exclusions": [
+    {
+      "prefix": "40809",
+      "reason": "4.08.09: estudios contrastados mezclados con drenaje percutáneo y colocación de marcador"
+    },
+    {
+      "prefix": "40813",
+      "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+    },
+    {
+      "prefix": "40814",
+      "reason": "4.08.14: trombectomía/trombólisis y otros procedimientos terapéuticos"
+    },
+    {
+      "prefix": "40502210",
+      "reason": "terapia de reposición enzimática por infusión (tratamiento)"
+    }
+  ],
+  "stats": {
+    "items": 5966,
+    "included": 2211,
+    "excludedByPrefix": {
+      "1010": 27,
+      "2010": 181,
+      "2020": 41,
+      "3010": 99,
+      "3020": 130,
+      "3021": 55,
+      "3030": 101,
+      "3031": 44,
+      "3040": 51,
+      "3050": 85,
+      "3060": 74,
+      "3070": 75,
+      "3071": 116,
+      "3072": 288,
+      "3073": 96,
+      "3080": 99,
+      "3090": 113,
+      "3091": 106,
+      "3100": 312,
+      "3110": 196,
+      "3120": 78,
+      "3130": 141,
+      "3140": 83,
+      "3150": 15,
+      "3160": 36,
+      "4020": 115,
+      "4040": 156,
+      "4070": 83,
+      "4071": 14,
+      "4120": 50,
+      "4130": 56,
+      "4150": 30,
+      "5000": 97,
+      "8100": 39,
+      "8200": 105,
+      "8300": 9,
+      "8400": 14,
+      "8500": 1,
+      "8510": 25,
+      "8520": 18,
+      "8530": 10,
+      "8540": 61,
+      "8550": 22,
+      "8600": 56,
+      "8700": 10
+    },
+    "excludedExplicitly": [
+      {
+        "code": "40502210",
+        "name": "Terapia de reposição enzimática por infusão endovenosa, por procedimento",
+        "reason": "terapia de reposición enzimática por infusión (tratamiento)"
+      },
+      {
+        "code": "40809021",
+        "name": "Sialografia (por glândula)",
+        "reason": "4.08.09: estudios contrastados mezclados con drenaje percutáneo y colocación de marcador"
+      },
+      {
+        "code": "40809030",
+        "name": "Histerossalpingografia",
+        "reason": "4.08.09: estudios contrastados mezclados con drenaje percutáneo y colocación de marcador"
+      },
+      {
+        "code": "40809048",
+        "name": "Artrografia ou pneumoartrografia",
+        "reason": "4.08.09: estudios contrastados mezclados con drenaje percutáneo y colocación de marcador"
+      },
+      {
+        "code": "40809056",
+        "name": "Fistulografia",
+        "reason": "4.08.09: estudios contrastados mezclados con drenaje percutáneo y colocación de marcador"
+      },
+      {
+        "code": "40809064",
+        "name": "Colangiografia transcutânea",
+        "reason": "4.08.09: estudios contrastados mezclados con drenaje percutáneo y colocación de marcador"
+      },
+      {
+        "code": "40809072",
+        "name": "Colangiopancreatografia retrógrada",
+        "reason": "4.08.09: estudios contrastados mezclados con drenaje percutáneo y colocación de marcador"
+      },
+      {
+        "code": "40809080",
+        "name": "Dacriocistografia",
+        "reason": "4.08.09: estudios contrastados mezclados con drenaje percutáneo y colocación de marcador"
+      },
+      {
+        "code": "40809102",
+        "name": "Drenagem percutânea orientada por RX (acrescentar o exame de base)",
+        "reason": "4.08.09: estudios contrastados mezclados con drenaje percutáneo y colocación de marcador"
+      },
+      {
+        "code": "40809110",
+        "name": "Broncografia (por punção ou entubação traqueal)",
+        "reason": "4.08.09: estudios contrastados mezclados con drenaje percutáneo y colocación de marcador"
+      },
+      {
+        "code": "40809129",
+        "name": "Broncografia unilateral",
+        "reason": "4.08.09: estudios contrastados mezclados con drenaje percutáneo y colocación de marcador"
+      },
+      {
+        "code": "40809137",
+        "name": "Pneumoperitônio (RX)",
+        "reason": "4.08.09: estudios contrastados mezclados con drenaje percutáneo y colocación de marcador"
+      },
+      {
+        "code": "40809145",
+        "name": "Colocação de marcador de local da intervenção",
+        "reason": "4.08.09: estudios contrastados mezclados con drenaje percutáneo y colocación de marcador"
+      },
+      {
+        "code": "40813010",
+        "name": "Ablação percutânea de tumor torácico (qualquer método)",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813029",
+        "name": "Ablação percutânea de tumor hepático (qualquer método) - metodo intervencionista/terapêutico por imagem",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813037",
+        "name": "Ablação percutânea de tumor ósseo (qualquer método)",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813045",
+        "name": "Ablação percutânea de tumor (qualquer método)",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813053",
+        "name": "Alcoolização percutânea de angioma",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813061",
+        "name": "Angioplastia de ramo intracraniano",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813070",
+        "name": "Angioplastia de tronco supra-aórtico",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813088",
+        "name": "Angioplastia de aorta para tratamento de coarctação",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813100",
+        "name": "Angioplastia de artéria visceral - por vaso",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813118",
+        "name": "Angioplastia arterial ou venosa de anastomose vascular de fígado transplantado",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813126",
+        "name": "Angioplastia renal para tratamento de hipertensão renovascular ou outra condição",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813134",
+        "name": "Angioplastia arterial ou venosa de anastomose vascular de rim transplantado",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813142",
+        "name": "Angioplastia de ramos hipogástricos para tratamento de impotência",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813150",
+        "name": "Angioplastia de tronco venoso",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813169",
+        "name": "Angioplastia venosa para tratamento de síndrome de BUDD-CHIARI",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813177",
+        "name": "Angioplastia transluminal percutânea",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813185",
+        "name": "Angioplastia transluminal percutânea para tratamento de obstrução arterial",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813193",
+        "name": "Colocação de stent em ramo intracraniano",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813207",
+        "name": "Colocação de stent em tronco supra-aórtico",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813215",
+        "name": "Colocação de stent aórtico",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813223",
+        "name": "Colocação de stent para tratamento de síndrome de VCI",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813231",
+        "name": "Colocação de cateter venoso central ou portocath",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813240",
+        "name": "Colocação de filtro de VCI para prevenção de TEP",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813258",
+        "name": "Colocação de stent em artéria visceral - por vaso",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813266",
+        "name": "Colocação de stent para tratamento de obstrução arterial ou venosa",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813274",
+        "name": "Colocação de stent revestido (stent-graft) para tratamento de aneurisma periférico",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813282",
+        "name": "Colocação de stent revestido (stent-graft) para tratamento de fístula arteriovenosa",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813290",
+        "name": "Colocação de stent em estenose vascular de enxerto transplantado",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813304",
+        "name": "Colocação de stent em traquéia ou brônquio",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813312",
+        "name": "Colocação de stent esofagiano, duodenal ou colônico",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813320",
+        "name": "Colocação de stent biliar",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813339",
+        "name": "Colocação de stent renal",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813347",
+        "name": "Colocação percutânea de cateter pielovesical",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813355",
+        "name": "Colocação percutânea de stent vascular",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813363",
+        "name": "Coluna vertebral: infiltração foraminal ou facetária ou articular",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813371",
+        "name": "Dilatação percutânea de estenose biliar cicatricial",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813380",
+        "name": "Dilatação percutânea de estenose de conduto urinário",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813398",
+        "name": "Dilatação percutânea de estenose de ducto pancreático",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813401",
+        "name": "Aterectomia percutânea orientada por RX",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813410",
+        "name": "Drenagem percutânea de coleção pleural",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813428",
+        "name": "Drenagem percutânea de pneumotórax",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813436",
+        "name": "Drenagem de abscesso pulmonar ou mediastinal",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813444",
+        "name": "Drenagem mediastinal orientada por RX ou TC",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813452",
+        "name": "Drenagem percutânea de coleção infectada abdominal",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813460",
+        "name": "Drenagem percutânea de abscesso hepático ou pancreático",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813479",
+        "name": "Drenagem percutânea de cisto hepático ou pancreático",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813487",
+        "name": "Drenagem percutânea de via biliar",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813495",
+        "name": "Drenagem percutânea de cisto renal",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813509",
+        "name": "Drenagem percutânea de abscesso renal",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813517",
+        "name": "Drenagem percutânea de coleção infectada profunda",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813525",
+        "name": "Drenagem percutânea de abscesso retroperitoneal ou pélvico",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813533",
+        "name": "Drenagem percutânea não especificada",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813541",
+        "name": "Embolização de aneurisma cerebral por oclusão sacular - por vaso",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813550",
+        "name": "Embolização de aneurisma cerebral por oclusão vascular - por vaso",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813568",
+        "name": "Embolização de malformação arteriovenosa cerebral ou medular - por vaso",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813576",
+        "name": "Embolização de fístula arteriovenosa em cabeça, pescoço ou coluna - por vaso",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813584",
+        "name": "Embolização para tratamento de epistaxe",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813592",
+        "name": "Embolização de aneurisma ou pseudoaneurisma visceral",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813606",
+        "name": "Embolização brônquica para tratamento de hemoptise",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813614",
+        "name": "Embolização pulmonar para tratamento de fístula arteriovenosa ou outra situação",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813622",
+        "name": "Embolização de varizes esofagianas ou gástricas",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813630",
+        "name": "Embolização de hemorragia digestiva",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813649",
+        "name": "Embolização de ramo portal",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813657",
+        "name": "Embolização esplênica para tratamento de hiperesplenismo ou outra situação",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813665",
+        "name": "Embolização arterial para tratamento de priapismo",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813673",
+        "name": "Embolização para tratamento de impotência",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813681",
+        "name": "Embolização de ramos hipogástricos para tratamento de sangramento ginecológico",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813690",
+        "name": "Embolização seletiva de fístula ou aneurisma renal para tratamento de hematúria",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813703",
+        "name": "Embolização de artéria renal para nefrectomia",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813711",
+        "name": "Embolização de fístula arteriovenosa não especificada acima - por vaso",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813720",
+        "name": "Embolização de malformação vascular - por vaso",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813738",
+        "name": "Embolização de pseudoaneurisma - por vaso",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813746",
+        "name": "Embolização de artéria uterina para tratamento de mioma ou outras situações",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813754",
+        "name": "Embolização de veia espermática para tratamento de varicocele",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813770",
+        "name": "Embolização definitiva não especificada acima - por vaso",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813789",
+        "name": "Embolização de tumor de cabeça e pescoço",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813797",
+        "name": "Embolização de tumor do aparelho digestivo",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813800",
+        "name": "Embolização de tumor ósseo ou de partes moles",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813819",
+        "name": "Embolização de tumor não especificado",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813827",
+        "name": "Traqueotomia percutânea orientada por RX ou TC",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813835",
+        "name": "Gastrostomia percutânea orientada por RX ou TC",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813843",
+        "name": "Colecistostomia percutânea orientada por RX, US ou TC",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813851",
+        "name": "Esclerose percutânea de cisto pancreático",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813860",
+        "name": "Celostomia percutânea orientada por RX ou TC",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813878",
+        "name": "Nefrostomia percutânea orientada por RX, US, TC ou RM",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813886",
+        "name": "Pielografia percutânea orientada por RX, US, TC ou RM",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813894",
+        "name": "Exérese percutânea de tumor benigno orientada por RX, US, TC ou RM",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813908",
+        "name": "Quimioterapia por cateter de tumor de cabeça e pescoço",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813916",
+        "name": "Quimioembolização para tratamento de tumor hepático",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813924",
+        "name": "Quimioterapia por cateter intra-arterial",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813932",
+        "name": "TIPS - anastomose porto-cava percutânea para tratamento de hipertensão portal",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813940",
+        "name": "Implante de endoprótese em aneurisma de aorta abdominal ou torácica com stent revestido (stent-graft)",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813959",
+        "name": "Implante de endoprótese em dissecção de aorta abdominal ou torácica com stent revestido (stent-graft)",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813967",
+        "name": "Tratamento de pseudoaneurisma por compressão com US-Doppler",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813975",
+        "name": "Tratamento do vasoespasmo pós-trauma",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813983",
+        "name": "Trombectomia mecânica para tratamento de TEP",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40813991",
+        "name": "Trombectomia mecânica venosa",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40814017",
+        "name": "Trombectomia medicamentosa para tratamento de TEP",
+        "reason": "4.08.14: trombectomía/trombólisis y otros procedimientos terapéuticos"
+      },
+      {
+        "code": "40814025",
+        "name": "Trombólise medicamentosa arterial ou venosa - por vaso",
+        "reason": "4.08.14: trombectomía/trombólisis y otros procedimientos terapéuticos"
+      },
+      {
+        "code": "40814033",
+        "name": "Trombólise medicamentosa arterial ou venosa para tratamento de isquemia mesentérica",
+        "reason": "4.08.14: trombectomía/trombólisis y otros procedimientos terapéuticos"
+      },
+      {
+        "code": "40814041",
+        "name": "Trombólise medicamentosa em troncos supra-aórticos e intracranianos",
+        "reason": "4.08.14: trombectomía/trombólisis y otros procedimientos terapéuticos"
+      },
+      {
+        "code": "40814050",
+        "name": "Repermeabilização tubária para tratamento de infertilidade",
+        "reason": "4.08.14: trombectomía/trombólisis y otros procedimientos terapéuticos"
+      },
+      {
+        "code": "40814068",
+        "name": "Retirada percutânea de cálculos biliares orientada por RX, US ou TC",
+        "reason": "4.08.14: trombectomía/trombólisis y otros procedimientos terapéuticos"
+      },
+      {
+        "code": "40814076",
+        "name": "Retirada percutânea de cálculos renais orientada por RX, US ou TC",
+        "reason": "4.08.14: trombectomía/trombólisis y otros procedimientos terapéuticos"
+      },
+      {
+        "code": "40814084",
+        "name": "Retirada percutânea de corpo estranho intravascular",
+        "reason": "4.08.14: trombectomía/trombólisis y otros procedimientos terapéuticos"
+      },
+      {
+        "code": "40814092",
+        "name": "Osteoplastia ou discectomia percutânea (vertebroplastia e outras)",
+        "reason": "4.08.14: trombectomía/trombólisis y otros procedimientos terapéuticos"
+      },
+      {
+        "code": "40814106",
+        "name": "Discografia",
+        "reason": "4.08.14: trombectomía/trombólisis y otros procedimientos terapéuticos"
+      },
+      {
+        "code": "40814114",
+        "name": "Litotripsia mecânica de cálculos renais orientada por RX ou US",
+        "reason": "4.08.14: trombectomía/trombólisis y otros procedimientos terapéuticos"
+      },
+      {
+        "code": "40814122",
+        "name": "Trituração de calcificação tendínea orientada por RX ou US",
+        "reason": "4.08.14: trombectomía/trombólisis y otros procedimientos terapéuticos"
+      },
+      {
+        "code": "40814130",
+        "name": "Sinusografia (abscessografia)",
+        "reason": "4.08.14: trombectomía/trombólisis y otros procedimientos terapéuticos"
+      },
+      {
+        "code": "40814149",
+        "name": "Paracentese orientada por RX ou US",
+        "reason": "4.08.14: trombectomía/trombólisis y otros procedimientos terapéuticos"
+      },
+      {
+        "code": "40814157",
+        "name": "Manipulação de drenos pós-drenagem (orientada por RX, TC, US ou RM)",
+        "reason": "4.08.14: trombectomía/trombólisis y otros procedimientos terapéuticos"
+      },
+      {
+        "code": "40814165",
+        "name": "Esclerose percutânea de nódulos benignos dirigida por RX, US, TC ou RM",
+        "reason": "4.08.14: trombectomía/trombólisis y otros procedimientos terapéuticos"
+      },
+      {
+        "code": "40814173",
+        "name": "Escleroterapia de cistos (renais, hepáticos, ovarianos), orientada por imagem",
+        "reason": "4.08.14: trombectomía/trombólisis y otros procedimientos terapéuticos"
+      },
+      {
+        "code": "40813762",
+        "name": "Embolização de veias ovarianas para tratamento de varizes pélvicas",
+        "reason": "4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)"
+      },
+      {
+        "code": "40814181",
+        "name": "Ablação percutânea de tumor renal (qualquer método)",
+        "reason": "4.08.14: trombectomía/trombólisis y otros procedimientos terapéuticos"
+      },
+      {
+        "code": "40814190",
+        "name": "Embolização das artérias prostáticas, por vaso",
+        "reason": "4.08.14: trombectomía/trombólisis y otros procedimientos terapéuticos"
+      },
+      {
+        "code": "40814203",
+        "name": "Neurólise de plexo nervoso guiado por tomografia computadorizada",
+        "reason": "4.08.14: trombectomía/trombólisis y otros procedimientos terapéuticos"
+      },
+      {
+        "code": "40814211",
+        "name": "Radioembolização hepática",
+        "reason": "4.08.14: trombectomía/trombólisis y otros procedimientos terapéuticos"
+      },
+      {
+        "code": "40814238",
+        "name": "Termoablação para nódulos benignos de tireoide",
+        "reason": "4.08.14: trombectomía/trombólisis y otros procedimientos terapéuticos"
+      },
+      {
+        "code": "40809153",
+        "name": "Punção biópsia/aspirativa de órgão ou estrutura superficial orientada por RX (não inclui o exame de base)",
+        "reason": "4.08.09: estudios contrastados mezclados con drenaje percutáneo y colocación de marcador"
+      },
+      {
+        "code": "40809161",
+        "name": "Punção biópsia/aspirativa de órgão ou estrutura superficial orientada por US (não inclui o exame de base)",
+        "reason": "4.08.09: estudios contrastados mezclados con drenaje percutáneo y colocación de marcador"
+      },
+      {
+        "code": "40809170",
+        "name": "Punção biópsia/aspirativa de órgão ou estrutura superficial orientada por TC (não inclui o exame de base)",
+        "reason": "4.08.09: estudios contrastados mezclados con drenaje percutáneo y colocación de marcador"
+      },
+      {
+        "code": "40809188",
+        "name": "Punção biópsia/aspirativa de órgão ou estrutura superficial orientada por RM (não inclui o exame de base)",
+        "reason": "4.08.09: estudios contrastados mezclados con drenaje percutáneo y colocación de marcador"
+      },
+      {
+        "code": "40809196",
+        "name": "Punção biópsia/aspirativa de órgão ou estrutura profunda orientada por RM (não inclui o exame de base)",
+        "reason": "4.08.09: estudios contrastados mezclados con drenaje percutáneo y colocación de marcador"
+      },
+      {
+        "code": "40809200",
+        "name": "Punção biópsia/aspirativa de órgão ou estrutura profunda orientada por RX (não inclui o exame de base)",
+        "reason": "4.08.09: estudios contrastados mezclados con drenaje percutáneo y colocación de marcador"
+      },
+      {
+        "code": "40809218",
+        "name": "Punção biópsia/aspirativa de órgão ou estrutura profunda orientada por TC (não inclui o exame de base)",
+        "reason": "4.08.09: estudios contrastados mezclados con drenaje percutáneo y colocación de marcador"
+      },
+      {
+        "code": "40809226",
+        "name": "Punção biópsia/aspirativa de órgão ou estrutura profunda orientada por US (não inclui o exame de base)",
+        "reason": "4.08.09: estudios contrastados mezclados con drenaje percutáneo y colocación de marcador"
+      },
+      {
+        "code": "40814220",
+        "name": "Trombectomia no acidente vascular cerebral AVC isquêmico agudo",
+        "reason": "4.08.14: trombectomía/trombólisis y otros procedimientos terapéuticos"
+      }
+    ]
+  }
+}

@@ -123,6 +123,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AccountResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AccountResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AccountResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AccountResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AccountResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -236,6 +237,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<Account360ResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<Account360ResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<Account360ResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<Account360ResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `Account360ResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -266,7 +268,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CRM_ADMIN, CRM_AGENT. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Cuenta no encontrada | Excepción explícita en src/modules/crm/services/crm-service.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -370,6 +371,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TeamMemberResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TeamMemberResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TeamMemberResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TeamMemberResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TeamMemberResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -400,7 +402,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CRM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Cuenta no encontrada | Excepción explícita en src/modules/crm/services/crm-sales.service.ts |
 | 409 | `CONFLICT` | El usuario ya pertenece al equipo de la cuenta | Excepción explícita en src/modules/crm/services/crm-sales.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -520,6 +521,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ActivityResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ActivityResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ActivityResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ActivityResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ActivityResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -660,6 +662,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CaseResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CaseResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CaseResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CaseResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CaseResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -794,6 +797,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<{ /** * Identificador único de la instancia. */ id: string; /** * Identificador asociado a case. */ caseId: string; }>` | No |
 | 429 | Operación completada correctamente. | `Promise<{ /** * Identificador único de la instancia. */ id: string; /** * Identificador asociado a case. */ caseId: string; }>` | No |
 | 500 | Operación completada correctamente. | `Promise<{ /** * Identificador único de la instancia. */ id: string; /** * Identificador asociado a case. */ caseId: string; }>` | No |
+| 504 | Operación completada correctamente. | `Promise<{ /** * Identificador único de la instancia. */ id: string; /** * Identificador asociado a case. */ caseId: string; }>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `{ /** * Identificador único de la instancia. */ id: string; /** * Identificador asociado a case. */ caseId: string; }`. Ejemplo completo derivado de ese DTO:
 
@@ -820,7 +824,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CRM_ADMIN, CRM_AGENT. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Caso no encontrado | Excepción explícita en src/modules/crm/services/crm-service.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | No se comenta un caso cerrado | Excepción explícita en src/modules/crm/services/crm-service.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -907,6 +910,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<CaseStatusResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CaseStatusResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CaseStatusResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CaseStatusResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CaseStatusResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -935,7 +939,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CRM_ADMIN, CRM_AGENT. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Caso no encontrado | Excepción explícita en src/modules/crm/services/crm-service.service.ts |
 | 409 | `CONFLICT` | Un caso cerrado no se reabre por esta vía | Excepción explícita en src/modules/crm/services/crm-service.service.ts |
 | 422 | `PRECONDITION_FAILED` | El caso ya está en ese estado | Excepción explícita en src/modules/crm/services/crm-service.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1038,6 +1041,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CaseStatusResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CaseStatusResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CaseStatusResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CaseStatusResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CaseStatusResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1066,7 +1070,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CRM_ADMIN, CRM_AGENT. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Caso no encontrado | Excepción explícita en src/modules/crm/services/crm-service.service.ts |
 | 409 | `CONFLICT` | Un caso cerrado no se reabre por esta vía | Excepción explícita en src/modules/crm/services/crm-service.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El caso ya está en ese estado | Excepción explícita en src/modules/crm/services/crm-service.service.ts |
@@ -1169,6 +1172,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ChannelOptInResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ChannelOptInResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ChannelOptInResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ChannelOptInResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ChannelOptInResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1195,8 +1199,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CRM_ADMIN, CRM_AGENT. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Contacto no encontrado | Excepción explícita en src/modules/crm/services/crm-service.service.ts |
-| 404 | `NOT_FOUND` | Canal de contacto no encontrado | Excepción explícita en src/modules/crm/services/crm-service.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El canal no pertenece a ese contacto | Excepción explícita en src/modules/crm/services/crm-service.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1304,6 +1306,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<LeadResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<LeadResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<LeadResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<LeadResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LeadResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1443,6 +1446,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ConvertLeadResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ConvertLeadResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ConvertLeadResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ConvertLeadResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ConvertLeadResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1469,7 +1473,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CRM_ADMIN, CRM_AGENT. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Lead no encontrado | Excepción explícita en src/modules/crm/services/crm-sales.service.ts |
 | 409 | `CONFLICT` | El lead ya fue convertido | Excepción explícita en src/modules/crm/services/crm-sales.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Solo se convierte un lead calificado | Excepción explícita en src/modules/crm/services/crm-sales.service.ts |
@@ -1574,6 +1577,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<LeadResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<LeadResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<LeadResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<LeadResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LeadResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1602,7 +1606,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CRM_ADMIN, CRM_AGENT. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Lead no encontrado | Excepción explícita en src/modules/crm/services/crm-sales.service.ts |
 | 409 | `CONFLICT` | El lead ya fue convertido | Excepción explícita en src/modules/crm/services/crm-sales.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1703,6 +1706,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<OpportunityResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<OpportunityResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<OpportunityResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OpportunityResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OpportunityResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1731,8 +1735,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CRM_ADMIN, CRM_AGENT. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Oportunidad no encontrada | Excepción explícita en src/modules/crm/services/crm-sales.service.ts |
-| 404 | `NOT_FOUND` | Etapa no encontrada | Excepción explícita en src/modules/crm/services/crm-sales.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La oportunidad ya está cerrada | Excepción explícita en src/modules/crm/services/crm-sales.service.ts |
 | 422 | `PRECONDITION_FAILED` | La oportunidad ya está en esa etapa | Excepción explícita en src/modules/crm/services/crm-sales.service.ts |
@@ -1834,6 +1836,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<OpportunityResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<OpportunityResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<OpportunityResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OpportunityResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OpportunityResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1862,7 +1865,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CRM_ADMIN, CRM_AGENT. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Oportunidad no encontrada | Excepción explícita en src/modules/crm/services/crm-sales.service.ts |
 | 409 | `CONFLICT` | La oportunidad ya está cerrada | Excepción explícita en src/modules/crm/services/crm-sales.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1949,6 +1951,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<OpportunityResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<OpportunityResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<OpportunityResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OpportunityResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OpportunityResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1977,7 +1980,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CRM_ADMIN, CRM_AGENT. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Oportunidad no encontrada | Excepción explícita en src/modules/crm/services/crm-sales.service.ts |
 | 409 | `CONFLICT` | La oportunidad ya está cerrada | Excepción explícita en src/modules/crm/services/crm-sales.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -2089,6 +2091,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PartnershipResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PartnershipResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PartnershipResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PartnershipResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PartnershipResponseDto`. Ejemplo completo derivado de ese DTO:
 

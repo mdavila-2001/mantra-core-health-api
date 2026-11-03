@@ -6,6 +6,7 @@ import {
   IsUUID,
   MaxLength,
 } from 'class-validator';
+import { RoleAssignmentRowDto } from './role-assignment-row.dto';
 
 /**
  * Cuerpo de `POST /practices/{practiceId}/role-assignments/self-request`
@@ -44,6 +45,18 @@ export class SelfRequestRoleAssignmentDto {
   @IsDateString()
   validFrom?: string;
 
+  /**
+   * Procedimiento de la sede en el que pide trabajar. Uno por llamada: para
+   * varios procedimientos se hace una solicitud por cada uno. Exige `practiceSiteId`.
+   */
+  @ApiPropertyOptional({
+    description: 'Servicio de salud (procedimiento) de la sede',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  healthcareServiceId?: string;
+
   /** Nota libre para quien revise la solicitud (p. ej. referencia a un documento de respaldo). */
   @ApiPropertyOptional({ maxLength: 500 })
   @IsOptional()
@@ -64,19 +77,12 @@ export class RoleAssignmentTransitionDto {
 }
 
 /** Vinculación tal como la ve el propio profesional (`GET /practitioners/me/role-assignments`). */
-export class MyRoleAssignmentResponseDto {
-  /** Identificador de la vinculación. */
-  @ApiProperty({ format: 'uuid' }) id!: string;
-  /** Organización (`practice.practices`). */
-  @ApiProperty({ format: 'uuid' }) practiceId!: string;
+export class MyRoleAssignmentResponseDto extends RoleAssignmentRowDto {
   /** Nombre legible de la organización. */
   @ApiProperty() practiceName!: string;
   /** Tipo de organización (concepto). */
   @ApiPropertyOptional({ format: 'uuid', nullable: true })
   practiceType!: string | null;
-  /** Sede, si la vinculación la declara. */
-  @ApiPropertyOptional({ format: 'uuid', nullable: true })
-  practiceSiteId!: string | null;
   /** Cargo. */
   @ApiProperty({ format: 'uuid' }) roleConceptId!: string;
   /** Especialidad, si la vinculación la declara. */

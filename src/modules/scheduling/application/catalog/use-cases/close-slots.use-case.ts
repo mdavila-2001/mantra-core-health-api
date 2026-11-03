@@ -1,4 +1,9 @@
-import { ACTIVE_BOOKING_STATES } from '../../../domain/booking/booking-states';
+import {
+  BOOKINGS_REQUIRE_CONFIRMATION,
+  BlockedBookingsCanceller,
+  blockCancellationReason,
+  type CancelledByBlock,
+} from '../support/blocked-bookings-canceller';
 import {
   CONCEPTS,
   ConflictException,
@@ -29,6 +34,7 @@ export class CloseSlotsUseCase {
     private readonly em: EntityManager,
     private readonly catalogRepo: SchedulingCatalogRepository,
     private readonly access: CatalogAccess,
+    private readonly blockedBookings: BlockedBookingsCanceller,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CloseSlotsUseCase.name);
@@ -158,13 +164,14 @@ export class CloseSlotsUseCase {
    * ofrece otra vez. Por eso las dos cosas van en la misma transacción — una
    * sin la otra es media operación.
    *
-   * ## Un cupo con paciente NO se cierra por acá
+   * ## Un cupo con paciente se cierra sólo si el profesional lo confirmó
    *
-   * Si alguno tiene cita viva, se rechaza **entera** y se nombran cuáles. No se
-   * cancela de arrastre: cancelar el turno de alguien es un acto que exige
-   * motivo y avisa a esa persona, y hacerlo como efecto secundario de «cerrá
-   * estos ratos» sería decidir por quien está esperando. Para eso está
-   * `cancel`, que ya existe y hace las dos cosas bien.
+   * Hasta el 24/10/2026 se rechazaba entero (409) y se nombraban las citas.
+   * El propietario pidió que cerrar **cancele y avise**: con
+   * `cancelAffectedBookings: true` cada cita se cancela por el mismo camino que
+   * una cancelación a mano —motivo, transición, aviso al paciente— dentro de
+   * esta transacción. Sin la confirmación, el 409 sigue, ahora con la lista
+   * completa (`affectedBookings`) para que la pantalla la muestre antes.
    *
    * ## La excepción cubre exactamente lo cerrado
    *
@@ -197,7 +204,9 @@ export class CloseSlotsUseCase {
       'Closing slots and blocking their range',
     );
 
-    return this.em.transactional(async (tx) => {
+    let cancelled: readonly CancelledByBlock[] = [];
+
+    const closed = await this.em.transactional(async (tx) => {
       const resource = await this.catalogRepo.findResourceById(tx, resourceId);
       if (!resource) {
         throw new ResourceNotFoundException('Recurso no encontrado', {
@@ -220,19 +229,29 @@ export class CloseSlotsUseCase {
         );
       }
 
-      const withPatient = await this.catalogRepo.findBookingsOfSlots(
-        tx,
-        slots.map((c) => c.id),
-        ACTIVE_BOOKING_STATES,
+      const affected = await this.blockedBookings.describe(tx, slots, () =>
+        this.access.assertMayReadAgendaBookings(resource, actor),
       );
-      if (withPatient.length > 0) {
+      this.blockedBookings.assertNobodyPresent(affected.present, resourceId);
+      if (
+        affected.cancellable.length > 0 &&
+        dto.cancelAffectedBookings !== true
+      ) {
         throw new ConflictException(
-          'Esos ratos tienen pacientes citados: cancele cada cita antes de cerrarlos',
+          'Esos ratos tienen pacientes citados: confirme para cancelar cada cita y avisar a cada persona',
           {
-            // Los ids y no los nombres: quien recibe esto es la pantalla, que
-            // ya sabe pedir cada cita con su permiso.
-            bookingIds: withPatient.map((b) => b.id),
+            failureCode: BOOKINGS_REQUIRE_CONFIRMATION,
+            bookingIds: affected.cancellable.map((b) => b.bookingId),
+            affectedBookings: affected.cancellable,
           },
+        );
+      }
+      if (affected.cancellable.length > 0) {
+        cancelled = await this.blockedBookings.cancelAll(
+          tx,
+          affected.cancellable,
+          actor,
+          blockCancellationReason(dto.exceptionType, dto.reason),
         );
       }
 
@@ -265,7 +284,11 @@ export class CloseSlotsUseCase {
         exceptionId: exception.id,
         from: from.toISOString(),
         to: to.toISOString(),
+        cancelledBookings: cancelled.length,
       };
     });
+
+    await this.blockedBookings.announce(cancelled);
+    return closed;
   }
 }

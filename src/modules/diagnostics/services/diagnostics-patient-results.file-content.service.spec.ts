@@ -82,6 +82,8 @@ function build(
     {} as any,
     logger as any,
     {} as any,
+    {} as any,
+    {} as any,
     fileUpload as any,
   );
   return { service, fileUpload };
@@ -90,11 +92,7 @@ function build(
 describe('DiagnosticsPatientResultsService.getOwnResultFileContent (CL-40)', () => {
   it('titular + liberado + archivo del informe: entrega los bytes', async () => {
     const d = build();
-    const out = await d.service.getOwnResultFileContent(
-      USER,
-      REPORT,
-      FILE,
-    );
+    const out = await d.service.getOwnResultFileContent(USER, REPORT, FILE);
     expect(out.buffer).toBe(BYTES);
     expect(out.mimeType).toBe('application/pdf');
     expect(d.fileUpload.downloadForAuthorizedContext).toHaveBeenCalledWith(

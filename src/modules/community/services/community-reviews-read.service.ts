@@ -6,13 +6,36 @@ import {
   decodeKeysetCursor,
   encodeKeysetCursor,
 } from '../../../common';
+import { badRequestWithReason } from '../../../common/errors/reasoned-http-exceptions';
+import { SystemErrorReason } from '../../../common/errors/system-error-reasons';
 import {
   PublicProfilesRepository,
   PublicSearchRepository,
   ReviewsRepository,
 } from '../repositories';
 import { COMM } from '../community.concepts';
+import { CommunityErrorReason } from '../community.error-reasons';
 import type { PublicProfileReviewsDto, ServiceReviewPageDto } from '../dto';
+
+/**
+ * Redondea un instante al día (medianoche UTC).
+ *
+ * La reseña pública es anónima por defecto y la encuesta del paciente es
+ * privada, pero las dos nacen de la misma atención y, minutos u horas después,
+ * del mismo paciente. Con la hora exacta de publicación se podría emparejar una
+ * reseña «anónima» con una encuesta por proximidad temporal. Al día, el dato
+ * sigue sirviendo para ordenar y para decir «hace tres semanas» y deja de servir
+ * para ese emparejamiento. Sigue siendo un `date-time` válido.
+ *
+ * @param value - Instante a redondear.
+ * @returns La medianoche UTC de ese día, o `null` si no hay instante.
+ */
+function roundToUtcDay(value: Date | null | undefined): Date | null {
+  if (!value) return null;
+  return new Date(
+    Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate()),
+  );
+}
 
 /**
  * Cara de lectura de las reviews de servicio (UC-19-11).
@@ -64,9 +87,13 @@ export class CommunityReviewsReadService {
     const em = this.em.fork();
     const profile = await this.profilesRepo.findById(em, profileId);
     if (!profile)
-      throw new ResourceNotFoundException('Perfil público no encontrado', {
-        profileId,
-      });
+      throw new ResourceNotFoundException(
+        'Perfil público no encontrado',
+        {
+          profileId,
+        },
+        CommunityErrorReason.REVIEW_TARGET_PROFILE_NOT_FOUND,
+      );
 
     return this.projectPage(em, profileId, options);
   }
@@ -112,14 +139,14 @@ export class CommunityReviewsReadService {
       throw new ResourceNotFoundException('No encontrado', { slug });
     }
 
-    const [pagina, ratings] = await Promise.all([
+    const [page, ratings] = await Promise.all([
       this.projectPage(em, profile.id, options),
       this.searchRepo.ratingsByProfile(em, [profile.id]),
     ]);
     const rating = ratings.get(profile.id);
 
     return {
-      ...pagina,
+      ...page,
       // `null` y no `0`: cero estrellas es una calificación pésima y «todavía
       // nadie calificó» no lo es.
       ratingAverage: rating?.average ?? null,
@@ -147,13 +174,9 @@ export class CommunityReviewsReadService {
     profileId: string,
     options: { cursor?: string; limit: number },
   ): Promise<ServiceReviewPageDto> {
-    const after = options.cursor
-      ? decodeKeysetCursor(options.cursor)
+    const afterKey = options.cursor
+      ? await this.resolveCursor(em, profileId, options.cursor)
       : undefined;
-    const afterKey =
-      typeof after?.createdAt === 'string' && typeof after?.id === 'string'
-        ? { createdAt: after.createdAt, id: after.id }
-        : undefined;
 
     const rows = await this.reviewsRepo.listByTargetPage(
       em,
@@ -178,7 +201,7 @@ export class CommunityReviewsReadService {
       )
       .map((review) => review.reviewerPatientProfileId);
 
-    const [scores, responses, nombres] = await Promise.all([
+    const [scores, responses, names] = await Promise.all([
       this.reviewsRepo.listDimensionScores(em, reviewIds),
       this.reviewsRepo.listResponses(em, reviewIds),
       this.reviewsRepo.displayNamesByPerson(em, signers),
@@ -195,11 +218,11 @@ export class CommunityReviewsReadService {
           review.reviewerDisplayModeConceptId ?? null,
         reviewerDisplayName:
           review.reviewerDisplayModeConceptId === COMM.REVIEW_DISPLAY_REAL_NAME
-            ? (nombres.get(review.reviewerPatientProfileId) ?? null)
+            ? (names.get(review.reviewerPatientProfileId) ?? null)
             : null,
         verificationStatusConceptId: review.verificationStatusConceptId,
-        publishedAt: review.publishedAt ?? null,
-        editedAt: review.editedAt ?? null,
+        publishedAt: roundToUtcDay(review.publishedAt),
+        editedAt: roundToUtcDay(review.editedAt),
         dimensionScores: scores
           .filter((score) => score.reviewId === review.id)
           .map((score) => ({
@@ -219,11 +242,45 @@ export class CommunityReviewsReadService {
       limit: options.limit,
       nextCursor:
         hasMore && last
-          ? encodeKeysetCursor({
-              createdAt: last.createdAt.toISOString(),
-              id: last.id,
-            })
+          ? // Sólo el id: el instante exacto de la reseña iría en claro dentro del
+            // cursor (es un base64 de un JSON) y desharía el redondeo al día de
+            // `publishedAt`. El servidor recupera la fecha por el id.
+            encodeKeysetCursor({ id: last.id })
           : null,
     };
+  }
+
+  /**
+   * La clave de continuación que corresponde a un cursor.
+   *
+   * El cursor lleva sólo el id de la última reseña de la página anterior; su
+   * `createdAt` se lee acá. Un cursor de un formato anterior
+   * (`{ createdAt, id }`) sigue valiendo: se usa únicamente su `id`.
+   *
+   * @param em - Contexto de persistencia.
+   * @param profileId - Perfil cuyas reseñas se pagina.
+   * @param cursor - Cursor recibido.
+   * @returns La clave `(createdAt, id)` de la consulta.
+   * @throws BadRequestException (`INVALID_CURSOR`) si el cursor no apunta a una
+   *   reseña de este perfil. No distingue «no existe» de «es de otro perfil».
+   */
+  private async resolveCursor(
+    em: EntityManager,
+    profileId: string,
+    cursor: string,
+  ): Promise<{ createdAt: string; id: string }> {
+    const key = decodeKeysetCursor(cursor);
+    const anchor =
+      typeof key.id === 'string'
+        ? await this.reviewsRepo.findById(em, key.id)
+        : null;
+    if (!anchor || anchor.targetPublicProfileId !== profileId) {
+      throw badRequestWithReason(
+        'El cursor de paginación no es válido',
+        SystemErrorReason.INVALID_CURSOR,
+        { parameter: 'cursor' },
+      );
+    }
+    return { createdAt: anchor.createdAt.toISOString(), id: anchor.id };
   }
 }

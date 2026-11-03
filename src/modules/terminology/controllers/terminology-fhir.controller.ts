@@ -16,7 +16,12 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   ConceptMapsService,
   ConceptsService,
@@ -63,6 +68,11 @@ export class TerminologyFhirController {
    * @param user - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de expand value set conforme al contrato `Promise<ExpandValueSetResponseDto>`.
    */
+  @Audited({
+    action: 'VALUE_SET_EXPANDED',
+    entity: 'value_set',
+    entityId: 'param:id',
+  })
   @Post('ValueSet/:id/$expand')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -84,6 +94,10 @@ export class TerminologyFhirController {
    * @param user - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de translate conforme al contrato `Promise<TranslateResponseDto>`.
    */
+  @Audited({
+    action: 'CONCEPT_MAP_TRANSLATED',
+    entity: 'concept_map',
+  })
   @Post('ConceptMap/$translate')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -101,6 +115,7 @@ export class TerminologyFhirController {
    *
    * @param system - Valor de system requerido por la operación.
    * @param code - Valor de code requerido por la operación.
+   * @param user - Usuario autenticado: decide si ve las propiedades `professional`.
    * @returns Resultado de lookup conforme al contrato `Promise<LookupResponseDto>`.
    * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
    */
@@ -117,6 +132,7 @@ export class TerminologyFhirController {
   lookup(
     @Query('system') system: string,
     @Query('code') code: string,
+    @CurrentUser() user: AuthenticatedUser,
   ): Promise<LookupResponseDto> {
     // `system` y `code` son la clave completa del concepto: resolver con uno solo
     // devolvería un resultado arbitrario.
@@ -125,6 +141,6 @@ export class TerminologyFhirController {
         '$lookup exige los parámetros system y code',
       );
     }
-    return this.conceptsService.lookupConcept(system, code);
+    return this.conceptsService.lookupConcept(system, code, user);
   }
 }

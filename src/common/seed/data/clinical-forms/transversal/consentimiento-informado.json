@@ -5,68 +5,93 @@
     "code": "TRANSVERSAL",
     "display": "Transversal (todas las especialidades)"
   },
-  "version": 2,
+  "version": 3,
   "provenance": {
-    "sourceTitle": "Modelo de consentimiento informado — Resolución 1738",
-    "organization": "Ministerio de Salud y Protección Social de Colombia",
-    "url": "https://www.minsalud.gov.co/sites/rid/Lists/BibliotecaDigital/RIDE/VS/ED/VSP/modelo-consentimiento-informado-resolucion-1738.pdf",
-    "license": "Documento oficial de acceso público",
-    "sourceVersion": "Resolución 1738",
-    "retrievedAt": "2026-08-14",
-    "note": "Transcripción de los campos del modelo oficial. El texto legal de cada procedimiento lo aporta la organización. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar."
+    "sourceTitle": "Constitución Política del Estado (2009), art. 44; Ley 3131 de Ejercicio Profesional Médico (2005) y su reglamento DS 28562",
+    "organization": "Estado Plurinacional de Bolivia — Ministerio de Salud y Deportes",
+    "url": "https://www.minsalud.gob.bo/",
+    "license": "Normativa oficial de acceso público",
+    "sourceVersion": "CPE 2009; Ley 3131 (2005); DS 28562 (2005)",
+    "retrievedAt": "2026-10-28",
+    "note": "Reorientada 2026-10-28 al consentimiento DIRIGIDO a una receta, orden de análisis o estudio, derivación, procedimiento o plan de cuidados. Cita literal: CPE art. 44.I. Paráfrasis (texto oficial no verificado en línea, sin número de artículo): la Ley 3131 y el DS 28562 hacen del consentimiento informado un documento del expediente clínico, escrito y firmado por el paciente o su representante, también cuando rechaza; el Código de Ética y Deontología Médica pide testigos cuando el paciente no puede consentir; la Norma Nacional de Referencia y Contrarreferencia (2013) trata la firma de la referencia como parte del consentimiento. Respaldo regional: el modelo de la Resolución 1738 del Ministerio de Salud y Protección Social de Colombia, fuente de la versión anterior. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar."
   },
   "fields": [
     {
-      "section": "Procedimiento",
-      "code": "procedimiento_propuesto",
-      "name": "Procedimiento propuesto",
-      "dataType": "text",
-      "required": true
+      "section": "Qué se consiente",
+      "code": "tipo_de_indicacion",
+      "name": "¿A qué se consiente?",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Receta o tratamiento farmacológico",
+        "Orden de análisis o estudio",
+        "Derivación a otro profesional o establecimiento",
+        "Procedimiento",
+        "Plan de cuidados"
+      ],
+      "description": "CPE, art. 44.I: ninguna persona será sometida a intervención quirúrgica, examen médico o de laboratorio sin su consentimiento o el de terceros legalmente autorizados, salvo peligro inminente de su vida."
     },
     {
-      "section": "Procedimiento",
+      "section": "Qué se consiente",
+      "code": "procedimiento_propuesto",
+      "name": "Tratamiento, receta, orden o derivación a la que se consiente",
+      "dataType": "text",
+      "required": true,
+      "description": "Lo concreto: el fármaco por su denominación común y su dosis, el estudio pedido, el servicio y el destino de la derivación, o el procedimiento."
+    },
+    {
+      "section": "Información",
       "code": "diagnostico_que_lo_motiva",
       "name": "Diagnóstico que lo motiva",
       "dataType": "text",
       "required": true
     },
     {
-      "section": "Procedimiento",
+      "section": "Información",
       "code": "beneficios_esperados",
       "name": "Beneficios esperados",
       "dataType": "text",
       "required": true
     },
     {
-      "section": "Procedimiento",
+      "section": "Información",
       "code": "riesgos_y_complicaciones",
       "name": "Riesgos y complicaciones frecuentes y graves",
       "dataType": "text",
       "required": true
     },
     {
-      "section": "Procedimiento",
+      "section": "Información",
+      "code": "riesgos_personalizados",
+      "name": "Riesgos personalizados",
+      "dataType": "text",
+      "required": false,
+      "description": "Los que dependen de esta persona: edad, embarazo, comorbilidades, otros medicamentos."
+    },
+    {
+      "section": "Información",
       "code": "alternativas_disponibles",
       "name": "Alternativas disponibles",
       "dataType": "text",
-      "required": false
+      "required": false,
+      "description": "Incluida la de no tratar. La persona puede pedir otra opinión médica (Ley 3131)."
     },
     {
-      "section": "Procedimiento",
+      "section": "Información",
       "code": "consecuencias_de_no_aceptar",
       "name": "Consecuencias de no aceptar",
       "dataType": "text",
       "required": false
     },
     {
-      "section": "Procedimiento",
+      "section": "Información",
       "code": "hubo_preguntas",
       "name": "¿El paciente hizo preguntas?",
       "dataType": "boolean",
       "required": false
     },
     {
-      "section": "Procedimiento",
+      "section": "Información",
       "code": "preguntas_del_paciente",
       "name": "¿Cuáles y qué se respondió?",
       "dataType": "text",
@@ -74,9 +99,62 @@
       "showWhen": { "field": "hubo_preguntas", "equals": true }
     },
     {
+      "section": "Quién informa y cómo",
+      "code": "profesional_que_informa",
+      "name": "Profesional que informa",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Quién informa y cómo",
+      "code": "canal_de_informacion",
+      "name": "Canal",
+      "dataType": "string",
+      "required": true,
+      "options": ["En persona", "Por telesalud"]
+    },
+    {
+      "section": "Quién informa y cómo",
+      "code": "idioma_de_la_informacion",
+      "name": "Idioma en que se informó",
+      "dataType": "string",
+      "required": false,
+      "options": ["Castellano", "Quechua", "Aymara", "Guaraní"],
+      "allowOther": true
+    },
+    {
+      "section": "Excepción legal",
+      "code": "aplica_excepcion",
+      "name": "¿Se actuó sin consentimiento previo por una excepción legal?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Excepción legal",
+      "code": "tipo_de_excepcion",
+      "name": "Excepción",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Urgencia con peligro inminente para la vida",
+        "Riesgo para la salud pública",
+        "La persona renunció a recibir la información"
+      ],
+      "showWhen": { "field": "aplica_excepcion", "equals": true }
+    },
+    {
+      "section": "Excepción legal",
+      "code": "justificacion_de_la_excepcion",
+      "name": "Justificación",
+      "dataType": "text",
+      "required": true,
+      "description": "En una urgencia, después se informa a la persona o a su familia y se deja constancia.",
+      "showWhen": { "field": "aplica_excepcion", "equals": true }
+    },
+    {
       "section": "Decisión",
       "code": "acepta_el_procedimiento",
-      "name": "Acepta el procedimiento",
+      "name": "Acepta la indicación",
       "dataType": "boolean",
       "required": true
     },
@@ -105,6 +183,14 @@
     },
     {
       "section": "Decisión",
+      "code": "documento_del_representante",
+      "name": "CI del representante",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "otorgado_por_representante", "equals": true }
+    },
+    {
+      "section": "Decisión",
       "code": "representante_vinculo",
       "name": "Vínculo",
       "dataType": "string",
@@ -126,6 +212,36 @@
       "required": true,
       "options": ["Menor de edad", "Incapacidad para decidir", "Urgencia"],
       "showWhen": { "field": "otorgado_por_representante", "equals": true }
+    },
+    {
+      "section": "Decisión",
+      "code": "asentimiento_de_la_persona",
+      "name": "¿La persona representada dio su asentimiento?",
+      "dataType": "boolean",
+      "required": true,
+      "showWhen": { "field": "otorgado_por_representante", "equals": true }
+    },
+    {
+      "section": "Decisión",
+      "code": "nombre_del_testigo",
+      "name": "Testigo",
+      "dataType": "string",
+      "required": false,
+      "description": "Cuando la persona no puede consentir o no sabe firmar, el Código de Ética y Deontología Médica recomienda hacerlo ante testigos."
+    },
+    {
+      "section": "Decisión",
+      "code": "documento_del_testigo",
+      "name": "CI del testigo",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Decisión",
+      "code": "derecho_a_revocar_informado",
+      "name": "Se informó que puede revocar su decisión en cualquier momento, sin efecto sobre lo ya realizado",
+      "dataType": "boolean",
+      "required": true
     },
     {
       "section": "Decisión",

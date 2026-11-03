@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
+  ConflictException,
   HttpDispatcherService,
   PreconditionFailedException,
   ResourceNotFoundException,
-  deriveWebhookSecret,
   joinUrl,
   touch,
   type AuthenticatedUser,
@@ -32,6 +32,13 @@ import {
   PendingCorrelationResponseDto,
 } from '../dto';
 import { INTEG } from '../integrations.concepts';
+import { IntegrationsErrorReason } from '../integrations.error-reasons';
+import {
+  assertConnectionInScope,
+  integrationsNotAvailable,
+  integrationsScope,
+} from '../integrations.tenant-scope';
+import { IntegrationsSecretsService } from './integrations-secrets.service';
 
 /** Nº máximo de intentos de envío antes de dead-letter. */
 const MAX_ATTEMPTS = 5;
@@ -71,6 +78,7 @@ export class IntegrationsMessagingService {
     private readonly retriesRepo: MessageRetriesRepository,
     private readonly inboundRepo: InboundMessagesRepository,
     private readonly http: HttpDispatcherService,
+    private readonly secrets: IntegrationsSecretsService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(IntegrationsMessagingService.name);
@@ -88,16 +96,14 @@ export class IntegrationsMessagingService {
       },
       'Enqueuing outbound message',
     );
+    const scope = integrationsScope(actor);
     return this.em.transactional(async (tx) => {
-      const connection = await this.connectionsRepo.findById(
-        tx,
-        dto.connectionId,
+      // La conexión elegida debe ser del tenant activo: encolar sobre una
+      // conexión ajena enviaría el payload al proveedor de otra organización.
+      const connection = assertConnectionInScope(
+        await this.connectionsRepo.findByIdInScope(tx, dto.connectionId, scope),
+        scope,
       );
-      if (!connection) {
-        throw new ResourceNotFoundException('Conexión no encontrada', {
-          connectionId: dto.connectionId,
-        });
-      }
       if (connection.stateConceptId !== INTEG.CONN_ACTIVE) {
         throw new PreconditionFailedException('La conexión no está activa', {
           connectionId: dto.connectionId,
@@ -109,6 +115,15 @@ export class IntegrationsMessagingService {
         tx,
         dto.idempotencyKey,
       );
+      if (existing && existing.connectionId !== connection.id) {
+        // La clave es única en toda la tabla: la de otra conexión no se
+        // devuelve (sería leer el mensaje de otro tenant) ni se reutiliza.
+        throw new ConflictException(
+          'La clave de idempotencia ya está en uso',
+          undefined,
+          IntegrationsErrorReason.INTEGRATIONS_IDEMPOTENCY_KEY_IN_USE,
+        );
+      }
       if (existing) {
         this.logger.info(
           {
@@ -162,12 +177,25 @@ export class IntegrationsMessagingService {
       { operation: 'integrations.message.dispatch', messageId },
       'Dispatching message',
     );
+    const scope = integrationsScope(actor);
     return this.em.transactional(async (tx) => {
+      // Mensaje → conexión → tenant, antes de bloquear la fila ni de firmar
+      // nada: un mensaje ajeno responde igual que uno inexistente.
+      const candidate = await this.outboundRepo.findById(tx, messageId);
+      const connection = assertConnectionInScope(
+        candidate
+          ? await this.connectionsRepo.findByIdInScope(
+              tx,
+              candidate.connectionId,
+              scope,
+            )
+          : null,
+        scope,
+        'Mensaje no encontrado',
+      );
       const message = await this.outboundRepo.findByIdForUpdate(tx, messageId);
-      if (!message)
-        throw new ResourceNotFoundException('Mensaje no encontrado', {
-          messageId,
-        });
+      if (!message || message.connectionId !== connection.id)
+        throw integrationsNotAvailable('Mensaje no encontrado');
       if (message.statusConceptId !== INTEG.MSG_QUEUED) {
         throw new PreconditionFailedException('El mensaje no está en cola', {
           messageId,
@@ -175,15 +203,6 @@ export class IntegrationsMessagingService {
       }
 
       // Resuelve el destino real: base_url del proveedor + path del endpoint.
-      const connection = await this.connectionsRepo.findById(
-        tx,
-        message.connectionId,
-      );
-      if (!connection) {
-        throw new ResourceNotFoundException('Conexión no encontrada', {
-          connectionId: message.connectionId,
-        });
-      }
       const provider = await this.providersRepo.findById(
         tx,
         connection.providerId,
@@ -206,8 +225,12 @@ export class IntegrationsMessagingService {
       }
       const url = joinUrl(provider.baseUrl, path);
 
-      // Firma el cuerpo con el secreto de la conexión (guarda anti-SSRF dentro).
-      const secret = deriveWebhookSecret('connection', connection.id); // TODO secreto por conexión
+      // Firma el cuerpo con el secreto de la credencial activa de la conexión,
+      // resuelto de la bóveda (guarda anti-SSRF dentro). Sin secreto no se envía.
+      const [secret] = await this.secrets.resolveActiveSecrets(
+        tx,
+        connection.id,
+      );
       const outcome = await this.http.post({
         url,
         body: message.requestPayloadJson,
@@ -263,12 +286,9 @@ export class IntegrationsMessagingService {
       { operation: 'integrations.message.retry', messageId },
       'Scheduling retry',
     );
+    const scope = integrationsScope(actor);
     return this.em.transactional(async (tx) => {
-      const message = await this.outboundRepo.findById(tx, messageId);
-      if (!message)
-        throw new ResourceNotFoundException('Mensaje no encontrado', {
-          messageId,
-        });
+      const message = await this.resolveMessageInScope(tx, messageId, scope);
       if (message.statusConceptId !== INTEG.MSG_FAILED) {
         throw new PreconditionFailedException(
           'El mensaje no está en estado fallido',
@@ -326,12 +346,9 @@ export class IntegrationsMessagingService {
       { operation: 'integrations.message.deadLetter', messageId },
       'Dead-lettering message',
     );
+    const scope = integrationsScope(actor);
     return this.em.transactional(async (tx) => {
-      const message = await this.outboundRepo.findById(tx, messageId);
-      if (!message)
-        throw new ResourceNotFoundException('Mensaje no encontrado', {
-          messageId,
-        });
+      const message = await this.resolveMessageInScope(tx, messageId, scope);
 
       // Transición terminal idempotente.
       if (message.statusConceptId === INTEG.MSG_DEAD_LETTER) {
@@ -387,12 +404,28 @@ export class IntegrationsMessagingService {
       { operation: 'integrations.message.correlate', inboundMessageId },
       'Correlating inbound callback',
     );
+    const scope = integrationsScope(actor);
     return this.em.transactional(async (tx) => {
-      const inbound = await this.inboundRepo.findById(tx, inboundMessageId);
+      // Callback → conexión → tenant. El bloqueo del callback serializa dos
+      // correlaciones concurrentes: la segunda lo ve ya procesado.
+      const candidate = await this.inboundRepo.findById(tx, inboundMessageId);
+      assertConnectionInScope(
+        candidate
+          ? await this.connectionsRepo.findByIdInScope(
+              tx,
+              candidate.connectionId,
+              scope,
+            )
+          : null,
+        scope,
+        'Mensaje entrante no encontrado',
+      );
+      const inbound = await this.inboundRepo.findByIdForUpdate(
+        tx,
+        inboundMessageId,
+      );
       if (!inbound) {
-        throw new ResourceNotFoundException('Mensaje entrante no encontrado', {
-          inboundMessageId,
-        });
+        throw integrationsNotAvailable('Mensaje entrante no encontrado');
       }
       if (inbound.statusConceptId !== INTEG.INBOUND_RECEIVED) {
         throw new PreconditionFailedException(
@@ -411,8 +444,10 @@ export class IntegrationsMessagingService {
         );
       }
 
-      const outbound = await this.outboundRepo.findByCorrelationId(
+      // Sólo correlaciona con salientes de la misma conexión que el callback.
+      const outbound = await this.outboundRepo.findByCorrelationIdInConnection(
         tx,
+        inbound.connectionId,
         inbound.correlationId,
       );
       if (!outbound) {
@@ -456,14 +491,18 @@ export class IntegrationsMessagingService {
    * `messaging`.
    */
   async listQueuedForDispatch(
+    actor: AuthenticatedUser,
     limit?: number,
   ): Promise<PendingDispatchResponseDto> {
     const em = this.em.fork();
+    const connectionIds = await this.scopedConnectionIds(em, actor);
+    if (connectionIds?.length === 0) return { messages: [] };
     const messages = await this.outboundRepo.findQueuedForDispatch(
       em,
       INTEG.MSG_QUEUED,
       new Date(),
       limit ?? DEFAULT_DISCOVERY_BATCH,
+      connectionIds,
     );
     return { messages: messages.map((message) => ({ id: message.id })) };
   }
@@ -475,12 +514,18 @@ export class IntegrationsMessagingService {
    * decide entre `retry` y `deadLetter` sin tener que inferirlo del cuerpo de
    * un error 422.
    */
-  async listFailedForRetry(limit?: number): Promise<PendingRetryResponseDto> {
+  async listFailedForRetry(
+    actor: AuthenticatedUser,
+    limit?: number,
+  ): Promise<PendingRetryResponseDto> {
     const em = this.em.fork();
+    const connectionIds = await this.scopedConnectionIds(em, actor);
+    if (connectionIds?.length === 0) return { messages: [] };
     const messages = await this.outboundRepo.findFailed(
       em,
       INTEG.MSG_FAILED,
       limit ?? DEFAULT_DISCOVERY_BATCH,
+      connectionIds,
     );
     const items = await Promise.all(
       messages.map(async (message) => {
@@ -501,14 +546,57 @@ export class IntegrationsMessagingService {
    * esto, `correlate` no tenía forma de saber qué `inboundMessageId` traer.
    */
   async listReceivedForCorrelation(
+    actor: AuthenticatedUser,
     limit?: number,
   ): Promise<PendingCorrelationResponseDto> {
     const em = this.em.fork();
+    const connectionIds = await this.scopedConnectionIds(em, actor);
+    if (connectionIds?.length === 0) return { messages: [] };
     const inbound = await this.inboundRepo.findReceived(
       em,
       INTEG.INBOUND_RECEIVED,
       limit ?? DEFAULT_DISCOVERY_BATCH,
+      connectionIds,
     );
     return { messages: inbound.map((message) => ({ id: message.id })) };
+  }
+
+  /**
+   * Mensaje saliente cuya conexión pertenece al alcance del actor. Uno ajeno,
+   * o inexistente, responde igual (404, mismo mensaje y `reason`).
+   */
+  private async resolveMessageInScope(
+    tx: EntityManager,
+    messageId: string,
+    scope: string | undefined,
+  ) {
+    const message = await this.outboundRepo.findById(tx, messageId);
+    assertConnectionInScope(
+      message
+        ? await this.connectionsRepo.findByIdInScope(
+            tx,
+            message.connectionId,
+            scope,
+          )
+        : null,
+      scope,
+      'Mensaje no encontrado',
+    );
+    return message as NonNullable<typeof message>;
+  }
+
+  /**
+   * Conexiones a las que se acotan los listados que descubren los jobs:
+   * las del tenant activo, o `undefined` (todas) para el barrido interno de
+   * `SYSTEM` sin tenant.
+   */
+  private async scopedConnectionIds(
+    em: EntityManager,
+    actor: AuthenticatedUser,
+  ): Promise<string[] | undefined> {
+    const scope = integrationsScope(actor);
+    return scope === undefined
+      ? undefined
+      : this.connectionsRepo.findIdsByTenant(em, scope);
   }
 }

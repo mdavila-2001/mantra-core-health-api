@@ -94,6 +94,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<TransitionHistoryResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<TransitionHistoryResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<TransitionHistoryResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<TransitionHistoryResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TransitionHistoryResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -223,6 +224,7 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `machineCode` | Sí | `string` | longitud máxima 100 | Máquina de estado que gobierna el agregado | `CODIGO_EJEMPLO` |
+| `purposeOfUseConceptId` | No | `string` | formato `uuid` | Propósito de uso con el que se dispara el comando. Debe coincidir con el que exige la transición; si ésta lo exige y falta o difiere, 403 WORKFLOW_PURPOSE_NOT_ALLOWED | `00000000-0000-4000-8000-000000000001` |
 | `actorTenantId` | No | `string` | formato `uuid` | Tenant en cuyo nombre actúa el llamante; queda en el evento de transición | `00000000-0000-4000-8000-000000000001` |
 | `reasonConceptId` | No | `string` | formato `uuid` | Motivo del movimiento | `00000000-0000-4000-8000-000000000001` |
 | `reasonText` | No | `string` | Sin restricción adicional declarada | Texto libre del motivo | `Texto descriptivo de ejemplo` |
@@ -245,6 +247,7 @@ Content-Type: application/json
 
 {
   "machineCode": "CODIGO_EJEMPLO",
+  "purposeOfUseConceptId": "00000000-0000-4000-8000-000000000001",
   "actorTenantId": "00000000-0000-4000-8000-000000000001",
   "reasonConceptId": "00000000-0000-4000-8000-000000000001",
   "reasonText": "Texto descriptivo de ejemplo",
@@ -269,6 +272,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TransitionEventResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TransitionEventResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TransitionEventResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TransitionEventResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TransitionEventResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -415,6 +419,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CompensateTransitionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CompensateTransitionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CompensateTransitionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CompensateTransitionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CompensateTransitionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -549,6 +554,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RetryTransitionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RetryTransitionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RetryTransitionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RetryTransitionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RetryTransitionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -709,6 +715,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<WorkflowInstanceResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<WorkflowInstanceResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<WorkflowInstanceResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<WorkflowInstanceResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `WorkflowInstanceResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -840,6 +847,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<SweepTimeoutsResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<SweepTimeoutsResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<SweepTimeoutsResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SweepTimeoutsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SweepTimeoutsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -977,6 +985,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<StateMachineResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StateMachineResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StateMachineResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StateMachineResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StateMachineResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1105,6 +1114,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PublishStateMachineResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PublishStateMachineResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PublishStateMachineResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PublishStateMachineResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PublishStateMachineResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1260,6 +1270,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DefineStatesResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DefineStatesResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DefineStatesResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DefineStatesResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DefineStatesResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1452,6 +1463,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TransitionDefinitionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TransitionDefinitionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TransitionDefinitionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TransitionDefinitionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TransitionDefinitionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1593,6 +1605,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CompleteTaskResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CompleteTaskResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CompleteTaskResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CompleteTaskResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CompleteTaskResponseDto`. Ejemplo completo derivado de ese DTO:
 

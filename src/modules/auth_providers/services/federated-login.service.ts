@@ -481,7 +481,7 @@ export class FederatedLoginService {
       'Completing account link',
     );
 
-    return this.em.transactional(async (tx) => {
+    const outcome = await this.em.transactional(async (tx) => {
       const request =
         await this.providersRepo.findLinkRequestByTokenHashForUpdate(
           tx,
@@ -502,14 +502,13 @@ export class FederatedLoginService {
         );
       }
       if (request.expiresAt && request.expiresAt.getTime() <= Date.now()) {
+        // El vencimiento se confirma antes de rechazar: lanzar acá lo
+        // revertiría (`transactional` deshace ante cualquier excepción) y la
+        // solicitud seguiría «pendiente» para siempre.
         request.statusConceptId = CONCEPTS.LINK_REQUEST_EXPIRED;
         touch(request, actor.id);
-        throw new PreconditionFailedException(
-          'La solicitud de vinculación caducó',
-          {
-            requestId: request.id,
-          },
-        );
+        await tx.flush();
+        return { expiredRequestId: request.id };
       }
 
       // La solicitud puede haber nacido en un callback sin usuario resuelto;
@@ -574,6 +573,14 @@ export class FederatedLoginService {
         statusConceptId: CONCEPTS.LINK_REQUEST_COMPLETED,
       };
     });
+
+    if ('expiredRequestId' in outcome) {
+      throw new PreconditionFailedException(
+        'La solicitud de vinculación caducó',
+        { requestId: outcome.expiredRequestId },
+      );
+    }
+    return outcome;
   }
 
   /**

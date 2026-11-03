@@ -136,6 +136,54 @@ export class PublicProfilesRepository {
   }
 
   /**
+   * Las vitrinas de varios sujetos en una consulta (por `target_id`).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param targetIds - Sujetos (p. ej. tenants de organizaciones).
+   * @returns Los perfiles existentes, sin orden garantizado.
+   */
+  listByTargetIds(
+    em: EntityManager,
+    targetIds: string[],
+  ): Promise<PublicProfiles[]> {
+    if (targetIds.length === 0) return Promise.resolve([]);
+    return em.find(PublicProfiles, { targetId: { $in: targetIds } });
+  }
+
+  /**
+   * Las vitrinas de varios sujetos, acotadas por tipo y estado, en una
+   * consulta. Ordenadas por nombre visible: es lo que muestra un selector.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param filters - Sujetos (`target_id`), tipos de sujeto y estado.
+   * @returns Los perfiles que cumplen los tres filtros.
+   */
+  listByTargetsTypesAndStatus(
+    em: EntityManager,
+    filters: {
+      targetIds: readonly string[];
+      targetTypeConceptIds: readonly string[];
+      statusConceptId: string;
+    },
+  ): Promise<PublicProfiles[]> {
+    if (
+      filters.targetIds.length === 0 ||
+      filters.targetTypeConceptIds.length === 0
+    ) {
+      return Promise.resolve([]);
+    }
+    return em.find(
+      PublicProfiles,
+      {
+        targetId: { $in: [...filters.targetIds] },
+        targetTypeConceptId: { $in: [...filters.targetTypeConceptIds] },
+        statusConceptId: filters.statusConceptId,
+      },
+      { orderBy: { displayName: 'ASC', id: 'ASC' } },
+    );
+  }
+
+  /**
    * Personas activas que se pueden elegir para iniciar un chat.
    *
    * Es una lectura autenticada y deliberadamente distinta del directorio
@@ -259,25 +307,25 @@ export class PublicProfilesRepository {
    * el mismo agujero que tenía el mayor contable.
    *
    * @param em - Contexto de persistencia o transacción activa.
-   * @param filtros - Tenant obligatorio; tipo de sujeto y visibilidad opcionales.
+   * @param filters - Tenant obligatorio; tipo de sujeto y visibilidad opcionales.
    * @param limit - Tope de filas.
    * @returns Los perfiles, del más reciente al más antiguo.
    */
   findByTenant(
     em: EntityManager,
-    filtros: {
+    filters: {
       tenantId: string;
       targetTypeConceptId?: string;
       visibilityConceptId?: string;
     },
     limit: number,
   ): Promise<PublicProfiles[]> {
-    const where: Record<string, unknown> = { tenantId: filtros.tenantId };
-    if (filtros.targetTypeConceptId) {
-      where.targetTypeConceptId = filtros.targetTypeConceptId;
+    const where: Record<string, unknown> = { tenantId: filters.tenantId };
+    if (filters.targetTypeConceptId) {
+      where.targetTypeConceptId = filters.targetTypeConceptId;
     }
-    if (filtros.visibilityConceptId) {
-      where.visibilityConceptId = filtros.visibilityConceptId;
+    if (filters.visibilityConceptId) {
+      where.visibilityConceptId = filters.visibilityConceptId;
     }
     return em.find(PublicProfiles, where, {
       orderBy: { createdAt: 'DESC' },

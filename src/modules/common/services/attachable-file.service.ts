@@ -316,8 +316,8 @@ export class AttachableFileService {
         { fileId },
       );
     }
-    const admitidos = options.allowedMimeTypes;
-    if (admitidos && !admitidos.includes(version.mimeType ?? '')) {
+    const accepted = options.allowedMimeTypes;
+    if (accepted && !accepted.includes(version.mimeType ?? '')) {
       throw new PreconditionFailedException(
         `${labels.subject} no es de un formato admitido para este uso`,
         { fileId, mimeType: version.mimeType ?? null },

@@ -18,7 +18,7 @@ diferenciar comportamiento entre ambientes:
 | Variable | Efecto |
 |---|---|
 | `NODE_ENV` | Deshabilita `/docs` y `/reference` en `production` |
-| `RLS_ENFORCE` | Aislamiento de tenant — **debe verificarse explícitamente por ambiente**, ver `SEC-001` |
+| `RLS_ENFORCE` | Aislamiento de tenant — **debe verificarse explícitamente por ambiente**, ver `docs/security/tenant-isolation.md` |
 | `ORM_SCHEMA_SYNC` | `off` en entornos donde un DBA gestiona el DDL externamente; `safe` por defecto |
 | `RATE_LIMIT_DISABLED` | Solo para pruebas de integración/generación de documentación — nunca en producción |
 

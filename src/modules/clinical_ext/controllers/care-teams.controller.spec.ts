@@ -16,7 +16,11 @@ const actor = { id: 'cc-1', roles: ['USER'] } as any;
  * @returns Resultado de build.
  */
 function build() {
-  const careTeamsService = { create: mockFn(), setResponsible: mockFn() };
+  const careTeamsService = {
+    create: mockFn(),
+    setResponsible: mockFn(),
+    listByPatient: mockFn(),
+  };
   const controller = new CareTeamsController(careTeamsService as any);
   return { controller, careTeamsService };
 }
@@ -40,5 +44,11 @@ describe('CareTeamsController', () => {
       'm1',
       actor,
     );
+  });
+
+  it('delegates listByPatient with the actor so the service can authorize', async () => {
+    const d = build();
+    await d.controller.listByPatient('p1', actor);
+    expect(d.careTeamsService.listByPatient).toHaveBeenCalledWith('p1', actor);
   });
 });

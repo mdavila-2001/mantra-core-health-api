@@ -1,6 +1,6 @@
 import type { SmokeCase } from '../smoke-kit';
 import { UUID_ABSENT } from '../smoke-kit';
-import { INS } from '../../../src/modules/insurance/insurance.concepts';
+import { INS } from '../../../src/modules/insurance/domain/insurance.concepts';
 
 /**
  * Smoke del módulo insurance (26). Cubre la espina dorsal autocontenida

@@ -16,10 +16,11 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   Roles,
-  type AuthenticatedUser,
   AccessLogged,
+  type AuthenticatedUser,
 } from '../../../common';
 import { DataReleaseService } from '../services';
 import {
@@ -48,6 +49,11 @@ export class FhirR5Controller {
   constructor(private readonly releaseService: DataReleaseService) {}
 
   /** UC-52-12. */
+  @Audited({
+    action: 'FHIR_BULK_EXPORT_STARTED',
+    entity: 'health_export_job',
+    entityId: 'result.id',
+  })
   @Post('$export')
   @Roles('PRIVACY_OFFICER', 'HEALTH_DATA_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -79,7 +85,8 @@ export class FhirR5Controller {
     name: 'custodian',
     required: false,
     format: 'uuid',
-    description: 'Custodio por el que se acota la búsqueda',
+    description:
+      'Obsoleto: el custodio sale de la sesión (X-Tenant-Id). Si llega y difiere del tenant activo, el paciente no está disponible (404).',
   })
   serveEverything(
     @Param('id', ParseUUIDPipe) id: string,

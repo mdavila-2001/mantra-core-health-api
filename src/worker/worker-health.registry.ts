@@ -25,6 +25,9 @@ import type { CircuitSnapshot } from '../common/resilience';
 
 export type TickOutcome = 'ok' | 'failed' | 'timeout' | 'skipped';
 
+/** Códigos estables que `/status` puede mostrar de un fallo de tick. */
+export type TickErrorCode = 'TICK_FAILED' | 'TICK_TIMEOUT';
+
 /** Estado acumulado de una operación programada. */
 export interface TickHealth {
   operation: string;
@@ -34,14 +37,36 @@ export interface TickHealth {
   lastFinishedAt?: number;
   lastDurationMs?: number;
   lastOutcome?: TickOutcome;
-  /** Mensaje del último fallo, recortado. Para el diagnóstico de un vistazo. */
-  lastError?: string;
+  /**
+   * Código estable del último fallo, sin payload. El mensaje original puede
+   * arrastrar datos de negocio (un error de BD que cite una fila, un `body` de
+   * proveedor), y `/status` lo serviría a cualquiera que alcance el puerto: el
+   * detalle vive sólo en el log del worker (`runTick`), que sí está protegido.
+   */
+  lastErrorCode?: TickErrorCode;
   runs: number;
   failures: number;
   timeouts: number;
   /** Ejecuciones descartadas porque la anterior seguía en vuelo. */
   skipped: number;
   consecutiveFailures: number;
+}
+
+/**
+ * Con qué está atendida una capacidad que depende de un proveedor externo.
+ *
+ * - `none`: conserva el adapter por defecto, que falla visible o deja el trabajo
+ *   pendiente. No hace nada útil.
+ * - `mock`: la atiende el emulador de proveedores. Válido fuera de producción;
+ *   en producción equivale a dar por bueno un doble de prueba.
+ * - `real`: hay un adapter de proveedor productivo.
+ */
+export type ProviderBinding = 'none' | 'mock' | 'real';
+
+/** Estado de una capacidad de proveedor; se muestra en `/status`. */
+export interface ProviderCapabilityHealth {
+  capability: string;
+  binding: ProviderBinding;
 }
 
 /** Veredicto de una sonda, con el porqué. */
@@ -59,6 +84,7 @@ export interface WorkerHealthSnapshot {
   startedAt: string;
   ticks: TickHealth[];
   circuits: CircuitSnapshot[];
+  providerCapabilities: ProviderCapabilityHealth[];
   memory: {
     rssBytes: number;
     heapUsedBytes: number;
@@ -68,37 +94,13 @@ export interface WorkerHealthSnapshot {
   readiness: ProbeResult;
 }
 
-/** Longitud máxima del resumen de error, incluido el carácter de elisión. */
-const ERROR_SUMMARY_MAX = 300;
-
-/**
- * Recorta el mensaje de error para que un stack no inunde la respuesta.
- *
- * Sólo se leen las dos formas de las que se puede sacar texto útil. Un
- * `String(objeto)` daría `[object Object]`, que ocupa el sitio del diagnóstico
- * sin aportar ninguno — peor que decir abiertamente que no se conoce la causa.
- */
-function summarizeError(error: unknown): string {
-  let text: string;
-  if (error instanceof Error) {
-    text = error.message;
-  } else if (typeof error === 'string') {
-    text = error;
-  } else {
-    text = 'error desconocido';
-  }
-
-  return text.length > ERROR_SUMMARY_MAX
-    ? `${text.slice(0, ERROR_SUMMARY_MAX - 1)}…`
-    : text;
-}
-
 export class WorkerHealthRegistry {
   /** Exclusión mutua de ticks; también es la fuente de "qué hay en vuelo". */
   readonly mutex: MutexRegistry;
 
   private readonly ticks = new Map<string, TickHealth>();
   private readonly circuits = new Map<string, () => CircuitSnapshot>();
+  private readonly providerCapabilities = new Map<string, ProviderBinding>();
   private readonly startedAt: number;
   private status: WorkerHealthSnapshot['status'] = 'starting';
   private workerName = 'unknown';
@@ -110,7 +112,11 @@ export class WorkerHealthRegistry {
    */
   private stuckThresholdMs = 10 * 60_000;
 
-  constructor(private readonly now: () => number = () => Date.now()) {
+  constructor(
+    private readonly now: () => number = () => Date.now(),
+    private readonly isProduction: () => boolean = () =>
+      process.env.NODE_ENV === 'production',
+  ) {
     this.mutex = new MutexRegistry(now);
     this.startedAt = now();
   }
@@ -140,6 +146,20 @@ export class WorkerHealthRegistry {
     this.circuits.set(name, snapshot);
   }
 
+  /**
+   * Declara con qué se atiende una capacidad que depende de un proveedor
+   * externo (borrado inter-store, identidad, embeddings...). En producción sólo
+   * `real` cuenta como atendida: las demás degradan la readiness para que un
+   * worker que conserva el adapter por defecto, o el emulador, no se declare
+   * sano mientras sus solicitudes fallan o quedan pendientes.
+   */
+  registerProviderCapability(
+    capability: string,
+    binding: ProviderBinding,
+  ): void {
+    this.providerCapabilities.set(capability, binding);
+  }
+
   tickStarted(operation: string): void {
     const health = this.ensure(operation);
     health.inFlightSince = this.now();
@@ -149,7 +169,6 @@ export class WorkerHealthRegistry {
   tickFinished(
     operation: string,
     outcome: Exclude<TickOutcome, 'skipped'>,
-    error?: unknown,
   ): void {
     const health = this.ensure(operation);
     const finishedAt = this.now();
@@ -165,13 +184,14 @@ export class WorkerHealthRegistry {
 
     if (outcome === 'ok') {
       health.consecutiveFailures = 0;
-      health.lastError = undefined;
+      health.lastErrorCode = undefined;
       return;
     }
 
     health.failures += 1;
     health.consecutiveFailures += 1;
-    health.lastError = summarizeError(error);
+    health.lastErrorCode =
+      outcome === 'timeout' ? 'TICK_TIMEOUT' : 'TICK_FAILED';
     if (outcome === 'timeout') {
       health.timeouts += 1;
     }
@@ -236,6 +256,18 @@ export class WorkerHealthRegistry {
       }
     }
 
+    if (this.isProduction()) {
+      for (const [capability, binding] of this.providerCapabilities) {
+        if (binding === 'real') continue;
+        reasons.push(
+          `la capacidad "${capability}" no tiene proveedor productivo ` +
+            (binding === 'mock'
+              ? '(sólo emulador)'
+              : '(conserva el adapter por defecto)'),
+        );
+      }
+    }
+
     return { healthy: reasons.length === 0, reasons };
   }
 
@@ -249,6 +281,9 @@ export class WorkerHealthRegistry {
       startedAt: new Date(this.startedAt).toISOString(),
       ticks: [...this.ticks.values()].map((tick) => ({ ...tick })),
       circuits: [...this.circuits.values()].map((read) => read()),
+      providerCapabilities: [...this.providerCapabilities].map(
+        ([capability, binding]) => ({ capability, binding }),
+      ),
       memory: {
         rssBytes: memory.rss,
         heapUsedBytes: memory.heapUsed,
@@ -293,6 +328,7 @@ export class WorkerHealthRegistry {
   reset(): void {
     this.ticks.clear();
     this.circuits.clear();
+    this.providerCapabilities.clear();
     this.mutex.reset();
     this.status = 'starting';
   }

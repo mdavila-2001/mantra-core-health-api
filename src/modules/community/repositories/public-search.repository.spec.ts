@@ -13,6 +13,7 @@ import {
   publicSitesOf,
   type SitePublicRow,
 } from './public-search.repository';
+import { CONCEPTS } from '../../../common';
 import { PRAC } from '../../practice/practice.concepts';
 import { PROF } from '../../profiles/profiles.concepts';
 
@@ -39,6 +40,7 @@ function row(partial: Partial<SitePublicRow> = {}): SitePublicRow {
     practice_type_concept_id: PRAC.PRACTICE_TYPE_CLINIC,
     practice_admin_user_id: 'admin-clinica',
     lines: 'Av. Arce 2345',
+    district_text: null,
     city: 'La Paz',
     postal_code: null,
     latitude: '-16.5000000',
@@ -116,32 +118,32 @@ describe('sedesPublicasDe — dónde atiende, para la ficha pública', () => {
 
   describe('qué sede es propia', () => {
     it('C · consultorio administrado por la cuenta activa del profesional → isOwn', () => {
-      const [sede] = doctorSites([row(OWN_OFFICE)]);
+      const [site] = doctorSites([row(OWN_OFFICE)]);
 
-      expect(sede.isOwn).toBe(true);
+      expect(site.isOwn).toBe(true);
     });
 
     it('D · consultorio administrado por OTRA cuenta → no es propio', () => {
-      const [sede] = doctorSites([
+      const [site] = doctorSites([
         row({ ...OWN_OFFICE, practice_admin_user_id: FOREIGN_ACCOUNT }),
       ]);
 
-      expect(sede.isOwn).toBe(false);
+      expect(site.isOwn).toBe(false);
     });
 
     it('D · consultorio administrado por una cuenta cuyo vínculo ya no está activo → no es propio', () => {
-      const [sede] = doctorSites([
+      const [site] = doctorSites([
         row({
           ...OWN_OFFICE,
           link_status_concept_id: PROF.ACCOUNT_LINK_SUPERSEDED,
         }),
       ]);
 
-      expect(sede.isOwn).toBe(false);
+      expect(site.isOwn).toBe(false);
     });
 
     it('D · profesional sin ningún vínculo de cuenta → nada es propio', () => {
-      const [sede] = doctorSites([
+      const [site] = doctorSites([
         row({
           ...OWN_OFFICE,
           link_user_id: null,
@@ -149,7 +151,7 @@ describe('sedesPublicasDe — dónde atiende, para la ficha pública', () => {
         }),
       ]);
 
-      expect(sede.isOwn).toBe(false);
+      expect(site.isOwn).toBe(false);
     });
 
     it('E · práctica diagnóstica administrada por la propia cuenta → no es propia', () => {
@@ -157,28 +159,28 @@ describe('sedesPublicasDe — dónde atiende, para la ficha pública', () => {
       // crea la sede con `SITE_TYPE_OFFICE` y deja como administradora a la
       // cuenta dueña. La fila ni siquiera trae el tipo de sede —la regla no lo
       // mira—; lo que la separa es el tipo de práctica.
-      const [sede] = doctorSites([
+      const [site] = doctorSites([
         row({
           ...OWN_OFFICE,
           practice_type_concept_id: PRAC.PRACTICE_TYPE_DIAGNOSTIC_CENTER,
         }),
       ]);
 
-      expect(sede.isOwn).toBe(false);
+      expect(site.isOwn).toBe(false);
     });
 
     it('administrar una clínica no la vuelve consultorio propio', () => {
-      const [sede] = doctorSites([
+      const [site] = doctorSites([
         row({ practice_admin_user_id: DOCTOR_ACCOUNT }),
       ]);
 
-      expect(sede.isOwn).toBe(false);
+      expect(site.isOwn).toBe(false);
     });
 
     it('el vínculo activo cuenta aunque llegue en la fila de otra asignación', () => {
       // El vínculo es de la persona: que la fila del consultorio traiga el
       // vínculo viejo y otra fila traiga el activo no cambia de quién es.
-      const [sede] = doctorSites([
+      const [site] = doctorSites([
         row({
           ...OWN_OFFICE,
           link_status_concept_id: PROF.ACCOUNT_LINK_SUPERSEDED,
@@ -189,7 +191,7 @@ describe('sedesPublicasDe — dónde atiende, para la ficha pública', () => {
         }),
       ]);
 
-      expect(sede).toMatchObject({ id: 'sede-propia', isOwn: true });
+      expect(site).toMatchObject({ id: 'sede-propia', isOwn: true });
     });
 
     it('la cuenta de un profesional no vuelve propio el consultorio de otro', () => {
@@ -238,7 +240,7 @@ describe('sedesPublicasDe — dónde atiende, para la ficha pública', () => {
 
   describe('dirección y punto', () => {
     it('H · sede sin dirección: addressText y location nulos, sin error', () => {
-      const [sede] = doctorSites([
+      const [site] = doctorSites([
         row({
           lines: null,
           city: null,
@@ -248,7 +250,7 @@ describe('sedesPublicasDe — dónde atiende, para la ficha pública', () => {
         }),
       ]);
 
-      expect(sede).toEqual({
+      expect(site).toEqual({
         id: 'sede-clinica',
         name: 'Clínica Los Olivos',
         addressText: null,
@@ -258,24 +260,24 @@ describe('sedesPublicasDe — dónde atiende, para la ficha pública', () => {
     });
 
     it('la dirección se compone calle, ciudad y código postal, sin partes vacías', () => {
-      const [sede] = doctorSites([
+      const [site] = doctorSites([
         row({ lines: '  Calle Sucre 45 ', city: '', postal_code: '0000' }),
       ]);
 
-      expect(sede.addressText).toBe('Calle Sucre 45, 0000');
+      expect(site.addressText).toBe('Calle Sucre 45, 0000');
     });
 
     it('las coordenadas numeric llegan como número', () => {
-      const [sede] = doctorSites([row()]);
+      const [site] = doctorSites([row()]);
 
-      expect(sede.location).toEqual({ lat: -16.5, lng: -68.13 });
+      expect(site.location).toEqual({ lat: -16.5, lng: -68.13 });
     });
 
     it('media coordenada no es un lugar: location nulo, dirección intacta', () => {
-      const [sede] = doctorSites([row({ longitude: null })]);
+      const [site] = doctorSites([row({ longitude: null })]);
 
-      expect(sede.location).toBeNull();
-      expect(sede.addressText).toBe('Av. Arce 2345, La Paz');
+      expect(site.location).toBeNull();
+      expect(site.addressText).toBe('Av. Arce 2345, La Paz');
     });
   });
 });
@@ -328,6 +330,112 @@ describe('PublicSearchRepository.practiceSitesByPractitioner', () => {
 
     const map = await d.repo.practiceSitesByPractitioner(d.em as any, [DOCTOR]);
 
-    expect(map.get(DOCTOR)?.map((s) => s.id)).toEqual(['z-propia', 'a-clinica']);
+    expect(map.get(DOCTOR)?.map((s) => s.id)).toEqual([
+      'z-propia',
+      'a-clinica',
+    ]);
+  });
+});
+
+describe('PublicSearchRepository · unaccent (P-14)', () => {
+  const where = { visibilityConceptId: 'vis', statusConceptId: 'st' };
+
+  function build(present: boolean) {
+    const execute = mockFn(async (sql: string) =>
+      sql.includes('pg_extension') ? [{ present }] : [{ id: 'p1' }],
+    );
+    const em = { getConnection: mockFn(() => ({ execute })) };
+    return { repo: new PublicSearchRepository() as any, em, execute };
+  }
+
+  it('pregunta por la extensión una sola vez y la usa si está', async () => {
+    const d = build(true);
+
+    await d.repo.matchIdsByText(d.em, 'cardio', where, 10);
+    await d.repo.matchIdsByText(d.em, 'pedia', where, 10);
+
+    const queries = d.execute.mock.calls.map((c: unknown[]) => String(c[0]));
+    expect(
+      queries.filter((sql: string) => sql.includes('pg_extension')),
+    ).toHaveLength(1);
+    expect(
+      queries.filter((sql: string) => sql.includes('unaccent(lower')),
+    ).toHaveLength(2);
+  });
+
+  it('sin la extensión consulta con lower(...) directo, sin intentar unaccent', async () => {
+    const d = build(false);
+
+    await d.repo.matchIdsByText(d.em, 'cardio', where, 10);
+
+    const queries = d.execute.mock.calls.map((c: unknown[]) => String(c[0]));
+    expect(queries.some((sql: string) => sql.includes('unaccent(lower'))).toBe(
+      false,
+    );
+    expect(d.execute).toHaveBeenCalledTimes(2);
+  });
+
+  it('un fallo real de la consulta se propaga: ya no se reintenta a ciegas', async () => {
+    const d = build(true);
+    const drop = new Error('connection terminated unexpectedly');
+    d.execute.mockImplementation(async (sql: string) => {
+      if (sql.includes('pg_extension')) return [{ present: true }];
+      throw drop;
+    });
+
+    await expect(d.repo.matchIdsByText(d.em, 'cardio', where, 10)).rejects.toBe(
+      drop,
+    );
+    expect(d.execute).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('PublicSearchRepository · locationsByOwner', () => {
+  function build(rows: unknown[] = []) {
+    const execute = mockFn(async () => rows);
+    const em = { getConnection: mockFn(() => ({ execute })) };
+    return { repo: new PublicSearchRepository(), em, execute };
+  }
+
+  it('correcto: compone la calle con su distrito y conserva ciudad y punto', async () => {
+    const d = build([
+      {
+        owner_id: DOCTOR,
+        lines: 'Calle Warnes 45',
+        district_text: 'Equipetrol',
+        city: 'Santa Cruz de la Sierra',
+        latitude: '-17.7700000',
+        longitude: '-63.1900000',
+      },
+    ]);
+
+    const map = await d.repo.locationsByOwner(d.em as any, [DOCTOR]);
+
+    expect(map.get(DOCTOR)).toEqual({
+      address: 'Calle Warnes 45, Equipetrol',
+      city: 'Santa Cruz de la Sierra',
+      lat: -17.77,
+      lng: -63.19,
+    });
+  });
+
+  it('inválido: sólo publica direcciones de trabajo, nunca un domicilio', async () => {
+    const d = build();
+
+    await d.repo.locationsByOwner(d.em as any, [DOCTOR]);
+
+    const [sql, params] = d.execute.mock.calls[0];
+    expect(sql).toContain('AND use_concept_id = ?');
+    expect(params).toEqual([[DOCTOR], CONCEPTS.ADDR_USE_WORK]);
+    expect(params).not.toContain(CONCEPTS.ADDR_USE_HOME);
+  });
+
+  it('límite: sin sujetos no consulta', async () => {
+    const d = build();
+
+    const map = await d.repo.locationsByOwner(d.em as any, []);
+
+    expect(map.size).toBe(0);
+    expect(d.execute).not.toHaveBeenCalled();
   });
 });

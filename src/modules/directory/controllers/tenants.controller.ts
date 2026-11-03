@@ -17,6 +17,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   ParseOptionalLimitPipe,
   Roles,
@@ -27,6 +28,7 @@ import {
   DirectoryMembershipsService,
   DirectoryReadService,
   DirectoryTenantsService,
+  TenantDocumentCompletionService,
 } from '../services';
 import {
   BranchAssignmentDto,
@@ -34,6 +36,7 @@ import {
   BranchResponseDto,
   ChangeMembershipRoleDto,
   CreateBranchDto,
+  UpdateBranchDto,
   CreateChildTenantDto,
   CreateMembershipDto,
   MembershipResponseDto,
@@ -47,6 +50,10 @@ import {
   TenantDetailResponseDto,
   MyOrganizationsResponseDto,
   UpdateTenantDto,
+  CompleteAffiliationDocumentsDto,
+  CompleteAffiliationDocumentsResponseDto,
+  LaboratoryReadinessResponseDto,
+  PharmacyReadinessResponseDto,
 } from '../dto';
 
 /** Tope de filas por página cuando el cliente no pide uno. */
@@ -55,6 +62,11 @@ const DEFAULT_PAGE_SIZE = 50;
 /**
  * Endpoints con scope de tenant sobre `/tenants/{tenantId}`: sub-tenants, branches
  * y ciclo de vida de membresías. Capa fina que delega en los servicios de dominio.
+ *
+ * Las rutas con `@Roles()` vacío (O3-3) no piden rol global: leer exige
+ * membresía activa en esa organización
+ * (`TenantAdministrationService.assertCanRead`) y escribir, ser OWNER/ADMIN de
+ * ella o plataforma (`assertCanAdminister`).
  */
 @ApiTags('directory-tenants')
 @ApiBearerAuth()
@@ -73,6 +85,7 @@ export class TenantsController {
     private readonly branchesService: DirectoryBranchesService,
     private readonly membershipsService: DirectoryMembershipsService,
     private readonly readService: DirectoryReadService,
+    private readonly documentCompletion: TenantDocumentCompletionService,
   ) {}
 
   /**
@@ -118,7 +131,13 @@ export class TenantsController {
    * Sólo owner o admin **de esa** organización (o la plataforma): un `staff`
    * la ve y no la edita.
    */
+  @Audited({
+    action: 'TENANT_UPDATED',
+    entity: 'tenant',
+    entityId: 'param:tenantId',
+  })
   @Patch(':tenantId')
+  @Roles()
   @ApiOperation({ summary: 'Editar los datos de la propia organización' })
   updateTenant(
     @Param('tenantId', ParseUUIDPipe) tenantId: string,
@@ -128,7 +147,71 @@ export class TenantsController {
     return this.tenantsService.updateTenant(tenantId, dto, actor);
   }
 
+  /**
+   * P50: completar después del alta los papeles que el alta pública dejó
+   * opcionales (los seis PDF que una farmacia necesita para operar).
+   *
+   * Sólo owner o admin **de esa** organización (o la plataforma), y sólo
+   * mientras está pendiente de verificación.
+   */
+  @Audited({
+    action: 'TENANT_AFFILIATION_DOCUMENTS_COMPLETED',
+    entity: 'tenant',
+    entityId: 'param:tenantId',
+  })
+  @Post(':tenantId/affiliation-documents')
+  @Roles()
+  @ApiOperation({
+    summary: 'Completar los documentos legales de la organización',
+    description:
+      'Vincula PDF ya subidos con POST /iam/auth/upload-registration-document. ' +
+      '422 sin documentos, fuera de PENDING, con archivo repetido o sin representante para el poder; ' +
+      '409 si ese papel ya está presentado; 403 si no administra la organización.',
+  })
+  completeAffiliationDocuments(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Body() dto: CompleteAffiliationDocumentsDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<CompleteAffiliationDocumentsResponseDto> {
+    return this.documentCompletion.complete(tenantId, dto, actor);
+  }
+
+  /**
+   * P50: lo que le falta a una farmacia para que la plataforma pueda
+   * verificarla (los seis papeles y el punto de la casa central).
+   */
+  @Get(':tenantId/pharmacy-readiness')
+  @Roles()
+  @ApiOperation({
+    summary: 'Requisitos pendientes para que la farmacia opere',
+  })
+  getPharmacyReadiness(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PharmacyReadinessResponseDto> {
+    return this.documentCompletion.pharmacyReadiness(tenantId, actor);
+  }
+
+  /**
+   * P51: lo que le falta a un laboratorio para que la plataforma pueda
+   * verificarlo (SEPREC, licencia de funcionamiento y SEDES).
+   */
+  @Get(':tenantId/laboratory-readiness')
+  @Roles()
+  @ApiOperation({
+    summary: 'Requisitos pendientes para que el laboratorio opere',
+    description:
+      '403 si no pertenece a la organización; 422 si no es un laboratorio.',
+  })
+  getLaboratoryReadiness(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<LaboratoryReadinessResponseDto> {
+    return this.documentCompletion.laboratoryReadiness(tenantId, actor);
+  }
+
   @Get(':tenantId')
+  @Roles()
   @ApiOperation({ summary: 'Ficha de una organización' })
   getTenant(
     @Param('tenantId', ParseUUIDPipe) tenantId: string,
@@ -139,6 +222,7 @@ export class TenantsController {
 
   /** UC-04-03 (cara de lectura). */
   @Get(':tenantId/child-tenants')
+  @Roles()
   @ApiOperation({ summary: 'Sub-organizaciones de una organización' })
   @ApiQuery({ name: 'cursor', required: false })
   @ApiQuery({ name: 'limit', required: false })
@@ -157,6 +241,7 @@ export class TenantsController {
 
   /** UC-04-02 (cara de lectura). */
   @Get(':tenantId/branches')
+  @Roles()
   @ApiOperation({ summary: 'Sucursales de la organización' })
   listBranches(
     @Param('tenantId', ParseUUIDPipe) tenantId: string,
@@ -167,6 +252,7 @@ export class TenantsController {
 
   /** UC-04-04 (cara de lectura). */
   @Get(':tenantId/memberships')
+  @Roles()
   @ApiOperation({ summary: 'Plantilla de la organización' })
   @ApiQuery({
     name: 'status',
@@ -192,6 +278,7 @@ export class TenantsController {
 
   /** UC-04-05 (cara de lectura). */
   @Get(':tenantId/memberships/:membershipId/branch-assignments')
+  @Roles()
   @ApiOperation({ summary: 'Sucursales asignadas a una membresía' })
   listBranchAssignments(
     @Param('tenantId', ParseUUIDPipe) tenantId: string,
@@ -206,6 +293,11 @@ export class TenantsController {
   }
 
   /** UC-04-03. */
+  @Audited({
+    action: 'CHILD_TENANT_CREATED',
+    entity: 'tenant',
+    entityId: 'result.id',
+  })
   @Post(':tenantId/child-tenants')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -219,7 +311,13 @@ export class TenantsController {
   }
 
   /** UC-04-04. */
+  @Audited({
+    action: 'BRANCH_CREATED',
+    entity: 'branch',
+    entityId: 'result.id',
+  })
   @Post(':tenantId/branches')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Crear una branch / sede física con geolocalización',
@@ -232,8 +330,32 @@ export class TenantsController {
     return this.branchesService.create(tenantId, dto, actor);
   }
 
+  /** Edición de una sucursal (P54): nombre, descripción, enlace y punto. */
+  @Audited({
+    action: 'BRANCH_UPDATED',
+    entity: 'branch',
+    entityId: 'param:branchId',
+  })
+  @Patch(':tenantId/branches/:branchId')
+  @Roles()
+  @ApiOperation({ summary: 'Editar una sucursal' })
+  updateBranch(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('branchId', ParseUUIDPipe) branchId: string,
+    @Body() dto: UpdateBranchDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<BranchResponseDto> {
+    return this.branchesService.update(tenantId, branchId, dto, actor);
+  }
+
   /** UC-04-05. */
+  @Audited({
+    action: 'TENANT_MEMBERSHIP_INVITED',
+    entity: 'tenant_membership',
+    entityId: 'result.id',
+  })
   @Post(':tenantId/memberships')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Incorporar un usuario al tenant (membership)' })
   invite(
@@ -245,7 +367,13 @@ export class TenantsController {
   }
 
   /** UC-04-06. */
+  @Audited({
+    action: 'BRANCH_MEMBERSHIP_ASSIGNED',
+    entity: 'branch_membership',
+    entityId: 'result.id',
+  })
   @Post(':tenantId/memberships/:membershipId/branch-assignments')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Asignar la membresía a una branch' })
   assignBranch(
@@ -263,7 +391,13 @@ export class TenantsController {
   }
 
   /** UC-04-07. */
+  @Audited({
+    action: 'TENANT_MEMBERSHIP_TRANSFERRED',
+    entity: 'tenant_membership',
+    entityId: 'param:membershipId',
+  })
   @Post(':tenantId/memberships/:membershipId/transfer')
+  @Roles()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Transferir la membresía entre branches' })
   transfer(
@@ -276,7 +410,13 @@ export class TenantsController {
   }
 
   /** UC-04-08. */
+  @Audited({
+    action: 'TENANT_MEMBERSHIP_ROLE_CHANGED',
+    entity: 'tenant_membership',
+    entityId: 'param:membershipId',
+  })
   @Patch(':tenantId/memberships/:membershipId/role')
+  @Roles()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Cambiar rol / scope de la membresía' })
   changeRole(
@@ -294,7 +434,13 @@ export class TenantsController {
   }
 
   /** UC-04-09. */
+  @Audited({
+    action: 'TENANT_MEMBERSHIP_OFFBOARDED',
+    entity: 'tenant_membership',
+    entityId: 'param:membershipId',
+  })
   @Post(':tenantId/memberships/:membershipId/offboard')
+  @Roles()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Revocar / offboarding de un miembro' })
   offboard(

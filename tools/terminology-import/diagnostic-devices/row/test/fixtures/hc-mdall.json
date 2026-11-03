@@ -1,0 +1,47 @@
+{
+  "activeLicences": [
+    {
+      "original_licence_no": 103935,
+      "licence_status": "I",
+      "appl_risk_class": 2,
+      "licence_name": "ALINITY C PROTEINS ASSAY",
+      "first_licence_status_dt": "2019-11-22",
+      "last_refresh_dt": "2020-02-07",
+      "end_date": null,
+      "licence_type_cd": "K",
+      "company_id": 111693,
+      "licence_type_desc": "Test Kit"
+    }
+  ],
+  "archiveLicences": [],
+  "companies": [
+    {
+      "company_id": 111693,
+      "company_name": "BIOKIT S.A.",
+      "addr_line_1": "Av. Can Montcau 7",
+      "addr_line_2": "",
+      "addr_line_3": "",
+      "postal_code": "08186",
+      "city": "Llissa D'Amunt",
+      "country_cd": "ES",
+      "region_cd": "08",
+      "company_status": "A"
+    }
+  ],
+  "identifiers": [
+    {
+      "original_licence_no": 103935,
+      "device_id": 1016948,
+      "first_licence_dt": "2019-11-22",
+      "end_date": null,
+      "device_identifier": "08P6701"
+    },
+    {
+      "original_licence_no": 103935,
+      "device_id": 1016949,
+      "first_licence_dt": "2019-11-22",
+      "end_date": null,
+      "device_identifier": "08P6710"
+    }
+  ]
+}

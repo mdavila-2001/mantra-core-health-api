@@ -69,6 +69,12 @@ export class SurveyVersions {
   responseWindowDays!: number;
 
   /**
+   * Tope de recordatorios por invitación. Nulo significa que no se envían.
+   */
+  @Property({ fieldName: 'max_reminders', columnType: 'int', nullable: true })
+  maxReminders?: number;
+
+  /**
    * Momento de publicación. Nulo mientras es borrador.
    */
   @Property({

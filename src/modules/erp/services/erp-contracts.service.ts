@@ -6,11 +6,11 @@ import {
   CONCEPTS,
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
 import { ErpContractsRepository } from '../repositories';
+import { ErpScopeService } from './erp-scope.service';
 import {
   CreatePartnerDto,
   PartnerResponseDto,
@@ -60,11 +60,13 @@ export class ErpContractsService {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param contractsRepo - Valor de contracts repo requerido por la operación.
+   * @param scope - Resolvedor de recursos acotados al tenant activo.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly contractsRepo: ErpContractsRepository,
+    private readonly scope: ErpScopeService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ErpContractsService.name);
@@ -75,10 +77,12 @@ export class ErpContractsService {
     dto: CreatePartnerDto,
     actor: AuthenticatedUser,
   ): Promise<PartnerResponseDto> {
+    // El propietario sale del contexto verificado, nunca del cuerpo.
+    const tenantId = this.scope.activeTenantFor(dto.tenantId);
     this.logger.info(
       {
         operation: 'erp.partner.create',
-        tenantId: dto.tenantId,
+        tenantId,
         partnerNumber: dto.partnerNumber,
       },
       'Creating business partner',
@@ -86,19 +90,19 @@ export class ErpContractsService {
 
     const duplicate = await this.contractsRepo.findPartnerByNumber(
       this.em,
-      dto.tenantId,
+      tenantId,
       dto.partnerNumber,
     );
     if (duplicate) {
       throw new ConflictException('Ya existe un socio con ese número', {
-        tenantId: dto.tenantId,
+        tenantId,
         partnerNumber: dto.partnerNumber,
       });
     }
 
     return this.em.transactional(async (tx) => {
       const partner = this.contractsRepo.createPartner(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         partnerNumber: dto.partnerNumber,
         partnerCategoryConceptId: PARTNER_CATEGORY_CONCEPT[dto.category],
         displayName: dto.displayName,
@@ -153,22 +157,11 @@ export class ErpContractsService {
     );
 
     return this.em.transactional(async (tx) => {
-      const partner = await this.contractsRepo.findPartnerById(tx, partnerId);
-      if (!partner) {
-        throw new ResourceNotFoundException('Socio de negocio no encontrado', {
-          partnerId,
-        });
-      }
+      await this.scope.partner(tx, partnerId);
 
-      const account = await this.contractsRepo.findBankAccountForUpdate(
-        tx,
-        accountId,
-      );
-      if (!account) {
-        throw new ResourceNotFoundException('Cuenta bancaria no encontrada', {
-          accountId,
-        });
-      }
+      // La cuenta se resuelve por el socio dueño dentro del tenant: una cuenta
+      // de un socio ajeno responde igual que una inexistente.
+      const { account } = await this.scope.bankAccountForUpdate(tx, accountId);
       if (account.businessPartnerId !== partnerId) {
         throw new PreconditionFailedException(
           'La cuenta no pertenece a ese socio',
@@ -199,10 +192,11 @@ export class ErpContractsService {
     dto: CreateContractDto,
     actor: AuthenticatedUser,
   ): Promise<ContractResponseDto> {
+    const tenantId = this.scope.activeTenantFor(dto.tenantId);
     this.logger.info(
       {
         operation: 'erp.contract.create',
-        tenantId: dto.tenantId,
+        tenantId,
         contractNumber: dto.contractNumber,
       },
       'Creating contract',
@@ -219,29 +213,24 @@ export class ErpContractsService {
 
     const duplicate = await this.contractsRepo.findContractByNumber(
       this.em,
-      dto.tenantId,
+      tenantId,
       dto.contractNumber,
     );
     if (duplicate) {
       throw new ConflictException('Ya existe un contrato con ese número', {
-        tenantId: dto.tenantId,
+        tenantId,
         contractNumber: dto.contractNumber,
       });
     }
 
     return this.em.transactional(async (tx) => {
-      const partner = await this.contractsRepo.findPartnerById(
+      const partner = await this.scope.partner(
         tx,
         dto.primaryBusinessPartnerId,
       );
-      if (!partner) {
-        throw new ResourceNotFoundException('Socio de negocio no encontrado', {
-          partnerId: dto.primaryBusinessPartnerId,
-        });
-      }
 
       const contract = this.contractsRepo.createContract(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         contractNumber: dto.contractNumber,
         contractTypeConceptId: CONTRACT_TYPE_CONCEPT[dto.contractType],
         title: dto.title,
@@ -290,15 +279,7 @@ export class ErpContractsService {
     );
 
     return this.em.transactional(async (tx) => {
-      const contract = await this.contractsRepo.findContractByIdForUpdate(
-        tx,
-        contractId,
-      );
-      if (!contract) {
-        throw new ResourceNotFoundException('Contrato no encontrado', {
-          contractId,
-        });
-      }
+      const contract = await this.scope.contractForUpdate(tx, contractId);
       if (contract.statusConceptId === CONCEPTS.CONTRACT_TERMINATED) {
         throw new PreconditionFailedException('El contrato está terminado', {
           contractId,
@@ -451,15 +432,7 @@ export class ErpContractsService {
     );
 
     return this.em.transactional(async (tx) => {
-      const contract = await this.contractsRepo.findContractByIdForUpdate(
-        tx,
-        contractId,
-      );
-      if (!contract) {
-        throw new ResourceNotFoundException('Contrato no encontrado', {
-          contractId,
-        });
-      }
+      const contract = await this.scope.contractForUpdate(tx, contractId);
       if (contract.statusConceptId === CONCEPTS.CONTRACT_TERMINATED) {
         throw new ConflictException('El contrato ya está terminado', {
           contractId,
@@ -516,15 +489,7 @@ export class ErpContractsService {
     );
 
     return this.em.transactional(async (tx) => {
-      const contract = await this.contractsRepo.findContractByIdForUpdate(
-        tx,
-        contractId,
-      );
-      if (!contract) {
-        throw new ResourceNotFoundException('Contrato no encontrado', {
-          contractId,
-        });
-      }
+      const contract = await this.scope.contractForUpdate(tx, contractId);
       if (!contract.totalValue) {
         throw new PreconditionFailedException(
           'El contrato no tiene valor total del que derivar las cuotas',
@@ -576,15 +541,7 @@ export class ErpContractsService {
 
   /** Contrato existente y en un estado que admite cambios. */
   private async assertMutableContract(tx: EntityManager, contractId: string) {
-    const contract = await this.contractsRepo.findContractByIdForUpdate(
-      tx,
-      contractId,
-    );
-    if (!contract) {
-      throw new ResourceNotFoundException('Contrato no encontrado', {
-        contractId,
-      });
-    }
+    const contract = await this.scope.contractForUpdate(tx, contractId);
     if (!MUTABLE_CONTRACT_STATES.includes(contract.statusConceptId)) {
       throw new PreconditionFailedException(
         'El contrato no admite cambios en su estado actual',

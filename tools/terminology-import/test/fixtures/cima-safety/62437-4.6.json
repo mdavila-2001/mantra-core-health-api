@@ -1,0 +1,21 @@
+{
+ "sourceUrl": "https://cima.aemps.es/cima/rest/docSegmentado/contenido/1?nregistro=62437&seccion=4.6",
+ "retrievedAt": "2026-10-25",
+ "nregistro": "62437",
+ "productName": "AMOXICILINA NORMON 500 MG CÁPSULAS DURAS EFG",
+ "vtm": {
+  "id": 27658006,
+  "nombre": "amoxicilina"
+ },
+ "fichaTecnicaDate": "2026-05-12",
+ "fichaTecnicaUrl": "https://cima.aemps.es/cima/dochtml/ft/62437/FT_62437.html",
+ "note": "Respuesta literal de la API REST de CIMA (AEMPS), sin recortar. Reutilización autorizada citando el origen y la fecha de la última actualización (https://www.aemps.gob.es/aviso-legal/).",
+ "response": [
+  {
+   "seccion": "4.6",
+   "titulo": "Fertilidad, embarazo y lactancia",
+   "contenido": "<div>\r\n    <p style=\"margin:0pt 0pt 6pt; text-align:justify; line-height:150%; widows:0; orphans:0; font-size:11pt\"><u><span style=\"font-family:Times New Roman; font-size:11pt;\">Embarazo</span></u></p>\r\n\r\n    <p style=\"margin:0pt 0pt 6pt; text-indent:36pt; text-align:justify; line-height:150%; widows:0; orphans:0; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">&#xa0;</span></p>\r\n\r\n    <p style=\"margin:0pt 0pt 6pt; text-align:justify; line-height:150%; widows:0; orphans:0; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">Los estudios en animales no han demostrado efectos perjudiciales directos o indirectos con respecto a toxicidad reproductiva. Los datos limitados sobre el uso de amoxicilina en el embarazo en humanos no indican un aumento del riesgo de malformaciones cong&#233;nitas. Se puede emplear amoxicilina en el embarazo cuando los beneficios potenciales superen los posibles riesgos asociados con el tratamiento.</span></p>\r\n\r\n    <p style=\"margin:0pt 0pt 6pt; text-indent:14.2pt; text-align:justify; line-height:150%; widows:0; orphans:0; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">&#xa0;</span></p>\r\n\r\n    <p style=\"margin:0pt 0pt 6pt; text-align:justify; line-height:150%; widows:0; orphans:0; font-size:11pt\"><u><span style=\"font-family:Times New Roman; font-size:11pt;\">Lactancia</span></u></p>\r\n\r\n    <p style=\"margin:0pt 0pt 6pt; text-align:justify; line-height:150%; widows:0; orphans:0; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">&#xa0;</span></p>\r\n\r\n    <p style=\"margin:0pt 0pt 6pt; text-align:justify; line-height:150%; widows:0; orphans:0; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">Amoxicilina se excreta por la leche humana en peque&#241;as cantidades con posible riesgo de sensibilizaci&#243;n. Por tanto, pueden aparecer en el lactante diarrea e infecci&#243;n f&#250;ngica de las membranas mucosas, por lo que la lactancia podr&#237;a tener que interrumpirse. S&#243;lo se debe administrar amoxicilina durante la lactancia tras haberse evaluado el beneficio/riesgo por parte del m&#233;dico.</span></p>\r\n\r\n    <p style=\"margin:0pt 0pt 6pt; text-indent:14.2pt; text-align:justify; line-height:150%; widows:0; orphans:0; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">&#xa0;</span></p>\r\n\r\n    <p style=\"margin:0pt 0pt 6pt; text-align:justify; line-height:150%; widows:0; orphans:0; font-size:11pt\"><u><span style=\"font-family:Times New Roman; font-size:11pt;\">Fertilidad</span></u></p>\r\n\r\n    <p style=\"margin:0pt 0pt 6pt; text-align:justify; line-height:150%; widows:0; orphans:0; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">&#xa0;</span></p>\r\n\r\n    <p style=\"margin:0pt 0pt 6pt; text-align:justify; line-height:150%; widows:0; orphans:0; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">No hay datos de los efectos de amoxicilina en la fertilidad en humanos. Los estudios sobre la reproducci&#243;n en animales no han mostrado efectos en la fertilidad.</span></p>\r\n\r\n    <p style=\"margin:0pt; line-height:115%; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">&#xa0;</span></p>\r\n  </div>",
+   "orden": 11
+  }
+ ]
+}

@@ -3,13 +3,13 @@
   Fuente real: src/modules/chart/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `chart`
 
 **Fuente:** [`src/modules/chart/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/chart/README.md)
-· 7 controllers · 8 services · 4 repositories · 11 entidades · 6 DTO
+· 7 controllers · 9 services · 4 repositories · 11 entidades · 6 DTO
 
 ---
 
@@ -89,8 +89,7 @@ Entidades (`tableName`, 11 de 11 archivos `*.entity.ts`): `care_plan_activities`
   antes de llegar al controlador; el servicio no lo repite.
 - **Relación paciente–encuentro.** Las altas que reciben ambos UUID requieren
   validación explícita de que el encuentro pertenece al paciente antes de
-  persistirlos. Esa validación no está completa todavía; ver la
-  [revisión ALOVIDA](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/chart.md).
+  persistirlos, y esa validación no está completa.
 - **Lectura (`GET /charts/patients/:id/chart`).** Cada documento trae
   `files[]` — `fileId`, `contentRole` (`PRIMARY`/`ATTACHMENT`) y `ordinal` —,
   ordenados por `ordinal`, resueltos en una sola consulta por lote para todos
@@ -102,7 +101,7 @@ Entidades (`tableName`, 11 de 11 archivos `*.entity.ts`): `care_plan_activities`
   el documento no existe como si el archivo no cuelga de él, sin distinguir
   cuál de las dos cosas falló.
 - **Firma propia (`sign`/`cosign` de una versión de nota).** El
-  `signerProfileId` del cuerpo tiene que ser el perfil profesional de quien
+  `signerProfileId` es opcional: si falta, el firmante es el perfil profesional de la sesión; si viene, tiene que ser el perfil profesional de quien
   firma (`practitionerProfileId` de la sesión); si no coincide, 403. Sin
   perfil profesional en la sesión, también 403. Un rol `SUPERADMIN` tiene
   paso franco, igual que en el resto de barreras por rol del sistema.

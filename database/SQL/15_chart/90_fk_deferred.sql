@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 15 · schema chart
+-- SALUD v4.2.83 · módulo 15 · schema chart
 -- Generado de diagram_15_chart.puml — NO editar a mano.
 
 
@@ -210,6 +210,13 @@ DO $$ BEGIN
     ALTER TABLE "chart"."care_plans"
         ADD CONSTRAINT "fk_care_plans_author_profile_id" FOREIGN KEY ("author_profile_id")
         REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: forms.form_instances (requiere schema forms)
+DO $$ BEGIN
+    ALTER TABLE "chart"."care_plans"
+        ADD CONSTRAINT "fk_care_plans_form_instance_id" FOREIGN KEY ("form_instance_id")
+        REFERENCES "forms"."form_instances" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: iam.users (requiere schema iam)

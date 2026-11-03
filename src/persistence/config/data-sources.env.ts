@@ -157,8 +157,9 @@ function readLegacy(source: NodeJS.ProcessEnv): LegacyDbEnv {
     // `DB_APP_USER` tiene precedencia porque es el rol de runtime sujeto a RLS.
     // Se respeta aquí igual que en `orm.config.ts`, para que introducir las
     // rutas no revierta esa decisión ya tomada.
-    user: source.DB_APP_USER ?? (source.DB_USER as string),
-    password: source.DB_APP_PASSWORD ?? (source.DB_PASSWORD as string),
+    // `||`: un valor vacío (compose del proceso de migración) cae al rol dueño.
+    user: source.DB_APP_USER || (source.DB_USER as string),
+    password: source.DB_APP_PASSWORD || (source.DB_PASSWORD as string),
     database: source.DB_NAME as string,
     poolMin: source.DB_POOL_MIN ? Number(source.DB_POOL_MIN) : DEFAULT_POOL_MIN,
     poolMax: source.DB_POOL_MAX ? Number(source.DB_POOL_MAX) : DEFAULT_POOL_MAX,

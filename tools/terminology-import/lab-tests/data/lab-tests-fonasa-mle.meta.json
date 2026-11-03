@@ -1,0 +1,163 @@
+{
+  "layer": "fonasa-mle",
+  "builtAt": "2026-10-24T17:56:43.759Z",
+  "records": 648,
+  "source": {
+    "name": "@mariohealthbits/fonasa-mle-open",
+    "version": "1.0.0"
+  },
+  "packageMetadata": null,
+  "codeSystems": [
+    {
+      "internalCode": "fonasa-mle",
+      "name": "FONASA — Arancel de la Modalidad Libre Elección (Chile)",
+      "canonicalUrl": "https://mantracore.health/fhir/CodeSystem/fonasa-mle",
+      "version": "2026",
+      "sourceKey": "fonasa-mle",
+      "records": 648
+    }
+  ],
+  "files": {
+    "mle-2026.json": {
+      "file": "lab-tests-sources/fonasa-mle-open/package/data/mle-2026.json",
+      "sha256": "5cb784b1857f727aed980a88ef480c79c590c44f2a0544f8f6f2fcaaafb6307e"
+    }
+  },
+  "rules": [
+    {
+      "prefix": "03",
+      "domain": "laboratory",
+      "evidence": "grupo 03: 443 ítems, todos análisis (ácido fólico, mielograma, agregación plaquetaria…)"
+    },
+    {
+      "prefix": "04",
+      "domain": "imaging",
+      "evidence": "grupo 04: 153 ítems, radiografía/eco/TC/RM"
+    },
+    {
+      "prefix": "0501",
+      "domain": "imaging",
+      "evidence": "subgrupo 05-01: 38 cintigrafías y captaciones (medicina nuclear diagnóstica); 05-02 son dosis terapéuticas y queda fuera"
+    },
+    {
+      "prefix": "0801",
+      "domain": "pathology",
+      "evidence": "subgrupo 08-01: 13 citologías y estudios histopatológicos"
+    },
+    {
+      "prefix": "1001",
+      "domain": "functional",
+      "evidence": "subgrupo 10-01: 5 pruebas funcionales endocrinas (estimulación/frenación, hipoglicemia, privación acuosa…)"
+    }
+  ],
+  "exclusions": [
+    {
+      "prefix": "0402022",
+      "reason": "angioplastía intraluminal coronaria (terapéutica)"
+    },
+    {
+      "prefix": "0402023",
+      "reason": "angioplastía intraluminal periférica (terapéutica)"
+    },
+    {
+      "prefix": "0402031",
+      "reason": "embolización o balonización (terapéutica)"
+    },
+    {
+      "prefix": "0402032",
+      "reason": "instalación de catéter o sonda intracardíaca (procedimiento)"
+    }
+  ],
+  "stats": {
+    "items": 2515,
+    "included": 648,
+    "excludedByPrefix": {
+      "1101": 38,
+      "1103": 69,
+      "1201": 39,
+      "1202": 76,
+      "1301": 37,
+      "1302": 73,
+      "1303": 2,
+      "1308": 2,
+      "1401": 1,
+      "1402": 59,
+      "1502": 66,
+      "1601": 15,
+      "1602": 24,
+      "1701": 54,
+      "1703": 68,
+      "1704": 63,
+      "1707": 42,
+      "1801": 37,
+      "1802": 83,
+      "1803": 35,
+      "1901": 25,
+      "1902": 76,
+      "2001": 18,
+      "2002": 4,
+      "2003": 33,
+      "2004": 11,
+      "2101": 3,
+      "2104": 199,
+      "2105": 9,
+      "2106": 3,
+      "2107": 7,
+      "2201": 2,
+      "2301": 76,
+      "2401": 64,
+      "2501": 52,
+      "2502": 27,
+      "2503": 7,
+      "2505": 13,
+      "2601": 5,
+      "2602": 1,
+      "2603": 2,
+      "2608": 1,
+      "2609": 2,
+      "2802": 11,
+      "2901": 3,
+      "2902": 8,
+      "2905": 3,
+      "2908": 112,
+      "3301": 2,
+      "3302": 2,
+      "3303": 1,
+      "0101": 56,
+      "0108": 46,
+      "0201": 18,
+      "0502": 5,
+      "0601": 5,
+      "0602": 3,
+      "0608": 5,
+      "0702": 28,
+      "0703": 6,
+      "0704": 15,
+      "0901": 5,
+      "0902": 3,
+      "0908": 3
+    },
+    "excludedExplicitly": [
+      {
+        "code": "0402022",
+        "name": "ANGIOPLASTIA INTRALUMINAL CORONARIA. PROCEDIMIENTO RADIOLÓGICO. (A.C.17-01-031)",
+        "reason": "angioplastía intraluminal coronaria (terapéutica)"
+      },
+      {
+        "code": "0402023",
+        "name": "ANGIOPLASTIA INTRALUMINAL PERIFÉRICA. PROCEDIMIENTO RADIOLÓGICO. (A.C. 17-01-032)",
+        "reason": "angioplastía intraluminal periférica (terapéutica)"
+      },
+      {
+        "code": "0402031",
+        "name": "EMBOLIZACIÓN O BALONIZACIÓN (A.C. DE LA ANGIOGRAFÍA CORRESPONDIENTE) (INCLUYE CONTROL RADIOLÓGICO INMEDIATO)",
+        "reason": "embolización o balonización (terapéutica)"
+      },
+      {
+        "code": "0402032",
+        "name": "INSTALACIÓN DE CATÉTER O SONDA INTRACARDÍACA, CONTROL POR RADIÓLOGO DE (A.C. 17-01-020, 17-01-021, 17-01-011 O 17-01-014, SEGÚN CORRESPONDA)",
+        "reason": "instalación de catéter o sonda intracardíaca (procedimiento)"
+      }
+    ]
+  }
+}

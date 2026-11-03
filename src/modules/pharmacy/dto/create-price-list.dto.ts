@@ -1,6 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  IsBoolean,
   IsDateString,
   IsIn,
   IsOptional,
@@ -9,6 +8,7 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
+import { IsStrictBoolean } from '../../../common/validators/strict-boolean.validator';
 
 /** Tipos de lista de precios soportados. */
 export type PriceListTypeCode = 'PUBLIC' | 'INSURER';
@@ -94,6 +94,6 @@ export class CreatePriceListDto {
    */
   @ApiPropertyOptional({ description: 'Visible públicamente' })
   @IsOptional()
-  @IsBoolean()
+  @IsStrictBoolean()
   publicVisibility?: boolean;
 }

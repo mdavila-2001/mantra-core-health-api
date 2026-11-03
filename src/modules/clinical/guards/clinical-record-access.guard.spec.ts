@@ -237,13 +237,11 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
       // la ruta es la historia que el profesional sí atiende, y el cuerpo mete
       // de contrabando la que no.
       const readService = {
-        assertCanWriteHistory: mockFn(
-          async (patientProfileId: string) => {
-            if (patientProfileId === FOREIGN) {
-              throw new ForbiddenException('no autorizado');
-            }
-          },
-        ),
+        assertCanWriteHistory: mockFn(async (patientProfileId: string) => {
+          if (patientProfileId === FOREIGN) {
+            throw new ForbiddenException('no autorizado');
+          }
+        }),
       };
       const guard = new ClinicalRecordAccessGuard(readService as any);
 

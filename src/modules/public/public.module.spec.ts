@@ -3,8 +3,8 @@ import { RequestMethod } from '@nestjs/common';
 import { METHOD_METADATA, PATH_METADATA } from '@nestjs/common/constants';
 import { ArgumentMetadata, ValidationPipe } from '@nestjs/common';
 import { IS_PUBLIC_KEY } from '../../common/auth/public.decorator';
-import { PublicCatalogController } from './controllers/public-catalog.controller';
-import { PublicCatalogPageQueryDto } from './dto/public-catalog.dto';
+import { PublicCatalogController } from './presentation/controllers/public-catalog.controller';
+import { PublicCatalogPageQueryDto } from './presentation/dto/public-catalog.dto';
 import { PublicCatalogModule } from './public.module';
 
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
@@ -26,9 +26,9 @@ describe('PublicCatalogModule (M4 · H2)', () => {
   it.each([
     ['organizationServices', 'public/profiles/o/:slug/services'],
     ['pharmacyProducts', 'public/profiles/f/:slug/products'],
-  ])('%s es GET %s y @Public()', (method, ruta) => {
+  ])('%s es GET %s y @Public()', (method, route) => {
     const handler = (PublicCatalogController.prototype as any)[method];
-    expect(Reflect.getMetadata(PATH_METADATA, handler)).toBe(ruta);
+    expect(Reflect.getMetadata(PATH_METADATA, handler)).toBe(route);
     expect(Reflect.getMetadata(METHOD_METADATA, handler)).toBe(
       RequestMethod.GET,
     );
@@ -40,7 +40,7 @@ describe('PublicCatalogModule (M4 · H2)', () => {
       organizationServices: mockFn().mockResolvedValue({ items: [] }),
       pharmacyProducts: mockFn().mockResolvedValue({ items: [] }),
     };
-    const controller = new PublicCatalogController(service as any);
+    const controller = new PublicCatalogController(service as any, {} as any);
 
     await controller.organizationServices('clinica-norte', { limit: 5 });
     await controller.pharmacyProducts('farmacia-central', { cursor: 'abc' });
@@ -50,6 +50,39 @@ describe('PublicCatalogModule (M4 · H2)', () => {
     });
     expect(service.pharmacyProducts).toHaveBeenCalledWith('farmacia-central', {
       cursor: 'abc',
+    });
+  });
+
+  it.each([
+    ['pharmacyBranches', 'public/profiles/f/:slug/branches', RequestMethod.GET],
+    [
+      'pharmacyBranchAvailability',
+      'public/profiles/f/:slug/branch-availability',
+      RequestMethod.POST,
+    ],
+  ])(
+    'P37: %s es %s, @Public() y con el método esperado',
+    (method, route, verb) => {
+      const handler = (PublicCatalogController.prototype as any)[method];
+      expect(Reflect.getMetadata(PATH_METADATA, handler)).toBe(route);
+      expect(Reflect.getMetadata(METHOD_METADATA, handler)).toBe(verb);
+      expect(Reflect.getMetadata(IS_PUBLIC_KEY, handler)).toBe(true);
+    },
+  );
+
+  it('P37: el controlador delega en el servicio de sucursales con el slug y el cuerpo', async () => {
+    const branches = {
+      branches: mockFn().mockResolvedValue({ items: [] }),
+      availability: mockFn().mockResolvedValue({ items: [] }),
+    };
+    const controller = new PublicCatalogController({} as any, branches as any);
+    await controller.pharmacyBranches('farmacia-central');
+    await controller.pharmacyBranchAvailability('farmacia-central', {
+      items: ['Paracetamol'],
+    });
+    expect(branches.branches).toHaveBeenCalledWith('farmacia-central');
+    expect(branches.availability).toHaveBeenCalledWith('farmacia-central', {
+      items: ['Paracetamol'],
     });
   });
 

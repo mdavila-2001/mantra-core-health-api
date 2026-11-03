@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 16 · schema accounting
+-- SALUD v4.2.83 · módulo 16 · schema accounting
 -- Generado de diagram_16_accounting.puml — NO editar a mano.
 
 
@@ -99,6 +99,8 @@ CREATE TABLE IF NOT EXISTS "accounting"."cost_centers" (
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
+    "tenant_id" uuid NOT NULL,
+    "clinical_unit_id" uuid,
     CONSTRAINT "pk_cost_centers" PRIMARY KEY ("id")
 );
 
@@ -308,6 +310,8 @@ CREATE TABLE IF NOT EXISTS "accounting"."infrastructure_items" (
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
+    "tenant_id" uuid NOT NULL,
+    "care_space_id" uuid,
     CONSTRAINT "pk_infrastructure_items" PRIMARY KEY ("id")
 );
 
@@ -781,4 +785,51 @@ CREATE TABLE IF NOT EXISTS "accounting"."accrual_postings" (
     "created_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     CONSTRAINT "pk_accrual_postings" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "accounting"."practitioner_simple_accounts" (
+    "id" uuid NOT NULL,
+    "practice_id" uuid NOT NULL,
+    "code" varchar NOT NULL,
+    "name" varchar NOT NULL,
+    "account_class" varchar NOT NULL,
+    "seeded" boolean NOT NULL DEFAULT false,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_practitioner_simple_accounts" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "accounting"."practitioner_simple_records" (
+    "id" uuid NOT NULL,
+    "practice_id" uuid NOT NULL,
+    "kind" varchar NOT NULL,
+    "record_date" date NOT NULL,
+    "account_id" uuid NOT NULL,
+    "description" varchar NOT NULL,
+    "amount" numeric NOT NULL,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_practitioner_simple_records" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "accounting"."practitioner_simple_transactions" (
+    "id" uuid NOT NULL,
+    "practice_id" uuid NOT NULL,
+    "transaction_date" date NOT NULL,
+    "description" varchar NOT NULL,
+    "debit_account_id" uuid NOT NULL,
+    "credit_account_id" uuid NOT NULL,
+    "amount" numeric NOT NULL,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_practitioner_simple_transactions" PRIMARY KEY ("id")
 );

@@ -24,6 +24,7 @@ import {
   boMunicipalityConceptId,
   boMunicipalityValueSetId,
   boMunicipalityVersionId,
+  departmentSiglaOfMunicipalityCode,
 } from './bo-geography.catalog';
 
 /** Id determinista de cada conjunto, por su clave natural. */
@@ -140,26 +141,26 @@ describe('BoGeographySeedService', () => {
         memberships: 9 + MUNICIPALITIES,
       });
 
-      const [departamentos, municipios] = rowsOf('ValueSets');
-      expect(departamentos).toMatchObject({
+      const [departments, municipalities] = rowsOf('ValueSets');
+      expect(departments).toMatchObject({
         id: boDepartmentValueSetId(),
         internalCode: BO_DEPARTMENT_VALUE_SET,
       });
-      expect(municipios).toMatchObject({
+      expect(municipalities).toMatchObject({
         id: boMunicipalityValueSetId(),
         internalCode: BO_MUNICIPALITY_VALUE_SET,
       });
 
       // Sin `isDefault`, `readExpansion` sin versión explícita devolvería 404
       // aunque el conjunto y sus miembros existan: es lo que pide el desplegable.
-      const [versionDepartamentos, versionMunicipios] =
+      const [versionDepartments, versionMunicipalities] =
         rowsOf('ValueSetVersions');
-      expect(versionDepartamentos).toMatchObject({
+      expect(versionDepartments).toMatchObject({
         id: boDepartmentVersionId(),
         valueSetId: boDepartmentValueSetId(),
         isDefault: true,
       });
-      expect(versionMunicipios).toMatchObject({
+      expect(versionMunicipalities).toMatchObject({
         id: boMunicipalityVersionId(),
         valueSetId: boMunicipalityValueSetId(),
         isDefault: true,
@@ -361,15 +362,15 @@ describe('BoGeographySeedService', () => {
 
       await service.run();
 
-      const propiedades = rowsOf('ConceptProperties').slice(9);
+      const properties = rowsOf('ConceptProperties').slice(9);
       // Dos por municipio: provincia y departamento padre, en ese orden.
-      expect(propiedades).toHaveLength(MUNICIPALITIES * 2);
-      expect(propiedades[0]).toMatchObject({
+      expect(properties).toHaveLength(MUNICIPALITIES * 2);
+      expect(properties[0]).toMatchObject({
         conceptId: boMunicipalityConceptId('010101'),
         propertyCode: 'geo:bo:province',
         valueJson: 'Oropeza',
       });
-      expect(propiedades[1]).toMatchObject({
+      expect(properties[1]).toMatchObject({
         conceptId: boMunicipalityConceptId('010101'),
         propertyCode: 'geo:bo:department',
         valueJson: boDepartmentConceptId('CH'),
@@ -395,8 +396,8 @@ describe('BoGeographySeedService', () => {
   describe('el catálogo en sí', () => {
     it('declara los nueve departamentos, sin siglas repetidas', () => {
       expect(BO_DEPARTMENTS).toHaveLength(9);
-      const siglas = BO_DEPARTMENTS.map((department) => department.code);
-      expect(new Set(siglas).size).toBe(9);
+      const acronyms = BO_DEPARTMENTS.map((department) => department.code);
+      expect(new Set(acronyms).size).toBe(9);
     });
 
     it('todo municipio cuelga del departamento que dice su código del INE', () => {
@@ -404,9 +405,9 @@ describe('BoGeographySeedService', () => {
       // con el prefijo del código, así que un municipio cuyo prefijo y cuyo
       // departamento declarado no coincidan aparecería bajo el departamento
       // equivocado.
-      const siglas = new Set(BO_DEPARTMENTS.map((d) => d.code));
+      const acronyms = new Set(BO_DEPARTMENTS.map((d) => d.code));
       for (const municipality of BO_MUNICIPALITIES) {
-        expect(siglas.has(municipality.department)).toBe(true);
+        expect(acronyms.has(municipality.department)).toBe(true);
         expect(
           BO_DEPARTMENT_BY_INE_PREFIX.get(municipality.ine.slice(0, 2)),
         ).toBe(municipality.department);
@@ -448,5 +449,41 @@ describe('BoGeographySeedService', () => {
         /^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
       );
     });
+  });
+});
+
+describe('departmentSiglaOfMunicipalityCode', () => {
+  it('lee la sigla de la forma <SIGLA>-<NOMBRE> del generador del modelo', () => {
+    expect(
+      departmentSiglaOfMunicipalityCode('SC-SANTA_CRUZ_DE_LA_SIERRA'),
+    ).toBe('SC');
+  });
+
+  it('deriva la sigla de la forma INE que siembra la API, para los nueve departamentos', () => {
+    for (const [prefijo, sigla] of BO_DEPARTMENT_BY_INE_PREFIX) {
+      expect(
+        departmentSiglaOfMunicipalityCode(`geo:bo:municipality:${prefijo}0101`),
+      ).toBe(sigla);
+    }
+  });
+
+  it('el código de cada municipio sembrado resuelve a su propio departamento', () => {
+    for (const municipality of BO_MUNICIPALITIES) {
+      expect(
+        departmentSiglaOfMunicipalityCode(
+          boMunicipalityConceptCode(municipality.ine),
+        ),
+      ).toBe(municipality.department);
+    }
+  });
+
+  it('devuelve undefined ante un código que no sigue ninguna de las dos formas', () => {
+    expect(departmentSiglaOfMunicipalityCode('geo:bo:municipality:99')).toBe(
+      undefined,
+    );
+    expect(
+      departmentSiglaOfMunicipalityCode('geo:bo:municipality:990101'),
+    ).toBe(undefined);
+    expect(departmentSiglaOfMunicipalityCode('cualquier-cosa')).toBe(undefined);
   });
 });

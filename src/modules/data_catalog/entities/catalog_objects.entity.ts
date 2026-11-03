@@ -2,52 +2,67 @@ import { Entity, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 import { randomUUID } from 'node:crypto';
 
 /**
- * Objeto físico observado (`data_catalog.catalog_objects`): tabla, vista,
- * vista materializada o tabla foránea, con identidad estable por
- * (fuente, schema, nombre).
- *
- * Guarda sólo hechos técnicos. La semántica curada vive en
- * `catalog_annotations`, que un escaneo nunca toca.
+ * Mapea la entidad persistente asociada a `catalog_objects`.
  */
 @Entity({ schema: 'data_catalog', tableName: 'catalog_objects' })
 export class CatalogObjects {
+  /**
+   * Identificador único de la instancia.
+   */
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
+  /**
+   * Valor de source code mantenido por la instancia.
+   */
   @Property({ fieldName: 'source_code', columnType: 'varchar' })
   sourceCode!: string;
 
+  /**
+   * Valor de schema name mantenido por la instancia.
+   */
   @Property({ fieldName: 'schema_name', columnType: 'varchar' })
   schemaName!: string;
 
+  /**
+   * Valor de object name mantenido por la instancia.
+   */
   @Property({ fieldName: 'object_name', columnType: 'varchar' })
   objectName!: string;
 
-  /** TABLE | PARTITIONED_TABLE | VIEW | MATERIALIZED_VIEW | FOREIGN_TABLE. */
+  /**
+   * Valor de object kind mantenido por la instancia.
+   */
   @Property({ fieldName: 'object_kind', columnType: 'varchar' })
   objectKind!: string;
 
-  /** OBSERVED | NOT_OBSERVED | RETIRED. Nunca se borra la fila. */
+  /**
+   * Valor de observation status mantenido por la instancia.
+   */
   @Property({ fieldName: 'observation_status', columnType: 'varchar' })
   observationStatus!: string;
 
-  /** `COMMENT ON TABLE` tal como lo declara la base. */
+  /**
+   * Valor de table comment mantenido por la instancia.
+   */
   @Property({ fieldName: 'table_comment', columnType: 'text', nullable: true })
   tableComment?: string;
 
-  /** Estimación de `pg_class.reltuples`; null si nunca se analizó. */
-  @Property({
-    fieldName: 'estimated_rows',
-    columnType: 'bigint',
-    nullable: true,
-  })
+  /**
+   * Valor de estimated rows mantenido por la instancia.
+   */
+  @Property({ fieldName: 'estimated_rows', type: 'bigint', nullable: true })
   estimatedRows?: string;
 
-  /** `pg_total_relation_size`; null en vistas. */
-  @Property({ fieldName: 'total_bytes', columnType: 'bigint', nullable: true })
+  /**
+   * Valor de total bytes mantenido por la instancia.
+   */
+  @Property({ fieldName: 'total_bytes', type: 'bigint', nullable: true })
   totalBytes?: string;
 
-  /** Cuándo se tomaron las estadísticas (son una foto, no un conteo). */
+  /**
+   * Valor de stats observed at mantenido por la instancia.
+   */
   @Property({
     fieldName: 'stats_observed_at',
     columnType: 'timestamptz',
@@ -55,10 +70,15 @@ export class CatalogObjects {
   })
   statsObservedAt?: Date;
 
+  /**
+   * Valor de column count mantenido por la instancia.
+   */
   @Property({ fieldName: 'column_count', columnType: 'int' })
   columnCount!: number;
 
-  /** Columnas de la PK en orden. */
+  /**
+   * Valor de primary key columns mantenido por la instancia.
+   */
   @Property({
     fieldName: 'primary_key_columns',
     type: 'json',
@@ -67,20 +87,33 @@ export class CatalogObjects {
   })
   primaryKeyColumns?: unknown;
 
-  /** Huella de la estructura (objeto + columnas), sin estadísticas. */
+  /**
+   * Valor de technical hash mantenido por la instancia.
+   */
   @Property({ fieldName: 'technical_hash', columnType: 'varchar' })
   technicalHash!: string;
 
+  /**
+   * Identificador asociado a first seen scan.
+   */
   @Property({ fieldName: 'first_seen_scan_id', type: 'uuid' }) // FK → data_catalog.catalog_scan_runs
   firstSeenScanId!: string;
 
+  /**
+   * Identificador asociado a last seen scan.
+   */
   @Property({ fieldName: 'last_seen_scan_id', type: 'uuid' }) // FK → data_catalog.catalog_scan_runs
   lastSeenScanId!: string;
 
+  /**
+   * Valor de last seen at mantenido por la instancia.
+   */
   @Property({ fieldName: 'last_seen_at', columnType: 'timestamptz' })
   lastSeenAt!: Date;
 
-  /** Desde cuándo un escaneo completo dejó de verlo. */
+  /**
+   * Valor de not observed since mantenido por la instancia.
+   */
   @Property({
     fieldName: 'not_observed_since',
     columnType: 'timestamptz',
@@ -88,18 +121,39 @@ export class CatalogObjects {
   })
   notObservedSince?: Date;
 
+  /**
+   * Identificador asociado a domain.
+   */
+  @Property({ fieldName: 'domain_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  domainId?: string;
+
+  /**
+   * Fecha y hora en que se creó el registro.
+   */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
   createdAt!: Date;
 
+  /**
+   * Fecha y hora de la última actualización.
+   */
   @Property({ fieldName: 'updated_at', columnType: 'timestamptz' })
   updatedAt!: Date;
 
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  /**
+   * Identificador asociado a created by user.
+   */
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   createdByUserId?: string;
 
-  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  /**
+   * Identificador asociado a updated by user.
+   */
+  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   updatedByUserId?: string;
 
+  /**
+   * Versión usada para controlar actualizaciones concurrentes.
+   */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
 }

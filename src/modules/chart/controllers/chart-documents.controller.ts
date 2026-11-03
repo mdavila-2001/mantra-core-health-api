@@ -22,10 +22,11 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   Roles,
-  type AuthenticatedUser,
   AccessLogged,
+  type AuthenticatedUser,
 } from '../../../common';
 import { ClinicalRecordAccessGuard } from '../../clinical/guards';
 import { ChartDocumentsService } from '../services';
@@ -51,6 +52,11 @@ export class ChartDocumentsController {
   constructor(private readonly documentsService: ChartDocumentsService) {}
 
   /** UC-15-09. */
+  @Audited({
+    action: 'CLINICAL_DOCUMENT_CREATED',
+    entity: 'document_record',
+    entityId: 'result.id',
+  })
   @Post()
   @UseGuards(ClinicalRecordAccessGuard)
   @HttpCode(HttpStatus.CREATED)

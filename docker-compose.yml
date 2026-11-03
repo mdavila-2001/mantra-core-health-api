@@ -39,6 +39,9 @@ x-app-env: &app-env
   # Producción usa manifiestos propios, no este archivo.
   NODE_ENV: ${NODE_ENV:-development}
   PORT: "3000"
+  # Barrido de vencimientos de las admisiones de profesionales (worker-profiles).
+  ADMISSIONS_EXPIRE_SWEEP_ENABLED: ${ADMISSIONS_EXPIRE_SWEEP_ENABLED:-true}
+  ADMISSIONS_EXPIRE_SWEEP_CRON: "${ADMISSIONS_EXPIRE_SWEEP_CRON:-0 * * * *}"
   # Conexión a datos: se lee del `.env` del host, con los nombres de servicio
   # del compose como default. Así el mismo archivo sirve para las dos formas
   # de correr: contra Postgres/Mongo gestionados (Neon, Atlas — el `.env`
@@ -53,6 +56,11 @@ x-app-env: &app-env
   DB_USER: ${DB_USER:-${POSTGRES_USER}}
   DB_PASSWORD: ${DB_PASSWORD:-${POSTGRES_PASSWORD}}
   DB_NAME: ${DB_NAME:-${POSTGRES_DB}}
+  # Rol de RUNTIME (HZ-05 · C-3): `mantra_app`, sin SUPERUSER ni BYPASSRLS.
+  # `postgres-init` le habilita LOGIN con DB_APP_PASSWORD. Vacíos, la API cae al
+  # rol dueño (DB_USER), que ignora RLS: reservalo para DDL, migraciones y seed.
+  DB_APP_USER: ${DB_APP_USER:-}
+  DB_APP_PASSWORD: ${DB_APP_PASSWORD:-}
   # Obligatorio contra un Postgres gestionado: sin esto `orm.env.ts` cae a su
   # default `false`, y Neon corta el `startup` en claro. No estaba declarado
   # en este bloque, así que el `.env` no podía activarlo dentro del contenedor.
@@ -164,7 +172,9 @@ x-app-env: &app-env
   # CORS con `credentials: true`. Ver `src/common/auth/README.md`.
   AUTH_REFRESH_COOKIE_ENABLED: ${AUTH_REFRESH_COOKIE_ENABLED:-false}
   AUTH_REFRESH_COOKIE_SECURE: ${AUTH_REFRESH_COOKIE_SECURE:-}
-  RLS_ENFORCE: ${RLS_ENFORCE:-false}
+  # Encendido por defecto (C-3). Con NODE_ENV=production cualquier otro valor
+  # aborta el arranque (SYSTEM_RLS_ENFORCE_DISABLED).
+  RLS_ENFORCE: ${RLS_ENFORCE:-true}
   MIKRO_ORM_DEBUG: ${MIKRO_ORM_DEBUG:-false}
   # Materialización del esquema. ESTA VARIABLE TIENE QUE ESTAR AQUÍ.
   #
@@ -214,6 +224,12 @@ x-app-env: &app-env
   # siquiera el aborto del plazo surtió efecto.
   WORKER_TICK_TIMEOUT_MS: ${WORKER_TICK_TIMEOUT_MS:-300000}
   WORKER_STUCK_TICK_MS: ${WORKER_STUCK_TICK_MS:-600000}
+  # Latido de cada worker hacia la API, y umbrales con los que la API lo juzga
+  # (`GET /admin/ops/instances/liveness`). Van juntos porque la API exige
+  # down > degraded >= intervalo al arrancar.
+  WORKER_HEARTBEAT_INTERVAL_MS: ${WORKER_HEARTBEAT_INTERVAL_MS:-15000}
+  OPS_LIVENESS_DEGRADED_AFTER_SECONDS: ${OPS_LIVENESS_DEGRADED_AFTER_SECONDS:-30}
+  OPS_LIVENESS_DOWN_AFTER_SECONDS: ${OPS_LIVENESS_DOWN_AFTER_SECONDS:-60}
   # Drenaje y apagado. `WORKER_SHUTDOWN_TIMEOUT_MS` debe quedar por DEBAJO del
   # `stop_grace_period` de cada servicio worker, o quien fuerza la salida es un
   # SIGKILL mudo y se pierde el diagnóstico de qué seguía pendiente.
@@ -264,6 +280,11 @@ x-app-env: &app-env
   # contenedor deriva el suyo del entrypoint que ejecuta
   # (`alovida-api`, `alovida-worker-messaging`, …); fijarlo aquí haría que los 21
   # procesos exportaran bajo el mismo nombre. Ver `docs/observability/`.
+  # Medición de peticiones HTTP para el portal de superadministración. Apagada por
+  # defecto en el código; el `.env.example` de desarrollo la enciende. Ver
+  # `src/observability/http-sli/`.
+  OBSERVABILITY_HTTP_SLI_ENABLED: ${OBSERVABILITY_HTTP_SLI_ENABLED:-false}
+  OBSERVABILITY_HTTP_SLI_FLUSH_SECONDS: ${OBSERVABILITY_HTTP_SLI_FLUSH_SECONDS:-60}
   OTEL_ENABLED: ${OTEL_ENABLED:-false}
   OTEL_SERVICE_NAMESPACE: ${OTEL_SERVICE_NAMESPACE:-alovida}
   OTEL_SERVICE_VERSION: ${OTEL_SERVICE_VERSION:-}
@@ -366,6 +387,9 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      # HZ-05: habilita LOGIN del rol de runtime `mantra_app` (ver el script).
+      DB_APP_USER: ${DB_APP_USER:-}
+      DB_APP_PASSWORD: ${DB_APP_PASSWORD:-}
     volumes:
       # Por defecto se aplica la copia versionada del DDL (`database/SQL` y
       # `database/NoSQL`, regenerada desde el modelo con `yarn db:vendor`).
@@ -494,25 +518,28 @@ services:
       - mantra-redesa-network
 
   minio:
-    # Última release de MinIO community con consola de administración completa.
-    # RELEASE.2025-05-24 en adelante reduce la consola a un navegador de objetos
-    # y el proyecto fue archivado en 2026 — no actualizar más allá de esta versión.
-    image: quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z
+    # RustFS 1.0.1 es S3-compatible y publica imagen multi-arquitectura.
+    # El nombre del servicio y los puertos siguen estables para los clientes S3 locales.
+    image: rustfs/rustfs:1.0.1
     restart: always
-    command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
-      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+      RUSTFS_VOLUMES: /data
+      RUSTFS_ADDRESS: "0.0.0.0:9000"
+      RUSTFS_CONSOLE_ADDRESS: "0.0.0.0:9001"
+      RUSTFS_CONSOLE_ENABLE: "true"
+      RUSTFS_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      RUSTFS_SECRET_KEY: ${MINIO_SECRET_KEY}
     ports:
       - "${MINIO_PORT:-9002}:9000"
       - "${MINIO_CONSOLE_PORT:-9003}:9001"
     volumes:
       - minio_data:/data
     healthcheck:
-      test: ["CMD", "mc", "ready", "local"]
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:9000/health/ready"]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 12
+      start_period: 20s
     networks:
       - mantra-redesa-network
 
@@ -582,6 +609,13 @@ services:
       # Retardo del veredicto: la autoridad acepta la solicitud al instante y
       # tarda en resolverla. Es lo que ejercita el bucle de espera del worker.
       IDENTITY_VERIFICATION_DELAY_MS: ${MOCK_IDENTITY_DELAY_MS:-10000}
+      # Sistema de las farmacias (Estándar ALOVIDA y cadena simulada). Una clave
+      # por farmacia, `CODIGO=clave;OTRO=clave`, o un JSON montado en el
+      # contenedor (ver `mock-provider-server/pharmacy-keys.example.json`).
+      # Vacías: ninguna farmacia autentica hasta que se le da una clave.
+      PHARMACY_ERP_PHARMACY_KEYS: ${MOCK_PHARMACY_ERP_PHARMACY_KEYS:-}
+      PHARMACY_ERP_PHARMACY_KEYS_FILE: ${MOCK_PHARMACY_ERP_PHARMACY_KEYS_FILE:-}
+      PHARMACY_ERP_FAILURE_RATE: ${MOCK_PHARMACY_ERP_FAILURE_RATE:-0}
     ports:
       - "${MOCK_PROVIDER_PORT:-4100}:4100"
     healthcheck:
@@ -942,6 +976,28 @@ services:
     networks:
       - mantra-redesa-network
 
+  worker-practice:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/src/worker-practice.js"]
+    environment:
+      <<: *app-env
+    deploy:
+      resources: *worker-resources
+    healthcheck: *worker-healthcheck
+    # Por encima de WORKER_SHUTDOWN_TIMEOUT_MS (30 s) para que el drenaje de los
+    # ticks en vuelo termine antes de que Docker mande SIGKILL. Con el default
+    # de 10 s, cada despliegue cortaría lotes a la mitad.
+    stop_grace_period: 45s
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
   worker-promotions:
     image: mantra-redesa-api:local
     build:
@@ -1026,6 +1082,31 @@ services:
     networks:
       - mantra-redesa-network
 
+  # Barrido de vencimientos y abandonos de las admisiones de profesionales.
+  # Cadencia: ADMISSIONS_EXPIRE_SWEEP_CRON (por defecto, cada hora en punto);
+  # apagarlo: ADMISSIONS_EXPIRE_SWEEP_ENABLED=false. Dos réplicas son inocuas: el
+  # cerrojo está en la API (`POST /admissions/expire-sweep`).
+  worker-profiles:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/src/worker-profiles.js"]
+    environment:
+      <<: *app-env
+    deploy:
+      resources: *worker-resources
+    healthcheck: *worker-healthcheck
+    # Por encima de WORKER_SHUTDOWN_TIMEOUT_MS (30 s), igual que el resto: un
+    # barrido en vuelo termina antes de que Docker mande SIGKILL.
+    stop_grace_period: 45s
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
   worker-read_models:
     image: mantra-redesa-api:local
     build:
@@ -1077,6 +1158,28 @@ services:
       dockerfile: Dockerfile
     restart: always
     command: ["node", "dist/src/worker-scheduling.js"]
+    environment:
+      <<: *app-env
+    deploy:
+      resources: *worker-resources
+    healthcheck: *worker-healthcheck
+    # Por encima de WORKER_SHUTDOWN_TIMEOUT_MS (30 s) para que el drenaje de los
+    # ticks en vuelo termine antes de que Docker mande SIGKILL. Con el default
+    # de 10 s, cada despliegue cortaría lotes a la mitad.
+    stop_grace_period: 45s
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
+  worker-telemetry:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/src/worker-telemetry.js"]
     environment:
       <<: *app-env
     deploy:

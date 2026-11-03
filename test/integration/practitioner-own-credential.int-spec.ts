@@ -8,7 +8,7 @@ import {
   identidadProfesional,
 } from './harness';
 import { PROF } from '../../src/modules/profiles/profiles.concepts';
-import { ProfessionalCredentialsRepository } from '../../src/modules/profiles/repositories';
+import { ProfessionalCredentialsRepository } from '../../src/modules/profiles/infrastructure/repositories';
 
 describe('edición de credencial profesional propia (integración)', () => {
   let ctx: TestContext;

@@ -60,9 +60,8 @@ que el modelo ya no declara.
 `database/SQL` reproduce el DDL canónico, y el DDL canónico **no cubre todo el
 modelo**. Medido contra una base recién construida desde aquí (02/09/2026): 71
 diferencias con las entidades de MikroORM — 45 tablas ausentes (`pharma_lab`
-entero entre ellas: es B-8 de `docs/progress/REGISTRO-DEFECTOS.md`, todavía abierto), 2
-columnas, y 24 columnas que la base exige NOT NULL mientras la entidad las
-declara opcionales.
+entero entre ellas; su DDL llegó después en `SQL/69_pharma_lab/`), 2 columnas, y
+24 columnas que la base exige NOT NULL mientras la entidad las declara opcionales.
 
 Las lecturas no se enteran, porque MikroORM proyecta `select "p0".*`. **Las
 altas sí**, porque un INSERT nombra cada columna: es el origen del

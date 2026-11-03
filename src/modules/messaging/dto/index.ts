@@ -50,3 +50,4 @@ export {
   UpdateMyPreferencesDto,
   MyPreferencesDto,
 } from './in-app.dto';
+export * from './web-push.dto';

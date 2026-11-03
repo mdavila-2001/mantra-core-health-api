@@ -1,0 +1,268 @@
+format-version: 1.2
+data-version: releases/2024-05-07
+remark: NCI Thesaurus, a controlled vocabulary in support of NCI administrative and scientific activities. Produced by the Enterprise Vocabulary System (EVS), a project by the NCI Center for Biomedical Informatics and Information Technology. National Cancer Institute, National Institutes of Health, Bethesda, MD 20892, U.S.A.
+property_value: owl:versionInfo "24.04e" xsd:string
+
+[Term]
+id: NCIT:C1000
+name: Recombinant Amphiregulin
+def: "A recombinant form of amphiregulin, a member of the heparin-binding epidermal growth factor (EGF) family. Endogenous amphiregulin is an autocrine growth factor, and binds to the EGF receptor. Overexpressed in several cancer cell types, endogenous amphiregulin may contribute to tumor cell proliferation and metastasis. (NCI04)" [] {http://purl.obolibrary.org/obo/NCIT_P378="NCI"}
+subset: NCIT:C63923
+synonym: "AMPHIREGULIN" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P385="7MGE0HPM2H", http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P386="UNII", http://purl.obolibrary.org/obo/NCIT_P384="FDA"}
+synonym: "AR" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="AB", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "CRDGF" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="AB", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "KAF" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="AB", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Recombinant Amphiregulin" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+is_a: NCIT:C1504 ! Recombinant Epidermal Growth Factor
+property_value: NCIT:NHC0 "C1000" xsd:string
+property_value: NCIT:P106 "Amino Acid, Peptide, or Protein" xsd:string
+property_value: NCIT:P106 "Pharmacologic Substance" xsd:string
+property_value: NCIT:P108 "Recombinant Amphiregulin" xsd:string
+property_value: NCIT:P207 "C1514768" xsd:string
+property_value: NCIT:P319 "7MGE0HPM2H" xsd:string
+property_value: NCIT:P322 "FDA" xsd:string
+property_value: NCIT:P366 "Recombinant_Amphiregulin" xsd:string
+
+[Term]
+id: NCIT:C27551
+name: Disorder by Site
+def: "A term that refers to the classification of a disorder according to the anatomic site that is involved in the pathologic process." [] {http://purl.obolibrary.org/obo/NCIT_P378="NCI"}
+synonym: "Disease by Site" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Disorder by Site" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="HD", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+is_a: NCIT:C2991 ! Disease or Disorder
+property_value: NCIT:NHC0 "C27551" xsd:string
+property_value: NCIT:P106 "Disease or Syndrome" xsd:string
+property_value: NCIT:P108 "Disorder by Site" xsd:string
+property_value: NCIT:P207 "C1333305" xsd:string
+property_value: NCIT:P310 "Header_Concept" xsd:string
+property_value: NCIT:P366 "Disorder_by_Site" xsd:string
+
+[Term]
+id: NCIT:C2985
+name: Diabetes Mellitus
+def: "A metabolic disorder characterized by abnormally high blood sugar levels due to diminished production of insulin or insulin resistance/desensitization." [] {http://purl.obolibrary.org/obo/NCIT_P378="NCI"}
+subset: NCIT:C116977
+subset: NCIT:C118168
+subset: NCIT:C118467
+subset: NCIT:C156952
+subset: NCIT:C156953
+subset: NCIT:C157528
+subset: NCIT:C157711
+subset: NCIT:C158034
+subset: NCIT:C158035
+subset: NCIT:C158520
+subset: NCIT:C165258
+subset: NCIT:C177537
+subset: NCIT:C178718
+subset: NCIT:C179026
+subset: NCIT:C179027
+subset: NCIT:C189083
+subset: NCIT:C192842
+subset: NCIT:C90259
+synonym: "Diabetes" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="caDSR"}
+synonym: "Diabetes" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="CPTAC"}
+synonym: "Diabetes" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Diabetes" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="GDC"}
+synonym: "diabetes" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P385="CDR0000044911", http://purl.obolibrary.org/obo/NCIT_P384="NCI-GLOSS"}
+synonym: "Diabetes Mellitus" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="CPTAC"}
+synonym: "Diabetes Mellitus" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="caDSR"}
+synonym: "Diabetes Mellitus" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="NICHD"}
+synonym: "Diabetes Mellitus" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="Cellosaurus"}
+synonym: "Diabetes Mellitus" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Diabetes Mellitus" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P384="CTRP", http://purl.obolibrary.org/obo/NCIT_P383="DN"}
+synonym: "Diabetes mellitus" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P384="SeroNet", http://purl.obolibrary.org/obo/NCIT_P383="PT"}
+synonym: "diabetes mellitus" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P385="CDR0000044129", http://purl.obolibrary.org/obo/NCIT_P384="NCI-GLOSS"}
+synonym: "DM" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="AB", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+is_a: NCIT:C171128 ! Non-Neoplastic Endocrine Pancreas Disorder
+is_a: NCIT:C53655 ! Glucose Metabolism Disorder
+property_value: NCIT:A32 NCIT:C16457
+property_value: NCIT:A32 NCIT:C17103
+property_value: NCIT:A37 NCIT:C17998
+property_value: NCIT:A37 NCIT:C48660
+property_value: NCIT:A37 NCIT:C49487
+property_value: NCIT:A37 NCIT:C49488
+property_value: NCIT:NHC0 "C2985" xsd:string
+property_value: NCIT:P106 "Disease or Syndrome" xsd:string
+property_value: NCIT:P107 "Diabetes Mellitus" xsd:string
+property_value: NCIT:P108 "Diabetes Mellitus" xsd:string
+property_value: NCIT:P207 "C4013416" xsd:string
+property_value: NCIT:P322 "Cellosaurus" xsd:string
+property_value: NCIT:P322 "CPTAC" xsd:string
+property_value: NCIT:P322 "CTRP" xsd:string
+property_value: NCIT:P322 "GDC" xsd:string
+property_value: NCIT:P322 "NICHD" xsd:string
+property_value: NCIT:P322 "SeroNet" xsd:string
+property_value: NCIT:P325 "A disease in which the body does not control the amount of glucose (a type of sugar) in the blood and the kidneys make a large amount of urine. This disease occurs when the body does not make enough insulin or does not use it the way it should." xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="NCI-GLOSS"}
+property_value: NCIT:P325 "A metabolic condition, characterized by hyperglycemia, caused by insufficient secretion of insulin by the pancreas and/or decreased insulin action in target tissues." xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="NICHD"}
+property_value: NCIT:P366 "Diabetes_Mellitus" xsd:string
+property_value: NCIT:P375 "Diabetes" xsd:string {http://purl.obolibrary.org/obo/NCIT_P393="Has Synonym", http://purl.obolibrary.org/obo/NCIT_P394="PT", http://purl.obolibrary.org/obo/NCIT_P395="comorbidities", http://purl.obolibrary.org/obo/NCIT_P396="GDC"}
+property_value: NCIT:P375 "Diabetes, NOS" xsd:string {http://purl.obolibrary.org/obo/NCIT_P393="Related To", http://purl.obolibrary.org/obo/NCIT_P394="PT", http://purl.obolibrary.org/obo/NCIT_P395="risk_factors", http://purl.obolibrary.org/obo/NCIT_P396="GDC"}
+
+[Term]
+id: NCIT:C2991
+name: Disease or Disorder
+def: "Any abnormal condition of the body or mind that causes discomfort, dysfunction, or distress to the person affected or those in contact with the person. The term is often used broadly to include injuries, disabilities, syndromes, symptoms, deviant behaviors, and atypical variations of structure and function." [] {http://purl.obolibrary.org/obo/NCIT_P378="NCI"}
+subset: NCIT:C116977
+subset: NCIT:C118168
+subset: NCIT:C138188
+subset: NCIT:C138189
+subset: NCIT:C157711
+subset: NCIT:C165451
+subset: NCIT:C166373
+subset: NCIT:C173072
+subset: NCIT:C175324
+subset: NCIT:C177536
+subset: NCIT:C61410
+subset: NCIT:C67497
+subset: NCIT:C90259
+subset: NCIT:C99147
+synonym: "Condition" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "condition" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P385="CDR0000651193", http://purl.obolibrary.org/obo/NCIT_P384="NCI-GLOSS"}
+synonym: "Diagnosis" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P384="CTDC", http://purl.obolibrary.org/obo/NCIT_P383="DN"}
+synonym: "Disease" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NICHD"}
+synonym: "Disease" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "disease" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P384="CTDC", http://purl.obolibrary.org/obo/NCIT_P383="PT"}
+synonym: "disease" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="CDISC-GLOSS"}
+synonym: "Disease or Disorder" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="caDSR"}
+synonym: "Disease or Disorder" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="NICHD"}
+synonym: "Disease or Disorder" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Disease or Disorder, Non-Neoplastic" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P384="CTRP", http://purl.obolibrary.org/obo/NCIT_P383="PT"}
+synonym: "disease term" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P386="ICDC", http://purl.obolibrary.org/obo/NCIT_P384="ICDC"}
+synonym: "disease type" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P385="VAR", http://purl.obolibrary.org/obo/NCIT_P384="GDC"}
+synonym: "disease_term" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P386="ICDC", http://purl.obolibrary.org/obo/NCIT_P384="ICDC"}
+synonym: "disease_type" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P385="VAR", http://purl.obolibrary.org/obo/NCIT_P384="GDC"}
+synonym: "Diseases" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Diseases and Disorders" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Disorder" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "disorder" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P385="CDR0000407758", http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="NCI-GLOSS"}
+synonym: "Disorders" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Other Disease" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P384="CTRP", http://purl.obolibrary.org/obo/NCIT_P383="DN"}
+xref: IMDRF:E23
+is_a: NCIT:C7057 ! Disease, Disorder or Finding
+property_value: NCIT:A31 NCIT:C17998
+property_value: NCIT:A31 NCIT:C184783
+property_value: NCIT:A31 NCIT:C184784
+property_value: NCIT:A31 NCIT:C3055
+property_value: NCIT:A31 NCIT:C3059
+property_value: NCIT:A31 NCIT:C3161
+property_value: NCIT:A31 NCIT:C3172
+property_value: NCIT:A31 NCIT:C3208
+property_value: NCIT:A31 NCIT:C3230
+property_value: NCIT:A31 NCIT:C3247
+property_value: NCIT:A31 NCIT:C3262
+property_value: NCIT:A31 NCIT:C3286
+property_value: NCIT:A31 NCIT:C3411
+property_value: NCIT:A31 NCIT:C3422
+property_value: NCIT:A31 NCIT:C3468
+property_value: NCIT:A31 NCIT:C3708
+property_value: NCIT:A31 NCIT:C3709
+property_value: NCIT:A31 NCIT:C3723
+property_value: NCIT:A31 NCIT:C3743
+property_value: NCIT:A31 NCIT:C3784
+property_value: NCIT:A31 NCIT:C3786
+property_value: NCIT:A31 NCIT:C3787
+property_value: NCIT:A31 NCIT:C3792
+property_value: NCIT:A31 NCIT:C40141
+property_value: NCIT:A31 NCIT:C4063
+property_value: NCIT:A31 NCIT:C4197
+property_value: NCIT:A31 NCIT:C4198
+property_value: NCIT:A31 NCIT:C4248
+property_value: NCIT:A31 NCIT:C43234
+property_value: NCIT:A31 NCIT:C4345
+property_value: NCIT:A31 NCIT:C4463
+property_value: NCIT:A31 NCIT:C4665
+property_value: NCIT:A31 NCIT:C48660
+property_value: NCIT:A31 NCIT:C4972
+property_value: NCIT:A31 NCIT:C7056
+property_value: NCIT:A31 NCIT:C7387
+property_value: NCIT:A31 NCIT:C7539
+property_value: NCIT:A31 NCIT:C9295
+property_value: NCIT:A31 NCIT:C9343
+property_value: NCIT:A31 NCIT:C9357
+property_value: NCIT:A31 NCIT:C9360
+property_value: NCIT:NHC0 "C2991" xsd:string
+property_value: NCIT:P106 "Disease or Syndrome" xsd:string
+property_value: NCIT:P107 "Disease or Disorder" xsd:string
+property_value: NCIT:P108 "Disease or Disorder" xsd:string
+property_value: NCIT:P207 "C0012634" xsd:string
+property_value: NCIT:P322 "CDISC-GLOSS" xsd:string
+property_value: NCIT:P322 "CTDC" xsd:string
+property_value: NCIT:P322 "CTRP" xsd:string
+property_value: NCIT:P322 "GDC" xsd:string
+property_value: NCIT:P322 "ICDC" xsd:string
+property_value: NCIT:P322 "NICHD" xsd:string
+property_value: NCIT:P325 "Any abnormal condition of the body or mind that causes discomfort, dysfunction, or distress to the affected person. NOTE: The term is often used broadly to include injuries, disabilities, syndromes, symptoms, deviant behaviors, and atypical variations of structure and function. [After NCI Thesaurus] See also diagnosis." xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="CDISC-GLOSS"}
+property_value: NCIT:P325 "In medicine, a health problem with certain characteristics or symptoms." xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="NCI-GLOSS"}
+property_value: NCIT:P366 "Diseases_and_Disorders" xsd:string
+
+[Term]
+id: NCIT:C3009
+name: Endocrine System Disorder
+def: "A non-neoplastic or neoplastic disorder that affects the endocrine system. Representative examples of non-neoplastic disorders include diabetes mellitus, hyperthyroidism, and adrenal gland insufficiency. Representative examples of neoplastic disorders include carcinoid tumor, neuroendocrine carcinoma, and pheochromocytoma." [] {http://purl.obolibrary.org/obo/NCIT_P378="NCI"}
+subset: NCIT:C156952
+subset: NCIT:C158035
+subset: NCIT:C158520
+subset: NCIT:C186336
+subset: NCIT:C186341
+subset: NCIT:C90259
+subset: NCIT:C99147
+synonym: "Disorder of Endocrine System" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NICHD"}
+synonym: "Endocrine Disease" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="CPTAC"}
+synonym: "Endocrine Disease" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Endocrine Disorder" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="PCDC", http://purl.obolibrary.org/obo/NCIT_P386="HL"}
+synonym: "Endocrine Disorder" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Endocrine System Disorder" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Endocrine System Disorder" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="CPTAC"}
+synonym: "Endocrine System Disorder" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="NICHD"}
+synonym: "Endocrine System Disorder" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Endocrinopathy" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Thyroid or other glandular disorders" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="caDSR"}
+is_a: NCIT:C27551 ! Disorder by Site
+property_value: NCIT:NHC0 "C3009" xsd:string
+property_value: NCIT:P106 "Disease or Syndrome" xsd:string
+property_value: NCIT:P108 "Endocrine System Disorder" xsd:string
+property_value: NCIT:P207 "C0014130" xsd:string
+property_value: NCIT:P322 "CPTAC" xsd:string
+property_value: NCIT:P322 "NICHD" xsd:string
+property_value: NCIT:P322 "PCDC" xsd:string
+property_value: NCIT:P366 "Endocrine_Disorder" xsd:string
+
+[Term]
+id: NCIT:C3367
+name: Finding
+def: "Clinical, laboratory or molecular evidence, or absence of evidence of disease." [] {http://purl.obolibrary.org/obo/NCIT_P378="NCI"}
+subset: NCIT:C116977
+subset: NCIT:C61410
+subset: NCIT:C67497
+subset: NCIT:C89506
+subset: NCIT:C90259
+synonym: "Finding" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Finding" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P384="CTRP", http://purl.obolibrary.org/obo/NCIT_P383="PT"}
+synonym: "Finding" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P384="CTRP", http://purl.obolibrary.org/obo/NCIT_P383="DN"}
+synonym: "Finding" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="NICHD"}
+synonym: "finding" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="CDISC-GLOSS"}
+synonym: "Observable Entity" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NICHD"}
+is_a: NCIT:C7057 ! Disease, Disorder or Finding
+property_value: NCIT:NHC0 "C3367" xsd:string
+property_value: NCIT:P106 "Finding" xsd:string
+property_value: NCIT:P107 "Finding" xsd:string
+property_value: NCIT:P108 "Finding" xsd:string
+property_value: NCIT:P207 "C1285578" xsd:string
+property_value: NCIT:P322 "CDISC-GLOSS" xsd:string
+property_value: NCIT:P322 "CTRP" xsd:string
+property_value: NCIT:P322 "NICHD" xsd:string
+property_value: NCIT:P325 "A meaningful interpretation of data or observations resulting from planned evaluations. Compare to conclusion, hypothesis. See also general observation class, intervention, event." xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="CDISC-GLOSS"}
+property_value: NCIT:P366 "Finding" xsd:string
+
+[Term]
+id: NCIT:C7057
+name: Disease, Disorder or Finding
+def: "A condition that is relevant to human neoplasms and non-neoplastic disorders.  This includes observations, test results, history and other concepts relevant to the characterization of human pathologic conditions." [] {http://purl.obolibrary.org/obo/NCIT_P378="NCI"}
+synonym: "Disease, Disorder or Finding" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+disjoint_from: NCIT:C97325 ! Manufactured Object
+property_value: NCIT:NHC0 "C7057" xsd:string
+property_value: NCIT:P106 "Conceptual Entity" xsd:string
+property_value: NCIT:P108 "Disease, Disorder or Finding" xsd:string
+property_value: NCIT:P207 "C1511989" xsd:string
+property_value: NCIT:P366 "Diseases_Disorders_and_Findings" xsd:string
+

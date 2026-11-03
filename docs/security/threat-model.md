@@ -3,7 +3,7 @@
 > Fase 13. Metodología STRIDE, verificada tabla por tabla contra el código real de este
 > repositorio. Fuente base: documento de arquitectura interno del proyecto ("Modelo de amenazas y
 > matriz de controles — STRIDE"), contrastado y ampliado con hallazgos propios de esta auditoría
-> (`docs/reports/`, `docs/governance/traceability-matrix.md`).
+> (`docs/reports/`).
 
 ## Activos críticos
 
@@ -28,7 +28,7 @@ tráfico entrante.
 | **S**poofing (suplantación) | Alguien se hace pasar por un profesional clínico | Credenciales hasheadas, MFA (`iam.mfa_factors`), API keys (`iam.api_keys`), `identity_assurance`, reglas de IP (`authz.ip_access_rules`) | Entidades confirmadas en [catálogo de entidades](../data/entity-catalog.md) |
 | **T**ampering (alteración) | Modificar un resultado de laboratorio ya registrado | Tablas `*_history` (versionado), `row_version` (bloqueo optimista, 353 usos de `PreconditionFailedException`), `audit.audit_log` WORM | [ADR-0002](../adr/ADR-0002-orm-mikroorm.md), [graphify-audit.md](../reports/graphify-audit.md) §7 |
 | **R**epudiation (negación) | "Yo no accedí a esa historia clínica" | `audit.data_access_log`, `authz.break_glass_sessions` (con justificación obligatoria) | Entidades confirmadas en código |
-| **I**nformation disclosure (fuga de PHI) | Exponer PHI a un actor sin autorización | Cifrado + `system_ops.encryption_keys`, `authz.field_permissions` (enmascaramiento), RLS por `tenant_id`, `system_ops.data_classifications` | [autorización](../api/authorization.md), [ADR-0006](../adr/ADR-0006-multi-tenancy-rls.md) — **RLS con verificación operativa pendiente, ver `SEC-001`** |
+| **I**nformation disclosure (fuga de PHI) | Exponer PHI a un actor sin autorización | Cifrado + `system_ops.encryption_keys`, `authz.field_permissions` (enmascaramiento), RLS por `tenant_id`, `system_ops.data_classifications` | [autorización](../api/authorization.md), [ADR-0006](../adr/ADR-0006-multi-tenancy-rls.md) — **la activación de RLS depende de cada entorno, ver [aislamiento por tenant](tenant-isolation.md)** |
 | **D**enial of service | Saturar el login o la API | `ThrottlerGuard` global (reconciliado — ver [arquitectura de seguridad](security-architecture.md) §"Discrepancia"), `iam.account_lockouts` | `src/app.module.ts` (`APP_GUARD` → `ThrottlerGuard`) |
 | **E**levation of privilege | Un usuario obtiene privilegios de `SUPERADMIN` | RBAC (`authz.role_permissions`), `authz.resource_scope_grants`, `authz.service_principals`, revisión de break-glass | [ADR-0005](../adr/ADR-0005-autorizacion-rbac-pdp-clinico.md) |
 
@@ -51,14 +51,14 @@ tráfico entrante.
 8. Mínimo privilegio y separación de deberes: quien ejecuta una acción sensible no debe ser quien
    la revisa.
 
-## Riesgos residuales — no cerrados por esta documentación
+## Riesgos residuales
 
 | Riesgo | Amenaza STRIDE | Probabilidad | Impacto | Mitigación actual | Riesgo residual |
 |---|---|---|---|---|---|
-| `RLS_ENFORCE` no verificado por entorno (`SEC-001`) | Information disclosure | Media (depende de configuración operativa) | **Crítico** — fuga cross-tenant de PHI | RLS implementado en código; verificación operativa pendiente | **Abierto** — no se declara mitigado sin verificación real contra cada entorno |
-| `SUPERADMIN` como bypass total de RBAC | Elevation of privilege | Baja (requiere comprometer una cuenta específica) | Crítico — bypass completo | Ninguna mitigación adicional identificada (sin aprobación dual, sin alerta especial de uso) | **Abierto** — candidato a mecanismo de aprobación dual o alerta de uso |
-| Población real de `entity_registry`/clasificación no verificada (`GOV-005`) | Information disclosure | — | Alto si hay tablas con PHI sin marcar | Mecanismo de gobernanza implementado en código | **Abierto** — requiere auditoría contra base real |
-| Cobertura de `data_access_log` sobre toda lectura de PHI | Repudiation / Information disclosure | — | Alto | Mecanismo existe; cobertura real no verificada (recomendación explícita del propio estándar de diseño del proyecto: "verificar por `entity_registry.contains_phi`") | **Abierto** |
+| `RLS_ENFORCE` no verificado por entorno | Information disclosure | Media (depende de configuración operativa) | **Crítico** — fuga cross-tenant de PHI | RLS implementado en código; su activación depende de cada entorno | **Sin mitigar** mientras no se verifique en el entorno concreto |
+| `SUPERADMIN` como bypass total de RBAC | Elevation of privilege | Baja (requiere comprometer una cuenta específica) | Crítico — bypass completo | Ninguna mitigación adicional identificada (sin aprobación dual, sin alerta especial de uso) | **Sin mitigar** |
+| Población real de `entity_registry`/clasificación no verificada | Information disclosure | — | Alto si hay tablas con PHI sin marcar | Mecanismo de gobernanza implementado en código | **Sin mitigar** (depende de los datos de cada base) |
+| Cobertura de `data_access_log` sobre toda lectura de PHI | Repudiation / Information disclosure | — | Alto | Mecanismo existe; cobertura real no verificada (recomendación explícita del propio estándar de diseño del proyecto: "verificar por `entity_registry.contains_phi`") | **Sin mitigar** |
 | 16 vulnerabilidades `high` en dependencias de desarrollo (`SEC-003`) | Denial of service (vía herramientas de build/test) | Baja — sin ruta de alcance a producción | Bajo | Ninguna — sin ruta de explotación en runtime de producción | **Aceptado**, ver `docs/reports/baseline.md` §3.3 |
 
 ## Por qué el break-glass importa (ejemplo real del propio diseño)

@@ -1,2 +1,0 @@
-Command: corepack yarn lint --max-warnings=0
-Exit: 0

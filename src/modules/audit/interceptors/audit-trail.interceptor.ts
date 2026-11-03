@@ -1,3 +1,8 @@
+import { routeTemplate, tenantOf } from './audit-request-identity';
+import {
+  deferAfterTenantTransaction,
+  deferAfterTenantTransactionFailure,
+} from '../../../common/tenant/tenant-transaction-completion';
 import {
   CallHandler,
   ExecutionContext,
@@ -5,28 +10,25 @@ import {
   Logger,
   NestInterceptor,
 } from '@nestjs/common';
-import { PATH_METADATA } from '@nestjs/common/constants';
 import { Reflector } from '@nestjs/core';
 import { TransactionPropagation } from '@mikro-orm/core';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { from, lastValueFrom, Observable } from 'rxjs';
 import {
   ACCESS_LOGGED_KEY,
-  AUDIT_TRAIL_KEY,
-  SKIP_AUDIT_TRAIL_KEY,
+  AUDITED_KEY,
+  NOT_AUDITED_KEY,
   deriveRouteAuditIdentity,
   isUuid,
-  joinRouteTemplate,
   readUuidParam,
   runWithAuditRequestContext,
   toInetAddress,
   type AccessLoggedOptions,
   type AuditRequestContext,
-  type AuditTrailOptions,
+  type AuditedOptions,
   type RouteAuditIdentity,
 } from '../../../common/audit-trail';
 import { CONCEPTS } from '../../../common/constants/concepts';
-import { getCurrentTenantId } from '../../../common/tenant/tenant-context';
 import type {
   AuthenticatedRequest,
   AuthenticatedUser,
@@ -47,6 +49,7 @@ type AuditableRequest = AuthenticatedRequest & {
   readonly ip?: string;
   readonly method: string;
   readonly params: Record<string, unknown>;
+  readonly body?: unknown;
 };
 
 /**
@@ -63,7 +66,8 @@ type AuditableRequest = AuthenticatedRequest & {
  *    atómico, y por eso los servicios de PHI, dinero, permisos y consentimiento
  *    siguen sellando dentro de su transacción (§1.1). Cuando un servicio ya selló,
  *    el interceptor no repite (`markAuditSealed` en `AuditLogRepository.append`).
- *  - **Fallo.** Sella `success: false` en una transacción `REQUIRES_NEW` —el
+ *  - **Fallo.** Sella `success: false` después del rollback exterior, en una
+ *    transacción `REQUIRES_NEW` —el
  *    rollback del caso de uso no se lleva la evidencia— y re-lanza el error
  *    ORIGINAL. Si sellar falla, se registra y gana el error original: un rechazo
  *    nunca se convierte en otra cosa.
@@ -76,8 +80,8 @@ type AuditableRequest = AuthenticatedRequest & {
  * `trg_forbid_update` (`SQL/10_audit/05_constraints.sql`).
  *
  * Sin actor no hay sello: `audit_log.user_id` es `NOT NULL`. Las rutas
- * `@Public()` que mutan deben declarar su rastro alternativo en la allowlist
- * del control de CI (`tools/alovida/audit-trail-coverage.mjs`).
+ * `@Public()` que mutan llevan `@NotAudited(motivo)` con su rastro alternativo;
+ * lo exige `src/common/audit-trail/audit-trail-coverage.spec.ts`.
  */
 @Injectable()
 export class AuditTrailInterceptor implements NestInterceptor {
@@ -124,7 +128,8 @@ export class AuditTrailInterceptor implements NestInterceptor {
       from(runWithAuditRequestContext(auditContext, fn));
 
     if (MUTATING_METHODS.has(request.method.toUpperCase())) {
-      if (this.isSkipped(context)) return this.withContext(auditContext, next);
+      if (this.isNotAudited(context))
+        return this.withContext(auditContext, next);
       return run(() =>
         this.sealAround(context, request, user, next, auditContext),
       );
@@ -157,9 +162,9 @@ export class AuditTrailInterceptor implements NestInterceptor {
     );
   }
 
-  private isSkipped(context: ExecutionContext): boolean {
+  private isNotAudited(context: ExecutionContext): boolean {
     const reason = this.reflector.getAllAndOverride<string | undefined>(
-      SKIP_AUDIT_TRAIL_KEY,
+      NOT_AUDITED_KEY,
       [context.getHandler(), context.getClass()],
     );
     return typeof reason === 'string' && reason.trim().length > 0;
@@ -178,11 +183,15 @@ export class AuditTrailInterceptor implements NestInterceptor {
       result = await lastValueFrom(next.handle());
     } catch (error) {
       if (!auditContext.sealedFailure) {
-        await this.sealFailure(
-          this.identityOf(context, request, undefined),
-          request,
-          user,
-        );
+        const seal = () =>
+          runWithAuditRequestContext(auditContext, () =>
+            this.sealFailure(
+              this.identityOf(context, request, undefined),
+              request,
+              user,
+            ),
+          );
+        if (!deferAfterTenantTransaction(seal)) await seal();
       }
       throw error;
     }
@@ -193,6 +202,16 @@ export class AuditTrailInterceptor implements NestInterceptor {
         user,
       );
     }
+    deferAfterTenantTransactionFailure(() =>
+      runWithAuditRequestContext(auditContext, async () => {
+        if (!auditContext.sealedFailure)
+          await this.sealFailure(
+            this.identityOf(context, request, undefined),
+            request,
+            user,
+          );
+      }),
+    );
     return result;
   }
 
@@ -203,34 +222,15 @@ export class AuditTrailInterceptor implements NestInterceptor {
   ): RouteAuditIdentity {
     return deriveRouteAuditIdentity({
       method: request.method,
-      routeTemplate: this.routeTemplate(context),
+      routeTemplate: routeTemplate(context),
       params: request.params ?? {},
       result,
-      options: this.reflector.getAllAndOverride<AuditTrailOptions | undefined>(
-        AUDIT_TRAIL_KEY,
+      body: request.body,
+      options: this.reflector.getAllAndOverride<AuditedOptions | undefined>(
+        AUDITED_KEY,
         [context.getHandler(), context.getClass()],
       ),
     });
-  }
-
-  /** Plantilla de la ruta tal como la declaran `@Controller()` y el verbo. */
-  private routeTemplate(context: ExecutionContext): string {
-    const first = (value: unknown): string =>
-      Array.isArray(value)
-        ? first(value[0])
-        : typeof value === 'string'
-          ? value
-          : '';
-    return joinRouteTemplate(
-      first(Reflect.getMetadata(PATH_METADATA, context.getClass())),
-      first(Reflect.getMetadata(PATH_METADATA, context.getHandler())),
-    );
-  }
-
-  /** Tenant del sello: el del contexto de la petición (no el custodio, §8.3). */
-  private tenantOf(request: AuditableRequest): string | undefined {
-    const tenantId = getCurrentTenantId() ?? request.resolvedTenantId;
-    return isUuid(tenantId) ? tenantId : undefined;
   }
 
   /**
@@ -243,7 +243,7 @@ export class AuditTrailInterceptor implements NestInterceptor {
     request: AuditableRequest,
     user: AuthenticatedUser,
   ): Promise<void> {
-    const tenantId = this.tenantOf(request);
+    const tenantId = tenantOf(request);
     const fork = this.em.fork({ clear: true, keepTransactionContext: true });
     const joinsRequestTransaction = fork.isInTransaction();
     try {
@@ -265,7 +265,7 @@ export class AuditTrailInterceptor implements NestInterceptor {
     request: AuditableRequest,
     user: AuthenticatedUser,
   ): Promise<void> {
-    const tenantId = this.tenantOf(request);
+    const tenantId = tenantOf(request);
     try {
       await this.em.fork({ clear: true }).transactional(
         async (tx) => {
@@ -311,7 +311,7 @@ export class AuditTrailInterceptor implements NestInterceptor {
     user: AuthenticatedUser,
   ): Promise<void> {
     const params = request.params ?? {};
-    const tenantId = this.tenantOf(request);
+    const tenantId = tenantOf(request);
     const fork = this.em.fork({ clear: true, keepTransactionContext: true });
     const joinsRequestTransaction = fork.isInTransaction();
     await fork.transactional(async (tx) => {
@@ -347,8 +347,9 @@ export class AuditTrailInterceptor implements NestInterceptor {
     }
     const candidate = readUuidParam(options.patient, params);
     if (!candidate) return undefined;
-    const rows = await tx.execute<{ id: string }[]>(
-      'SELECT id FROM profiles.patient_profiles WHERE id = ? LIMIT 1',
+    // La PK de `patient_profiles` es `profile_id` (el id de la persona).
+    const rows = await tx.execute<{ profile_id: string }[]>(
+      'SELECT profile_id FROM profiles.patient_profiles WHERE profile_id = ? LIMIT 1',
       [candidate],
     );
     return rows.length > 0 ? candidate : undefined;

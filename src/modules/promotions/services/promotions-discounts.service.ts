@@ -6,15 +6,26 @@ import {
   CONCEPTS,
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
+  requireTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { PromotionsErrorReason } from '../promotions.error-reasons';
 import {
   PromotionsDiscountsRepository,
   PromotionsLoyaltyRepository,
 } from '../repositories';
-import { Coupons, DiscountRules, Promotions } from '../entities';
+import {
+  Coupons,
+  DiscountRules,
+  LoyaltyMemberships,
+  Promotions,
+} from '../entities';
+import {
+  assertPromotionsScope,
+  promotionsOutOfScope,
+  resolvePromotionsScope,
+} from './promotions-scope';
 import { REWARD_MEMBER_CONCEPT } from './promotions-loyalty.service';
 import {
   CreatePromotionDto,
@@ -110,10 +121,12 @@ export class PromotionsDiscountsService {
     dto: CreatePromotionDto,
     actor: AuthenticatedUser,
   ): Promise<PromotionResponseDto> {
+    // El tenant sale del contexto verificado; el del cuerpo no es fuente de verdad.
+    const tenantId = requireTenantId();
     this.logger.info(
       {
         operation: 'promotions.promotion.create',
-        tenantId: dto.tenantId,
+        tenantId,
         code: dto.code,
       },
       'Creating promotion',
@@ -121,14 +134,18 @@ export class PromotionsDiscountsService {
 
     const duplicate = await this.discountsRepo.findPromotionByCode(
       this.em,
-      dto.tenantId,
+      tenantId,
       dto.code,
     );
     if (duplicate) {
-      throw new ConflictException('Ya existe una promoción con ese código', {
-        tenantId: dto.tenantId,
-        code: dto.code,
-      });
+      throw new ConflictException(
+        'Ya existe una promoción con ese código',
+        {
+          tenantId,
+          code: dto.code,
+        },
+        PromotionsErrorReason.PROMOTION_CODE_ALREADY_EXISTS,
+      );
     }
 
     const validFrom = new Date(dto.validFrom);
@@ -140,13 +157,14 @@ export class PromotionsDiscountsService {
           validFrom: dto.validFrom,
           validTo: dto.validTo,
         },
+        PromotionsErrorReason.PROMOTION_INVALID_DATE_RANGE,
       );
     }
     dto.rules.forEach((rule) => this.assertRuleShape(rule));
 
     return this.em.transactional(async (tx) => {
       const promotion = this.discountsRepo.createPromotion(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         code: dto.code,
         name: dto.name,
         promotionTypeConceptId: PROMOTION_TYPE_CONCEPT[dto.promotionType],
@@ -216,6 +234,7 @@ export class PromotionsDiscountsService {
         {
           promotionId,
         },
+        PromotionsErrorReason.PERSONAL_COUPON_REQUIRES_MEMBER,
       );
     }
     // Un lote de cupones personales para un mismo miembro no tiene lectura de
@@ -224,24 +243,28 @@ export class PromotionsDiscountsService {
       throw new PreconditionFailedException(
         'Un cupón PERSONAL se emite de uno en uno',
         { promotionId, quantity: dto.quantity },
+        PromotionsErrorReason.PERSONAL_COUPON_SINGLE_QUANTITY,
       );
     }
 
+    const scope = resolvePromotionsScope(actor);
     return this.em.transactional(async (tx) => {
-      const promotion = await this.discountsRepo.findPromotionById(
-        tx,
-        promotionId,
+      const found = await this.discountsRepo.findPromotionById(tx, promotionId);
+      const promotion = assertPromotionsScope(
+        found,
+        found?.tenantId,
+        scope,
+        'Promoción no encontrada',
       );
-      if (!promotion) {
-        throw new ResourceNotFoundException('Promoción no encontrada', {
-          promotionId,
-        });
-      }
       if (promotion.statusConceptId !== CONCEPTS.PROMOTION_ACTIVE) {
-        throw new PreconditionFailedException('La promoción no está activa', {
-          promotionId,
-          statusConceptId: promotion.statusConceptId,
-        });
+        throw new PreconditionFailedException(
+          'La promoción no está activa',
+          {
+            promotionId,
+            statusConceptId: promotion.statusConceptId,
+          },
+          PromotionsErrorReason.PROMOTION_NOT_ACTIVE,
+        );
       }
 
       const codes = await this.generateCouponCodes(
@@ -284,6 +307,9 @@ export class PromotionsDiscountsService {
       'Validating coupon',
     );
 
+    // El código del cupón es global; el alcance lo decide su promoción. Un cupón
+    // de otro tenant se informa igual que uno inexistente.
+    const tenantId = requireTenantId();
     const coupon = await this.discountsRepo.findCouponByCode(this.em, dto.code);
     if (!coupon) return { valid: false, reason: 'Cupón inexistente' };
 
@@ -291,6 +317,9 @@ export class PromotionsDiscountsService {
       this.em,
       coupon.promotionId,
     );
+    if (promotion && promotion.tenantId !== tenantId) {
+      return { valid: false, reason: 'Cupón inexistente' };
+    }
     if (!promotion) return { valid: false, reason: 'Promoción inexistente' };
 
     const rejection = this.rejectionReason(coupon, promotion, dto);
@@ -324,13 +353,19 @@ export class PromotionsDiscountsService {
     dto: CreateRedemptionDto,
     actor: AuthenticatedUser,
   ): Promise<RedemptionResponseDto> {
+    const scope = resolvePromotionsScope(actor);
     this.logger.info(
       { operation: 'promotions.redemption.create', code: dto.code },
       'Redeeming coupon',
     );
 
     return this.em.transactional(async (tx) => {
-      const evaluation = await this.evaluateCouponForUpdate(tx, dto.code, dto);
+      const evaluation = await this.evaluateCouponForUpdate(
+        tx,
+        dto.code,
+        dto,
+        scope,
+      );
 
       evaluation.coupon.redemptionCount =
         (evaluation.coupon.redemptionCount ?? 0) + 1;
@@ -391,9 +426,11 @@ export class PromotionsDiscountsService {
       throw new PreconditionFailedException(
         'Hay que indicar el cupón o la promoción automática a aplicar',
         { orderId },
+        PromotionsErrorReason.DISCOUNT_TARGET_REQUIRED,
       );
     }
 
+    const scope = resolvePromotionsScope(actor);
     return this.em.transactional(async (tx) => {
       let promotion: Promotions;
       let rule: DiscountRules;
@@ -409,6 +446,7 @@ export class PromotionsDiscountsService {
             redeemerType: dto.redeemerType,
             redeemerRefId: dto.redeemerRefId,
           },
+          scope,
         );
         ({ promotion, rule, coupon, discountAmount } = {
           promotion: evaluation.promotion,
@@ -417,14 +455,23 @@ export class PromotionsDiscountsService {
           discountAmount: evaluation.discountAmount,
         });
       } else {
+        // La promoción se compara con el tenant activo antes de bloquearla.
+        const unlocked = await this.discountsRepo.findPromotionById(
+          tx,
+          dto.promotionId!,
+        );
+        assertPromotionsScope(
+          unlocked,
+          unlocked?.tenantId,
+          scope,
+          'Promoción no encontrada',
+        );
         const found = await this.discountsRepo.findPromotionForUpdate(
           tx,
           dto.promotionId!,
         );
         if (!found) {
-          throw new ResourceNotFoundException('Promoción no encontrada', {
-            promotionId: dto.promotionId,
-          });
+          throw promotionsOutOfScope('Promoción no encontrada');
         }
         this.assertPromotionUsable(found);
         const rules = await this.discountsRepo.findRulesByPromotion(
@@ -436,6 +483,7 @@ export class PromotionsDiscountsService {
           throw new PreconditionFailedException(
             'Ninguna regla de la promoción aplica al importe de la orden',
             { promotionId: found.id, orderAmount: dto.orderAmount },
+            PromotionsErrorReason.NO_RULE_APPLIES_TO_ORDER,
           );
         }
         await this.assertLimits(tx, found, dto.redeemerRefId);
@@ -519,21 +567,39 @@ export class PromotionsDiscountsService {
       'Reversing redemption',
     );
 
+    const scope = resolvePromotionsScope(actor);
     return this.em.transactional(async (tx) => {
+      // La redención no lleva tenant: es el de su promoción. Se compara antes
+      // de bloquearla.
+      const unlocked = await this.discountsRepo.findRedemptionById(
+        tx,
+        redemptionId,
+      );
+      const redemptionPromotion = unlocked
+        ? await this.discountsRepo.findPromotionById(tx, unlocked.promotionId)
+        : null;
+      assertPromotionsScope(
+        unlocked && redemptionPromotion ? unlocked : null,
+        redemptionPromotion?.tenantId,
+        scope,
+        'Redención no encontrada',
+      );
       const redemption = await this.discountsRepo.findRedemptionForUpdate(
         tx,
         redemptionId,
       );
-      if (!redemption) {
-        throw new ResourceNotFoundException('Redención no encontrada', {
-          redemptionId,
-        });
+      if (!redemption || !redemptionPromotion) {
+        throw promotionsOutOfScope('Redención no encontrada');
       }
       if (redemption.statusConceptId !== CONCEPTS.REDEMPTION_APPLIED) {
-        throw new ConflictException('La redención ya no está aplicada', {
-          redemptionId,
-          statusConceptId: redemption.statusConceptId,
-        });
+        throw new ConflictException(
+          'La redención ya no está aplicada',
+          {
+            redemptionId,
+            statusConceptId: redemption.statusConceptId,
+          },
+          PromotionsErrorReason.REDEMPTION_NOT_APPLIED,
+        );
       }
 
       if (redemption.couponId) {
@@ -565,15 +631,13 @@ export class PromotionsDiscountsService {
         if (previous) {
           ledgerEntryId = previous.id;
         } else {
-          const membership = await this.loyaltyRepo.findMembershipForUpdate(
+          // La membresía a la que se devuelven los puntos debe ser del mismo
+          // tenant que la promoción de la redención.
+          const membership = await this.lockMembershipOfTenant(
             tx,
             dto.membershipId,
+            redemptionPromotion.tenantId,
           );
-          if (!membership) {
-            throw new ResourceNotFoundException('Membresía no encontrada', {
-              membershipId: dto.membershipId,
-            });
-          }
           const balanceAfter = this.round(
             Number(membership.pointsBalance ?? '0') + Number(dto.restorePoints),
           );
@@ -607,6 +671,42 @@ export class PromotionsDiscountsService {
 
   // --- Apoyo ---
 
+  /**
+   * Bloquea una membresía de lealtad por UUID exigiendo que su programa sea del
+   * tenant dado (el de la promoción con la que se está operando). La membresía
+   * no lleva tenant: es el de su programa; se compara antes de bloquear.
+   *
+   * @throws ResourceNotFoundException (`PROMOTIONS_RESOURCE_OUT_OF_SCOPE`) si la
+   * membresía o su programa no existen, o son de otro tenant.
+   */
+  private async lockMembershipOfTenant(
+    tx: EntityManager,
+    membershipId: string,
+    tenantId: string,
+  ): Promise<LoyaltyMemberships> {
+    const unlocked = await this.loyaltyRepo.findMembershipById(
+      tx,
+      membershipId,
+    );
+    const program = unlocked
+      ? await this.loyaltyRepo.findProgramById(tx, unlocked.loyaltyProgramId)
+      : null;
+    assertPromotionsScope(
+      unlocked && program ? unlocked : null,
+      program?.tenantId,
+      tenantId,
+      'Membresía no encontrada',
+    );
+    const membership = await this.loyaltyRepo.findMembershipForUpdate(
+      tx,
+      membershipId,
+    );
+    if (!membership) {
+      throw promotionsOutOfScope('Membresía no encontrada');
+    }
+    return membership;
+  }
+
   /** Toma el cupón bloqueado y comprueba todo lo que impediría redimirlo. */
   private async evaluateCouponForUpdate(
     tx: EntityManager,
@@ -625,10 +725,24 @@ export class PromotionsDiscountsService {
        */
       redeemerRefId: string;
     },
+    scope: string | undefined,
   ): Promise<CouponEvaluation> {
+    // El código del cupón es global; el alcance lo decide su promoción. Se
+    // compara con el tenant activo antes de bloquear cupón y promoción.
+    const unlocked = await this.discountsRepo.findCouponByCode(tx, code);
+    const unlockedPromotion = unlocked
+      ? await this.discountsRepo.findPromotionById(tx, unlocked.promotionId)
+      : null;
+    assertPromotionsScope(
+      unlocked && unlockedPromotion ? unlocked : null,
+      unlockedPromotion?.tenantId,
+      scope,
+      'Cupón no encontrado',
+    );
+
     const coupon = await this.discountsRepo.findCouponByCodeForUpdate(tx, code);
     if (!coupon) {
-      throw new ResourceNotFoundException('Cupón no encontrado', { code });
+      throw promotionsOutOfScope('Cupón no encontrado');
     }
 
     const promotion = await this.discountsRepo.findPromotionForUpdate(
@@ -636,16 +750,18 @@ export class PromotionsDiscountsService {
       coupon.promotionId,
     );
     if (!promotion) {
-      throw new ResourceNotFoundException('Promoción del cupón no encontrada', {
-        promotionId: coupon.promotionId,
-      });
+      throw promotionsOutOfScope('Cupón no encontrado');
     }
 
     const rejection = this.rejectionReason(coupon, promotion, {
       redeemerRefId: context.redeemerRefId,
     });
     if (rejection) {
-      throw new PreconditionFailedException(rejection, { code });
+      throw new PreconditionFailedException(
+        rejection,
+        { code },
+        PromotionsErrorReason.COUPON_NOT_REDEEMABLE,
+      );
     }
 
     const rules = await this.discountsRepo.findRulesByPromotion(
@@ -657,6 +773,7 @@ export class PromotionsDiscountsService {
       throw new PreconditionFailedException(
         'Ninguna regla aplica al importe de la orden',
         { code, orderAmount: context.orderAmount },
+        PromotionsErrorReason.NO_RULE_APPLIES_TO_ORDER,
       );
     }
 
@@ -719,9 +836,13 @@ export class PromotionsDiscountsService {
   private assertPromotionUsable(promotion: Promotions): void {
     const now = new Date();
     if (promotion.statusConceptId !== CONCEPTS.PROMOTION_ACTIVE) {
-      throw new PreconditionFailedException('La promoción no está activa', {
-        promotionId: promotion.id,
-      });
+      throw new PreconditionFailedException(
+        'La promoción no está activa',
+        {
+          promotionId: promotion.id,
+        },
+        PromotionsErrorReason.PROMOTION_NOT_ACTIVE,
+      );
     }
     if (
       (promotion.validFrom && promotion.validFrom > now) ||
@@ -732,6 +853,7 @@ export class PromotionsDiscountsService {
         {
           promotionId: promotion.id,
         },
+        PromotionsErrorReason.PROMOTION_OUT_OF_VALIDITY,
       );
     }
   }
@@ -758,6 +880,7 @@ export class PromotionsDiscountsService {
           promotionId: promotion.id,
           totalRedemptionLimit: promotion.totalRedemptionLimit,
         },
+        PromotionsErrorReason.PROMOTION_REDEMPTION_LIMIT_REACHED,
       );
     }
 
@@ -767,6 +890,7 @@ export class PromotionsDiscountsService {
         throw new PreconditionFailedException(
           'El usuario alcanzó su límite de redenciones en la promoción',
           { promotionId: promotion.id, perUserLimit: promotion.perUserLimit },
+          PromotionsErrorReason.PROMOTION_PER_USER_LIMIT_REACHED,
         );
       }
     }
@@ -783,6 +907,7 @@ export class PromotionsDiscountsService {
             promotionId: promotion.id,
             budgetAmount: promotion.budgetAmount,
           },
+          PromotionsErrorReason.PROMOTION_BUDGET_EXHAUSTED,
         );
       }
     }
@@ -905,6 +1030,7 @@ export class PromotionsDiscountsService {
         throw new PreconditionFailedException(
           'Una regla PERCENTAGE necesita porcentaje',
           {},
+          PromotionsErrorReason.PERCENTAGE_RULE_REQUIRES_PERCENTAGE,
         );
       }
       const pct = Number(rule.percentage);
@@ -914,6 +1040,7 @@ export class PromotionsDiscountsService {
           {
             percentage: rule.percentage,
           },
+          PromotionsErrorReason.PERCENTAGE_OUT_OF_RANGE,
         );
       }
     }
@@ -921,6 +1048,7 @@ export class PromotionsDiscountsService {
       throw new PreconditionFailedException(
         'Una regla FIXED necesita importe',
         {},
+        PromotionsErrorReason.FIXED_RULE_REQUIRES_AMOUNT,
       );
     }
     if (
@@ -930,6 +1058,7 @@ export class PromotionsDiscountsService {
       throw new PreconditionFailedException(
         'Una regla BOGO necesita buyQuantity y getQuantity',
         {},
+        PromotionsErrorReason.BOGO_RULE_REQUIRES_QUANTITIES,
       );
     }
   }
@@ -959,6 +1088,7 @@ export class PromotionsDiscountsService {
     throw new ConflictException(
       'No se pudieron generar códigos de cupón libres',
       { quantity },
+      PromotionsErrorReason.COUPON_CODE_GENERATION_EXHAUSTED,
     );
   }
 

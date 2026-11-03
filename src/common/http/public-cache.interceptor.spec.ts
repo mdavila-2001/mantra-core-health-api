@@ -45,13 +45,13 @@ function build(options: {
     status: mockFn(),
     cabeceras: {} as Record<string, string>,
   };
-  res.setHeader = mockFn((nombre: string, valor: string) => {
-    res.cabeceras[nombre] = valor;
+  res.setHeader = mockFn((name: string, value: string) => {
+    res.cabeceras[name] = value;
   });
 
   const reflector = {
-    getAllAndOverride: mockFn((clave: unknown) =>
-      clave === HEADERS_METADATA ? (options.headers ?? []) : options.publico,
+    getAllAndOverride: mockFn((key: unknown) =>
+      key === HEADERS_METADATA ? (options.headers ?? []) : options.publico,
     ),
   };
   const path = options.path ?? '/public/search';
@@ -136,9 +136,9 @@ describe('PublicCacheInterceptor', () => {
   });
 
   it('devuelve 304 cuando el cliente ya tiene esa versión', async () => {
-    const primero = build({ publico: true, body: { items: [7] } });
-    await primero.ejecutar();
-    const etag = primero.res.cabeceras['ETag'];
+    const first = build({ publico: true, body: { items: [7] } });
+    await first.ejecutar();
+    const etag = first.res.cabeceras['ETag'];
 
     const second = build({
       publico: true,
@@ -155,9 +155,9 @@ describe('PublicCacheInterceptor', () => {
   // versiones manda las dos separadas por coma, y comparar con `===` contra el
   // encabezado entero no encontraría ninguna.
   it('reconoce su ETag entre varios separados por coma', async () => {
-    const primero = build({ publico: true, body: { items: [7] } });
-    await primero.ejecutar();
-    const etag = primero.res.cabeceras['ETag'];
+    const first = build({ publico: true, body: { items: [7] } });
+    await first.ejecutar();
+    const etag = first.res.cabeceras['ETag'];
 
     const second = build({
       publico: true,
@@ -224,10 +224,10 @@ describe('PublicCacheInterceptor', () => {
   describe('MCH-028 · revalidación antes del handler', () => {
     it('una relectura con el mismo ETag no vuelve a llamar a next.handle()', async () => {
       const store = new PublicCacheStore();
-      const primero = build({ publico: true, body: { items: [7] }, store });
-      await primero.ejecutar();
-      expect(primero.llamadasAlHandler()).toBe(1);
-      const etag = primero.res.cabeceras['ETag'];
+      const first = build({ publico: true, body: { items: [7] }, store });
+      await first.ejecutar();
+      expect(first.llamadasAlHandler()).toBe(1);
+      const etag = first.res.cabeceras['ETag'];
 
       const second = build({
         publico: true,
@@ -247,8 +247,8 @@ describe('PublicCacheInterceptor', () => {
 
     it('una relectura sin If-None-Match también evita next.handle(): sirve el cuerpo cacheado', async () => {
       const store = new PublicCacheStore();
-      const primero = build({ publico: true, body: { items: [9] }, store });
-      await primero.ejecutar();
+      const first = build({ publico: true, body: { items: [9] }, store });
+      await first.ejecutar();
 
       const second = build({ publico: true, body: { items: [9] }, store });
       const body = await second.ejecutar();
@@ -260,8 +260,8 @@ describe('PublicCacheInterceptor', () => {
 
     it('una escritura limpia el caché: la siguiente lectura vuelve a llamar al handler', async () => {
       const store = new PublicCacheStore();
-      const primero = build({ publico: true, body: { items: [1] }, store });
-      await primero.ejecutar();
+      const first = build({ publico: true, body: { items: [1] }, store });
+      await first.ejecutar();
 
       // Una escritura, aunque no sea `@Public()`: publicar un post es lo que
       // vuelve obsoleto el feed que se acaba de cachear.
@@ -308,12 +308,12 @@ describe('PublicCacheInterceptor', () => {
 
     it('un handler con Cache-Control propio nunca se cachea (respeta no-store)', async () => {
       const store = new PublicCacheStore();
-      const primero = build({
+      const first = build({
         publico: true,
         headers: [{ name: 'Cache-Control', value: 'no-store' }],
         store,
       });
-      await primero.ejecutar();
+      await first.ejecutar();
       expect(store.size).toBe(0);
 
       const second = build({

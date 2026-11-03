@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 09 · schema forms
+-- SALUD v4.2.83 · módulo 09 · schema forms
 -- Generado de diagram_09_forms.puml — NO editar a mano.
 
 
@@ -44,6 +44,10 @@ CREATE TABLE IF NOT EXISTS "forms"."dynamic_field_definitions" (
     "fhir_extension_url" text,
     "schema_version" integer,
     "state_concept_id" uuid,
+    "options" jsonb,
+    "multiple" boolean,
+    "allow_other" boolean,
+    "description" text,
     "created_at" timestamptz NOT NULL,
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
@@ -158,6 +162,7 @@ CREATE TABLE IF NOT EXISTS "forms"."field_values" (
     "effective_to" timestamptz,
     "value_version" integer,
     "supersedes_value_id" uuid,
+    "value_code" text,
     "created_at" timestamptz NOT NULL,
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,

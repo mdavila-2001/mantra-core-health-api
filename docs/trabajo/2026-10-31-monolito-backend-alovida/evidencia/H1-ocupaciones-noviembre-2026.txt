@@ -1,0 +1,28 @@
+=== EVIDENCIA H1.S1.M1 & H1.S1.M2 ===
+Fecha: 2026-10-31 12:35 UTC-4
+Comando: yarn --cwd c:\Alovida\mantra-core-health-api test src/common/seed/bo-occupations-seed.service.spec.ts
+Salida:
+PASS src/common/seed/bo-occupations-seed.service.spec.ts
+  BoOccupationsSeedService
+    primera corrida sobre una base vacía
+      √ materializa el conjunto, su versión vigente y todas las ocupaciones (159 ms)
+      √ los conceptos llevan el nombre en castellano y son seleccionables (151 ms)
+      √ la expansión conserva el orden alfabético del catálogo (114 ms)
+      √ cada ocupación guarda su rama de actividad (130 ms)
+    segunda corrida
+      √ no escribe nada: los ids son deterministas y ya están (161 ms)
+    catálogo ampliado sobre una base ya sembrada
+      √ reordena las membresías existentes para que el orden alfabético se mantenga (91 ms)
+      √ el catálogo cubre las ingenierías y conserva los códigos originales (3 ms)
+    invariantes del catálogo
+      √ ningún código se declara dos veces (2 ms)
+      √ ningún nombre se repite: dos opciones iguales en un desplegable no se pueden elegir (2 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       9 passed, 9 total
+Snapshots:   0 total
+Time:        4.296 s
+
+Versión verificada: '2026.11.0'
+Catálogo: VS_BO_OCCUPATION (Ocupaciones de Bolivia)
+Ocupaciones sembradas: 375 ocupaciones bolivianas normalizadas en 10 ramas de actividad.

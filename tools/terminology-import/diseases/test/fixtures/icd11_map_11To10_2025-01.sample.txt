@@ -1,0 +1,5 @@
+﻿Linearization (release) URI	icd11Code	icd11Chapter	icd11Title	icd10Code	icd10Chapter	icd10Title	2025-Jan-24
+http://id.who.int/icd/release/11/2025-01/mms/257068234	1A00	01	Cholera	A00.9	I	Cholera, unspecified
+http://id.who.int/icd/release/11/2025-01/mms/344162786	1A03	01	Intestinal infections due to Escherichia coli	A04	I	Other bacterial intestinal infections
+http://id.who.int/icd/release/11/2025-01/mms/2099226249	1A03.0	01	Enteropathogenic Escherichia coli infection	A04.0	I	Enteropathogenic Escherichia coli infection
+http://id.who.int/icd/release/11/2025-01/mms/1435254666	01	01	Certain infectious or parasitic diseases	I	I	Certain infectious and parasitic diseases

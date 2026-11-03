@@ -106,6 +106,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<FieldAssignmentListResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<FieldAssignmentListResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<FieldAssignmentListResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<FieldAssignmentListResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FieldAssignmentListResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -213,7 +214,7 @@ Asignar campos a un target con política de extensión. Requiere JWT y los roles
 
 ### Descripción del sistema
 
-NestJS resuelve `POST /forms/assignments` en `FormsAssignmentsController_createAssignment`. El controlador delega en `FormsAssignmentsService.createAssignment`. Valida el body como `CreateAssignmentDto` y consume `application/json`. El tipo de retorno estático es `Promise<IdResponseDto>`.
+NestJS resuelve `POST /forms/assignments` en `FormsAssignmentsController_createAssignment`. El controlador delega en `FormsAssignmentsService.createAssignment`. Valida el body como `FormsCreateAssignmentDto` y consume `application/json`. El tipo de retorno estático es `Promise<IdResponseDto>`.
 
 ### Parámetros
 
@@ -221,7 +222,7 @@ No hay parámetros de ruta, query ni cabeceras específicos de la operación.
 
 ### Payload mínimo aceptable
 
-Incluye únicamente los campos obligatorios del DTO `CreateAssignmentDto`; los campos opcionales se omiten.
+Incluye únicamente los campos obligatorios del DTO `FormsCreateAssignmentDto`; los campos opcionales se omiten.
 
 ```http
 POST /forms/assignments HTTP/1.1
@@ -293,6 +294,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -408,6 +410,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OkResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -537,6 +540,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OkResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -646,6 +650,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<ExtensionBudgetResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ExtensionBudgetResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ExtensionBudgetResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ExtensionBudgetResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ExtensionBudgetResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -780,6 +785,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OkResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -887,6 +893,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<DefinitionSetListResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<DefinitionSetListResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<DefinitionSetListResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<DefinitionSetListResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DefinitionSetListResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1040,6 +1047,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DefinitionSetResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DefinitionSetResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DefinitionSetResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DefinitionSetResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DefinitionSetResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1153,6 +1161,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<DefinitionSetDetailResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<DefinitionSetDetailResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<DefinitionSetDetailResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<DefinitionSetDetailResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DefinitionSetDetailResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1429,6 +1438,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<MigrationRunResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<MigrationRunResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<MigrationRunResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MigrationRunResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MigrationRunResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1576,6 +1586,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OkResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1686,6 +1697,10 @@ Content-Type: application/json
 | `validationRules[].parameters` | No | `object` | Sin restricción adicional declarada | Parámetros de la regla | `{}` |
 | `validationRules[].severity` | No | `string` | valores: `ERROR`, `WARNING` | Sin descripción específica en el contrato OpenAPI. | `ERROR` |
 | `validationRules[].errorMessage` | No | `string` | longitud máxima 500 | Mensaje de error asociado | `valor-ejemplo` |
+| `options` | No | `array<string>` | mínimo 2 elemento(s) | Opciones propias de un campo de elección (dataType "code" sin valueSetId) | `["valor-ejemplo","valor-ejemplo"]` |
+| `multiple` | No | `boolean` | Sin restricción adicional declarada | Admite varias respuestas en vez de una sola | `false` |
+| `allowOther` | No | `boolean` | Sin restricción adicional declarada | Ofrece «Otro», con texto libre | `false` |
+| `description` | No | `string` | longitud máxima 1000 | Ayuda que se lee bajo la pregunta (se sirve como "hint") | `Texto descriptivo de ejemplo` |
 
 ### Payload completo de ejemplo
 
@@ -1716,7 +1731,14 @@ Content-Type: application/json
       "severity": "ERROR",
       "errorMessage": "valor-ejemplo"
     }
-  ]
+  ],
+  "options": [
+    "valor-ejemplo",
+    "valor-ejemplo"
+  ],
+  "multiple": false,
+  "allowOther": false,
+  "description": "Texto descriptivo de ejemplo"
 }
 ```
 
@@ -1733,6 +1755,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1759,6 +1782,13 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
 | 409 | `CONFLICT` | El código de campo ya existe | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | `options` sólo aplica a dataType "code" | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | `allowOther` sólo aplica a dataType "code" | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un campo "code" declara valueSetId u options, no los dos | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | `allowOther` no aplica sobre un valueSetId: ese catálogo lo administra terminología | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un campo "code" sin valueSetId necesita al menos dos opciones | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | Una opción no puede estar vacía | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | Las opciones no pueden repetirse | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1827,6 +1857,12 @@ Content-Type: application/json
 |---|:---:|---|---|---|---|
 | `name` | No | `string` | longitud mínima 1; longitud máxima 200 | Nombre legible del campo | `Nombre de ejemplo` |
 | `dataType` | No | `string` | valores: `string`, `text`, `integer`, `decimal`, `boolean`, `date`, `datetime`, `time`, `uuid`, `json`, `binary`, `reference`, `code` | Tipo de dato técnico; con valores capturados no se cambia (409) | `string` |
+| `options` | No | `array<string>` | mínimo 2 elemento(s) | Opciones, reemplazadas enteras | `["valor-ejemplo","valor-ejemplo"]` |
+| `multiple` | No | `boolean` | Sin restricción adicional declarada | Admite varias respuestas | `true` |
+| `allowOther` | No | `boolean` | Sin restricción adicional declarada | Ofrece «Otro», con texto libre | `true` |
+| `description` | No | `object` | longitud máxima 1000; admite null | Ayuda bajo la pregunta; null la quita | `{}` |
+| `cardinalityMin` | No | `object` | mínimo 0; admite null | Mínimo de respuestas; null quita el tope | `{}` |
+| `cardinalityMax` | No | `object` | mínimo 1; admite null | Máximo de respuestas; null quita el tope | `{}` |
 
 ### Payload completo de ejemplo
 
@@ -1840,7 +1876,16 @@ Content-Type: application/json
 
 {
   "name": "Nombre de ejemplo",
-  "dataType": "string"
+  "dataType": "string",
+  "options": [
+    "valor-ejemplo",
+    "valor-ejemplo"
+  ],
+  "multiple": true,
+  "allowOther": true,
+  "description": {},
+  "cardinalityMin": {},
+  "cardinalityMax": {}
 }
 ```
 
@@ -1858,6 +1903,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OkResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1886,6 +1932,17 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Campo no encontrado | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
 | 409 | `CONFLICT` | El campo ya tiene valores capturados: cambiar su tipo reescribiría la historia | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | No se puede quitar una opción que ya tiene respuestas capturadas | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | `options` sólo aplica a dataType "code" | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | `allowOther` sólo aplica a dataType "code" | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un campo "code" declara valueSetId u options, no los dos | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | `allowOther` no aplica sobre un valueSetId: ese catálogo lo administra terminología | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un campo "code" sin valueSetId necesita al menos dos opciones | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | Una opción no puede estar vacía | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | Las opciones no pueden repetirse | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | Los topes de respuestas sólo aplican a un campo de elección que admite varias | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | El mínimo de respuestas no puede superar al máximo | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | El tope de respuestas no puede superar la cantidad de opciones | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1996,6 +2053,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2132,6 +2190,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2264,6 +2323,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2373,6 +2433,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<FormInstanceListResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<FormInstanceListResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<FormInstanceListResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<FormInstanceListResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FormInstanceListResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2420,7 +2481,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | instanceId ? 'Instancia no encontrada' : 'Encuentro no encontrado' | Excepción explícita en src/modules/forms/services/forms-read.service.ts |
+| 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
+| 404 | `NOT_FOUND` | failure.message | Excepción explícita en src/modules/forms/services/forms-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2488,7 +2550,6 @@ Content-Type: application/json
 | `resourceId` | Sí | `string` | formato `uuid` | Recurso al que se adjunta el formulario | `00000000-0000-4000-8000-000000000001` |
 | `resourceTypeConceptId` | No | `string` | formato `uuid` | Tipo de recurso (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `tenantContextId` | No | `string` | formato `uuid` | Contexto de tenant | `00000000-0000-4000-8000-000000000001` |
-| `definitionSetVersionId` | No | `string` | formato `uuid` | Versión publicada del set cuyo schema se congela | `00000000-0000-4000-8000-000000000001` |
 | `schemaVersion` | No | `number` | mínimo 1 | Versión de schema explícita | `1` |
 
 ### Payload completo de ejemplo
@@ -2505,7 +2566,6 @@ Content-Type: application/json
   "resourceId": "00000000-0000-4000-8000-000000000001",
   "resourceTypeConceptId": "00000000-0000-4000-8000-000000000001",
   "tenantContextId": "00000000-0000-4000-8000-000000000001",
-  "definitionSetVersionId": "00000000-0000-4000-8000-000000000001",
   "schemaVersion": 1
 }
 ```
@@ -2523,6 +2583,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<FormInstanceResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<FormInstanceResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<FormInstanceResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<FormInstanceResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FormInstanceResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2636,6 +2697,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<FormInstanceDetailResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<FormInstanceDetailResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<FormInstanceDetailResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<FormInstanceDetailResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FormInstanceDetailResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2687,8 +2749,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Instancia no encontrada | Excepción explícita en src/modules/forms/services/forms-read.service.ts |
-| 404 | `NOT_FOUND` | instanceId ? 'Instancia no encontrada' : 'Encuentro no encontrado' | Excepción explícita en src/modules/forms/services/forms-read.service.ts |
+| 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
+| 404 | `NOT_FOUND` | INSTANCE_NOT_FOUND.message | Excepción explícita en src/modules/forms/services/forms-read.service.ts |
+| 404 | `NOT_FOUND` | failure.message | Excepción explícita en src/modules/forms/services/forms-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2773,6 +2836,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OkResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2918,6 +2982,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdListResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdListResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdListResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdListResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdListResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2947,6 +3012,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Instancia no encontrada | Excepción explícita en src/modules/forms/services/forms-values.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La instancia no está abierta | Excepción explícita en src/modules/forms/services/forms-values.service.ts |
+| 422 | `PRECONDITION_FAILED` | El campo no tiene opciones declaradas | Excepción explícita en src/modules/forms/services/forms-values.service.ts |
+| 422 | `PRECONDITION_FAILED` | El valor no está entre las opciones del campo | Excepción explícita en src/modules/forms/services/forms-values.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3027,6 +3094,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<MyFormInstanceListResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<MyFormInstanceListResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<MyFormInstanceListResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MyFormInstanceListResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyFormInstanceListResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3155,6 +3223,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<FormInstanceDetailResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<FormInstanceDetailResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<FormInstanceDetailResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<FormInstanceDetailResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FormInstanceDetailResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3311,6 +3380,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3338,6 +3408,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Valor no encontrado | Excepción explícita en src/modules/forms/services/forms-values.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El valor ya fue superado | Excepción explícita en src/modules/forms/services/forms-values.service.ts |
+| 422 | `PRECONDITION_FAILED` | El campo no tiene opciones declaradas | Excepción explícita en src/modules/forms/services/forms-values.service.ts |
+| 422 | `PRECONDITION_FAILED` | El valor no está entre las opciones del campo | Excepción explícita en src/modules/forms/services/forms-values.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3461,6 +3533,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdListResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdListResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdListResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdListResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdListResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3489,6 +3562,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Instancia no encontrada | Excepción explícita en src/modules/forms/services/forms-values.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El campo no tiene opciones declaradas | Excepción explícita en src/modules/forms/services/forms-values.service.ts |
+| 422 | `PRECONDITION_FAILED` | El valor no está entre las opciones del campo | Excepción explícita en src/modules/forms/services/forms-values.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 

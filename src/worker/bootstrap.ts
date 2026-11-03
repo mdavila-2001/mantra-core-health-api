@@ -28,6 +28,7 @@ import { SystemApiClientModule } from './system-api-client.module';
 import { MockProviderClientModule } from './mock-provider-client.module';
 import { GoogleEmailClientModule } from './google-email-client.module';
 import { WorkerLifecycleService } from './worker-lifecycle.service';
+import { WorkerHeartbeatService } from './worker-heartbeat.service';
 import { configureTicks } from './run-tick.util';
 import { workerHealth } from './worker-health.registry';
 import { startWorkerHealthServer } from './worker-health.server';
@@ -94,7 +95,7 @@ export async function bootstrapWorker(
       ScheduleModule.forRoot(),
       domainModule,
     ],
-    providers: [WorkerLifecycleService],
+    providers: [WorkerLifecycleService, WorkerHeartbeatService],
   })
   class WorkerRootModule {}
 
@@ -143,7 +144,11 @@ export async function bootstrapWorker(
   // instancia— y cerrarla ahí la dejaría sin respuesta en el peor momento.
   // Como el servidor está `unref`, no es motivo para que el proceso siga vivo:
   // muere cuando ya no queda nada más pendiente, que es lo correcto.
-  startWorkerHealthServer({ port: env.healthPort, logger });
+  startWorkerHealthServer({
+    port: env.healthPort,
+    host: env.healthHost,
+    logger,
+  });
 
   // Aviso explícito cuando el emulador está activo. En producción esto ya no se
   // alcanza (el proceso habría abortado antes), pero en desarrollo es fácil

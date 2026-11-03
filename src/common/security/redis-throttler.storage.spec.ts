@@ -16,13 +16,13 @@ import { RedisThrottlerStorage } from './redis-throttler.storage';
  * @returns El doble y los comandos que se le pidieron.
  */
 function redisFake(initial: { count: number; pttl: number }) {
-  const estado = { ...initial };
-  const pexpire = mockFn((_clave: string, ms: number) => {
-    estado.pttl = ms;
+  const status = { ...initial };
+  const pexpire = mockFn((_key: string, ms: number) => {
+    status.pttl = ms;
     return Promise.resolve(1);
   });
   const redis = {
-    estado,
+    estado: status,
     pexpire,
     multi: () => ({
       incr: function () {
@@ -32,10 +32,10 @@ function redisFake(initial: { count: number; pttl: number }) {
         return this;
       },
       exec: () => {
-        estado.count += 1;
+        status.count += 1;
         return Promise.resolve([
-          [null, estado.count],
-          [null, estado.pttl],
+          [null, status.count],
+          [null, status.pttl],
         ]);
       },
     }),

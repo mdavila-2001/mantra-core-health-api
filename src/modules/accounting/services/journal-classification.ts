@@ -153,8 +153,8 @@ export function classify(
   entry: ClassificationEntry,
   ruleSet: RuleSet = CURRENT_RULE_SET,
 ): ClassificationResult {
-  const origen = entry.sourceDocumentType?.trim().toUpperCase();
-  if (!origen) {
+  const origin = entry.sourceDocumentType?.trim().toUpperCase();
+  if (!origin) {
     return {
       decision: 'SIN_REGLA',
       rulesetVersion: ruleSet.version,
@@ -164,14 +164,14 @@ export function classify(
   }
 
   const candidates = ruleSet.reglas
-    .filter((r) => r.sourceDocumentType.toUpperCase() === origen)
+    .filter((r) => r.sourceDocumentType.toUpperCase() === origin)
     .sort((a, b) => a.prioridad - b.prioridad);
 
   if (candidates.length === 0) {
     return {
       decision: 'SIN_REGLA',
       rulesetVersion: ruleSet.version,
-      reason: `Ninguna regla del juego ${ruleSet.version} cubre el origen ${origen}`,
+      reason: `Ninguna regla del juego ${ruleSet.version} cubre el origen ${origin}`,
     };
   }
 
@@ -183,7 +183,7 @@ export function classify(
     return {
       decision: 'AMBIGUA',
       rulesetVersion: ruleSet.version,
-      reason: `Reglas en conflicto para el origen ${origen}: ${best
+      reason: `Reglas en conflicto para el origen ${origin}: ${best
         .map((r) => r.id)
         .join(', ')}`,
     };

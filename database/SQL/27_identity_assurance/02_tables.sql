@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 27 · schema identity_assurance
+-- SALUD v4.2.83 · módulo 27 · schema identity_assurance
 -- Generado de diagram_27_identity_assurance.puml — NO editar a mano.
 
 
@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS "identity_assurance"."identity_verification_policies"
 
 CREATE TABLE IF NOT EXISTS "identity_assurance"."identity_verification_cases" (
     "id" uuid NOT NULL,
+    "tenant_id" uuid,
     "subject_type_concept_id" uuid NOT NULL,
     "subject_entity_id" uuid NOT NULL,
     "identity_verification_policy_id" uuid NOT NULL,

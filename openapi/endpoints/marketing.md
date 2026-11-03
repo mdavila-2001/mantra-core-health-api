@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `marketing`
 
-Referencia exhaustiva de 14 operación(es) del módulo `marketing`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 15 operación(es) del módulo `marketing`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `marketing`
 - **Controladores:** `MarketingController`, `TrackedLinkRedirectController`
@@ -24,7 +24,8 @@ Referencia exhaustiva de 14 operación(es) del módulo `marketing`, derivada del
 11. [POST /marketing/segments/{id}/refresh](#11-post-marketing-segments-id-refresh) — Recomputar la membresía del segmento
 12. [POST /marketing/touchpoints](#12-post-marketing-touchpoints) — Registrar un touchpoint de marketing
 13. [POST /marketing/tracked-links](#13-post-marketing-tracked-links) — Crear un enlace rastreable con parámetros UTM
-14. [GET /r/{code}](#14-get-r-code) — Resolver un enlace rastreable y registrar el click
+14. [POST /marketing/tracked-links/{id}/recipient-tokens](#14-post-marketing-tracked-links-id-recipient-tokens) — Emitir el token de destinatario de un enlace rastreable
+15. [GET /r/{code}](#15-get-r-code) — Resolver un enlace rastreable y registrar el click
 
 ---
 
@@ -127,6 +128,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ComputeAttributionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ComputeAttributionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ComputeAttributionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ComputeAttributionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ComputeAttributionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -223,7 +225,6 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "tenantId": "00000000-0000-4000-8000-000000000001",
   "code": "CODIGO_EJEMPLO",
   "name": "Nombre de ejemplo",
   "campaignType": "ONE_SHOT",
@@ -241,7 +242,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | No | `string` | formato `uuid` | Opcional: el tenant sale del contexto autenticado; si se envía debe coincidir con él | `00000000-0000-4000-8000-000000000001` |
 | `code` | Sí | `string` | longitud máxima 100 | Código de campaña, único por tenant | `CODIGO_EJEMPLO` |
 | `name` | Sí | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `campaignType` | Sí | `string` | valores: `ONE_SHOT`, `RECURRING` | Sin descripción específica en el contrato OpenAPI. | `ONE_SHOT` |
@@ -295,6 +296,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CampaignResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CampaignResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CampaignResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CampaignResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CampaignResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -323,7 +325,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: MARKETING_MANAGER. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Segmento no encontrado | Excepción explícita en src/modules/marketing/services/marketing-campaigns.service.ts |
 | 409 | `CONFLICT` | Ya existe una campaña con ese código | Excepción explícita en src/modules/marketing/services/marketing-campaigns.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La campaña debe terminar después de empezar | Excepción explícita en src/modules/marketing/services/marketing-campaigns.service.ts |
@@ -425,6 +426,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<MaterializeMembersResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<MaterializeMembersResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<MaterializeMembersResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MaterializeMembersResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MaterializeMembersResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -455,7 +457,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: MARKETING_MANAGER, SYSTEM. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Campaña no encontrada | Excepción explícita en src/modules/marketing/services/marketing-campaigns.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La campaña no admite materializar audiencia en su estado actual | Excepción explícita en src/modules/marketing/services/marketing-campaigns.service.ts |
 | 422 | `PRECONDITION_FAILED` | La campaña no tiene segmento del que derivar audiencia | Excepción explícita en src/modules/marketing/services/marketing-campaigns.service.ts |
@@ -511,7 +512,6 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "tenantId": "00000000-0000-4000-8000-000000000001",
   "name": "Nombre de ejemplo",
   "channel": "EMAIL"
 }
@@ -527,7 +527,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | No | `string` | formato `uuid` | Opcional: el tenant sale del contexto autenticado; si se envía debe coincidir con él | `00000000-0000-4000-8000-000000000001` |
 | `name` | Sí | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `channel` | Sí | `string` | valores: `EMAIL`, `SMS`, `PUSH` | Sin descripción específica en el contrato OpenAPI. | `EMAIL` |
 | `languageConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
@@ -572,6 +572,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TemplateVersionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TemplateVersionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TemplateVersionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TemplateVersionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TemplateVersionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -699,6 +700,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AdvanceEnrollmentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AdvanceEnrollmentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AdvanceEnrollmentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AdvanceEnrollmentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AdvanceEnrollmentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -729,7 +731,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, MARKETING_MANAGER. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Inscripción no encontrada o en curso | Excepción explícita en src/modules/marketing/services/marketing-journeys.service.ts |
 | 404 | `NOT_FOUND` | Paso actual no encontrado | Excepción explícita en src/modules/marketing/services/marketing-journeys.service.ts |
 | 409 | `CONFLICT` | La inscripción ya no está activa | Excepción explícita en src/modules/marketing/services/marketing-journeys.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -835,6 +836,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ExitEnrollmentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ExitEnrollmentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ExitEnrollmentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ExitEnrollmentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ExitEnrollmentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -863,7 +865,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, MARKETING_MANAGER. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Inscripción no encontrada | Excepción explícita en src/modules/marketing/services/marketing-journeys.service.ts |
 | 409 | `CONFLICT` | La inscripción ya no está activa | Excepción explícita en src/modules/marketing/services/marketing-journeys.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -916,7 +917,6 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "tenantId": "00000000-0000-4000-8000-000000000001",
   "code": "CODIGO_EJEMPLO",
   "name": "Nombre de ejemplo",
   "entryTrigger": "SEGMENT"
@@ -933,7 +933,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | No | `string` | formato `uuid` | Opcional: el tenant sale del contexto autenticado; si se envía debe coincidir con él | `00000000-0000-4000-8000-000000000001` |
 | `code` | Sí | `string` | longitud máxima 100 | Código del journey, único por tenant | `CODIGO_EJEMPLO` |
 | `name` | Sí | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `entryTrigger` | Sí | `string` | valores: `SEGMENT`, `EVENT` | Sin descripción específica en el contrato OpenAPI. | `SEGMENT` |
@@ -975,6 +975,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<JourneyResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<JourneyResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<JourneyResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<JourneyResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `JourneyResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1005,7 +1006,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: MARKETING_MANAGER. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Segmento de entrada no encontrado | Excepción explícita en src/modules/marketing/services/marketing-journeys.service.ts |
 | 409 | `CONFLICT` | Ya existe un journey con ese código | Excepción explícita en src/modules/marketing/services/marketing-journeys.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Un journey con entrada por segmento necesita entrySegmentId | Excepción explícita en src/modules/marketing/services/marketing-journeys.service.ts |
@@ -1112,6 +1112,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ActivateJourneyResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ActivateJourneyResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ActivateJourneyResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ActivateJourneyResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ActivateJourneyResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1142,7 +1143,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: MARKETING_MANAGER. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Journey no encontrado | Excepción explícita en src/modules/marketing/services/marketing-journeys.service.ts |
 | 409 | `CONFLICT` | El journey ya no está en borrador | Excepción explícita en src/modules/marketing/services/marketing-journeys.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Un journey sin pasos no puede activarse | Excepción explícita en src/modules/marketing/services/marketing-journeys.service.ts |
@@ -1264,6 +1264,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<JourneyStepsResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<JourneyStepsResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<JourneyStepsResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<JourneyStepsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `JourneyStepsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1292,7 +1293,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: MARKETING_MANAGER. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Journey no encontrado | Excepción explícita en src/modules/marketing/services/marketing-journeys.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Sólo un journey en borrador admite nuevos pasos | Excepción explícita en src/modules/marketing/services/marketing-journeys.service.ts |
 | 422 | `PRECONDITION_FAILED` | Un paso SEND necesita plantilla de contenido | Excepción explícita en src/modules/marketing/services/marketing-journeys.service.ts |
@@ -1349,7 +1349,6 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "tenantId": "00000000-0000-4000-8000-000000000001",
   "code": "CODIGO_EJEMPLO",
   "name": "Nombre de ejemplo",
   "segmentType": "DYNAMIC"
@@ -1366,7 +1365,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | No | `string` | formato `uuid` | Opcional: el tenant sale del contexto autenticado; si se envía debe coincidir con él | `00000000-0000-4000-8000-000000000001` |
 | `code` | Sí | `string` | longitud máxima 100 | Código del segmento, único por tenant | `CODIGO_EJEMPLO` |
 | `name` | Sí | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `segmentType` | Sí | `string` | valores: `DYNAMIC`, `STATIC` | Sin descripción específica en el contrato OpenAPI. | `DYNAMIC` |
@@ -1406,6 +1405,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<SegmentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<SegmentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<SegmentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SegmentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SegmentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1548,6 +1548,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RefreshSegmentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RefreshSegmentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RefreshSegmentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RefreshSegmentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RefreshSegmentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1578,7 +1579,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: MARKETING_MANAGER, SYSTEM. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Segmento no encontrado | Excepción explícita en src/modules/marketing/services/marketing-campaigns.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El segmento no está activo | Excepción explícita en src/modules/marketing/services/marketing-campaigns.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1696,6 +1696,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TouchpointResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TouchpointResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TouchpointResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TouchpointResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TouchpointResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1724,6 +1725,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, MARKETING_MANAGER. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Enlace no encontrado | Excepción explícita en src/modules/marketing/services/marketing-journeys.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El touchpoint necesita campaña o journey de origen | Excepción explícita en src/modules/marketing/services/marketing-journeys.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1833,6 +1835,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TrackedLinkResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TrackedLinkResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TrackedLinkResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TrackedLinkResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TrackedLinkResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1880,7 +1883,141 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. GET /r/{code}
+## 14. POST /marketing/tracked-links/{id}/recipient-tokens
+
+- **Módulo:** `marketing`
+- **Etiqueta OpenAPI:** `marketing`
+- **Nombre:** Emitir el token de destinatario de un enlace rastreable
+- **Operation ID:** `MarketingController_issueTrackedLinkToken`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [MarketingController.issueTrackedLinkToken](../../src/modules/marketing/controllers/marketing.controller.ts)
+
+### Descripción de negocio
+
+El token es opaco, firmado, con vencimiento y ligado al enlace y al destinatario, que debe ser miembro de la campaña del enlace. El click público lo presenta como `?t=`.
+
+Contexto declarado en el controlador: MKT-03: token que identifica al destinatario en el enlace público.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /marketing/tracked-links/{id}/recipient-tokens` en `MarketingController_issueTrackedLinkToken`. El controlador delega en `MarketingJourneysService.issueTrackedLinkToken`. Valida el body como `IssueTrackedLinkTokenDto` y consume `application/json`. El tipo de retorno estático es `Promise<TrackedLinkTokenResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `IssueTrackedLinkTokenDto`; los campos opcionales se omiten.
+
+```http
+POST /marketing/tracked-links/00000000-0000-4000-8000-000000000001/recipient-tokens HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "memberType": "CONTACT",
+  "memberRefId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`, `MARKETING_MANAGER`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `memberType` | Sí | `string` | valores: `CONTACT`, `PATIENT` | Sin descripción específica en el contrato OpenAPI. | `CONTACT` |
+| `memberRefId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `ttlSeconds` | No | `number` | mínimo 60; máximo 2592000 | Sin descripción específica en el contrato OpenAPI. | `604800` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /marketing/tracked-links/00000000-0000-4000-8000-000000000001/recipient-tokens HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "memberType": "CONTACT",
+  "memberRefId": "00000000-0000-4000-8000-000000000001",
+  "ttlSeconds": 604800
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<TrackedLinkTokenResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<TrackedLinkTokenResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<TrackedLinkTokenResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<TrackedLinkTokenResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<TrackedLinkTokenResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<TrackedLinkTokenResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<TrackedLinkTokenResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<TrackedLinkTokenResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<TrackedLinkTokenResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<TrackedLinkTokenResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TrackedLinkTokenResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TrackedLinkTokenResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "token": "valor-ejemplo",
+  "expiresAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `token` | Sí | `string` | Sin restricción adicional declarada | Se agrega al enlace público como `?t=<token>` | `valor-ejemplo` |
+| `expiresAt` | Sí | `string` | formato `date-time` | Momento en que el token deja de ser válido. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, MARKETING_MANAGER. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Enlace no encontrado | Excepción explícita en src/modules/marketing/services/marketing-journeys.service.ts |
+| 404 | `NOT_FOUND` | Destinatario no encontrado | Excepción explícita en src/modules/marketing/services/marketing-journeys.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/marketing/tracked-links/{id}/recipient-tokens"
+}
+```
+
+---
+
+## 15. GET /r/{code}
 
 - **Módulo:** `marketing`
 - **Etiqueta OpenAPI:** `marketing`
@@ -1891,7 +2028,7 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-El contador se incrementa de forma atómica; el touchpoint sólo se registra si se identifica al miembro.
+El contador se incrementa de forma atómica. El touchpoint sólo se registra si el click trae un token de destinatario firmado y vigente; el destinatario nunca se declara en parámetros públicos.
 
 Contexto declarado en el controlador: UC-50-10. Ruta pública: quien hace click es el destinatario del mensaje, no un usuario con sesión. Devuelve el destino en vez de un 302 para que el cliente decida cómo redirigir; el click ya quedó contado.
 
@@ -1904,8 +2041,7 @@ NestJS resuelve `GET /r/{code}` en `TrackedLinkRedirectController_resolve`. El c
 | Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|---|:---:|---|---|---|---|
 | `code` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `CODIGO_EJEMPLO` |
-| `memberType` | query | No | `string` | valores: `CONTACT`, `PATIENT` | Sin descripción específica en OpenAPI. | `CONTACT` |
-| `memberRefId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `t` | query | No | `string` | Sin restricción adicional declarada | Token opaco emitido por POST /marketing/tracked-links/:id/recipient-tokens | `valor-ejemplo` |
 
 ### Payload mínimo aceptable
 
@@ -1929,7 +2065,7 @@ Host: localhost:3000
 No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
 
 ```http
-GET /r/CODIGO_EJEMPLO?memberType=CONTACT&memberRefId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+GET /r/CODIGO_EJEMPLO?t=valor-ejemplo HTTP/1.1
 Host: localhost:3000
 ```
 
@@ -1942,6 +2078,7 @@ Host: localhost:3000
 | 404 | Consulta completada correctamente. | `Promise<TrackedLinkClickResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<TrackedLinkClickResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<TrackedLinkClickResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<TrackedLinkClickResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TrackedLinkClickResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1959,7 +2096,7 @@ Campos de la respuesta:
 |---|:---:|---|---|---|---|
 | `targetUrl` | Sí | `string` | Sin restricción adicional declarada | Destino al que redirigir | `valor-ejemplo` |
 | `clickCount` | Sí | `string` | Sin restricción adicional declarada | Clicks acumulados tras registrar este | `valor-ejemplo` |
-| `touchpointId` | No | `string` | formato `uuid` | Touchpoint del click; ausente si no se identificó al miembro | `00000000-0000-4000-8000-000000000001` |
+| `touchpointId` | No | `string` | formato `uuid` | Touchpoint del click; ausente si el click no trae un token de destinatario válido | `00000000-0000-4000-8000-000000000001` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -1970,6 +2107,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 404 | `NOT_FOUND` | Enlace no encontrado | Excepción explícita en src/modules/marketing/services/marketing-journeys.service.ts |
 | 422 | `PRECONDITION_FAILED` | El enlace no está activo | Excepción explícita en src/modules/marketing/services/marketing-journeys.service.ts |
+| 422 | `PRECONDITION_FAILED` | El token del enlace no es válido | Excepción explícita en src/modules/marketing/services/marketing-journeys.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 

@@ -11,8 +11,8 @@ rige el valor por defecto de acá.
 ## 70.1 Concurrencia — límites
 
 1. **Trabajos activos simultáneos: 1.** No se abre un segundo trabajo (plan de la regla 20) sin
-   haber cerrado el anterior con su `REPORTE.md` (regla 40), o sin haberlo dejado explícitamente
-   en `BLOQUEADO` con su causa registrada.
+   haber cerrado el anterior con su reporte en el PR (regla 40), o sin haberlo dejado explícitamente
+   en `BLOQUEADO` con su causa registrada en un issue.
 2. **Subagentes simultáneos: 1**, salvo que el `CLAUDE.md` del proyecto autorice más.
 3. **Subagentes en background: prohibidos** cuando el proyecto no declare lo contrario. Un agente
    que sigue corriendo después de cerrar el turno no tiene quién lea su resultado.
@@ -74,7 +74,8 @@ Reglas adicionales:
 1. **Prohibido leer un archivo entero** cuando un rango o una búsqueda alcanzan.
 2. **Prohibido pegar volcados** (archivos completos, logs largos, diffs extensos) en el chat.
 3. Las skills se cargan **cuando la fase las necesita**, no todas al principio.
-4. Los hallazgos van a notas durables (el `PLAN.md` o el `REPORTE.md`), no a acumularse en el chat.
+4. Los hallazgos van a notas durables (el issue o la descripción del PR), no a acumularse en el chat
+   ni a un archivo del repo.
 5. El detalle está en `context-thrift`.
 
 ## 70.6 Prohibiciones

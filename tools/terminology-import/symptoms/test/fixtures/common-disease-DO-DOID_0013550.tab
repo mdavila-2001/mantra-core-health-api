@@ -1,0 +1,3 @@
+Disease ID	Disease Name	Gene ID	Gene Name	Genotype	Gene Symbol(s)	Phenotype ID	Phenotype Name	Age of Onset ID	Age of Onset Name	Evidence ID	Evidence Name	Frequency	Sex ID	Sex Name	Negation ID	Negation Name	Description	Pub	Assigned by	Date Created
+DO:DOID:0013550	Glaucoma, Angle-Closure					HP:0000501	Glaucoma			ITM	ITM						Parsed by BioLark from Pubmed abstract (additional info: 6811.402773675256/1355). MESHID: D015812	PMID:22321499;PMID:15741811;PMID:11816999;PMID:19430552;PMID:15039625	HPO	11.05.2015
+DO:DOID:0013550	Glaucoma, Angle-Closure					HP:0000518	Cataract			ITM	ITM						Parsed by BioLark from Pubmed abstract (additional info: 1333.4604195042355/234). MESHID: D015812	PMID:19430552;PMID:9795850;PMID:1390424;PMID:1891218;PMID:22433746	HPO	11.05.2015

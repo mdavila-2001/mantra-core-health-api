@@ -4,10 +4,14 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   CONCEPTS,
   ConflictException,
+  PreconditionFailedException,
+  ResourceNotFoundException,
   type AuthenticatedUser,
 } from '../../../common';
+import { POLICY_STATE } from '../../polyglot_storage/constants';
 import { GovernanceRepository, ResidencyRepository } from '../repositories';
 import { SYSOPS } from '../system_ops.concepts';
+import { SystemOpsErrorReason } from '../system_ops.error-reasons';
 import {
   CreateCrossBorderTransferDto,
   CreateResidencyPolicyDto,
@@ -81,12 +85,70 @@ export class ResidencyService {
     });
   }
 
-  /** UC-11-06: vincula un tenant a una política de residencia. */
+  /**
+   * UC-11-06: vincula un tenant a una política de residencia.
+   *
+   * `tenant_residency_bindings.residency_policy_id` tiene su FK contra
+   * `polyglot_storage.residency_policies`, no contra las políticas que crea
+   * `createResidencyPolicy` en este módulo. Por eso el binding se valida contra
+   * esa tabla, dentro de la transacción y antes de insertar: tenant, política
+   * (activa), regiones (existentes y dentro de lo que la política permite).
+   * Cada ausencia o combinación inválida sale como excepción de dominio; un
+   * error de FK del driver nunca llega al filtro HTTP.
+   */
   async createBinding(
     dto: CreateTenantResidencyBindingDto,
     actor: AuthenticatedUser,
   ): Promise<IdResultDto> {
     return this.em.transactional(async (tx) => {
+      const policy = await this.repo.findBindingPolicyById(
+        tx,
+        dto.residencyPolicyId,
+      );
+      if (!policy || !(await this.repo.tenantExists(tx, dto.tenantId))) {
+        throw new ResourceNotFoundException(
+          'El tenant o la política de residencia no existen',
+          undefined,
+          SystemOpsErrorReason.SYSOPS_RESIDENCY_REFERENCE_NOT_FOUND,
+        );
+      }
+      const regionIds = [
+        dto.primaryRegionConceptId,
+        ...(dto.disasterRecoveryRegionConceptId
+          ? [dto.disasterRecoveryRegionConceptId]
+          : []),
+      ];
+      const regionCodes = await this.repo.findConceptCodes(tx, regionIds);
+      if (regionIds.some((id) => !regionCodes.has(id))) {
+        throw new ResourceNotFoundException(
+          'Una de las regiones indicadas no existe',
+          undefined,
+          SystemOpsErrorReason.SYSOPS_RESIDENCY_REFERENCE_NOT_FOUND,
+        );
+      }
+      if (policy.state !== POLICY_STATE.ACTIVE) {
+        throw new PreconditionFailedException(
+          'La política de residencia no está activa',
+          undefined,
+          SystemOpsErrorReason.SYSOPS_RESIDENCY_POLICY_NOT_EFFECTIVE,
+        );
+      }
+      const allowedRegions = (policy.allowedRegionCodes ?? []).map((code) =>
+        code.toLowerCase(),
+      );
+      if (
+        allowedRegions.length > 0 &&
+        regionIds.some(
+          (id) => !allowedRegions.includes(regionCodes.get(id)!.toLowerCase()),
+        )
+      ) {
+        throw new PreconditionFailedException(
+          'Una de las regiones queda fuera de las que la política permite',
+          undefined,
+          SystemOpsErrorReason.SYSOPS_RESIDENCY_REGION_NOT_ALLOWED,
+        );
+      }
+
       const binding = this.repo.createBinding(tx, {
         tenantId: dto.tenantId,
         residencyPolicyId: dto.residencyPolicyId,

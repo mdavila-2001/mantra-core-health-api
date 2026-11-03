@@ -35,8 +35,16 @@ function build() {
   const integrationService = {
     createConnection: mockFn(),
     mapProduct: mockFn(),
+    updateMapping: mockFn(),
+    unmapProduct: mockFn(),
   };
   const catalogService = { projectCatalog: mockFn() };
+  const openingHoursService = {
+    getOpeningHours: mockFn(),
+    setOpen24h: mockFn(),
+    createShift: mockFn(),
+    cancelShift: mockFn(),
+  };
 
   const controller = new PharmacyController(
     pharmaciesService as any,
@@ -45,9 +53,12 @@ function build() {
     pricingService as any,
     integrationService as any,
     catalogService as any,
+    { list: mockFn() } as any,
+    openingHoursService as any,
   );
   return {
     controller,
+    openingHoursService,
     pharmaciesService,
     sitesService,
     productsService,
@@ -58,6 +69,54 @@ function build() {
 }
 
 describe('PharmacyController', () => {
+  describe('P34 · horario declarado', () => {
+    it('delega la lectura del horario', async () => {
+      const d = build();
+      d.openingHoursService.getOpeningHours.mockResolvedValue({ sites: [] });
+      await expect(d.controller.getOpeningHours('ph1', actor)).resolves.toEqual(
+        {
+          sites: [],
+        },
+      );
+      expect(d.openingHoursService.getOpeningHours).toHaveBeenCalledWith(
+        'ph1',
+        actor,
+      );
+    });
+
+    it('delega la declaración de 24 h', async () => {
+      const d = build();
+      await d.controller.setOpen24h('ph1', 's1', { open24h: null }, actor);
+      expect(d.openingHoursService.setOpen24h).toHaveBeenCalledWith(
+        'ph1',
+        's1',
+        { open24h: null },
+        actor,
+      );
+    });
+
+    it('delega el alta y la cancelación de un turno', async () => {
+      const d = build();
+      const dto = {
+        startsAt: '2026-10-26T20:00:00-04:00',
+        endsAt: '2026-10-27T08:00:00-04:00',
+      };
+      await d.controller.createOnCallShift('ph1', 's1', dto, actor);
+      expect(d.openingHoursService.createShift).toHaveBeenCalledWith(
+        'ph1',
+        's1',
+        dto,
+        actor,
+      );
+      await d.controller.cancelOnCallShift('ph1', 'sh1', actor);
+      expect(d.openingHoursService.cancelShift).toHaveBeenCalledWith(
+        'ph1',
+        'sh1',
+        actor,
+      );
+    });
+  });
+
   it('delegates createPharmacy (UC-24-01)', async () => {
     const d = build();
     const dto = {
@@ -184,5 +243,25 @@ describe('PharmacyController', () => {
     const d = build();
     await d.controller.projectCatalog('ph1', actor);
     expect(d.catalogService.projectCatalog).toHaveBeenCalledWith('ph1', actor);
+  });
+
+  it('delegates updateMapping and unmapProduct', async () => {
+    const d = build();
+    const dto = { externalProductCode: 'ERP-0002' } as any;
+    await d.controller.updateMapping('ph1', 'conn1', 'map1', dto, actor);
+    expect(d.integrationService.updateMapping).toHaveBeenCalledWith(
+      'ph1',
+      'conn1',
+      'map1',
+      dto,
+      actor,
+    );
+    await d.controller.unmapProduct('ph1', 'conn1', 'map1', actor);
+    expect(d.integrationService.unmapProduct).toHaveBeenCalledWith(
+      'ph1',
+      'conn1',
+      'map1',
+      actor,
+    );
   });
 });

@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { ResourceNotFoundException } from '../../../common';
+import {
+  ResourceNotFoundException,
+  type AuthenticatedUser,
+} from '../../../common';
 import type { CatalogConcepts } from '../../terminology/entities';
 import type {
   CareSpaces,
@@ -27,6 +30,7 @@ import type {
   OrganizationStaffMemberDto,
   PracticeConceptDto,
 } from '../dto';
+import { PracticeAccessService } from './practice-access.service';
 
 /** Milisegundos de un día, para los días que faltan hasta un vencimiento. */
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
@@ -54,6 +58,13 @@ const ONE_DAY_MS = 24 * 60 * 60 * 1000;
  * leer nada, y una práctica ajena responde el mismo 404 que una inexistente:
  * distinguirlas convertiría el endpoint en un detector de qué identificadores
  * existen en otras organizaciones.
+ *
+ * ## Aislamiento por vinculación
+ *
+ * El tenant no alcanza para un `PRACTITIONER`: los médicos auto-registrados
+ * comparten el tenant `DEFAULT`. Un profesional sin vinculación ACTIVE con la
+ * práctica recibe también el mismo 404 (`PracticeAccessService`), por el mismo
+ * motivo: no debe poder sondear qué prácticas existen.
  */
 @Injectable()
 export class PracticeOrganizationReadService {
@@ -63,11 +74,13 @@ export class PracticeOrganizationReadService {
    * @param em - Contexto de persistencia.
    * @param practicesRepo - Lectura de la práctica y su tenant.
    * @param readRepo - Consultas por lote del árbol de la organización.
+   * @param access - Qué prácticas puede ver el actor.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly practicesRepo: PracticesRepository,
     private readonly readRepo: PracticeOrganizationReadRepository,
+    private readonly access: PracticeAccessService,
   ) {}
 
   /**
@@ -75,17 +88,23 @@ export class PracticeOrganizationReadService {
    *
    * @param practiceId - Práctica consultada.
    * @param tenantId - Tenant del contexto, que debe ser el dueño.
+   * @param actor - Actor autenticado; un profesional necesita vinculación ACTIVE.
    * @returns Su ficha, sedes, áreas, espacios, servicios, plantilla,
    *   documentación legal e inventario.
-   * @throws ResourceNotFoundException si la práctica no existe o es de otro tenant.
+   * @throws ResourceNotFoundException si la práctica no existe, es de otro
+   *   tenant o el profesional no tiene vinculación ACTIVE con ella.
    */
   async getConsole(
     practiceId: string,
     tenantId: string,
+    actor: AuthenticatedUser,
   ): Promise<MedicalOrganizationConsoleDto> {
     const em = this.em.fork();
-    const practice = await this.practicesRepo.findById(em, practiceId);
-    if (!practice || practice.tenantId !== tenantId) {
+    const [practice, allowed] = await Promise.all([
+      this.practicesRepo.findById(em, practiceId),
+      this.access.canAccess(actor, practiceId, tenantId),
+    ]);
+    if (!practice || practice.tenantId !== tenantId || !allowed) {
       throw new ResourceNotFoundException('Práctica no encontrada', {
         practiceId,
       });
@@ -130,7 +149,7 @@ export class PracticeOrganizationReadService {
 
     const unitsBySite = countBy(units, (unit) => unit.practiceSiteId);
     const spacesBySite = countBy(spaces, (space) => space.practiceSiteId);
-    const hoy = new Date();
+    const today = new Date();
 
     return {
       organization: this.header(practice, byId),
@@ -154,7 +173,7 @@ export class PracticeOrganizationReadService {
           practitionerNames.get(row.practitionerProfileId),
         ),
       ),
-      legalDocuments: documents.map((doc) => this.document(doc, byId, hoy)),
+      legalDocuments: documents.map((doc) => this.document(doc, byId, today)),
       inventory: inventory.map((item) => this.supply(item, byId)),
     };
   }
@@ -276,8 +295,8 @@ export class PracticeOrganizationReadService {
       role: concept(concepts, row.roleConceptId),
       specialty: optionalConcept(concepts, row.specialtyConceptId),
       isPrimary: row.isPrimary ?? null,
-      validFrom: soloDate(row.validFrom),
-      validTo: soloDate(row.validTo),
+      validFrom: onlyDate(row.validFrom),
+      validTo: onlyDate(row.validTo),
       status: concept(concepts, row.statusConceptId),
     };
   }
@@ -285,7 +304,7 @@ export class PracticeOrganizationReadService {
   private document(
     doc: PracticeAccreditations,
     concepts: ReadonlyMap<string, CatalogConcepts>,
-    hoy: Date,
+    today: Date,
   ): OrganizationLegalDocumentDto {
     return {
       id: doc.id,
@@ -294,9 +313,9 @@ export class PracticeOrganizationReadService {
       number: doc.accreditationNumber ?? null,
       issuerName: doc.issuerName ?? null,
       evidenceFileId: doc.evidenceFileId ?? null,
-      validFrom: soloDate(doc.validFrom),
-      validTo: soloDate(doc.validTo),
-      daysToExpiry: daysUntil(doc.validTo, hoy),
+      validFrom: onlyDate(doc.validFrom),
+      validTo: onlyDate(doc.validTo),
+      daysToExpiry: daysUntil(doc.validTo, today),
       verificationStatus: concept(concepts, doc.verificationStatusConceptId),
     };
   }
@@ -309,7 +328,7 @@ export class PracticeOrganizationReadService {
       id: item.id,
       name: item.name,
       lotNumber: item.lotNumber ?? null,
-      expiryDate: soloDate(item.expiryDate),
+      expiryDate: onlyDate(item.expiryDate),
       quantityOnHand: item.quantityOnHand,
       unit: optionalConcept(concepts, item.unitConceptId),
       reorderLevel: item.reorderLevel ?? null,
@@ -333,9 +352,9 @@ function concept(
   concepts: ReadonlyMap<string, CatalogConcepts>,
   id: string | undefined,
 ): PracticeConceptDto {
-  const valor = id === undefined ? undefined : concepts.get(id);
-  return valor
-    ? { code: valor.code, display: valor.display }
+  const value = id === undefined ? undefined : concepts.get(id);
+  return value
+    ? { code: value.code, display: value.display }
     : { code: 'UNKNOWN', display: 'Sin registrar' };
 }
 
@@ -346,8 +365,8 @@ function optionalConcept(
   return id === undefined ? null : concept(concepts, id);
 }
 
-function soloDate(valor: Date | undefined): string | null {
-  return valor?.toISOString().slice(0, 10) ?? null;
+function onlyDate(value: Date | undefined): string | null {
+  return value?.toISOString().slice(0, 10) ?? null;
 }
 
 /**
@@ -357,17 +376,17 @@ function soloDate(valor: Date | undefined): string | null {
  * no `-1` por unas horas de diferencia: la alerta la lee una persona que piensa
  * en días de calendario, no en instantes.
  */
-function daysUntil(valor: Date | undefined, hoy: Date): number | null {
-  if (valor === undefined) return null;
+function daysUntil(value: Date | undefined, today: Date): number | null {
+  if (value === undefined) return null;
   const expires = Date.UTC(
-    valor.getUTCFullYear(),
-    valor.getUTCMonth(),
-    valor.getUTCDate(),
+    value.getUTCFullYear(),
+    value.getUTCMonth(),
+    value.getUTCDate(),
   );
   const reference = Date.UTC(
-    hoy.getUTCFullYear(),
-    hoy.getUTCMonth(),
-    hoy.getUTCDate(),
+    today.getUTCFullYear(),
+    today.getUTCMonth(),
+    today.getUTCDate(),
   );
   return Math.round((expires - reference) / ONE_DAY_MS);
 }
@@ -385,9 +404,9 @@ function restockPointLow(
 ): boolean {
   if (reorderLevel === undefined) return false;
   const stock = Number(quantityOnHand);
-  const umbral = Number(reorderLevel);
-  if (Number.isNaN(stock) || Number.isNaN(umbral)) return false;
-  return stock <= umbral;
+  const threshold = Number(reorderLevel);
+  if (Number.isNaN(stock) || Number.isNaN(threshold)) return false;
+  return stock <= threshold;
 }
 
 function unique(values: readonly string[]): string[] {
@@ -396,13 +415,13 @@ function unique(values: readonly string[]): string[] {
 
 function countBy<T>(
   rows: readonly T[],
-  keyOf: (fila: T) => string | undefined,
+  keyOf: (row: T) => string | undefined,
 ): Map<string, number> {
   const result = new Map<string, number>();
   for (const row of rows) {
-    const clave = keyOf(row);
-    if (clave !== undefined) {
-      result.set(clave, (result.get(clave) ?? 0) + 1);
+    const key = keyOf(row);
+    if (key !== undefined) {
+      result.set(key, (result.get(key) ?? 0) + 1);
     }
   }
   return result;

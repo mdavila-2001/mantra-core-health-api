@@ -4,7 +4,7 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
+  requireTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -15,6 +15,9 @@ import {
 } from '../repositories';
 import { StartTrackingSessionDto, TrackingSessionResponseDto } from '../dto';
 import { GEO } from '../geo.concepts';
+import { assertSubjectInTenant } from '../geo-scope';
+import { GeoErrorReason } from '../geo.error-reasons';
+import { assertResourceInTenant } from '../../../common/tenant/resource-scope';
 
 /**
  * Casos de uso sobre `geo.tracking_sessions`: iniciar sesión (UC-13-02) y
@@ -55,16 +58,12 @@ export class GeoTrackingSessionsService {
       },
       'Starting tracking session',
     );
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const subject = await this.subjectsRepo.findById(
-        tx,
-        dto.trackedSubjectId,
+      const subject = assertSubjectInTenant(
+        await this.subjectsRepo.findById(tx, dto.trackedSubjectId),
+        tenantId,
       );
-      if (!subject) {
-        throw new ResourceNotFoundException('Sujeto rastreado no encontrado', {
-          trackedSubjectId: dto.trackedSubjectId,
-        });
-      }
       if (subject.stateConceptId !== GEO.SUBJECT_ACTIVE) {
         throw new PreconditionFailedException(
           'El sujeto no está activo para rastreo',
@@ -126,13 +125,22 @@ export class GeoTrackingSessionsService {
       { operation: 'geo.session.close', sessionId, actorId: actor.id },
       'Closing tracking session',
     );
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const session = await this.sessionsRepo.findById(tx, sessionId);
-      if (!session)
-        throw new ResourceNotFoundException(
-          'Sesión de tracking no encontrada',
-          { sessionId },
-        );
+      // La sesión no lleva tenant propio: lo hereda del sujeto rastreado.
+      const found = await this.sessionsRepo.findById(tx, sessionId);
+      const subject = found
+        ? await this.subjectsRepo.findById(tx, found.trackedSubjectId)
+        : null;
+      const session = assertResourceInTenant(
+        found,
+        subject?.tenantId,
+        tenantId,
+        {
+          message: 'Sesión de tracking no encontrada',
+          reason: GeoErrorReason.TRACKING_SESSION_NOT_AVAILABLE,
+        },
+      );
 
       if (session.statusConceptId !== GEO.SESSION_OPEN) {
         throw new PreconditionFailedException('La sesión no está abierta', {
@@ -158,10 +166,6 @@ export class GeoTrackingSessionsService {
       touch(session, actor.id, now);
 
       // Libera el estado en-seguimiento del sujeto.
-      const subject = await this.subjectsRepo.findById(
-        tx,
-        session.trackedSubjectId,
-      );
       if (subject) touch(subject, actor.id, now);
 
       this.logger.info(

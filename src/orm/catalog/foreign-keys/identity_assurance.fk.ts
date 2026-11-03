@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `identity_assurance`.
- * 69 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 70 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const identityAssuranceForeignKeys: readonly ForeignKeyTuple[] = [
@@ -28,16 +28,16 @@ export const identityAssuranceForeignKeys: readonly ForeignKeyTuple[] = [
   ['identity_authority_endpoints', 'integration_endpoint_id', 'integrations', 'integration_endpoints', 'id'],
   ['identity_authority_endpoints', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['identity_authority_endpoints', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['identity_check_results', 'checked_by_actor_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['identity_check_results', 'identity_check_id', 'identity_assurance', 'identity_checks', 'id'],
+  ['identity_check_results', 'result_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['identity_check_results', 'supersedes_result_id', 'identity_assurance', 'identity_check_results', 'id'],
   ['identity_checks', 'authority_id', 'identity_assurance', 'identity_authorities', 'id'],
   ['identity_checks', 'check_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['identity_checks', 'created_by_user_id', 'iam', 'users', 'id'],
   ['identity_checks', 'identity_verification_case_id', 'identity_assurance', 'identity_verification_cases', 'id'],
   ['identity_checks', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['identity_checks', 'updated_by_user_id', 'iam', 'users', 'id'],
-  ['identity_check_results', 'checked_by_actor_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['identity_check_results', 'identity_check_id', 'identity_assurance', 'identity_checks', 'id'],
-  ['identity_check_results', 'result_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['identity_check_results', 'supersedes_result_id', 'identity_assurance', 'identity_check_results', 'id'],
   ['identity_evidence_records', 'collected_under_consent_id', 'consent', 'consents', 'id'],
   ['identity_evidence_records', 'created_by_user_id', 'iam', 'users', 'id'],
   ['identity_evidence_records', 'evidence_file_id', 'common', 'files', 'id'],
@@ -68,6 +68,7 @@ export const identityAssuranceForeignKeys: readonly ForeignKeyTuple[] = [
   ['identity_verification_cases', 'requested_assurance_level_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['identity_verification_cases', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['identity_verification_cases', 'subject_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['identity_verification_cases', 'tenant_id', 'directory', 'tenants', 'id'],
   ['identity_verification_cases', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['identity_verification_policies', 'created_by_user_id', 'iam', 'users', 'id'],
   ['identity_verification_policies', 'required_authenticator_assurance_level_concept_id', 'terminology', 'catalog_concepts', 'id'],

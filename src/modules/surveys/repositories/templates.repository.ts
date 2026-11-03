@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { SurveyTemplates, SurveyVersions, SurveyQuestions } from '../entities';
 import { createdBy } from '../../../common';
@@ -6,13 +7,26 @@ import { createdBy } from '../../../common';
 /** Alta de una plantilla de encuesta. */
 export interface CreateTemplateData {
   /**
+   * Identificador fijo. Sólo lo pasa la encuesta base del sistema, cuyos ids
+   * son deterministas; el resto lo genera la entidad.
+   */
+  id?: string;
+  /**
    * Identificador asociado a tenant.
    */
   tenantId: string;
   /**
-   * Identificador asociado a owner practitioner.
+   * Profesional dueño. Ausente cuando el dueño es el par tipado.
    */
-  ownerPractitionerId: string;
+  ownerPractitionerId?: string;
+  /**
+   * Tipo del dueño alterno (encuesta base del sistema).
+   */
+  ownerTypeConceptId?: string;
+  /**
+   * Identificador del dueño alterno.
+   */
+  ownerId?: string;
   /**
    * Valor de title mantenido por la instancia.
    */
@@ -34,6 +48,10 @@ export interface CreateTemplateData {
 /** Alta de una versión de la plantilla. */
 export interface CreateVersionData {
   /**
+   * Identificador fijo (encuesta base del sistema).
+   */
+  id?: string;
+  /**
    * Identificador asociado a survey template.
    */
   surveyTemplateId: string;
@@ -50,6 +68,15 @@ export interface CreateVersionData {
    */
   responseWindowDays: number;
   /**
+   * Inicio de vigencia. Ausente en un borrador.
+   */
+  effectiveFrom?: Date;
+  /**
+   * Momento de publicación. Ausente en un borrador; la versión de sistema nace
+   * publicada.
+   */
+  publishedAt?: Date;
+  /**
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
@@ -57,6 +84,10 @@ export interface CreateVersionData {
 
 /** Alta de una pregunta dentro de una versión en borrador. */
 export interface CreateQuestionData {
+  /**
+   * Identificador fijo (encuesta base del sistema).
+   */
+  id?: string;
   /**
    * Identificador asociado a survey version.
    */
@@ -110,6 +141,40 @@ export class TemplatesRepository {
     id: string,
   ): Promise<SurveyTemplates | null> {
     return em.findOne(SurveyTemplates, { id });
+  }
+
+  /**
+   * Bloquea la plantilla (`FOR UPDATE`) hasta el fin de la transacción.
+   *
+   * Serializa a quienes numeran versiones a partir de la última leída: el
+   * segundo espera y ve la versión que el primero ya confirmó.
+   *
+   * @param em - Transacción activa.
+   * @param id - Identificador de la plantilla.
+   */
+  async lockTemplate(em: EntityManager, id: string): Promise<void> {
+    await em.findOne(
+      SurveyTemplates,
+      { id },
+      { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
+  }
+
+  /**
+   * Bloquea la versión (`FOR UPDATE`) hasta el fin de la transacción.
+   *
+   * Serializa a quienes consultan «¿ya hay una asignación activa de esta
+   * versión?» antes de insertarla.
+   *
+   * @param em - Transacción activa.
+   * @param id - Identificador de la versión.
+   */
+  async lockVersion(em: EntityManager, id: string): Promise<void> {
+    await em.findOne(
+      SurveyVersions,
+      { id },
+      { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
   }
 
   /**
@@ -177,6 +242,24 @@ export class TemplatesRepository {
       SurveyVersions,
       { surveyTemplateId },
       { orderBy: { versionNumber: 'desc' } },
+    );
+  }
+
+  /**
+   * Lista todas las versiones de una plantilla.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param surveyTemplateId - Identificador de la plantilla.
+   * @returns Resultado conforme al contrato `Promise<SurveyVersions[]>`.
+   */
+  listVersions(
+    em: EntityManager,
+    surveyTemplateId: string,
+  ): Promise<SurveyVersions[]> {
+    return em.find(
+      SurveyVersions,
+      { surveyTemplateId },
+      { orderBy: { versionNumber: 'asc' } },
     );
   }
 

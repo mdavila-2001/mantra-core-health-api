@@ -5,3 +5,4 @@ export type {
   PublishDomainEventInput,
   PublishDomainEventResult,
 } from './outbox.service';
+export * from './web-push.service';

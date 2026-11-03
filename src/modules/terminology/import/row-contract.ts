@@ -90,7 +90,7 @@ export interface ImportProfile {
  */
 export interface FileParser {
   readonly formato: FileFormat;
-  parse(buffer: Buffer, perfil: ImportProfile): ParsingResult;
+  parse(buffer: Buffer, profile: ImportProfile): ParsingResult;
 }
 
 /**

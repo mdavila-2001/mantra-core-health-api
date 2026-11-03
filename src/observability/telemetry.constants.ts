@@ -104,7 +104,11 @@ export const EXCLUDED_HTTP_PATHS: readonly string[] = [
   '/ready',
   '/readiness',
   '/liveness',
+  // Latido de los 25 workers hacia la API (4/min cada uno): es infraestructura,
+  // no tráfico de negocio, y ensuciaría `/admin/ops/traffic` y las trazas.
+  '/internal/ops/heartbeats',
   '/metrics',
+  '/internal/ops/heartbeats',
   '/favicon.ico',
   '/docs',
   '/docs-json',

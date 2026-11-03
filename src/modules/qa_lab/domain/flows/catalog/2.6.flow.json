@@ -1,0 +1,400 @@
+{
+  "id": "2.6",
+  "version": 1,
+  "module": "2 · Médico",
+  "title": "Consulta y elaboración de la ficha médica (paciente sin seguro)",
+  "source": {
+    "document": "SALUD/📋 Registro de procesos por módulo.md",
+    "section": "2.6 · Consulta, elaboración de la ficha medica"
+  },
+  "actors": ["PRACTITIONER", "PATIENT"],
+  "frontRoutes": ["/medical-records/:profileId/consultation"],
+  "root": "crear-ficha",
+  "nodes": [
+    {
+      "id": "crear-ficha",
+      "kind": "SCREEN",
+      "title": "El médico diagnostica y crea la ficha",
+      "actor": "PRACTITIONER",
+      "uiRoute": "/medical-records/:profileId/consultation",
+      "sourceRef": "ítem 1.1",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "El médico termina el diagnóstico",
+          "expected": "Guarda la ficha",
+          "next": "registrar-ficha",
+          "reason": "Pantalla: no hace una petición propia; la hace la llamada que dispara."
+        }
+      ]
+    },
+    {
+      "id": "registrar-ficha",
+      "kind": "API_CALL",
+      "title": "Guardar la ficha médica",
+      "actor": "PRACTITIONER",
+      "endpoint": {
+        "method": "POST",
+        "path": "/charts/notes"
+      },
+      "sourceRef": "ítem 1.1",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "La ficha tiene los datos requeridos",
+          "expected": "Queda guardada en la historia del paciente",
+          "next": "avisar-ficha",
+          "reason": "Journey con variable: necesita un identificador producido por el paso anterior y el runner aún no encadena respuestas (pendiente #5 del portal)."
+        },
+        {
+          "kind": "NEGATIVE",
+          "condition": "Falta el cuerpo de la ficha",
+          "expected": "Rechaza la petición (400)",
+          "loopsTo": "crear-ficha",
+          "qaCase": {
+            "method": "POST",
+            "path": "/charts/notes",
+            "expectedStatus": 400,
+            "observedOn": "2026-10-17",
+            "body": {},
+            "headers": {
+              "x-tenant-id": "1befcfea-44c0-563a-81cd-337ec6acc840"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "avisar-ficha",
+      "kind": "API_CALL",
+      "title": "Avisar al paciente de su ficha",
+      "actor": "SYSTEM",
+      "endpoint": {
+        "method": "POST",
+        "path": "/notifications/requests"
+      },
+      "sourceRef": "ítem 1.1",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "La ficha quedó guardada",
+          "expected": "El paciente recibe el aviso",
+          "next": "enlace-paciente",
+          "reason": "Journey con variable: necesita un identificador producido por el paso anterior y el runner aún no encadena respuestas (pendiente #5 del portal)."
+        },
+        {
+          "kind": "NEGATIVE",
+          "condition": "Falta el cuerpo de la notificación",
+          "expected": "Rechaza la petición (400)",
+          "loopsTo": "avisar-ficha",
+          "qaCase": {
+            "method": "POST",
+            "path": "/notifications/requests",
+            "expectedStatus": 400,
+            "observedOn": "2026-10-17",
+            "body": {},
+            "headers": {
+              "x-tenant-id": "1befcfea-44c0-563a-81cd-337ec6acc840"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "enlace-paciente",
+      "kind": "API_CALL",
+      "title": "Enviar al paciente un solo enlace con receta, laboratorios y análisis",
+      "actor": "PRACTITIONER",
+      "gap": "No se encontró un endpoint que agrupe receta, laboratorios y análisis en un único enlace para el paciente.",
+      "sourceRef": "ítem 1.2",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "El médico pidió estudios y receta",
+          "expected": "El paciente recibe un enlace por separado para cada uno",
+          "next": "pedir-estudios",
+          "reason": "Sin endpoint en el contrato: no hay qué probar."
+        }
+      ]
+    },
+    {
+      "id": "pedir-estudios",
+      "kind": "API_CALL",
+      "title": "Pedir laboratorios y análisis clínicos",
+      "actor": "PRACTITIONER",
+      "endpoint": {
+        "method": "POST",
+        "path": "/clinical/service-requests"
+      },
+      "sourceRef": "ítem 1.2",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "El médico pide los estudios",
+          "expected": "Se crean las solicitudes de servicio",
+          "next": "recibir-resultados",
+          "reason": "Journey con variable: necesita un identificador producido por el paso anterior y el runner aún no encadena respuestas (pendiente #5 del portal)."
+        },
+        {
+          "kind": "NEGATIVE",
+          "condition": "Falta el cuerpo de la solicitud",
+          "expected": "Rechaza la petición (400)",
+          "loopsTo": "pedir-estudios",
+          "qaCase": {
+            "method": "POST",
+            "path": "/clinical/service-requests",
+            "expectedStatus": 400,
+            "observedOn": "2026-10-17",
+            "body": {},
+            "headers": {
+              "x-tenant-id": "1befcfea-44c0-563a-81cd-337ec6acc840"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "recibir-resultados",
+      "kind": "API_CALL",
+      "title": "Recibir los resultados del paciente",
+      "actor": "PRACTITIONER",
+      "endpoint": {
+        "method": "GET",
+        "path": "/diagnostics/patients/{patientProfileId}/orders"
+      },
+      "sourceRef": "ítem 1.3",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "El paciente tiene órdenes y reportes",
+          "expected": "Devuelve órdenes y reportes (pueden ser listas vacías)",
+          "next": "reconsulta-o-tele",
+          "qaCase": {
+            "method": "GET",
+            "path": "/diagnostics/patients/00000000-0000-4000-8000-0000000000aa/orders",
+            "expectedStatus": 200,
+            "observedOn": "2026-10-17",
+            "headers": {
+              "x-tenant-id": "1befcfea-44c0-563a-81cd-337ec6acc840"
+            }
+          }
+        },
+        {
+          "kind": "NEGATIVE",
+          "condition": "El identificador del paciente no es un UUID",
+          "expected": "Rechaza la petición (400)",
+          "loopsTo": "recibir-resultados",
+          "qaCase": {
+            "method": "GET",
+            "path": "/diagnostics/patients/abc/orders",
+            "expectedStatus": 400,
+            "observedOn": "2026-10-17",
+            "headers": {
+              "x-tenant-id": "1befcfea-44c0-563a-81cd-337ec6acc840"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "reconsulta-o-tele",
+      "kind": "DECISION",
+      "title": "¿Re-consulta presencial o teleconsulta?",
+      "actor": "PRACTITIONER",
+      "sourceRef": "ítem 1.3.1",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "El paciente vuelve al consultorio",
+          "expected": "El médico informa el diagnóstico final",
+          "next": "recetar",
+          "reason": "Decisión del recorrido: no llama a la API; sus caminos se prueban en los nodos a los que lleva."
+        },
+        {
+          "kind": "EDGE",
+          "condition": "El médico propone teleconsulta para informar resultados y enviar la receta",
+          "expected": "Abre una sesión de telesalud",
+          "next": "teleconsulta",
+          "reason": "Decisión del recorrido: no llama a la API; sus caminos se prueban en los nodos a los que lleva."
+        }
+      ]
+    },
+    {
+      "id": "teleconsulta",
+      "kind": "API_CALL",
+      "title": "Iniciar la teleconsulta",
+      "actor": "PRACTITIONER",
+      "endpoint": {
+        "method": "POST",
+        "path": "/virtual-encounters"
+      },
+      "sourceRef": "ítem 1.3.1.1",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "El médico inicia la sesión",
+          "expected": "Crea la sesión de telesalud",
+          "next": "recetar",
+          "reason": "Journey con variable: necesita un identificador producido por el paso anterior y el runner aún no encadena respuestas (pendiente #5 del portal)."
+        },
+        {
+          "kind": "NEGATIVE",
+          "condition": "Falta el cuerpo de la sesión",
+          "expected": "Rechaza la petición (400)",
+          "loopsTo": "reconsulta-o-tele",
+          "qaCase": {
+            "method": "POST",
+            "path": "/virtual-encounters",
+            "expectedStatus": 400,
+            "observedOn": "2026-10-17",
+            "body": {},
+            "headers": {
+              "x-tenant-id": "1befcfea-44c0-563a-81cd-337ec6acc840"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "recetar",
+      "kind": "API_CALL",
+      "title": "Crear la receta con las indicaciones",
+      "actor": "PRACTITIONER",
+      "endpoint": {
+        "method": "POST",
+        "path": "/clinical/medication-requests"
+      },
+      "sourceRef": "ítems 1.3.2 y 1.3.3",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "El médico detalla medicamentos e indicaciones",
+          "expected": "Queda la receta en borrador",
+          "next": "emitir-receta",
+          "reason": "Journey con variable: necesita un identificador producido por el paso anterior y el runner aún no encadena respuestas (pendiente #5 del portal)."
+        },
+        {
+          "kind": "NEGATIVE",
+          "condition": "Falta el cuerpo de la receta",
+          "expected": "Rechaza la petición (400)",
+          "loopsTo": "recetar",
+          "qaCase": {
+            "method": "POST",
+            "path": "/clinical/medication-requests",
+            "expectedStatus": 400,
+            "observedOn": "2026-10-17",
+            "body": {},
+            "headers": {
+              "x-tenant-id": "1befcfea-44c0-563a-81cd-337ec6acc840"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "emitir-receta",
+      "kind": "API_CALL",
+      "title": "Emitir la receta al paciente",
+      "actor": "PRACTITIONER",
+      "endpoint": {
+        "method": "POST",
+        "path": "/clinical/medication-requests/{id}/issue"
+      },
+      "sourceRef": "ítem 1.3.2",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "La receta está lista",
+          "expected": "El paciente recibe un nuevo enlace con la receta",
+          "next": "cronograma-medicamentos",
+          "reason": "Journey con variable: necesita un identificador producido por el paso anterior y el runner aún no encadena respuestas (pendiente #5 del portal)."
+        },
+        {
+          "kind": "NEGATIVE",
+          "condition": "La receta no existe",
+          "expected": "Responde 404 «Receta no encontrada»",
+          "loopsTo": "recetar",
+          "qaCase": {
+            "method": "POST",
+            "path": "/clinical/medication-requests/00000000-0000-4000-8000-0000000000aa/issue",
+            "expectedStatus": 404,
+            "observedOn": "2026-10-17",
+            "body": {},
+            "headers": {
+              "x-tenant-id": "1befcfea-44c0-563a-81cd-337ec6acc840"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "cronograma-medicamentos",
+      "kind": "API_CALL",
+      "title": "Crear el cronograma de tomas con calendario y alarmas",
+      "actor": "SYSTEM",
+      "gap": "No se encontró un endpoint de cronograma de tomas ni de alarmas por medicamento; los recordatorios que existen (`/scheduling/bookings/{id}/reminders`) son de citas.",
+      "sourceRef": "ítem 1.3.3",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "La receta se emitió",
+          "expected": "El paciente ve cada toma en su calendario con alarma 15 minutos antes",
+          "next": "cerrar-consulta",
+          "reason": "Sin endpoint en el contrato: no hay qué probar."
+        }
+      ]
+    },
+    {
+      "id": "cerrar-consulta",
+      "kind": "API_CALL",
+      "title": "Completar la ficha y cerrar la consulta",
+      "actor": "PRACTITIONER",
+      "endpoint": {
+        "method": "POST",
+        "path": "/clinical/encounters/{id}/close"
+      },
+      "effects": ["Gatilla la facturación (summary del contrato)"],
+      "sourceRef": "ítem 1.3.4",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "El encuentro está en curso",
+          "expected": "Cierra el encuentro y gatilla la facturación",
+          "next": "fin-cerrada",
+          "reason": "Journey con variable: necesita un identificador producido por el paso anterior y el runner aún no encadena respuestas (pendiente #5 del portal)."
+        },
+        {
+          "kind": "NEGATIVE",
+          "condition": "El encuentro no existe",
+          "expected": "Responde 404 «Encuentro no encontrado»",
+          "loopsTo": "cerrar-consulta",
+          "qaCase": {
+            "method": "POST",
+            "path": "/clinical/encounters/00000000-0000-4000-8000-0000000000aa/close",
+            "expectedStatus": 404,
+            "observedOn": "2026-10-17",
+            "body": {},
+            "headers": {
+              "x-tenant-id": "1befcfea-44c0-563a-81cd-337ec6acc840"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "fin-cerrada",
+      "kind": "OUTCOME",
+      "title": "Consulta cerrada y facturable",
+      "actor": "PRACTITIONER",
+      "sourceRef": "ítem 1.3.4",
+      "branches": []
+    }
+  ],
+  "openQuestions": [
+    "La fuente llama «TOUS» al aviso al paciente y no lo define; se modeló como notificación (`/notifications/requests`). Confirmar el término.",
+    "La fuente sólo describe al paciente SIN seguro. Falta la rama con seguro de la consulta (el Registro la pide en 2.7).",
+    "Teleconsulta: es una de las cuatro decisiones que no son del equipo (si entra en esta etapa). El contrato ya tiene `/virtual-encounters`; no se asume que esté habilitada.",
+    "La API tiene `/clinical/medication-requests/{id}/sign` además de `/issue`; la fuente no dice si firmar es un paso aparte del médico.",
+    "Las ramas con `reason` «Journey con variable» no corren hasta que el runner de QA encadene respuestas."
+  ]
+}

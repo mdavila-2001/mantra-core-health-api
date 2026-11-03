@@ -57,6 +57,10 @@ export interface CreateFacilityLicenseData {
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
+  /** Alcance opcional a una unidad de la sede (v4.2.67b). */
+  clinicalUnitId?: string;
+  /** Alcance opcional a un servicio de la sede (v4.2.67b). */
+  healthcareServiceId?: string;
 }
 
 /**
@@ -65,9 +69,13 @@ export interface CreateFacilityLicenseData {
  */
 @Injectable()
 export class FacilityLicensesRepository {
-  /** Busca una licencia por id; `null` si no existe. */
-  findById(em: EntityManager, id: string): Promise<FacilityLicenses | null> {
-    return em.findOne(FacilityLicenses, { id });
+  /** Busca una licencia por id dentro de un tenant; `null` si no existe o es de otro tenant. */
+  findByIdInTenant(
+    em: EntityManager,
+    id: string,
+    tenantId: string,
+  ): Promise<FacilityLicenses | null> {
+    return em.findOne(FacilityLicenses, { id, tenantId });
   }
 
   /** Detecta un duplicado de número de licencia para (tenant, tipo). */
@@ -96,6 +104,22 @@ export class FacilityLicensesRepository {
     });
   }
 
+  /**
+   * Licencias de una sede del tenant, las más recientes primero (F1: fachada
+   * `GET /sites/:siteId/licenses` de `practice`).
+   */
+  findBySite(
+    em: EntityManager,
+    tenantId: string,
+    practiceSiteId: string,
+  ): Promise<FacilityLicenses[]> {
+    return em.find(
+      FacilityLicenses,
+      { tenantId, practiceSiteId },
+      { orderBy: { validTo: 'desc', createdAt: 'desc' } },
+    );
+  }
+
   /** Crea la licencia en la unidad de trabajo (sin flush). */
   create(em: EntityManager, data: CreateFacilityLicenseData): FacilityLicenses {
     return em.create(
@@ -113,6 +137,8 @@ export class FacilityLicensesRepository {
         validTo: data.validTo,
         evidenceFileId: data.evidenceFileId,
         verificationStatusConceptId: data.verificationStatusConceptId,
+        clinicalUnitId: data.clinicalUnitId,
+        healthcareServiceId: data.healthcareServiceId,
         ...createdBy(data.actorUserId),
       },
       { partial: true },

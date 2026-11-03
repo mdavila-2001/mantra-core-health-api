@@ -14,8 +14,8 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 import { defer, lastValueFrom, of, throwError } from 'rxjs';
 import {
   AccessLogged,
-  AuditTrail,
-  SkipAuditTrail,
+  Audited,
+  NotAudited,
   getAuditRequestContext,
   markAuditSealed,
 } from '../../../common/audit-trail';
@@ -40,15 +40,15 @@ class ThingsController {
   close(): void {}
 
   @Post()
-  @AuditTrail({
+  @Audited({
     action: 'THING_CREATED',
     entity: 'thing',
-    entityId: 'result:id',
+    entityId: 'result.id',
   })
   create(): void {}
 
   @Post('relay')
-  @SkipAuditTrail('Plomería de cola: rastro propio.')
+  @NotAudited('Plomería de cola: rastro propio.')
   relay(): void {}
 
   @Get(':id')
@@ -236,7 +236,7 @@ describe('AuditTrailInterceptor', () => {
       ]);
     });
 
-    it('usa el nombre de negocio de @AuditTrail y el id del resultado', async () => {
+    it('usa el nombre de negocio de @Audited y el id del resultado', async () => {
       const h = harness();
       await run(
         h,
@@ -368,7 +368,7 @@ describe('AuditTrailInterceptor', () => {
       expect(seen).toBeUndefined();
     });
 
-    it('@SkipAuditTrail deja pasar sin sellar', async () => {
+    it('@NotAudited deja pasar sin sellar', async () => {
       const h = harness();
       await run(h, 'relay', { method: 'POST', user: actor() }, returning('ok'));
       expect(h.appended).toEqual([]);

@@ -23,6 +23,7 @@ import { CONCEPTS } from '../constants/concepts';
  */
 function build(existing: Set<string> = new Set()) {
   const created: { entity: string; data: any }[] = [];
+  const updated: { entity: string; where: any; data: any }[] = [];
   let flushes = 0;
 
   const em = {
@@ -40,6 +41,10 @@ function build(existing: Set<string> = new Set()) {
       flushes += 1;
       return Promise.resolve();
     }),
+    nativeUpdate: mockFn((entity: any, where: any, data: any) => {
+      updated.push({ entity: entity.name, where, data });
+      return Promise.resolve(1);
+    }),
   };
   const orm = { em: { fork: mockFn(() => em) } };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
@@ -48,6 +53,7 @@ function build(existing: Set<string> = new Set()) {
   return {
     service,
     created,
+    updated,
     /** Filas creadas para una entidad concreta. */
     rowsOf: (entity: string) =>
       created.filter((row) => row.entity === entity).map((row) => row.data),
@@ -119,6 +125,58 @@ describe('DynamicEnumSeedService', () => {
       options: 0,
       bindings: 0,
     });
+  });
+
+  it('renueva el testigo de caché de una versión ya sembrada cuando gana una opción', async () => {
+    // Base sembrada antes de que existiera CLINIC: todo menos su opción y su
+    // miembro.
+    const first = build();
+    await first.service.run();
+    const clinicIds = new Set<string>(
+      first.created
+        .filter((row) => row.data.conceptId === CONCEPTS.TENANT_TYPE_CLINIC)
+        .map((row) => row.data.id as string),
+    );
+    expect(clinicIds.size).toBeGreaterThan(0);
+    const alreadyExist = new Set<string>(
+      first.created
+        .map((row) => row.data.id as string)
+        .filter((id) => !clinicIds.has(id)),
+    );
+    const tenantTypeVersion = first
+      .rowsOf('DynamicEnumVersions')
+      .find((row) =>
+        first
+          .rowsOf('DynamicEnumOptions')
+          .some(
+            (option) =>
+              option.dynamicEnumVersionId === row.id &&
+              option.conceptId === CONCEPTS.TENANT_TYPE_CLINIC,
+          ),
+      );
+
+    const second = build(alreadyExist);
+    await second.service.run();
+
+    expect(second.updated).toEqual([
+      {
+        entity: 'DynamicEnumVersions',
+        where: { id: tenantTypeVersion.id },
+        data: { cacheToken: tenantTypeVersion.cacheToken },
+      },
+    ]);
+  });
+
+  it('no toca el testigo cuando la versión es nueva o nada cambió', async () => {
+    const first = build();
+    await first.service.run();
+    expect(first.updated).toEqual([]);
+
+    const second = build(
+      new Set<string>(first.created.map((row) => row.data.id as string)),
+    );
+    await second.service.run();
+    expect(second.updated).toEqual([]);
   });
 
   it('resuelve código y rótulo de cada opción contra el catálogo de conceptos', async () => {

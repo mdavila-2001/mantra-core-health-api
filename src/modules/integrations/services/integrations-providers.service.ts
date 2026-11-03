@@ -28,6 +28,7 @@ import {
   HTTP_METHOD_CONCEPT_BY_CODE,
   DIRECTION_CONCEPT_BY_CODE,
 } from '../integrations.concepts';
+import { activeIntegrationsTenant } from '../integrations.tenant-scope';
 
 /**
  * Casos de uso sobre proveedores externos: registro (UC-12-01), publicación de
@@ -218,6 +219,8 @@ export class IntegrationsProvidersService {
       },
       'Managing webhook subscription',
     );
+    // La suscripción pertenece al tenant del contexto; el cuerpo no es autoridad.
+    const tenantId = activeIntegrationsTenant(dto.tenantId);
     return this.em.transactional(async (tx) => {
       const provider = await this.providersRepo.findById(tx, providerId);
       if (!provider)
@@ -234,7 +237,7 @@ export class IntegrationsProvidersService {
         tx,
         providerId,
         dto.eventType,
-        dto.tenantId,
+        tenantId,
       );
       if (existing) {
         existing.callbackUrl = dto.callbackUrl;
@@ -256,7 +259,7 @@ export class IntegrationsProvidersService {
         eventType: dto.eventType,
         callbackUrl: dto.callbackUrl,
         stateConceptId: INTEG.WEBHOOK_ACTIVE,
-        tenantId: dto.tenantId,
+        tenantId,
         secretRef: dto.secretRef,
         actorUserId: actor.id,
       });

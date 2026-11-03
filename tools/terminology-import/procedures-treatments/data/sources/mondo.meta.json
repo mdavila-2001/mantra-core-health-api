@@ -1,0 +1,18 @@
+{
+  "source": "mondo",
+  "name": "Mondo Disease Ontology",
+  "publisher": "Monarch Initiative",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+  "homepage": "https://github.com/monarch-initiative/mondo",
+  "retrievedAt": "2026-10-24T00:46:53.689Z",
+  "tag": "v2026-10-06",
+  "files": {
+    "mondo.obo": {
+      "url": "https://github.com/monarch-initiative/mondo/releases/download/v2026-10-06/mondo.obo",
+      "fileUrl": "https://github.com/monarch-initiative/mondo/releases/download/v2026-10-06/mondo.obo",
+      "sha256": "2631e8e165d41def1a46749adb1ce0a336c8aba7f6bc0978729592cee8fed60b",
+      "bytes": 53320617
+    }
+  }
+}

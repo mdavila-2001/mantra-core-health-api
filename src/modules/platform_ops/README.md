@@ -105,7 +105,7 @@ runbooks/:id/versions ──> versión inmutable y vigente; runbook-executions d
 resilience-exercises/:id/complete ──> pass | fail derivado del objetivo de recuperación
 ```
 
-## Reglas de negocio
+## Business rules
 
 - **Quien pide el cambio no lo aprueba**. El CAB existe para que lo mire alguien distinto, y sin esa
   comprobación el control es decorativo.
@@ -146,7 +146,7 @@ resilience-exercises/:id/complete ──> pass | fail derivado del objetivo de r
 - **El resultado del ejercicio de resiliencia se deriva**, no se declara: dejar que quien ejecuta el
   simulacro se ponga la nota lo vaciaría de valor.
 
-## Permisos
+## Permissions
 
 `PLATFORM_ADMIN` cubre el módulo entero. `RELEASE_MANAGER` abre cambios, despliega y cierra
 revisiones de preparación. `CHANGE_APPROVER` decide en el CAB. `DEPLOY_PIPELINE` publica artefactos y
@@ -156,7 +156,7 @@ capacidad. `SYSTEM` registra corridas de health check, mediciones de SLO y event
 
 Ninguna ruta es pública.
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE` sobre la ventana de mantenimiento al atarle un cambio, sobre el cambio en toda decisión
 o despliegue, sobre el despliegue vigente del par componente+entorno —sólo puede haber uno, y ceder
@@ -173,7 +173,7 @@ cerrada con "no go", ejecución de runbook que no completa y ejercicio que incum
 mediciones y los eventos de quema no tienen columnas de auditoría —son logs de sólo inserción—, así
 que quién los registró se deja en el log.
 
-## Pruebas
+## Tests
 
 `corepack yarn test src/modules/platform_ops --runInBand --silent` — 5 suites y 146 pruebas
 aprobadas durante la revisión.
@@ -191,14 +191,9 @@ aprobadas durante la revisión.
 - **Guardrail de capacidad**: `capacity_plans.cost_guardrails_json` es JSON libre; el módulo lee de
   él la clave `maxUtilizationPercent`. La convención está documentada en `services/`.
 
-## Pendiente
+## Fuera de este módulo
 
-- **Outbox** (módulo 35): `ChangeRequestOpened`, `ChangeApproved`, `ArtifactPublished`,
-  `DeploymentStarted/Succeeded/RolledBack`, `HealthCheckFailed`, `IncidentOpened`,
-  `IncidentStatusChanged`, `PostmortemOpened`, `SloMeasured`, `ErrorBudgetBurn`,
-  `DeploymentFreezeActivated`, `CapacityMeasured`, `ReadinessReviewCompleted`,
-  `RunbookVersionPublished`, `RunbookExecuted`, `ResilienceExerciseCompleted`.
-- **Proyecciones**: `read_models.*` e índices de `search_platform` los alimenta el outbox.
+- **Proyecciones**: `read_models.*` e índices de `search_platform` se alimentan desde el outbox.
 - **Series temporales**: `deployment_frequency_series`, `change_failure_rate_series` (DORA),
   `health_check_latency_series`, `slo_attainment_series`, `error_budget_burn_series`,
   `capacity_utilization_series`, `mttr_series`, `dr_rto_series` viven en `time_series` (módulo 49).
@@ -207,10 +202,8 @@ aprobadas durante la revisión.
 - **Cálculo del burn rate**: se registra el ritmo, no se calcula. El evaluador de SLO lo computa
   fuera y lo reporta aquí.
 - **Guardia y escalado**: `operational_teams`, `on_call_schedules`, `on_call_shifts` y
-  `escalation_policies` están en el esquema pero ningún caso de uso del módulo los opera; su gestión
-  llegará con los casos de uso que los declaren.
+  `escalation_policies` están en el esquema pero ningún caso de uso del módulo los opera.
 
 ## Revisión ALOVIDA
 
-Los recursos operativos resueltos por UUID aún no se acotan al tenant activo; ver
-[el informe](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/platform_ops.md).
+Los recursos operativos resueltos por UUID no se acotan al tenant activo.

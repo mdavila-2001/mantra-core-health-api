@@ -168,6 +168,23 @@ describe('NotificationsService · carril P1 (campana)', () => {
       ).not.toHaveBeenCalled();
     });
 
+    it('emitInApp con ADMISSION respeta que la categoría esté silenciada', async () => {
+      const d = build();
+      d.notificationsRepo.findPreferences.mockResolvedValue([
+        {
+          categoryConceptId: NOTIFICATION_CATEGORY_CONCEPT.ADMISSION,
+          optedIn: false,
+          quietHoursJson: null,
+        },
+      ]);
+      const res = await d.service.emitInApp({
+        recipientUserId: RECIPIENT,
+        category: 'ADMISSION',
+        subject: 'Recibimos su solicitud de verificación',
+      });
+      expect(res.suppressed).toBe(true);
+    });
+
     it('no crea un aviso nuevo si ya hay uno SIN LEER para el mismo objeto', async () => {
       const d = build();
       d.notificationsRepo.findUnreadInAppForResource.mockResolvedValue({
@@ -340,6 +357,24 @@ describe('NotificationsService · carril P1 (campana)', () => {
       });
     });
 
+    it('un aviso de admisión sale con category ADMISSION, no null', async () => {
+      const d = build();
+      d.notificationsRepo.listInAppPage.mockResolvedValue([
+        row({
+          categoryConceptId: NOTIFICATION_CATEGORY_CONCEPT.ADMISSION,
+          relatedResourceType: 'profiles.practitioner_admissions',
+          relatedResourceId: 'adm-1',
+          payloadJson: { kind: 'ADMISSION_REJECTED' },
+        }),
+      ]);
+      const page = await d.service.listMine(actor as any, {});
+      expect(page.items[0].category).toBe('ADMISSION');
+      expect(page.items[0].destination).toEqual({
+        type: 'profiles.practitioner_admissions',
+        id: 'adm-1',
+      });
+    });
+
     it('lee siempre la bandeja del actor, nunca una ajena', async () => {
       const d = build();
       await d.service.listMine(actor as any, { limit: 5 });
@@ -373,7 +408,10 @@ describe('NotificationsService · carril P1 (campana)', () => {
         readAt: new Date('2026-08-01T00:00:00.000Z'),
       });
       const withoutRead = row({ id: 'nueva' });
-      d.notificationsRepo.findUnreadInApp.mockResolvedValue([alreadyRead, withoutRead]);
+      d.notificationsRepo.findUnreadInApp.mockResolvedValue([
+        alreadyRead,
+        withoutRead,
+      ]);
       d.notificationsRepo.countUnreadInApp.mockResolvedValue(0);
 
       const res = await d.service.markAllInAppRead(actor as any);

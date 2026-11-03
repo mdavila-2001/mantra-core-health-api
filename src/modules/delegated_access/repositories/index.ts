@@ -5,3 +5,7 @@ export * from './practitioner-delegate-assignments.repository';
 export * from './delegated-access-approval-requests.repository';
 export * from './delegated-access-grants.repository';
 export * from './delegation-events.repository';
+export * from './delegation-scope.repository';
+export * from './shared-access-links.repository';
+export * from './support-links.repository';
+export * from './support-staff-provisioning.repository';

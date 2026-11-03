@@ -1,11 +1,15 @@
 import { touch, type AuthenticatedUser } from '../../../../../common';
 import { BookingAccess } from '../support/booking-access';
 import { BookingDecisionResponseDto } from '../../../presentation/dto';
+import {
+  BOOKING_COMPLETED_PORT,
+  type BookingCompletedPort,
+} from '../../ports/booking-completed.port';
 import { BookingTransitionRecorder } from '../support/booking-transition-recorder';
 import { CLIN } from '../../../../clinical/clinical.concepts';
 import { ClinicalAppointmentSync } from '../support/clinical-appointment-sync';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { SCHED } from '../../../domain/scheduling.concepts';
 import { ServiceSlotLifecycle } from '../support/service-slot-lifecycle';
@@ -19,6 +23,8 @@ export class CompleteAppointmentUseCase {
     private readonly transitions: BookingTransitionRecorder,
     private readonly serviceSlots: ServiceSlotLifecycle,
     private readonly clinicalSync: ClinicalAppointmentSync,
+    @Inject(BOOKING_COMPLETED_PORT)
+    private readonly completed: BookingCompletedPort,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CompleteAppointmentUseCase.name);
@@ -41,7 +47,7 @@ export class CompleteAppointmentUseCase {
       'Completing appointment',
     );
 
-    return this.em.transactional(async (tx) => {
+    const result = await this.em.transactional(async (tx) => {
       const booking = await this.access.loadForOperation(tx, bookingId, actor);
       const fromState = booking.statusConceptId;
       this.transitions.assertTransition(fromState, SCHED.BOOKING_COMPLETED);
@@ -70,5 +76,11 @@ export class CompleteAppointmentUseCase {
         desplazadas: [],
       };
     });
+
+    // Después del commit y fuera de la transacción: la encuesta de la atención
+    // se emite al paciente, pero un fallo de ese contexto nunca revierte el
+    // cierre (el puerto no lanza). Ver `BookingCompletedPort`.
+    await this.completed.onBookingCompleted(result.bookingId, actor);
+    return result;
   }
 }

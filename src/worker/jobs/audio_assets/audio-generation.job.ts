@@ -8,7 +8,7 @@ import {
   TTS_PROVIDER,
   type TtsProviderPort,
 } from '../../../modules/audio_assets/domain/tts-provider.port';
-import { AudioMetricsService } from '../../../modules/audio_assets/infrastructure/audio-metrics.service';
+import { AudioMetricsService } from '../../../modules/audio_assets/infrastructure/adapters/audio-metrics.service';
 import { SystemApiClient } from '../../system-api-client.service';
 import { registerQueueJobHandler } from '../messaging/queue.job';
 import { publishAudioBytes } from '../files/remote-storage-publication';

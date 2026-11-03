@@ -15,7 +15,9 @@ import {
   FILE_STORAGE_ADAPTER,
   PreconditionFailedException,
   ResourceNotFoundException,
+  UNSUPPORTED_IMAGE_FORMAT_REASON,
   UPLOAD_MIME_ALLOWLIST,
+  detectUnsupportedImageFormat,
   isMimeTypeAllowedForCategory,
   loadStorageEnv,
   sniffMimeType,
@@ -177,6 +179,20 @@ export class FileUploadService {
 
     const detectedMimeType = sniffMimeType(file.buffer);
     if (!detectedMimeType) {
+      // Una foto de iPhone (HEIC) no es contenido sospechoso: es un formato
+      // que no se acepta. Se dice cuál y qué hacer, con un `reason` estable
+      // para que el cliente lo explique sin parsear el mensaje.
+      const unsupportedImage = detectUnsupportedImageFormat(file.buffer);
+      if (unsupportedImage) {
+        throw new PreconditionFailedException(
+          'Las fotos HEIC, HEIF o AVIF no se aceptan: enviala como JPEG, PNG, WEBP o GIF',
+          {
+            detectedFormat: unsupportedImage,
+            allowedMimeTypes: UPLOAD_MIME_ALLOWLIST[dto.category],
+          },
+          UNSUPPORTED_IMAGE_FORMAT_REASON,
+        );
+      }
       throw new PreconditionFailedException(
         'El contenido no corresponde a ningún formato de archivo permitido',
         { allowedMimeTypes: UPLOAD_MIME_ALLOWLIST[dto.category] },
@@ -497,8 +513,8 @@ export class FileUploadService {
     fileId: string,
     actor: AuthenticatedUser,
   ): Promise<FileContentDto> {
-    const forked = this.em.fork();
-
+    // Preserve tenant transaction context so RLS policies allow reading common.files
+    const forked = this.em.fork({ keepTransactionContext: true });
     const file = await this.filesRepo.findById(forked, fileId);
     if (!file) {
       throw new ResourceNotFoundException('Archivo no encontrado', { fileId });
@@ -550,8 +566,8 @@ export class FileUploadService {
     fileId: string,
     operation: string,
   ): Promise<FileContentDto> {
-    const forked = this.em.fork();
-
+    // Preserve tenant transaction context so RLS policies allow reading common.files
+    const forked = this.em.fork({ keepTransactionContext: true });
     const file = await this.filesRepo.findById(forked, fileId);
     if (!file) {
       throw new ResourceNotFoundException('Archivo no encontrado', { fileId });
@@ -636,49 +652,48 @@ export class FileUploadService {
    */
   async downloadPublicMedia(fileId: string): Promise<FileContentDto> {
     const forked = this.em.fork();
+    const { file, version } = await forked.transactional(async (tx) => {
+      // Scoped system context allows reading clean public images without an HTTP tenant session.
+      await tx.execute("select set_config('app.system_context', 'true', true)");
+      const f = await this.filesRepo.findById(tx, fileId);
+      if (
+        !f ||
+        f.categoryConceptId !== CONCEPTS.FILE_CATEGORY_IMAGE ||
+        f.sensitivityConceptId !== CONCEPTS.SENSITIVITY_NORMAL
+      ) {
+        throw new ResourceNotFoundException('Archivo no encontrado', {
+          fileId,
+        });
+      }
+      if (f.deletedAt || f.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED) {
+        throw new PreconditionFailedException('El archivo está borrado', {
+          fileId,
+        });
+      }
+      if (!f.currentVersionId) {
+        throw new PreconditionFailedException(
+          'El archivo no tiene una versión vigente',
+          { fileId },
+        );
+      }
 
-    const file = await this.filesRepo.findById(forked, fileId);
-    if (
-      !file ||
-      file.categoryConceptId !== CONCEPTS.FILE_CATEGORY_IMAGE ||
-      file.sensitivityConceptId !== CONCEPTS.SENSITIVITY_NORMAL
-    ) {
-      throw new ResourceNotFoundException('Archivo no encontrado', { fileId });
-    }
-    if (
-      file.deletedAt ||
-      file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED
-    ) {
-      throw new PreconditionFailedException('El archivo está borrado', {
-        fileId,
-      });
-    }
-    if (!file.currentVersionId) {
-      throw new PreconditionFailedException(
-        'El archivo no tiene una versión vigente',
-        { fileId },
-      );
-    }
+      const v = await this.fileVersionsRepo.findById(tx, f.currentVersionId);
+      if (!v) {
+        throw new ResourceNotFoundException('Versión vigente no encontrada', {
+          fileId,
+        });
+      }
+      if (v.malwareScanStatusConceptId !== CONCEPTS.SCAN_CLEAN) {
+        throw new PreconditionFailedException(
+          'La versión vigente todavía no está lista para servirse públicamente',
+          { fileId },
+        );
+      }
+      return { file: f, version: v };
+    });
 
-    const version = await this.fileVersionsRepo.findById(
-      forked,
-      file.currentVersionId,
-    );
-    if (!version) {
-      throw new ResourceNotFoundException('Versión vigente no encontrada', {
-        fileId,
-      });
-    }
-    if (version.malwareScanStatusConceptId !== CONCEPTS.SCAN_CLEAN) {
-      throw new PreconditionFailedException(
-        'La versión vigente todavía no está lista para servirse públicamente',
-        { fileId },
-      );
-    }
-
-    const buffer = await this.storage.retrieve(version.storageUri);
     return {
-      buffer,
+      buffer: await this.storage.retrieve(version.storageUri),
       mimeType: version.mimeType,
       originalName: file.originalName,
     };

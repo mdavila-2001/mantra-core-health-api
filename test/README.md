@@ -20,4 +20,4 @@ corepack yarn smoke --listTests --runInBand
 corepack yarn test:e2e --listTests --runInBand
 ```
 
-Estos comandos enumeran archivos; **no** demuestran que pasen. El análisis de riesgos y brechas de prueba está en el [informe de revisión](../docs/revision-backend-2026-10-04/transversal/suite-pruebas.md).
+Estos comandos enumeran archivos; **no** demuestran que pasen.

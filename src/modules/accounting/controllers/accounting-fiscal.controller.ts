@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { FiscalService } from '../services';
 import {
   CreateFiscalYearDto,
@@ -29,9 +34,18 @@ export class AccountingFiscalController {
    */
   constructor(private readonly fiscalService: FiscalService) {}
 
-  /** UC-16-04. */
+  /**
+   * UC-16-04. Los roles son los de la lectura (`GET /accounting/fiscal-years`);
+   * el servicio decide si el actor administra la práctica o es el médico
+   * titular de su consultorio propio (S-8).
+   */
+  @Audited({
+    action: 'FISCAL_YEAR_OPENED',
+    entity: 'fiscal_year',
+    entityId: 'result.id',
+  })
   @Post('fiscal-years')
-  @Roles('SECURITY_ADMIN')
+  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'PRACTITIONER')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Abrir un ejercicio fiscal y sus periodos' })
   openFiscalYear(
@@ -42,6 +56,11 @@ export class AccountingFiscalController {
   }
 
   /** UC-16-05. */
+  @Audited({
+    action: 'FISCAL_PERIOD_LOCKED',
+    entity: 'fiscal_period',
+    entityId: 'param:id',
+  })
   @Post('fiscal-periods/:id/lock')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

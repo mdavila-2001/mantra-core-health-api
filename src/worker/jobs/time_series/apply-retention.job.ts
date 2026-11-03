@@ -2,7 +2,6 @@ import { randomUUID } from 'node:crypto';
 import { Inject, Injectable } from '@nestjs/common';
 import { Interval } from '@nestjs/schedule';
 import { PinoLogger } from 'nestjs-pino';
-import { SEED } from '../../../common';
 import { TIMESERIES_TABLES } from '../../../modules/time_series/constants';
 import { SystemApiClient } from '../../system-api-client.service';
 import { runTick } from '../../run-tick.util';
@@ -67,7 +66,7 @@ export class ApplyRetentionJob {
         table,
         olderThan,
         batchId: randomUUID(),
-        tenantId: SEED.tenantId,
+        tenantId: this.env.tsAdminTenantId,
         reason: 'worker.time_series.apply-retention: TS_RETENTION_POLICIES',
       },
     );

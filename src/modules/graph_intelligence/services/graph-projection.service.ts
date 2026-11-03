@@ -5,6 +5,7 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  requireTenantId,
   type AuthenticatedUser,
 } from '../../../common';
 import { OutboxService } from '../../messaging/services';
@@ -31,6 +32,7 @@ import {
   ReconcileSourceVersionDto,
   ReconcileResponseDto,
 } from '../dto';
+import { assertGraphResourceInTenant } from '../graph-scope';
 
 /**
  * Proyección del grafo (UC-61-01, 02, 03, 10, 12).
@@ -308,19 +310,13 @@ export class GraphProjectionService {
     dto: StartProjectionRunDto,
     _actor: AuthenticatedUser,
   ): Promise<ProjectionRunResponseDto> {
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const definition = await this.projectionRepo.findDefinitionById(
-        tx,
-        definitionId,
+      const definition = assertGraphResourceInTenant(
+        await this.projectionRepo.findDefinitionById(tx, definitionId),
+        'Definición de proyección no encontrada.',
+        tenantId,
       );
-      if (!definition) {
-        throw new ResourceNotFoundException(
-          'Definición de proyección no encontrada.',
-          {
-            definitionId,
-          },
-        );
-      }
       if (definition.state !== 'active') {
         throw new PreconditionFailedException(
           'La definición de proyección no está activa.',
@@ -387,14 +383,13 @@ export class GraphProjectionService {
     dto: AdvanceProjectionRunDto,
     actor: AuthenticatedUser,
   ): Promise<ProjectionRunResponseDto> {
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const run = await this.projectionRepo.findRunForUpdate(tx, runId);
-      if (!run) {
-        throw new ResourceNotFoundException(
-          'Corrida de proyección no encontrada.',
-          { runId },
-        );
-      }
+      const run = assertGraphResourceInTenant(
+        await this.projectionRepo.findRunForUpdate(tx, runId),
+        'Corrida de proyección no encontrada.',
+        tenantId,
+      );
       if (run.status !== 'running') {
         throw new PreconditionFailedException(
           'La corrida ya no está en marcha.',
@@ -479,13 +474,13 @@ export class GraphProjectionService {
     dto: ExpireEdgeDto,
     actor: AuthenticatedUser,
   ): Promise<ExpireEdgeResponseDto> {
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const edge = await this.projectionRepo.findEdgeForUpdate(tx, edgeId);
-      if (!edge) {
-        throw new ResourceNotFoundException('Arista no encontrada.', {
-          edgeId,
-        });
-      }
+      const edge = assertGraphResourceInTenant(
+        await this.projectionRepo.findEdgeForUpdate(tx, edgeId),
+        'Arista no encontrada.',
+        tenantId,
+      );
 
       if (edge.lifecycleState !== 'active') {
         return {

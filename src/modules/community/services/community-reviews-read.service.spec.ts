@@ -9,7 +9,8 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { CommunityReviewsReadService } from './community-reviews-read.service';
-import { ResourceNotFoundException } from '../../../common';
+import { ResourceNotFoundException, encodeKeysetCursor } from '../../../common';
+import { BadRequestException } from '@nestjs/common';
 import { COMM } from '../community.concepts';
 
 /**
@@ -20,6 +21,7 @@ function build() {
   const em = { fork: mockFn(() => ({})) };
   const profilesRepo = { findById: mockFn().mockResolvedValue({ id: 'p-1' }) };
   const reviewsRepo = {
+    findById: mockFn().mockResolvedValue(null),
     listByTargetPage: mockFn().mockResolvedValue([]),
     listDimensionScores: mockFn().mockResolvedValue([]),
     listResponses: mockFn().mockResolvedValue([]),
@@ -286,5 +288,186 @@ describe('CommunityReviewsReadService — opiniones de la ficha pública (P31)',
     const serialized = JSON.stringify(res);
     expect(serialized).not.toContain('encuentro-secreto');
     expect(serialized).not.toContain('paciente-secreto');
+  });
+});
+
+describe('CommunityReviewsReadService — fechas y cursor de la lectura pública', () => {
+  const exact = new Date('2026-08-01T22:45:13.123Z');
+
+  it('redondea publishedAt y editedAt al día (medianoche UTC) y sigue siendo una fecha válida', async () => {
+    const d = build();
+    d.reviewsRepo.listByTargetPage.mockResolvedValue([
+      {
+        ...review,
+        publishedAt: exact,
+        editedAt: new Date('2026-08-03T01:02:03.004Z'),
+      },
+    ]);
+
+    const res = await d.service.listProfileReviews('p-1', { limit: 10 });
+
+    expect(res.items[0].publishedAt).toEqual(
+      new Date('2026-08-01T00:00:00.000Z'),
+    );
+    expect(res.items[0].editedAt).toEqual(new Date('2026-08-03T00:00:00.000Z'));
+    expect(res.items[0].publishedAt!.toISOString()).toBe(
+      '2026-08-01T00:00:00.000Z',
+    );
+    // Nada de la hora exacta sale en la respuesta serializada.
+    expect(JSON.stringify(res)).not.toMatch(/22:45|13\.123|01:02:03/);
+  });
+
+  it('el redondeo es por día UTC, también cerca de la medianoche', async () => {
+    const d = build();
+    d.reviewsRepo.listByTargetPage.mockResolvedValue([
+      { ...review, id: 'a', publishedAt: new Date('2026-08-01T23:59:59.999Z') },
+      { ...review, id: 'b', publishedAt: new Date('2026-08-02T00:00:00.000Z') },
+    ]);
+
+    const res = await d.service.listProfileReviews('p-1', { limit: 10 });
+
+    expect(res.items.map((i) => i.publishedAt!.toISOString())).toEqual([
+      '2026-08-01T00:00:00.000Z',
+      '2026-08-02T00:00:00.000Z',
+    ]);
+  });
+
+  it('sin publishedAt ni editedAt devuelve null', async () => {
+    const d = build();
+    d.reviewsRepo.listByTargetPage.mockResolvedValue([review]);
+    const res = await d.service.listProfileReviews('p-1', { limit: 10 });
+    expect(res.items[0].publishedAt).toBeNull();
+    expect(res.items[0].editedAt).toBeNull();
+  });
+
+  it('también redondea en la lectura pública por slug', async () => {
+    const d = build();
+    d.searchRepo.findPublicBySlug.mockResolvedValue({
+      id: 'p-1',
+      targetTypeConceptId: COMM.PROFILE_TARGET_PRACTITIONER,
+    });
+    d.reviewsRepo.listByTargetPage.mockResolvedValue([
+      { ...review, publishedAt: exact },
+    ]);
+
+    const res = await d.service.listPublicReviewsBySlug('dra', undefined, {
+      limit: 10,
+    });
+
+    expect(res.items[0].publishedAt).toEqual(
+      new Date('2026-08-01T00:00:00.000Z'),
+    );
+  });
+
+  it('la respuesta del profesional conserva su fecha: no es del paciente', async () => {
+    const d = build();
+    const answeredAt = new Date('2026-08-02T09:15:00.000Z');
+    d.reviewsRepo.listByTargetPage.mockResolvedValue([review]);
+    d.reviewsRepo.listResponses.mockResolvedValue([
+      {
+        id: 'resp-1',
+        reviewId: 'r-1',
+        responderPublicProfileId: 'p-1',
+        responseText: 'gracias',
+        publishedAt: answeredAt,
+      },
+    ]);
+    const res = await d.service.listProfileReviews('p-1', { limit: 10 });
+    expect(res.items[0].responses[0].publishedAt).toEqual(answeredAt);
+  });
+
+  describe('cursor', () => {
+    it('el cursor lleva sólo el id: no expone el instante exacto de la reseña', async () => {
+      const d = build();
+      d.reviewsRepo.listByTargetPage.mockResolvedValue([
+        { ...review, createdAt: exact },
+        { ...review, id: 'r-2' },
+      ]);
+
+      const res = await d.service.listProfileReviews('p-1', { limit: 1 });
+
+      const decoded = Buffer.from(res.nextCursor!, 'base64url').toString(
+        'utf8',
+      );
+      expect(JSON.parse(decoded)).toEqual({ id: 'r-1' });
+      expect(decoded).not.toContain('22:45');
+    });
+
+    it('al volver con el cursor, la fecha de la clave sale de la base y la reseña debe ser de ese perfil', async () => {
+      const d = build();
+      d.reviewsRepo.findById.mockResolvedValue({
+        id: 'r-1',
+        targetPublicProfileId: 'p-1',
+        createdAt: exact,
+      });
+
+      await d.service.listProfileReviews('p-1', {
+        limit: 10,
+        cursor: encodeKeysetCursor({ id: 'r-1' }),
+      });
+
+      expect(d.reviewsRepo.listByTargetPage).toHaveBeenCalledWith(
+        expect.anything(),
+        'p-1',
+        COMM.PUBLICATION_PUBLISHED,
+        COMM.MODERATION_REMOVED,
+        { createdAt: exact.toISOString(), id: 'r-1' },
+        11,
+      );
+    });
+
+    it('acepta el formato anterior del cursor ({ createdAt, id }) usando sólo el id', async () => {
+      const d = build();
+      d.reviewsRepo.findById.mockResolvedValue({
+        id: 'r-1',
+        targetPublicProfileId: 'p-1',
+        createdAt: exact,
+      });
+
+      await d.service.listProfileReviews('p-1', {
+        limit: 10,
+        cursor: encodeKeysetCursor({
+          createdAt: '1999-01-01T00:00:00.000Z',
+          id: 'r-1',
+        }),
+      });
+
+      expect(d.reviewsRepo.listByTargetPage.mock.calls[0][4]).toEqual({
+        createdAt: exact.toISOString(),
+        id: 'r-1',
+      });
+    });
+
+    it.each([
+      ['una reseña que no existe', null],
+      [
+        'una reseña de otro perfil',
+        { id: 'r-9', targetPublicProfileId: 'otro', createdAt: exact },
+      ],
+    ])('rechaza con 400 un cursor que apunta a %s', async (_name, found) => {
+      const d = build();
+      d.reviewsRepo.findById.mockResolvedValue(found);
+
+      await expect(
+        d.service.listProfileReviews('p-1', {
+          limit: 10,
+          cursor: encodeKeysetCursor({ id: 'r-9' }),
+        }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+      expect(d.reviewsRepo.listByTargetPage).not.toHaveBeenCalled();
+    });
+
+    it('rechaza con 400 un cursor sin id o corrupto', async () => {
+      const d = build();
+      await expect(
+        d.service.listProfileReviews('p-1', {
+          limit: 10,
+          cursor: encodeKeysetCursor({ createdAt: '2026-01-01T00:00:00.000Z' }),
+        }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+      await expect(
+        d.service.listProfileReviews('p-1', { limit: 10, cursor: '%%%no' }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+    });
   });
 });

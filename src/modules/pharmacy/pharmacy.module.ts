@@ -2,7 +2,11 @@ import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
 import { DirectoryModule } from '../directory/directory.module';
+import { PracticeModule } from '../practice/practice.module';
+import { CommonModule } from '../common/common.module';
+import { SystemContextModule } from '../system_context/system_context.module';
 import {
+  PharmacyBulkController,
   PharmacyController,
   PharmacyPublicController,
   PharmacyReadController,
@@ -18,11 +22,21 @@ import {
   PharmacyStaffReadService,
   PharmacyMarketplaceService,
   MedicineCatalogSearchService,
+  PharmacyCategoriesService,
+  PharmacyOpeningHoursService,
+  PharmacyProvisioningService,
+  PharmacyBulkService,
+  CategoriesBulkHandler,
+  ProductsBulkHandler,
+  PricesBulkHandler,
+  SitesBulkHandler,
+  MedicationCatalogResolver,
 } from './services';
 import {
   PharmaciesRepository,
   PharmacyLicensesRepository,
   PharmacySitesRepository,
+  PharmacyReferencesRepository,
   PharmacyProductsRepository,
   MedicineCatalogRepository,
   PharmacyProductIdentifiersRepository,
@@ -32,6 +46,8 @@ import {
   PharmacyExternalProductMappingsRepository,
   PharmacyReadRepository,
   PharmacyMarketplaceRepository,
+  PharmacyCatalogRepository,
+  PharmacyOnCallShiftsRepository,
 } from './repositories';
 
 /**
@@ -48,17 +64,30 @@ import {
     // `DirectoryAuthorizationModule`) y el representante y las gerencias
     // (`DirectoryReadService`), leídos en el mismo lugar que `GET /tenants/me`.
     DirectoryModule,
+    // P50: el alta de farmacia crea su práctica, sus sedes físicas y sus
+    // direcciones (`PharmacyProvisioningService`). Ni `practice` ni `common`
+    // importan `pharmacy`, así que no cierra ciclo.
+    PracticeModule,
+    // P47: las imágenes del producto pasan por `AttachableFileService` (archivo
+    // vivo, de imagen y subido por quien edita).
+    CommonModule,
+    // El vínculo producto → medicamento se resuelve contra el catálogo con que
+    // se receta (la enumeración del campo de la receta). `system_context` no
+    // importa `pharmacy`, así que no cierra ciclo.
+    SystemContextModule,
   ],
   controllers: [
     PharmacyController,
     PharmacyReadController,
     PharmacyPublicController,
+    PharmacyBulkController,
   ],
   providers: [
     // Repositorios
     PharmaciesRepository,
     PharmacyLicensesRepository,
     PharmacySitesRepository,
+    PharmacyReferencesRepository,
     PharmacyProductsRepository,
     MedicineCatalogRepository,
     PharmacyProductIdentifiersRepository,
@@ -68,6 +97,8 @@ import {
     PharmacyExternalProductMappingsRepository,
     PharmacyReadRepository,
     PharmacyMarketplaceRepository,
+    PharmacyCatalogRepository,
+    PharmacyOnCallShiftsRepository,
     // Servicios
     PharmaciesService,
     PharmacySitesService,
@@ -79,9 +110,27 @@ import {
     PharmacyStaffReadService,
     PharmacyMarketplaceService,
     MedicineCatalogSearchService,
+    PharmacyCategoriesService,
+    PharmacyOpeningHoursService,
+    PharmacyProvisioningService,
+    // FAR-05: la carga masiva, una tabla por manejador.
+    PharmacyBulkService,
+    CategoriesBulkHandler,
+    ProductsBulkHandler,
+    PricesBulkHandler,
+    SitesBulkHandler,
+    MedicationCatalogResolver,
   ],
   // La cara de lectura se exporta para que el inventario (módulo 25) componga
   // disponibilidad sin duplicar los finders de publicación y precios.
-  exports: [PharmacyReadRepository],
+  // `PharmacyProvisioningService` se exporta para `iam`: el alta pública de
+  // farmacia la provisiona dentro de su propia transacción (P50).
+  // `PharmacyBulkService` se exporta para que el inventario cargue el stock
+  // por sucursal con el mismo contrato `{ mode, dryRun }` que el catálogo.
+  exports: [
+    PharmacyReadRepository,
+    PharmacyProvisioningService,
+    PharmacyBulkService,
+  ],
 })
 export class PharmacyModule {}

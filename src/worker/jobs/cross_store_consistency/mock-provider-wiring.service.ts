@@ -1,6 +1,7 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { MockProviderClient } from '../../mock-provider-client.service';
+import { declareProviderCapability } from '../../provider-capability';
 import { DeletionPipelineJob } from './deletion-pipeline.job';
 import {
   createMockDeletionExecutionAdapter,
@@ -23,7 +24,19 @@ export class MockProviderWiringService implements OnModuleInit {
   }
 
   onModuleInit(): void {
-    if (!this.client.isConfigured()) return;
+    if (!this.client.isConfigured()) {
+      declareProviderCapability(
+        this.logger,
+        'cross_store_consistency.deletion',
+        'none',
+      );
+      return;
+    }
+    declareProviderCapability(
+      this.logger,
+      'cross_store_consistency.deletion',
+      'mock',
+    );
 
     this.job.executionAdapter = createMockDeletionExecutionAdapter(this.client);
     this.job.verificationAdapter = createMockDeletionVerificationAdapter(

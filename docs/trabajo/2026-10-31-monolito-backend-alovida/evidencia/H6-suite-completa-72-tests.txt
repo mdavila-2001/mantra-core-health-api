@@ -1,0 +1,40 @@
+﻿
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.12 [39m[90mc:/Alovida/alovida-backend[39m
+
+ [32mÔ£ô[39m src/modules/billing/services/billing/billing.service.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 354[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m debe estar definido [33m 326[2mms[22m[39m
+ [32mÔ£ô[39m src/app.controller.spec.ts [2m([22m[2m1 test[22m[2m)[22m[33m 326[2mms[22m[39m
+       [33m[2mÔ£ô[22m[39m should return "Hello World!" [33m 323[2mms[22m[39m
+ [32mÔ£ô[39m src/modules/pharmacy/services/pharmacy/pharmacy.service.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 357[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m debe estar definido [33m 332[2mms[22m[39m
+ [32mÔ£ô[39m src/modules/diagnostics/services/diagnostics/diagnostics.service.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 328[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m debe estar definido [33m 305[2mms[22m[39m
+ [32mÔ£ô[39m src/modules/clinical/services/clinical/clinical.service.spec.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 368[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m debe estar definido [33m 314[2mms[22m[39m
+ [32mÔ£ô[39m src/modules/appointments/services/appointments/appointments.service.spec.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 372[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m debe estar definido [33m 324[2mms[22m[39m
+ [32mÔ£ô[39m src/modules/patients/controllers/patients/patients.controller.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 332[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m debe estar definido [33m 314[2mms[22m[39m
+ [32mÔ£ô[39m src/modules/clinical/controllers/clinical/clinical.controller.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 360[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m debe estar definido [33m 340[2mms[22m[39m
+ [32mÔ£ô[39m src/modules/diagnostics/controllers/diagnostics/diagnostics.controller.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 383[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m debe estar definido [33m 338[2mms[22m[39m
+ [32mÔ£ô[39m src/modules/appointments/controllers/appointments/appointments.controller.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 398[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m debe estar definido [33m 368[2mms[22m[39m
+ [32mÔ£ô[39m src/modules/practitioners/controllers/practitioners/practitioners.controller.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 379[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m debe estar definido [33m 352[2mms[22m[39m
+ [32mÔ£ô[39m src/modules/core/filters/http-exception/http-exception.filter.spec.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32mÔ£ô[39m src/modules/patients/services/patients/patients.service.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32mÔ£ô[39m src/modules/practitioners/services/practitioners/practitioners.service.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32mÔ£ô[39m src/modules/terminology/services/terminology/terminology.service.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32mÔ£ô[39m src/modules/terminology/controllers/terminology/terminology.controller.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 226[2mms[22m[39m
+ [32mÔ£ô[39m src/modules/core/guards/roles/roles.guard.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32mÔ£ô[39m src/modules/core/guards/jwt-auth/jwt-auth.guard.spec.ts [2m([22m[2m1 test[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32mÔ£ô[39m src/modules/pharmacy/controllers/pharmacy/pharmacy.controller.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 223[2mms[22m[39m
+ [32mÔ£ô[39m src/modules/billing/controllers/billing/billing.controller.spec.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 201[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m20 passed[39m[22m[90m (20)[39m
+[2m      Tests [22m [1m[32m72 passed[39m[22m[90m (72)[39m
+[2m   Start at [22m 20:14:25
+[2m   Duration [22m 4.52s[2m (transform 1.37s, setup 0ms, import 32.37s, tests 4.67s, environment 3ms)[22m
+

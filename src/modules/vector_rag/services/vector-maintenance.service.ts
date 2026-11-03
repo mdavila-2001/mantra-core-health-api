@@ -13,6 +13,12 @@ import {
   VectorCorpusRepository,
 } from '../repositories';
 import {
+  effectiveTenant,
+  inScopeOrNotFound,
+  resolveVectorScope,
+} from '../vector-scope';
+import { VectorErrorReason } from '../vector_rag.error-reasons';
+import {
   PropagateDeletionDto,
   DeletionResponseDto,
   ReconcileCollectionDto,
@@ -69,30 +75,54 @@ export class VectorMaintenanceService {
     dto: PropagateDeletionDto,
     actor: AuthenticatedUser,
   ): Promise<DeletionResponseDto> {
+    if (!dto.sourceDocumentId && !dto.patientProfileId) {
+      throw new PreconditionFailedException(
+        'Hay que declarar qué se borra: un documento fuente o un paciente.',
+      );
+    }
+    // El borrado es físico e irreversible: el tenant efectivo es el activo de la
+    // petición (el del cuerpo sólo puede repetirlo) y acota la selección antes
+    // de tocar la primera fila.
+    const tenantId = effectiveTenant(
+      resolveVectorScope(actor),
+      dto.tenantId,
+      'Referencia de borrado no encontrada.',
+      VectorErrorReason.DELETION_TARGET_OUT_OF_SCOPE,
+    );
+    const filter = {
+      sourceDocumentId: dto.sourceDocumentId,
+      patientProfileId: dto.patientProfileId,
+    };
+
     return this.em.transactional(async (tx) => {
-      if (!dto.sourceDocumentId && !dto.patientProfileId) {
-        throw new PreconditionFailedException(
-          'Hay que declarar qué se borra: un documento fuente o un paciente.',
+      const batchSize = dto.batchSize ?? DEFAULT_DELETION_BATCH;
+      const documents = await this.corpusRepo.findDocumentsForDeletion(
+        tx,
+        tenantId,
+        filter,
+        batchSize,
+      );
+      // Una referencia que no resuelve a nada del tenant, y que el tenant nunca
+      // pidió borrar, responde igual que una inexistente: no hay job, ni evento,
+      // ni «verificado». Una continuación por lotes (ya hubo un job del tenant
+      // para la misma referencia) sí puede llegar a «no queda nada».
+      if (
+        documents.length === 0 &&
+        !(await this.corpusRepo.hasPriorDeletionJob(tx, tenantId, filter))
+      ) {
+        throw new ResourceNotFoundException(
+          'Referencia de borrado no encontrada.',
+          undefined,
+          VectorErrorReason.DELETION_TARGET_OUT_OF_SCOPE,
         );
       }
-
       const job = this.corpusRepo.createDeletionJob(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         sourceDocumentId: dto.sourceDocumentId,
         patientProfileId: dto.patientProfileId,
         deletionReason: dto.deletionReason,
         status: 'verifying',
       });
-
-      const batchSize = dto.batchSize ?? DEFAULT_DELETION_BATCH;
-      const documents = await this.corpusRepo.findDocumentsForDeletion(
-        tx,
-        {
-          sourceDocumentId: dto.sourceDocumentId,
-          patientProfileId: dto.patientProfileId,
-        },
-        batchSize,
-      );
       const documentIds = documents.map((d) => d.id);
 
       const chunks = await this.corpusRepo.findChunksByDocuments(
@@ -120,7 +150,7 @@ export class VectorMaintenanceService {
       }
 
       await this.outbox.publishDomainEvent(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         eventType: 'VectorEmbeddingsPurged',
         aggregateType: 'vector_rag.vector_deletion_jobs',
         aggregateId: job.id,
@@ -179,18 +209,19 @@ export class VectorMaintenanceService {
     dto: ReconcileCollectionDto,
     actor: AuthenticatedUser,
   ): Promise<ReconciliationResponseDto> {
+    const scope = resolveVectorScope(actor);
     return this.em.transactional(async (tx) => {
       const startedAt = new Date();
 
-      const collection = await this.catalogRepo.findCollectionById(
-        tx,
-        collectionId,
-      );
-      if (!collection) {
-        throw new ResourceNotFoundException('Colección no encontrada.', {
+      const collection = inScopeOrNotFound(
+        scope,
+        await this.catalogRepo.findCollectionById(
+          tx,
           collectionId,
-        });
-      }
+          scope.tenantId,
+        ),
+        'Colección no encontrada.',
+      );
 
       const documents = await this.corpusRepo.findActiveDocumentsByCollection(
         tx,

@@ -2,7 +2,7 @@
   "code": "NEURO_EVALUACION_BASE",
   "name": "Neurología — consulta inicial (ficha base)",
   "specialty": { "code": "NEUROLOGIA", "display": "Neurología" },
-  "version": 2,
+  "version": 3,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, anamnesis y examen del sistema nervioso",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -10,7 +10,7 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "De la norma salen la estructura común de la consulta y el apartado de examen del sistema nervioso: motivo, tiempo de evolución, antecedentes, examen, diagnóstico y conducta. Son agregados propios de la especialidad el desglose del examen neurológico en campos separados (estado de conciencia, pares craneales, fuerza muscular, sensibilidad, reflejos, coordinación y marcha) y la anamnesis dirigida de cefalea y episodios convulsivos. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: escala de coma de Glasgow, escala de fuerza MRC."
+    "note": "De la norma salen la estructura común de la consulta y el apartado de examen del sistema nervioso: motivo, tiempo de evolución, antecedentes, examen, diagnóstico y conducta. Son agregados propios de la especialidad el desglose del examen neurológico en campos separados (estado de conciencia, pares craneales, fuerza muscular, sensibilidad, reflejos, coordinación y marcha) y la anamnesis dirigida de cefalea y episodios convulsivos. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: escala de coma de Glasgow, escala de fuerza MRC. Ampliación internacional (2026-10-24): la graduación de los reflejos osteotendinosos por sitio y lado (cluster exam_tendon_reflexes) desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 3.0 o 4.0 según cada uno, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
   },
   "fields": [
     {
@@ -168,6 +168,176 @@
       "name": "Reflejos osteotendinosos",
       "dataType": "text",
       "required": false
+    },
+    {
+      "section": "Examen neurológico",
+      "code": "reflejo_bicipital_izquierdo",
+      "name": "Reflejo bicipital (C5–C6) — izquierdo",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Ausente",
+        "± — Dudoso",
+        "1+ — Disminuido",
+        "2+ — Normal",
+        "3+ — Vivo",
+        "4+ — Clonus agotable",
+        "5+ — Clonus inagotable"
+      ],
+      "description": "Los sitios y la graduación (0, ±, 1+ a 5+) son los del arquetipo; la notación numérica es la que el propio arquetipo menciona en cada respuesta. Fuente: graduación de los reflejos de estiramiento muscular (el arquetipo no trae referencia bibliográfica), según el arquetipo openEHR openEHR-EHR-CLUSTER.exam_tendon_reflexes.v0 (rev. 0.0.2-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Examen neurológico",
+      "code": "reflejo_bicipital_derecho",
+      "name": "Reflejo bicipital (C5–C6) — derecho",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Ausente",
+        "± — Dudoso",
+        "1+ — Disminuido",
+        "2+ — Normal",
+        "3+ — Vivo",
+        "4+ — Clonus agotable",
+        "5+ — Clonus inagotable"
+      ],
+      "description": "Fuente: graduación de los reflejos de estiramiento muscular (el arquetipo no trae referencia bibliográfica), según el arquetipo openEHR openEHR-EHR-CLUSTER.exam_tendon_reflexes.v0 (rev. 0.0.2-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Examen neurológico",
+      "code": "reflejo_braquiorradial_izquierdo",
+      "name": "Reflejo braquiorradial o estilorradial (C6) — izquierdo",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Ausente",
+        "± — Dudoso",
+        "1+ — Disminuido",
+        "2+ — Normal",
+        "3+ — Vivo",
+        "4+ — Clonus agotable",
+        "5+ — Clonus inagotable"
+      ],
+      "description": "Fuente: graduación de los reflejos de estiramiento muscular (el arquetipo no trae referencia bibliográfica), según el arquetipo openEHR openEHR-EHR-CLUSTER.exam_tendon_reflexes.v0 (rev. 0.0.2-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Examen neurológico",
+      "code": "reflejo_braquiorradial_derecho",
+      "name": "Reflejo braquiorradial o estilorradial (C6) — derecho",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Ausente",
+        "± — Dudoso",
+        "1+ — Disminuido",
+        "2+ — Normal",
+        "3+ — Vivo",
+        "4+ — Clonus agotable",
+        "5+ — Clonus inagotable"
+      ],
+      "description": "Fuente: graduación de los reflejos de estiramiento muscular (el arquetipo no trae referencia bibliográfica), según el arquetipo openEHR openEHR-EHR-CLUSTER.exam_tendon_reflexes.v0 (rev. 0.0.2-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Examen neurológico",
+      "code": "reflejo_tricipital_izquierdo",
+      "name": "Reflejo tricipital (C7) — izquierdo",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Ausente",
+        "± — Dudoso",
+        "1+ — Disminuido",
+        "2+ — Normal",
+        "3+ — Vivo",
+        "4+ — Clonus agotable",
+        "5+ — Clonus inagotable"
+      ],
+      "description": "Fuente: graduación de los reflejos de estiramiento muscular (el arquetipo no trae referencia bibliográfica), según el arquetipo openEHR openEHR-EHR-CLUSTER.exam_tendon_reflexes.v0 (rev. 0.0.2-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Examen neurológico",
+      "code": "reflejo_tricipital_derecho",
+      "name": "Reflejo tricipital (C7) — derecho",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Ausente",
+        "± — Dudoso",
+        "1+ — Disminuido",
+        "2+ — Normal",
+        "3+ — Vivo",
+        "4+ — Clonus agotable",
+        "5+ — Clonus inagotable"
+      ],
+      "description": "Fuente: graduación de los reflejos de estiramiento muscular (el arquetipo no trae referencia bibliográfica), según el arquetipo openEHR openEHR-EHR-CLUSTER.exam_tendon_reflexes.v0 (rev. 0.0.2-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Examen neurológico",
+      "code": "reflejo_rotuliano_izquierdo",
+      "name": "Reflejo rotuliano (L4) — izquierdo",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Ausente",
+        "± — Dudoso",
+        "1+ — Disminuido",
+        "2+ — Normal",
+        "3+ — Vivo",
+        "4+ — Clonus agotable",
+        "5+ — Clonus inagotable"
+      ],
+      "description": "Fuente: graduación de los reflejos de estiramiento muscular (el arquetipo no trae referencia bibliográfica), según el arquetipo openEHR openEHR-EHR-CLUSTER.exam_tendon_reflexes.v0 (rev. 0.0.2-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Examen neurológico",
+      "code": "reflejo_rotuliano_derecho",
+      "name": "Reflejo rotuliano (L4) — derecho",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Ausente",
+        "± — Dudoso",
+        "1+ — Disminuido",
+        "2+ — Normal",
+        "3+ — Vivo",
+        "4+ — Clonus agotable",
+        "5+ — Clonus inagotable"
+      ],
+      "description": "Fuente: graduación de los reflejos de estiramiento muscular (el arquetipo no trae referencia bibliográfica), según el arquetipo openEHR openEHR-EHR-CLUSTER.exam_tendon_reflexes.v0 (rev. 0.0.2-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Examen neurológico",
+      "code": "reflejo_aquileo_izquierdo",
+      "name": "Reflejo aquíleo (S1) — izquierdo",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Ausente",
+        "± — Dudoso",
+        "1+ — Disminuido",
+        "2+ — Normal",
+        "3+ — Vivo",
+        "4+ — Clonus agotable",
+        "5+ — Clonus inagotable"
+      ],
+      "description": "Fuente: graduación de los reflejos de estiramiento muscular (el arquetipo no trae referencia bibliográfica), según el arquetipo openEHR openEHR-EHR-CLUSTER.exam_tendon_reflexes.v0 (rev. 0.0.2-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Examen neurológico",
+      "code": "reflejo_aquileo_derecho",
+      "name": "Reflejo aquíleo (S1) — derecho",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Ausente",
+        "± — Dudoso",
+        "1+ — Disminuido",
+        "2+ — Normal",
+        "3+ — Vivo",
+        "4+ — Clonus agotable",
+        "5+ — Clonus inagotable"
+      ],
+      "description": "Fuente: graduación de los reflejos de estiramiento muscular (el arquetipo no trae referencia bibliográfica), según el arquetipo openEHR openEHR-EHR-CLUSTER.exam_tendon_reflexes.v0 (rev. 0.0.2-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Examen neurológico",

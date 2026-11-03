@@ -1,0 +1,8 @@
+# Lo que no aporta al grafo del código: datos generados, la copia del DDL, documentos, infraestructura y JSON.
+inventario/
+database/
+docs/
+evidencias/
+infra/
+docker/
+*.json

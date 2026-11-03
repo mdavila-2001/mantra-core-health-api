@@ -44,6 +44,18 @@ export class ListExceptionsUseCase {
     to: Date,
     actor: AuthenticatedUser,
   ): Promise<AvailabilityExceptionListDto> {
+    // Sin `from`/`to` (o con un texto que no es fecha) llegan `Invalid Date`:
+    // el chequeo de abajo los atraparía, pero su `toISOString()` revienta con
+    // RangeError y la respuesta era un 500 en vez de decir qué falta.
+    if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) {
+      throw new PreconditionFailedException(
+        'La ventana no es una fecha válida',
+        {
+          from: String(from),
+          to: String(to),
+        },
+      );
+    }
     if (!(from < to)) {
       throw new PreconditionFailedException(
         'La ventana debe empezar antes de terminar',

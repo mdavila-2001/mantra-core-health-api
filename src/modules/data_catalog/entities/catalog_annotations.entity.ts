@@ -2,30 +2,37 @@ import { Entity, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 import { randomUUID } from 'node:crypto';
 
 /**
- * Ficha de negocio vigente de una tabla o columna
- * (`data_catalog.catalog_annotations`): por qué existe, qué significa una
- * fila, quién responde por ella y en qué estado de revisión está.
- *
- * Es la proyección de la última revisión. El historial completo, incluido el
- * contenido aprobado cuando hay una revisión nueva pendiente, vive en
- * `catalog_annotation_revisions`.
+ * Mapea la entidad persistente asociada a `catalog_annotations`.
  */
 @Entity({ schema: 'data_catalog', tableName: 'catalog_annotations' })
 export class CatalogAnnotations {
+  /**
+   * Identificador único de la instancia.
+   */
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  /** OBJECT | COLUMN. */
+  /**
+   * Valor de target kind mantenido por la instancia.
+   */
   @Property({ fieldName: 'target_kind', columnType: 'varchar' })
   targetKind!: string;
 
+  /**
+   * Identificador asociado a object.
+   */
   @Property({ fieldName: 'object_id', type: 'uuid' }) // FK → data_catalog.catalog_objects
   objectId!: string;
 
-  /** Sólo en fichas de columna. */
+  /**
+   * Identificador asociado a column.
+   */
   @Property({ fieldName: 'column_id', type: 'uuid', nullable: true }) // FK → data_catalog.catalog_columns
   columnId?: string;
 
+  /**
+   * Valor de business name mantenido por la instancia.
+   */
   @Property({
     fieldName: 'business_name',
     columnType: 'varchar',
@@ -33,13 +40,21 @@ export class CatalogAnnotations {
   })
   businessName?: string;
 
+  /**
+   * Valor de definition mantenido por la instancia.
+   */
   @Property({ columnType: 'text', nullable: true })
   definition?: string;
 
+  /**
+   * Valor de purpose mantenido por la instancia.
+   */
   @Property({ columnType: 'text', nullable: true })
   purpose?: string;
 
-  /** Por qué hace falta persistencia propia y no una vista o un cálculo. */
+  /**
+   * Valor de existence rationale mantenido por la instancia.
+   */
   @Property({
     fieldName: 'existence_rationale',
     columnType: 'text',
@@ -47,11 +62,15 @@ export class CatalogAnnotations {
   })
   existenceRationale?: string;
 
-  /** Qué representa exactamente una fila y cuál es su identidad. */
+  /**
+   * Valor de row grain mantenido por la instancia.
+   */
   @Property({ fieldName: 'row_grain', columnType: 'text', nullable: true })
   rowGrain?: string;
 
-  /** Por qué no se resuelve con una vista, un cálculo o una tabla existente. */
+  /**
+   * Valor de alternatives rationale mantenido por la instancia.
+   */
   @Property({
     fieldName: 'alternatives_rationale',
     columnType: 'text',
@@ -59,6 +78,9 @@ export class CatalogAnnotations {
   })
   alternativesRationale?: string;
 
+  /**
+   * Valor de process supported mantenido por la instancia.
+   */
   @Property({
     fieldName: 'process_supported',
     columnType: 'text',
@@ -66,6 +88,9 @@ export class CatalogAnnotations {
   })
   processSupported?: string;
 
+  /**
+   * Valor de source of truth mantenido por la instancia.
+   */
   @Property({
     fieldName: 'source_of_truth',
     columnType: 'text',
@@ -73,13 +98,21 @@ export class CatalogAnnotations {
   })
   sourceOfTruth?: string;
 
+  /**
+   * Valor de producers mantenido por la instancia.
+   */
   @Property({ type: 'json', columnType: 'jsonb', nullable: true })
   producers?: unknown;
 
+  /**
+   * Valor de consumers mantenido por la instancia.
+   */
   @Property({ type: 'json', columnType: 'jsonb', nullable: true })
   consumers?: unknown;
 
-  /** Consecuencia conocida de eliminar, alterar o retrasar estos datos. */
+  /**
+   * Valor de deletion impact mantenido por la instancia.
+   */
   @Property({
     fieldName: 'deletion_impact',
     columnType: 'text',
@@ -87,6 +120,9 @@ export class CatalogAnnotations {
   })
   deletionImpact?: string;
 
+  /**
+   * Valor de business owner mantenido por la instancia.
+   */
   @Property({
     fieldName: 'business_owner',
     columnType: 'varchar',
@@ -94,6 +130,9 @@ export class CatalogAnnotations {
   })
   businessOwner?: string;
 
+  /**
+   * Valor de data steward mantenido por la instancia.
+   */
   @Property({
     fieldName: 'data_steward',
     columnType: 'varchar',
@@ -101,6 +140,9 @@ export class CatalogAnnotations {
   })
   dataSteward?: string;
 
+  /**
+   * Valor de technical owner mantenido por la instancia.
+   */
   @Property({
     fieldName: 'technical_owner',
     columnType: 'varchar',
@@ -108,22 +150,33 @@ export class CatalogAnnotations {
   })
   technicalOwner?: string;
 
-  /** Unidad, moneda o zona horaria (columnas). */
+  /**
+   * Valor de unit mantenido por la instancia.
+   */
   @Property({ columnType: 'varchar', nullable: true })
   unit?: string;
 
+  /**
+   * Valor de value domain mantenido por la instancia.
+   */
   @Property({ fieldName: 'value_domain', columnType: 'text', nullable: true })
   valueDomain?: string;
 
-  /** Qué significa null, vacío o cero en esta columna. */
+  /**
+   * Valor de null semantics mantenido por la instancia.
+   */
   @Property({ fieldName: 'null_semantics', columnType: 'text', nullable: true })
   nullSemantics?: string;
 
-  /** UNKNOWN | NONE | INTERNAL | PII | PHI | SECRET. UNKNOWN ≠ NONE. */
+  /**
+   * Valor de sensitivity mantenido por la instancia.
+   */
   @Property({ columnType: 'varchar' })
   sensitivity!: string;
 
-  /** Deuda declarada: preguntas sin responder, con campo, responsable y plazo. */
+  /**
+   * Valor de open questions mantenido por la instancia.
+   */
   @Property({
     fieldName: 'open_questions',
     type: 'json',
@@ -132,18 +185,27 @@ export class CatalogAnnotations {
   })
   openQuestions?: unknown;
 
-  /** DRAFT | NEEDS_REVIEW | APPROVED | REJECTED, de la revisión vigente. */
+  /**
+   * Valor de review status mantenido por la instancia.
+   */
   @Property({ fieldName: 'review_status', columnType: 'varchar' })
   reviewStatus!: string;
 
-  /** MANUAL | IMPORTED_VAULT | AI_SUGGESTED, de la revisión vigente. */
+  /**
+   * Valor de origin mantenido por la instancia.
+   */
   @Property({ columnType: 'varchar' })
   origin!: string;
 
+  /**
+   * Valor de current revision no mantenido por la instancia.
+   */
   @Property({ fieldName: 'current_revision_no', columnType: 'int' })
   currentRevisionNo!: number;
 
-  /** Última revisión aprobada; puede quedar detrás de la vigente. */
+  /**
+   * Valor de approved revision no mantenido por la instancia.
+   */
   @Property({
     fieldName: 'approved_revision_no',
     columnType: 'int',
@@ -151,9 +213,15 @@ export class CatalogAnnotations {
   })
   approvedRevisionNo?: number;
 
-  @Property({ fieldName: 'approved_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  /**
+   * Identificador asociado a approved by user.
+   */
+  @Property({ fieldName: 'approved_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   approvedByUserId?: string;
 
+  /**
+   * Valor de approved at mantenido por la instancia.
+   */
   @Property({
     fieldName: 'approved_at',
     columnType: 'timestamptz',
@@ -161,19 +229,33 @@ export class CatalogAnnotations {
   })
   approvedAt?: Date;
 
+  /**
+   * Fecha y hora en que se creó el registro.
+   */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
   createdAt!: Date;
 
+  /**
+   * Fecha y hora de la última actualización.
+   */
   @Property({ fieldName: 'updated_at', columnType: 'timestamptz' })
   updatedAt!: Date;
 
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  /**
+   * Identificador asociado a created by user.
+   */
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   createdByUserId?: string;
 
-  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  /**
+   * Identificador asociado a updated by user.
+   */
+  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   updatedByUserId?: string;
 
-  /** Versión que el cliente envía como `expectedVersion`. */
+  /**
+   * Versión usada para controlar actualizaciones concurrentes.
+   */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
 }

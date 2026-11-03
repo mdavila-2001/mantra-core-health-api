@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
-import { PublicCatalogController } from './controllers/public-catalog.controller';
-import { PublicCatalogRepository } from './repositories/public-catalog.repository';
-import { PublicCatalogService } from './services/public-catalog.service';
+import { PublicCatalogController } from './presentation/controllers/public-catalog.controller';
+import { PublicCatalogRepository } from './infrastructure/repositories/public-catalog.repository';
+import { PublicCatalogService } from './application/services/public-catalog.service';
+import { PublicPharmacyBranchesRepository } from './infrastructure/repositories/public-pharmacy-branches.repository';
+import { PublicPharmacyBranchesService } from './application/services/public-pharmacy-branches.service';
 
 /**
  * Lecturas públicas de las fichas de organización y farmacia (M4 · H2).
@@ -17,6 +19,11 @@ import { PublicCatalogService } from './services/public-catalog.service';
   // Sin esta línea, olvidar registrarlo en `AppModule` pasaba sin aviso.
   imports: [],
   controllers: [PublicCatalogController],
-  providers: [PublicCatalogService, PublicCatalogRepository],
+  providers: [
+    PublicCatalogService,
+    PublicCatalogRepository,
+    PublicPharmacyBranchesService,
+    PublicPharmacyBranchesRepository,
+  ],
 })
 export class PublicCatalogModule {}

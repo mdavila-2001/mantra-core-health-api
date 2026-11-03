@@ -4,6 +4,8 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { RefreshRollupsJob } from './refresh-rollups.job';
 
+const PLATFORM_TENANT = '22222222-2222-4222-8222-222222222222';
+
 function build(env: any = {}) {
   const api = { get: mockFn(), post: mockFn(), workerId: mockFn() };
   const logger = {
@@ -12,7 +14,11 @@ function build(env: any = {}) {
     warn: mockFn(),
     error: mockFn(),
   };
-  const workerEnv = { tsRollupRefreshWindowHours: 2, ...env };
+  const workerEnv = {
+    tsRollupRefreshWindowHours: 2,
+    tsAdminTenantId: PLATFORM_TENANT,
+    ...env,
+  };
   const job = new RefreshRollupsJob(api as any, logger as any, workerEnv);
   return { job, api, logger, workerEnv };
 }
@@ -35,7 +41,7 @@ describe('RefreshRollupsJob', () => {
         from: expect.any(String),
         to: expect.any(String),
         batchId: expect.any(String),
-        tenantId: expect.any(String),
+        tenantId: PLATFORM_TENANT,
       }),
     );
     expect(new Date(body.to).getTime() - new Date(body.from).getTime()).toBe(

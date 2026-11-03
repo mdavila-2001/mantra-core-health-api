@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
+import { ClinicalErrorReason } from '../clinical.error-reasons';
 import {
   ResourceNotFoundException,
   touch,
@@ -138,9 +139,13 @@ export class PrescriptionSignaturePoliciesService {
     return this.em.transactional(async (tx) => {
       const policy = await this.repo.findById(tx, id);
       if (!policy) {
-        throw new ResourceNotFoundException('Política no encontrada', {
-          policyId: id,
-        });
+        throw new ResourceNotFoundException(
+          'Política no encontrada',
+          {
+            policyId: id,
+          },
+          ClinicalErrorReason.SIGNATURE_POLICY_NOT_FOUND,
+        );
       }
       const now = new Date();
       // No se sobreescribe una fecha de fin anterior ya pasada.

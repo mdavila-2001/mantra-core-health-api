@@ -319,6 +319,38 @@ export class PatientIdentityRepository {
     });
   }
 
+  /**
+   * Membresía viva del perfil en un clúster **del tenant dado**.
+   *
+   * `findLiveMembershipByProfile` no filtra por tenant: un perfil puede figurar
+   * en el clúster de otra organización, y servirlo desde ahí expandiría la
+   * historia con la identidad de un clúster ajeno.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param patientProfileId - Perfil de paciente.
+   * @param tenantId - Tenant propietario del clúster.
+   * @returns La membresía en un clúster del tenant, o `null`.
+   */
+  async findLiveMembershipInTenant(
+    em: EntityManager,
+    patientProfileId: string,
+    tenantId: string,
+  ): Promise<PatientIdentityMembers | null> {
+    const memberships = await em.find(PatientIdentityMembers, {
+      patientProfileId,
+      effectiveTo: null,
+    });
+    if (memberships.length === 0) return null;
+    const clusters = await em.find(PatientIdentityClusters, {
+      id: { $in: memberships.map((m) => m.patientIdentityClusterId) },
+      tenantId,
+    });
+    const owned = new Set(clusters.map((cluster) => cluster.id));
+    return (
+      memberships.find((m) => owned.has(m.patientIdentityClusterId)) ?? null
+    );
+  }
+
   // --- Línea de tiempo (UC-52-10, 13) ---
 
   /** Entrada append-only de la línea de tiempo del paciente. */

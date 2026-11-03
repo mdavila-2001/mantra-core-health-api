@@ -6,6 +6,11 @@ import { createdBy } from '../../../common';
 /** Datos para publicar un servicio de salud. */
 export interface CreateHealthcareServiceData {
   /**
+   * Tenant dueño del servicio: el de la práctica. La columna es NOT NULL desde
+   * F1c y la FK compuesta `(tenant_id, practice_id)` exige que coincidan.
+   */
+  tenantId: string;
+  /**
    * Identificador asociado a practice.
    */
   practiceId: string;
@@ -42,6 +47,10 @@ export interface CreateHealthcareServiceData {
    */
   telehealthAvailable?: boolean;
   /**
+   * Ítem de `billing.service_catalog` que fija el precio en la sede.
+   */
+  serviceCatalogId?: string;
+  /**
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
@@ -76,6 +85,44 @@ export class HealthcareServicesRepository {
   }
 
   /**
+   * El servicio que una sede ya ofrece para un procedimiento.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practiceSiteId - Sede.
+   * @param serviceConceptId - Procedimiento.
+   * @returns El servicio, o `null` si la sede no lo ofrece.
+   */
+  findBySiteAndConcept(
+    em: EntityManager,
+    practiceSiteId: string,
+    serviceConceptId: string,
+  ): Promise<HealthcareServices | null> {
+    return em.findOne(HealthcareServices, { practiceSiteId, serviceConceptId });
+  }
+
+  /**
+   * Los servicios con sede de una práctica, en el orden en que se publicaron.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practiceId - Práctica.
+   * @param practiceSiteId - Si viene, solo los de esa sede.
+   * @returns Los servicios; los que no tienen sede no son una oferta y no figuran.
+   */
+  listByPractice(
+    em: EntityManager,
+    practiceId: string,
+    practiceSiteId?: string,
+  ): Promise<HealthcareServices[]> {
+    return em.find(
+      HealthcareServices,
+      practiceSiteId === undefined
+        ? { practiceId, practiceSiteId: { $ne: null } }
+        : { practiceId, practiceSiteId },
+      { orderBy: { createdAt: 'ASC', id: 'ASC' } },
+    );
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.
@@ -89,6 +136,7 @@ export class HealthcareServicesRepository {
     return em.create(
       HealthcareServices,
       {
+        tenantId: data.tenantId,
         practiceId: data.practiceId,
         practiceSiteId: data.practiceSiteId,
         clinicalUnitId: data.clinicalUnitId,
@@ -97,6 +145,7 @@ export class HealthcareServicesRepository {
         referralRequired: data.referralRequired,
         appointmentRequired: data.appointmentRequired,
         telehealthAvailable: data.telehealthAvailable,
+        serviceCatalogId: data.serviceCatalogId,
         statusConceptId: data.statusConceptId,
         ...createdBy(data.actorUserId),
       },

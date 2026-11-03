@@ -2,9 +2,7 @@
 
 Facturación al paciente (CxC), cuentas por pagar (CxP), contabilización a ledger,
 conciliación bancaria, morosidad, planes de pago y KPIs financieros. Expone los 12
-casos de uso UC-17-01..12, tres lecturas de soporte y rutas de catálogo. La
-[revisión de 2026-10-05](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/billing.md)
-documenta los límites de autorización, dinero e idempotencia.
+casos de uso UC-17-01..12, tres lecturas de soporte y rutas de catálogo.
 
 ## Rutas HTTP y alcance (medido)
 
@@ -15,11 +13,11 @@ documenta los límites de autorización, dinero e idempotencia.
   find src/modules/billing -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **4 controllers, 21 rutas HTTP, 22 entidades y 12 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **4 controllers, 22 rutas HTTP, 22 entidades y 12 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
-Importa (`PracticeModule`, `SurveysModule`).
+Importa (`CommonModule`, `PracticeModule`).
 
 Entidades (`tableName`, 22 de 22 archivos `*.entity.ts`): `bill_lines`, `billing_document_links`, `bills`, `budget_lines`, `budgets`, `dunning_items`, `dunning_runs`, `financial_kpi_snapshots`, `invoice_lines`, `invoices`, `patient_statements`, `payable_payment_allocations`, `payments_made`, `payments_received`, `quotation_installments`, `quotations`, `receivable_payment_allocations`, `reimbursements`, `service_catalog`, `tax_codes`, `tax_periods`, `vendors`.
 
@@ -44,8 +42,53 @@ Entidades (`tableName`, 22 de 22 archivos `*.entity.ts`): `bill_lines`, `billing
 | `GET /billing/service-catalog` | sesión | `billing-service-catalog` |
 | `POST /billing/service-catalog` | SECURITY_ADMIN, PRACTITIONER, CLINICIAN | `billing-service-catalog` |
 | `PATCH /billing/service-catalog/:id` | PRACTITIONER, CLINICIAN, SECURITY_ADMIN | `billing-service-catalog` |
+| `GET /billing/service-catalog/:id/image` | sesión | `billing-service-catalog` |
 | `GET /billing/service-catalog/procedure-specialties` | sesión | `billing-service-catalog` |
 | `GET /billing/service-catalog/procedures` | sesión | `billing-service-catalog` |
+
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/billing -name '*.controller.ts' | wc -l
+  find src/modules/billing -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/billing -name '*.entity.ts' | wc -l
+  find src/modules/billing -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **4 controllers, 22 rutas HTTP, 22 entidades y 12 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`CommonModule`, `PracticeModule`).
+
+Entidades (`tableName`, 22 de 22 archivos `*.entity.ts`): `bill_lines`, `billing_document_links`, `bills`, `budget_lines`, `budgets`, `dunning_items`, `dunning_runs`, `financial_kpi_snapshots`, `invoice_lines`, `invoices`, `patient_statements`, `payable_payment_allocations`, `payments_made`, `payments_received`, `quotation_installments`, `quotations`, `receivable_payment_allocations`, `reimbursements`, `service_catalog`, `tax_codes`, `tax_periods`, `vendors`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /billing/documents/:id\\:post-to-ledger` | SECURITY_ADMIN | `billing-operations` |
+| `POST /billing/reconciliation\\:clear` | SECURITY_ADMIN | `billing-operations` |
+| `POST /billing/dunning-runs\\:execute` | SECURITY_ADMIN | `billing-operations` |
+| `POST /billing/internal/dunning-runs/run-due` | SYSTEM, SECURITY_ADMIN | `billing-operations` |
+| `POST /billing/kpi-snapshots\\:compute` | SECURITY_ADMIN | `billing-operations` |
+| `POST /billing/bills` | SECURITY_ADMIN | `billing-payables` |
+| `POST /billing/payments-made\\:execute` | SECURITY_ADMIN | `billing-payables` |
+| `GET /billing/invoices` | SECURITY_ADMIN | `billing-receivables` |
+| `GET /billing/invoices/:id` | SECURITY_ADMIN | `billing-receivables` |
+| `GET /billing/patient-statements` | SECURITY_ADMIN | `billing-receivables` |
+| `POST /billing/invoices\\:issue-from-encounter` | SECURITY_ADMIN | `billing-receivables` |
+| `POST /billing/payments-received\\:apply` | SECURITY_ADMIN | `billing-receivables` |
+| `POST /billing/invoices/:id\\:credit-note` | SECURITY_ADMIN | `billing-receivables` |
+| `POST /billing/reimbursements\\:link` | SECURITY_ADMIN | `billing-receivables` |
+| `POST /billing/patient-statements\\:generate` | SECURITY_ADMIN | `billing-receivables` |
+| `POST /billing/payment-plans` | SECURITY_ADMIN | `billing-receivables` |
+| `GET /billing/service-catalog` | sesión | `billing-service-catalog` |
+| `POST /billing/service-catalog` | SECURITY_ADMIN, PRACTITIONER, CLINICIAN | `billing-service-catalog` |
+| `PATCH /billing/service-catalog/:id` | PRACTITIONER, CLINICIAN, SECURITY_ADMIN | `billing-service-catalog` |
+| `GET /billing/service-catalog/:id/image` | sesión | `billing-service-catalog` |
+| `GET /billing/service-catalog/procedure-specialties` | sesión | `billing-service-catalog` |
+| `GET /billing/service-catalog/procedures` | sesión | `billing-service-catalog` |
+
+**Imagen de un servicio (P-22-8).** `GET /billing/service-catalog/:id/image` autoriza por contexto, no por rol: sesión con tenant verificado, servicio **activo** cuya práctica pertenece a ese tenant, y un archivo que es imagen (`png`, `jpeg` o `webp`) de sensibilidad normal, del tenant activo y con versión vigente utilizable (se comprueba también el tipo de la versión que se descarga). `POST /billing/service-catalog` valida `imageFileId` con la misma regla que el logo de la organización (`assertUsableBy`: archivo propio del actor) más sensibilidad normal y tenant; un archivo inexistente, ajeno o de otro tenant responde el mismo 404. Un `imageFileId` guardado antes de esa validación que no cumpla las condiciones no se sirve. Cualquier otro caso —servicio inexistente, ajeno, inactivo, sin imagen, o archivo no servible— responde el mismo 404. No abre `GET /common/files/:id/content` ni expone la imagen sin sesión: el catálogo público sigue sin devolver `image_file_id`.
 
 ## Endpoints (UC → ruta)
 
@@ -74,14 +117,13 @@ Las rutas de acción usan `:` literal, escapado en el decorador (`invoices\\:iss
 `dunning_items`, `financial_kpi_snapshots` (+ catálogos `vendors`, `service_catalog`,
 `tax_codes`, `budgets`, `tax_periods` sin endpoint propio en este módulo).
 
-## Reglas de negocio
+## Business rules
 
 - Totales de factura derivados de líneas (`base = cantidad*precio - descuento`,
   `total = subtotal + impuestos`); `balance = total - paid_total`.
 - Cobros/pagos: el código limita la suma asignada (más retención en CxP) contra el
-  monto y actualiza los saldos. Descuentos, signos y pertenencia de práctica todavía
-  requieren el endurecimiento registrado en el informe antes de considerarlos una
-  garantía contable completa.
+  monto y actualiza los saldos. Descuentos, signos y pertenencia de práctica no
+  están endurecidos: no son una garantía contable completa.
 - Nota de crédito: crea factura de reverso (total negativo) y baja el saldo de la
   original; el reverso no puede exceder el saldo salvo `writeOff`.
 - Bills: vendor activo, sin doble captura de `bill_number`, three-way match (línea
@@ -90,7 +132,7 @@ Las rutas de acción usan `:` literal, escapado en el decorador (`invoices\\:iss
 - Statement/dunning/KPI: unicidad lógica (periodo, `run_number`, clave de KPI).
 - Plan de pagos: la suma de cuotas debe igualar el saldo origen.
 
-## Permisos
+## Permissions
 
 Las operaciones financieras requieren `SECURITY_ADMIN` (`SUPERADMIN` es comodín).
 El catálogo tiene lectura abierta y altas/ediciones con roles administrativos o
@@ -114,3 +156,45 @@ etc.), inicio y éxito; rechazos de regla de negocio en `warn`/excepción. Sin P
   (mockean servicios). La pasada dirigida del 2026-10-05 ejecutó `corepack yarn test
   src/modules/billing --runInBand --silent`: 16 suites y 94 tests pasan.
 - Smoke: `test/smoke/modules/billing.smoke.ts` (`BILLING_SMOKE`).
+
+## «Mis gastos» del paciente — `GET /patient-spending/me` (P44)
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `GET /patient-spending/me?from=&to=&limit=` | PATIENT | `patient-spending` |
+
+Lectura sobre las facturas emitidas al titular (`billing.invoices`, con
+`patient_profile_id` del token): un movimiento por factura, del cobro más
+reciente al más antiguo, con importes en texto decimal exacto y
+`paidAmount = grossAmount − coveredAmount − discountAmount`.
+
+- **Pagado** = `total` de la factura. **Cubierto** = por cada línea que factura
+  la parte del paciente de un reclamo, `billed_amount − line_total` del reclamo.
+  **Descontado** = `discount_total`. **Costo** = la suma de los tres.
+- Un borrador no se lee; una nota de crédito pesa con signo negativo; una factura
+  que pasó a plan de pagos pesa sólo lo pagado antes del plan (`total − balance`),
+  porque el saldo lo cargan las cuotas.
+- Categoría (`SPEND_*`, conceptos de `billing.concepts.ts`): procedimiento →
+  farmacia → imagen → laboratorio → consulta (si hay encuentro) → `SPEND_OTHER`.
+- Moneda `BOB`: una factura sin moneda se lee en `BOB`; una en otra moneda no
+  entra. Rango `from`/`to` inclusive, hasta tres años, nunca después de hoy
+  (La Paz); fuera de eso, 400. `limit` hasta 1000 y `truncated` dice si recortó.
+- No incluye compras de farmacia sin seguro ni primas de seguro: ninguna de las
+  dos se registra hoy como factura al paciente.
+
+Código: `controllers/patient-spending.controller.ts`,
+`services/patient-spending.service.ts`, `repositories/patient-spending.repository.ts`.
+
+## Editor de catálogos · Servicios — `/admin/catalogs/services`
+
+Acceso `SECURITY_ADMIN` (`SUPERADMIN` por comodín); todo se acota a la organización del token y un recurso ajeno responde 404. Sin `DELETE`: se desactiva. Auditoría `@Audited` (entidad `service_catalog`): `ADMIN_SERVICE_CATALOG_CREATED|UPDATED|DEACTIVATED|REACTIVATED`.
+
+| Ruta | Qué hace |
+| --- | --- |
+| `GET /admin/catalogs/services/scopes` | Tipos de organización en uso, prácticas activas y monedas del editor (declarada **antes** de `:id`) |
+| `GET /admin/catalogs/services` · `GET …/:id` | Lista con cursor `(code, id)` y filtros; uno con su `rowVersion` |
+| `POST /admin/catalogs/services` | Alta idempotente por `(práctica, código)`: 201 / 200 repetición idéntica / 409 contenido distinto |
+| `PATCH …/:id` | Edición con `expectedRowVersion` (409 `SERVICE_CATALOG_VERSION_MISMATCH`) |
+| `POST …/:id/deactivate` · `…/reactivate` | Idempotentes |
+
+El contrato completo vive en el comentario de `controllers/admin-service-catalog.controller.ts`. El glosario (`/admin/catalogs/glossary`) está en `terminology/`; el reporte contable por tipo de usuario sigue siendo una decisión de negocio sin construir.

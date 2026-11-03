@@ -1,10 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import {
-  ResourceNotFoundException,
-  type AuthenticatedUser,
-} from '../../../common';
+import { type AuthenticatedUser } from '../../../common';
 import {
   PharmaciesRepository,
   PharmacyProductsRepository,
@@ -12,6 +9,7 @@ import {
 } from '../repositories';
 import { PHARM } from '../pharmacy.concepts';
 import { CatalogEntryDto, CatalogProjectionDto } from '../dto';
+import { requireManagedPharmacy } from './pharmacy-scope';
 
 /**
  * UC-24-11: proyección de catálogo y precios al read-model.
@@ -55,11 +53,7 @@ export class PharmacyCatalogService {
     );
     const em = this.em.fork();
 
-    const pharmacy = await this.pharmaciesRepo.findById(em, pharmacyId);
-    if (!pharmacy)
-      throw new ResourceNotFoundException('Farmacia no encontrada', {
-        pharmacyId,
-      });
+    await requireManagedPharmacy(this.pharmaciesRepo, em, pharmacyId, actor);
 
     const products = await this.productsRepo.findByPharmacyAndStatus(
       em,

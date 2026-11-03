@@ -1,4 +1,10 @@
 import { jest } from '@jest/globals';
+import {
+  PreconditionFailedException,
+  ResourceNotFoundException,
+  runWithTenant,
+} from '../../../common';
+import { VectorErrorReason } from '../vector_rag.error-reasons';
 
 /**
  * Ejecuta la operación mock fn.
@@ -61,7 +67,21 @@ function build() {
     outbox as any,
     logger as any,
   );
-  return { service, em, tx, catalogRepo, outbox, logger };
+  // Las operaciones exigen el tenant activo: estas pruebas actúan dentro de
+  // TENANT_ID. `raw` conserva la operación sin contexto para probar otro tenant.
+  const raw = service;
+  const scoped = Object.create(raw) as typeof service;
+  for (const name of [
+    'createCollection',
+    'defineRagPolicy',
+    'publishRagPolicy',
+    'updateCollectionLifecycle',
+  ] as const) {
+    (scoped as any)[name] = (...args: unknown[]) =>
+      runWithTenant(TENANT_ID, () => (raw as any)[name](...args));
+  }
+
+  return { service: scoped, raw, em, tx, catalogRepo, outbox, logger };
 }
 
 /**
@@ -273,25 +293,29 @@ describe('VectorGovernanceService', () => {
       expect(result.reboundCollections).toBe(1);
     });
 
-    it('rechaza reenlazar una colección de otro tenant', async () => {
+    it('rechaza reenlazar una colección de otro tenant con el mismo 404 que una inexistente', async () => {
       const d = build();
-      d.catalogRepo.findPolicyById.mockResolvedValue({
-        id: POLICY_ID,
-        tenantId: TENANT_ID,
-        state: 'draft',
-      });
+      const policy = { id: POLICY_ID, tenantId: TENANT_ID, state: 'draft' };
+      d.catalogRepo.findPolicyById.mockResolvedValue(policy);
       d.catalogRepo.findCollectionForUpdate.mockResolvedValue({
         id: COLLECTION_ID,
         tenantId: 'otro-tenant',
       });
 
-      await expect(
-        d.service.publishRagPolicy(
+      const error = await d.service
+        .publishRagPolicy(
           POLICY_ID,
           { rebindCollectionIds: [COLLECTION_ID] } as any,
           actor,
-        ),
-      ).rejects.toThrow(/otro tenant/);
+        )
+        .catch((e: any) => e);
+
+      expect(error).toBeInstanceOf(ResourceNotFoundException);
+      expect(error.reason).toBe(VectorErrorReason.RESOURCE_OUT_OF_SCOPE);
+      expect(error.details).toBeUndefined();
+      // No se revela de qué tenant es: ni en el mensaje ni en los detalles.
+      expect(JSON.stringify(error.getResponse())).not.toContain('otro-tenant');
+      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
     });
   });
 
@@ -383,6 +407,7 @@ describe('VectorGovernanceService', () => {
       const d = build();
       d.catalogRepo.findCollectionForUpdate.mockResolvedValue({
         id: COLLECTION_ID,
+        tenantId: TENANT_ID,
         lifecycleState: 'sealed',
       });
 
@@ -394,6 +419,123 @@ describe('VectorGovernanceService', () => {
 
       expect(result.frozenBindings).toBe(0);
       expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('alcance de tenant (VEC-01)', () => {
+    const OTHER_TENANT = '99999999-9999-9999-9999-999999999999';
+    const CREATE_DTO = {
+      tenantId: TENANT_ID,
+      code: 'c1',
+      name: 'Colección',
+      namespace: 'ns',
+      embeddingModelVersionId: MODEL_ID,
+    } as any;
+
+    /** Falla esperada: devuelve la excepción o lanza si no hubo. */
+    async function failure(promise: Promise<unknown>) {
+      try {
+        await promise;
+      } catch (error) {
+        return error as ResourceNotFoundException;
+      }
+      throw new Error('debía rechazar');
+    }
+
+    it('el tenant del cuerpo no puede ser otro que el activo: 404 y no crea nada', async () => {
+      const d = build();
+
+      const error = await failure(
+        d.service.createCollection(
+          { ...CREATE_DTO, tenantId: OTHER_TENANT },
+          actor,
+        ),
+      );
+
+      expect(error.reason).toBe(VectorErrorReason.RESOURCE_OUT_OF_SCOPE);
+      expect(d.em.transactional).not.toHaveBeenCalled();
+      expect(d.catalogRepo.createCollection).not.toHaveBeenCalled();
+      expect(d.catalogRepo.createBinding).not.toHaveBeenCalled();
+    });
+
+    it('no enlaza a la colección una política de otro tenant', async () => {
+      const d = build();
+      d.catalogRepo.findModelVersionForUpdate.mockResolvedValue({
+        id: MODEL_ID,
+        dimension: 1536,
+        distanceMetric: 'cosine',
+        approvedForPhi: true,
+      });
+      // El repositorio filtra por id + tenant: la política ajena no se encuentra.
+      d.catalogRepo.findPolicyById.mockResolvedValue(null);
+
+      const error = await failure(
+        d.service.createCollection(
+          { ...CREATE_DTO, accessPolicyId: POLICY_ID },
+          actor,
+        ),
+      );
+
+      expect(error.reason).toBe(VectorErrorReason.RESOURCE_OUT_OF_SCOPE);
+      expect(d.catalogRepo.findPolicyById).toHaveBeenCalledWith(
+        d.tx,
+        POLICY_ID,
+        TENANT_ID,
+      );
+      expect(d.catalogRepo.createCollection).not.toHaveBeenCalled();
+    });
+
+    it('publicar la política de otro tenant responde 404 y no la publica', async () => {
+      const d = build();
+      const foreign = { id: POLICY_ID, tenantId: OTHER_TENANT, state: 'draft' };
+      d.catalogRepo.findPolicyById.mockResolvedValue(foreign);
+
+      const error = await failure(
+        d.service.publishRagPolicy(POLICY_ID, {} as any, actor),
+      );
+
+      expect(error.reason).toBe(VectorErrorReason.RESOURCE_OUT_OF_SCOPE);
+      expect(foreign.state).toBe('draft');
+      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+    });
+
+    it('sellar la colección de otro tenant responde 404 y no la modifica', async () => {
+      const d = build();
+      const foreign = {
+        id: COLLECTION_ID,
+        tenantId: OTHER_TENANT,
+        lifecycleState: 'active',
+      };
+      d.catalogRepo.findCollectionForUpdate.mockResolvedValue(foreign);
+
+      const error = await failure(
+        d.service.updateCollectionLifecycle(
+          COLLECTION_ID,
+          { lifecycleState: 'sealed' },
+          actor,
+        ),
+      );
+
+      expect(error.reason).toBe(VectorErrorReason.RESOURCE_OUT_OF_SCOPE);
+      expect(foreign.lifecycleState).toBe('active');
+      expect(
+        d.catalogRepo.findBindingsByCollectionForUpdate,
+      ).not.toHaveBeenCalled();
+    });
+
+    it('sin tenant activo un actor corriente falla cerrado (412)', async () => {
+      const d = build();
+
+      const error = await d.raw
+        .updateCollectionLifecycle(
+          COLLECTION_ID,
+          { lifecycleState: 'sealed' },
+          actor,
+        )
+        .catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(PreconditionFailedException);
+      expect(d.catalogRepo.findCollectionForUpdate).not.toHaveBeenCalled();
     });
   });
 });

@@ -57,12 +57,19 @@ export interface CreateAffiliationData {
  */
 @Injectable()
 export class OrganizationAffiliationsRepository {
-  /** Busca una afiliación por id; `null` si no existe. */
-  findById(
+  /**
+   * Busca una afiliación por id en la que el tenant es una de las dos partes
+   * (primaria o participante); `null` si no existe o el tenant no participa.
+   */
+  findByIdForParty(
     em: EntityManager,
     id: string,
+    tenantId: string,
   ): Promise<OrganizationAffiliations | null> {
-    return em.findOne(OrganizationAffiliations, { id });
+    return em.findOne(OrganizationAffiliations, {
+      id,
+      $or: [{ primaryTenantId: tenantId }, { participatingTenantId: tenantId }],
+    });
   }
 
   /** Detecta una afiliación activa duplicada para (primary, participating, tipo). */

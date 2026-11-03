@@ -50,4 +50,10 @@ describe('autorización del plano de ejecución de QA', () => {
   it('la lectura del laboratorio no incluye roles de escritura ajenos', () => {
     expect(rolesOf(QaLabReadController).run).toEqual([...QA_LAB_READ_ROLES]);
   });
+
+  it('el catálogo de flujos se lee con los mismos roles que el resto del laboratorio', () => {
+    const roles = rolesOf(QaLabReadController);
+    expect(roles.listFlows).toEqual([...QA_LAB_READ_ROLES]);
+    expect(roles.flow).toEqual([...QA_LAB_READ_ROLES]);
+  });
 });

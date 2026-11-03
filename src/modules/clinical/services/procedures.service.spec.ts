@@ -19,8 +19,18 @@ const actor = { id: 'user-1', roles: [] } as any;
  * @returns Resultado de build.
  */
 function build() {
-  const tx = { flush: mockFn().mockResolvedValue(undefined) };
+  const order: string[] = [];
+  const tx = {
+    flush: mockFn().mockImplementation(async () => {
+      order.push('flush');
+    }),
+  };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
+  const receivedServices = {
+    projectProcedure: mockFn().mockImplementation(async () => {
+      order.push('project');
+    }),
+  };
   const proceduresRepo = { findById: mockFn(), create: mockFn() };
   const serviceRequestsRepo = { findById: mockFn() };
   const filesService = { createLink: mockFn() };
@@ -35,9 +45,13 @@ function build() {
     filesService as any,
     logger as any,
     clinicalRead as any,
+    receivedServices as any,
   );
   return {
     service,
+    receivedServices,
+    tx,
+    order,
     proceduresRepo,
     serviceRequestsRepo,
     filesService,
@@ -72,6 +86,49 @@ describe('ProceduresService (UC-08-12)', () => {
     );
     expect(sr.statusConceptId).toBe(CLIN.SERVICE_REQUEST_COMPLETED);
     expect(res.status).toBe(CLIN.PROCEDURE_COMPLETED);
+  });
+
+  it('projects the procedure to received services in the same transaction, after it is flushed', async () => {
+    const d = build();
+    const procedure = {
+      id: 'proc1',
+      patientProfileId: 'p1',
+      statusConceptId: CLIN.PROCEDURE_COMPLETED,
+      createdAt: new Date(),
+    };
+    d.proceduresRepo.create.mockReturnValue(procedure);
+    await d.service.create(
+      {
+        custodianTenantId: 't1',
+        patientProfileId: 'p1',
+        codeConceptId: 'code1',
+      },
+      actor,
+    );
+    expect(d.receivedServices.projectProcedure).toHaveBeenCalledWith(
+      d.tx,
+      procedure,
+      'user-1',
+    );
+    // El servicio depende del procedimiento por FK: el procedimiento se vuelca primero.
+    expect(d.order).toEqual(['flush', 'project', 'flush']);
+  });
+
+  it('does not project when the source service request is missing', async () => {
+    const d = build();
+    d.serviceRequestsRepo.findById.mockResolvedValue(null);
+    await expect(
+      d.service.create(
+        {
+          custodianTenantId: 't1',
+          patientProfileId: 'p1',
+          codeConceptId: 'code1',
+          serviceRequestId: 'missing',
+        } as any,
+        actor,
+      ),
+    ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    expect(d.receivedServices.projectProcedure).not.toHaveBeenCalled();
   });
 
   it('rejects when the source service request is missing', async () => {

@@ -11,11 +11,34 @@ import { IdentityChecksService } from './identity-checks.service';
 import {
   PreconditionFailedException,
   ResourceNotFoundException,
+  runWithTenant,
 } from '../../../common';
 import { IDA } from '../identity_assurance.concepts';
 import { IDENTITY_CARD_VERTICAL } from '../identity_assurance.seed';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
+const system = { id: 'worker-1', roles: ['SYSTEM'] } as any;
+const T1 = 'tenant-1';
+
+/**
+ * Ejecuta cada método del servicio dentro del contexto de tenant, como lo hace
+ * `TenantContextInterceptor` en una petición real.
+ *
+ * @param service - Servicio bajo prueba.
+ * @param tenantId - Tenant activo del contexto.
+ * @returns Proxy que fija el tenant en cada llamada.
+ */
+function scoped<S extends object>(service: S, tenantId: string): S {
+  return new Proxy(service, {
+    get(target, key) {
+      const value = (target as any)[key];
+      return typeof value === 'function'
+        ? (...args: unknown[]) =>
+            runWithTenant(tenantId, () => value.apply(target, args))
+        : value;
+    },
+  });
+}
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -23,9 +46,13 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
  */
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
-  const em = { transactional: mockFn((cb: any) => cb(tx)) };
+  const em = {
+    transactional: mockFn((cb: any) => cb(tx)),
+    fork: mockFn(() => tx),
+  };
   const checksRepo = {
     findById: mockFn(),
+    findDispatchable: mockFn().mockResolvedValue([]),
     countOpenRequiredByCase: mockFn().mockResolvedValue(0),
     findRequiredByCase: mockFn().mockResolvedValue([]),
   };
@@ -51,8 +78,14 @@ function build() {
     }),
   };
   const effects = { applyVerified: mockFn().mockResolvedValue(undefined) };
+  // La política de alcance se prueba aparte (identity-case-scope.service.spec.ts):
+  // acá se verifica que el servicio la consulte con el tenant del contexto.
+  const scope = {
+    findAuthorizedCase: mockFn().mockResolvedValue({ id: 'k1' }),
+    filterToTenant: mockFn(async (_tx: unknown, cases: unknown[]) => cases),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new IdentityChecksService(
+  const raw = new IdentityChecksService(
     em as any,
     checksRepo as any,
     attemptsRepo,
@@ -61,10 +94,13 @@ function build() {
     assertionsRepo as any,
     authorityEndpointsRepo as any,
     effects as any,
+    scope as any,
     logger as any,
   );
   return {
-    service,
+    service: scoped(raw, T1),
+    rawService: raw,
+    scope,
     tx,
     checksRepo,
     attemptsRepo,
@@ -500,6 +536,206 @@ describe('IdentityChecksService', () => {
       await expect(
         d.service.settleManualApproval(d.tx as any, kase, actor),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+  });
+
+  describe('alcance por tenant (el check hereda el tenant de su caso)', () => {
+    const ownCheck = () => ({
+      id: 'ch1',
+      identityVerificationCaseId: 'k1',
+      required: true,
+      statusConceptId: IDA.CHECK_IN_PROGRESS,
+      updatedAt: new Date(),
+    });
+
+    it('rechaza con 404 el resultado de un check cuyo caso es de otro tenant, sin mutar nada', async () => {
+      const d = build();
+      const check: any = ownCheck();
+      d.checksRepo.findById.mockResolvedValue(check);
+      d.scope.findAuthorizedCase.mockResolvedValue(null);
+
+      await expect(
+        d.service.recordResult('ch1', { result: 'MATCH' } as any, actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+
+      expect(d.scope.findAuthorizedCase).toHaveBeenCalledWith(d.tx, 'k1', T1);
+      expect(check.statusConceptId).toBe(IDA.CHECK_IN_PROGRESS);
+      expect(d.resultsRepo.create).not.toHaveBeenCalled();
+      expect(d.assertionsRepo.create).not.toHaveBeenCalled();
+      expect(d.effects.applyVerified).not.toHaveBeenCalled();
+    });
+
+    it('rechaza con 404 el intento sobre un check de otro tenant, sin mutar nada', async () => {
+      const d = build();
+      const check: any = ownCheck();
+      d.checksRepo.findById.mockResolvedValue(check);
+      d.scope.findAuthorizedCase.mockResolvedValue(null);
+
+      await expect(
+        d.service.recordAttempt(
+          'ch1',
+          { identityAuthorityEndpointId: 'ep1' } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+
+      expect(check.statusConceptId).toBe(IDA.CHECK_IN_PROGRESS);
+      expect(d.attemptsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('responde igual para un check ajeno que para uno inexistente', async () => {
+      const foreign = build();
+      foreign.checksRepo.findById.mockResolvedValue(ownCheck());
+      foreign.scope.findAuthorizedCase.mockResolvedValue(null);
+      const missing = build();
+      missing.checksRepo.findById.mockResolvedValue(null);
+      const body = { identityAuthorityEndpointId: 'ep1' } as any;
+
+      const a = await foreign.service
+        .recordAttempt('ch1', body, actor)
+        .catch((e) => e);
+      const b = await missing.service
+        .recordAttempt('ch1', body, actor)
+        .catch((e) => e);
+
+      expect(a).toBeInstanceOf(ResourceNotFoundException);
+      expect(a.message).toBe(b.message);
+      expect(a.getStatus()).toBe(b.getStatus());
+    });
+
+    it('exige tenant a un actor que no es SYSTEM', async () => {
+      const d = build();
+      d.checksRepo.findById.mockResolvedValue(ownCheck());
+
+      // Sin contexto de tenant: se llama al servicio sin el proxy.
+      await expect(
+        d.rawService.recordResult('ch1', { result: 'MATCH' } as any, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.resultsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('SYSTEM opera entre tenants: no consulta el alcance ni exige tenant', async () => {
+      const d = build();
+      const check: any = ownCheck();
+      d.checksRepo.findById.mockResolvedValue(check);
+      d.attemptsRepo.create.mockReturnValue({
+        id: 'at1',
+        attemptNumber: 1,
+        outcomeConceptId: IDA.ATTEMPT_SUCCESS,
+      });
+
+      await expect(
+        d.rawService.recordAttempt(
+          'ch1',
+          { identityAuthorityEndpointId: 'ep1' } as any,
+          system,
+        ),
+      ).resolves.toMatchObject({ attemptNumber: 1 });
+      expect(d.scope.findAuthorizedCase).not.toHaveBeenCalled();
+    });
+
+    it('listDispatchable deja a un SECURITY_ADMIN sólo los checks de casos de su tenant', async () => {
+      const d = build();
+      const mine = {
+        ...ownCheck(),
+        checkTypeConceptId: IDA.CHECK_TYPE_IDENTITY_CARD,
+      };
+      const theirs = {
+        ...ownCheck(),
+        id: 'ch2',
+        identityVerificationCaseId: 'k2',
+        checkTypeConceptId: IDA.CHECK_TYPE_IDENTITY_CARD,
+      };
+      d.checksRepo.findDispatchable.mockResolvedValue([mine, theirs]);
+      d.casesRepo.findById.mockImplementation(async (_tx: any, id: string) => ({
+        id,
+      }));
+      d.scope.filterToTenant.mockImplementation(
+        async (_tx: any, cases: any[]) => cases.filter((k) => k.id === 'k1'),
+      );
+
+      const res = await d.service.listDispatchable(actor);
+
+      expect(d.scope.filterToTenant).toHaveBeenCalledWith(
+        expect.anything(),
+        [{ id: 'k1' }, { id: 'k2' }],
+        T1,
+      );
+      expect(res.checks.map((c) => c.id)).toEqual(['ch1']);
+    });
+
+    it('listDispatchable entrega a SYSTEM los checks de todos los tenants', async () => {
+      const d = build();
+      const a = {
+        ...ownCheck(),
+        checkTypeConceptId: IDA.CHECK_TYPE_IDENTITY_CARD,
+      };
+      const b = {
+        ...ownCheck(),
+        id: 'ch2',
+        identityVerificationCaseId: 'k2',
+        checkTypeConceptId: IDA.CHECK_TYPE_IDENTITY_CARD,
+      };
+      d.checksRepo.findDispatchable.mockResolvedValue([a, b]);
+
+      const res = await d.rawService.listDispatchable(system);
+
+      expect(d.scope.filterToTenant).not.toHaveBeenCalled();
+      expect(res.checks.map((c) => c.id)).toEqual(['ch1', 'ch2']);
+    });
+
+    it('listDispatchable no deja que los checks más antiguos de otro tenant llenen el lote del actor', async () => {
+      const d = build();
+      const row = (id: string, caseId: string) => ({
+        ...ownCheck(),
+        id,
+        identityVerificationCaseId: caseId,
+        checkTypeConceptId: IDA.CHECK_TYPE_IDENTITY_CARD,
+      });
+      // Lote de 2: la primera página es toda de otro tenant, la segunda trae
+      // los dos checks propios.
+      d.checksRepo.findDispatchable.mockImplementation(
+        async (_em: any, _s: any, _limit: number, offset = 0) =>
+          offset === 0
+            ? [row('x1', 'kx1'), row('x2', 'kx2')]
+            : [row('m1', 'k1'), row('m2', 'k2')],
+      );
+      d.casesRepo.findById.mockImplementation(async (_tx: any, id: string) => ({
+        id,
+      }));
+      d.scope.filterToTenant.mockImplementation(
+        async (_tx: any, cases: any[]) =>
+          cases.filter((k) => !k.id.startsWith('kx')),
+      );
+
+      const res = await d.service.listDispatchable(actor, 2);
+
+      expect(res.checks.map((c) => c.id)).toEqual(['m1', 'm2']);
+      expect(d.checksRepo.findDispatchable).toHaveBeenCalledTimes(2);
+    });
+
+    it('un SYSTEM acotado a un tenant (scopedRoles) no barre entre tenants', async () => {
+      const d = build();
+      d.checksRepo.findDispatchable.mockResolvedValue([]);
+      const scopedSystem = {
+        id: 'worker-2',
+        roles: ['SYSTEM'],
+        scopedRoles: { [T1]: ['SYSTEM'] },
+      } as any;
+
+      await d.service.listDispatchable(scopedSystem);
+
+      // Pasó por el filtro de tenant en vez de saltarlo como el SYSTEM global.
+      expect(d.checksRepo.findDispatchable).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        50,
+        0,
+      );
+      const noTenant = d.rawService.listDispatchable(scopedSystem);
+      await expect(noTenant).rejects.toBeInstanceOf(
+        PreconditionFailedException,
+      );
     });
   });
 });

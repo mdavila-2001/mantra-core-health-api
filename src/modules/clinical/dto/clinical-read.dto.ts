@@ -297,6 +297,12 @@ export class MedicationRequestItemDto {
   frequencyText?: string;
 
   /**
+   * Cantidad recetada, si la receta la declara. Ausente si no fija cantidad.
+   */
+  @ApiPropertyOptional({ type: Number })
+  quantityDecimal?: number;
+
+  /**
    * Valor de valid from mantenido por la instancia.
    */
   @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })

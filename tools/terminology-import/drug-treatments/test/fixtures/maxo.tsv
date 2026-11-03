@@ -1,0 +1,4 @@
+disease_id	disease_name	source_id	maxo_id	maxo_name	hpo_id	relation	evidence	extension_id	extension_name	comment	other	author	last_updated	created
+MONDO:0009419	Woodhouse-sakati Syndrome	PMID:27489925	MAXO:0000058	pharmacotherapy	HP:0001332	treats	TAS	CHEBI:48873	cholinergic antagonist			ORCID:0000-0002-4142-7153	2023-03-04	2022-07-29
+MONDO:0100079	Epileptic Encephalopathy, Early Infantile, 6 (dravet Syndrome)	PMID:9596203	MAXO:0000208	sodium channel inhibitor therapy	HP:0032794	contraindicated	TAS	CHEBI:6367	lamotrigine	Seizures can worsen on withdrawing lamotrigine.		ORCID:0000-0002-1735-8178	2023-07-12	2023-07-12
+MONDO:0008854	Bardet-biedl Syndrome 1	PMID:20301537	MAXO:0000011	physical therapy	HP:0002141	treats	TAS					ORCID:0000-0001-7941-2961	2023-01-31	2022-01-06

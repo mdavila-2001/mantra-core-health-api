@@ -209,9 +209,7 @@ describe('AllergyIntolerancesService (UC-08-09)', () => {
         id: 'alg1',
         patientProfileId: 'p1',
       });
-      d.clinicalRead.assertCanReadHistory.mockRejectedValue(
-        new Error('403'),
-      );
+      d.clinicalRead.assertCanReadHistory.mockRejectedValue(new Error('403'));
       await expect(d.service.listAttachments('alg1', actor)).rejects.toThrow(
         '403',
       );
@@ -257,9 +255,7 @@ describe('AllergyIntolerancesService (UC-08-09)', () => {
         id: 'alg1',
         patientProfileId: 'p1',
       });
-      d.clinicalRead.assertCanWriteHistory.mockRejectedValue(
-        new Error('403'),
-      );
+      d.clinicalRead.assertCanWriteHistory.mockRejectedValue(new Error('403'));
       await expect(
         d.service.attachFile('alg1', { fileId: 'f1' }, actor),
       ).rejects.toThrow('403');

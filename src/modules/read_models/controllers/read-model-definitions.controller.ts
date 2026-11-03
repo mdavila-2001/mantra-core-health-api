@@ -10,7 +10,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { ReadModelDefinitionsService } from '../services';
 import {
   CreateReadModelDefinitionDto,
@@ -38,6 +43,11 @@ export class ReadModelDefinitionsController {
   constructor(private readonly service: ReadModelDefinitionsService) {}
 
   /** UC-30-01. */
+  @Audited({
+    action: 'READ_MODEL_DEFINITION_CREATED',
+    entity: 'read_model_definition',
+    entityId: 'result.id',
+  })
   @Post('definitions')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -52,6 +62,11 @@ export class ReadModelDefinitionsController {
   }
 
   /** UC-30-08. */
+  @Audited({
+    action: 'READ_MODEL_DEFINITION_VERSIONED',
+    entity: 'read_model_definition',
+    entityId: 'result.id',
+  })
   @Post('definitions/:schema/:object/versions')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -82,6 +97,11 @@ export class ReadModelDefinitionsController {
   }
 
   /** UC-30-03. */
+  @Audited({
+    action: 'READ_MODEL_REFRESHED',
+    entity: 'read_model_refresh_run',
+    entityId: 'result.id',
+  })
   @Post(':definitionId/refresh')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -96,6 +116,11 @@ export class ReadModelDefinitionsController {
   }
 
   /** UC-30-04. */
+  @Audited({
+    action: 'READ_MODEL_BACKFILLED',
+    entity: 'read_model_definition',
+    entityId: 'param:definitionId',
+  })
   @Post(':definitionId/backfill')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -108,6 +133,11 @@ export class ReadModelDefinitionsController {
   }
 
   /** UC-30-06. */
+  @Audited({
+    action: 'READ_MODEL_INVALIDATED',
+    entity: 'read_model_definition',
+    entityId: 'param:definitionId',
+  })
   @Post(':definitionId/invalidate')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -126,6 +156,11 @@ export class ReadModelDefinitionsController {
    * `health()`: el worker periódico llama este endpoint para cada definición
    * `stale` que descubre.
    */
+  @Audited({
+    action: 'READ_MODEL_RECONCILED',
+    entity: 'read_model_definition',
+    entityId: 'param:definitionId',
+  })
   @Post(':definitionId/reconcile')
   @Roles('SYSTEM', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -140,6 +175,11 @@ export class ReadModelDefinitionsController {
   }
 
   /** UC-30-13a. */
+  @Audited({
+    action: 'READ_MODEL_DEFINITION_DEPRECATED',
+    entity: 'read_model_definition',
+    entityId: 'param:id',
+  })
   @Post('definitions/:id/deprecate')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -152,6 +192,11 @@ export class ReadModelDefinitionsController {
   }
 
   /** UC-30-13b. */
+  @Audited({
+    action: 'READ_MODEL_DEFINITION_RETIRED',
+    entity: 'read_model_definition',
+    entityId: 'param:id',
+  })
   @Delete('definitions/:id')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

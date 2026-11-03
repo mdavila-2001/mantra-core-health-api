@@ -1,0 +1,224 @@
+{
+ "graphs": [
+  {
+   "id": "http://purl.obolibrary.org/obo/doid/doid-merged.owl",
+   "meta": {
+    "basicPropertyValues": [
+     {
+      "pred": "http://purl.obolibrary.org/obo/IAO_0000700",
+      "val": "http://purl.obolibrary.org/obo/DOID_4"
+     },
+     {
+      "pred": "http://purl.org/dc/elements/1.1/description",
+      "val": "The Disease Ontology has been developed as a standardized ontology for human disease with the purpose of providing the biomedical community with consistent, reusable and sustainable descriptions of human disease terms, phenotype characteristics and related medical vocabulary disease concepts."
+     },
+     {
+      "pred": "http://purl.org/dc/elements/1.1/language",
+      "val": "en"
+     },
+     {
+      "pred": "http://purl.org/dc/elements/1.1/title",
+      "val": "Human Disease Ontology"
+     },
+     {
+      "pred": "http://purl.org/dc/terms/license",
+      "val": "https://creativecommons.org/publicdomain/zero/1.0/"
+     },
+     {
+      "pred": "http://www.geneontology.org/formats/oboInOwl#date",
+      "val": "30:09:2026 11:23"
+     },
+     {
+      "pred": "http://www.geneontology.org/formats/oboInOwl#default-namespace",
+      "val": "disease_ontology"
+     },
+     {
+      "pred": "http://www.geneontology.org/formats/oboInOwl#hasOBOFormatVersion",
+      "val": "1.2"
+     },
+     {
+      "pred": "http://www.geneontology.org/formats/oboInOwl#saved-by",
+      "val": "lschriml"
+     },
+     {
+      "pred": "http://www.w3.org/2000/01/rdf-schema#comment",
+      "val": "The Disease Ontology content is available via the Creative Commons Public Domain Dedication CC0 1.0 Universal license (https://creativecommons.org/publicdomain/zero/1.0/)."
+     },
+     {
+      "pred": "http://www.w3.org/2002/07/owl#versionInfo",
+      "val": "2026-09-30"
+     }
+    ],
+    "version": "http://purl.obolibrary.org/obo/doid/releases/2026-09-30/doid-merged.owl"
+   },
+   "nodes": [
+    {
+     "id": "http://purl.obolibrary.org/obo/DOID_0040084",
+     "lbl": "Streptococcus pneumonia",
+     "type": "CLASS",
+     "meta": {
+      "definition": {
+       "val": "A bacterial pneumonia has_material_basis_in Streptococcus pneumoniae.",
+       "xrefs": [
+        "url:https://www.ncbi.nlm.nih.gov/pubmed/26396191"
+       ],
+       "meta": {
+        "basicPropertyValues": [
+         {
+          "pred": "http://purl.org/dc/elements/1.1/type",
+          "val": "http://purl.obolibrary.org/obo/ECO_0007645"
+         },
+         {
+          "pred": "http://www.w3.org/2000/01/rdf-schema#comment",
+          "val": "IEDB:RV"
+         }
+        ]
+       }
+      },
+      "subsets": [
+       "http://purl.obolibrary.org/obo/doid#DO_IEDB_slim",
+       "http://purl.obolibrary.org/obo/doid#DO_infectious_disease_slim"
+      ],
+      "xrefs": [
+       {
+        "val": "ICD10CM:J13"
+       },
+       {
+        "val": "ICD9CM:481"
+       }
+      ],
+      "basicPropertyValues": [
+       {
+        "pred": "http://www.geneontology.org/formats/oboInOwl#hasOBONamespace",
+        "val": "disease_ontology"
+       }
+      ]
+     }
+    },
+    {
+     "id": "http://purl.obolibrary.org/obo/DOID_0050035",
+     "lbl": "African tick-bite fever",
+     "type": "CLASS",
+     "meta": {
+      "definition": {
+       "val": "A spotted fever that has_material_basis_in Rickettsia africae, which is transmitted_by ticks (Amblyomma hebraeum and Amblyomma variegatum). The infection has_symptom fever, has_symptom eschar and has_symptom maculopapular rash.",
+       "xrefs": [
+        "url:http://jcm.asm.org/cgi/reprint/42/2/816",
+        "url:http://www.cdc.gov/otherspottedfever/index.html"
+       ],
+       "meta": {
+        "basicPropertyValues": [
+         {
+          "pred": "http://purl.org/dc/elements/1.1/type",
+          "val": "http://purl.obolibrary.org/obo/ECO_0007637"
+         },
+         {
+          "pred": "http://purl.org/dc/elements/1.1/type",
+          "val": "http://purl.obolibrary.org/obo/ECO_0007645"
+         }
+        ]
+       }
+      },
+      "subsets": [
+       "http://purl.obolibrary.org/obo/doid#DO_infectious_disease_slim",
+       "http://purl.obolibrary.org/obo/doid#gram-negative_bacterial_infectious_disease",
+       "http://purl.obolibrary.org/obo/doid#tick-borne_infectious_disease",
+       "http://purl.obolibrary.org/obo/doid#zoonotic_infectious_disease"
+      ],
+      "synonyms": [
+       {
+        "pred": "hasExactSynonym",
+        "val": "Rickettsia africae spotted fever"
+       },
+       {
+        "pred": "hasExactSynonym",
+        "val": "south african tick-bite fever"
+       }
+      ],
+      "basicPropertyValues": [
+       {
+        "pred": "http://www.geneontology.org/formats/oboInOwl#hasAlternativeId",
+        "val": "DOID:0050034"
+       },
+       {
+        "pred": "http://www.geneontology.org/formats/oboInOwl#hasAlternativeId",
+        "val": "DOID:0050036"
+       },
+       {
+        "pred": "http://www.geneontology.org/formats/oboInOwl#hasOBONamespace",
+        "val": "disease_ontology"
+       }
+      ]
+     }
+    },
+    {
+     "id": "http://purl.obolibrary.org/obo/NCBITaxon_1313",
+     "lbl": "Streptococcus pneumoniae",
+     "type": "CLASS"
+    },
+    {
+     "id": "http://purl.obolibrary.org/obo/NCBITaxon_34608",
+     "lbl": "Amblyomma hebraeum",
+     "type": "CLASS"
+    },
+    {
+     "id": "http://purl.obolibrary.org/obo/IDO_0000664",
+     "lbl": "has material basis in",
+     "type": "PROPERTY",
+     "propertyType": "OBJECT",
+     "meta": {
+      "definition": {
+       "val": "Relating the disease to it\u2019s causation (disease and disorder).",
+       "xrefs": [
+        "url:http://purl.obolibrary.org/obo/IDO_0000664"
+       ]
+      }
+     }
+    },
+    {
+     "id": "http://purl.obolibrary.org/obo/RO_0002451",
+     "lbl": "transmitted by",
+     "type": "PROPERTY",
+     "propertyType": "OBJECT"
+    }
+   ],
+   "edges": [
+    {
+     "sub": "http://purl.obolibrary.org/obo/DOID_0040084",
+     "pred": "http://purl.obolibrary.org/obo/IDO_0000664",
+     "obj": "http://purl.obolibrary.org/obo/NCBITaxon_1313"
+    },
+    {
+     "sub": "http://purl.obolibrary.org/obo/DOID_0050035",
+     "pred": "http://purl.obolibrary.org/obo/IDO_0000664",
+     "obj": "http://purl.obolibrary.org/obo/NCBITaxon_35788"
+    },
+    {
+     "sub": "http://purl.obolibrary.org/obo/DOID_0050035",
+     "pred": "http://purl.obolibrary.org/obo/RO_0002451",
+     "obj": "http://purl.obolibrary.org/obo/NCBITaxon_34608"
+    },
+    {
+     "sub": "http://purl.obolibrary.org/obo/DOID_0050035",
+     "pred": "http://purl.obolibrary.org/obo/RO_0002451",
+     "obj": "http://purl.obolibrary.org/obo/NCBITaxon_34610"
+    },
+    {
+     "sub": "http://purl.obolibrary.org/obo/DOID_0050035",
+     "pred": "http://purl.obolibrary.org/obo/RO_0002451",
+     "obj": "http://purl.obolibrary.org/obo/TRANS_0000024"
+    },
+    {
+     "sub": "http://purl.obolibrary.org/obo/NCBITaxon_1313",
+     "pred": "is_a",
+     "obj": "http://purl.obolibrary.org/obo/NCBITaxon_1301"
+    },
+    {
+     "sub": "http://purl.obolibrary.org/obo/NCBITaxon_34608",
+     "pred": "is_a",
+     "obj": "http://purl.obolibrary.org/obo/NCBITaxon_6942"
+    }
+   ]
+  }
+ ]
+}

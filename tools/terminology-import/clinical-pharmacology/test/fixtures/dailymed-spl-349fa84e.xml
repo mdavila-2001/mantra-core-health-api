@@ -1,0 +1,2007 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet href="https://www.accessdata.fda.gov/spl/stylesheet/spl.xsl" type="text/xsl"?>
+<document xmlns="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:hl7-org:v3 https://www.accessdata.fda.gov/spl/schema/spl.xsd">
+   <id root="8d557cac-41d7-4b8f-ab59-02c08ca89f01"/>
+   <code code="34391-3" codeSystem="2.16.840.1.113883.6.1" displayName="HUMAN PRESCRIPTION DRUG LABEL"/>
+   <title>These highlights do not include all the information needed to use ZEGFROVY safely and effectively. See full prescribing information for ZEGFROVY. <br/>
+      <br/> ZEGFROVY (sunvozertinib) tablets, for oral use <br/> Initial U.S. Approval: 2025</title>
+   <effectiveTime value="20260916"/>
+   <setId root="349fa84e-1fdb-4976-b1bb-689b80eac8ad"/>
+   <versionNumber value="1"/>
+   <author>
+      <time/>
+      <assignedEntity>
+         <representedOrganization>
+            <id extension="552624146" root="1.3.6.1.4.1.519.1"/>
+            <name>Dizal Pharmaceutical Co., Ltd.</name>
+            <assignedEntity>
+               <assignedOrganization/>
+            </assignedEntity>
+         </representedOrganization>
+      </assignedEntity>
+   </author>
+   <component>
+      <structuredBody>
+         <component>
+            <section ID="DLDE">
+               <id root="0a3a0b45-7352-486f-a8a2-b7ba7588721f"/>
+               <code code="48780-1" codeSystem="2.16.840.1.113883.6.1" displayName="SPL PRODUCT DATA ELEMENTS SECTION"/>
+               <effectiveTime value="20260917"/>
+               <subject>
+                  <manufacturedProduct>
+                     <manufacturedProduct>
+                        <code code="84694-101" codeSystem="2.16.840.1.113883.6.69"/>
+                        <name>ZEGFROVY</name>
+                        <formCode code="C42931" codeSystem="2.16.840.1.113883.3.26.1.1" displayName="TABLET, FILM COATED"/>
+                        <asEntityWithGeneric>
+                           <genericMedicine>
+                              <name>Sunvozertinib</name>
+                           </genericMedicine>
+                        </asEntityWithGeneric>
+                        <ingredient classCode="ACTIB">
+                           <quantity>
+                              <numerator value="150" unit="mg"/>
+                              <denominator value="1" unit="1"/>
+                           </quantity>
+                           <ingredientSubstance>
+                              <code code="L1Q2K5JYO8" codeSystem="2.16.840.1.113883.4.9"/>
+                              <name>Sunvozertinib</name>
+                              <activeMoiety>
+                                 <activeMoiety>
+                                    <code code="L1Q2K5JYO8" codeSystem="2.16.840.1.113883.4.9"/>
+                                    <name>Sunvozertinib</name>
+                                 </activeMoiety>
+                              </activeMoiety>
+                           </ingredientSubstance>
+                        </ingredient>
+                        <ingredient classCode="IACT">
+                           <ingredientSubstance>
+                              <code code="EWQ57Q8I5X" codeSystem="2.16.840.1.113883.4.9"/>
+                              <name>lactose monohydrate</name>
+                           </ingredientSubstance>
+                        </ingredient>
+                        <ingredient classCode="IACT">
+                           <ingredientSubstance>
+                              <code code="OP1R32D61U" codeSystem="2.16.840.1.113883.4.9"/>
+                              <name>microcrystalline cellulose</name>
+                           </ingredientSubstance>
+                        </ingredient>
+                        <ingredient classCode="IACT">
+                           <ingredientSubstance>
+                              <code code="ETJ7Z6XBU4" codeSystem="2.16.840.1.113883.4.9"/>
+                              <name>SILICON DIOXIDE</name>
+                           </ingredientSubstance>
+                        </ingredient>
+                        <ingredient classCode="IACT">
+                           <ingredientSubstance>
+                              <code code="M28OL1HH48" codeSystem="2.16.840.1.113883.4.9"/>
+                              <name>croscarmellose sodium</name>
+                           </ingredientSubstance>
+                        </ingredient>
+                        <ingredient classCode="IACT">
+                           <ingredientSubstance>
+                              <code code="9XZ8H6N6OH" codeSystem="2.16.840.1.113883.4.9"/>
+                              <name>HYDROXYPROPYL CELLULOSE, UNSPECIFIED</name>
+                           </ingredientSubstance>
+                        </ingredient>
+                        <ingredient classCode="IACT">
+                           <ingredientSubstance>
+                              <code code="70097M6I30" codeSystem="2.16.840.1.113883.4.9"/>
+                              <name>magnesium stearate</name>
+                           </ingredientSubstance>
+                        </ingredient>
+                        <ingredient classCode="IACT">
+                           <ingredientSubstance>
+                              <code code="0WZ8WG20P6" codeSystem="2.16.840.1.113883.4.9"/>
+                              <name>HYPROMELLOSE 2910 (6 MPA.S)</name>
+                           </ingredientSubstance>
+                        </ingredient>
+                        <ingredient classCode="IACT">
+                           <ingredientSubstance>
+                              <code code="15FIX9V2JP" codeSystem="2.16.840.1.113883.4.9"/>
+                              <name>titanium dioxide</name>
+                           </ingredientSubstance>
+                        </ingredient>
+                        <ingredient classCode="IACT">
+                           <ingredientSubstance>
+                              <code code="XHX3C3X673" codeSystem="2.16.840.1.113883.4.9"/>
+                              <name>triacetin</name>
+                           </ingredientSubstance>
+                        </ingredient>
+                        <ingredient classCode="IACT">
+                           <ingredientSubstance>
+                              <code code="EX438O2MRT" codeSystem="2.16.840.1.113883.4.9"/>
+                              <name>FERRIC OXIDE YELLOW</name>
+                           </ingredientSubstance>
+                        </ingredient>
+                        <asContent>
+                           <quantity>
+                              <numerator value="30" unit="1"/>
+                              <denominator value="1"/>
+                           </quantity>
+                           <containerPackagedProduct>
+                              <code codeSystem="2.16.840.1.113883.6.69"/>
+                              <formCode code="C43169" codeSystem="2.16.840.1.113883.3.26.1.1" displayName="BOTTLE"/>
+                              <asContent>
+                                 <quantity>
+                                    <numerator value="1" unit="1"/>
+                                    <denominator value="1"/>
+                                 </quantity>
+                                 <containerPackagedProduct>
+                                    <code code="84694-101-01" codeSystem="2.16.840.1.113883.6.69"/>
+                                    <formCode code="C43182" codeSystem="2.16.840.1.113883.3.26.1.1" displayName="CARTON"/>
+                                 </containerPackagedProduct>
+                                 <subjectOf>
+                                    <marketingAct>
+                                       <code code="C53292" codeSystem="2.16.840.1.113883.3.26.1.1"/>
+                                       <statusCode code="active"/>
+                                       <effectiveTime>
+                                          <low value="20261022"/>
+                                       </effectiveTime>
+                                    </marketingAct>
+                                 </subjectOf>
+                              </asContent>
+                           </containerPackagedProduct>
+                           <subjectOf>
+                              <characteristic>
+                                 <code code="SPLCMBPRDTP" codeSystem="2.16.840.1.113883.1.11.19255"/>
+                                 <value code="C112160" codeSystem="2.16.840.1.113883.3.26.1.1" displayName="Type 0: Not a Combination Product" xsi:type="CV"/>
+                              </characteristic>
+                           </subjectOf>
+                        </asContent>
+                     </manufacturedProduct>
+                     <subjectOf>
+                        <approval>
+                           <id extension="NDA219839" root="2.16.840.1.113883.3.150"/>
+                           <code code="C73594" codeSystem="2.16.840.1.113883.3.26.1.1" displayName="NDA"/>
+                           <author>
+                              <territorialAuthority>
+                                 <territory>
+                                    <code code="USA" codeSystem="2.16.840.1.113883.5.28"/>
+                                 </territory>
+                              </territorialAuthority>
+                           </author>
+                        </approval>
+                     </subjectOf>
+                     <subjectOf>
+                        <marketingAct>
+                           <code code="C53292" codeSystem="2.16.840.1.113883.3.26.1.1"/>
+                           <statusCode code="active"/>
+                           <effectiveTime>
+                              <low value="20261022"/>
+                           </effectiveTime>
+                        </marketingAct>
+                     </subjectOf>
+                     <subjectOf>
+                        <characteristic classCode="OBS">
+                           <code code="SPLCOLOR" codeSystem="2.16.840.1.113883.1.11.19255"/>
+                           <value code="C48330" codeSystem="2.16.840.1.113883.3.26.1.1" displayName="YELLOW" xsi:type="CE"/>
+                        </characteristic>
+                     </subjectOf>
+                     <subjectOf>
+                        <characteristic classCode="OBS">
+                           <code code="SPLSCORE" codeSystem="2.16.840.1.113883.1.11.19255"/>
+                           <value value="1" xsi:type="INT"/>
+                        </characteristic>
+                     </subjectOf>
+                     <subjectOf>
+                        <characteristic classCode="OBS">
+                           <code code="SPLSHAPE" codeSystem="2.16.840.1.113883.1.11.19255"/>
+                           <value code="C48336" codeSystem="2.16.840.1.113883.3.26.1.1" displayName="CAPSULE" xsi:type="CE">
+                              <originalText>biconvex</originalText>
+                           </value>
+                        </characteristic>
+                     </subjectOf>
+                     <subjectOf>
+                        <characteristic classCode="OBS">
+                           <code code="SPLSIZE" codeSystem="2.16.840.1.113883.1.11.19255"/>
+                           <value unit="mm" value="16" xsi:type="PQ"/>
+                        </characteristic>
+                     </subjectOf>
+                     <subjectOf>
+                        <characteristic classCode="OBS">
+                           <code code="SPLIMPRINT" codeSystem="2.16.840.1.113883.1.11.19255"/>
+                           <value xsi:type="ST">150;companylogo</value>
+                        </characteristic>
+                     </subjectOf>
+                     <consumedIn>
+                        <substanceAdministration>
+                           <routeCode code="C38288" codeSystem="2.16.840.1.113883.3.26.1.1" displayName="ORAL"/>
+                        </substanceAdministration>
+                     </consumedIn>
+                  </manufacturedProduct>
+               </subject>
+               <subject>
+                  <manufacturedProduct>
+                     <manufacturedProduct>
+                        <code code="84694-102" codeSystem="2.16.840.1.113883.6.69"/>
+                        <name>ZEGFROVY</name>
+                        <formCode code="C42931" codeSystem="2.16.840.1.113883.3.26.1.1" displayName="TABLET, FILM COATED"/>
+                        <asEntityWithGeneric>
+                           <genericMedicine>
+                              <name>Sunvozertinib</name>
+                           </genericMedicine>
+                        </asEntityWithGeneric>
+                        <ingredient classCode="ACTIB">
+                           <quantity>
+                              <numerator value="200" unit="mg"/>
+                              <denominator value="1" unit="1"/>
+                           </quantity>
+                           <ingredientSubstance>
+                              <code code="L1Q2K5JYO8" codeSystem="2.16.840.1.113883.4.9"/>
+                              <name>Sunvozertinib</name>
+                              <activeMoiety>
+                                 <activeMoiety>
+                                    <code code="L1Q2K5JYO8" codeSystem="2.16.840.1.113883.4.9"/>
+                                    <name>Sunvozertinib</name>
+                                 </activeMoiety>
+                              </activeMoiety>
+                           </ingredientSubstance>
+                        </ingredient>
+                        <ingredient classCode="IACT">
+                           <ingredientSubstance>
+                              <code code="M28OL1HH48" codeSystem="2.16.840.1.113883.4.9"/>
+                              <name>croscarmellose sodium</name>
+                           </ingredientSubstance>
+                        </ingredient>
+                        <ingredient classCode="IACT">
+                           <ingredientSubstance>
+                              <code code="EX438O2MRT" codeSystem="2.16.840.1.113883.4.9"/>
+                              <name>FERRIC OXIDE YELLOW</name>
+                           </ingredientSubstance>
+                        </ingredient>
+                        <ingredient classCode="IACT">
+                           <ingredientSubstance>
+                              <code code="9XZ8H6N6OH" codeSystem="2.16.840.1.113883.4.9"/>
+                              <name>HYDROXYPROPYL CELLULOSE, UNSPECIFIED</name>
+                           </ingredientSubstance>
+                        </ingredient>
+                        <ingredient classCode="IACT">
+                           <ingredientSubstance>
+                              <code code="0WZ8WG20P6" codeSystem="2.16.840.1.113883.4.9"/>
+                              <name>HYPROMELLOSE 2910 (6 MPA.S)</name>
+                           </ingredientSubstance>
+                        </ingredient>
+                        <ingredient classCode="IACT">
+                           <ingredientSubstance>
+                              <code code="EWQ57Q8I5X" codeSystem="2.16.840.1.113883.4.9"/>
+                              <name>lactose monohydrate</name>
+                           </ingredientSubstance>
+                        </ingredient>
+                        <ingredient classCode="IACT">
+                           <ingredientSubstance>
+                              <code code="70097M6I30" codeSystem="2.16.840.1.113883.4.9"/>
+                              <name>magnesium stearate</name>
+                           </ingredientSubstance>
+                        </ingredient>
+                        <ingredient classCode="IACT">
+                           <ingredientSubstance>
+                              <code code="OP1R32D61U" codeSystem="2.16.840.1.113883.4.9"/>
+                              <name>microcrystalline cellulose</name>
+                           </ingredientSubstance>
+                        </ingredient>
+                        <ingredient classCode="IACT">
+                           <ingredientSubstance>
+                              <code code="ETJ7Z6XBU4" codeSystem="2.16.840.1.113883.4.9"/>
+                              <name>SILICON DIOXIDE</name>
+                           </ingredientSubstance>
+                        </ingredient>
+                        <ingredient classCode="IACT">
+                           <ingredientSubstance>
+                              <code code="15FIX9V2JP" codeSystem="2.16.840.1.113883.4.9"/>
+                              <name>titanium dioxide</name>
+                           </ingredientSubstance>
+                        </ingredient>
+                        <ingredient classCode="IACT">
+                           <ingredientSubstance>
+                              <code code="XHX3C3X673" codeSystem="2.16.840.1.113883.4.9"/>
+                              <name>triacetin</name>
+                           </ingredientSubstance>
+                        </ingredient>
+                        <asContent>
+                           <quantity>
+                              <numerator value="30" unit="1"/>
+                              <denominator value="1"/>
+                           </quantity>
+                           <containerPackagedProduct>
+                              <code codeSystem="2.16.840.1.113883.6.69"/>
+                              <formCode code="C43169" codeSystem="2.16.840.1.113883.3.26.1.1" displayName="BOTTLE"/>
+                              <asContent>
+                                 <quantity>
+                                    <numerator value="1" unit="1"/>
+                                    <denominator value="1"/>
+                                 </quantity>
+                                 <containerPackagedProduct>
+                                    <code code="84694-102-01" codeSystem="2.16.840.1.113883.6.69"/>
+                                    <formCode code="C43182" codeSystem="2.16.840.1.113883.3.26.1.1" displayName="CARTON"/>
+                                 </containerPackagedProduct>
+                                 <subjectOf>
+                                    <marketingAct>
+                                       <code code="C53292" codeSystem="2.16.840.1.113883.3.26.1.1"/>
+                                       <statusCode code="active"/>
+                                       <effectiveTime>
+                                          <low value="20261022"/>
+                                       </effectiveTime>
+                                    </marketingAct>
+                                 </subjectOf>
+                              </asContent>
+                           </containerPackagedProduct>
+                           <subjectOf>
+                              <characteristic>
+                                 <code code="SPLCMBPRDTP" codeSystem="2.16.840.1.113883.1.11.19255"/>
+                                 <value code="C112160" codeSystem="2.16.840.1.113883.3.26.1.1" displayName="Type 0: Not a Combination Product" xsi:type="CV"/>
+                              </characteristic>
+                           </subjectOf>
+                        </asContent>
+                     </manufacturedProduct>
+                     <subjectOf>
+                        <approval>
+                           <id extension="NDA219839" root="2.16.840.1.113883.3.150"/>
+                           <code code="C73594" codeSystem="2.16.840.1.113883.3.26.1.1" displayName="NDA"/>
+                           <author>
+                              <territorialAuthority>
+                                 <territory>
+                                    <code code="USA" codeSystem="2.16.840.1.113883.5.28"/>
+                                 </territory>
+                              </territorialAuthority>
+                           </author>
+                        </approval>
+                     </subjectOf>
+                     <subjectOf>
+                        <marketingAct>
+                           <code code="C53292" codeSystem="2.16.840.1.113883.3.26.1.1"/>
+                           <statusCode code="active"/>
+                           <effectiveTime>
+                              <low value="20261022"/>
+                           </effectiveTime>
+                        </marketingAct>
+                     </subjectOf>
+                     <subjectOf>
+                        <characteristic classCode="OBS">
+                           <code code="SPLCOLOR" codeSystem="2.16.840.1.113883.1.11.19255"/>
+                           <value code="C48330" codeSystem="2.16.840.1.113883.3.26.1.1" displayName="YELLOW" xsi:type="CE"/>
+                        </characteristic>
+                     </subjectOf>
+                     <subjectOf>
+                        <characteristic classCode="OBS">
+                           <code code="SPLSCORE" codeSystem="2.16.840.1.113883.1.11.19255"/>
+                           <value value="1" xsi:type="INT"/>
+                        </characteristic>
+                     </subjectOf>
+                     <subjectOf>
+                        <characteristic classCode="OBS">
+                           <code code="SPLSHAPE" codeSystem="2.16.840.1.113883.1.11.19255"/>
+                           <value code="C48336" codeSystem="2.16.840.1.113883.3.26.1.1" displayName="CAPSULE" xsi:type="CE">
+                              <originalText>biconvex</originalText>
+                           </value>
+                        </characteristic>
+                     </subjectOf>
+                     <subjectOf>
+                        <characteristic classCode="OBS">
+                           <code code="SPLSIZE" codeSystem="2.16.840.1.113883.1.11.19255"/>
+                           <value unit="mm" value="19" xsi:type="PQ"/>
+                        </characteristic>
+                     </subjectOf>
+                     <subjectOf>
+                        <characteristic classCode="OBS">
+                           <code code="SPLIMPRINT" codeSystem="2.16.840.1.113883.1.11.19255"/>
+                           <value xsi:type="ST">200;companylogo</value>
+                        </characteristic>
+                     </subjectOf>
+                     <consumedIn>
+                        <substanceAdministration>
+                           <routeCode code="C38288" codeSystem="2.16.840.1.113883.3.26.1.1" displayName="ORAL"/>
+                        </substanceAdministration>
+                     </consumedIn>
+                  </manufacturedProduct>
+               </subject>
+            </section>
+         </component>
+         <component>
+            <section ID="S1">
+               <id root="913e8998-7897-49a1-abb1-22d536fd2e3d"/>
+               <code code="34067-9" codeSystem="2.16.840.1.113883.6.1" displayName="INDICATIONS &amp; USAGE SECTION"/>
+               <title>1.	INDICATIONS AND USAGE</title>
+               <text>
+                  <paragraph>ZEGFROVY is indicated for the treatment of adult patients with locally advanced or metastatic non-small cell lung cancer (NSCLC) with epidermal growth factor receptor (EGFR) exon 20 insertion mutations, as detected by an FDA-approved test <content styleCode="italics">[see <linkHtml href="#S2.1">Dosage and Administration (2.1)</linkHtml>]</content>, whose disease has progressed on or after platinum-based chemotherapy. </paragraph>
+                  <paragraph>This indication is approved under accelerated approval based on overall response rate and duration of response <content styleCode="italics">[see <linkHtml href="#S14">Clinical Studies (14)</linkHtml>]</content>. Continued approval for this indication may be contingent upon verification and description of clinical benefit in confirmatory trial(s).</paragraph>
+               </text>
+               <effectiveTime value="20260831"/>
+               <excerpt>
+                  <highlight>
+                     <text>
+                        <paragraph>ZEGFROVY is a kinase inhibitor indicated for the treatment of adult patients with locally advanced or metastatic non-small cell lung cancer (NSCLC) with epidermal growth factor receptor (EGFR) exon 20 insertion mutations, as detected by an FDA-approved test, whose disease has progressed on or after platinum-based chemotherapy. (<linkHtml href="#S1">1</linkHtml>, <linkHtml href="#S2.1">2.1</linkHtml>)</paragraph>
+                        <paragraph>This indication is approved under accelerated approval based on overall response rate and duration of response. Continued approval for this indication may be contingent upon verification and description of clinical benefit in confirmatory trial(s). (<linkHtml href="#S1">1</linkHtml>)</paragraph>
+                     </text>
+                  </highlight>
+               </excerpt>
+            </section>
+         </component>
+         <component>
+            <section ID="S2">
+               <id root="0c10fcd6-e37e-41fa-bb69-4da98d95fe27"/>
+               <code code="34068-7" codeSystem="2.16.840.1.113883.6.1" displayName="DOSAGE &amp; ADMINISTRATION SECTION"/>
+               <title>2.	DOSAGE AND ADMINISTRATION</title>
+               <effectiveTime value="20260831"/>
+               <excerpt>
+                  <highlight>
+                     <text>
+                        <paragraph>Recommended dosage: 200 mg orally once daily taken with food. (<linkHtml href="#S2.2">2.2</linkHtml>)</paragraph>
+                     </text>
+                  </highlight>
+               </excerpt>
+               <component>
+                  <section ID="S2.1">
+                     <id root="24c7e7a0-1869-40d1-b6c0-21651d9e093e"/>
+                     <code code="42229-5" codeSystem="2.16.840.1.113883.6.1" displayName="SPL UNCLASSIFIED SECTION"/>
+                     <title>2.1	Patient Selection</title>
+                     <text>
+                        <paragraph>Select patients for treatment with ZEGFROVY for locally advanced or metastatic NSCLC based on the presence of EGFR exon 20 insertion mutations in tumor tissue <content styleCode="italics">[see <linkHtml href="#S14">Clinical Studies (14)</linkHtml>]</content>. Information on FDA-approved tests is available at: http://www.fda.gov/CompanionDiagnostics.</paragraph>
+                     </text>
+                     <effectiveTime value="20260831"/>
+                  </section>
+               </component>
+               <component>
+                  <section ID="S2.2">
+                     <id root="dcf00f93-99da-4254-81fd-eb7be3668db5"/>
+                     <code code="42229-5" codeSystem="2.16.840.1.113883.6.1" displayName="SPL UNCLASSIFIED SECTION"/>
+                     <title>2.2	Recommended Dosage</title>
+                     <text>
+                        <paragraph>The recommended dosage of ZEGFROVY is 200 mg orally once daily with food <content styleCode="italics">[see <linkHtml href="#S5.2">Warnings and Precautions (5.2)</linkHtml>]</content> until disease progression or unacceptable toxicity. Swallow ZEGFROVY tablets whole. Do not split, crush, chew, or dissolve the tablets. Take ZEGFROVY at the same time each day. </paragraph>
+                        <paragraph>
+                           <content styleCode="italics">Missed Dose</content>
+                        </paragraph>
+                        <paragraph>If a dose of ZEGFROVY is missed within 12 hours, take the dose. If a dose of ZEGFROVY is missed by more than 12 hours, skip the missed dose and take the next dose at the regularly scheduled time.</paragraph>
+                        <paragraph>
+                           <content styleCode="italics">Vomiting</content>
+                        </paragraph>
+                        <paragraph>If a ZEGFROVY dose is vomited, do not take an additional dose. Take the next dose at the regularly scheduled time.</paragraph>
+                     </text>
+                     <effectiveTime value="20260831"/>
+                  </section>
+               </component>
+               <component>
+                  <section ID="S2.3">
+                     <id root="55af52f3-b2be-4b59-ac7c-33c4c610ad14"/>
+                     <code code="42229-5" codeSystem="2.16.840.1.113883.6.1" displayName="SPL UNCLASSIFIED SECTION"/>
+                     <title>2.3	Dosage Modifications for Adverse Reactions</title>
+                     <text>
+                        <paragraph>Reduce the dose of ZEGFROVY to 150 mg orally once daily with food, for the management of adverse reactions. Permanently discontinue ZEGFROVY in patients unable to tolerate 150 mg orally once daily.</paragraph>
+                        <paragraph>The recommended dosage modifications for adverse reactions are provided in Table 1.</paragraph>
+                        <table width="90%">
+                           <caption>Table 1:	Recommended Dosage Modifications of ZEGFROVY for Adverse Reactions</caption>
+                           <col width="35%" align="left" valign="middle"/>
+                           <col width="20%" align="left" valign="middle"/>
+                           <col width="45%" align="left" valign="middle"/>
+                           <thead>
+                              <tr>
+                                 <th styleCode="Lrule Rrule">Adverse Reaction</th>
+                                 <th styleCode="Rrule">Severity<footnote>Adverse reactions graded by the National Cancer Institute Common Terminology Criteria for Adverse Events Version 5.0 (NCI CTCAE v5.0).</footnote>
+                                 </th>
+                                 <th styleCode="Rrule">Dose Modifications</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">Interstitial Lung Disease (ILD)/Pneumonitis <content styleCode="italics">[see <linkHtml href="#S5.1">Warnings and Precautions (5.1)</linkHtml>]</content>
+                                 </td>
+                                 <td styleCode="Rrule">Any Grade</td>
+                                 <td styleCode="Rrule">
+                                    <list listType="unordered" styleCode="disc">
+                                       <item>Withhold ZEGFROVY if ILD/pneumonitis is suspected.</item>
+                                       <item>Permanently discontinue ZEGFROVY if ILD/pneumonitis is confirmed.</item>
+                                    </list>
+                                 </td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule" rowspan="3">Nausea or Vomiting <content styleCode="italics">[see <linkHtml href="#S5.2">Warnings and Precautions (5.2)</linkHtml>]</content>
+                                 </td>
+                                 <td styleCode="Rrule">Grade 1</td>
+                                 <td styleCode="Rrule">
+                                    <list listType="unordered" styleCode="disc">
+                                       <item>Administer supportive care including anti-emetics.</item>
+                                    </list>
+                                 </td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Rrule">Grade 2</td>
+                                 <td styleCode="Rrule">
+                                    <list listType="unordered" styleCode="disc">
+                                       <item>Administer supportive care including anti-emetics.</item>
+                                       <item>Withhold ZEGFROVY until recovery to Grade ≤1; then resume ZEGFROVY at the same dose.</item>
+                                    </list>
+                                 </td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Rrule">Grade 3 or 4</td>
+                                 <td styleCode="Rrule">
+                                    <list listType="unordered" styleCode="disc">
+                                       <item>Administer supportive care including anti-emetics.</item>
+                                       <item>Withhold ZEGFROVY until recovery to Grade ≤1; then resume ZEGFROVY at the next lower dose.</item>
+                                    </list>
+                                 </td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule" rowspan="3">Diarrhea <content styleCode="italics">[see <linkHtml href="#S5.2">Warnings and Precautions (5.2)</linkHtml>]</content>
+                                 </td>
+                                 <td styleCode="Rrule">Grade 1</td>
+                                 <td styleCode="Rrule">
+                                    <list listType="unordered" styleCode="disc">
+                                       <item>Administer supportive care including anti-diarrheals (i.e., loperamide).</item>
+                                    </list>
+                                 </td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Rrule">Grade 2 or 3</td>
+                                 <td styleCode="Rrule">
+                                    <content styleCode="underline">First occurrence</content>
+                                    <list listType="unordered" styleCode="disc">
+                                       <item>Administer supportive care and anti-diarrheals (i.e., loperamide).</item>
+                                       <item>Withhold ZEGFROVY until recovery to Grade ≤1; then resume ZEGFROVY at the same dose level.</item>
+                                    </list>
+                                    <content styleCode="underline">Recurrence</content>
+                                    <list listType="unordered" styleCode="disc">
+                                       <item>Withhold ZEGFROVY until recovery to Grade ≤1; then resume ZEGFROVY at the next lower dose.</item>
+                                    </list>
+                                 </td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Rrule">Grade 4</td>
+                                 <td styleCode="Rrule">
+                                    <content styleCode="underline">First occurrence</content>
+                                    <list listType="unordered" styleCode="disc">
+                                       <item>Withhold ZEGFROVY and provide supportive care and anti-diarrheals (i.e., loperamide).</item>
+                                       <item>If resolved to Grade ≤1 within 3 weeks, resume ZEGFROVY at the next lower dose.</item>
+                                       <item>If not resolved to Grade ≤1 within 3 weeks, permanently discontinue ZEGFROVY.</item>
+                                    </list>
+                                    <content styleCode="underline">Recurrence</content>
+                                    <br/>
+                                    <list listType="unordered" styleCode="disc">
+                                       <item>Permanently discontinue ZEGFROVY.</item>
+                                    </list>
+                                 </td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule" rowspan="3">Dermatologic Adverse Reactions <content styleCode="italics">[see <linkHtml href="#S5.3">Warnings and Precautions (5.3)</linkHtml>]</content>
+                                 </td>
+                                 <td styleCode="Rrule">Grade 2</td>
+                                 <td styleCode="Rrule">
+                                    <list listType="unordered" styleCode="disc">
+                                       <item>Administer supportive care.</item>
+                                       <item>Reassess within 3 weeks, if rash does not improve, consider ZEGFROVY dose reduction.</item>
+                                    </list>
+                                 </td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Rrule">Grade 3</td>
+                                 <td styleCode="Rrule">
+                                    <list listType="unordered" styleCode="disc">
+                                       <item>Withhold ZEGFROVY and administer supportive care.</item>
+                                       <item>Upon recovery to Grade ≤1, resume ZEGFROVY at the next lower dose.</item>
+                                       <item>If no improvement within 3 weeks, permanently discontinue ZEGFROVY.</item>
+                                    </list>
+                                 </td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Rrule">Grade 4</td>
+                                 <td styleCode="Rrule">
+                                    <list listType="unordered" styleCode="disc">
+                                       <item>Permanently discontinue ZEGFROVY.</item>
+                                    </list>
+                                 </td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">Ocular Toxicity <content styleCode="italics">[see <linkHtml href="#S5.4">Warnings and Precautions (5.4)</linkHtml>]</content>
+                                 </td>
+                                 <td styleCode="Rrule">Any Grade</td>
+                                 <td styleCode="Rrule">
+                                    <list listType="unordered" styleCode="disc">
+                                       <item>Withhold ZEGFROVY if ulcerative keratitis is suspected.</item>
+                                       <item>Permanently discontinue ZEGFROVY if ulcerative keratitis is confirmed.</item>
+                                    </list>
+                                 </td>
+                              </tr>
+                              <tr>
+                                 <td styleCode="Lrule Rrule">Other Adverse Reactions <content styleCode="italics">[see <linkHtml href="#S6.1">Adverse Reaction (6.1)</linkHtml>]</content>
+                                 </td>
+                                 <td styleCode="Rrule">Grade 3 or 4</td>
+                                 <td styleCode="Rrule">
+                                    <list listType="unordered" styleCode="disc">
+                                       <item>Withhold ZEGFROVY.</item>
+                                       <item>If resolved to Grade ≤1 within 3 weeks, resume ZEGFROVY at the same dose or the next lower dose.</item>
+                                       <item>If not resolved to Grade ≤1 within 3 weeks, permanently discontinue ZEGFROVY.</item>
+                                    </list>
+                                 </td>
+                              </tr>
+                           </tbody>
+                        </table>
+                     </text>
+                     <effectiveTime value="20260831"/>
+                  </section>
+               </component>
+               <component>
+                  <section ID="S2.4">
+                     <id root="b29ee707-7956-4e80-a074-335aa48a6634"/>
+                     <code code="42229-5" codeSystem="2.16.840.1.113883.6.1" displayName="SPL UNCLASSIFIED SECTION"/>
+                     <title>2.4	Dosage Modifications for Drug Interactions</title>
+                     <text>
+                        <paragraph>
+                           <content styleCode="underline">Strong CYP3A Inhibitors</content>
+                        </paragraph>
+                        <paragraph>Avoid concomitant use of strong CYP3A inhibitors. If concomitant use cannot be avoided, reduce the ZEGFROVY dose from 200 mg to 150 mg <content styleCode="italics">[see <linkHtml href="#S7.1">Drug Interactions (7.1)</linkHtml>]</content>.</paragraph>
+                        <paragraph>After discontinuing a CYP3A inhibitor, resume the ZEGFROVY dose (after 3 to 5 half-lives of the CYP3A inhibitor) that was taken prior to initiating the CYP3A inhibitor.</paragraph>
+                        <paragraph>
+                           <content styleCode="underline">Strong and Moderate CYP3A Inducers</content>
+                        </paragraph>
+                        <paragraph>Avoid concomitant use of strong and moderate CYP3A inducers<content styleCode="italics">.</content> If concomitant use cannot be avoided, increase the ZEGFROVY dose from 200 mg to 400 mg <content styleCode="italics">[see <linkHtml href="#S7.1">Drug Interactions (7.1)</linkHtml>].</content>
+                        </paragraph>
+                        <paragraph>After discontinuing a CYP3A inducer, resume the ZEGFROVY dose (7 to 14 days after discontinuing the CYP3A inducer) that was taken prior to initiating the CYP3A inducer.</paragraph>
+                     </text>
+                     <effectiveTime value="20260831"/>
+                  </section>
+               </component>
+            </section>
+         </component>
+         <component>
+            <section ID="S3">
+               <id root="bb5d08cd-d121-48fa-8efb-c08ef3430c70"/>
+               <code code="43678-2" codeSystem="2.16.840.1.113883.6.1" displayName="DOSAGE FORMS &amp; STRENGTHS SECTION"/>
+               <title>3.	DOSAGE FORMS AND STRENGTHS</title>
+               <text>
+                  <paragraph>Tablets:</paragraph>
+                  <list styleCode="disc" listType="unordered">
+                     <item>150 mg: yellow, biconvex film-coated tablets, debossed with "150" on one side and Dizal company logo on the other side. </item>
+                     <item>200 mg: yellow, biconvex film-coated tablets, debossed with "200" on one side and Dizal company logo on the other side. </item>
+                  </list>
+               </text>
+               <effectiveTime value="20260831"/>
+               <excerpt>
+                  <highlight>
+                     <text>
+                        <paragraph>Tablets: 150 mg and 200 mg. (<linkHtml href="#S3">3</linkHtml>)</paragraph>
+                     </text>
+                  </highlight>
+               </excerpt>
+            </section>
+         </component>
+         <component>
+            <section ID="S4">
+               <id root="d6a184b6-a7ee-4f2d-a1f5-679fb37b751d"/>
+               <code code="34070-3" codeSystem="2.16.840.1.113883.6.1" displayName="CONTRAINDICATIONS SECTION"/>
+               <title>4.	CONTRAINDICATIONS</title>
+               <text>
+                  <paragraph>None.</paragraph>
+               </text>
+               <effectiveTime value="20260831"/>
+               <excerpt>
+                  <highlight>
+                     <text>
+                        <paragraph>None. (<linkHtml href="#S4">4</linkHtml>)</paragraph>
+                     </text>
+                  </highlight>
+               </excerpt>
+            </section>
+         </component>
+         <component>
+            <section ID="S5">
+               <id root="89beada0-4761-4366-8cb6-f17d9dca8994"/>
+               <code code="43685-7" codeSystem="2.16.840.1.113883.6.1" displayName="WARNINGS AND PRECAUTIONS SECTION"/>
+               <title>5.	WARNINGS AND PRECAUTIONS</title>
+               <effectiveTime value="20260831"/>
+               <excerpt>
+                  <highlight>
+                     <text>
+                        <list styleCode="disc" listType="unordered">
+                           <item>
+                              <content styleCode="underline">Interstitial Lung Disease (ILD)/Pneumonitis</content>: Monitor patients for new or worsening pulmonary symptoms indicative of ILD/pneumonitis. Immediately withhold ZEGFROVY in patients with suspected ILD/pneumonitis and permanently discontinue ZEGFROVY if ILD/pneumonitis is confirmed. (<linkHtml href="#S2.3">2.3</linkHtml>, <linkHtml href="#S5.1">5.1</linkHtml>)</item>
+                           <item>
+                              <content styleCode="underline">Gastrointestinal Adverse Reactions</content>: Administer ZEGFROVY with food to reduce gastrointestinal adverse reactions. Monitor patients for nausea, vomiting and diarrhea and provide supportive care, including anti-diarrheals, anti-emetics, or fluid replacement, as indicated. Withhold, reduce the dose, or permanently discontinue ZEGFROVY based on severity. (<linkHtml href="#S2.3">2.3</linkHtml>, <linkHtml href="#S5.2">5.2</linkHtml>)</item>
+                           <item>
+                              <content styleCode="underline">Dermatologic Adverse Reactions</content>: Monitor patients for rash and dermatologic adverse reactions. Instruct patients to use alcohol-free (e.g., isopropanol-free, ethanol-free) emollient cream during treatment with ZEGFROVY and to avoid the use of irritating skin products (e.g., products containing retinol or retinoic acid, benzoyl peroxides). Withhold, reduce the dose, or permanently discontinue ZEGFROVY based on severity. (<linkHtml href="#S2.3">2.3</linkHtml>, <linkHtml href="#S5.3">5.3</linkHtml>)</item>
+                           <item>
+                              <content styleCode="underline">Ocular Toxicity:</content> Promptly refer patients presenting with eye symptoms suggestive of keratitis to an ophthalmologist. Advise discontinuation of contact lenses until ocular symptoms are evaluated. Withhold, reduce the dose, or permanently discontinue ZEGFROVY based on severity. (<linkHtml href="#S2.3">2.3</linkHtml>, <linkHtml href="#S5.4">5.4</linkHtml>)</item>
+                           <item>
+                              <content styleCode="underline">Embryo-Fetal Toxicity:</content> Can cause fetal harm. Advise females of reproductive potential of the potential risk to a fetus and to use effective non-hormonal contraception. (<linkHtml href="#S5.5">5.5</linkHtml>, <linkHtml href="#S8.1">8.1</linkHtml>, <linkHtml href="#S8.3">8.3</linkHtml>)</item>
+                        </list>
+                     </text>
+                  </highlight>
+               </excerpt>
+               <component>
+                  <section ID="S5.1">
+                     <id root="c152dea8-fefb-4d15-b624-79cd78eb5238"/>
+                     <code code="42229-5" codeSystem="2.16.840.1.113883.6.1" displayName="SPL UNCLASSIFIED SECTION"/>
+                     <title>5.1	Interstitial Lung Disease/Pneumonitis</title>
+                     <text>
+                        <paragraph>ZEGFROVY can cause severe and life-threatening interstitial lung disease (ILD)/pneumonitis.</paragraph>
+                        <paragraph>In the safety population <content styleCode="italics">[see <linkHtml href="#S6.1">Adverse Reactions (6.1)</linkHtml>]</content>, ILD/pneumonitis occurred in 1.7% of patients. The median time to first onset for ILD/pneumonitis was 61 days (range: 35 to 86 days). ZEGFROVY was discontinued due to ILD/pneumonitis in 0.8% of patients.</paragraph>
+                        <paragraph>Monitor patients for new or worsening pulmonary symptoms indicative of ILD/pneumonitis (e.g., dyspnea, cough, and fever). Immediately withhold ZEGFROVY in patients with suspected ILD/pneumonitis and permanently discontinue ZEGFROVY if ILD/pneumonitis is confirmed <content styleCode="italics">[see <linkHtml href="#S2.3">Dosage and Administration (2.3)</linkHtml>]</content>.</paragraph>
+                     </text>
+                     <effectiveTime value="20260831"/>
+                  </section>
+               </component>
+               <component>
+                  <section ID="S5.2">
+                     <id root="b6e25fce-5d7e-44a5-bbcd-b32bd58a40fc"/>
+                     <code code="42229-5" codeSystem="2.16.840.1.113883.6.1" displayName="SPL UNCLASSIFIED SECTION"/>
+                     <title>5.2	Gastrointestinal Adverse Reactions</title>
+                     <text>
+                        <paragraph>ZEGFROVY can cause severe gastrointestinal adverse reactions including diarrhea, nausea, and vomiting.</paragraph>
+                        <paragraph>In the safety population <content styleCode="italics">[see <linkHtml href="#S6.1">Adverse Reactions (6.1)</linkHtml>],</content> serious gastrointestinal adverse reactions occurred in 1.7% of patients, including 0.8% Grade 3 nausea. Diarrhea occurred in 73% of patients who received ZEGFROVY, including 2.5% Grade 3. Diarrhea leading to dosage interruption or dose reduction occurred in 5% of patients and required permanent discontinuation of ZEGFROVY in 0.8% of patients. Nausea and vomiting occurred in 43% of patients, including 3.3% Grade 3 events. Nausea and vomiting leading to dosage interruption or dose reduction occurred in 7% of patients and permanent discontinuation of ZEGFROVY in 0.8% of patients.</paragraph>
+                        <paragraph>Administer ZEGFROVY with food to reduce gastrointestinal adverse reactions<content styleCode="italics">.</content> Monitor patients for gastrointestinal toxicity, and provide supportive care, including anti-diarrheals, anti-emetics, or fluid replacement, as indicated. Withhold, reduce the dose, or permanently discontinue ZEGFROVY based on severity <content styleCode="italics">[see <linkHtml href="#S2.3">Dosage and Administration (2.3)</linkHtml>]</content>.</paragraph>
+                     </text>
+                     <effectiveTime value="20260831"/>
+                  </section>
+               </component>
+               <component>
+                  <section ID="S5.3">
+                     <id root="d188ed35-ceec-45f7-833a-1979a360051e"/>
+                     <code code="42229-5" codeSystem="2.16.840.1.113883.6.1" displayName="SPL UNCLASSIFIED SECTION"/>
+                     <title>5.3	Dermatologic Adverse Reactions</title>
+                     <text>
+                        <paragraph>ZEGFROVY can cause severe rash including acneiform dermatitis and pruritus.</paragraph>
+                        <paragraph>Based on the safety population <content styleCode="italics">[see <linkHtml href="#S6.1">Adverse Reactions (6.1)</linkHtml>]</content>, dermatologic adverse reactions occurred in 68% of patients including 9% acneiform dermatitis. Grade 3 dermatologic adverse reactions were 7% rash, 0.8% acneiform dermatitis, and 0.8% pruritus.</paragraph>
+                        <paragraph>Instruct patients to use alcohol-free (e.g., isopropanol-free, ethanol-free) emollient cream during treatment with ZEGFROVY and to avoid the use of irritating skin products (e.g., products containing retinol or retinoic acid, benzoyl peroxides).</paragraph>
+                        <paragraph>Withhold, reduce the dose, or permanently discontinue ZEGFROVY based on severity <content styleCode="italics">[see <linkHtml href="#S2.3">Dosage and Administration (2.3)</linkHtml>].</content>
+                        </paragraph>
+                     </text>
+                     <effectiveTime value="20260831"/>
+                  </section>
+               </component>
+               <component>
+                  <section ID="S5.4">
+                     <id root="1dd1f5a2-402e-4cb7-986b-572c29d56626"/>
+                     <code code="42229-5" codeSystem="2.16.840.1.113883.6.1" displayName="SPL UNCLASSIFIED SECTION"/>
+                     <title>5.4	Ocular Toxicity</title>
+                     <text>
+                        <paragraph>ZEGFROVY can cause ocular toxicity including keratitis, dry eye symptoms, blurred vision, and visual impairment. </paragraph>
+                        <paragraph>Based on the safety population <content styleCode="italics">[see <linkHtml href="#S6.1">Adverse Reactions (6.1)</linkHtml>],</content> ocular toxicity occurred in 13% of patients who received ZEGFROVY, including keratitis (0.8%).</paragraph>
+                        <paragraph>Promptly refer patients with new or worsening eye symptoms to an ophthalmologist. Advise discontinuation of contact lenses until ocular symptoms are evaluated. Withhold, reduce the dose, or permanently discontinue ZEGFROVY based on severity <content styleCode="italics">[see <linkHtml href="#S2.3">Dosage and Administration (2.3)</linkHtml>].</content>
+                        </paragraph>
+                        <paragraph/>
+                     </text>
+                     <effectiveTime value="20260831"/>
+                  </section>
+               </component>
+               <component>
+                  <section ID="S5.5">
+                     <id root="6b6f9e10-fb09-42c6-a312-3eb3b338f278"/>
+                     <code code="42229-5" codeSystem="2.16.840.1.113883.6.1" displayName="SPL UNCLASSIFIED SECTION"/>
+                     <title>5.5	Embryo-Fetal Toxicity</title>
+                     <text>
+                        <paragraph>Based on findings from animal studies and its mechanism of action, ZEGFROVY can cause fetal harm when administered to a pregnant woman. </paragraph>
+                        <paragraph>In animal reproduction studies, oral administration of sunvozertinib to pregnant animals during the period of organogenesis resulted in structural abnormalities at concentrations below the human exposure at the recommended dose based on area under the curve (AUC) <content styleCode="italics">[see <linkHtml href="#S8.1">Use in Specific Populations (8.1)</linkHtml>]</content>.</paragraph>
+                        <paragraph>Advise pregnant women and females of reproductive potential of the potential risk to a fetus. Advise females of reproductive potential to use effective non-hormonal contraception during treatment with ZEGFROVY and for 2 weeks after the last dose, since ZEGFROVY can render some hormonal contraceptives ineffective <content styleCode="italics">[see <linkHtml href="#S7.2">Drug Interactions (7.2)</linkHtml>]</content>. Advise male patients with female partners of reproductive potential to use effective contraception during treatment with ZEGFROVY and for 2 weeks after the last dose <content styleCode="italics">[see <linkHtml href="#S8.1">Use in Specific Populations (8.1</linkHtml>, <linkHtml href="#S8.3">8.3)</linkHtml>]</content>.</paragraph>
+                     </text>
+                     <effectiveTime value="20260831"/>
+                  </section>
+               </component>
+            </section>
+         </component>
+         <component>
+            <section ID="S6">
+               <id root="b394d053-1376-4b35-86b8-7ca5e2d32ba3"/>
+               <code code="34084-4" codeSystem="2.16.840.1.113883.6.1" displayName="ADVERSE REACTIONS SECTION"/>
+               <title>6.	 ADVERSE REACTIONS</title>
+               <text>
+                  <paragraph>The following adverse reactions are described elsewhere in the labeling: </paragraph>
+                  <list listType="unordered" styleCode="disc">
+                     <item>Interstitial Lung Disease/Pneumonitis <content styleCode="italics">[see <linkHtml href="#S5.1">Warnings and Precautions (5.1)</linkHtml>]</content>
+                     </item>
+                     <item>Gastrointestinal Adverse Reactions <content styleCode="italics">[see <linkHtml href="#S5.2">Warnings and Precautions (5.2)</linkHtml>
+                        </content>]</item>
+                     <item>Dermatologic Adverse Reactions <content styleCode="italics">[see <linkHtml href="#S5.3">Warnings and Precautions (5.3)</linkHtml>]</content>
+                     </item>
+                     <item>Ocular Toxicity <content styleCode="italics">[see <linkHtml href="#S5.4">Warnings and Precautions (5.4)</linkHtml>]</content>
+                     </item>
+                  </list>
+               </text>
+               <effectiveTime value="20260831"/>
+               <excerpt>
+                  <highlight>
+                     <text>
+                        <list styleCode="disc" listType="unordered">
+                           <item>
+                              <content styleCode="underline">The most common (≥20%) adverse reactions were:</content> diarrhea, rash, decreased appetite, stomatitis, fatigue, nausea, paronychia, vomiting, constipation, musculoskeletal pain, pruritus, dry skin, urinary tract infection, abdominal pain and decreased weight. (<linkHtml href="#S6.1">6.1</linkHtml>)</item>
+                           <item>
+                              <content styleCode="underline">The most common (≥2%) Grade 3 or 4 laboratory abnormalities were:</content> decreased lymphocytes, increased lipase, decreased hemoglobin, increased amylase, increased creatine kinase, decreased neutrophils, decreased potassium, increased aspartate aminotransferase, increased alanine aminotransferase, decreased sodium, increased magnesium, and increased alkaline phosphatase. (<linkHtml href="#S6.1">6.1</linkHtml>)</item>
+                        </list>
+                        <br/>
+                        <paragraph>
+                           <content styleCode="bold">To report SUSPECTED ADVERSE REACTIONS, contact Dizal Pharmaceutical Co., Ltd. at +1-855-482-0653 or FDA at 1-800-FDA-1088 or www.fda.gov/medwatch.</content>
+                        </paragraph>
+                     </text>
+                  </highlight>
+               </excerpt>
+               <component>
+                  <section ID="S6.1">
+                     <id root="8a1053e7-bb70-4405-891c-3da2bd75b3a0"/>
+                     <code code="90374-0" codeSystem="2.16.840.1.113883.6.1" displayName="CLINICAL TRIALS EXPERIENCE SECTION"/>
+                     <title>6.1	Clinical Trials Experience</title>
+                     <text>
+                        <paragraph>Because clinical trials are conducted under widely varying conditions, adverse reaction rates observed in the clinical trials of a drug cannot be directly compared to rates in the clinical trials of another drug and may not reflect the rates observed in practice.</paragraph>
+                        <paragraph>The pooled safety populations described in <content styleCode="italics">WARNINGS AND PRECAUTIONS</content> reflect exposure to ZEGFROVY as a single agent at a dose of 200 mg orally once daily in 121 patients with locally advanced or metastatic NSCLC from two clinical trials WU-KONG1 (NCT03974022) <content styleCode="italics">[see <linkHtml href="#S14">Clinical Studies (14)</linkHtml>]</content> and WU-KONG2 (n=3). Among 121 patients who received ZEGFROVY, 56% were exposed for 6 months or longer and 28% were exposed for greater than one year. In this pooled safety population, the most common (≥20%) adverse reactions were diarrhea, rash, decreased appetite, stomatitis, fatigue, nausea, paronychia, vomiting, constipation, musculoskeletal pain, pruritus, dry skin, urinary tract infection, abdominal pain and decreased weight. The most common (≥2%) Grade 3 or 4 laboratory abnormalities were decreased lymphocytes, increased lipase, decreased hemoglobin, increased amylase, increased creatine kinase, decreased neutrophils, decreased potassium, increased aspartate aminotransferase, increased alanine aminotransferase, decreased sodium, increased magnesium, and increased alkaline phosphatase.</paragraph>
+                        <paragraph>
+                           <content styleCode="underline">EGFR Exon 20 Insertion Mutation-Positive Locally Advanced or Metastatic NSCLC Previously Treated with Platinum-Based Chemotherapy</content>
+                        </paragraph>
+                        <paragraph>The safety of ZEGFROVY was evaluated in WU-KONG1B <content styleCode="italics">[see <linkHtml href="#S14">Clinical Studies (14)</linkHtml>]</content> in patients with locally advanced or metastatic NSCLC with EGFR exon 20 insertion mutations in a multinational, open-label, dose randomization clinical trial. Eligible patients must have had disease progression on or after platinum-based chemotherapy and received ZEGFROVY 200 mg orally once daily until disease progression or intolerable toxicity. The median age of patients who received ZEGFROVY was 62 years (range: 35-88); 67% were females; 65% were Asian and 33% were White; 97% were not of Hispanic or Latino ethnicity. </paragraph>
+                        <paragraph>Serious adverse reactions occurred in 41% of patients who received ZEGFROVY. Serious adverse reactions in ≥2% of patients who received ZEGFROVY were pneumonia (9%); dyspnea (4.4%); and pancreatitis, device related infection and rash (2.2% each). Fatal adverse reactions occurred in 2.2% of patients who received ZEGFROVY including thrombosis (1.1%) and COVID-19 infection (1.1%). </paragraph>
+                        <paragraph>Permanent discontinuation of ZEGFROVY due to adverse reactions occurred in 8% of patients. Adverse reactions leading to treatment discontinuation of ZEGFROVY in ≥2% of patients were pneumonia and rash (2.2% each).</paragraph>
+                        <paragraph>Dosage interruption of ZEGFROVY due to adverse reactions occurred in 48% of patients. Adverse reactions requiring dosage interruption of ZEGFROVY in ≥5% of patients were vomiting (9%), pneumonia (8%), and rash (8%). </paragraph>
+                        <paragraph>Dose reduction of ZEGFROVY due to adverse reactions occurred in 23% of patients. Adverse reactions requiring dose reduction of ZEGFROVY in ≥3% of patients were rash (4.4%) and diarrhea (3.3%). </paragraph>
+                        <paragraph>Table 2 summarizes the adverse reactions in WU-KONG1B. </paragraph>
+                        <table width="80%">
+                           <caption>Table 2:	Adverse Reactions (≥10%) in Patients with Locally Advanced or Metastatic NSCLC Who Received ZEGFROVY in WU-KONG1B</caption>
+                           <col width="40%" align="left" valign="middle"/>
+                           <col width="30%" align="center" valign="middle"/>
+                           <col width="30%" align="center" valign="middle"/>
+                           <thead>
+                              <tr styleCode="Botrule">
+                                 <th styleCode="Lrule Rrule" rowspan="2">Adverse Reaction</th>
+                                 <th styleCode="Rrule" colspan="2">ZEGFROVY <br/> N=91</th>
+                              </tr>
+                              <tr>
+                                 <th styleCode="Lrule Rrule" align="center">All grades<footnote>NCI CTCAE v5.0. </footnote>
+                                    <br/> (%)</th>
+                                 <th styleCode="Rrule">Grade 3 or 4 <br/> (%)</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule" colspan="3">
+                                    <content styleCode="bold">Gastrointestinal disorders</content>
+                                 </td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">  Diarrhea<footnote ID="t2ft1">Grouped Terms</footnote>
+                                 </td>
+                                 <td styleCode="Rrule">73</td>
+                                 <td styleCode="Rrule">2.2</td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">  Stomatitis<footnoteRef IDREF="t2ft1"/>
+                                 </td>
+                                 <td styleCode="Rrule">40</td>
+                                 <td styleCode="Rrule">2.2</td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">  Vomiting<footnoteRef IDREF="t2ft1"/>
+                                 </td>
+                                 <td styleCode="Rrule">35</td>
+                                 <td styleCode="Rrule">0</td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">  Nausea</td>
+                                 <td styleCode="Rrule">32</td>
+                                 <td styleCode="Rrule">2.2</td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">  Constipation</td>
+                                 <td styleCode="Rrule">27</td>
+                                 <td styleCode="Rrule">0</td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">  Weight decreased</td>
+                                 <td styleCode="Rrule">26</td>
+                                 <td styleCode="Rrule">3.3</td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">  Abdominal pain<footnoteRef IDREF="t2ft1"/>
+                                 </td>
+                                 <td styleCode="Rrule">19</td>
+                                 <td styleCode="Rrule">1.1</td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">  Abdominal distension</td>
+                                 <td styleCode="Rrule">16</td>
+                                 <td styleCode="Rrule">0</td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">
+                                    <content styleCode="bold">Skin and subcutaneous tissue disorders</content>
+                                 </td>
+                                 <td styleCode="Rrule"/>
+                                 <td styleCode="Rrule"/>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">  Rash<footnoteRef IDREF="t2ft1"/>
+                                 </td>
+                                 <td styleCode="Rrule">60</td>
+                                 <td styleCode="Rrule">8</td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">  Paronychia<footnoteRef IDREF="t2ft1"/>
+                                 </td>
+                                 <td styleCode="Rrule">30</td>
+                                 <td styleCode="Rrule">0</td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">  Pruritus</td>
+                                 <td styleCode="Rrule">26</td>
+                                 <td styleCode="Rrule">1.1</td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">  Dry skin<footnoteRef IDREF="t2ft1"/>
+                                 </td>
+                                 <td styleCode="Rrule">21</td>
+                                 <td styleCode="Rrule">0</td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule" colspan="3">
+                                    <content styleCode="bold">Metabolism and nutrition disorders</content>
+                                 </td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">  Decreased appetite</td>
+                                 <td styleCode="Rrule">52</td>
+                                 <td styleCode="Rrule">0</td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule" colspan="3">
+                                    <content styleCode="bold">General disorders and administration site conditions</content>
+                                 </td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">  Fatigue<footnoteRef IDREF="t2ft1"/>
+                                 </td>
+                                 <td styleCode="Rrule">41</td>
+                                 <td styleCode="Rrule">1.1</td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">  Edema<footnoteRef IDREF="t2ft1"/>
+                                 </td>
+                                 <td styleCode="Rrule">11</td>
+                                 <td styleCode="Rrule">0</td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">  Malaise</td>
+                                 <td styleCode="Rrule">11</td>
+                                 <td styleCode="Rrule">1.1</td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule" colspan="3">
+                                    <content styleCode="bold">Musculoskeletal and connective tissue disorders</content>
+                                 </td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">  Musculoskeletal pain<footnoteRef IDREF="t2ft1"/>
+                                 </td>
+                                 <td styleCode="Rrule">26</td>
+                                 <td styleCode="Rrule">2.2</td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule" colspan="3">
+                                    <content styleCode="bold">Infections and infestations</content>
+                                 </td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">  Urinary tract infection<footnoteRef IDREF="t2ft1"/>
+                                 </td>
+                                 <td styleCode="Rrule">24</td>
+                                 <td styleCode="Rrule">1.1</td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">  Pneumonia<footnoteRef IDREF="t2ft1"/>
+                                 </td>
+                                 <td styleCode="Rrule">25</td>
+                                 <td styleCode="Rrule">11</td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule" colspan="3">
+                                    <content styleCode="bold">Eye disorders</content>
+                                 </td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">  Ocular toxicity<footnoteRef IDREF="t2ft1"/>
+                                 </td>
+                                 <td styleCode="Rrule">18</td>
+                                 <td styleCode="Rrule">0</td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule" colspan="3">
+                                    <content styleCode="bold">Nervous system disorders</content>
+                                 </td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">  Peripheral neuropathy<footnoteRef IDREF="t2ft1"/>
+                                 </td>
+                                 <td styleCode="Rrule">14</td>
+                                 <td styleCode="Rrule">0</td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule" colspan="3">
+                                    <content styleCode="bold">Cardiac disorders</content>
+                                 </td>
+                              </tr>
+                              <tr>
+                                 <td styleCode="Lrule Rrule">  Arrhythmia<footnoteRef IDREF="t2ft1"/>
+                                 </td>
+                                 <td styleCode="Rrule">12</td>
+                                 <td styleCode="Rrule">1.1</td>
+                              </tr>
+                           </tbody>
+                        </table>
+                        <paragraph>Clinically relevant adverse reactions in &lt;10% of patients who received ZEGFROVY were: cough, dizziness, dyspnea, dry eye and keratitis.</paragraph>
+                        <paragraph>Table 3 summarizes the laboratory abnormalities in WU-KONG1B.</paragraph>
+                        <table width="80%">
+                           <caption>Table 3:	Selected Laboratory Abnormalities (≥20%) That Worsened from Baseline in Patients with Locally Advanced or Metastatic NSCLC Who Received ZEGFROVY in WU-KONG1B</caption>
+                           <col width="40%" align="left" valign="middle"/>
+                           <col width="30%" align="center" valign="middle"/>
+                           <col width="30%" align="center" valign="middle"/>
+                           <thead>
+                              <tr styleCode="Botrule">
+                                 <th styleCode="Lrule Rrule" rowspan="2">Laboratory Abnormality</th>
+                                 <th styleCode="Rrule" colspan="2">ZEGFROVY <br/> N=91<footnote>The denominator used to calculate the rate varied from 89 to 90 based on the number of patients with a baseline and at least one post-treatment value.</footnote>
+                                 </th>
+                              </tr>
+                              <tr>
+                                 <th styleCode="Lrule Rrule" align="center">All Grades<footnote>NCI CTCAE v5.0 </footnote>
+                                    <br/> (%)</th>
+                                 <th styleCode="Rrule">Grade 3 or 4 <br/> (%)</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule" colspan="3">
+                                    <content styleCode="bold">Chemistry</content>
+                                 </td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">  Creatinine increased</td>
+                                 <td styleCode="Rrule">62</td>
+                                 <td styleCode="Rrule">0</td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">  Creatine kinase increased</td>
+                                 <td styleCode="Rrule">57</td>
+                                 <td styleCode="Rrule">8</td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">  Lipase increased</td>
+                                 <td styleCode="Rrule">47</td>
+                                 <td styleCode="Rrule">13</td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">  Aspartate aminotransferase increased</td>
+                                 <td styleCode="Rrule">44</td>
+                                 <td styleCode="Rrule">4.4</td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">  Amylase increased</td>
+                                 <td styleCode="Rrule">37</td>
+                                 <td styleCode="Rrule">9</td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">  Sodium decreased</td>
+                                 <td styleCode="Rrule">33</td>
+                                 <td styleCode="Rrule">3.4</td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">  Albumin decreased</td>
+                                 <td styleCode="Rrule">32</td>
+                                 <td styleCode="Rrule">0</td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">  Potassium decreased</td>
+                                 <td styleCode="Rrule">29</td>
+                                 <td styleCode="Rrule">3.4</td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">  Alanine aminotransferase increased</td>
+                                 <td styleCode="Rrule">28</td>
+                                 <td styleCode="Rrule">4.4</td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">  Magnesium increased</td>
+                                 <td styleCode="Rrule">23</td>
+                                 <td styleCode="Rrule">4.4</td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">  Alkaline phosphatase increased</td>
+                                 <td styleCode="Rrule">21</td>
+                                 <td styleCode="Rrule">2.2</td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule" colspan="3">
+                                    <content styleCode="bold">Hematology</content>
+                                 </td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">  Hemoglobin decreased</td>
+                                 <td styleCode="Rrule">61</td>
+                                 <td styleCode="Rrule">12</td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">  Lymphocytes decreased</td>
+                                 <td styleCode="Rrule">54</td>
+                                 <td styleCode="Rrule">20</td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">  Neutrophils decreased</td>
+                                 <td styleCode="Rrule">41</td>
+                                 <td styleCode="Rrule">4.4</td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule" colspan="3">
+                                    <content styleCode="bold">Urinalysis</content>
+                                 </td>
+                              </tr>
+                              <tr>
+                                 <td styleCode="Lrule Rrule">  Urine protein increased</td>
+                                 <td styleCode="Rrule">38</td>
+                                 <td styleCode="Rrule">0</td>
+                              </tr>
+                           </tbody>
+                        </table>
+                        <paragraph>
+                           <content styleCode="underline italics">Other Clinical Trials Experience</content>
+                        </paragraph>
+                        <paragraph>The following adverse reactions occurred following administration of ZEGFROVY: Interstitial Lung Disease (ILD)/Pneumonitis</paragraph>
+                     </text>
+                     <effectiveTime value="20260831"/>
+                  </section>
+               </component>
+            </section>
+         </component>
+         <component>
+            <section ID="S7">
+               <id root="abb1ff45-2d1c-4d8e-97f1-ff37dcf94493"/>
+               <code code="34073-7" codeSystem="2.16.840.1.113883.6.1" displayName="DRUG INTERACTIONS SECTION"/>
+               <title>7.	DRUG INTERACTIONS</title>
+               <effectiveTime value="20260831"/>
+               <excerpt>
+                  <highlight>
+                     <text>
+                        <list listType="unordered" styleCode="disc">
+                           <item>
+                              <content styleCode="underline">Strong CYP3A Inhibitors</content>: Avoid concomitant use. If concomitant use cannot be avoided, reduce ZEGFROVY dose. (<linkHtml href="#S2.4">2.4</linkHtml>, <linkHtml href="#S7.1">7.1</linkHtml>)</item>
+                           <item>
+                              <content styleCode="underline">Strong and Moderate CYP3A Inducers</content>: Avoid concomitant use. If concomitant use cannot be avoided, increase ZEGFROVY dose. (<linkHtml href="#S2.4">2.4</linkHtml>, <linkHtml href="#S7.1">7.1</linkHtml>) </item>
+                           <item>
+                              <content styleCode="underline">P-gp or BCRP Substrates</content>: Monitor for increased adverse reactions during concomitant use with ZEGFROVY. (<linkHtml href="#S7.2">7.2</linkHtml>)</item>
+                           <item>
+                              <content styleCode="underline">Hormonal Contraceptives</content>: Avoid concomitant use. (<linkHtml href="#S7.2">7.2</linkHtml>)</item>
+                        </list>
+                     </text>
+                  </highlight>
+               </excerpt>
+               <component>
+                  <section ID="S7.1">
+                     <id root="cff2c81f-b882-4b80-a4d5-c1a9ab4383d6"/>
+                     <code code="42229-5" codeSystem="2.16.840.1.113883.6.1" displayName="SPL UNCLASSIFIED SECTION"/>
+                     <title>7.1	Effect of Other Drugs on ZEGFROVY</title>
+                     <text>
+                        <paragraph>Table 4 describes drug interactions where coadministration with another drug affects ZEGFROVY.</paragraph>
+                        <table width="90%">
+                           <caption>Table 4:	Effect of Other Drugs on ZEGFROVY</caption>
+                           <col width="20%" align="left" valign="middle"/>
+                           <col width="80%" align="left" valign="middle"/>
+                           <tbody>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule" colspan="2">
+                                    <content styleCode="bold">Strong CYP3A Inhibitors</content>
+                                 </td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">Prevention or Management</td>
+                                 <td styleCode="Rrule">
+                                    <list listType="unordered" styleCode="disc">
+                                       <item>Avoid concomitant use with strong CYP3A inhibitors. </item>
+                                       <item>If concomitant use cannot be avoided, reduce ZEGFROVY dose as recommended <content styleCode="italics">[see <linkHtml href="#S2.4">Dosage and Administration (2.4)</linkHtml>]</content> and monitor for increased ZEGFROVY adverse reactions.</item>
+                                    </list>
+                                 </td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">Mechanism and Clinical Effect(s)</td>
+                                 <td styleCode="Rrule">
+                                    <list listType="unordered" styleCode="disc">
+                                       <item>Sunvozertinib is a CYP3A substrate.</item>
+                                       <item>Concomitant use with strong CYP3A inhibitors increases sunvozertinib exposure <content styleCode="italics">[see <linkHtml href="#S12.3">Clinical Pharmacology (12.3)</linkHtml>],</content> which may increase the risk of ZEGFROVY-associated adverse reactions.</item>
+                                    </list>
+                                 </td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule" colspan="2">
+                                    <content styleCode="bold">Strong or Moderate CYP3A Inducers</content>
+                                 </td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">Prevention or Management</td>
+                                 <td styleCode="Rrule">
+                                    <list listType="unordered" styleCode="disc">
+                                       <item>Avoid concomitant use with strong and moderate CYP3A inducers.</item>
+                                       <item>If concomitant use cannot be avoided, increase ZEGFROVY dose as recommended <content styleCode="italics">[see <linkHtml href="#S2.4">Dosage and Administration (2.4)</linkHtml>].</content>
+                                       </item>
+                                    </list>
+                                 </td>
+                              </tr>
+                              <tr>
+                                 <td styleCode="Lrule Rrule">Mechanism and Clinical Effect(s)</td>
+                                 <td styleCode="Rrule">
+                                    <list listType="unordered" styleCode="disc">
+                                       <item>Sunvozertinib is a CYP3A substrate.</item>
+                                       <item>Concomitant use with strong or moderate CYP3A inducers decreases sunvozertinib exposure <content styleCode="italics">[see <linkHtml href="#S12.3">Clinical Pharmacology (12.3)</linkHtml>],</content> which may reduce effectiveness of ZEGFROVY.</item>
+                                    </list>
+                                 </td>
+                              </tr>
+                           </tbody>
+                        </table>
+                     </text>
+                     <effectiveTime value="20260831"/>
+                  </section>
+               </component>
+               <component>
+                  <section ID="S7.2">
+                     <id root="9b74e12a-e4c5-4828-b3af-08f2881e6481"/>
+                     <code code="42229-5" codeSystem="2.16.840.1.113883.6.1" displayName="SPL UNCLASSIFIED SECTION"/>
+                     <title>7.2	Effect of ZEGFROVY on Other Drugs</title>
+                     <text>
+                        <paragraph>Table 5 describes drug interactions where coadministration with ZEGFROVY affects another drug.</paragraph>
+                        <table width="90%">
+                           <caption>Table 5:	Effect of ZEGFROVY on Other Drugs</caption>
+                           <col width="20%" align="left" valign="middle"/>
+                           <col width="80%" align="left" valign="middle"/>
+                           <tbody>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule" colspan="2">
+                                    <content styleCode="bold">Hormonal Contraceptives (CYP3A Substrates)</content>
+                                 </td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">Prevention or Management</td>
+                                 <td styleCode="Rrule">
+                                    <list listType="unordered" styleCode="disc">
+                                       <item>Avoid concomitant use of ZEGFROVY with hormonal contraceptives.</item>
+                                       <item>Advise females of reproductive potential to use effective non-hormonal contraception during treatment with ZEGFROVY and for 2 weeks after the last dose.</item>
+                                    </list>
+                                 </td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">Mechanism and Clinical Effect(s)</td>
+                                 <td styleCode="Rrule">
+                                    <list listType="unordered" styleCode="disc">
+                                       <item>Sunvozertinib is an inducer of CYP3A4.</item>
+                                       <item>Concomitant use of ZEGFROVY with CYP3A substrates decreased their plasma concentrations <content styleCode="italics">[see <linkHtml href="#S12.3">Clinical Pharmacology (12.3)</linkHtml>]</content>, where minimal concentration changes may lead to therapeutic failure of hormonal contraceptives.</item>
+                                    </list>
+                                 </td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule" colspan="2">
+                                    <content styleCode="bold">P-gp or BCRP Substrates</content>
+                                 </td>
+                              </tr>
+                              <tr styleCode="Botrule">
+                                 <td styleCode="Lrule Rrule">Prevention or Management</td>
+                                 <td styleCode="Rrule">
+                                    <list listType="unordered" styleCode="disc">
+                                       <item>Monitor for increased adverse reactions of P-gp or BCRP substrates, where minimal concentration changes may lead to serious adverse reactions, when coadministered with ZEGFROVY.</item>
+                                    </list>
+                                 </td>
+                              </tr>
+                              <tr>
+                                 <td styleCode="Lrule Rrule">Mechanism and Clinical Effect(s)</td>
+                                 <td styleCode="Rrule">
+                                    <list listType="unordered" styleCode="disc">
+                                       <item>Sunvozertinib is an inhibitor of P-gp and BCRP.</item>
+                                       <item>ZEGFROVY increases exposure of P-gp or BCRP substrates <content styleCode="italics">[see <linkHtml href="#S12.3">Clinical Pharmacology (12.3)</linkHtml>],</content> which may increase the risk of adverse reactions associated with these substrates.</item>
+                                    </list>
+                                 </td>
+                              </tr>
+                           </tbody>
+                        </table>
+                     </text>
+                     <effectiveTime value="20260831"/>
+                  </section>
+               </component>
+            </section>
+         </component>
+         <component>
+            <section ID="S8">
+               <id root="f631c405-faab-4dd8-af3c-e41ca59413a5"/>
+               <code code="43684-0" codeSystem="2.16.840.1.113883.6.1" displayName="USE IN SPECIFIC POPULATIONS SECTION"/>
+               <title>8.	USE IN SPECIFIC POPULATIONS</title>
+               <effectiveTime value="20260831"/>
+               <excerpt>
+                  <highlight>
+                     <text>
+                        <list styleCode="disc" listType="unordered">
+                           <item>
+                              <content styleCode="underline">Lactation</content>: Advise not to breastfeed. (<linkHtml href="#S8.2">8.2</linkHtml>)</item>
+                        </list>
+                     </text>
+                  </highlight>
+               </excerpt>
+               <component>
+                  <section ID="S8.1">
+                     <id root="5acdc77e-aa09-453e-a476-e4da835ba2c0"/>
+                     <code code="42228-7" codeSystem="2.16.840.1.113883.6.1" displayName="PREGNANCY SECTION"/>
+                     <title>8.1	Pregnancy</title>
+                     <text>
+                        <paragraph>
+                           <content styleCode="underline">Risk Summary</content>
+                        </paragraph>
+                        <paragraph>Based on findings from animal studies and its mechanism of action <content styleCode="italics">[see <linkHtml href="#S12.1">Clinical Pharmacology (12.1)</linkHtml>],</content> ZEGFROVY can cause fetal harm when administered to a pregnant woman. There are no available data on the use of ZEGFROVY in pregnant women to inform a drug-associated risk. Oral administration of sunvozertinib to pregnant animals during the period of organogenesis resulted in structural abnormalities at concentrations below the human exposure at the recommended dose based on AUC (<content styleCode="italics">see <linkHtml href="#data">Data</linkHtml>
+                           </content>). Advise pregnant women and females of reproductive potential of the potential risk to a fetus.</paragraph>
+                        <paragraph>In the U.S. general population, the estimated background risk of major birth defects and miscarriage in clinically recognized pregnancies is 2% to 4% and 15% to 20%, respectively.</paragraph>
+                        <paragraph ID="data">
+                           <content styleCode="underline">Data</content>
+                        </paragraph>
+                        <paragraph>
+                           <content styleCode="italics">Animal Data</content>
+                        </paragraph>
+                        <paragraph>In an embryo-fetal development study, pregnant rats received oral doses of 10, 20, or 40 mg/kg/day of sunvozertinib during the period of organogenesis (gestation day 6 to 17). Sunvozertinib caused maternal toxicity (decreased body weight and food consumption) and embryo-fetal toxicity (skeletal variations) at 40 mg/kg/day (0.6 times the human exposure at the recommended dose based on AUC). </paragraph>
+                        <paragraph>In an embryo-fetal development study, pregnant rabbits received oral doses of 0.5, 1.5, or 5 mg/kg/day of sunvozertinib during the period of organogenesis (gestation day 6 to 19). Sunvozertinib caused maternal toxicity (decreased body weight and food consumption) and embryo-fetal toxicities including an increased incidence of visceral malformations in the heart and lung at ≥0.5 mg/kg/day (0.02 times the human exposure at the recommended dose based on AUC) and skeletal variations at ≥1.5 mg/kg/day (0.07 times the human exposure at the recommended dose based on AUC). </paragraph>
+                     </text>
+                     <effectiveTime value="20260831"/>
+                  </section>
+               </component>
+               <component>
+                  <section ID="S8.2">
+                     <id root="4d7ce946-1dde-40f3-9a37-0927bec06623"/>
+                     <code code="77290-5" codeSystem="2.16.840.1.113883.6.1" displayName="LACTATION SECTION"/>
+                     <title>8.2	Lactation</title>
+                     <text>
+                        <paragraph>
+                           <content styleCode="underline">Risk Summary</content>
+                        </paragraph>
+                        <paragraph>There are no data on the presence of sunvozertinib or its metabolites in human milk or their effects on the breastfed child or on milk production. Because of the potential for serious adverse reactions in breastfed children, advise women not to breastfeed during treatment with ZEGFROVY and for 2 weeks after the last dose.</paragraph>
+                     </text>
+                     <effectiveTime value="20260831"/>
+                  </section>
+               </component>
+               <component>
+                  <section ID="S8.3">
+                     <id root="01ac2a5d-b120-4619-b998-ba3001b55e8d"/>
+                     <code code="77291-3" codeSystem="2.16.840.1.113883.6.1" displayName="FEMALES &amp; MALES OF REPRODUCTIVE POTENTIAL SECTION"/>
+                     <title>8.3	Females and Males of Reproductive Potential</title>
+                     <text>
+                        <paragraph>Based on animal data and mechanism of action, ZEGFROVY can cause fetal harm when administered to pregnant women <content styleCode="italics">[see <linkHtml href="#S8.1">Use in Specific Populations (8.1)</linkHtml>]</content>.</paragraph>
+                        <paragraph>
+                           <content styleCode="underline">Pregnancy Testing</content>
+                        </paragraph>
+                        <paragraph>Verify the pregnancy status of females of reproductive potential prior to initiating ZEGFROVY.</paragraph>
+                        <paragraph>
+                           <content styleCode="underline">Contraception</content>
+                        </paragraph>
+                        <paragraph>
+                           <content styleCode="italics">Females</content>
+                        </paragraph>
+                        <paragraph>Advise females of reproductive potential to use effective non-hormonal contraception during treatment with ZEGFROVY and for 2 weeks after the last dose. ZEGFROVY may render hormonal contraceptives ineffective <content styleCode="italics">[see <linkHtml href="#S7.2">Drug Interactions (7.2)</linkHtml>]</content>.</paragraph>
+                        <paragraph>
+                           <content styleCode="italics">Males</content>
+                        </paragraph>
+                        <paragraph>Advise male patients with female partners of reproductive potential to use effective contraception during treatment with ZEGFROVY and for 2 weeks after the last dose <content styleCode="italics">[see <linkHtml href="#S8.1">Use in Specific Populations (8.1)</linkHtml>]</content>.</paragraph>
+                        <paragraph>
+                           <content styleCode="underline">Infertility </content>
+                        </paragraph>
+                        <paragraph>
+                           <content styleCode="italics">Females</content>
+                        </paragraph>
+                        <paragraph>Based on animal studies, ZEGFROVY may impair fertility in females. The reversibility of the effects on female fertility was not assessed <content styleCode="italics">[see <linkHtml href="#S13.1">Nonclinical Toxicology (13.1)</linkHtml>]</content>.</paragraph>
+                        <paragraph>
+                           <content styleCode="italics">Males</content>
+                        </paragraph>
+                        <paragraph>Based on animal studies, ZEGFROVY may impair fertility in males. The effects on male fertility were reversible <content styleCode="italics">[see <linkHtml href="#S13">Nonclinical Toxicology (13)</linkHtml>]</content>.</paragraph>
+                     </text>
+                     <effectiveTime value="20260831"/>
+                  </section>
+               </component>
+               <component>
+                  <section ID="S8.4">
+                     <id root="7c5bb3de-1b30-4057-83ee-1f4c3960b897"/>
+                     <code code="34081-0" codeSystem="2.16.840.1.113883.6.1" displayName="PEDIATRIC USE SECTION"/>
+                     <title>8.4	Pediatric Use</title>
+                     <text>
+                        <paragraph>The safety and effectiveness of ZEGFROVY in pediatric patients have not been established.</paragraph>
+                     </text>
+                     <effectiveTime value="20260831"/>
+                  </section>
+               </component>
+               <component>
+                  <section ID="S8.5">
+                     <id root="f5573692-fdcd-49cc-b7de-7beca80a4d9a"/>
+                     <code code="34082-8" codeSystem="2.16.840.1.113883.6.1" displayName="GERIATRIC USE SECTION"/>
+                     <title>8.5	Geriatric Use</title>
+                     <text>
+                        <paragraph>Of the 121 patients who received ZEGFROVY 200 mg in clinical studies, 43% were 65 years and over, and 9% were 75 years and over. No overall difference in effectiveness was observed between patients who were ≥65 years of age and younger patients. There was a higher incidence of adverse reactions of Grade ≥3 (69% vs. 52%) and serious adverse reactions (48% vs. 38%) in patients at 65 years and older as compared to those younger than 65 years.</paragraph>
+                     </text>
+                     <effectiveTime value="20260831"/>
+                  </section>
+               </component>
+            </section>
+         </component>
+         <component>
+            <section ID="S11">
+               <id root="bfaf17af-1aa0-4e01-befb-4f94243e5afd"/>
+               <code code="34089-3" codeSystem="2.16.840.1.113883.6.1" displayName="DESCRIPTION SECTION"/>
+               <title>11.	DESCRIPTION</title>
+               <text>
+                  <paragraph>ZEGFROVY (sunvozertinib) is a kinase inhibitor. The molecular formula for sunvozertinib is C<sub>29</sub>H<sub>35</sub>ClFN<sub>7</sub>O<sub>3</sub>, and the molecular weight is 584.09 g/mol. The chemical name of sunvozertinib is <content styleCode="italics">N</content>-{5-[(4-{[5-chloro-4-fluoro-2-(1-hydroxy-1-methylethyl)phenyl]amino}pyrimidin-2-yl)amino]-2-[(<content styleCode="italics">3R</content>)-3-(dimethylamino)pyrrolidin-1-yl]-4-methoxyphenyl}prop-2-enamide. Sunvozertinib has one chiral carbon with <content styleCode="italics">R</content>-configuration. The chemical structure of sunvozertinib is shown below:</paragraph>
+                  <renderMultiMedia referencedObject="MM1"/>
+                  <paragraph>ZEGFROVY tablets contain 150 mg or 200 mg of active ingredient sunvozertinib. Inactive ingredients in ZEGFROVY core tablets are colloidal silicon dioxide, croscarmellose sodium, hydroxypropyl cellulose, lactose monohydrate, magnesium stearate, and microcrystalline cellulose. The tablet coating consists of hypromellose 2910, iron oxide yellow, titanium dioxide, and triacetin.</paragraph>
+               </text>
+               <effectiveTime value="20260831"/>
+               <component>
+                  <observationMedia ID="MM1">
+                     <text>Chemical Structure</text>
+                     <value xsi:type="ED" mediaType="image/jpeg">
+                        <reference value="splzegfrovy-01.jpg"/>
+                     </value>
+                  </observationMedia>
+               </component>
+            </section>
+         </component>
+         <component>
+            <section ID="S12">
+               <id root="260881b0-3059-413f-95f6-43c27ceb53c5"/>
+               <code code="34090-1" codeSystem="2.16.840.1.113883.6.1" displayName="CLINICAL PHARMACOLOGY SECTION"/>
+               <title>12.	CLINICAL PHARMACOLOGY</title>
+               <effectiveTime value="20260831"/>
+               <component>
+                  <section ID="S12.1">
+                     <id root="9efd0704-195b-4bc4-92d9-5612434464f7"/>
+                     <code code="43679-0" codeSystem="2.16.840.1.113883.6.1" displayName="MECHANISM OF ACTION SECTION"/>
+                     <title>12.1	Mechanism of Action</title>
+                     <text>
+                        <paragraph>Sunvozertinib is a kinase inhibitor of the epidermal growth factor receptor (EGFR) that binds to and inhibits EGFR exon 20 insertion mutations at similar concentrations as wild-type EGFR. </paragraph>
+                        <paragraph>In cultured cell models, sunvozertinib inhibited EGFR phosphorylation in cells expressing different EGFR exon 20 insertion mutation variants at approximately 2- to 10-fold lower concentrations than wild-type EGFR signaling inhibition. Sunvozertinib exhibited anti-tumor activity against xenograft models of NSCLC with EGFR exon 20 insertion mutations.</paragraph>
+                     </text>
+                     <effectiveTime value="20260831"/>
+                  </section>
+               </component>
+               <component>
+                  <section ID="S12.2">
+                     <id root="f9303c06-55b6-40ef-bea7-06d2e83c222d"/>
+                     <code code="43681-6" codeSystem="2.16.840.1.113883.6.1" displayName="PHARMACODYNAMICS SECTION"/>
+                     <title>12.2	Pharmacodynamics</title>
+                     <text>
+                        <paragraph>
+                           <content styleCode="underline">Exposure Response Relationships</content>
+                        </paragraph>
+                        <paragraph>No clinically significant exposure-response relationships for overall response rate (ORR) were observed over the exposure range between sunvozertinib 200 mg and 300 mg (1.5 times the approved recommended dose).</paragraph>
+                        <paragraph>
+                           <content styleCode="underline">Cardiac Electrophysiology</content>
+                        </paragraph>
+                        <paragraph>At 1.5 times the approved recommended dose, a clinically significant QTc interval prolongation was not observed. </paragraph>
+                     </text>
+                     <effectiveTime value="20260831"/>
+                  </section>
+               </component>
+               <component>
+                  <section ID="S12.3">
+                     <id root="602d1c00-ec52-4d33-92e2-28a008b303e9"/>
+                     <code code="43682-4" codeSystem="2.16.840.1.113883.6.1" displayName="PHARMACOKINETICS SECTION"/>
+                     <title>12.3	Pharmacokinetics</title>
+                     <text>
+                        <paragraph>Sunvozertinib pharmacokinetics were observed at steady state at the approved recommended dosage and are presented as geometric mean (CV%) unless otherwise specified.</paragraph>
+                        <paragraph>Sunvozertinib total systemic exposure (AUC) and maximum concentration (C<sub>max</sub>) increase approximately dose-proportionally across the dose range of 50 mg (0.25 times the approved recommended dose) to 400 mg (2 times the approved recommended dose). Steady state is reached within 15 days and the mean accumulation of AUC was approximately 3-fold. The steady-state C<sub>max</sub> and AUC of sunvozertinib were 412 (45%) ng/mL and 8,060 (42%) h*ng/mL, respectively.</paragraph>
+                        <paragraph>
+                           <content styleCode="underline">Absorption</content>
+                        </paragraph>
+                        <paragraph>Sunvozertinib median (minimum, maximum) time to maximum plasma concentration (t<sub>max</sub>) is approximately 6 hours (3, 10 hours).</paragraph>
+                        <paragraph>
+                           <content styleCode="italics">Effect of Food</content>
+                        </paragraph>
+                        <paragraph>No clinically significant differences in sunvozertinib AUC and C<sub>max</sub> were observed following administration of sunvozertinib with a high-fat meal (approximately 1,000 calories, approximately 50% fat).</paragraph>
+                        <paragraph>
+                           <content styleCode="underline">Distribution</content>
+                        </paragraph>
+                        <paragraph>The apparent (oral) volume of distribution is 2,116 L (81%). Sunvozertinib plasma protein binding ranges from approximately 89% to 94% in vitro.</paragraph>
+                        <paragraph>
+                           <content styleCode="underline">Elimination</content>
+                        </paragraph>
+                        <paragraph>Sunvozertinib elimination half-life is 50 hours (27%) with an apparent (oral) clearance of 29 L/h (54%).</paragraph>
+                        <paragraph>
+                           <content styleCode="italics">Metabolism</content>
+                        </paragraph>
+                        <paragraph>Sunvozertinib is primarily metabolized by CYP3A and forms the active demethylated metabolite, DZ0753. DZ0753 AUC represents 10% of the parent AUC. </paragraph>
+                        <paragraph>
+                           <content styleCode="italics">Excretion</content>
+                        </paragraph>
+                        <paragraph>Following a single oral dose of radiolabeled sunvozertinib, 79% of the dose was recovered in feces (7.3% unchanged) and 10% in urine (5.6% unchanged).</paragraph>
+                        <paragraph styleCode="underline">Specific Populations</paragraph>
+                        <paragraph>No clinically significant differences in the pharmacokinetics of sunvozertinib were observed based on age (19 to 96 years), sex, race (Asian 62%, White 28%, Black or African American 8%), body weight (30 to 118 kg), smoking status, mild to moderate renal impairment (CLcr 30 to 89 mL/min, estimated by Cockcroft-Gault), and mild (bilirubin ≤ ULN and AST &gt; ULN or bilirubin &gt;1 to 1.5 × ULN and any AST) to moderate (bilirubin ≥1.5 to 3 × ULN and any AST) hepatic impairment. The effect of severe hepatic impairment (total bilirubin &gt;3 × ULN and any AST) and severe renal impairment (CLcr 15 to 29 mL/min) on the pharmacokinetics of sunvozertinib has not been studied.</paragraph>
+                        <paragraph styleCode="underline">Drug Interaction Studies</paragraph>
+                        <paragraph styleCode="italics">Clinical Studies and Model-Informed Approaches</paragraph>
+                        <paragraph>
+                           <content styleCode="underline italics">Strong CYP3A Inhibitors</content>
+                           <content styleCode=" italics">:</content> Sunvozertinib AUC increased by 1.5-fold and C<sub>max</sub> by 1.3-fold following concomitant administration of itraconazole (strong CYP3A inhibitor) 200 mg once daily.</paragraph>
+                        <paragraph>
+                           <content styleCode="underline italics">Strong and Moderate CYP3A Inducers:</content> Sunvozertinib AUC decreased by 48% and C<sub>max</sub> by 38% following concomitant administration of carbamazepine (strong CYP3A inducer) 300 mg twice daily.</paragraph>
+                        <paragraph>Sunvozertinib AUC is predicted to decrease by 44% following concomitant administration of efavirenz (moderate CYP3A inducer) 600 mg once daily. </paragraph>
+                        <paragraph>
+                           <content styleCode="underline italics">CYP3A Substrates</content>
+                           <content styleCode="italics">:</content> Midazolam (sensitive CYP3A substrate) AUC decreased by 23% and C<sub>max</sub> by 15% following concomitant administration of ZEGFROVY.</paragraph>
+                        <paragraph>
+                           <content styleCode="underline italics">P-glycoprotein (P-gp) Substrates</content>
+                           <content styleCode="italics">:</content> Digoxin (P-gp substrate) AUC increased by 1.4-fold and C<sub>max</sub> by 1.2-fold following concomitant administration of ZEGFROVY.</paragraph>
+                        <paragraph>
+                           <content styleCode="underline italics">BCRP Substrates:</content> Rosuvastatin (BCRP substrate) AUC increased by 1.4-fold and C<sub>max</sub> by 1.6-fold following concomitant administration of ZEGFROVY.</paragraph>
+                        <paragraph>
+                           <content styleCode="underline italics">Other Drugs</content>
+                           <content styleCode="italics">:</content>
+                        </paragraph>
+                        <paragraph>No clinically significant effect on sunvozertinib pharmacokinetics is predicted following concomitant administration of fluconazole (moderate CYP3A inhibitor) 200 mg once daily.</paragraph>
+                        <paragraph>No clinically significant effect on sunvozertinib pharmacokinetics is predicted following concomitant administration of dexamethasone (weak CYP3A inducer) 8 mg once daily. </paragraph>
+                        <paragraph>No clinically significant effect on the pharmacokinetics of desipramine (CYP2D6 substrate) is predicted when used concomitantly with ZEGFROVY. </paragraph>
+                        <paragraph>No clinically significant effect on sunvozertinib pharmacokinetics was observed when used concomitantly with acid reducing agents (e.g. proton pump inhibitor).</paragraph>
+                        <paragraph styleCode="italics">In Vitro Studies</paragraph>
+                        <paragraph>
+                           <content styleCode="underline italics">CYP450 Enzymes</content>: Sunvozertinib induces CYP2C8.</paragraph>
+                        <paragraph>
+                           <content styleCode="underline italics">Transporter Systems</content>: Sunvozertinib is a substrate of P-gp. Sunvozertinib inhibits OATP1B1.</paragraph>
+                     </text>
+                     <effectiveTime value="20260831"/>
+                  </section>
+               </component>
+            </section>
+         </component>
+         <component>
+            <section ID="S13">
+               <id root="f5c1648f-adba-421d-b55a-5264945d45f0"/>
+               <code code="43680-8" codeSystem="2.16.840.1.113883.6.1" displayName="NONCLINICAL TOXICOLOGY SECTION"/>
+               <title>13.	NONCLINICAL TOXICOLOGY</title>
+               <effectiveTime value="20260831"/>
+               <component>
+                  <section ID="S13.1">
+                     <id root="65a98a71-ee53-4ac2-b961-85d3e6e1481f"/>
+                     <code code="34083-6" codeSystem="2.16.840.1.113883.6.1" displayName="CARCINOGENESIS &amp; MUTAGENESIS &amp; IMPAIRMENT OF FERTILITY SECTION"/>
+                     <title>13.1	Carcinogenesis, Mutagenesis, Impairment of Fertility</title>
+                     <text>
+                        <paragraph>
+                           <content styleCode="underline">Carcinogenesis</content>
+                        </paragraph>
+                        <paragraph>Carcinogenicity studies have not been conducted with sunvozertinib.</paragraph>
+                        <paragraph>
+                           <content styleCode="underline">Mutagenesis</content>
+                        </paragraph>
+                        <paragraph>Sunvozertinib was not genotoxic in the bacterial reverse mutation (Ames) assay, an in vitro chromosome aberration assay, or an in vivo micronucleus assay in rats.</paragraph>
+                        <paragraph>
+                           <content styleCode="underline">Impairment of Fertility</content>
+                        </paragraph>
+                        <paragraph>Fertility studies have not been conducted with sunvozertinib. In repeat-dose toxicology studies of up to 4-weeks duration in dogs, oral administration of sunvozertinib caused vaginal epithelial atrophy and degeneration of the seminiferous tubule in the testes at doses as low as 8 mg/kg/day (≥0.2 times the human exposure at the recommended dose based on AUC). The reversibility of the findings in females was not assessed. The findings in males were reversible.</paragraph>
+                     </text>
+                     <effectiveTime value="20260831"/>
+                  </section>
+               </component>
+            </section>
+         </component>
+         <component>
+            <section ID="S14">
+               <id root="ef5426cc-9f20-4cf5-a626-505a066279d4"/>
+               <code code="34092-7" codeSystem="2.16.840.1.113883.6.1" displayName="CLINICAL STUDIES SECTION"/>
+               <title>14.	CLINICAL STUDIES</title>
+               <text>
+                  <paragraph>
+                     <content styleCode="underline">EGFR Exon 20 Insertion Mutation-Positive Locally Advanced or Metastatic NSCLC Previously Treated with Platinum-Based Chemotherapy</content>
+                  </paragraph>
+                  <paragraph>The efficacy of ZEGFROVY was evaluated in WU-KONG1B (NCT03974022), a multinational, open-label, dose randomization clinical trial. Eligible patients had locally advanced or metastatic NSCLC with EGFR exon 20 insertion mutations with disease progression on or after platinum-based chemotherapy and Eastern Cooperative Oncology Group (ECOG) of score 0 or 1. Patients with previously treated and stable intracranial metastases were eligible to enroll. Patients with measurable disease at baseline were randomized to receive either ZEGFROVY 200 mg (n=85) or ZEGFROVY at an unapproved dose orally once daily with food until disease progression or intolerable toxicity. </paragraph>
+                  <paragraph>The major efficacy outcome measure was overall response rate (ORR) according to Response Evaluation Criteria in Solid Tumors (RECIST v 1.1) as evaluated by a blinded independent review committee (BIRC). An additional efficacy outcome measure was duration of response (DOR) by BIRC.</paragraph>
+                  <paragraph>The efficacy population had the following demographic characteristics: the median age was 61 years (range: 35 to 88 years); 67% were female; 65% were Asian; 33% were White; and 2% were other races or had race not reported; 2% were of Hispanic or Latino ethnicity; 71% had never smoked. At baseline, 61% had ECOG performance status of 1; 96% had metastatic disease; 94% had adenocarcinoma histology; and 25% had brain metastases. All patients had received prior platinum-based chemotherapy, 42% had received prior anti-PD-(L)1 therapy, and 14% had received prior amivantamab. </paragraph>
+                  <paragraph>All 85 patients in the efficacy population had EGFR exon 20 insertion mutations in tumor based prospective local or central laboratory testing. Tumor samples from patients were tested retrospectively using Life Technologies Corporation Oncomine™ Dx Express Test. In these tumor samples, 68% (58/85) were positive for EGFR exon 20 insertion mutations, 2.4% (2/85) did not have an EGFR exon 20 insertion mutation identified, and 29% (25/85) did not generate reportable results.</paragraph>
+                  <paragraph>Efficacy results are summarized in Table 6.</paragraph>
+                  <table width="80%">
+                     <caption>Table 6:	Efficacy Results of WU-KONG1B Study</caption>
+                     <col width="70%" align="left" valign="middle"/>
+                     <col width="30%" align="center" valign="middle"/>
+                     <thead>
+                        <tr>
+                           <th styleCode="Lrule Rrule">Efficacy Parameter</th>
+                           <th styleCode="Rrule">ZEGFROVY <br/>(N=85)</th>
+                        </tr>
+                     </thead>
+                     <tfoot>
+                        <tr>
+                           <td align="left" colspan="2">CI = confidence interval</td>
+                        </tr>
+                     </tfoot>
+                     <tbody>
+                        <tr styleCode="Botrule">
+                           <td styleCode="Lrule Rrule">
+                              <content styleCode="bold">Overall Response Rate (ORR)</content>, % (95% CI<footnote>95% CI for ORR was calculated based on Clopper-Pearson exact CI method.</footnote>)</td>
+                           <td styleCode="Rrule">46 (35, 57)</td>
+                        </tr>
+                        <tr styleCode="Botrule">
+                           <td styleCode="Lrule Rrule">  Complete Response, %</td>
+                           <td styleCode="Rrule">6</td>
+                        </tr>
+                        <tr styleCode="Botrule">
+                           <td styleCode="Lrule Rrule">  Partial Response, %</td>
+                           <td styleCode="Rrule">40</td>
+                        </tr>
+                        <tr styleCode="Botrule">
+                           <td styleCode="Lrule Rrule">
+                              <content styleCode="bold">Duration of Response (DOR)</content>
+                           </td>
+                           <td styleCode="Rrule">N=39</td>
+                        </tr>
+                        <tr styleCode="Botrule">
+                           <td styleCode="Lrule Rrule">  Median<footnote>Kaplan-Meier estimate using confirmed responses.</footnote>, months (95% CI)</td>
+                           <td styleCode="Rrule">11.1 (8.2, NE)</td>
+                        </tr>
+                        <tr>
+                           <td styleCode="Lrule Rrule">  Patients with DOR ≥6 months</td>
+                           <td styleCode="Rrule">72%</td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </text>
+               <effectiveTime value="20260831"/>
+            </section>
+         </component>
+         <component>
+            <section ID="S16">
+               <id root="b195b97b-b989-46ef-aacf-d92d9e674e0d"/>
+               <code code="34069-5" codeSystem="2.16.840.1.113883.6.1" displayName="HOW SUPPLIED SECTION"/>
+               <title>16.	HOW SUPPLIED/STORAGE AND HANDLING</title>
+               <text>
+                  <paragraph>
+                     <content styleCode="underline">How Supplied</content>
+                  </paragraph>
+                  <paragraph>ZEGFROVY tablets are supplied in bottles with a child-resistant cap as follows:</paragraph>
+                  <table width="90%">
+                     <col width="20%" align="center" valign="middle"/>
+                     <col width="45%" align="center" valign="middle"/>
+                     <col width="15%" align="center" valign="middle"/>
+                     <col width="20%" align="center" valign="middle"/>
+                     <thead>
+                        <tr>
+                           <th styleCode="Lrule Rrule">Tablet Strength</th>
+                           <th styleCode="Rrule">Description</th>
+                           <th styleCode="Rrule">Quantity</th>
+                           <th styleCode="Rrule">NDC Code</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr styleCode="Botrule">
+                           <td styleCode="Lrule Rrule">150 mg</td>
+                           <td styleCode="Rrule" align="left">Yellow, biconvex film-coated tablets, debossed with "150" on one side and Dizal company logo on the other side.</td>
+                           <td styleCode="Rrule">30</td>
+                           <td styleCode="Rrule">84694-101-01</td>
+                        </tr>
+                        <tr>
+                           <td styleCode="Lrule Rrule">200 mg</td>
+                           <td styleCode="Rrule" align="left">Yellow, biconvex film-coated tablets, debossed with "200" on one side and Dizal company logo on the other side.</td>
+                           <td styleCode="Rrule">30</td>
+                           <td styleCode="Rrule">84694-102-01</td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </text>
+               <effectiveTime value="20260831"/>
+               <component>
+                  <section>
+                     <id root="342cf26d-0c9d-4779-b579-593ad8f0b8a1"/>
+                     <code code="44425-7" codeSystem="2.16.840.1.113883.6.1" displayName="STORAGE AND HANDLING SECTION"/>
+                     <text>
+                        <paragraph>
+                           <content styleCode="underline">Storage and Handling</content>
+                        </paragraph>
+                        <paragraph>Store ZEGFROVY tablets at 20°C to 25°C (68°F to 77°F); excursions permitted between 15°C and 30°C (59°F and 86°F) [see USP Controlled Room Temperature].</paragraph>
+                     </text>
+                     <effectiveTime value="20260831"/>
+                  </section>
+               </component>
+            </section>
+         </component>
+         <component>
+            <section ID="S17">
+               <id root="837469ab-d668-46b1-9c23-be7210adb043"/>
+               <code code="34076-0" codeSystem="2.16.840.1.113883.6.1" displayName="INFORMATION FOR PATIENTS SECTION"/>
+               <title>17.	PATIENT COUNSELING INFORMATION</title>
+               <text>
+                  <paragraph>Advise the patient to read the FDA-approved patient labeling (Patient Information).</paragraph>
+                  <paragraph>
+                     <content styleCode="underline">Interstitial Lung Disease/Pneumonitis</content>
+                  </paragraph>
+                  <paragraph>Advise patients that ZEGFROVY can cause interstitial lung disease/pneumonitis. Advise patients to immediately contact their healthcare provider for new or worsening respiratory symptoms <content styleCode="italics">[see <linkHtml href="#S5.1">Warnings and Precautions (5.1)</linkHtml>].</content>
+                  </paragraph>
+                  <paragraph>
+                     <content styleCode="underline">Gastrointestinal Toxicity</content>
+                  </paragraph>
+                  <paragraph>Advise patients that ZEGFROVY can cause gastrointestinal toxicity, including nausea, vomiting, and diarrhea. Advise patients to take ZEGFROVY with food to reduce gastrointestinal adverse reactions. Advise patients to immediately contact their healthcare provider for symptoms of gastrointestinal toxicity <content styleCode="italics">[see <linkHtml href="#S5.2">Warnings and Precautions (5.2)</linkHtml>].</content>
+                  </paragraph>
+                  <paragraph>
+                     <content styleCode="underline">Dermatologic Adverse Reactions</content>
+                  </paragraph>
+                  <paragraph>Advise patients that ZEGFROVY can cause dermatologic adverse reactions, including rash and pruritus. Advise patients to use alcohol-free (e.g., isopropanol-free, ethanol-free) emollient cream during treatment with ZEGFROVY and to avoid the use of irritating skin products (e.g., products containing retinol or retinoic acid, benzoyl peroxides). Advise patients to immediately contact their healthcare provider for symptoms of dermatologic adverse reactions <content styleCode="italics">[see <linkHtml href="#S5.3">Warnings and Precautions (5.3)</linkHtml>].</content>
+                  </paragraph>
+                  <paragraph>
+                     <content styleCode="underline">Ocular Toxicity</content>
+                  </paragraph>
+                  <paragraph>Advise patients that ZEGFROVY can cause ocular toxicity. Advise patients to contact their healthcare provider if they develop eye symptoms. Advise discontinuation of contact lenses until symptoms are evaluated <content styleCode="italics">[see <linkHtml href="#S5.4">Warnings and Precautions (5.4)</linkHtml>]</content> and at least one week after symptoms have resolved<content styleCode="italics">.</content>
+                  </paragraph>
+                  <paragraph>
+                     <content styleCode="underline">Embryo-Fetal Toxicity</content>
+                  </paragraph>
+                  <paragraph>Advise females of reproductive potential of the potential risk to a fetus and to inform their healthcare provider of a known or suspected pregnancy <content styleCode="italics">[see <linkHtml href="#S5.5">Warnings and Precautions (5.5)</linkHtml>, <linkHtml href="#S8.1">Use in Specific Populations (8.1)</linkHtml>]</content>.</paragraph>
+                  <paragraph>Advise females of reproductive potential to use effective non-hormonal contraception during treatment with ZEGFROVY and for 2 weeks after the last dose <content styleCode="italics">[see <linkHtml href="#S8.3">Use in Specific Populations (8.3)</linkHtml>],</content> since ZEGFROVY can render some hormonal contraceptives ineffective <content styleCode="italics">[see <linkHtml href="#S7.2">Drug Interactions (7.2)</linkHtml>]</content>.</paragraph>
+                  <paragraph>Advise males with female partners of reproductive potential to use effective contraception during treatment with ZEGFROVY and for 2 weeks after the last dose <content styleCode="italics">[see <linkHtml href="#S8.3">Use in Specific Populations (8.3)</linkHtml>]</content>.</paragraph>
+                  <paragraph>
+                     <content styleCode="underline">Lactation</content>
+                  </paragraph>
+                  <paragraph>Advise women not to breastfeed during treatment with ZEGFROVY and for 2 weeks after the last dose <content styleCode="italics">[see <linkHtml href="#S8.2">Use in Specific Populations (8.2)</linkHtml>]</content>.</paragraph>
+                  <paragraph>
+                     <content styleCode="underline">Infertility</content>
+                  </paragraph>
+                  <paragraph>Advise females and males of reproductive potential that ZEGFROVY may impair fertility <content styleCode="italics">[see <linkHtml href="#S8.3">Use in Specific Populations (8.3)</linkHtml> and <linkHtml href="#S13.1">Nonclinical Toxicology (13.1)</linkHtml>]</content>.</paragraph>
+                  <paragraph>
+                     <content styleCode="underline">Drug Interactions</content>
+                  </paragraph>
+                  <paragraph>Advise patients to inform their healthcare providers of all concomitant medications, including prescription medicines, over-the-counter drugs, vitamins, and herbal products <content styleCode="italics">[see <linkHtml href="#S7.1">Drug Interactions (7.1</linkHtml>, <linkHtml href="#S7.2">7.2)</linkHtml>].</content>
+                  </paragraph>
+               </text>
+               <effectiveTime value="20260831"/>
+            </section>
+         </component>
+         <component>
+            <section>
+               <id root="579fd2dd-5804-481c-9d23-ec8bf00cfb94"/>
+               <code code="42229-5" codeSystem="2.16.840.1.113883.6.1" displayName="SPL UNCLASSIFIED SECTION"/>
+               <text>
+                  <paragraph>Manufactured for:</paragraph>
+                  <paragraph>Dizal Pharmaceutical Co., Ltd. </paragraph>
+                  <paragraph>Shanghai, 201203, China</paragraph>
+                  <paragraph>Distributed by: </paragraph>
+                  <paragraph>AstraZeneca Pharmaceuticals LP</paragraph>
+                  <paragraph>Wilmington, DE 19850</paragraph>
+                  <paragraph>ZEGFROVY is a trademark of the AstraZeneca group of companies. </paragraph>
+                  <paragraph>©AstraZeneca 2026</paragraph>
+                  <paragraph>DIZAL™ and the DIZAL Logo are trademarks of Dizal Pharmaceutical Co., Ltd.</paragraph>
+                  <paragraph>©2025 Dizal Pharmaceutical Co., Ltd. All rights reserved.</paragraph>
+               </text>
+               <effectiveTime value="20260831"/>
+            </section>
+         </component>
+         <component>
+            <section>
+               <id root="511ed4db-3812-45f2-a5fb-0d1ca6ab103d"/>
+               <code code="42230-3" codeSystem="2.16.840.1.113883.6.1" displayName="SPL PATIENT PACKAGE INSERT SECTION"/>
+               <text>
+                  <table width="100%">
+                     <col width="2%" align="left" valign="top"/>
+                     <col width="24%" align="left" valign="top"/>
+                     <col width="15%" align="left" valign="top"/>
+                     <col width="16%" align="left" valign="top"/>
+                     <col width="10%" align="left" valign="top"/>
+                     <col width="13%" align="left" valign="top"/>
+                     <col width="20%" align="left" valign="top"/>
+                     <thead>
+                        <tr>
+                           <th styleCode="Lrule Rrule" align="center" colspan="7">PATIENT INFORMATION <br/> ZEGFROVY (zeg-FROH-vee) <br/> (sunvozertinib) <br/> tablets, for oral use</th>
+                        </tr>
+                     </thead>
+                     <tfoot>
+                        <tr>
+                           <td align="left" colspan="6">This Patient Information has been approved by the U.S. Food and Drug Administration.</td>
+                           <td align="left">Revised: 08/2026</td>
+                        </tr>
+                     </tfoot>
+                     <tbody>
+                        <tr styleCode="Botrule">
+                           <td styleCode="Lrule Rrule" colspan="7">
+                              <content styleCode="bold">What is ZEGFROVY?</content>
+                              <br/> ZEGFROVY is a prescription medicine used to treat adults with non-small cell lung cancer (NSCLC): 									
+									<list listType="unordered" styleCode="disc">
+                                 <item>that has spread to nearby tissues (locally advanced) or to other parts of the body (metastatic), <content styleCode="bold">and</content>
+                                 </item>
+                                 <item>has a certain abnormal epidermal growth factor receptor (EGFR) gene, <content styleCode="bold">and</content>
+                                 </item>
+                                 <item>whose disease has worsened while on or after chemotherapy that contains platinum.</item>
+                              </list>Your healthcare provider will perform a test to make sure that ZEGFROVY is right for you. <br/> It is not known if ZEGFROVY is safe and effective in children.</td>
+                        </tr>
+                        <tr styleCode="Botrule">
+                           <td styleCode="Lrule Rrule" colspan="7">
+                              <content styleCode="bold">Before taking ZEGFROVY, tell your healthcare provider about all of your medical conditions, including if you:</content>
+                              <list listType="unordered" styleCode="disc">
+                                 <item>have a history of eye or vision problems.</item>
+                                 <item>are pregnant or plan to become pregnant. ZEGFROVY can harm your unborn baby.<br/>
+                                    <content styleCode="bold">Females who are able to become pregnant:</content>
+                                    <list listType="unordered" styleCode="circle">
+                                       <item>Your healthcare provider should do a pregnancy test before you start treatment with ZEGFROVY.</item>
+                                       <item>You should use an effective form of non-hormonal birth control (contraception) during treatment with ZEGFROVY and for 2 weeks after your last dose of ZEGFROVY.</item>
+                                       <item>Talk to your healthcare provider about birth control methods that might be right for you during this time.</item>
+                                       <item>Tell your healthcare provider right away if you become pregnant or think you may be pregnant during treatment with ZEGFROVY.</item>
+                                    </list>
+                                    <content styleCode="bold">Males who have female partners who are able to become pregnant:</content>
+                                    <list listType="unordered" styleCode="circle">
+                                       <item>You should use effective birth control (contraception) during treatment with ZEGFROVY and for 2 weeks after your last dose of ZEGFROVY.</item>
+                                    </list>
+                                 </item>
+                                 <item>are breastfeeding or plan to breastfeed. It is not known if ZEGFROVY passes into your breast milk. Do not breastfeed during treatment with ZEGFROVY and for 2 weeks after your last dose of ZEGFROVY. Talk to your healthcare provider about the best way to feed your baby during treatment with ZEGROVY.</item>
+                              </list>
+                              <content styleCode="bold">Tell your healthcare provider about all the medicines you take</content>, including prescription and over-the-counter medicines, vitamins, and herbal supplements. ZEGFROVY may affect the way other medicines work and other medicines may affect how ZEGFROVY works.</td>
+                        </tr>
+                        <tr styleCode="Botrule">
+                           <td styleCode="Lrule Rrule" colspan="7">
+                              <content styleCode="bold">How should I take ZEGFROVY?</content>
+                              <list listType="unordered" styleCode="disc">
+                                 <item>Take ZEGFROVY exactly as your healthcare provider tells you.</item>
+                                 <item>Do not change your dose or stop taking ZEGFROVY unless your healthcare provider tells you to.</item>
+                                 <item>Your healthcare provider may change your dose, temporarily stop, or permanently stop treatment with ZEGFROVY if you develop certain side effects.</item>
+                                 <item>Take your prescribed dose of ZEGFROVY 1 time a day at the same time each day.</item>
+                                 <item>Take ZEGFROVY with food.</item>
+                                 <item>Swallow ZEGFROVY tablets whole. Do not split, crush, chew, or dissolve the tablets.</item>
+                                 <item>If you miss a dose of ZEGFROVY, take it as soon as you remember within 12 hours. If it has been more than 12 hours, skip the missed dose and take your next dose at your regularly scheduled time.</item>
+                                 <item>If you vomit after taking a dose of ZEGFROVY, do not take an extra dose. Take your next dose at your regularly scheduled time.</item>
+                              </list>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td styleCode="Lrule Rrule" colspan="7">
+                              <content styleCode="bold">What are the possible side effects of ZEGFROVY? <br/> ZEGFROVY may cause serious side effects, including:</content>
+                              <list listType="unordered" styleCode="disc">
+                                 <item>
+                                    <content styleCode="bold">Lung problems.</content> ZEGFROVY can cause lung problems that can be severe and life-threatening. Symptoms may be similar to those from lung cancer. Tell your healthcare provider right away if you develop new or worsening symptoms of lung problems during treatment with ZEGFROVY, including shortness of breath or trouble breathing, cough, or fever.</item>
+                                 <item>
+                                    <content styleCode="bold">Stomach and intestinal (gastrointestinal) problems.</content> ZEGFROVY can cause stomach and intestinal problems that can be severe, including diarrhea, nausea, and vomiting. Tell your healthcare provider right away if you get any of these symptoms during treatment with ZEGFROVY. Your healthcare provider may prescribe medicines as needed, or recommend drinking fluids or other treatments, to help treat your symptoms.</item>
+                                 <item>
+                                    <content styleCode="bold">Skin problems.</content> ZEGFROVY can cause severe skin rashes. Use alcohol-free (such as isopropanol-free or ethanol-free) moisturizing cream during treatment with ZEGFROVY. Avoid use of irritating skin products, such as skin products containing retinol or retinoic acid, and benzoyl peroxide. Tell your healthcare provider right away if you develop any skin reactions, including small, raised skin bumps that look like acne or itchy skin.</item>
+                                 <item>
+                                    <content styleCode="bold">Eye problems.</content> Your healthcare provider may send you to see an eye specialist (ophthalmologist) if you develop new or worsening eye problems during treatment with ZEGFROVY. You should not use contact lenses until your eye symptoms are checked by a healthcare provider and for at least 1 week after your eye symptoms have resolved. Tell your healthcare provider right away if you develop any new or worsening symptoms of eye problems, including:</item>
+                              </list>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td styleCode="Lrule"/>
+                           <td colspan="2">
+                              <list listType="unordered" styleCode="circle">
+                                 <item>eye pain</item>
+                                 <item>eye redness</item>
+                                 <item>light sensitivity</item>
+                                 <item>feeling like something is in your eyes</item>
+                              </list>
+                           </td>
+                           <td colspan="3">
+                              <list listType="unordered" styleCode="circle">
+                                 <item>increased tears</item>
+                                 <item>discharge from your eyes</item>
+                                 <item>eye irritation</item>
+                                 <item>dry eyes</item>
+                              </list>
+                           </td>
+                           <td styleCode="Rrule">
+                              <list listType="unordered" styleCode="circle">
+                                 <item>eye crusting</item>
+                                 <item>blurred vision</item>
+                                 <item>loss of vision</item>
+                                 <item>vision problems</item>
+                              </list>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td styleCode="Lrule Rrule" colspan="7">
+                              <content styleCode="bold">The most common side effects of ZEGFROVY include:</content>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td styleCode="Lrule" colspan="2">
+                              <list listType="unordered" styleCode="disc">
+                                 <item>diarrhea</item>
+                                 <item>rash</item>
+                                 <item>decreased appetite</item>
+                                 <item>mouth sores</item>
+                                 <item>feeling very tired</item>
+                              </list>
+                           </td>
+                           <td colspan="3">
+                              <list listType="unordered" styleCode="disc">
+                                 <item>nausea</item>
+                                 <item>infected skin around the nail</item>
+                                 <item>vomiting</item>
+                                 <item>constipation</item>
+                                 <item>muscle or joint pain</item>
+                              </list>
+                           </td>
+                           <td styleCode="Rrule" colspan="2">
+                              <list listType="unordered" styleCode="disc">
+                                 <item>itchy skin </item>
+                                 <item>dry skin</item>
+                                 <item>urinary tract infection</item>
+                                 <item>stomach-area pain</item>
+                                 <item>decreased weight </item>
+                              </list>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td styleCode="Lrule Rrule" colspan="7">
+                              <content styleCode="bold">The most common severe abnormal lab test results with ZEGFROVY include:</content>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td styleCode="Lrule" colspan="4">
+                              <list listType="unordered" styleCode="disc">
+                                 <item>decreased white blood cell and red blood cell counts</item>
+                                 <item>increased pancreas enzyme levels</item>
+                                 <item>increased creatine kinase levels</item>
+                              </list>
+                           </td>
+                           <td styleCode="Rrule" colspan="3">
+                              <list listType="unordered" styleCode="disc">
+                                 <item>decreased potassium and salt (sodium) levels</item>
+                                 <item>increase liver enzyme levels </item>
+                                 <item>increased magnesium levels </item>
+                              </list>
+                           </td>
+                        </tr>
+                        <tr styleCode="Botrule">
+                           <td styleCode="Lrule Rrule" colspan="7">ZEGFROVY may affect fertility in females and males, which may affect your ability to have a child. Talk to your healthcare provider if this is a concern for you. <br/> These are not all of the possible side effects of ZEGFROVY. <br/> Call your doctor for medical advice about side effects. You may report side effects to FDA at 1-800-FDA-1088.</td>
+                        </tr>
+                        <tr styleCode="Botrule">
+                           <td styleCode="Lrule Rrule" colspan="7">
+                              <content styleCode="bold">How should I store ZEGFROVY?</content>
+                              <list listType="unordered" styleCode="disc">
+                                 <item>Store ZEGFROVY at room temperature between 68°F to 77°F (20°C to 25°C).</item>
+                              </list>
+                              <content styleCode="bold">Keep ZEGFROVY and all medicines out of the reach of children.</content>
+                           </td>
+                        </tr>
+                        <tr styleCode="Botrule">
+                           <td styleCode="Lrule Rrule" colspan="7">
+                              <content styleCode="bold">General information about the safe and effective use of ZEGFROVY.</content>
+                              <br/> Medicines are sometimes prescribed for purposes other than those listed in a Patient Information leaflet. Do not use ZEGFROVY for a condition for which it was not prescribed. Do not give ZEGFROVY to other people, even if they have the same symptoms that you have. It may harm them. <br/> You can ask your pharmacist or healthcare provider for information about ZEGFROVY that is written for health professionals.</td>
+                        </tr>
+                        <tr>
+                           <td styleCode="Lrule Rrule" colspan="7">
+                              <content styleCode="bold">What are the ingredients in ZEGFROVY?</content>
+                              <br/>
+                              <content styleCode="bold">Active ingredient:</content> sunvozertinib <br/>
+                              <content styleCode="bold">Inactive ingredients:</content> colloidal silicon dioxide, croscarmellose sodium, hydroxypropyl cellulose, lactose monohydrate, magnesium stearate, and microcrystalline cellulose. Tablet coating contains: hypromellose 2910, iron oxide yellow, titanium dioxide, and triacetin.</td>
+                        </tr>
+                        <tr>
+                           <td styleCode="Lrule Rrule" colspan="7">Manufactured for: Dizal Pharmaceutical Co., Ltd., Shanghai, 201203, China <br/> Distributed by: AstraZeneca Pharmaceuticals LP, Wilmington, DE 19850 <br/> ZEGFROVY is a trademark of the AstraZeneca group of companies. <br/> ©AstraZeneca 2026 <br/> DIZAL™ and the DIZAL Logo are trademarks of Dizal Pharmaceutical Co., Ltd. <br/> ©2025 Dizal Pharmaceutical Co., Ltd. All rights reserved. <br/> For more information, call +1-855-482-0653.</td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </text>
+               <effectiveTime value="20260831"/>
+            </section>
+         </component>
+         <component>
+            <section>
+               <id root="79ec387c-a7bb-42da-9296-0fa992ffc669"/>
+               <code code="51945-4" codeSystem="2.16.840.1.113883.6.1" displayName="PACKAGE LABEL.PRINCIPAL DISPLAY PANEL"/>
+               <title>PRINCIPAL DISPLAY PANEL - 150 mg Tablet Bottle Carton</title>
+               <text>
+                  <paragraph>NDC 84694-101-01 <br/> Rx only</paragraph>
+                  <paragraph>ZEGFROVY<br/> (sunvozertinib) <br/> tablets <br/> 150 mg</paragraph>
+                  <paragraph>30 tablets</paragraph>
+                  <paragraph>Dizal</paragraph>
+                  <renderMultiMedia referencedObject="MM2"/>
+               </text>
+               <effectiveTime value="20260831"/>
+               <component>
+                  <observationMedia ID="MM2">
+                     <text>PRINCIPAL DISPLAY PANEL - 150 mg Tablet Bottle Carton</text>
+                     <value xsi:type="ED" mediaType="image/jpeg">
+                        <reference value="splzegfrovy-02.jpg"/>
+                     </value>
+                  </observationMedia>
+               </component>
+            </section>
+         </component>
+         <component>
+            <section>
+               <id root="ad6b46bd-1dea-400c-a1b8-398ff828444f"/>
+               <code code="51945-4" codeSystem="2.16.840.1.113883.6.1" displayName="PACKAGE LABEL.PRINCIPAL DISPLAY PANEL"/>
+               <title>PRINCIPAL DISPLAY PANEL - 200 mg Tablet Bottle Carton</title>
+               <text>
+                  <paragraph>Sealing Paste Area</paragraph>
+                  <paragraph>NDC 84694-102-01 <br/> Rx only</paragraph>
+                  <paragraph>ZEGFROVY<br/> (sunvozertinib) <br/> tablets <br/> 200 mg</paragraph>
+                  <paragraph>30 tablets</paragraph>
+                  <paragraph>Dizal</paragraph>
+                  <renderMultiMedia referencedObject="MM3"/>
+               </text>
+               <effectiveTime value="20260831"/>
+               <component>
+                  <observationMedia ID="MM3">
+                     <text>PRINCIPAL DISPLAY PANEL - 200 mg Tablet Bottle Carton</text>
+                     <value xsi:type="ED" mediaType="image/jpeg">
+                        <reference value="splzegfrovy-03.jpg"/>
+                     </value>
+                  </observationMedia>
+               </component>
+            </section>
+         </component>
+      </structuredBody>
+   </component>
+</document>

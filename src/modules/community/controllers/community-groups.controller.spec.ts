@@ -57,6 +57,16 @@ describe('CommunityGroupsController', () => {
     expect(d.service.joinGroup).toHaveBeenCalledWith('g1', dto, actor);
   });
 
+  it('delegates listGroups con la sesión, que define qué foros restringidos ve (API#837)', async () => {
+    const d = build();
+    await d.controller.listGroups('t1', actor, 'topic-1', 'cardio');
+    expect(d.readService.listGroups).toHaveBeenCalledWith(
+      't1',
+      { cursor: undefined, limit: 50, topicId: 'topic-1', query: 'cardio' },
+      actor,
+    );
+  });
+
   it('delegates getGroup (P7)', async () => {
     const d = build();
     await d.controller.getGroup('g1', actor, 'p1');

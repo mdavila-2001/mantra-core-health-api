@@ -70,6 +70,14 @@ export class DiagnosticUnitSiteDetailDto {
 
   @ApiPropertyOptional({ nullable: true })
   imagingAvailable!: boolean | null;
+
+  /** Latitud WGS84 de la sede física; `null` si no tiene dirección geolocalizada. */
+  @ApiPropertyOptional({ nullable: true })
+  latitude!: number | null;
+
+  /** Longitud WGS84 de la sede física; `null` si no tiene dirección geolocalizada. */
+  @ApiPropertyOptional({ nullable: true })
+  longitude!: number | null;
 }
 
 /** Equipo publicado dentro de una sede. */

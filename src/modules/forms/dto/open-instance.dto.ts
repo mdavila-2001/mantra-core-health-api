@@ -32,16 +32,10 @@ export class OpenInstanceDto {
   @IsUUID()
   tenantContextId?: string;
 
-  /**
-   * Identificador asociado a definition set version.
-   */
-  @ApiPropertyOptional({
-    description: 'Versión publicada del set cuyo schema se congela',
-    format: 'uuid',
-  })
-  @IsOptional()
-  @IsUUID()
-  definitionSetVersionId?: string;
+  // `definitionSetVersionId` ya no está: prometía «congelar el schema de la
+  // versión publicada», pero `form_instances` no tiene dónde guardarlo
+  // (diagram_09_forms.puml) y el servidor lo ignoraba con un 201. Ahora
+  // responde 400 hasta que el modelo declare la columna.
 
   /**
    * Valor de schema version mantenido por la instancia.

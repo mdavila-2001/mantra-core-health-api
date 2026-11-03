@@ -6,17 +6,25 @@ import {
   CONCEPTS,
   ConflictException,
   PreconditionFailedException,
+  requireTenantId,
+  getCurrentTenantId,
   ResourceNotFoundException,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
 import { OutboxService } from '../../messaging/services';
+import { AutomationErrorReason } from '../automation.error-reasons';
 import type { AgentRuns, WorkflowRuns } from '../entities';
 import {
   AgentsRepository,
   AutomationGovernanceRepository,
   AutomationRunsRepository,
 } from '../repositories';
+import {
+  AUTOMATION_SCOPE_FAILURES,
+  inTenantScope,
+  loadAgentRunInScope,
+} from './automation-scope';
 import {
   StartWorkflowRunDto,
   WorkflowRunResponseDto,
@@ -136,50 +144,53 @@ export class AutomationExecutionService {
    * El run nace `queued` y pasa a `running` en la misma transacción: el caso de
    * uso lo describe así (`queued -> running`) y separarlo dejaría un estado
    * intermedio que nadie observa.
+   *
+   * El tenant del run es el del contexto, nunca el del cuerpo. El workflow y el
+   * disparador tienen que ser de ese tenant: un UUID ajeno responde igual que
+   * uno inexistente.
    */
   async startWorkflowRun(
     workflowId: string,
     dto: StartWorkflowRunDto,
     actor: AuthenticatedUser,
   ): Promise<WorkflowRunResponseDto> {
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const workflow = await this.governanceRepo.findWorkflowById(
-        tx,
-        workflowId,
+      const workflow = inTenantScope(
+        await this.governanceRepo.findWorkflowById(tx, workflowId),
+        tenantId,
+        AUTOMATION_SCOPE_FAILURES.workflow,
       );
-      if (!workflow) {
-        throw new ResourceNotFoundException('Workflow no encontrado.', {
-          workflowId,
-        });
-      }
       if (workflow.stateConceptId === CONCEPTS.AUTO_WORKFLOW_ARCHIVED) {
-        throw new PreconditionFailedException('El workflow está archivado.', {
-          workflowId,
-        });
+        throw new PreconditionFailedException(
+          'El workflow está archivado.',
+          {
+            workflowId,
+          },
+          AutomationErrorReason.WORKFLOW_ARCHIVED,
+        );
       }
 
       if (dto.triggerId) {
-        const trigger = await this.governanceRepo.findTriggerById(
-          tx,
-          dto.triggerId,
+        const trigger = inTenantScope(
+          await this.governanceRepo.findTriggerById(tx, dto.triggerId),
+          tenantId,
+          AUTOMATION_SCOPE_FAILURES.trigger,
         );
-        if (!trigger) {
-          throw new ResourceNotFoundException('Disparador no encontrado.', {
-            triggerId: dto.triggerId,
-          });
-        }
         if (trigger.isEnabled !== true) {
           throw new PreconditionFailedException(
             'El disparador está deshabilitado.',
             {
               triggerId: trigger.id,
             },
+            AutomationErrorReason.TRIGGER_DISABLED,
           );
         }
         if (trigger.workflowId !== workflowId) {
           throw new PreconditionFailedException(
             'El disparador no pertenece a ese workflow.',
             { triggerId: trigger.id, workflowId },
+            AutomationErrorReason.TRIGGER_WORKFLOW_MISMATCH,
           );
         }
       }
@@ -208,7 +219,7 @@ export class AutomationExecutionService {
       const run = this.runsRepo.createWorkflowRun(tx, {
         workflowId,
         triggerId: dto.triggerId,
-        tenantId: dto.tenantId ?? workflow.tenantId,
+        tenantId,
         runNumber: `${workflow.code}-${previousRuns + 1}`,
         triggerSourceConceptId: dto.triggerSourceConceptId,
         inputJson: dto.inputJson,
@@ -263,16 +274,13 @@ export class AutomationExecutionService {
     dto: StartAgentRunDto,
     actor: AuthenticatedUser,
   ): Promise<AgentRunResponseDto> {
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const run = await this.runsRepo.findWorkflowRunById(tx, workflowRunId);
-      if (!run) {
-        throw new ResourceNotFoundException(
-          'Ejecución de workflow no encontrada.',
-          {
-            workflowRunId,
-          },
-        );
-      }
+      const run = inTenantScope(
+        await this.runsRepo.findWorkflowRunById(tx, workflowRunId),
+        tenantId,
+        AUTOMATION_SCOPE_FAILURES.workflowRun,
+      );
       if (run.statusConceptId !== CONCEPTS.AUTO_RUN_RUNNING) {
         throw new PreconditionFailedException(
           'La ejecución del workflow no está en marcha.',
@@ -280,20 +288,24 @@ export class AutomationExecutionService {
             workflowRunId,
             statusConceptId: run.statusConceptId,
           },
+          AutomationErrorReason.WORKFLOW_RUN_NOT_RUNNING,
         );
       }
 
-      const agent = await this.agentsRepo.findAgentById(tx, dto.agentId);
-      if (!agent) {
-        throw new ResourceNotFoundException('Agente no encontrado.', {
-          agentId: dto.agentId,
-        });
-      }
+      const agent = inTenantScope(
+        await this.agentsRepo.findAgentById(tx, dto.agentId),
+        tenantId,
+        AUTOMATION_SCOPE_FAILURES.agent,
+      );
       if (agent.stateConceptId !== CONCEPTS.AUTO_AGENT_ACTIVE) {
-        throw new PreconditionFailedException('El agente no está activo.', {
-          agentId: agent.id,
-          stateConceptId: agent.stateConceptId,
-        });
+        throw new PreconditionFailedException(
+          'El agente no está activo.',
+          {
+            agentId: agent.id,
+            stateConceptId: agent.stateConceptId,
+          },
+          AutomationErrorReason.AGENT_NOT_ACTIVE,
+        );
       }
 
       const version = dto.agentVersionId
@@ -306,12 +318,14 @@ export class AutomationExecutionService {
             agentId: agent.id,
             agentVersionId: dto.agentVersionId,
           },
+          AutomationErrorReason.AGENT_VERSION_NOT_FOUND_FOR_AGENT,
         );
       }
       if (version.statusConceptId !== CONCEPTS.AUTO_VERSION_PUBLISHED) {
         throw new PreconditionFailedException(
           'Sólo se puede ejecutar una versión publicada del agente.',
           { agentVersionId: version.id },
+          AutomationErrorReason.AGENT_VERSION_NOT_PUBLISHED,
         );
       }
 
@@ -362,26 +376,24 @@ export class AutomationExecutionService {
     dto: RecordAgentStepDto,
     actor: AuthenticatedUser,
   ): Promise<AgentStepResponseDto> {
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const agentRun = await this.runsRepo.findAgentRunForUpdate(
+      const { agentRun, agent } = await loadAgentRunInScope(
         tx,
+        this.runsRepo,
+        this.agentsRepo,
         agentRunId,
+        tenantId,
       );
-      if (!agentRun) {
-        throw new ResourceNotFoundException(
-          'Ejecución de agente no encontrada.',
-          { agentRunId },
-        );
-      }
       if (agentRun.statusConceptId !== CONCEPTS.AUTO_AGENT_RUN_RUNNING) {
         throw new PreconditionFailedException(
           'La ejecución del agente no está en marcha; no admite pasos nuevos.',
           { agentRunId, statusConceptId: agentRun.statusConceptId },
+          AutomationErrorReason.AGENT_RUN_NOT_RUNNING_FOR_STEP,
         );
       }
 
-      const agent = await this.agentsRepo.findAgentById(tx, agentRun.agentId);
-      const recordedByUserId = agent?.actsAsUserId ?? actor.id;
+      const recordedByUserId = agent.actsAsUserId ?? actor.id;
 
       const blocker = await this.findBlocker(tx, agentRun, dto);
       const sequenceNo =
@@ -473,21 +485,20 @@ export class AutomationExecutionService {
     dto: RequestApprovalDto,
     actor: AuthenticatedUser,
   ): Promise<ApprovalResponseDto> {
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const agentRun = await this.runsRepo.findAgentRunForUpdate(
+      const { agentRun, agent } = await loadAgentRunInScope(
         tx,
+        this.runsRepo,
+        this.agentsRepo,
         agentRunId,
+        tenantId,
       );
-      if (!agentRun) {
-        throw new ResourceNotFoundException(
-          'Ejecución de agente no encontrada.',
-          { agentRunId },
-        );
-      }
       if (!OPEN_AGENT_RUN_STATUSES.includes(agentRun.statusConceptId)) {
         throw new PreconditionFailedException(
           'La ejecución del agente ya terminó; no admite aprobaciones.',
           { agentRunId, statusConceptId: agentRun.statusConceptId },
+          AutomationErrorReason.AGENT_RUN_ALREADY_FINISHED,
         );
       }
 
@@ -509,7 +520,6 @@ export class AutomationExecutionService {
         };
       }
 
-      const agent = await this.agentsRepo.findAgentById(tx, agentRun.agentId);
       const approval = await this.pauseForApproval(
         tx,
         agentRun,
@@ -520,7 +530,7 @@ export class AutomationExecutionService {
           targetResourceType: dto.targetResourceType,
           targetRefId: dto.targetRefId,
         },
-        agent?.actsAsUserId ?? actor.id,
+        agent.actsAsUserId ?? actor.id,
       );
 
       return {
@@ -542,41 +552,51 @@ export class AutomationExecutionService {
    * Quien decide queda en `decided_by_user_id`. Es el actor humano, no la identidad
    * de servicio del agente: el sentido de la aprobación es precisamente que la
    * tomó una persona.
+   *
+   * La aprobación no lleva tenant propio: lo hereda del run de agente al que
+   * pertenece. Una aprobación de otro tenant responde como inexistente **antes**
+   * de mirar su estado, para que `APPROVAL_ALREADY_DECIDED` no delate que existe.
    */
   async decideApproval(
     approvalId: string,
     dto: DecideApprovalDto,
     actor: AuthenticatedUser,
   ): Promise<DecideApprovalResponseDto> {
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
       const approval = await this.runsRepo.findApprovalForUpdate(
         tx,
         approvalId,
       );
       if (!approval) {
-        throw new ResourceNotFoundException('Aprobación no encontrada.', {
-          approvalId,
-        });
-      }
-      if (approval.statusConceptId !== CONCEPTS.AUTO_APPROVAL_PENDING) {
-        throw new ConflictException('La aprobación ya está decidida.', {
-          approvalId,
-          statusConceptId: approval.statusConceptId,
-        });
-      }
-
-      const agentRun = await this.runsRepo.findAgentRunForUpdate(
-        tx,
-        approval.agentRunId,
-      );
-      if (!agentRun) {
         throw new ResourceNotFoundException(
-          'Ejecución de agente no encontrada.',
-          {
-            agentRunId: approval.agentRunId,
-          },
+          AUTOMATION_SCOPE_FAILURES.approval.message,
+          undefined,
+          AUTOMATION_SCOPE_FAILURES.approval.reason,
         );
       }
+      // El run (y su agente y su workflow run) se acota al tenant ANTES de mirar
+      // el estado de la aprobación: una ajena no puede distinguirse de una
+      // inexistente ni siquiera por "ya está decidida".
+      const { agentRun } = await loadAgentRunInScope(
+        tx,
+        this.runsRepo,
+        this.agentsRepo,
+        approval.agentRunId,
+        tenantId,
+        AUTOMATION_SCOPE_FAILURES.approval,
+      );
+      if (approval.statusConceptId !== CONCEPTS.AUTO_APPROVAL_PENDING) {
+        throw new ConflictException(
+          'La aprobación ya está decidida.',
+          {
+            approvalId,
+            statusConceptId: approval.statusConceptId,
+          },
+          AutomationErrorReason.APPROVAL_ALREADY_DECIDED,
+        );
+      }
+
       if (agentRun.statusConceptId !== CONCEPTS.AUTO_AGENT_RUN_PAUSED) {
         throw new PreconditionFailedException(
           'La ejecución del agente no está en pausa.',
@@ -584,6 +604,7 @@ export class AutomationExecutionService {
             agentRunId: agentRun.id,
             statusConceptId: agentRun.statusConceptId,
           },
+          AutomationErrorReason.AGENT_RUN_NOT_PAUSED,
         );
       }
 
@@ -681,19 +702,13 @@ export class AutomationExecutionService {
     dto: FinalizeWorkflowRunDto,
     actor: AuthenticatedUser,
   ): Promise<FinalizeWorkflowRunResponseDto> {
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const run = await this.runsRepo.findWorkflowRunForUpdate(
-        tx,
-        workflowRunId,
+      const run = inTenantScope(
+        await this.runsRepo.findWorkflowRunForUpdate(tx, workflowRunId),
+        tenantId,
+        AUTOMATION_SCOPE_FAILURES.workflowRun,
       );
-      if (!run) {
-        throw new ResourceNotFoundException(
-          'Ejecución de workflow no encontrada.',
-          {
-            workflowRunId,
-          },
-        );
-      }
 
       if (!LIVE_RUN_STATUSES.includes(run.statusConceptId)) {
         return {
@@ -719,6 +734,7 @@ export class AutomationExecutionService {
         throw new PreconditionFailedException(
           'La ejecución tiene aprobaciones pendientes y no puede cerrarse.',
           { workflowRunId, pendingApprovals: pending.length },
+          AutomationErrorReason.WORKFLOW_RUN_HAS_PENDING_APPROVALS,
         );
       }
 
@@ -810,6 +826,12 @@ export class AutomationExecutionService {
    * Toma el lote con `FOR UPDATE SKIP LOCKED` (mismo patrón que
    * `ReportingRunsService.schedulerTick`): varios ticks solapados no deben
    * disparar dos veces la misma marca.
+   *
+   * Es un barrido de `SYSTEM` entre tenants, así que el tenant de cada run sale
+   * de su propio disparador, nunca del llamante, y el workflow enlazado tiene
+   * que ser de ese mismo tenant: un disparador cuyo workflow es de otro tenant
+   * consume la marca sin arrancar nada. Si el barrido declara un tenant
+   * (`X-Tenant-Id`), sólo evalúa los disparadores de ese tenant.
    */
   async evaluateCalendarTriggers(
     dto: EvaluateCalendarTriggersDto,
@@ -835,7 +857,13 @@ export class AutomationExecutionService {
       }> = [];
       let skipped = 0;
 
+      const sweepTenantId = getCurrentTenantId();
+
       for (const trigger of candidates) {
+        if (sweepTenantId && trigger.tenantId !== sweepTenantId) {
+          skipped += 1;
+          continue;
+        }
         if (!trigger.scheduleCron) {
           skipped += 1;
           continue;
@@ -879,12 +907,16 @@ export class AutomationExecutionService {
           tx,
           trigger.workflowId,
         );
+        const runTenantId = trigger.tenantId ?? workflow?.tenantId;
         if (
           !workflow ||
+          !runTenantId ||
+          (workflow.tenantId && workflow.tenantId !== runTenantId) ||
           workflow.stateConceptId === CONCEPTS.AUTO_WORKFLOW_ARCHIVED
         ) {
-          // El workflow ya no está en marcha: la marca se consume igual, si no
-          // este disparador se reevaluaría en cada tick para siempre (mismo
+          // Sin workflow, de otro tenant que el disparador, o ya no en marcha: la
+          // marca se consume igual y no se arranca nada: si no, este
+          // disparador se reevaluaría en cada tick para siempre (mismo
           // criterio que `ReportingRunsService.schedulerTick` con una
           // definición que dejó de estar activa).
           touch(trigger, actor.id, nextFireAt);
@@ -899,7 +931,7 @@ export class AutomationExecutionService {
         const run = this.runsRepo.createWorkflowRun(tx, {
           workflowId: workflow.id,
           triggerId: trigger.id,
-          tenantId: trigger.tenantId ?? workflow.tenantId,
+          tenantId: runTenantId,
           runNumber: `${workflow.code}-${previousRuns + 1}`,
           triggerSourceConceptId: CONCEPTS.AUTO_SOURCE_SCHEDULE,
           statusConceptId: CONCEPTS.AUTO_RUN_RUNNING,
@@ -982,9 +1014,13 @@ export class AutomationExecutionService {
     if (dto.agentToolId) {
       const tool = await this.agentsRepo.findToolById(tx, dto.agentToolId);
       if (!tool) {
-        throw new ResourceNotFoundException('Herramienta no encontrada.', {
-          agentToolId: dto.agentToolId,
-        });
+        throw new ResourceNotFoundException(
+          'Herramienta no encontrada.',
+          {
+            agentToolId: dto.agentToolId,
+          },
+          AutomationErrorReason.TOOL_NOT_FOUND,
+        );
       }
 
       const binding = await this.agentsRepo.findBinding(
@@ -999,6 +1035,7 @@ export class AutomationExecutionService {
             agentToolId: dto.agentToolId,
             agentVersionId: agentRun.agentVersionId,
           },
+          AutomationErrorReason.TOOL_NOT_BOUND_TO_VERSION,
         );
       }
       // Un enlace que deniega es una decisión explícita del ingeniero; no se
@@ -1007,6 +1044,7 @@ export class AutomationExecutionService {
         throw new PreconditionFailedException(
           'El enlace deniega el uso de esa herramienta para esta versión.',
           { agentToolId: dto.agentToolId },
+          AutomationErrorReason.TOOL_BINDING_DENIED,
         );
       }
       if (
@@ -1025,6 +1063,7 @@ export class AutomationExecutionService {
               agentToolId: dto.agentToolId,
               maxCallsPerRun: binding.maxCallsPerRun,
             },
+            AutomationErrorReason.TOOL_CALL_LIMIT_EXCEEDED,
           );
         }
       }

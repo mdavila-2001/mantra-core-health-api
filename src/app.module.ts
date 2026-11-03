@@ -1,3 +1,4 @@
+import { admissionIdentityEnvSchema } from './modules/clinical/services/inpatient/admission-identity';
 import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
@@ -14,6 +15,8 @@ import {
   TraceResponseInterceptor,
   telemetryEnvSchema,
 } from './observability';
+import { HttpSliModule } from './observability/http-sli/http-sli.module';
+import { SystemObservabilityModule } from './modules/observability/observability.module';
 import {
   AllExceptionsFilter,
   AuthModule,
@@ -40,9 +43,14 @@ import { AuditModule } from './modules/audit/audit.module';
 import { AuditTrailInterceptor } from './modules/audit/interceptors/audit-trail.interceptor';
 import { AudioAssetsModule } from './modules/audio_assets/audio-assets.module';
 import { audioEnvSchema } from './modules/audio_assets/audio.env';
+import { admissionsEnvSchema } from './modules/profiles/domain/admissions/admissions.config';
 import { AuthProvidersModule } from './modules/auth_providers/auth_providers.module';
 import { AutomationModule } from './modules/automation/automation.module';
+import { GovernanceAdminModule } from './modules/governance_admin/governance_admin.module';
+import { RuntimePiecesModule } from './modules/platform_ops/runtime_pieces/runtime_pieces.module';
+import { UiVisibilityModule } from './modules/ui_visibility/ui_visibility.module';
 import { BillingModule } from './modules/billing/billing.module';
+import { BulkImportModule } from './modules/bulk_import/bulk-import.module';
 import { ChartModule } from './modules/chart/chart.module';
 import { ClinicalModule } from './modules/clinical/clinical.module';
 import { ClinicalExtModule } from './modules/clinical_ext/clinical_ext.module';
@@ -52,7 +60,9 @@ import { CrmModule } from './modules/crm/crm.module';
 import { CrossStoreConsistencyModule } from './modules/cross_store_consistency/cross_store_consistency.module';
 import { DelegatedAccessModule } from './modules/delegated_access/delegated_access.module';
 import { DiagnosticUnitsModule } from './modules/diagnostic_units/diagnostic_units.module';
+import { MedicalCentersModule } from './modules/medical_centers/medical_centers.module';
 import { DiagnosticsModule } from './modules/diagnostics/diagnostics.module';
+import { DataCatalogModule } from './modules/data_catalog/data_catalog.module';
 import { SurveysModule } from './modules/surveys/surveys.module';
 import { EducationModule } from './modules/education/education.module';
 import { ErpModule } from './modules/erp/erp.module';
@@ -88,11 +98,12 @@ import { ReportingModule } from './modules/reporting/reporting.module';
 import { SchedulingModule } from './modules/scheduling/scheduling.module';
 import { SystemContextModule } from './modules/system_context/system_context.module';
 import { SystemOpsModule } from './modules/system_ops/system_ops.module';
-import { DataCatalogModule } from './modules/data_catalog/data_catalog.module';
 import { QaExecutionModule } from './modules/qa_execution/qa_execution.module';
 import { OpsConsoleModule } from './modules/ops_console/ops_console.module';
 import { TelemetryModule } from './modules/telemetry/telemetry.module';
 import { webAnalyticsEnvSchema } from './modules/telemetry/web-analytics.env';
+import { pharmacyErpEnvSchema } from './modules/pharmacy_inventory/infrastructure/adapters/pharmacy-erp.env';
+import { paymentsGatewayEnvSchema } from './modules/payments/gateway/payments-gateway.env';
 import { TrackingModule } from './modules/tracking/tracking.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
 import { TimeSeriesModule } from './modules/time_series/time_series.module';
@@ -105,6 +116,7 @@ import { RedisThrottlerStorage } from './common/security/redis-throttler.storage
 import { PublicCacheInterceptor } from './common/http/public-cache.interceptor';
 import { PublicCacheStore } from './common/http/public-cache.store';
 import { SearchPlatformModule } from './modules/search_platform/search_platform.module';
+import { StudyCatalogModule } from './modules/study_catalog/study_catalog.module';
 
 /**
  * Configura las dependencias NestJS de app.
@@ -126,9 +138,13 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
         .concat(appSecurityEnvSchema)
         .concat(storageEnvSchema)
         .concat(audioEnvSchema)
+        .concat(admissionsEnvSchema)
         .concat(telemetryEnvSchema)
         .concat(webAnalyticsEnvSchema)
+        .concat(pharmacyErpEnvSchema)
+        .concat(paymentsGatewayEnvSchema)
         .concat(verificationBypassEnvSchema)
+        .concat(admissionIdentityEnvSchema)
         .concat(seedBootEnvSchema),
     }),
     // Rate limiting global como red anti-DoS/fuerza bruta. El límite global es
@@ -154,6 +170,11 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     // `TracingService` sin reimportar nada. No arranca el SDK -eso ocurre en la
     // primera línea de `main.ts`-, solo expone la API que lo consume.
     ObservabilityModule,
+    // Medición de peticiones HTTP (portal de superadministración): vuelca cada
+    // minuto lo que el middleware de `main.ts` agregó. Apagado por defecto
+    // (`OBSERVABILITY_HTTP_SLI_ENABLED`).
+    HttpSliModule,
+    SystemObservabilityModule,
     // Autenticación/autorización transversal: estrategia JWT, guards globales y
     // emisión de tokens. Global, se aplica a todos los dominios.
     AuthModule,
@@ -183,12 +204,16 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     AuthzModule,
     ConsentModule,
     AccountingModule,
+    GovernanceAdminModule,
+    UiVisibilityModule,
+    RuntimePiecesModule,
     AdsModule,
     AuditModule,
     AudioAssetsModule,
     AuthProvidersModule,
     AutomationModule,
     BillingModule,
+    BulkImportModule,
     ChartModule,
     ClinicalModule,
     ClinicalExtModule,
@@ -198,6 +223,7 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     CrossStoreConsistencyModule,
     DelegatedAccessModule,
     DiagnosticUnitsModule,
+    MedicalCentersModule,
     DiagnosticsModule,
     EducationModule,
     ErpModule,
@@ -234,9 +260,9 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     ReportingModule,
     SchedulingModule,
     SurveysModule,
+    DataCatalogModule,
     SystemContextModule,
     SystemOpsModule,
-    DataCatalogModule,
     QaExecutionModule,
     OpsConsoleModule,
     TelemetryModule,
@@ -247,6 +273,7 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     DocumentStoreModule,
     RedisRuntimeModule,
     SearchPlatformModule,
+    StudyCatalogModule,
   ],
   controllers: [AppController],
   providers: [

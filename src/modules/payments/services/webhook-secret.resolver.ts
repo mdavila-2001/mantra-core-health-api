@@ -13,13 +13,45 @@ export interface GatewayWebhookSecrets {
     | 'intent-without-connection'
     | 'connection-not-found'
     | 'connection-gateway-mismatch'
+    | 'connection-tenant-mismatch'
+    | 'secret-ref-not-tenant-owned'
     | 'secret-ref-unresolved';
+}
+
+/**
+ * Prefijo de variable de entorno que le pertenece a un tenant.
+ *
+ * @param tenantId - UUID del tenant dueño de la conexión.
+ * @returns `WEBHOOK_SECRET_<UUID sin guiones, en mayúsculas>_`.
+ */
+function tenantSecretPrefix(tenantId: string): string {
+  return `WEBHOOK_SECRET_${tenantId.replace(/-/g, '').toUpperCase()}_`;
+}
+
+/**
+ * Si todas las entradas de la referencia nombran variables del tenant.
+ *
+ * @param ref - Referencia de la conexión (`env:A,env:B` en una rotación).
+ * @param tenantId - Tenant dueño de la conexión.
+ * @returns `true` sólo si cada entrada es `env:` + el prefijo del tenant.
+ */
+function secretRefBelongsToTenant(ref: string, tenantId: string): boolean {
+  const prefix = `env:${tenantSecretPrefix(tenantId)}`;
+  return ref.split(',').every((entry) => entry.trim().startsWith(prefix));
 }
 
 /**
  * MCH-019 · resuelve el secreto con que el gateway firma el callback de una
  * transacción: el de la conexión configurada en la intención
  * (`payment_intents.gateway_connection_id` → `gateway_connections.webhook_secret_ref`).
+ *
+ * Propiedad de la referencia: el entorno es un espacio de nombres único para
+ * todos los tenants y quien configura la conexión escribe la referencia, así
+ * que sólo vale si nombra variables del tenant dueño de la conexión
+ * (`env:WEBHOOK_SECRET_<TENANT>_<NOMBRE>`, UUID en mayúsculas y sin guiones) y
+ * ese tenant es el de la intención. Sin ese vínculo, el administrador de un
+ * tenant apuntaría su conexión al secreto de otro y firmaría callbacks válidos
+ * sobre transacciones ajenas.
  *
  * Fail-closed: sin conexión, con una conexión de otro gateway o con una
  * referencia que no resuelve, no hay secreto y el callback debe rechazarse. No
@@ -48,6 +80,14 @@ export async function resolveGatewayWebhookSecrets(
     return { secrets: [], connectionId, reason: 'connection-not-found' };
   if (connection.gatewayId !== transaction.gatewayId)
     return { secrets: [], connectionId, reason: 'connection-gateway-mismatch' };
+
+  if (!connection.tenantId || connection.tenantId !== intent?.tenantId)
+    return { secrets: [], connectionId, reason: 'connection-tenant-mismatch' };
+  if (
+    !connection.webhookSecretRef ||
+    !secretRefBelongsToTenant(connection.webhookSecretRef, connection.tenantId)
+  )
+    return { secrets: [], connectionId, reason: 'secret-ref-not-tenant-owned' };
 
   const secrets = resolveWebhookSecretRef(connection.webhookSecretRef, env);
   if (!secrets)

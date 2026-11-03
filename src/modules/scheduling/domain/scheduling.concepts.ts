@@ -58,6 +58,23 @@ export const { seeds: SCHEDULING_CONCEPT_SEEDS, ids: SCHED } =
       display: 'Paid',
     },
 
+    // --- Revisión del comprobante de pago que sube el paciente (v4.2.64) -----
+    // Del módulo, igual que el estado de pago: el modelo no declara un value set
+    // para la revisión. Confirmar uno deja la cita pagada; rechazar no toca el
+    // estado de pago.
+    RECEIPT_PENDING: {
+      code: 'PAYMENT_RECEIPT_PENDING',
+      display: 'Payment receipt pending review',
+    },
+    RECEIPT_CONFIRMED: {
+      code: 'PAYMENT_RECEIPT_CONFIRMED',
+      display: 'Payment receipt confirmed',
+    },
+    RECEIPT_REJECTED: {
+      code: 'PAYMENT_RECEIPT_REJECTED',
+      display: 'Payment receipt rejected',
+    },
+
     // --- Servicios con duración dinámica (v4.2.40) ----------------------------
     /**
      * Cupo de consulta que un servicio pisó y que dejó de ofrecerse.
@@ -203,5 +220,13 @@ export const { seeds: SCHEDULING_CONCEPT_SEEDS, ids: SCHED } =
     NOTICE_BOOKING_STATE_CHANGED: {
       code: 'AGENDA_NOTICE_BOOKING_STATE',
       display: 'Agenda notice: the appointment changed state',
+    },
+    NOTICE_PAYMENT_RECEIPT_UPLOADED: {
+      code: 'AGENDA_NOTICE_PAYMENT_RECEIPT_UPLOADED',
+      display: 'Agenda notice: the patient uploaded a payment receipt',
+    },
+    NOTICE_PAYMENT_RECEIPT_REVIEWED: {
+      code: 'AGENDA_NOTICE_PAYMENT_RECEIPT_REVIEWED',
+      display: 'Agenda notice: the payment receipt was reviewed',
     },
   });

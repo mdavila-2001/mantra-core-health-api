@@ -1,0 +1,31 @@
+{
+  "layer": "npu-ifcc",
+  "builtAt": "2026-10-24T19:09:07.588Z",
+  "records": 25699,
+  "source": {
+    "url": "https://cms.ifcc.org/wp-content/uploads/npu-codes-latest.csv",
+    "lastModified": "Wed, 30 Sep 2026 14:38:51 GMT"
+  },
+  "codeSystems": [
+    {
+      "internalCode": "npu-ifcc",
+      "name": "NPU Terminology (IFCC-IUPAC), versión internacional",
+      "canonicalUrl": "urn:oid:1.2.208.176",
+      "version": "2026-09-30",
+      "sourceKey": "npu-ifcc",
+      "records": 25699
+    }
+  ],
+  "files": {
+    "npu-codes-latest.csv": {
+      "file": "lab-tests-sources/npu/npu-codes-latest.csv",
+      "sha256": "3aef05383e918cc1304c53c5ca6f8a9467b6d700fc3ba18563744c1fbe904353",
+      "url": "https://cms.ifcc.org/wp-content/uploads/npu-codes-latest.csv"
+    }
+  },
+  "stats": {
+    "rows": 25699,
+    "included": 25699,
+    "excluded": 0
+  }
+}

@@ -92,7 +92,7 @@ contexto (active) + versión 1 (draft)
    └─ bindings ──> el consumidor recibe el contexto en su ventana de validez
 ```
 
-## Reglas de negocio
+## Business rules
 
 - **Nada de `ENUM` nativos de PostgreSQL** (`dynamic_postgresql_enums_allowed = false`): el conjunto
   permitido son filas versionadas, y por eso cambiar los valores no exige un despliegue.
@@ -139,7 +139,7 @@ locale, país, tipo de fuente, tipo de consumidor— no se inventan: el cliente 
 `*ConceptId` y el módulo lo persiste tal cual. El caso de uso los declara "validados contra value
 sets cerrados", y esa validación vive en `terminology`, no aquí.
 
-## Permisos
+## Permissions
 
 `PLATFORM_ADMIN` cubre el módulo. `TERMINOLOGY_ENGINEER` define enumeraciones, redacta y publica
 versiones. `MODULE_OWNER` crea bindings de enum y de contexto. `WRITE_SERVICE` resuelve valores en
@@ -147,7 +147,7 @@ escritura. `GOVERNANCE` define contextos. `SYSTEM` ejecuta el refresco. `GET /dy
 `@Public()` para poblar altas anónimas; `GET /dynamic-enums/bindings` queda autenticado sin rol
 específico.
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE` protege la definición al redactar, la versión publicada al publicar, los bindings al
 retirar, y el contexto/versiones que cambian `current_version_id`. `row_version` aporta bloqueo
@@ -160,7 +160,7 @@ en el informe de revisión.
 corrida de refresco fallida por entrada obligatoria ausente, retiro de definición y rollback de
 contexto. No se loguea el contenido del contexto.
 
-## Pruebas
+## Tests
 
 `corepack yarn test src/modules/system_context --runInBand --silent` — **3 suites y 99 pruebas**
 aprobadas en la revisión de 2026-10-04. Son pruebas unitarias con repositorios simulados; no
@@ -170,25 +170,19 @@ global.
 ## Revisión de seguridad e integridad
 
 La resolución de tenant está centralizada en `TenantContextInterceptor`, que rechaza propietarios
-contradictorios y puede fijar RLS. La revisión confirmó riesgos pendientes en la clave de
-idempotencia global del refresh, la carrera al crear bindings, el DTO de procedencia que admite
-campos `NOT NULL` ausentes y reasons no versionados. El detalle, evidencia y plan de pruebas están
-en [la revisión ALOVIDA](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/system_context.md).
+contradictorios y puede fijar RLS. Riesgos conocidos: la clave de idempotencia global del refresh,
+la carrera al crear bindings, el DTO de procedencia que admite campos `NOT NULL` ausentes y reasons
+no versionados.
 
-## Pendiente
+## Fuera de este módulo
 
 - **Caché en Redis** (`redis_runtime.dynamic_enum_cache_entries`,
   `system_context_cache_entries`): el módulo emite y devuelve el `cacheToken`, que es lo que
   identifica la entrada; poblar e invalidar la caché es del módulo de almacenamiento políglota.
 - **Validación contra `system_ops.entity_registry`**: el caso de uso pide validar
-  `target_schema/entity/field` y `source_schema/entity` contra el registro de entidades. Escribir o
-  leer ahí cruzaría la frontera del esquema; queda para cuando exista el cliente gobernado de
-  `system_ops`.
+  `target_schema/entity/field` y `source_schema/entity` contra el registro de entidades; el módulo no
+  lo hace, porque escribir o leer ahí cruzaría la frontera del esquema.
 - **Resolución de `value_set_version_id` vigente**: el caso de uso la resuelve contra
   `terminology.value_set_versions`. Aquí se acepta la que entrega el llamante.
-- **Outbox** (módulo 35): `DynamicEnumDefinitionCreated`, `DynamicEnumVersionDrafted`,
-  `DynamicEnumVersionPublished`, `DynamicEnumBindingCreated`, `DynamicEnumValidationRejected`,
-  `DynamicEnumDefinitionRetired`, `SystemContextCreated`, `SystemContextRefreshCompleted`,
-  `SystemContextVersionActivated`, `SystemContextBound`, `SystemContextRolledBack`.
-- **Proyecciones y series**: `read_models.*` y `time_series.context_refresh_series` los alimenta el
-  outbox.
+- **Proyecciones y series**: `read_models.*` y `time_series.context_refresh_series` se alimentan
+  desde el outbox.

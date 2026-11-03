@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { HipaaAuthorizationsService } from '../services';
 import {
   CreateHipaaAuthorizationDto,
@@ -29,6 +34,11 @@ export class HipaaAuthorizationsController {
   constructor(private readonly hipaaService: HipaaAuthorizationsService) {}
 
   /** UC-07-04. */
+  @Audited({
+    action: 'HIPAA_AUTHORIZATION_GRANTED',
+    entity: 'hipaa_authorization',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -41,6 +51,11 @@ export class HipaaAuthorizationsController {
   }
 
   /** UC-07-05. */
+  @Audited({
+    action: 'HIPAA_AUTHORIZATION_REVOKED',
+    entity: 'hipaa_authorization',
+    entityId: 'param:id',
+  })
   @Post(':id/revoke')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

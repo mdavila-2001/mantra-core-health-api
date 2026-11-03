@@ -42,4 +42,4 @@ mecanismo "suficiente para producción" sin esa evaluación explícita.
 `.env.example`, `src/orm/config/orm.env.ts`, `src/worker/worker.env.ts`.
 
 ## Plan de revisión
-Evaluar en Fase 13 (seguridad) si se requiere un gestor de secretos dedicado.
+Revisar si el volumen y la sensibilidad de los secretos justifican un gestor de secretos dedicado.

@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 15 · schema chart
+-- SALUD v4.2.83 · módulo 15 · schema chart
 -- Generado de diagram_15_chart.puml — NO editar a mano.
 
 
@@ -85,6 +85,8 @@ CREATE INDEX IF NOT EXISTS "ix_care_plans_status_concept_id" ON "chart"."care_pl
 CREATE INDEX IF NOT EXISTS "ix_care_plans_intent_concept_id" ON "chart"."care_plans" ("intent_concept_id");
 
 CREATE INDEX IF NOT EXISTS "ix_care_plans_author_profile_id" ON "chart"."care_plans" ("author_profile_id");
+
+CREATE INDEX IF NOT EXISTS "ix_care_plans_form_instance_id" ON "chart"."care_plans" ("form_instance_id");
 
 CREATE INDEX IF NOT EXISTS "ix_care_plans_created_by_user_id" ON "chart"."care_plans" ("created_by_user_id");
 

@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { PracticeAccreditationsService } from '../services';
 import { VerifyAccreditationDto, AccreditationResponseDto } from '../dto';
 
@@ -27,6 +32,11 @@ export class AccreditationsController {
   ) {}
 
   /** UC-14-03. */
+  @Audited({
+    action: 'PRACTICE_ACCREDITATION_VERIFIED',
+    entity: 'practice_accreditation',
+    entityId: 'param:id',
+  })
   @Post(':id/verify')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

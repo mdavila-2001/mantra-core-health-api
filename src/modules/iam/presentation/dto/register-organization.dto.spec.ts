@@ -1,0 +1,687 @@
+import { describe, it, expect } from '@jest/globals';
+import { plainToInstance } from 'class-transformer';
+import { validate, type ValidationError } from 'class-validator';
+
+import { RegisterOrganizationDto } from './register-organization.dto';
+import { DUNIT } from '../../../diagnostic_units/diagnostic_units.concepts';
+import { CONCEPTS } from '../../../../common/constants/concepts';
+import {
+  TENANT_TYPE_CODES,
+  TENANT_TYPE_CONCEPT_BY_CODE,
+} from '../../../directory/directory.concepts';
+
+/**
+ * El alta mínima que el DTO exige, para no repetirla en cada caso.
+ *
+ * Sin `diagnosticUnit`: es el bloque de la subtarea 1.5, opcional para
+ * cualquier tipo (la exclusividad con `tenantType` la comprueba el servicio,
+ * no el DTO).
+ */
+const MINIMAL_REGISTRATION = {
+  organization: {
+    code: 'CENTRO_IMAGEN_Z',
+    legalName: 'Centro de Imagen Z S.R.L.',
+    tenantType: 'DIAGNOSTIC_CENTER',
+  },
+  owner: {
+    email: 'ana@ejemplo.test',
+    password: 'secreto12',
+    name: 'Ana',
+    lastName: 'Paz',
+  },
+};
+
+/**
+ * Aplana el árbol de `ValidationError` a rutas `a.b.c`, igual que hace el
+ * `ValidationPipe` de Nest (`prependConstraintsWithParentProp`) para las
+ * propiedades anidadas.
+ *
+ * @param errors - Los errores devueltos por `validate()`.
+ * @param prefix - La ruta acumulada hasta este nivel.
+ * @returns Las rutas de las propiedades con error, ordenadas y sin repetidos.
+ */
+function routesWithError(
+  errors: readonly ValidationError[],
+  prefix = '',
+): string[] {
+  const routes: string[] = [];
+  for (const error of errors) {
+    const route = prefix ? `${prefix}.${error.property}` : error.property;
+    if (error.constraints) routes.push(route);
+    if (error.children && error.children.length > 0) {
+      routes.push(...routesWithError(error.children, route));
+    }
+  }
+  return [...new Set(routes)].sort();
+}
+
+/**
+ * Valida un alta y devuelve las rutas de las propiedades que quedaron mal.
+ *
+ * `forbidNonWhitelisted` reproduce el `ValidationPipe` real de `main.ts`: sin
+ * ella, una clave desconocida se ignora en silencio.
+ *
+ * @param registration - El cuerpo del alta, tal como llegaría del cliente.
+ * @returns Las rutas con error.
+ */
+async function propertiesWithError(
+  registration: Record<string, unknown>,
+): Promise<string[]> {
+  const dto = plainToInstance(RegisterOrganizationDto, registration);
+  const errors = await validate(dto, {
+    whitelist: true,
+    forbidNonWhitelisted: true,
+  });
+  return routesWithError(errors);
+}
+
+describe('RegisterOrganizationDto · alta mínima', () => {
+  it('acepta el alta mínima con DIAGNOSTIC_CENTER, sin el bloque diagnosticUnit', async () => {
+    expect(await propertiesWithError(MINIMAL_REGISTRATION)).toEqual([]);
+  });
+
+  it('acepta DIAGNOSTIC_CENTER entre los tipos válidos', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        organization: {
+          ...MINIMAL_REGISTRATION.organization,
+          tenantType: 'HOSPITAL',
+        },
+      }),
+    ).toEqual([]);
+  });
+});
+
+/**
+ * CM-11 · A-3: un centro médico se registra con un tipo de salud que ya
+ * existe (`HOSPITAL`), sin tipo nuevo en IAM.
+ */
+describe('RegisterOrganizationDto · centro médico (CM-11, A-3)', () => {
+  const MEDICAL_CENTER = {
+    organization: {
+      code: 'CENTRO_MEDICO_Z',
+      legalName: 'Centro Médico Z S.R.L.',
+      tenantType: 'HOSPITAL',
+      countryConceptId: '22222222-2222-4222-8222-222222222222',
+      jurisdictionConceptId: '33333333-3333-4333-8333-333333333333',
+    },
+    owner: MINIMAL_REGISTRATION.owner,
+  };
+
+  it('acepta HOSPITAL con país y jurisdicción', async () => {
+    expect(await propertiesWithError(MEDICAL_CENTER)).toEqual([]);
+  });
+
+  it('no agrega un tipo de organización nuevo para el centro médico', () => {
+    expect(TENANT_TYPE_CODES).toContain('HOSPITAL');
+    expect([...TENANT_TYPE_CODES].sort()).toEqual(
+      Object.keys(TENANT_TYPE_CONCEPT_BY_CODE).sort(),
+    );
+    expect(TENANT_TYPE_CODES).not.toContain('MEDICAL_CENTER');
+  });
+
+  it('rechaza un tipo que no existe', async () => {
+    expect(
+      await propertiesWithError({
+        ...MEDICAL_CENTER,
+        organization: {
+          ...MEDICAL_CENTER.organization,
+          tenantType: 'MEDICAL_CENTER',
+        },
+      }),
+    ).toEqual(['organization.tenantType']);
+  });
+});
+
+/**
+ * El bloque `diagnosticUnit` (subtarea 1.5): el DTO sólo comprueba forma
+ * (uuid, longitudes, anidamiento); que sólo corresponda a DIAGNOSTIC_CENTER y
+ * que las modalidades pertenezcan a la lista cerrada del módulo 23 lo
+ * comprueba `TenantTypeProfileService`, no este DTO.
+ */
+describe('RegisterOrganizationDto · diagnosticUnit (1.5)', () => {
+  it('acepta el bloque completo', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        organization: {
+          ...MINIMAL_REGISTRATION.organization,
+          diagnosticUnit: {
+            code: 'CENTRO_IMAGEN_Z_CENTRAL',
+            name: 'Sede central',
+            modalityConceptIds: [DUNIT.MODALITY_XRAY, DUNIT.MODALITY_MRI],
+            walkInAvailable: true,
+            homeCollectionAvailable: false,
+            primarySite: {
+              name: 'Sede central',
+              timeZone: 'America/La_Paz',
+              address: {
+                lines: ['Av. San Martín 123'],
+                municipalityConceptId: '33333333-3333-4333-8333-333333333333',
+                latitude: -17.78,
+                longitude: -63.18,
+              },
+            },
+          },
+        },
+      }),
+    ).toEqual([]);
+  });
+
+  it('rechaza una modalidad que no es un uuid', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        organization: {
+          ...MINIMAL_REGISTRATION.organization,
+          diagnosticUnit: {
+            modalityConceptIds: ['no-es-un-uuid'],
+          },
+        },
+      }),
+    ).toEqual(['organization.diagnosticUnit.modalityConceptIds']);
+  });
+
+  it('rechaza una clave desconocida dentro de diagnosticUnit', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        organization: {
+          ...MINIMAL_REGISTRATION.organization,
+          diagnosticUnit: { codigoQueNoExiste: 'X' },
+        },
+      }),
+    ).toContain('organization.diagnosticUnit.codigoQueNoExiste');
+  });
+
+  it('el par de coordenadas de la sede primaria es ambas o ninguna', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        organization: {
+          ...MINIMAL_REGISTRATION.organization,
+          diagnosticUnit: {
+            primarySite: {
+              address: { lines: [], latitude: -17.78 },
+            },
+          },
+        },
+      }),
+    ).toEqual(['organization.diagnosticUnit.primarySite.address.longitude']);
+  });
+});
+
+/**
+ * El tipo societario del diccionario internacional (subtarea 1.1). El DTO
+ * sólo comprueba que el código pertenezca al set cerrado; la coherencia con
+ * el país declarado y la derivación del concepto la comprueban
+ * `TenantTypeProfileService` e `IamOrganizationSelfRegistrationService`.
+ */
+describe('RegisterOrganizationDto · legalEntityType (1.1)', () => {
+  it('acepta un código boliviano', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        organization: {
+          ...MINIMAL_REGISTRATION.organization,
+          legalEntityType: 'SRL',
+        },
+      }),
+    ).toEqual([]);
+  });
+
+  it('acepta un código de otra jurisdicción', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        organization: {
+          ...MINIMAL_REGISTRATION.organization,
+          legalEntityType: 'US_LLC',
+        },
+      }),
+    ).toEqual([]);
+  });
+
+  it('rechaza un código fuera del diccionario', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        organization: {
+          ...MINIMAL_REGISTRATION.organization,
+          legalEntityType: 'BO_SRL',
+        },
+      }),
+    ).toEqual(['organization.legalEntityType']);
+  });
+
+  it('sin el campo, el alta sigue siendo válida', async () => {
+    expect(await propertiesWithError(MINIMAL_REGISTRATION)).toEqual([]);
+  });
+});
+
+/**
+ * Los documentos legales de afiliación en PDF (subtarea 1.2). El DTO sólo
+ * comprueba que el bloque venga completo y con uuids; la existencia y
+ * pertenencia al catálogo de cada `fileId` las comprueba
+ * `TenantAffiliationDocumentsService`, no este DTO.
+ */
+describe('RegisterOrganizationDto · legalDocuments (1.2)', () => {
+  const LEGAL_DOCUMENTS_COMPLETE = {
+    constitutionFileId: '11111111-1111-4111-8111-111111111111',
+    taxIdentifierFileId: '22222222-2222-4222-8222-222222222222',
+    commerceRegistryFileId: '33333333-3333-4333-8333-333333333333',
+    operatingLicenseFileId: '44444444-4444-4444-8444-444444444444',
+    healthAuthorityCertificateFileId: '55555555-5555-4555-8555-555555555555',
+  };
+
+  it('acepta el bloque completo con los cinco fileId', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        organization: {
+          ...MINIMAL_REGISTRATION.organization,
+          legalDocuments: LEGAL_DOCUMENTS_COMPLETE,
+        },
+      }),
+    ).toEqual([]);
+  });
+
+  it('el bloque es todo o nada: falta uno solo es 400, no 422', async () => {
+    const { healthAuthorityCertificateFileId, ...incomplete } =
+      LEGAL_DOCUMENTS_COMPLETE;
+    void healthAuthorityCertificateFileId;
+
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        organization: {
+          ...MINIMAL_REGISTRATION.organization,
+          legalDocuments: incomplete,
+        },
+      }),
+    ).toEqual(['organization.legalDocuments.healthAuthorityCertificateFileId']);
+  });
+
+  it('la matrícula de comercio es opcional en el DTO: la exige el servicio según el tipo societario', async () => {
+    const { commerceRegistryFileId, ...withoutCommerce } =
+      LEGAL_DOCUMENTS_COMPLETE;
+    void commerceRegistryFileId;
+
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        organization: {
+          ...MINIMAL_REGISTRATION.organization,
+          legalDocuments: withoutCommerce,
+        },
+      }),
+    ).toEqual([]);
+  });
+
+  it('rechaza un fileId que no es un uuid', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        organization: {
+          ...MINIMAL_REGISTRATION.organization,
+          legalDocuments: {
+            ...LEGAL_DOCUMENTS_COMPLETE,
+            constitutionFileId: 'no-es-un-uuid',
+          },
+        },
+      }),
+    ).toEqual(['organization.legalDocuments.constitutionFileId']);
+  });
+
+  it('sin el bloque, el alta sigue siendo válida (opcional en el contrato)', async () => {
+    expect(await propertiesWithError(MINIMAL_REGISTRATION)).toEqual([]);
+  });
+});
+
+/**
+ * Coordenadas de la casa matriz del `PAYER` (subtarea 1.3). El DTO sólo
+ * comprueba forma y rango; la persistencia en `common.addresses` la hace
+ * `TenantTypeProfileService`, no este DTO.
+ */
+describe('RegisterOrganizationDto · coordenadas de la casa matriz (1.3)', () => {
+  const PAYER_REGISTRATION = {
+    organization: {
+      code: 'ASEGURADORA_Z',
+      legalName: 'Aseguradora Z S.R.L.',
+      tenantType: 'PAYER',
+      payer: {
+        carrierCode: 'CAR-Z',
+        sigla: 'ASZ',
+        address: 'Av. Siempre Viva 742',
+        regulatorIdentifier: 'APS-9001',
+      },
+    },
+    owner: MINIMAL_REGISTRATION.owner,
+  };
+
+  it('acepta el par completo', async () => {
+    expect(
+      await propertiesWithError({
+        ...PAYER_REGISTRATION,
+        organization: {
+          ...PAYER_REGISTRATION.organization,
+          payer: {
+            ...PAYER_REGISTRATION.organization.payer,
+            latitude: -17.7833,
+            longitude: -63.1821,
+          },
+        },
+      }),
+    ).toEqual([]);
+  });
+
+  it('sólo latitude es 400: el par va junto o no va', async () => {
+    expect(
+      await propertiesWithError({
+        ...PAYER_REGISTRATION,
+        organization: {
+          ...PAYER_REGISTRATION.organization,
+          payer: {
+            ...PAYER_REGISTRATION.organization.payer,
+            latitude: -17.7833,
+          },
+        },
+      }),
+    ).toEqual(['organization.payer.longitude']);
+  });
+
+  it('sólo longitude es 400: el par va junto o no va', async () => {
+    expect(
+      await propertiesWithError({
+        ...PAYER_REGISTRATION,
+        organization: {
+          ...PAYER_REGISTRATION.organization,
+          payer: {
+            ...PAYER_REGISTRATION.organization.payer,
+            longitude: -63.1821,
+          },
+        },
+      }),
+    ).toEqual(['organization.payer.latitude']);
+  });
+
+  it('rechaza una latitud fuera de rango', async () => {
+    expect(
+      await propertiesWithError({
+        ...PAYER_REGISTRATION,
+        organization: {
+          ...PAYER_REGISTRATION.organization,
+          payer: {
+            ...PAYER_REGISTRATION.organization.payer,
+            latitude: 90.5,
+            longitude: -63.1821,
+          },
+        },
+      }),
+    ).toEqual(['organization.payer.latitude']);
+  });
+
+  it('rechaza una longitud fuera de rango', async () => {
+    expect(
+      await propertiesWithError({
+        ...PAYER_REGISTRATION,
+        organization: {
+          ...PAYER_REGISTRATION.organization,
+          payer: {
+            ...PAYER_REGISTRATION.organization.payer,
+            latitude: -17.7833,
+            longitude: -180.5,
+          },
+        },
+      }),
+    ).toEqual(['organization.payer.longitude']);
+  });
+
+  it('sin coordenadas, el alta sigue siendo válida (opcional en el contrato)', async () => {
+    expect(await propertiesWithError(PAYER_REGISTRATION)).toEqual([]);
+  });
+});
+
+/**
+ * El nombre del representante legal y de las gerencias, en partes
+ * (`name`/`lastName` obligatorios salvo que venga `fullName`, la forma
+ * anterior). Mismo criterio que `RegisterOrganizationOwnerDto`.
+ */
+describe('RegisterOrganizationDto · representante legal y gerencias · nombre en partes', () => {
+  const REGISTRATION_WITH_REPRESENTATION = {
+    organization: {
+      code: 'ASEGURADORA_PARTES',
+      legalName: 'Aseguradora Partes S.R.L.',
+      tenantType: 'PAYER',
+      payer: {
+        carrierCode: 'CAR-PARTES',
+        sigla: 'APT',
+        address: 'Av. Siempre Viva 742',
+        regulatorIdentifier: 'APS-9001',
+      },
+    },
+    owner: MINIMAL_REGISTRATION.owner,
+  };
+
+  const BASE_REPRESENTATIVE = {
+    idNumber: '4872190 SC',
+    email: 'legal@aseguradora.com',
+    powerOfAttorneyFileId: '11111111-1111-4111-8111-111111111111',
+  };
+
+  const BASE_MANAGEMENT = {
+    phone: '+591 70012345',
+    email: 'gm@aseguradora.com',
+  };
+
+  function registrationWith(legalRepresentative: Record<string, unknown>) {
+    return {
+      ...REGISTRATION_WITH_REPRESENTATION,
+      organization: {
+        ...REGISTRATION_WITH_REPRESENTATION.organization,
+        legalRepresentative,
+      },
+    };
+  }
+
+  it('acepta las partes (name/lastName), sin fullName', async () => {
+    expect(
+      await propertiesWithError(
+        registrationWith({
+          ...BASE_REPRESENTATIVE,
+          name: 'Mariana',
+          lastName: 'Siles',
+        }),
+      ),
+    ).toEqual([]);
+  });
+
+  it('acepta sólo fullName (forma anterior), sin partes', async () => {
+    expect(
+      await propertiesWithError(
+        registrationWith({
+          ...BASE_REPRESENTATIVE,
+          fullName: 'Mariana Siles Justiniano',
+        }),
+      ),
+    ).toEqual([]);
+  });
+
+  it('sin partes NI fullName, rechaza name y lastName', async () => {
+    expect(
+      await propertiesWithError(registrationWith({ ...BASE_REPRESENTATIVE })),
+    ).toEqual([
+      'organization.legalRepresentative.lastName',
+      'organization.legalRepresentative.name',
+    ]);
+  });
+
+  it('rechaza thirdName: no es una clave del contrato, el cliente lo pliega en middleName', async () => {
+    expect(
+      await propertiesWithError(
+        registrationWith({
+          ...BASE_REPRESENTATIVE,
+          name: 'Mariana',
+          lastName: 'Siles',
+          thirdName: 'Elena',
+        }),
+      ),
+    ).toEqual(['organization.legalRepresentative.thirdName']);
+  });
+
+  it('rechaza un nombre de más de 100 caracteres', async () => {
+    expect(
+      await propertiesWithError(
+        registrationWith({
+          ...BASE_REPRESENTATIVE,
+          name: 'A'.repeat(101),
+          lastName: 'Siles',
+        }),
+      ),
+    ).toEqual(['organization.legalRepresentative.name']);
+  });
+
+  it('una gerencia con partes, sin fullName, es válida', async () => {
+    expect(
+      await propertiesWithError({
+        ...REGISTRATION_WITH_REPRESENTATION,
+        organization: {
+          ...REGISTRATION_WITH_REPRESENTATION.organization,
+          executives: {
+            generalManager: {
+              ...BASE_MANAGEMENT,
+              name: 'Carlos',
+              lastName: 'Mendoza',
+            },
+            commercialManager: {
+              ...BASE_MANAGEMENT,
+              name: 'Ana',
+              lastName: 'Paz',
+            },
+            marketingManager: {
+              ...BASE_MANAGEMENT,
+              name: 'Luis',
+              lastName: 'Rojas',
+            },
+          },
+        },
+      }),
+    ).toEqual([]);
+  });
+});
+
+/**
+ * Organización médica: las cinco institucionales de salud y los bordes de las
+ * validaciones del alta. `CLINIC` («Clínica») es el código que faltaba: el
+ * formulario lo ofrecía y el DTO lo rechazaba con 400.
+ */
+describe('RegisterOrganizationDto · organización médica por tipo y bordes', () => {
+  const MEDICAL_ORGANIZATION = {
+    organization: {
+      code: 'CLINICA_Z',
+      legalName: 'Clínica Z S.R.L.',
+      tenantType: 'CLINIC',
+      countryConceptId: '22222222-2222-4222-8222-222222222222',
+      jurisdictionConceptId: '33333333-3333-4333-8333-333333333333',
+    },
+    owner: MINIMAL_REGISTRATION.owner,
+  };
+
+  /** El alta médica con un cambio en `organization`. */
+  const withOrganization = (changes: Record<string, unknown>) => ({
+    ...MEDICAL_ORGANIZATION,
+    organization: { ...MEDICAL_ORGANIZATION.organization, ...changes },
+  });
+
+  /** El alta médica con un cambio en `owner`. */
+  const withOwner = (changes: Record<string, unknown>) => ({
+    ...MEDICAL_ORGANIZATION,
+    owner: { ...MEDICAL_ORGANIZATION.owner, ...changes },
+  });
+
+  it.each(['HOSPITAL', 'CLINIC', 'MEDICAL_OFFICE', 'NURSING', 'HEALTH_OTHER'])(
+    'acepta %s con país y jurisdicción',
+    async (tenantType) => {
+      expect(
+        await propertiesWithError(withOrganization({ tenantType })),
+      ).toEqual([]);
+    },
+  );
+
+  it('CLINIC es un código propio con su concepto, distinto de HOSPITAL', () => {
+    expect(TENANT_TYPE_CODES).toContain('CLINIC');
+    expect(TENANT_TYPE_CONCEPT_BY_CODE.CLINIC).toBe(
+      CONCEPTS.TENANT_TYPE_CLINIC,
+    );
+    expect(TENANT_TYPE_CONCEPT_BY_CODE.CLINIC).not.toBe(
+      TENANT_TYPE_CONCEPT_BY_CODE.HOSPITAL,
+    );
+  });
+
+  it('rechaza CLINICA: el código del contrato es CLINIC', async () => {
+    expect(
+      await propertiesWithError(withOrganization({ tenantType: 'CLINICA' })),
+    ).toEqual(['organization.tenantType']);
+  });
+
+  it('code: acepta 3 y 100 caracteres, rechaza 2 y 101', async () => {
+    expect(
+      await propertiesWithError(withOrganization({ code: 'C'.repeat(3) })),
+    ).toEqual([]);
+    expect(
+      await propertiesWithError(withOrganization({ code: 'C'.repeat(100) })),
+    ).toEqual([]);
+    expect(
+      await propertiesWithError(withOrganization({ code: 'C'.repeat(2) })),
+    ).toEqual(['organization.code']);
+    expect(
+      await propertiesWithError(withOrganization({ code: 'C'.repeat(101) })),
+    ).toEqual(['organization.code']);
+  });
+
+  it('legalName y tradeName: aceptan 300 caracteres, rechazan 301', async () => {
+    expect(
+      await propertiesWithError(
+        withOrganization({
+          legalName: 'L'.repeat(300),
+          tradeName: 'T'.repeat(300),
+        }),
+      ),
+    ).toEqual([]);
+    expect(
+      await propertiesWithError(
+        withOrganization({ legalName: 'L'.repeat(301) }),
+      ),
+    ).toEqual(['organization.legalName']);
+    expect(
+      await propertiesWithError(
+        withOrganization({ tradeName: 'T'.repeat(301) }),
+      ),
+    ).toEqual(['organization.tradeName']);
+  });
+
+  it('password: acepta 8 y 200 caracteres, rechaza 7 y 201', async () => {
+    expect(
+      await propertiesWithError(withOwner({ password: 'p'.repeat(8) })),
+    ).toEqual([]);
+    expect(
+      await propertiesWithError(withOwner({ password: 'p'.repeat(200) })),
+    ).toEqual([]);
+    expect(
+      await propertiesWithError(withOwner({ password: 'p'.repeat(7) })),
+    ).toEqual(['owner.password']);
+    expect(
+      await propertiesWithError(withOwner({ password: 'p'.repeat(201) })),
+    ).toEqual(['owner.password']);
+  });
+
+  it('owner.name: acepta 100 caracteres, rechaza 101', async () => {
+    expect(
+      await propertiesWithError(withOwner({ name: 'N'.repeat(100) })),
+    ).toEqual([]);
+    expect(
+      await propertiesWithError(withOwner({ name: 'N'.repeat(101) })),
+    ).toEqual(['owner.name']);
+  });
+});

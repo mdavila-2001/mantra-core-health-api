@@ -253,6 +253,7 @@ export class DynamicEnumSeedService {
     await em.flush();
 
     // --- Nivel 6: opciones de la versión publicada ---
+    const grownVersions = new Set<(typeof entries)[number]>();
     const optionIds = entries.flatMap((entry) =>
       entry.options.map((option) => enumOptionId(entry.code, option.conceptId)),
     );
@@ -281,9 +282,24 @@ export class DynamicEnumSeedService {
           { partial: true },
         );
         counters.options += 1;
+        // La versión ya existía: la opción nueva cambia su composición.
+        if (existingEnumVersions.has(enumVersionId(entry.code))) {
+          grownVersions.add(entry);
+        }
       });
     }
     await em.flush();
+
+    // El testigo de caché depende de la composición, pero la fila de versión
+    // ya sembrada no se recrea: sin esto, una base viva recibe la opción nueva
+    // con el testigo viejo y un cliente que cachea por testigo no la ve.
+    for (const entry of grownVersions) {
+      await em.nativeUpdate(
+        DynamicEnumVersions,
+        { id: enumVersionId(entry.code) },
+        { cacheToken: entry.cacheToken },
+      );
+    }
 
     // --- Nivel 7: amarre campo -> enumeración ---
     const bindingIds = entries.flatMap((entry) =>

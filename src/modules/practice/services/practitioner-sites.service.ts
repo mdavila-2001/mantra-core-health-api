@@ -1,8 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   CONCEPTS,
+  LOGO_IMAGE_MIME_TYPES,
+  PreconditionFailedException,
+  assertLogoImage,
   requireTenantId,
   ResourceNotFoundException,
   touch,
@@ -13,10 +16,12 @@ import {
 // (P32-b) desde acá, que es donde vive el caso de uso de «mudé mi consultorio».
 import { Addresses } from '../../common/entities';
 import { AddressesRepository } from '../../common/repositories';
+import { AttachableFileService } from '../../common/services/attachable-file.service';
+import { adminDivisionLineage } from '../../../common/seed/admin-divisions.catalog';
 // Mismo patrón que `clinical_ext` con `ProfileOwnershipService`: se importa la
 // clase puntual, no `ProfilesModule`, para no cerrar un ciclo entre módulos.
-import { ProfileOwnershipService } from '../../profiles/services/profile-ownership.service';
-import { PersonAccountLinksRepository } from '../../profiles/repositories';
+import { ProfileOwnershipService } from '../../profiles/application/services/profile-ownership.service';
+import { PersonAccountLinksRepository } from '../../profiles/infrastructure/repositories';
 import { PRAC } from '../practice.concepts';
 import {
   CareSpacesRepository,
@@ -112,6 +117,7 @@ export class PractitionerSitesService {
     private readonly provisioning: OwnSiteProvisioningService,
     private readonly ownership: ProfileOwnershipService,
     private readonly logger: PinoLogger,
+    private readonly attachable: AttachableFileService,
   ) {
     this.logger.setContext(PractitionerSitesService.name);
   }
@@ -144,6 +150,9 @@ export class PractitionerSitesService {
     return this.em.transactional(async (tx) => {
       const practitionerProfileId =
         await this.ownership.requireOwnPractitionerProfileId(tx, actor);
+      if (dto.logoFileId) {
+        await this.assertUsableLogo(tx, dto.logoFileId, actor);
+      }
 
       const { site } = await this.provisioning.provision(
         tx,
@@ -165,8 +174,10 @@ export class PractitionerSitesService {
         addressText: dto.address ? ownSiteAddressText(dto.address) : null,
         latitude: dto.address?.latitude ?? null,
         longitude: dto.address?.longitude ?? null,
+        contactPhone: dto.contactPhone ?? null,
         isOwnSite: true,
         bankQrFileId: site.bankQrFileId ?? null,
+        logoFileId: site.logoFileId ?? null,
         status: site.statusConceptId,
       };
     });
@@ -215,7 +226,14 @@ export class PractitionerSitesService {
         { operation: 'practice.sites.updateOwn', siteId },
         'Practitioner own site updated',
       );
-      return this.projectSite(tx, site, true);
+      const practitionerProfileId =
+        await this.ownership.requireOwnPractitionerProfileId(tx, actor);
+      const assignment = await this.rolesRepo.findCurrentBySite(
+        tx,
+        practitionerProfileId,
+        siteId,
+      );
+      return this.projectSite(tx, site, true, assignment?.contactPhone);
     });
   }
 
@@ -275,6 +293,99 @@ export class PractitionerSitesService {
         tx,
         site,
         await this.isOwnPractice(tx, site.practiceId, actor.id, tenantId),
+        assignment?.contactPhone,
+      );
+    });
+  }
+
+  /**
+   * Fija —o quita— el logo del consultorio propio, el que sale en el membrete
+   * de sus PDF.
+   *
+   * A diferencia del QR, alcanza sólo al consultorio **propio**: el logo es de
+   * la sede, no de con qué cobra el profesional en ella, y la sede de otra
+   * organización la administra ella.
+   *
+   * @param actor - El profesional autenticado.
+   * @param siteId - El consultorio.
+   * @param fileId - La imagen ya subida, o `null` para dejar la sede sin logo.
+   * @returns La sede con el logo aplicado, en el formato de la lista.
+   * @throws ResourceNotFoundException (404) si la sede no es un consultorio propio del actor.
+   * @throws PreconditionFailedException (422) si el archivo no sirve como logo.
+   */
+  async setSiteLogo(
+    actor: AuthenticatedUser,
+    siteId: string,
+    fileId: string | null,
+  ): Promise<PractitionerSiteDto> {
+    const tenantId = requireTenantId();
+    return this.em.transactional(async (tx) => {
+      const site = await this.requireOwnSite(tx, actor, siteId, tenantId);
+      if (fileId !== null) {
+        await this.assertUsableLogo(tx, fileId, actor);
+      }
+
+      // `undefined` y no `null`: la propiedad de la entidad es opcional, y
+      // MikroORM traduce la ausencia a `NULL` en la columna.
+      site.logoFileId = fileId ?? undefined;
+      touch(site, actor.id);
+      await tx.flush();
+
+      this.logger.info(
+        {
+          operation: 'practice.sites.setLogo',
+          siteId,
+          cleared: fileId === null,
+        },
+        'Practitioner own site logo updated',
+      );
+      const practitionerProfileId =
+        await this.ownership.requireOwnPractitionerProfileId(tx, actor);
+      const assignment = await this.rolesRepo.findCurrentBySite(
+        tx,
+        practitionerProfileId,
+        siteId,
+      );
+      return this.projectSite(tx, site, true, assignment?.contactPhone);
+    });
+  }
+
+  /** Guarda el contacto de este médico en la vinculación con la sede. */
+  async setSiteContactPhone(
+    actor: AuthenticatedUser,
+    siteId: string,
+    contactPhone: string | null,
+  ): Promise<PractitionerSiteDto> {
+    const tenantId = requireTenantId();
+    return this.em.transactional(async (tx) => {
+      const practitionerProfileId =
+        await this.ownership.requireOwnPractitionerProfileId(tx, actor);
+      const assignment = await this.rolesRepo.findCurrentBySite(
+        tx,
+        practitionerProfileId,
+        siteId,
+        PRAC.ROLE_ASSIGNMENT_ACTIVE,
+      );
+      const site = assignment
+        ? await this.sitesRepo.findById(tx, siteId)
+        : null;
+      const practice = site
+        ? await this.practicesRepo.findById(tx, site.practiceId)
+        : null;
+      if (!assignment || !site || !practice) {
+        throw new ResourceNotFoundException(
+          'No tiene una vinculación vigente con esa sede',
+          { siteId },
+        );
+      }
+      assignment.contactPhone = contactPhone?.trim() || undefined;
+      touch(assignment, actor.id);
+      await tx.flush();
+      return this.projectSite(
+        tx,
+        site,
+        await this.isOwnPractice(tx, site.practiceId, actor.id, tenantId),
+        assignment.contactPhone,
       );
     });
   }
@@ -345,12 +456,32 @@ export class PractitionerSitesService {
       em,
       practitionerProfileId,
     );
-    const sites = await this.loadSites(em, siteIds, tenantId, link?.userId);
+    const sites = await this.loadSites(
+      em,
+      siteIds,
+      tenantId,
+      link?.userId,
+      true,
+    );
+
+    const contactBySite = new Map<string, string | undefined>();
+    for (const assignment of assignments) {
+      if (
+        assignment.practiceSiteId &&
+        !contactBySite.has(assignment.practiceSiteId)
+      ) {
+        contactBySite.set(assignment.practiceSiteId, assignment.contactPhone);
+      }
+    }
 
     const resolved: PractitionerSiteDto[] = [];
     for (const siteId of siteIds) {
       const site = sites.get(siteId);
-      if (site) resolved.push(site);
+      if (site)
+        resolved.push({
+          ...site,
+          contactPhone: contactBySite.get(siteId) ?? null,
+        });
     }
     return resolved;
   }
@@ -430,6 +561,8 @@ export class PractitionerSitesService {
    *   prudente —ajeno mientras no conste lo contrario— y la que corresponde a
    *   las llamadas que no preguntan por una persona, como la resolución de
    *   recursos de la agenda.
+   * @param includeLinkedSites - Incluye sedes de otros tenants cuando los ids
+   *   provienen de asignaciones activas del profesional consultado.
    * @returns Un mapa de sede a proyección, sin entrada para lo descartado.
    */
   private async loadSites(
@@ -437,6 +570,7 @@ export class PractitionerSitesService {
     siteIds: readonly string[],
     tenantId: string,
     ownerUserId?: string,
+    includeLinkedSites = false,
   ): Promise<Map<string, PractitionerSiteDto>> {
     const result = new Map<string, PractitionerSiteDto>();
     if (siteIds.length === 0) return result;
@@ -445,7 +579,10 @@ export class PractitionerSitesService {
       const site = await this.sitesRepo.findById(em, siteId);
       if (!site) continue;
       const practice = await this.practicesRepo.findById(em, site.practiceId);
-      if (!practice || practice.tenantId !== tenantId) {
+      if (
+        !practice ||
+        (!includeLinkedSites && practice.tenantId !== tenantId)
+      ) {
         this.logger.warn(
           { operation: 'practice.sites.resolve', siteId },
           'Sede de otra organización referida por un recurso: se omite',
@@ -477,6 +614,7 @@ export class PractitionerSitesService {
     em: EntityManager,
     site: PracticeSites,
     isOwnSite: boolean,
+    contactPhone?: string,
   ): Promise<PractitionerSiteDto> {
     const address = site.addressId
       ? await em.findOne(Addresses, { id: site.addressId })
@@ -492,8 +630,10 @@ export class PractitionerSitesService {
         address?.latitude !== undefined ? Number(address.latitude) : null,
       longitude:
         address?.longitude !== undefined ? Number(address.longitude) : null,
+      contactPhone: contactPhone ?? null,
       isOwnSite,
       bankQrFileId: site.bankQrFileId ?? null,
+      logoFileId: site.logoFileId ?? null,
       status: site.statusConceptId,
     };
   }
@@ -528,6 +668,57 @@ export class PractitionerSitesService {
       );
     }
     return site;
+  }
+
+  /**
+   * Comprueba que el archivo sirve como logo del consultorio: del actor, vivo,
+   * imagen png, jpeg o webp de categoría IMAGE, sensibilidad NORMAL y hasta
+   * 2 MB —las reglas del logo de una organización—.
+   *
+   * Todo rechazo del archivo es 422, también «no existe» o «es de otro»: el
+   * 404 de esta superficie queda para la sede, y separar los motivos dejaría
+   * enumerar qué uuids son archivos ajenos.
+   *
+   * @param em - Transacción activa.
+   * @param fileId - El archivo que se quiere usar como logo.
+   * @param actor - El profesional autenticado.
+   * @throws PreconditionFailedException si el archivo no sirve como logo.
+   */
+  private async assertUsableLogo(
+    em: EntityManager,
+    fileId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    let usable: Awaited<ReturnType<AttachableFileService['assertUsableBy']>>;
+    try {
+      usable = await this.attachable.assertUsableBy(
+        em,
+        fileId,
+        actor,
+        {
+          allowedMimeTypes: LOGO_IMAGE_MIME_TYPES,
+          operation: 'practice.sites.logo',
+        },
+        { subject: 'El logo', notFound: 'El logo no existe' },
+      );
+    } catch (err) {
+      if (
+        err instanceof ForbiddenException ||
+        err instanceof ResourceNotFoundException
+      ) {
+        throw new PreconditionFailedException(
+          'El logo no es un archivo suyo que se pueda usar',
+          { fileId },
+        );
+      }
+      throw err;
+    }
+    if (usable.file.categoryConceptId !== CONCEPTS.FILE_CATEGORY_IMAGE) {
+      throw new PreconditionFailedException('El logo debe ser una imagen', {
+        fileId,
+      });
+    }
+    assertLogoImage(usable.file, usable.version);
   }
 
   /**
@@ -581,15 +772,15 @@ export class PractitionerSitesService {
     if (site.addressId) {
       const current = await em.findOne(Addresses, { id: site.addressId });
       if (current) {
-        this.addressesRepo.closeVigente(current, new Date(), actorUserId);
+        this.addressesRepo.closeCurrent(current, new Date(), actorUserId);
       }
     }
 
     // Una línea en blanco no es una dirección ausente: es una fila vacía.
     // Mismo criterio que el alta (`OwnSiteProvisioningService.provision`).
     const lines = address.lines
-      .map((linea) => linea.trim())
-      .filter((linea) => linea.length > 0);
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
     const fresh = this.addressesRepo.create(em, {
       ownerTypeConceptId: CONCEPTS.OWNER_USER,
       ownerId: actorUserId,
@@ -597,6 +788,11 @@ export class PractitionerSitesService {
       city: address.city,
       municipalityConceptId: address.municipalityConceptId,
       administrativeAreaConceptId: address.administrativeAreaConceptId,
+      // ADR-0028: provincia deducida del municipio y distrito aparte.
+      administrativeArea2ConceptId: address.municipalityConceptId
+        ? adminDivisionLineage(address.municipalityConceptId)?.level2ConceptId
+        : undefined,
+      districtText: address.district?.trim() || undefined,
       countryConceptId: CONCEPTS.COUNTRY_BO,
       useConceptId: CONCEPTS.ADDR_USE_WORK,
       typeConceptId: CONCEPTS.ADDR_TYPE_POSTAL,
@@ -644,7 +840,14 @@ function unique(ids: readonly string[]): string[] {
  * no como una cadena de comas.
  */
 function addressText(address: Addresses): string | null {
-  const parts = [address.lines, address.city, address.postalCode]
+  // El distrito va aparte de las líneas desde ADR-0028; se repone acá para
+  // que el texto de la sede siga diciendo la zona, como cuando venía pegado.
+  const parts = [
+    address.lines,
+    address.districtText,
+    address.city,
+    address.postalCode,
+  ]
     .map((part) => part?.trim())
     .filter((part): part is string => Boolean(part));
   return parts.length === 0 ? null : parts.join(', ');
@@ -660,9 +863,10 @@ function addressText(address: Addresses): string | null {
  */
 function ownSiteAddressText(address: {
   lines: string[];
+  district?: string;
   city?: string;
 }): string | null {
-  const parts = [address.lines.join('\n'), address.city]
+  const parts = [address.lines.join('\n'), address.district, address.city]
     .map((part) => part?.trim())
     .filter((part): part is string => Boolean(part));
   return parts.length === 0 ? null : parts.join(', ');

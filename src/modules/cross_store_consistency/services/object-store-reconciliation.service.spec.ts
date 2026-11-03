@@ -34,30 +34,30 @@ function build(options: {
   inventario?: ObjectInventory;
 }) {
   const {
-    referencias = [],
-    presentes = [],
-    incomprobables = [],
-    inventario = { estado: 'COMPLETO', objetos: [] },
+    referencias: references = [],
+    presentes: present = [],
+    incomprobables: unverifiable = [],
+    inventario: inventory = { estado: 'COMPLETO', objetos: [] },
   } = options;
 
   const em = {
     fork: () => ({
       getConnection: () => ({
-        execute: mockFn().mockResolvedValue(referencias),
+        execute: mockFn().mockResolvedValue(references),
       }),
     }),
   };
   const reader = {
     stat: mockFn(async ({ key }: { key: string }) => {
-      if (incomprobables.includes(key)) {
+      if (unverifiable.includes(key)) {
         throw new ObjectContentUnavailableError('PROVIDER_ERROR');
       }
-      return presentes.includes(key) ? { sizeBytes: 1n } : null;
+      return present.includes(key) ? { sizeBytes: 1n } : null;
     }),
     digest: mockFn(),
     open: mockFn(),
   };
-  const inventoryPort = { list: mockFn().mockResolvedValue(inventario) };
+  const inventoryPort = { list: mockFn().mockResolvedValue(inventory) };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new ObjectStoreReconciliationService(
@@ -179,7 +179,7 @@ describe('ObjectStoreReconciliationService · F09', () => {
       'el inventario quedó truncado',
       { estado: 'TRUNCADO', objetos: [{ key: 'x.bin', sizeBytes: 1n }] },
     ],
-  ])('no emite ningún EXTRA cuando %s', async (_caso, inventory) => {
+  ])('no emite ningún EXTRA cuando %s', async (_case, inventory) => {
     const d = build({
       referencias: [ref('fv1', 'a/1.pdf')],
       presentes: ['a/1.pdf'],

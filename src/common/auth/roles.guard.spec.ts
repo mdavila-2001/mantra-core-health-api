@@ -2,6 +2,7 @@ import { jest } from '@jest/globals';
 const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
 import { ForbiddenException } from '@nestjs/common';
 import { RolesGuard } from './roles.guard';
+import { IS_PUBLIC_KEY } from './public.decorator';
 import type { AuthenticatedUser } from './authenticated-user.interface';
 
 /** Contexto de ejecución HTTP mínimo con el usuario ya autenticado. */
@@ -16,7 +17,11 @@ function contextFor(user: AuthenticatedUser, resolvedTenantId?: string) {
 }
 
 function build(required: string[] | undefined) {
-  const reflector = { getAllAndOverride: fn(() => required) };
+  const reflector = {
+    getAllAndOverride: fn((key: unknown) =>
+      key === IS_PUBLIC_KEY ? false : required,
+    ),
+  };
   const guard = new RolesGuard(reflector as never);
   return { guard };
 }
@@ -29,6 +34,22 @@ describe('RolesGuard', () => {
         contextFor({ id: 'u1', roles: [] } as AuthenticatedUser),
       ),
     ).toBe(true);
+  });
+
+  it('un SUPERADMIN acotado a un tenant (scopedRoles) no es comodín', () => {
+    const { guard } = build(['STORAGE_ADMIN']);
+    expect(() =>
+      guard.canActivate(
+        contextFor(
+          {
+            id: 'u1',
+            roles: ['SUPERADMIN'],
+            scopedRoles: { t1: ['SUPERADMIN'] },
+          } as AuthenticatedUser,
+          't1',
+        ),
+      ),
+    ).toThrow(ForbiddenException);
   });
 
   it('SUPERADMIN pasa cualquier chequeo de rol', () => {
@@ -82,9 +103,32 @@ describe('RolesGuard', () => {
     it('retirar el rol (fuera de scopedRoles y de roles) deja de autorizar', () => {
       const { guard } = build(['STORAGE_ADMIN']);
       const withoutRole: AuthenticatedUser = { id: 'u1', roles: [] };
-      expect(() => guard.canActivate(contextFor(withoutRole, 'tenant-A'))).toThrow(
-        ForbiddenException,
-      );
+      expect(() =>
+        guard.canActivate(contextFor(withoutRole, 'tenant-A')),
+      ).toThrow(ForbiddenException);
     });
+  });
+});
+
+describe('RolesGuard · rutas @Public()', () => {
+  const guardCon = (publica: boolean, roles: string[]) =>
+    new RolesGuard({
+      getAllAndOverride: fn((key: unknown) =>
+        key === IS_PUBLIC_KEY ? publica : roles,
+      ),
+    } as never);
+
+  it('una ruta @Public() con @Roles() por error no devuelve 403 (no hay request.user)', () => {
+    const guard = guardCon(true, ['STORAGE_ADMIN']);
+    expect(guard.canActivate(contextFor(undefined as never))).toBe(true);
+  });
+
+  it('una ruta que no es pública sigue exigiendo el rol', () => {
+    const guard = guardCon(false, ['STORAGE_ADMIN']);
+    expect(() =>
+      guard.canActivate(
+        contextFor({ id: 'u1', roles: [] } as AuthenticatedUser),
+      ),
+    ).toThrow(ForbiddenException);
   });
 });

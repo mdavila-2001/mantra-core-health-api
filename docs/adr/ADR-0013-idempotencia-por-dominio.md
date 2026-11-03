@@ -41,5 +41,3 @@ desconocimiento del patrón existente en `payments`.
 `src/modules/payments/controllers/payments-intents.controller.ts` (`idempotencyKey`),
 ausencia de middleware genérico en `src/main.ts`.
 
-## Plan de revisión
-Completar el catálogo de qué endpoints son idempotentes en Fase 9 (por módulo) — pendiente.

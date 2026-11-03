@@ -50,6 +50,9 @@ export class InsuranceClaimLines {
   }) // FK → pharmacy_inventory.medication_dispensation_lines
   medicationDispensationLineId?: string;
 
+  /**
+   * Identificador asociado a inventory reservation line.
+   */
   @Property({
     fieldName: 'inventory_reservation_line_id',
     type: 'uuid',

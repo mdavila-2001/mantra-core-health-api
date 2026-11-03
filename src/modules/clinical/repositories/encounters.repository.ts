@@ -102,6 +102,11 @@ export interface CreateParticipantData {
  */
 export interface CreateLocationData {
   /**
+   * Tenant del encuentro. NOT NULL desde F3 y atado por la FK compuesta
+   * `(tenant_id, encounter_id)`: sin él, el check-in falla con 23502.
+   */
+  tenantId: string;
+  /**
    * Identificador asociado a encounter.
    */
   encounterId: string;
@@ -237,6 +242,7 @@ export class EncountersRepository {
     return em.create(
       EncounterLocations,
       {
+        tenantId: data.tenantId,
         encounterId: data.encounterId,
         practiceSiteId: data.practiceSiteId,
         clinicalUnitId: data.clinicalUnitId,
@@ -313,10 +319,10 @@ export class EncountersRepository {
       { appointmentId: { $in: [...appointmentIds] } },
       { orderBy: { createdAt: 'DESC' } },
     );
-    for (const encuentro of encounters) {
-      if (encuentro.appointmentId == null) continue;
-      if (!map.has(encuentro.appointmentId)) {
-        map.set(encuentro.appointmentId, encuentro.id);
+    for (const encounter of encounters) {
+      if (encounter.appointmentId == null) continue;
+      if (!map.has(encounter.appointmentId)) {
+        map.set(encounter.appointmentId, encounter.id);
       }
     }
     return map;
@@ -346,11 +352,11 @@ export class EncountersRepository {
       { appointmentId: { $in: [...appointmentIds] } },
       { orderBy: { createdAt: 'DESC' } },
     );
-    for (const encuentro of encounters) {
-      if (encuentro.appointmentId == null) continue;
-      const ids = map.get(encuentro.appointmentId) ?? [];
-      ids.push(encuentro.id);
-      map.set(encuentro.appointmentId, ids);
+    for (const encounter of encounters) {
+      if (encounter.appointmentId == null) continue;
+      const ids = map.get(encounter.appointmentId) ?? [];
+      ids.push(encounter.id);
+      map.set(encounter.appointmentId, ids);
     }
     return map;
   }

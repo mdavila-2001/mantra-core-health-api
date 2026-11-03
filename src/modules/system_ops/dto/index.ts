@@ -1,6 +1,7 @@
 export * from './common-response.dto';
 export * from './governance-catalog.dto';
 export * from './governance-policy.dto';
+export * from './governance-read.dto';
 export * from './retention-execution.dto';
 export * from './residency.dto';
 export * from './legal-hold.dto';
@@ -8,3 +9,4 @@ export * from './backup.dto';
 export * from './framework.dto';
 export * from './assessment.dto';
 export * from './draft.dto';
+export * from './governance-read.dto';

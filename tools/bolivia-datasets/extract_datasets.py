@@ -51,6 +51,37 @@ SALIDA_POR_DEFECTO = RAIZ_API / "src" / "common" / "seed" / "data" / "bolivia"
 # nunca inventadas.
 FUENTE_COORDS_POR_DEFECTO = RAIZ_API.parent / "mantra-core-health" / "data" / "markdown-institutions"
 
+# Procedencia (M1 del carril de carga versionada): cada archivo que el extractor
+# abre queda registrado con el sha256 de sus bytes, y `escribir` lo vuelca en el
+# dataset como `_procedencia`. Así un dataset dice de qué versión del padrón salió
+# y regenerarlo con las mismas fuentes da los mismos bytes. Se registra el
+# archivo, no su contenido: ningún dato del padrón viaja en la procedencia.
+_LEIDAS: dict[str, str] = {}
+# Se fija en `main`: el commit del modelo del que salieron los markdown.
+_COMMIT_DEL_MODELO = ""
+
+
+def _registrar_lectura(ruta: Path, crudo: bytes) -> None:
+    """Anota el archivo leído, relativo a la carpeta que contiene la fuente."""
+    _LEIDAS[f"{ruta.parent.name}/{ruta.name}"] = hashlib.sha256(crudo).hexdigest()
+
+
+def _commit_del_modelo(fuente: Path) -> str:
+    """Último commit del repo del modelo que tocó la carpeta de origen.
+
+    No es el `HEAD`: un commit del modelo que no toca estos markdown no debe
+    cambiar los bytes de los datasets. Vacío si la fuente no es un checkout git.
+    """
+    try:
+        resultado = subprocess.run(
+            ["git", "log", "-1", "--format=%H", "--", "."],
+            cwd=fuente, capture_output=True, text=True, check=True,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return ""
+    return resultado.stdout.strip()
+
+
 # Marcas de daño de OCR: letras y dígitos mezclados dentro de una palabra, o
 # caracteres que el reconocedor usa para rellenar lo que no pudo leer.
 from ocr_es import LEXICO_VERSIONADO, Lexico, corregir_texto  # noqa: E402
@@ -172,6 +203,7 @@ def leer(ruta: Path) -> list[str]:
     rompería—, y el criterio es contar caracteres imposibles en castellano.
     """
     crudo = ruta.read_bytes()
+    _registrar_lectura(ruta, crudo)
     if crudo[:2] in (b"\xff\xfe", b"\xfe\xff"):
         texto = crudo.decode("utf-16")
     else:
@@ -271,7 +303,9 @@ def procedencia(archivo: Path, indice: int) -> dict:
 def _cargar_json(ruta: Path) -> object | None:
     if not ruta.is_file():
         return None
-    return json.loads(ruta.read_text(encoding="utf-8"))
+    crudo = ruta.read_bytes()
+    _registrar_lectura(ruta, crudo)
+    return json.loads(crudo.decode("utf-8"))
 
 
 class Coordenadas:
@@ -965,9 +999,26 @@ def contar(nodo) -> int:
     return 0
 
 
-def escribir(salida: Path, nombre: str, contenido, nota: str) -> int:
+def escribir(
+    salida: Path,
+    nombre: str,
+    contenido,
+    nota: str,
+    fuentes_extra: dict[str, str] | None = None,
+) -> int:
     salida.mkdir(parents=True, exist_ok=True)
-    cuerpo = {"_nota": nota, "datos": contenido}
+    # `_procedencia` va entre la nota y los datos. Las fuentes salen ordenadas por
+    # nombre para que el orden en que se abrieron no cambie los bytes.
+    fuentes = {**(fuentes_extra or {}), **_LEIDAS}
+    _LEIDAS.clear()
+    cuerpo = {
+        "_nota": nota,
+        "_procedencia": {
+            "modeloCommit": _COMMIT_DEL_MODELO,
+            "fuentes": dict(sorted(fuentes.items())),
+        },
+        "datos": contenido,
+    }
     ruta = salida / nombre
     # `newline=""` porque en Windows la traducción por defecto convierte cada
     # «\n» en CRLF, y `.gitattributes` declara `*.json text eol=lf`: sin esto,
@@ -999,7 +1050,13 @@ def main() -> int:
     print(f"Origen : {args.fuente}")
     print(f"Destino: {args.salida}\n")
 
+    global _COMMIT_DEL_MODELO
+    _COMMIT_DEL_MODELO = _commit_del_modelo(args.fuente)
     coords = Coordenadas(args.fuente_coords)
+    # Las coordenadas se cargan una vez, al principio: se apartan para atribuirlas
+    # solo al dataset de establecimientos, que es el único que las usa.
+    fuentes_de_coordenadas = dict(_LEIDAS)
+    _LEIDAS.clear()
     if not args.fuente_coords.is_dir():
         print(
             f"Aviso: no está el repo de coordenadas ({args.fuente_coords}); "
@@ -1030,6 +1087,7 @@ def main() -> int:
         "RED_ASEGURADORA salen de las redes de Alianza y Nacional: son consultorios "
         "que el padrón oficial no lista y sin los cuales un médico no puede declarar "
         "dónde atiende.",
+        fuentes_extra=fuentes_de_coordenadas,
     )
     escribir(
         args.salida, "provider-networks.dataset.json",

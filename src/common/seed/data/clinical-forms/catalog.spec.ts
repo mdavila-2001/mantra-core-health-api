@@ -29,14 +29,14 @@ const WITHOUT_PRESUMPTIVE_DIAGNOSIS = new Set([
   'PSIQ_EVALUACION_BASE',
 ]);
 
-const campos = STANDARD_FORMS.flatMap((form) =>
+const fields = STANDARD_FORMS.flatMap((form) =>
   form.fields.map((field) => ({ form, field })),
 );
 
 describe('catálogo v2 — contenido', () => {
   it('las escalas con categorías finitas se eligen de una lista, no se escriben', () => {
     const scales = /\b(ASA|Mallampati|NYHA|ECOG|mMRC|Bristol|Fitzpatrick)\b/;
-    const free = campos
+    const free = fields
       .filter(({ field }) => scales.test(field.name))
       .filter(({ field }) => field.options === undefined)
       .map(({ form, field }) => `${form.code}.${field.code}`);
@@ -57,16 +57,16 @@ describe('catálogo v2 — contenido', () => {
       (form.kind === 'BASE' ? group.base : group.especificas).push(form.code);
       bySpecialty.set(form.specialty.code, group);
     }
-    for (const [especialidad, grupo] of bySpecialty) {
-      expect({ especialidad, bases: grupo.base.length }).toEqual({
-        especialidad,
+    for (const [specialty, group] of bySpecialty) {
+      expect({ especialidad: specialty, bases: group.base.length }).toEqual({
+        especialidad: specialty,
         bases: 1,
       });
       expect({
-        especialidad,
-        especificas: grupo.especificas.length > 0,
+        especialidad: specialty,
+        especificas: group.especificas.length > 0,
       }).toEqual({
-        especialidad,
+        especialidad: specialty,
         especificas: true,
       });
     }
@@ -77,6 +77,7 @@ describe('catálogo v2 — contenido', () => {
         .sort(),
     ).toEqual([
       'TRANSV_ANAMNESIS_GENERAL',
+      'TRANSV_CITA_MEDICA',
       'TRANSV_CONSENTIMIENTO_INFORMADO',
       'TRANSV_EPICRISIS',
       'TRANSV_EXAMEN_FISICO',
@@ -116,7 +117,7 @@ describe('catálogo v2 — contenido', () => {
         true,
       );
       expect(
-        [...sections].some((nombre) => nombre?.startsWith('Evaluación:')),
+        [...sections].some((name) => name?.startsWith('Evaluación:')),
       ).toBe(true);
     }
   });
@@ -137,7 +138,7 @@ describe('catálogo v2 — contenido', () => {
   });
 
   it('el dengue pide los signos de alarma de la guía OPS/OMS', () => {
-    const signs = campos.filter(
+    const signs = fields.filter(
       ({ field }) => field.code === 'dengue_signos_de_alarma',
     );
     expect(signs.length).toBeGreaterThanOrEqual(1);
@@ -151,7 +152,7 @@ describe('catálogo v2 — contenido', () => {
   });
 
   it('una lista de varias respuestas se guarda como json, y una de una sola como texto', () => {
-    for (const { field } of campos) {
+    for (const { field } of fields) {
       if (field.options === undefined) continue;
       expect(field.dataType).toBe(field.multiple === true ? 'json' : 'string');
     }
@@ -160,7 +161,7 @@ describe('catálogo v2 — contenido', () => {
   it('ninguna ficha cita un instrumento con licencia comercial no confirmada', () => {
     const withLicense =
       /PHQ-9|GAD-7|Beck|MMSE|Mini-Mental|STOP-BANG|IIEF|Braden|Morse|MUST|Roma IV|CAM-ICU/;
-    const cited = campos
+    const cited = fields
       .filter(({ field }) =>
         withLicense.test(
           `${field.name} ${(field.options ?? []).join(' ')} ${field.description ?? ''}`,
@@ -258,14 +259,16 @@ describe('catálogo v2 — validación de carga', () => {
  * ese filtro no puede dejar pasar.
  */
 describe('fichas de las NNAC de Bolivia', () => {
-  const nnac = STANDARD_FORMS.filter((record) => record.code.startsWith('NNAC'));
-  const DOSIS =
+  const nnac = STANDARD_FORMS.filter((record) =>
+    record.code.startsWith('NNAC'),
+  );
+  const DOSE =
     /\b\d+(?:[.,]\d+)?\s?(?:mg|mcg|µg|ml|mL|UI|mEq|gotas?|comprimidos?|tabletas?|ampollas?)\b|\b(?:IV|VO|IM|SC)\b|\bdosis\b/u;
 
   it('hay fichas de las dos ediciones de la norma, una por enfermedad', () => {
-    const de2025 = nnac.filter((record) => record.code.startsWith('NNAC25_'));
-    expect(de2025.length).toBeGreaterThanOrEqual(70);
-    expect(nnac.length - de2025.length).toBeGreaterThanOrEqual(140);
+    const nnac2025 = nnac.filter((record) => record.code.startsWith('NNAC25_'));
+    expect(nnac2025.length).toBeGreaterThanOrEqual(70);
+    expect(nnac.length - nnac2025.length).toBeGreaterThanOrEqual(140);
     const names = nnac.map((record) =>
       record.name.replace(/ \(NNAC (?:2012|2025)\)$/, ''),
     );
@@ -273,12 +276,14 @@ describe('fichas de las NNAC de Bolivia', () => {
   });
 
   it('el código CIE-10 de 2025 es una lista de «código: nombre» de la norma', () => {
-    const con = STANDARD_FORMS.filter((f) => f.code.startsWith('NNAC25_'))
+    const formsWithOptions = STANDARD_FORMS.filter((f) =>
+      f.code.startsWith('NNAC25_'),
+    )
       .map((f) => f.fields.find((c) => c.code === 'codigo_cie10'))
       .filter((c) => c?.options !== undefined);
-    expect(con.length).toBeGreaterThan(60);
-    for (const campo of con)
-      for (const option of campo?.options ?? [])
+    expect(formsWithOptions.length).toBeGreaterThan(60);
+    for (const field of formsWithOptions)
+      for (const option of field?.options ?? [])
         expect(option).toMatch(/^[A-Z]\d{2}(\.\d+)?: .{4,}/);
   });
 
@@ -292,13 +297,13 @@ describe('fichas de las NNAC de Bolivia', () => {
   });
 
   it('ninguna opción es una dosis, una vía de administración o una instrucción', () => {
-    const ofensoras = nnac.flatMap((record) =>
+    const offending = nnac.flatMap((record) =>
       record.fields
-        .flatMap((campo) => campo.options ?? [])
-        .filter((option) => DOSIS.test(option))
+        .flatMap((field) => field.options ?? [])
+        .filter((option) => DOSE.test(option))
         .map((option) => `${record.code}: ${option}`),
     );
-    expect(ofensoras).toEqual([]);
+    expect(offending).toEqual([]);
   });
 
   it('las opciones son frases cortas, sin restos de otra sección', () => {
@@ -318,5 +323,139 @@ describe('fichas de las NNAC de Bolivia', () => {
       expect(treatment?.dataType).toBe('text');
       expect(treatment?.options).toBeUndefined();
     }
+  });
+});
+
+/**
+ * La ampliación con estándares internacionales (2026-10-24,
+ * `tools/clinical-forms/mejoras-intl.mjs`): campos tomados del CKM de openEHR
+ * y de las Digital Adaptation Kits de la OMS. Estas pruebas fijan las reglas de
+ * procedencia que el generador ya aplica al escribirlos.
+ */
+describe('ampliación internacional del catálogo', () => {
+  const fromCkm = fields.filter(({ field }) =>
+    /según el arquetipo openEHR/.test(field.description ?? ''),
+  );
+  const fromDak = fields.filter(({ field }) =>
+    /Digital adaptation kit|Digital Adaptation Kit/i.test(
+      field.description ?? '',
+    ),
+  );
+
+  it('cada campo de una escala del CKM cita la publicación, el arquetipo y su licencia', () => {
+    expect(fromCkm.length).toBeGreaterThan(100);
+    for (const { form, field } of fromCkm) {
+      expect({ campo: `${form.code}.${field.code}`, ok: true }).toEqual({
+        campo: `${form.code}.${field.code}`,
+        ok:
+          /Fuente: .+\((.+\d{4}|el arquetipo no trae referencia bibliográfica)/.test(
+            field.description ?? '',
+          ) && /CC BY-SA [34]\.0/.test(field.description ?? ''),
+      });
+    }
+  });
+
+  it('la traducción propia se marca como no oficial, y la del CKM se nombra', () => {
+    for (const { field } of fromCkm) {
+      expect(field.description).toMatch(
+        /Traducción propia del inglés|traducción al castellano \(es(-[A-Z]{2})?\) del CKM|Texto del CKM con una corrección propia/,
+      );
+    }
+  });
+
+  it('todo campo de una DAK de la OMS lleva el descargo que exige su licencia', () => {
+    expect(fromDak.length).toBeGreaterThan(40);
+    for (const { field } of fromDak) {
+      expect(field.description).toMatch(/CC BY-NC-SA 3\.0 IGO/);
+      expect(field.description).toMatch(
+        /Esta adaptación no fue creada por la Organización Mundial de la Salud/,
+      );
+    }
+  });
+
+  it('no se cuela ningún código ni value set de SNOMED CT', () => {
+    const snomed = fields
+      .filter(({ field }) =>
+        /snomed\.info|\bSCTID\b|\b\d{6,18}\s*\|/i.test(
+          `${field.name} ${(field.options ?? []).join(' ')} ${field.description ?? ''}`,
+        ),
+      )
+      .map(({ form, field }) => `${form.code}.${field.code}`);
+    expect(snomed).toEqual([]);
+  });
+
+  it('las fichas nuevas existen, una por condición', () => {
+    const codes = new Set(STANDARD_FORMS.map((f) => f.code));
+    for (const code of [
+      'GASTRO_CTRL_COLITIS_ULCEROSA',
+      'INFECTO_CTRL_ITS',
+      'ENFER_CTRL_VACUNACION',
+      'PATOL_INFORME_BIOPSIA_PROSTATA',
+    ])
+      expect(codes.has(code)).toBe(true);
+    // 374 de la ampliación + la ficha por defecto de la cita (2026-10-29).
+    expect(STANDARD_FORMS).toHaveLength(375);
+  });
+});
+
+describe('ficha por defecto de la cita médica (2026-10-29)', () => {
+  const cita = STANDARD_FORMS.find((f) => f.code === 'TRANSV_CITA_MEDICA');
+  const campo = (code: string) => cita?.fields.find((f) => f.code === code);
+
+  it('es transversal: sirve para cualquier especialidad', () => {
+    expect(cita?.kind).toBe('GENERAL');
+    expect(cita?.specialty.code).toBe('TRANSVERSAL');
+  });
+
+  it('recorre la consulta en el orden SOAP, de la cita al plan', () => {
+    const secciones = [...new Set(cita?.fields.map((f) => f.section))];
+    expect(secciones).toEqual([
+      'Datos de la cita',
+      'Motivo de consulta',
+      'Antecedentes relevantes',
+      'Signos vitales',
+      'Examen físico',
+      'Diagnóstico',
+      'Plan e indicaciones',
+    ]);
+  });
+
+  it('exige lo mínimo de toda cita: motivo, examen, diagnóstico, signos de alarma y destino', () => {
+    for (const code of [
+      'tipo_de_consulta',
+      'motivo_consulta',
+      'presion_arterial_sistolica',
+      'presion_arterial_diastolica',
+      'frecuencia_cardiaca',
+      'examen_fisico_dirigido',
+      'diagnostico',
+      'tipo_de_diagnostico',
+      'signos_de_alarma_explicados',
+      'destino',
+    ])
+      expect({ code, required: campo(code)?.required }).toEqual({
+        code,
+        required: true,
+      });
+  });
+
+  it('pregunta lo que evita dañar antes de indicar: alergias, medicación y embarazo', () => {
+    expect(campo('tiene_alergias')?.dataType).toBe('boolean');
+    expect(campo('toma_medicacion')?.dataType).toBe('boolean');
+    expect(campo('embarazo_posible')?.options).toEqual([
+      'No',
+      'Sí',
+      'No sabe',
+      'No corresponde',
+    ]);
+  });
+
+  it('un control programado pide la fecha, y una referencia su motivo', () => {
+    expect(campo('fecha_de_control')?.showWhen).toEqual({
+      field: 'destino',
+      equals: 'Control programado',
+    });
+    expect(campo('fecha_de_control')?.dataType).toBe('date');
+    expect(campo('motivo_de_referencia')?.showWhen?.field).toBe('destino');
   });
 });

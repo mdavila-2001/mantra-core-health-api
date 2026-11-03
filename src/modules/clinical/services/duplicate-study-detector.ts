@@ -18,6 +18,63 @@ export const DEFAULT_DUPLICATE_STUDY_WINDOW_DAYS = 30;
 /** Tope defendible del parámetro de ventana del chequeo. */
 export const MAX_DUPLICATE_STUDY_WINDOW_DAYS = 365;
 
+/**
+ * V10: qué parte del estudio distingue un duplicado de un pedido distinto.
+ * Sin alcance, la clave es sólo el código (comportamiento histórico).
+ *
+ * - Imagen: `(código, región, lateralidad)`; «mano izquierda» y «mano derecha»
+ *   no son el mismo estudio. Un informe anterior SIN región/lateralidad
+ *   (orden previa a v4.2.82) cuenta como cubriendo cualquiera: no se sabe.
+ * - Laboratorio: `(código)` + conjunto de componentes; pedir componentes que
+ *   el informe anterior no cubre no es duplicado. Una orden anterior sin
+ *   componentes registrados se lee como «estudio completo».
+ */
+export interface DuplicateStudyScope {
+  readonly bodySiteConceptId?: string;
+  readonly lateralityConceptId?: string;
+  readonly componentConceptIds?: readonly string[];
+}
+
+/** Fragmento SQL y parámetros del alcance, sobre la orden de alias `alias`. */
+function scopeClause(
+  alias: string,
+  scope: DuplicateStudyScope | undefined,
+): { sql: string; params: unknown[] } {
+  if (!scope) return { sql: '', params: [] };
+  const parts: string[] = [];
+  const params: unknown[] = [];
+  if (scope.bodySiteConceptId) {
+    parts.push(
+      `(${alias}.body_site_concept_id IS NULL OR ${alias}.body_site_concept_id = ?::uuid)`,
+    );
+    params.push(scope.bodySiteConceptId);
+  }
+  if (scope.lateralityConceptId) {
+    parts.push(
+      `(${alias}.laterality_concept_id IS NULL OR ${alias}.laterality_concept_id = ?::uuid)`,
+    );
+    params.push(scope.lateralityConceptId);
+  }
+  if (scope.componentConceptIds && scope.componentConceptIds.length > 0) {
+    parts.push(
+      `(NOT EXISTS (SELECT 1 FROM clinical.service_request_components c0
+                     WHERE c0.service_request_id = ${alias}.id)
+        OR NOT EXISTS (
+          SELECT 1 FROM unnest(string_to_array(?, ',')::uuid[]) AS req(cid)
+           WHERE NOT EXISTS (
+             SELECT 1 FROM clinical.service_request_components c1
+              WHERE c1.service_request_id = ${alias}.id
+                AND c1.component_concept_id = req.cid)))`,
+    );
+    params.push(scope.componentConceptIds.join(','));
+  }
+  if (parts.length === 0) return { sql: '', params: [] };
+  return {
+    sql: ` AND (${alias}.id IS NULL OR (${parts.join(' AND ')}))`,
+    params,
+  };
+}
+
 /** El informe previo que el motor encontró dentro de la ventana. */
 export interface DuplicateStudyMatch {
   readonly report: DiagnosticReports;
@@ -28,7 +85,8 @@ export interface DuplicateStudyMatch {
 
 /** El estudio previo, listo para viajar en un DTO de respuesta. */
 export interface PreviousStudyDescription {
-  readonly reportId: string;
+  /** `null` cuando lo que consta es una orden activa que aún no tiene informe. */
+  readonly reportId: string | null;
   readonly serviceRequestId: string | null;
   readonly studyName: string;
   readonly providerName: string;
@@ -87,8 +145,10 @@ export class DuplicateStudyDetector {
     codeConceptId: string,
     windowDays: number,
     now: Date,
+    scope?: DuplicateStudyScope,
   ): Promise<DuplicateStudyMatch | null> {
     const windowStart = this.windowStartOf(windowDays, now);
+    const narrow = scopeClause('sr', scope);
 
     // MCH-029: la ventana, el estado y la orden revocada se resuelven en la
     // base, y vuelve UNA fila. Antes se traían todos los informes del paciente
@@ -112,7 +172,7 @@ export class DuplicateStudyDetector {
                OR r.result_release_status_concept_id = ?
                OR r.lifecycle_status_concept_id = ?)
           AND (sr.id IS NULL OR sr.status_concept_id <> ?)
-          AND COALESCE(v.issued_at, v.recorded_at, r.created_at) >= ?
+          AND COALESCE(v.issued_at, v.recorded_at, r.created_at) >= ?${narrow.sql}
         ORDER BY COALESCE(v.issued_at, v.recorded_at, r.created_at) DESC, r.id DESC
         LIMIT 1`,
       [
@@ -122,6 +182,7 @@ export class DuplicateStudyDetector {
         CLIN.REPORT_FINAL,
         CLIN.SERVICE_REQUEST_REVOKED,
         windowStart,
+        ...narrow.params,
       ],
       'all',
     );
@@ -162,6 +223,79 @@ export class DuplicateStudyDetector {
         report.lifecycleStatusConceptId !== CLIN.REPORT_FINAL &&
         !this.isReleased(report, null),
     );
+  }
+
+  /**
+   * La orden ACTIVA más reciente del mismo estudio para el paciente, dentro de
+   * la ventana, que todavía no tiene informe. {@link findDuplicate} sólo ve
+   * informes: un estudio pedido hace un minuto y aún sin muestra no tiene
+   * ninguno y se podía pedir dos veces. Una orden que ya tiene informe (de
+   * cualquier estado) la cubre aquella consulta o `findPendingReport`, por eso
+   * acá se excluye. Cruza organizaciones, igual que {@link findDuplicate}.
+   *
+   * @returns La descripción (con `reportId: null`), o `null` si no hay ninguna.
+   */
+  async findActiveOrderWithoutReport(
+    em: EntityManager,
+    patientProfileId: string,
+    codeConceptId: string,
+    windowDays: number,
+    requesterTenantId: string,
+    now: Date,
+    scope?: DuplicateStudyScope,
+  ): Promise<PreviousStudyDescription | null> {
+    const narrow = scopeClause('sr', scope);
+    const rows = await em.getConnection().execute<
+      {
+        id: string;
+        created_at: Date;
+        custodian_tenant_id: string;
+        performer_tenant_id: string | null;
+      }[]
+    >(
+      `SELECT sr.id, sr.created_at, sr.custodian_tenant_id, sr.performer_tenant_id
+         FROM clinical.service_requests sr
+        WHERE sr.patient_profile_id = ?
+          AND sr.code_concept_id = ?
+          AND sr.status_concept_id = ?
+          AND sr.created_at >= ?${narrow.sql}
+          AND NOT EXISTS (
+            SELECT 1 FROM clinical.diagnostic_reports r
+             WHERE r.service_request_id = sr.id)
+        ORDER BY sr.created_at DESC, sr.id DESC
+        LIMIT 1`,
+      [
+        patientProfileId,
+        codeConceptId,
+        CLIN.SERVICE_REQUEST_ACTIVE,
+        this.windowStartOf(windowDays, now),
+        ...narrow.params,
+      ],
+      'all',
+    );
+    const row = rows[0];
+    if (!row) return null;
+
+    const performedAt = new Date(row.created_at);
+    const [studyName, providerName] = await Promise.all([
+      this.designationOrDisplay(em, codeConceptId),
+      this.providerName(em, row.performer_tenant_id ?? row.custodian_tenant_id),
+    ]);
+    return {
+      reportId: null,
+      serviceRequestId: row.id,
+      studyName,
+      providerName,
+      performedAt,
+      daysAgo: Math.max(
+        0,
+        Math.floor((now.getTime() - performedAt.getTime()) / 86_400_000),
+      ),
+      resultsAvailable: false,
+      conclusionText: null,
+      reportDownloadUrl: null,
+      sameOrganization: row.custodian_tenant_id === requesterTenantId,
+    };
   }
 
   /**
@@ -258,6 +392,16 @@ export class DuplicateStudyDetector {
    * "El paciente ya cuenta con este estudio…").
    */
   warningMessageFor(description: PreviousStudyDescription): string {
+    if (description.reportId === null) {
+      const cuando =
+        description.daysAgo === 0
+          ? 'hoy'
+          : `hace ${description.daysAgo} ${description.daysAgo === 1 ? 'día' : 'días'}`;
+      return (
+        `Este estudio (${description.studyName}) ya fue pedido ${cuando} ` +
+        `y la orden sigue activa, sin informe.`
+      );
+    }
     const plural = description.daysAgo === 1 ? 'día' : 'días';
     return (
       `El paciente ya cuenta con este estudio (${description.studyName}) ` +

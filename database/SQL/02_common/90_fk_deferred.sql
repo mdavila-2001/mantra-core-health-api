@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 02 · schema common
+-- SALUD v4.2.83 · módulo 02 · schema common
 -- Generado de diagram_02_common.puml — NO editar a mano.
 
 
@@ -125,6 +125,13 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN
     ALTER TABLE "common"."addresses"
         ADD CONSTRAINT "fk_addresses_administrative_area_concept_id" FOREIGN KEY ("administrative_area_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "common"."addresses"
+        ADD CONSTRAINT "fk_addresses_administrative_area_2_concept_id" FOREIGN KEY ("administrative_area_2_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 

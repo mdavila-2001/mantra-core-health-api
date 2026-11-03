@@ -91,6 +91,14 @@ export const { seeds: READ_MODELS_CONCEPT_SEEDS, ids: RM } =
     },
     PORTAL_TYPE_PUBLIC: { code: 'RM_PORTAL_PUBLIC', display: 'Public portal' },
 
+    // --- Estado de una ruta del frontend que ya no está en el registro de
+    // navegación (frontend_routes.status_concept_id; las activas usan
+    // `CONCEPTS.STATE_ACTIVE`) ---
+    ROUTE_DEPRECATED: {
+      code: 'RM_ROUTE_DEPRECATED',
+      display: 'Frontend route deprecated',
+    },
+
     // --- Tipo de vista (frontend_page_views.view_type_concept_id) ---
     VIEW_TYPE_TABLE: { code: 'RM_VIEW_TABLE', display: 'Table view' },
     VIEW_TYPE_DASHBOARD: {

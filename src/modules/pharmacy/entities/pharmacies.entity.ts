@@ -73,6 +73,17 @@ export class Pharmacies {
   defaultCurrencyConceptId?: string;
 
   /**
+   * Sede central de la farmacia (`practice.practice_sites`), creada con el
+   * alta pública (P50). Opcional: las farmacias anteriores no la tienen.
+   */
+  @Property({
+    fieldName: 'primary_practice_site_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK (destino no resuelto)
+  primaryPracticeSiteId?: string;
+
+  /**
    * Identificador asociado a verification status concept.
    */
   @Property({ fieldName: 'verification_status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

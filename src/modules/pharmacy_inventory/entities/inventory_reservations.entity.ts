@@ -43,7 +43,7 @@ export class InventoryReservations {
   /**
    * Identificador asociado a quotation.
    */
-  @Property({ fieldName: 'quotation_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'quotation_id', type: 'uuid', nullable: true }) // FK → billing.quotations
   quotationId?: string;
 
   /**
@@ -88,6 +88,9 @@ export class InventoryReservations {
   })
   idempotencyKey?: string;
 
+  /**
+   * Identificador asociado a delivery mode concept.
+   */
   @Property({
     fieldName: 'delivery_mode_concept_id',
     type: 'uuid',
@@ -95,9 +98,15 @@ export class InventoryReservations {
   }) // FK → terminology.catalog_concepts
   deliveryModeConceptId?: string;
 
+  /**
+   * Identificador asociado a delivery address.
+   */
   @Property({ fieldName: 'delivery_address_id', type: 'uuid', nullable: true }) // FK → common.addresses
   deliveryAddressId?: string;
 
+  /**
+   * Valor de total amount mantenido por la instancia.
+   */
   @Property({
     fieldName: 'total_amount',
     columnType: 'numeric',
@@ -105,12 +114,21 @@ export class InventoryReservations {
   })
   totalAmount?: string;
 
+  /**
+   * Identificador asociado a currency concept.
+   */
   @Property({ fieldName: 'currency_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts
   currencyConceptId?: string;
 
+  /**
+   * Valor de pickup code mantenido por la instancia.
+   */
   @Property({ fieldName: 'pickup_code', columnType: 'varchar', nullable: true })
   pickupCode?: string;
 
+  /**
+   * Valor de rejection reason text mantenido por la instancia.
+   */
   @Property({
     fieldName: 'rejection_reason_text',
     columnType: 'varchar',

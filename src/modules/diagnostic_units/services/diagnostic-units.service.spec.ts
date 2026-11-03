@@ -10,11 +10,33 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { DiagnosticUnitsService } from './diagnostic-units.service';
 import {
+  CONCEPTS,
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  runWithTenant,
 } from '../../../common';
 import { DUNIT } from '../diagnostic_units.concepts';
+import { DiagnosticUnitsErrorReason } from '../diagnostic_units.error-reasons';
+import { DiagnosticUnitScopeService } from './diagnostic-unit-scope.service';
+
+const T1 = '11111111-1111-4111-8111-111111111111';
+const T2 = '22222222-2222-4222-8222-222222222222';
+
+/**
+ * Devuelve el servicio con cada método ejecutándose dentro del contexto de
+ * `tenantId`, como lo deja el interceptor de tenant en una petición real.
+ */
+function inTenant<T extends object>(service: T, tenantId: string = T1): T {
+  return new Proxy(service, {
+    get(target, prop, receiver) {
+      const value = Reflect.get(target, prop, receiver);
+      if (typeof value !== 'function') return value;
+      return (...args: unknown[]) =>
+        runWithTenant(tenantId, () => value.apply(target, args));
+    },
+  });
+}
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -23,7 +45,10 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
  * @returns Resultado de build.
  */
 function build() {
-  const tx = { flush: mockFn().mockResolvedValue(undefined) };
+  const tx = {
+    flush: mockFn().mockResolvedValue(undefined),
+    findOne: mockFn().mockResolvedValue(null),
+  };
   const em = {
     transactional: mockFn((cb: any) => cb(tx)),
     fork: mockFn(() => em),
@@ -58,18 +83,30 @@ function build() {
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
-  const service = new DiagnosticUnitsService(
+  const scope = new DiagnosticUnitScopeService(
+    unitsRepo as any,
+    sitesRepo as any,
+    accreditationsRepo as any,
+    {} as any,
+    {} as any,
+    {} as any,
+    {} as any,
+  );
+  const raw = new DiagnosticUnitsService(
     em as any,
     unitsRepo,
     sitesRepo,
     specialtiesRepo,
     accreditationsRepo,
     assignmentsRepo as any,
+    scope,
     publicProfiles as any,
     logger as any,
   );
   return {
-    service,
+    raw,
+    service: inTenant(raw),
+    serviceOfTenant: (tenantId: string) => inTenant(raw, tenantId),
     tx,
     em,
     unitsRepo,
@@ -87,6 +124,7 @@ function build() {
  */
 const activeUnit = () => ({
   id: 'u1',
+  tenantId: T1,
   code: 'DU-1',
   name: 'Lab',
   statusConceptId: DUNIT.UNIT_ACTIVE,
@@ -105,7 +143,7 @@ describe('DiagnosticUnitsService', () => {
 
       const res = await d.service.create(
         {
-          tenantId: 't1',
+          tenantId: T1,
           code: 'DU-1',
           name: 'Lab',
           sites: [{ practiceSiteId: 'ps1' }],
@@ -127,7 +165,7 @@ describe('DiagnosticUnitsService', () => {
       d.unitsRepo.findByCode.mockResolvedValue({ id: 'existing' });
       await expect(
         d.service.create(
-          { tenantId: 't1', code: 'DU-1', name: 'Lab' } as any,
+          { tenantId: T1, code: 'DU-1', name: 'Lab' } as any,
           actor,
         ),
       ).rejects.toBeInstanceOf(ConflictException);
@@ -190,6 +228,60 @@ describe('DiagnosticUnitsService', () => {
       );
       expect(d.specialtiesRepo.verifyOpenForUnit).toHaveBeenCalled();
       expect(d.accreditationsRepo.verifyOpenForUnit).toHaveBeenCalled();
+    });
+  });
+
+  describe('verifyAndPublish · laboratorio sin organización verificada (P51)', () => {
+    const labUnit = () => ({
+      ...activeUnit(),
+      diagnosticUnitTypeConceptId: DUNIT.UNIT_TYPE_LABORATORY,
+    });
+
+    it('rechaza con 422 si la organización DIAGNOSTIC_CENTER no está verificada', async () => {
+      const d = build();
+      const unit = labUnit();
+      d.unitsRepo.findById.mockResolvedValue(unit);
+      d.sitesRepo.countActiveForUnit.mockResolvedValue(1);
+      d.tx.findOne.mockResolvedValue({
+        tenantTypeConceptId: CONCEPTS.TENANT_TYPE_DIAGNOSTIC_CENTER,
+        verificationStatusConceptId: CONCEPTS.TENANT_UNVERIFIED,
+      });
+
+      await expect(
+        d.service.verifyAndPublish('u1', actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(unit.verificationStatusConceptId).toBe(DUNIT.VERIFICATION_PENDING);
+      expect(d.publicProfiles.projectOrganization).not.toHaveBeenCalled();
+    });
+
+    it('con la organización verificada, publica', async () => {
+      const d = build();
+      const unit = labUnit();
+      d.unitsRepo.findById.mockResolvedValue(unit);
+      d.sitesRepo.countActiveForUnit.mockResolvedValue(1);
+      d.tx.findOne.mockResolvedValue({
+        tenantTypeConceptId: CONCEPTS.TENANT_TYPE_DIAGNOSTIC_CENTER,
+        verificationStatusConceptId: CONCEPTS.TENANT_VERIFIED,
+      });
+
+      await d.service.verifyAndPublish('u1', actor);
+
+      expect(unit.verificationStatusConceptId).toBe(
+        DUNIT.VERIFICATION_VERIFIED,
+      );
+    });
+
+    it('una unidad de imágenes no consulta la organización', async () => {
+      const d = build();
+      d.unitsRepo.findById.mockResolvedValue({
+        ...activeUnit(),
+        diagnosticUnitTypeConceptId: DUNIT.UNIT_TYPE_IMAGING,
+      });
+      d.sitesRepo.countActiveForUnit.mockResolvedValue(1);
+
+      await d.service.verifyAndPublish('u1', actor);
+
+      expect(d.tx.findOne).not.toHaveBeenCalled();
     });
   });
 
@@ -283,6 +375,7 @@ describe('DiagnosticUnitsService', () => {
         updatedAt: new Date(),
       };
       d.accreditationsRepo.findById.mockResolvedValue(prev);
+      d.unitsRepo.findById.mockResolvedValue(activeUnit());
       d.accreditationsRepo.create.mockReturnValue({
         id: 'acc2',
         verificationStatusConceptId: '',
@@ -298,6 +391,7 @@ describe('DiagnosticUnitsService', () => {
       const d = build();
       d.unitsRepo.findById.mockResolvedValue({
         id: 'u1',
+        tenantId: T1,
         verificationStatusConceptId: DUNIT.VERIFICATION_VERIFIED,
         publicProfileId: 'pp1',
       });
@@ -311,6 +405,179 @@ describe('DiagnosticUnitsService', () => {
       await expect(
         d.service.reproject('missing', actor),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
+  describe('alcance de tenant (DUNIT-01)', () => {
+    /** Exige el 404 uniforme: mismo `reason`, sin `details`. */
+    async function expectOutOfScope(promise: Promise<unknown>) {
+      const error: any = await promise.then(
+        () => null,
+        (e: unknown) => e,
+      );
+      expect(error).toBeInstanceOf(ResourceNotFoundException);
+      expect(error.getStatus()).toBe(404);
+      expect(error.reason).toBe(
+        DiagnosticUnitsErrorReason.DIAGNOSTIC_UNIT_RESOURCE_OUT_OF_SCOPE,
+      );
+      expect(error.details).toBeUndefined();
+      return error;
+    }
+
+    const foreignUnit = () => ({ ...activeUnit(), tenantId: T2 });
+
+    it('crea la unidad en el tenant activo aunque el cuerpo omita tenantId', async () => {
+      const d = build();
+      d.unitsRepo.findByCode.mockResolvedValue(null);
+      d.unitsRepo.create.mockReturnValue(activeUnit());
+      await d.service.create({ code: 'DU-1', name: 'Lab' } as any, actor);
+      expect(d.unitsRepo.findByCode).toHaveBeenCalledWith(d.tx, T1, 'DU-1');
+      expect(d.unitsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ tenantId: T1 }),
+      );
+    });
+
+    it('rechaza un tenantId del cuerpo distinto del activo y no escribe', async () => {
+      const d = build();
+      await expectOutOfScope(
+        d.service.create(
+          { tenantId: T2, code: 'DU-1', name: 'Lab' } as any,
+          actor,
+        ),
+      );
+      expect(d.unitsRepo.create).not.toHaveBeenCalled();
+      expect(d.unitsRepo.findByCode).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      [
+        'addSite',
+        (s: any) => s.addSite('u1', { practiceSiteId: 'ps1' } as any, actor),
+      ],
+      ['verifyAndPublish', (s: any) => s.verifyAndPublish('u1', actor)],
+      [
+        'setSpecialties',
+        (s: any) =>
+          s.setSpecialties(
+            'u1',
+            { specialties: [{ specialtyConceptId: 'a' }] } as any,
+            actor,
+          ),
+      ],
+      [
+        'assignPractitioner',
+        (s: any) =>
+          s.assignPractitioner(
+            'u1',
+            { practitionerRoleAssignmentId: 'pra1' } as any,
+            actor,
+          ),
+      ],
+      [
+        'addAccreditation',
+        (s: any) =>
+          s.addAccreditation(
+            'u1',
+            { accreditationConceptId: 'acc1' } as any,
+            actor,
+          ),
+      ],
+      ['reproject', (s: any) => s.reproject('u1', actor)],
+    ])(
+      '%s sobre una unidad de otro tenant responde 404 uniforme y no escribe',
+      async (_name, call) => {
+        const d = build();
+        d.unitsRepo.findById.mockResolvedValue(foreignUnit());
+        await expectOutOfScope(call(d.service));
+        expect(d.sitesRepo.create).not.toHaveBeenCalled();
+        expect(d.specialtiesRepo.create).not.toHaveBeenCalled();
+        expect(d.assignmentsRepo.create).not.toHaveBeenCalled();
+        expect(d.accreditationsRepo.create).not.toHaveBeenCalled();
+        expect(d.publicProfiles.projectOrganization).not.toHaveBeenCalled();
+      },
+    );
+
+    it('una unidad ajena responde igual que una inexistente', async () => {
+      const ajena = build();
+      ajena.unitsRepo.findById.mockResolvedValue(foreignUnit());
+      const inexistente = build();
+      inexistente.unitsRepo.findById.mockResolvedValue(null);
+      const a = await expectOutOfScope(
+        ajena.service.verifyAndPublish('u1', actor),
+      );
+      const b = await expectOutOfScope(
+        inexistente.service.verifyAndPublish('u1', actor),
+      );
+      expect(a.getResponse()).toEqual(b.getResponse());
+    });
+
+    it('updateSite sobre un sitio cuya unidad es de otro tenant no lo modifica', async () => {
+      const d = build();
+      const site: any = {
+        id: 's1',
+        diagnosticUnitId: 'u1',
+        accessionPrefix: 'A',
+        updatedAt: new Date(),
+      };
+      d.sitesRepo.findById.mockResolvedValue(site);
+      d.unitsRepo.findById.mockResolvedValue(foreignUnit());
+      await expectOutOfScope(
+        d.service.updateSite('s1', { accessionPrefix: 'HACK' } as any, actor),
+      );
+      expect(site.accessionPrefix).toBe('A');
+    });
+
+    it('renewAccreditation de otro tenant conserva la vigencia y no crea fila', async () => {
+      const d = build();
+      const prev: any = {
+        id: 'acc1',
+        diagnosticUnitId: 'u1',
+        accreditationConceptId: 'c1',
+        validTo: null,
+        updatedAt: new Date(),
+      };
+      d.accreditationsRepo.findById.mockResolvedValue(prev);
+      d.unitsRepo.findById.mockResolvedValue(foreignUnit());
+      await expectOutOfScope(
+        d.service.renewAccreditation('acc1', {} as any, actor),
+      );
+      expect(prev.validTo).toBeNull();
+      expect(d.accreditationsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('el mismo recurso es accesible desde su propio tenant', async () => {
+      const d = build();
+      d.unitsRepo.findById.mockResolvedValue(activeUnit());
+      const res = await d.serviceOfTenant(T1).reproject('u1', actor);
+      expect(res.diagnosticUnitId).toBe('u1');
+    });
+
+    it('rechaza un sitio del cuerpo que pertenece a otra unidad', async () => {
+      const d = build();
+      d.unitsRepo.findById.mockImplementation((_tx: any, id: string) =>
+        Promise.resolve(id === 'u1' ? activeUnit() : { ...activeUnit(), id }),
+      );
+      d.sitesRepo.findById.mockResolvedValue({
+        id: 's9',
+        diagnosticUnitId: 'u-otra',
+      });
+      await expectOutOfScope(
+        d.service.addAccreditation(
+          'u1',
+          { accreditationConceptId: 'acc1', diagnosticUnitSiteId: 's9' } as any,
+          actor,
+        ),
+      );
+      expect(d.accreditationsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('sin tenant en el contexto la operación falla antes de leer', async () => {
+      const d = build();
+      await expect(d.raw.reproject('u1', actor)).rejects.toBeInstanceOf(
+        PreconditionFailedException,
+      );
+      expect(d.unitsRepo.findById).not.toHaveBeenCalled();
     });
   });
 });

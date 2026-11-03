@@ -11,7 +11,12 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { PractitionerAccountingService } from '../services';
 import {
   PaidConsultationsResponseDto,
@@ -27,6 +32,7 @@ import {
   LiabilityCreatedResponseDto,
   LiabilitySummaryDto,
   LiabilityScheduleResponseDto,
+  AssetDepreciationHistoryResponseDto,
   RegisterLiabilityProgressDto,
   ProgressRegisteredResponseDto,
 } from '../dto';
@@ -64,6 +70,11 @@ export class AccountingPractitionerController {
   }
 
   /** Registrar el ingreso de una consulta pagada. */
+  @Audited({
+    action: 'PRACTITIONER_CONSULTATION_INCOME_REGISTERED',
+    entity: 'journal_transaction',
+    entityId: 'result.id',
+  })
   @Post('consultation-income')
   @Roles('PRACTITIONER')
   @HttpCode(HttpStatus.CREATED)
@@ -80,6 +91,11 @@ export class AccountingPractitionerController {
   }
 
   /** Registrar un gasto o un ingreso que no proviene de una consulta. */
+  @Audited({
+    action: 'PRACTITIONER_ENTRY_REGISTERED',
+    entity: 'journal_transaction',
+    entityId: 'result.id',
+  })
   @Post('entries')
   @Roles('PRACTITIONER')
   @HttpCode(HttpStatus.CREATED)
@@ -111,6 +127,11 @@ export class AccountingPractitionerController {
   }
 
   /** Da de alta un activo propio. Mismo contrato que `SECURITY_ADMIN` usa en `/accounting/assets/capitalize`. */
+  @Audited({
+    action: 'PRACTITIONER_ASSET_CAPITALIZED',
+    entity: 'asset',
+    entityId: 'result.id',
+  })
   @Post('assets')
   @Roles('PRACTITIONER')
   @HttpCode(HttpStatus.CREATED)
@@ -123,6 +144,11 @@ export class AccountingPractitionerController {
   }
 
   /** Prende o apaga la automatización de un activo propio. */
+  @Audited({
+    action: 'ASSET_AUTOMATION_CHANGED',
+    entity: 'asset',
+    entityId: 'param:id',
+  })
   @Patch('assets/:id/automation')
   @Roles('PRACTITIONER')
   @ApiOperation({ summary: 'Prender o apagar la automatización de un activo' })
@@ -134,7 +160,27 @@ export class AccountingPractitionerController {
     return this.practitionerAccounting.setAssetAutomation(id, dto, actor);
   }
 
+  /** El histórico de depreciación de un activo propio (T26 · criterio 6). */
+  @Get('assets/:id/depreciations')
+  @Roles('PRACTITIONER')
+  @ApiOperation({
+    summary: 'Histórico de depreciación de un activo propio',
+    description:
+      'Una fila por período fiscal depreciado, en orden de registro, con el valor en libros que dejó. Sólo el profesional vinculado a la práctica del activo; un activo ajeno responde 422 y uno de otra organización, 404.',
+  })
+  readAssetDepreciations(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<AssetDepreciationHistoryResponseDto> {
+    return this.practitionerAccounting.readAssetDepreciations(id, actor);
+  }
+
   /** "Registrar avance": una corrida de depreciación acotada a este activo. */
+  @Audited({
+    action: 'PRACTITIONER_ASSET_PROGRESS_REGISTERED',
+    entity: 'asset',
+    entityId: 'param:id',
+  })
   @Post('assets/:id/progress')
   @Roles('PRACTITIONER')
   @HttpCode(HttpStatus.CREATED)
@@ -159,6 +205,11 @@ export class AccountingPractitionerController {
   }
 
   /** Da de alta un pasivo propio con su cronograma de amortización. */
+  @Audited({
+    action: 'PRACTITIONER_LIABILITY_CREATED',
+    entity: 'liability',
+    entityId: 'result.id',
+  })
   @Post('liabilities')
   @Roles('PRACTITIONER')
   @HttpCode(HttpStatus.CREATED)
@@ -186,6 +237,11 @@ export class AccountingPractitionerController {
   }
 
   /** Prende o apaga la automatización de un pasivo propio. */
+  @Audited({
+    action: 'LIABILITY_AUTOMATION_CHANGED',
+    entity: 'liability',
+    entityId: 'param:id',
+  })
   @Patch('liabilities/:id/automation')
   @Roles('PRACTITIONER')
   @ApiOperation({ summary: 'Prender o apagar la automatización de un pasivo' })
@@ -198,6 +254,11 @@ export class AccountingPractitionerController {
   }
 
   /** "Registrar avance": liquida la próxima cuota pendiente del pasivo. */
+  @Audited({
+    action: 'PRACTITIONER_LIABILITY_PROGRESS_REGISTERED',
+    entity: 'liability',
+    entityId: 'param:id',
+  })
   @Post('liabilities/:id/progress')
   @Roles('PRACTITIONER')
   @HttpCode(HttpStatus.CREATED)

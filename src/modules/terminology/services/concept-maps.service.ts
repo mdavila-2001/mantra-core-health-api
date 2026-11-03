@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -28,11 +28,26 @@ const EQUIVALENCE_CONCEPTS: Record<Equivalence, string> = {
 };
 
 /**
+ * Roles que pueden curar un mapeo: los mismos que administran el resto de la terminología
+ * (`@Roles('SECURITY_ADMIN')` en todas sus escrituras) más el terminólogo. `SUPERADMIN` pasa
+ * cualquier `@Roles` (ver `roles.guard.ts`) y aquí se trata igual.
+ */
+const CURATOR_ROLES: readonly string[] = [
+  'SECURITY_ADMIN',
+  'TERMINOLOGY_ENGINEER',
+  'SUPERADMIN',
+];
+
+/**
  * Mapeos entre conceptos de sistemas distintos (UC-03-09, FHIR `$translate`).
  *
  * El caso de uso cubre dos caminos por el mismo endpoint: el terminólogo **cura**
  * el mapa (escritura) y el consumidor FHIR lo **consulta** (sólo lectura). Se
  * distinguen por la presencia de `targetConceptId`.
+ *
+ * La ruta no lleva `@Roles` porque la consulta sólo exige sesión; por eso la autorización de la
+ * escritura vive acá: curar un mapeo cambia cómo se traducen códigos clínicos entre sistemas y
+ * lo hace únicamente un rol de {@link CURATOR_ROLES}.
  */
 @Injectable()
 export class ConceptMapsService {
@@ -70,6 +85,15 @@ export class ConceptMapsService {
     dto: TranslateConceptDto,
     actor: AuthenticatedUser,
   ): Promise<TranslateResponseDto> {
+    if (!actor.roles.some((role) => CURATOR_ROLES.includes(role))) {
+      this.logger.warn(
+        { operation: 'terminology.concept-map.forbidden', actorId: actor.id },
+        'Concept map curation rejected: actor is not a curator',
+      );
+      throw new ForbiddenException(
+        'Curar un mapeo exige un rol de terminología',
+      );
+    }
     this.logger.info(
       {
         operation: 'terminology.concept-map.curate',

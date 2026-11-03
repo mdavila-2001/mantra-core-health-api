@@ -272,8 +272,9 @@ export class VectorCatalogRepository {
   findCollectionById(
     em: EntityManager,
     id: string,
+    tenantId?: string,
   ): Promise<VectorCollections | null> {
-    return em.findOne(VectorCollections, { id });
+    return em.findOne(VectorCollections, tenantId ? { id, tenantId } : { id });
   }
 
   /**
@@ -286,12 +287,11 @@ export class VectorCatalogRepository {
   findCollectionForUpdate(
     em: EntityManager,
     id: string,
+    tenantId?: string,
   ): Promise<VectorCollections | null> {
-    return em.findOne(
-      VectorCollections,
-      { id },
-      { lockMode: LockMode.PESSIMISTIC_WRITE },
-    );
+    return em.findOne(VectorCollections, tenantId ? { id, tenantId } : { id }, {
+      lockMode: LockMode.PESSIMISTIC_WRITE,
+    });
   }
 
   /**
@@ -422,8 +422,9 @@ export class VectorCatalogRepository {
   findPolicyById(
     em: EntityManager,
     id: string,
+    tenantId?: string,
   ): Promise<RagAccessPolicies | null> {
-    return em.findOne(RagAccessPolicies, { id });
+    return em.findOne(RagAccessPolicies, tenantId ? { id, tenantId } : { id });
   }
 
   /**
@@ -489,12 +490,11 @@ export class VectorCatalogRepository {
   findJobForUpdate(
     em: EntityManager,
     id: string,
+    tenantId?: string,
   ): Promise<EmbeddingJobs | null> {
-    return em.findOne(
-      EmbeddingJobs,
-      { id },
-      { lockMode: LockMode.PESSIMISTIC_WRITE },
-    );
+    return em.findOne(EmbeddingJobs, tenantId ? { id, tenantId } : { id }, {
+      lockMode: LockMode.PESSIMISTIC_WRITE,
+    });
   }
 
   /**
@@ -529,10 +529,11 @@ export class VectorCatalogRepository {
     em: EntityManager,
     queuedStatus: string,
     limit: number,
+    tenantId?: string,
   ): Promise<EmbeddingJobs[]> {
     return em.find(
       EmbeddingJobs,
-      { status: queuedStatus },
+      tenantId ? { status: queuedStatus, tenantId } : { status: queuedStatus },
       { orderBy: { createdAt: 'ASC' }, limit },
     );
   }

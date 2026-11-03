@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "linaje.schema.json",
+  "title": "Linaje de datos: dominios, tablas y operaciones",
+  "description": "Qué operación toca qué tabla y qué tabla referencia a cuál. Lo consume la vista de linaje del portal.",
+  "type": "object",
+  "required": ["metricas", "nodos", "aristas"],
+  "additionalProperties": false,
+  "properties": {
+    "metricas": {
+      "type": "object",
+      "required": [
+        "dominios",
+        "rutas",
+        "tablas",
+        "tablasConPii",
+        "aristas",
+        "operacionATabla",
+        "tablaATabla"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "dominios": { "type": "integer", "minimum": 0 },
+        "rutas": { "type": "integer", "minimum": 0 },
+        "tablas": { "type": "integer", "minimum": 0 },
+        "tablasConPii": {
+          "oneOf": [
+            { "type": "integer", "minimum": 0 },
+            { "const": "SIN_FUENTE" }
+          ]
+        },
+        "aristas": { "type": "integer", "minimum": 0 },
+        "operacionATabla": { "type": "integer", "minimum": 0 },
+        "tablaATabla": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "nodos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "tipo", "etiqueta"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "tipo": { "enum": ["DOMINIO", "TABLA", "OPERACION"] },
+          "etiqueta": { "type": "string", "minLength": 1 },
+          "dominio": { "type": ["string", "null"] },
+          "riesgo": { "enum": ["ALTO", "MEDIO", "BAJO"] }
+        }
+      }
+    },
+    "aristas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["de", "a", "tipo"],
+        "additionalProperties": false,
+        "properties": {
+          "de": { "type": "string" },
+          "a": { "type": "string" },
+          "tipo": {
+            "enum": ["PERTENECE", "LEE", "ESCRIBE", "BORRA", "REFERENCIA"]
+          }
+        }
+      }
+    }
+  }
+}

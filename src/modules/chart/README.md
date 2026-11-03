@@ -1,6 +1,6 @@
 # src / modules / chart
 
-Agrupa los componentes relacionados con **chart** y mantiene cohesionada esta responsabilidad del sistema.
+Groups **chart**-related components and keeps this system responsibility cohesive.
 
 ## Rutas HTTP y alcance (medido)
 
@@ -45,9 +45,9 @@ Entidades (`tableName`, 11 de 11 archivos `*.entity.ts`): `care_plan_activities`
 | `GET /charts/templates` | CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `chart-templates` |
 | `GET /charts/templates/:id` | CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `chart-templates` |
 
-## Contenido
+## Contents
 
-### Subcarpetas
+### Subdirectories
 
 - [`controllers/`](./controllers/README.md): Adaptadores HTTP que validan solicitudes, aplican autorización y delegan la lógica en servicios.
 - [`dto/`](./dto/README.md): Contratos de entrada y salida, validación y documentación de la API.
@@ -55,12 +55,12 @@ Entidades (`tableName`, 11 de 11 archivos `*.entity.ts`): `care_plan_activities`
 - [`repositories/`](./repositories/README.md): Consultas y operaciones de persistencia aisladas de la lógica de negocio.
 - [`services/`](./services/README.md): Casos de uso, reglas de negocio y coordinación transaccional.
 
-### Archivos
+### Files
 
 | Archivo | Responsabilidad |
 | --- | --- |
-| `chart.concepts.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `chart.module.ts` | Composición de dependencias del módulo NestJS. |
+| `chart.concepts.ts` | Support implementation or resource for this folder. |
+| `chart.module.ts` | NestJS module dependency composition. |
 
 ## Documentos del expediente y firma
 
@@ -74,8 +74,7 @@ Entidades (`tableName`, 11 de 11 archivos `*.entity.ts`): `care_plan_activities`
   antes de llegar al controlador; el servicio no lo repite.
 - **Relación paciente–encuentro.** Las altas que reciben ambos UUID requieren
   validación explícita de que el encuentro pertenece al paciente antes de
-  persistirlos. Esa validación no está completa todavía; ver la
-  [revisión ALOVIDA](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/chart.md).
+  persistirlos, y esa validación no está completa.
 - **Lectura (`GET /charts/patients/:id/chart`).** Cada documento trae
   `files[]` — `fileId`, `contentRole` (`PRIMARY`/`ATTACHMENT`) y `ordinal` —,
   ordenados por `ordinal`, resueltos en una sola consulta por lote para todos
@@ -87,15 +86,15 @@ Entidades (`tableName`, 11 de 11 archivos `*.entity.ts`): `care_plan_activities`
   el documento no existe como si el archivo no cuelga de él, sin distinguir
   cuál de las dos cosas falló.
 - **Firma propia (`sign`/`cosign` de una versión de nota).** El
-  `signerProfileId` del cuerpo tiene que ser el perfil profesional de quien
+  `signerProfileId` es opcional: si falta, el firmante es el perfil profesional de la sesión; si viene, tiene que ser el perfil profesional de quien
   firma (`practitionerProfileId` de la sesión); si no coincide, 403. Sin
   perfil profesional en la sesión, también 403. Un rol `SUPERADMIN` tiene
   paso franco, igual que en el resto de barreras por rol del sistema.
 
-## Criterios de mantenimiento
+## Maintenance guidelines
 
-- Mantener las reglas de negocio fuera de los adaptadores de transporte.
-- Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
-- Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
+- Keep business rules outside transport adapters.
+- Document decisions, preconditions, parameters, return values, and relevant errors with TSDoc.
+- Update this index when a component is added, removed, or its responsibility changes.
 - Ejecutar la evidencia dirigida con `corepack yarn test src/modules/chart --runInBand --silent`
   (18 suites y 139 pruebas aprobadas durante la revisión).

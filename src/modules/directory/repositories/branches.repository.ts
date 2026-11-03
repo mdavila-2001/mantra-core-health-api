@@ -37,6 +37,8 @@ export interface CreateBranchData {
    * Valor de longitude mantenido por la instancia.
    */
   longitude?: string;
+  description?: string;
+  locationUrl?: string;
   /**
    * Identificador asociado a actor user.
    */
@@ -82,6 +84,8 @@ export class BranchesRepository {
         timeZone: data.timeZone,
         latitude: data.latitude,
         longitude: data.longitude,
+        description: data.description,
+        locationUrl: data.locationUrl,
         ...createdBy(data.actorUserId),
       },
       { partial: true },

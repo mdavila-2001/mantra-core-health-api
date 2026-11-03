@@ -1,0 +1,117 @@
+{
+  "startedAt": "2026-10-24T03:30:47.327Z",
+  "finishedAt": "2026-10-24T03:30:49.606Z",
+  "requiredHosts": [
+    "ansm.sante.fr",
+    "api.datalake.sante.service.ec.europa.eu",
+    "ec.europa.eu",
+    "health.ec.europa.eu",
+    "pard.mhra.gov.uk",
+    "swissdamed.ch",
+    "webgate.ec.europa.eu",
+    "www.aemps.gob.es",
+    "www.bfarm.de",
+    "www.dati.salute.gov.it"
+  ],
+  "results": [
+    {
+      "source": "EMDN",
+      "host": "health.ec.europa.eu",
+      "url": "https://health.ec.europa.eu/medical-devices-topics-interest/european-medical-devices-nomenclature-emdn_en",
+      "httpStatus": null,
+      "blockedByEnvironment": true,
+      "error": "curl: (56) CONNECT tunnel failed, response 403",
+      "reachable": false
+    },
+    {
+      "source": "EUDAMED_DATALAKE",
+      "host": "api.datalake.sante.service.ec.europa.eu",
+      "url": "https://api.datalake.sante.service.ec.europa.eu/eudamed/reference?LANGUAGE=en&format=json&api-version=v1.0",
+      "httpStatus": null,
+      "blockedByEnvironment": true,
+      "error": "curl: (56) CONNECT tunnel failed, response 403",
+      "reachable": false
+    },
+    {
+      "source": "EUDAMED_PORTAL",
+      "host": "ec.europa.eu",
+      "url": "https://ec.europa.eu/tools/eudamed/api/devices/udiDiData?page=0&pageSize=1&size=1&iso2Code=en&languageIso2Code=en",
+      "httpStatus": null,
+      "blockedByEnvironment": true,
+      "error": "curl: (56) CONNECT tunnel failed, response 403",
+      "reachable": false
+    },
+    {
+      "source": "MHRA_PARD",
+      "host": "pard.mhra.gov.uk",
+      "url": "https://pard.mhra.gov.uk/",
+      "httpStatus": null,
+      "blockedByEnvironment": true,
+      "error": "curl: (56) CONNECT tunnel failed, response 403",
+      "reachable": false
+    },
+    {
+      "source": "SWISSDAMED",
+      "host": "swissdamed.ch",
+      "url": "https://swissdamed.ch/",
+      "httpStatus": null,
+      "blockedByEnvironment": true,
+      "error": "curl: (56) CONNECT tunnel failed, response 403",
+      "reachable": false
+    },
+    {
+      "source": "IT_BDRDM",
+      "host": "www.dati.salute.gov.it",
+      "url": "https://www.dati.salute.gov.it/it/dataset/dispositivi-medici/",
+      "httpStatus": null,
+      "blockedByEnvironment": true,
+      "error": "curl: (56) CONNECT tunnel failed, response 403",
+      "reachable": false
+    },
+    {
+      "source": "IT_CND",
+      "host": "www.dati.salute.gov.it",
+      "url": "https://www.dati.salute.gov.it/it/dataset/classificazione-nazionale-dei-dispositivi-medici-cnd/",
+      "httpStatus": null,
+      "blockedByEnvironment": true,
+      "error": "curl: (56) CONNECT tunnel failed, response 403",
+      "reachable": false
+    },
+    {
+      "source": "NANDO",
+      "host": "webgate.ec.europa.eu",
+      "url": "https://webgate.ec.europa.eu/single-market-compliance-space/notified-bodies",
+      "httpStatus": null,
+      "blockedByEnvironment": true,
+      "error": "curl: (56) CONNECT tunnel failed, response 403",
+      "reachable": false
+    },
+    {
+      "source": "DE_BFARM",
+      "host": "www.bfarm.de",
+      "url": "https://www.bfarm.de/EN/Medical-devices/_node.html",
+      "httpStatus": null,
+      "blockedByEnvironment": true,
+      "error": "curl: (56) CONNECT tunnel failed, response 403",
+      "reachable": false
+    },
+    {
+      "source": "ES_AEMPS",
+      "host": "www.aemps.gob.es",
+      "url": "https://www.aemps.gob.es/",
+      "httpStatus": null,
+      "blockedByEnvironment": true,
+      "error": "curl: (56) CONNECT tunnel failed, response 403",
+      "reachable": false
+    },
+    {
+      "source": "FR_ANSM",
+      "host": "ansm.sante.fr",
+      "url": "https://ansm.sante.fr/",
+      "httpStatus": null,
+      "blockedByEnvironment": true,
+      "error": "curl: (56) CONNECT tunnel failed, response 403",
+      "reachable": false
+    }
+  ]
+}

@@ -1,10 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsDateString,
-  IsNumberString,
-  IsOptional,
-  IsUUID,
-} from 'class-validator';
+import { IsDateString, IsOptional, IsUUID, Matches } from 'class-validator';
+import { MONEY_PATTERN } from '../money.util';
+
+const MONEY_MESSAGE =
+  'debe ser un importe decimal no negativo con hasta 2 decimales';
 
 /** Cuerpo de `POST /billing/reimbursements:link` (UC-17-08). */
 export class LinkReimbursementDto {
@@ -35,7 +34,7 @@ export class LinkReimbursementDto {
     description: 'Monto reembolsado por la aseguradora',
     example: '30.00',
   })
-  @IsNumberString()
+  @Matches(MONEY_PATTERN, { message: MONEY_MESSAGE })
   amount!: string;
 
   /**

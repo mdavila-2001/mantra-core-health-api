@@ -20,6 +20,7 @@ import {
   OBJECT_LIFECYCLE,
   PLACEMENT_ROLE,
   STORAGE_CLASS,
+  MULTIPART_UPLOAD,
   UPLOAD_STATUS,
 } from '../constants';
 
@@ -232,6 +233,37 @@ describe('ObjectStorageService', () => {
         status: UPLOAD_STATUS.INITIATED,
         duplicate: false,
       });
+    });
+
+    it('una carga sin expiresAt nace con el plazo por defecto (la columna es NOT NULL)', async () => {
+      const d = build();
+      d.storageRepo.findNamespaceByCode.mockResolvedValue(activeNamespace());
+      const antes = Date.now();
+
+      await d.service.initiateUpload('clinical-media', dto);
+
+      const datos = d.storageRepo.createUpload.mock.calls[0][1];
+      expect(datos.expiresAt).toBeInstanceOf(Date);
+      const vida = datos.expiresAt.getTime() - antes;
+      expect(vida).toBeGreaterThanOrEqual(
+        MULTIPART_UPLOAD.DEFAULT_TTL_SECONDS * 1000 - 1000,
+      );
+      expect(vida).toBeLessThanOrEqual(
+        MULTIPART_UPLOAD.DEFAULT_TTL_SECONDS * 1000 + 5000,
+      );
+    });
+
+    it('respeta el expiresAt que manda el cliente', async () => {
+      const d = build();
+      d.storageRepo.findNamespaceByCode.mockResolvedValue(activeNamespace());
+
+      await d.service.initiateUpload('clinical-media', {
+        ...dto,
+        expiresAt: '2030-01-01T00:00:00.000Z',
+      });
+
+      const datos = d.storageRepo.createUpload.mock.calls[0][1];
+      expect(datos.expiresAt.toISOString()).toBe('2030-01-01T00:00:00.000Z');
     });
 
     it('does not restart the same provider upload', async () => {
@@ -797,12 +829,12 @@ describe('ObjectStorageService', () => {
       it('caps the lifetime the client asks for', async () => {
         const d = build();
         wire(d);
-        const antes = Date.now();
+        const before = Date.now();
 
         const { res } = await issue(d, { ...dto, expiresInSeconds: 86400 });
 
         expect(new Date(res.expiresAt).getTime()).toBeLessThanOrEqual(
-          antes + 900 * 1000 + 1000,
+          before + 900 * 1000 + 1000,
         );
       });
 
@@ -862,14 +894,14 @@ describe('ObjectStorageService', () => {
         const d = build();
         wire(d);
         const { token } = await issue(d);
-        const [payload, firma] = token.split('.');
-        const otherSignature = `${payload}.${firma.slice(0, -2)}${firma.endsWith('AA') ? 'BB' : 'AA'}`;
+        const [payload, signature] = token.split('.');
+        const otherSignature = `${payload}.${signature.slice(0, -2)}${signature.endsWith('AA') ? 'BB' : 'AA'}`;
         const claims = JSON.parse(
           Buffer.from(payload, 'base64url').toString('utf8'),
         );
         const otherPayload = `${Buffer.from(
           JSON.stringify({ ...claims, exp: claims.exp + 3600 }),
-        ).toString('base64url')}.${firma}`;
+        ).toString('base64url')}.${signature}`;
 
         for (const fake of [otherSignature, otherPayload, 'basura', '']) {
           await expect(

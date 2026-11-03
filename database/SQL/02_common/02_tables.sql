@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 02 · schema common
+-- SALUD v4.2.83 · módulo 02 · schema common
 -- Generado de diagram_02_common.puml — NO editar a mano.
 
 
@@ -53,11 +53,15 @@ CREATE TABLE IF NOT EXISTS "common"."addresses" (
     "lines" varchar,
     "city" varchar,
     "administrative_area_concept_id" uuid,
+    "administrative_area_2_concept_id" uuid,
     "municipality_concept_id" uuid,
+    "district_text" varchar,
     "postal_code" varchar,
     "country_concept_id" uuid NOT NULL,
     "latitude" numeric,
     "longitude" numeric,
+    "label" varchar,
+    "is_preferred" boolean NOT NULL DEFAULT false,
     "valid_from" date,
     "valid_to" date,
     "created_at" timestamptz NOT NULL,

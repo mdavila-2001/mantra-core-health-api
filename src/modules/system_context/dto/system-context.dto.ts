@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
+  ArrayMaxSize,
   IsArray,
   IsBoolean,
   IsIn,
@@ -885,6 +886,7 @@ export class RefreshSystemContextDto {
   })
   @IsOptional()
   @IsArray()
+  @ArrayMaxSize(500)
   @ValidateNested({ each: true })
   @Type(() => ContextInputDto)
   inputs?: ContextInputDto[];
@@ -1191,6 +1193,15 @@ export class DynamicEnumOptionItemDto {
    */
   @ApiProperty()
   display!: string;
+
+  /**
+   * Nombre en castellano (designación `ES` preferida del concepto), si existe.
+   *
+   * `display` es el rótulo del sistema de codificación y está en inglés
+   * («Complete blood count»); el selector prefiere éste cuando viene.
+   */
+  @ApiPropertyOptional()
+  displayEs?: string;
 
   /**
    * Posición en la que se ofrece, empezando en cero.

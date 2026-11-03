@@ -64,6 +64,15 @@ describe('MedicineCatalogRepository', () => {
       expect(d.em.find).not.toHaveBeenCalled();
     });
 
+    it('looks the id up among the medicine code systems, one marker each', async () => {
+      const d = build([]);
+      await d.repo.findProductById(d.em as any, 'c1');
+      const [sql, params] = d.em.execute.mock.calls[0];
+      expect(params.some((value: unknown) => Array.isArray(value))).toBe(false);
+      expect(sql.split('?').length - 1).toBe(params.length);
+      expect(params[0]).toBe('c1');
+    });
+
     it('rebuilds the product from the concept and its properties', async () => {
       const d = build([{ id: 'c1' }], [CONCEPT], FULL_PROPS);
       const product = await d.repo.findProductById(d.em as any, 'c1');
@@ -134,7 +143,22 @@ describe('MedicineCatalogRepository', () => {
         source: 'invima',
         limit: 5,
       });
-      expect(d.em.execute.mock.calls[0][1][0]).toEqual(['invima-medicamentos']);
+      const [sql, params] = d.em.execute.mock.calls[0];
+      expect(sql).toContain('s.internal_code in (?)');
+      expect(params[0]).toBe('invima-medicamentos');
+    });
+
+    it('sends one scalar per marker: no JavaScript array reaches the driver', async () => {
+      const d = build([]);
+      await d.repo.search(d.em as any, {
+        text: 'ibu',
+        atc: 'M01AE01',
+        limit: 5,
+      });
+      const [sql, params] = d.em.execute.mock.calls[0];
+      expect(params.some((value: unknown) => Array.isArray(value))).toBe(false);
+      expect(sql.split('?').length - 1).toBe(params.length);
+      expect(sql).not.toContain('any(');
     });
 
     it('does not hit the properties table when there is nothing to hydrate', async () => {
@@ -159,7 +183,9 @@ describe('MedicineCatalogRepository', () => {
       await expect(
         d.repo.findVademecumConceptIdByAtc(d.em as any, ['M01AE01']),
       ).resolves.toBe('vad-1');
-      expect(d.em.execute.mock.calls[0][1]).toEqual(['vademecum', ['M01AE01']]);
+      const [sql, params] = d.em.execute.mock.calls[0];
+      expect(sql).toContain('c.code in (?)');
+      expect(params).toEqual(['vademecum', 'M01AE01']);
     });
 
     it('returns null when no vademecum concept has that ATC', async () => {

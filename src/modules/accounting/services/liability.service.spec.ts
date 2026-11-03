@@ -14,6 +14,12 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
 } from '../../../common';
+import { AccountingErrorReason } from '../accounting.error-reasons';
+import {
+  buildScope,
+  expectScopeNotFound,
+  inTenant,
+} from './accounting-scope.testing';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -38,13 +44,17 @@ function build() {
     generateNumber: mockFn(() => 'LIABP-1'),
   };
   const logger = { setContext: mockFn(), info: mockFn() };
-  const service = new LiabilityService(
-    em as any,
-    liabilityRepo as any,
-    posting as any,
-    logger as any,
+  const { scope, doubles } = buildScope({ liabilityRepo });
+  const service = inTenant(
+    new LiabilityService(
+      em as any,
+      liabilityRepo as any,
+      posting as any,
+      scope,
+      logger as any,
+    ),
   );
-  return { service, tx, liabilityRepo, posting };
+  return { service, tx, liabilityRepo, posting, doubles };
 }
 
 const payDto = {
@@ -78,6 +88,7 @@ describe('LiabilityService', () => {
       const d = build();
       d.liabilityRepo.findById.mockResolvedValue({
         id: 'l1',
+        practiceId: 'p1',
         statusConceptId: ACCT.LIABILITY_SETTLED,
         accountId: 'liab-acc',
       });
@@ -90,6 +101,7 @@ describe('LiabilityService', () => {
       const d = build();
       const liability = {
         id: 'l1',
+        practiceId: 'p1',
         code: 'LIAB-1',
         statusConceptId: ACCT.LIABILITY_ACTIVE,
         accountId: 'liab-acc',
@@ -109,6 +121,7 @@ describe('LiabilityService', () => {
       const d = build();
       const liability = {
         id: 'l1',
+        practiceId: 'p1',
         code: 'LIAB-1',
         statusConceptId: ACCT.LIABILITY_ACTIVE,
         accountId: 'liab-acc',
@@ -154,6 +167,7 @@ describe('LiabilityService', () => {
       const d = build();
       d.liabilityRepo.findById.mockResolvedValue({
         id: 'l1',
+        practiceId: 'p1',
         code: 'LIAB-1',
         statusConceptId: ACCT.LIABILITY_ACTIVE,
         accountId: 'liab-acc',
@@ -188,6 +202,7 @@ describe('LiabilityService', () => {
       const d = build();
       d.liabilityRepo.findById.mockResolvedValue({
         id: 'l1',
+        practiceId: 'p1',
         code: 'LIAB-1',
         statusConceptId: ACCT.LIABILITY_ACTIVE,
         accountId: 'liab-acc',
@@ -206,6 +221,102 @@ describe('LiabilityService', () => {
         ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
       expect(d.posting.post).not.toHaveBeenCalled();
+    });
+
+    describe('alcance de tenant (ACC-01)', () => {
+      const liabilityOf = (practiceId: string) => ({
+        id: 'l1',
+        practiceId,
+        code: 'LIAB-1',
+        statusConceptId: ACCT.LIABILITY_ACTIVE,
+        accountId: 'liab-acc',
+        outstandingAmount: '1000.00',
+        updatedAt: new Date(),
+      });
+
+      /** Ni pago, ni asiento, ni saldo movido. */
+      function expectNothingWritten(d: ReturnType<typeof build>) {
+        expect(d.posting.post).not.toHaveBeenCalled();
+        expect(d.liabilityRepo.createPayment).not.toHaveBeenCalled();
+        expect(d.liabilityRepo.createPosting).not.toHaveBeenCalled();
+      }
+
+      it('una práctica de otra organización responde como inexistente y no carga el pasivo', async () => {
+        const d = build();
+        d.liabilityRepo.findById.mockResolvedValue(liabilityOf('p-b'));
+
+        await expectScopeNotFound(
+          d.service.payLiability('l1', { ...payDto, practiceId: 'p-b' }, actor),
+          AccountingErrorReason.PRACTICE_NOT_FOUND,
+        );
+        expect(d.liabilityRepo.findById).not.toHaveBeenCalled();
+        expectNothingWritten(d);
+      });
+
+      it('un pasivo de una práctica de otra organización responde como inexistente y conserva su saldo', async () => {
+        const foreign = build();
+        const foreignLiability = liabilityOf('p-b');
+        foreign.liabilityRepo.findById.mockResolvedValue(foreignLiability);
+        const absent = build();
+        absent.liabilityRepo.findById.mockResolvedValue(null);
+
+        const a = await expectScopeNotFound(
+          foreign.service.payLiability('l1', payDto, actor),
+          AccountingErrorReason.LIABILITY_NOT_FOUND,
+        );
+        const b = await expectScopeNotFound(
+          absent.service.payLiability('l1', payDto, actor),
+          AccountingErrorReason.LIABILITY_NOT_FOUND,
+        );
+
+        expect(a.getResponse()).toEqual(b.getResponse());
+        expect(foreignLiability.outstandingAmount).toBe('1000.00');
+        expect(foreignLiability.statusConceptId).toBe(ACCT.LIABILITY_ACTIVE);
+        expectNothingWritten(foreign);
+      });
+
+      it('un pasivo de otra práctica de la misma organización tampoco se paga desde ésta', async () => {
+        const d = build();
+        d.liabilityRepo.findById.mockResolvedValue(liabilityOf('p2'));
+
+        await expectScopeNotFound(
+          d.service.payLiability('l1', payDto, actor),
+          AccountingErrorReason.LIABILITY_NOT_FOUND,
+        );
+        expectNothingWritten(d);
+      });
+
+      it('un pasivo ajeno ya liquidado no delata su estado (404, no 422)', async () => {
+        const d = build();
+        d.liabilityRepo.findById.mockResolvedValue({
+          ...liabilityOf('p-b'),
+          statusConceptId: ACCT.LIABILITY_SETTLED,
+        });
+
+        await expectScopeNotFound(
+          d.service.payLiability('l1', payDto, actor),
+          AccountingErrorReason.LIABILITY_NOT_FOUND,
+        );
+      });
+
+      it('con el pasivo propio paga, y las cuentas del pago viajan al posteo que las acota', async () => {
+        const d = build();
+        d.liabilityRepo.findById.mockResolvedValue(liabilityOf('p1'));
+
+        await d.service.payLiability('l1', payDto, actor);
+
+        expect(d.posting.post).toHaveBeenCalledWith(
+          d.tx,
+          expect.objectContaining({
+            practiceId: 'p1',
+            lines: expect.arrayContaining([
+              expect.objectContaining({ accountId: 'liab-acc' }),
+              expect.objectContaining({ accountId: 'int-exp' }),
+              expect.objectContaining({ accountId: 'bank' }),
+            ]),
+          }),
+        );
+      });
     });
   });
 });

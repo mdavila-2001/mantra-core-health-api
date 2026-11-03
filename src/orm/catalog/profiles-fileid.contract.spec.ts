@@ -60,9 +60,26 @@ describe('profiles.fileId / canonical Model PR #20', () => {
     );
   });
 
-  it('reports only the profiles delta in the vendored generation report', () => {
+  it('reports the profiles counts that the vendored profiles DDL actually declares', () => {
+    // Antes fijaba la fila literal de v4.2.12 (127 FK · 136 índices). El módulo
+    // siguió creciendo en el modelo y la fila quedó vieja; lo que este contrato
+    // protege es que el reporte vendorizado describa el DDL vendorizado, así que
+    // la fila esperada se deriva de los mismos archivos.
+    const foreignKeys =
+      read('05_profiles/03_fk_intra.sql') +
+      read('05_profiles/90_fk_deferred.sql');
+    const tables = read('05_profiles/02_tables.sql').match(
+      /^CREATE TABLE IF NOT EXISTS /gm,
+    )?.length;
+    const fkCount = foreignKeys.match(/ FOREIGN KEY \(/g)?.length;
+    const inferredCount = foreignKeys.match(
+      /-- \(inferida por convención\)/g,
+    )?.length;
+    const indexCount = read('05_profiles/04_indexes.sql').match(
+      /^CREATE (UNIQUE )?INDEX IF NOT EXISTS /gm,
+    )?.length;
     expect(read('_generation_report.md')).toContain(
-      '| 05 | profiles | 19 | 127 | 2 | 136 | 0 |',
+      `| 05 | profiles | ${tables} | ${fkCount} | ${inferredCount ?? 0} | ${indexCount} | 0 |`,
     );
   });
 });

@@ -1,2 +1,0 @@
-$ corepack yarn typecheck   # tras H2
-exit=0

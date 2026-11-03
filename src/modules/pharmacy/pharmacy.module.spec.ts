@@ -1,6 +1,9 @@
 import { PharmacyModule } from './pharmacy.module';
 import { PharmacyReadController } from './controllers';
-import { MedicineCatalogRepository } from './repositories';
+import {
+  MedicineCatalogRepository,
+  PharmacyReferencesRepository,
+} from './repositories';
 import {
   MedicineCatalogSearchService,
   PharmacyProductsService,
@@ -23,6 +26,10 @@ describe('PharmacyModule · catálogo universal de medicamentos', () => {
 
   it('keeps the products service registered (it now depends on the catalog repository)', () => {
     expect(providers).toContain(PharmacyProductsService);
+  });
+
+  it('registers the references repository the write services depend on', () => {
+    expect(providers).toContain(PharmacyReferencesRepository);
   });
 
   it('exposes the read controller that injects the search service', () => {

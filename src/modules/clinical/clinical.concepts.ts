@@ -50,6 +50,126 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
       code: 'LOC_COMPLETED',
       display: 'Encounter location completed',
     },
+    // --- F3 internación / ADT (CONTRATO-F2-F5 §F3.1–F3.2) ----------------------
+    // `LOCATION_RESERVED` y `CENSUS_CLOSED` los fija el modelo por literal
+    // (patch f3_clinical, «Desvíos» M-F3): no se renombran.
+    LOCATION_RESERVED: {
+      code: 'LOC_RESERVED',
+      display: 'Encounter location reserved',
+    },
+    LOCATION_CANCELLED: {
+      code: 'LOC_CANCELLED',
+      display: 'Encounter location cancelled',
+    },
+    ENCOUNTER_CLASS_INPATIENT: {
+      code: 'ENC_IMP',
+      display: 'Inpatient encounter (HL7 IMP)',
+    },
+    ADT_ADMIT: { code: 'ADT_ADMIT', display: 'Ingreso a cama (A01)' },
+    ADT_TRANSFER: { code: 'ADT_TRANSFER', display: 'Traslado (A02)' },
+    ADT_SWAP: { code: 'ADT_SWAP', display: 'Intercambio (A17)' },
+    ADT_RESERVE: { code: 'ADT_RESERVE', display: 'Reserva de cama' },
+    ADT_END_DISCHARGE: { code: 'ADT_END_DISCHARGE', display: 'Fin por egreso' },
+    ADT_END_TRANSFER_OUT: {
+      code: 'ADT_END_TRANSFER_OUT',
+      display: 'Fin por traslado',
+    },
+    ADT_END_SWAP: { code: 'ADT_END_SWAP', display: 'Fin por intercambio' },
+    ADT_END_RESERVATION_CANCELLED: {
+      code: 'ADT_END_RESERVATION_CANCELLED',
+      display: 'Reserva cancelada',
+    },
+    ADT_END_TRANSFER_CANCELLED: {
+      code: 'ADT_END_TRANSFER_CANCELLED',
+      display: 'Traslado anulado (A12)',
+    },
+    ADT_END_RESERVATION_CONVERTED: {
+      code: 'ADT_END_RESERVATION_CONVERTED',
+      display: 'Reserva convertida en ocupación',
+    },
+    LOC_CARE_GENERAL: { code: 'LOC_CARE_GENERAL', display: 'Cuidado general' },
+    LOC_CARE_INTERMEDIATE: {
+      code: 'LOC_CARE_INTERMEDIATE',
+      display: 'Cuidado intermedio',
+    },
+    LOC_CARE_ICU: { code: 'LOC_CARE_ICU', display: 'Terapia intensiva' },
+    LOC_CARE_NEONATAL_ICU: {
+      code: 'LOC_CARE_NEONATAL_ICU',
+      display: 'Terapia intensiva neonatal',
+    },
+    // --- Admisión crea el vínculo (patient_admission_footprints) ---
+    ADM_ORIGIN_EMERGENCY: {
+      code: 'ADM_ORIGIN_EMERGENCY',
+      display: 'Ingreso por emergencia',
+    },
+    ADM_ORIGIN_REFERRAL: {
+      code: 'ADM_ORIGIN_REFERRAL',
+      display: 'Ingreso por derivación',
+    },
+    ADM_ORIGIN_SCHEDULED: {
+      code: 'ADM_ORIGIN_SCHEDULED',
+      display: 'Ingreso programado',
+    },
+    ADM_ORIGIN_TRANSFER_IN: {
+      code: 'ADM_ORIGIN_TRANSFER_IN',
+      display: 'Ingreso por traslado',
+    },
+    IDV_CI: { code: 'IDV_CI', display: 'Cédula de identidad' },
+    IDV_PASSPORT: { code: 'IDV_PASSPORT', display: 'Pasaporte' },
+    IDV_FOREIGN_ID: { code: 'IDV_FOREIGN_ID', display: 'Documento extranjero' },
+    IDV_BIRTH_CERT: {
+      code: 'IDV_BIRTH_CERT',
+      display: 'Certificado de nacimiento',
+    },
+    IDV_OTHER: { code: 'IDV_OTHER', display: 'Otro documento' },
+    ADM_SRC_EMERGENCY: {
+      code: 'ADM_SRC_EMERGENCY',
+      display: 'Desde emergencias',
+    },
+    ADM_SRC_OUTPATIENT: {
+      code: 'ADM_SRC_OUTPATIENT',
+      display: 'Desde consulta externa',
+    },
+    ADM_SRC_REFERRAL: { code: 'ADM_SRC_REFERRAL', display: 'Por referencia' },
+    ADM_SRC_BIRTH: { code: 'ADM_SRC_BIRTH', display: 'Nacimiento' },
+    ADM_SRC_TRANSFER_IN: {
+      code: 'ADM_SRC_TRANSFER_IN',
+      display: 'Traslado desde otro establecimiento',
+    },
+    DISP_HOME: { code: 'DISP_HOME', display: 'Alta a domicilio' },
+    DISP_TRANSFER: {
+      code: 'DISP_TRANSFER',
+      display: 'Traslado a otro establecimiento',
+    },
+    DISP_DEATH: { code: 'DISP_DEATH', display: 'Fallecimiento' },
+    DISP_AGAINST_ADVICE: {
+      code: 'DISP_AGAINST_ADVICE',
+      display: 'Alta voluntaria',
+    },
+    DISP_OTHER: { code: 'DISP_OTHER', display: 'Otro destino' },
+    PLC_INC_OPEN: {
+      code: 'PLC_INC_OPEN',
+      display: 'Incidente de ubicación abierto',
+    },
+    PLC_INC_REVIEWED: {
+      code: 'PLC_INC_REVIEWED',
+      display: 'Incidente de ubicación revisado',
+    },
+    PLC_INC_CLOSED: {
+      code: 'PLC_INC_CLOSED',
+      display: 'Incidente de ubicación cerrado',
+    },
+    CENSUS_OPEN: { code: 'CENSUS_OPEN', display: 'Censo abierto' },
+    CENSUS_CLOSED: { code: 'CENSUS_CLOSED', display: 'Censo cerrado' },
+    CEN_PRESENT: { code: 'CEN_PRESENT', display: 'Presente al corte' },
+    CEN_ADMITTED: { code: 'CEN_ADMITTED', display: 'Ingreso del día' },
+    CEN_DISCHARGED: { code: 'CEN_DISCHARGED', display: 'Egreso del día' },
+    CEN_TRANSFER_IN: { code: 'CEN_TRANSFER_IN', display: 'Traslado entrante' },
+    CEN_TRANSFER_OUT: {
+      code: 'CEN_TRANSFER_OUT',
+      display: 'Traslado saliente',
+    },
+    CEN_SAME_DAY: { code: 'CEN_SAME_DAY', display: 'Estancia del mismo día' },
 
     // --- observations ----------------------------------------------------------
     OBSERVATION_PRELIMINARY: {
@@ -166,6 +286,32 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
     SERVICE_REQUEST_CATEGORY_CARDIO: {
       code: 'SR_CARDIO',
       display: 'Cardiac study category',
+    },
+    /* P40 (carril C2): la orden de análisis clasifica en tres —laboratorio,
+       imagen y «otro»— y «otro» no tenía concepto: una orden que no era de
+       laboratorio ni de imagen sólo podía pedirse sin categoría, que la lectura
+       trata como «sin clasificar». Es el `category: 'OTHER'` del alta. */
+    SERVICE_REQUEST_CATEGORY_OTHER: {
+      code: 'SR_OTHER',
+      display: 'Other analysis category',
+    },
+
+    /* --- quién ejecuta la orden -------------------------------------------------
+       El médico recomienda, no impone: el paciente siempre puede elegir otro
+       centro. `SR_PERF_PATIENT_CHOICE` es el valor de toda orden que no declara
+       modo. Ninguno concede acceso a la orden: la custodia sigue en
+       `performer_tenant_id`, que la recomendación no llena. */
+    SERVICE_REQUEST_PERFORMER_SELF: {
+      code: 'SR_PERF_SELF',
+      display: 'Performed by the ordering practitioner',
+    },
+    SERVICE_REQUEST_PERFORMER_ORGANIZATION: {
+      code: 'SR_PERF_ORGANIZATION',
+      display: 'Performed at a recommended medical center',
+    },
+    SERVICE_REQUEST_PERFORMER_PATIENT_CHOICE: {
+      code: 'SR_PERF_PATIENT_CHOICE',
+      display: 'Performer chosen by the patient',
     },
 
     /* --- qué se pide: el catálogo de estudios ---------------------------------
@@ -625,6 +771,19 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
       display: 'Immunization completed',
     },
 
+    // --- servicios recibidos (vs_received_service_type) ---------------------------
+    // Mismas claves y displays que `gen_seeds.py` (modelo, v4.2.49): ambos lados
+    // siembran por id, y el id sale de `clinical:<NOMBRE>`. Un tipo nuevo se agrega
+    // acá y en el value set del modelo, al final.
+    RECEIVED_SERVICE_INTERVENTION: {
+      code: 'RECEIVED_SERVICE_INTERVENTION',
+      display: 'Received service: medical intervention',
+    },
+    RECEIVED_SERVICE_VACCINATION: {
+      code: 'RECEIVED_SERVICE_VACCINATION',
+      display: 'Received service: vaccination',
+    },
+
     // --- appointments (referenciado por check-in) ------------------------------
     /**
      * Turno pedido por el paciente y todavía sin aceptar (FHIR `pending`).
@@ -872,8 +1031,8 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
     MEDICATION_ALOPURINOL: { code: 'M04AA01', display: 'Alopurinol' },
 
     /* --- vía de administración ------------------------------------------------
-       Éstas sí son una enumeración cerrada de verdad, y las seis cubren la
-       práctica ambulatoria. Los códigos siguen la vía de administración de HL7
+       Éstas sí son una enumeración cerrada de verdad: las seis primeras cubren
+       la práctica ambulatoria y las que siguen, el resto. Los códigos siguen la vía de administración de HL7
        (`route-codes`). */
     MEDICATION_ROUTE_ORAL: { code: 'ROUTE_ORAL', display: 'Oral route' },
     MEDICATION_ROUTE_INTRAVENOUS: {
@@ -893,6 +1052,64 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
       code: 'ROUTE_INH',
       display: 'Inhalation route',
     },
+    // Las vías que completan la práctica más allá del consultorio: mucosas
+    // (sublingual, bucal, nasal, rectal, vaginal), órganos de los sentidos
+    // (oftálmica, ótica), piel (transdérmica, intradérmica, intralesional,
+    // infiltración local —la de la anestesia odontológica—), las de
+    // procedimiento (intraarticular, intratecal, epidural, intraósea) y la
+    // enteral por sonda. Mismo vocabulario que `route-codes` de HL7 (SNOMED CT).
+    MEDICATION_ROUTE_SUBLINGUAL: {
+      code: 'ROUTE_SL',
+      display: 'Sublingual route',
+    },
+    MEDICATION_ROUTE_BUCCAL: { code: 'ROUTE_BUCCAL', display: 'Buccal route' },
+    MEDICATION_ROUTE_NASAL: { code: 'ROUTE_NASAL', display: 'Nasal route' },
+    MEDICATION_ROUTE_RECTAL: { code: 'ROUTE_RECTAL', display: 'Rectal route' },
+    MEDICATION_ROUTE_VAGINAL: {
+      code: 'ROUTE_VAGINAL',
+      display: 'Vaginal route',
+    },
+    MEDICATION_ROUTE_OPHTHALMIC: {
+      code: 'ROUTE_OPHTHALMIC',
+      display: 'Ophthalmic route',
+    },
+    MEDICATION_ROUTE_OTIC: { code: 'ROUTE_OTIC', display: 'Otic route' },
+    MEDICATION_ROUTE_TRANSDERMAL: {
+      code: 'ROUTE_TRANSDERMAL',
+      display: 'Transdermal route',
+    },
+    MEDICATION_ROUTE_INTRADERMAL: {
+      code: 'ROUTE_ID',
+      display: 'Intradermal route',
+    },
+    MEDICATION_ROUTE_INTRALESIONAL: {
+      code: 'ROUTE_INTRALESIONAL',
+      display: 'Intralesional route',
+    },
+    MEDICATION_ROUTE_INFILTRATION: {
+      code: 'ROUTE_INFILTRATION',
+      display: 'Local infiltration route',
+    },
+    MEDICATION_ROUTE_INTRAARTICULAR: {
+      code: 'ROUTE_IA',
+      display: 'Intra-articular route',
+    },
+    MEDICATION_ROUTE_INTRATHECAL: {
+      code: 'ROUTE_IT',
+      display: 'Intrathecal route',
+    },
+    MEDICATION_ROUTE_EPIDURAL: {
+      code: 'ROUTE_EPIDURAL',
+      display: 'Epidural route',
+    },
+    MEDICATION_ROUTE_INTRAOSSEOUS: {
+      code: 'ROUTE_IO',
+      display: 'Intraosseous route',
+    },
+    MEDICATION_ROUTE_ENTERAL_TUBE: {
+      code: 'ROUTE_ENTERAL_TUBE',
+      display: 'Enteral route via feeding tube',
+    },
 
     /* --- unidad de la cantidad prescrita --------------------------------------
        Códigos UCUM, que es lo que el contrato de cantidad espera. Las de forma
@@ -904,6 +1121,43 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
     MEDICATION_UNIT_TABLET: { code: 'UNIT_{tablet}', display: 'Tablet' },
     MEDICATION_UNIT_CAPSULE: { code: 'UNIT_{capsule}', display: 'Capsule' },
     MEDICATION_UNIT_DROP: { code: 'UNIT_[drp]', display: 'Drop' },
+    // Las que faltaban para prescribir lo que de verdad se receta: el
+    // microgramo (levotiroxina, salbutamol), la unidad internacional (insulina,
+    // vitamina D, heparina), el miliequivalente (potasio, bicarbonato) y las
+    // formas farmacéuticas que se cuentan por pieza. Mismo criterio UCUM que
+    // las de arriba: magnitud cuando la hay, anotación entre llaves cuando no.
+    MEDICATION_UNIT_MICROGRAM: { code: 'UNIT_ug', display: 'Microgram' },
+    MEDICATION_UNIT_INTERNATIONAL_UNIT: {
+      code: 'UNIT_[iU]',
+      display: 'International unit',
+    },
+    MEDICATION_UNIT_MILLIEQUIVALENT: {
+      code: 'UNIT_meq',
+      display: 'Milliequivalent',
+    },
+    MEDICATION_UNIT_AMPOULE: { code: 'UNIT_{ampoule}', display: 'Ampoule' },
+    MEDICATION_UNIT_VIAL: { code: 'UNIT_{vial}', display: 'Vial' },
+    MEDICATION_UNIT_PREFILLED_SYRINGE: {
+      code: 'UNIT_{prefilled_syringe}',
+      display: 'Prefilled syringe',
+    },
+    MEDICATION_UNIT_SACHET: { code: 'UNIT_{sachet}', display: 'Sachet' },
+    MEDICATION_UNIT_SUPPOSITORY: {
+      code: 'UNIT_{suppository}',
+      display: 'Suppository',
+    },
+    MEDICATION_UNIT_PESSARY: {
+      code: 'UNIT_{pessary}',
+      display: 'Vaginal pessary',
+    },
+    MEDICATION_UNIT_PATCH: { code: 'UNIT_{patch}', display: 'Patch' },
+    MEDICATION_UNIT_PUFF: { code: 'UNIT_{puff}', display: 'Puff' },
+    MEDICATION_UNIT_APPLICATION: {
+      code: 'UNIT_{application}',
+      display: 'Application',
+    },
+    MEDICATION_UNIT_BOTTLE: { code: 'UNIT_{bottle}', display: 'Bottle' },
+    MEDICATION_UNIT_TUBE: { code: 'UNIT_{tube}', display: 'Tube' },
 
     /* --- nosología inicial del diagnóstico -------------------------------------
        ⚠️ CATÁLOGO INICIAL, NO UNA NOSOLOGÍA. Mismo criterio y mismas razones que

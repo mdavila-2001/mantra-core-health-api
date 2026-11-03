@@ -4,11 +4,15 @@ import {
   ArrayMinSize,
   IsArray,
   IsDateString,
-  IsNumberString,
   IsOptional,
   IsUUID,
+  Matches,
   ValidateNested,
 } from 'class-validator';
+import { MONEY_PATTERN } from '../money.util';
+
+const MONEY_MESSAGE =
+  'debe ser un importe decimal no negativo con hasta 2 decimales';
 
 /** Asignación de un pago emitido a una factura de proveedor (UC-17-05). */
 export class PayableAllocationInputDto {
@@ -26,7 +30,7 @@ export class PayableAllocationInputDto {
    * Valor de allocated amount mantenido por la instancia.
    */
   @ApiProperty({ description: 'Monto asignado', example: '100.00' })
-  @IsNumberString()
+  @Matches(MONEY_PATTERN, { message: MONEY_MESSAGE })
   allocatedAmount!: string;
 
   /**
@@ -34,7 +38,7 @@ export class PayableAllocationInputDto {
    */
   @ApiPropertyOptional({ description: 'Descuento', example: '0.00' })
   @IsOptional()
-  @IsNumberString()
+  @Matches(MONEY_PATTERN, { message: MONEY_MESSAGE })
   discountAmount?: string;
 
   /**
@@ -45,7 +49,7 @@ export class PayableAllocationInputDto {
     example: '0.00',
   })
   @IsOptional()
-  @IsNumberString()
+  @Matches(MONEY_PATTERN, { message: MONEY_MESSAGE })
   withholdingAmount?: string;
 
   /**
@@ -84,7 +88,7 @@ export class ExecutePaymentMadeDto {
    * Valor de amount mantenido por la instancia.
    */
   @ApiProperty({ description: 'Monto total del pago', example: '100.00' })
-  @IsNumberString()
+  @Matches(MONEY_PATTERN, { message: MONEY_MESSAGE })
   amount!: string;
 
   /**

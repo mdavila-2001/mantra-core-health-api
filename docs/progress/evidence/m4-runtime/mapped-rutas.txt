@@ -1,2 +1,0 @@
-Mapped {/public/profiles/o/:slug/services, GET}
-Mapped {/public/profiles/f/:slug/products, GET}

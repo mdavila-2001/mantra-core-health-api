@@ -14,3 +14,4 @@ export type {
   CreateLedgerEntryData,
   CreateAssignmentData,
 } from './journal.repository';
+export { PractitionerSimpleAccountingRepository } from './practitioner-simple-accounting.repository';

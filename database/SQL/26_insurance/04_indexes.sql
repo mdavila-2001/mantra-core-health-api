@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 26 · schema insurance
+-- SALUD v4.2.83 · módulo 26 · schema insurance
 -- Generado de diagram_26_insurance.puml — NO editar a mano.
 
 
@@ -55,6 +55,36 @@ CREATE INDEX IF NOT EXISTS "ix_broker_carrier_agreements_status_concept_id" ON "
 CREATE INDEX IF NOT EXISTS "ix_broker_carrier_agreements_created_by_user_id" ON "insurance"."broker_carrier_agreements" ("created_by_user_id");
 
 CREATE INDEX IF NOT EXISTS "ix_broker_carrier_agreements_updated_by_user_id" ON "insurance"."broker_carrier_agreements" ("updated_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_broker_carrier_agreements_representation_mode_concept_id" ON "insurance"."broker_carrier_agreements" ("representation_mode_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_broker_carrier_agreements_relationship_type_concept_id" ON "insurance"."broker_carrier_agreements" ("relationship_type_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_broker_carrier_agreements_branch_id" ON "insurance"."broker_carrier_agreements" ("branch_id");
+
+CREATE INDEX IF NOT EXISTS "ix_broker_carrier_agreements_supervisor_user_id" ON "insurance"."broker_carrier_agreements" ("supervisor_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_insurance_terms_conditions_insurance_carrier_id" ON "insurance"."insurance_terms_conditions" ("insurance_carrier_id");
+
+CREATE INDEX IF NOT EXISTS "ix_insurance_terms_conditions_document_file_id" ON "insurance"."insurance_terms_conditions" ("document_file_id");
+
+CREATE INDEX IF NOT EXISTS "ix_insurance_terms_conditions_insurance_product_id" ON "insurance"."insurance_terms_conditions" ("insurance_product_id");
+
+CREATE INDEX IF NOT EXISTS "ix_insurance_terms_conditions_insurance_plan_id" ON "insurance"."insurance_terms_conditions" ("insurance_plan_id");
+
+CREATE INDEX IF NOT EXISTS "ix_insurance_terms_conditions_service_concept_id" ON "insurance"."insurance_terms_conditions" ("service_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_insurance_terms_conditions_contract_id" ON "insurance"."insurance_terms_conditions" ("contract_id");
+
+CREATE INDEX IF NOT EXISTS "ix_insurance_terms_conditions_jurisdiction_concept_id" ON "insurance"."insurance_terms_conditions" ("jurisdiction_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_insurance_terms_conditions_client_type_concept_id" ON "insurance"."insurance_terms_conditions" ("client_type_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_insurance_terms_conditions_status_concept_id" ON "insurance"."insurance_terms_conditions" ("status_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_insurance_terms_conditions_created_by_user_id" ON "insurance"."insurance_terms_conditions" ("created_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_insurance_terms_conditions_updated_by_user_id" ON "insurance"."insurance_terms_conditions" ("updated_by_user_id");
 
 CREATE INDEX IF NOT EXISTS "ix_employer_groups_tenant_id" ON "insurance"."employer_groups" ("tenant_id");
 
@@ -139,6 +169,20 @@ CREATE INDEX IF NOT EXISTS "ix_network_provider_memberships_status_concept_id" O
 CREATE INDEX IF NOT EXISTS "ix_network_provider_memberships_created_by_user_id" ON "insurance"."network_provider_memberships" ("created_by_user_id");
 
 CREATE INDEX IF NOT EXISTS "ix_network_provider_memberships_updated_by_user_id" ON "insurance"."network_provider_memberships" ("updated_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_practitioner_insurer_requests_practitioner_profile_id" ON "insurance"."practitioner_insurer_requests" ("practitioner_profile_id");
+
+CREATE INDEX IF NOT EXISTS "ix_practitioner_insurer_requests_insurance_carrier_id" ON "insurance"."practitioner_insurer_requests" ("insurance_carrier_id");
+
+CREATE INDEX IF NOT EXISTS "ix_practitioner_insurer_requests_status_concept_id" ON "insurance"."practitioner_insurer_requests" ("status_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_practitioner_insurer_requests_decided_by_user_id" ON "insurance"."practitioner_insurer_requests" ("decided_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_practitioner_insurer_requests_created_by_user_id" ON "insurance"."practitioner_insurer_requests" ("created_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_practitioner_insurer_requests_updated_by_user_id" ON "insurance"."practitioner_insurer_requests" ("updated_by_user_id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "uq_practitioner_insurer_requests_live_pair" ON "insurance"."practitioner_insurer_requests" ("practitioner_profile_id", "insurance_carrier_id") WHERE status_concept_id IN ('bc4f121c-f0cf-54b9-a1b8-f9a62a1cde8c', 'dfb1912e-d1ad-5566-8f9b-1d7a09f9da8f');
 
 CREATE UNIQUE INDEX IF NOT EXISTS "uq_insurance_campaigns_carrier_code" ON "insurance"."insurance_campaigns" ("insurance_carrier_id", "code");
 

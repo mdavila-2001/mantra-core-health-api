@@ -9,6 +9,7 @@ import {
   TerminologyFhirController,
   TerminologyTenantCatalogController,
   TerminologyImportTemplateController,
+  AdminGlossaryController,
 } from './controllers';
 import {
   CodeSystemsService,
@@ -20,8 +21,9 @@ import {
   ConceptFileImportService,
   CodeSystemsReadService,
   ImportTemplateService,
+  AdminGlossaryService,
   IMPORT_PARSERS,
-  LECTOR_IMPORT,
+  READER_IMPORT,
 } from './services';
 import {
   TerminologySourcesRepository,
@@ -53,6 +55,8 @@ import {
     TerminologyFhirController,
     TerminologyTenantCatalogController,
     TerminologyImportTemplateController,
+    // H3 — editor administrativo del glosario global.
+    AdminGlossaryController,
   ],
   providers: [
     CodeSystemsService,
@@ -64,9 +68,10 @@ import {
     ConceptFileImportService,
     CodeSystemsReadService,
     ImportTemplateService,
+    AdminGlossaryService,
     // Qué formatos sabe leer el importador y con qué perfiles. Va por token
     // para que sumar un formato sea cambiar esta lista y no el servicio.
-    { provide: IMPORT_PARSERS, useValue: LECTOR_IMPORT },
+    { provide: IMPORT_PARSERS, useValue: READER_IMPORT },
     TerminologySourcesRepository,
     CodeSystemsRepository,
     CodeSystemVersionsRepository,

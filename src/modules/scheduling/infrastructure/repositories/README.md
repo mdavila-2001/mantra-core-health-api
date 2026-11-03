@@ -35,7 +35,7 @@ PostgreSQL, schema `scheduling`. Entidades generadas por introspección. Las alt
 Consultas por PK, FK o clave natural indexada. Sin N+1: los servicios piden la colección una vez y
 agregan en memoria. Los recorridos por lotes siempre llevan `limit`.
 
-## Pruebas
+## Tests
 
 Se ejercitan desde los specs de servicio, donde van mockeados. La cobertura real de las consultas
 —y del comportamiento de los bloqueos— llega con las pruebas de integración sobre testcontainers.

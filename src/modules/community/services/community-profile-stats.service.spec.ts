@@ -12,7 +12,7 @@ import { CommunityProfileStatsService } from './community-profile-stats.service'
 
 const TENANT = 'tenant-1';
 const PROFILE = 'perfil-1';
-const HOY = new Date('2026-08-18T10:00:00Z');
+const TODAY = new Date('2026-08-18T10:00:00Z');
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -79,7 +79,7 @@ describe('CommunityProfileStatsService', () => {
       const d = build();
       d.redis.getCounters.mockRejectedValue(new Error('redis caído'));
 
-      const res = await d.service.read(TENANT, PROFILE, HOY);
+      const res = await d.service.read(TENANT, PROFILE, TODAY);
 
       expect(res.views).toBe(0);
       expect(res.daily).toHaveLength(7);
@@ -97,7 +97,7 @@ describe('CommunityProfileStatsService', () => {
         ]),
       );
 
-      const res = await d.service.read(TENANT, PROFILE, HOY);
+      const res = await d.service.read(TENANT, PROFILE, TODAY);
 
       expect(res.windowDays).toBe(7);
       expect(res.views).toBe(10);
@@ -114,7 +114,7 @@ describe('CommunityProfileStatsService', () => {
     it('un día sin datos vale 0 y aparece igual: el hueco es información', async () => {
       const d = build();
 
-      const res = await d.service.read(TENANT, PROFILE, HOY);
+      const res = await d.service.read(TENANT, PROFILE, TODAY);
 
       expect(res.daily.every((day: any) => day.views === 0)).toBe(true);
       expect(res.daily).toHaveLength(7);

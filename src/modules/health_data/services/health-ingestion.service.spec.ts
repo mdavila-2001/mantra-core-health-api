@@ -14,7 +14,9 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  runWithTenant,
 } from '../../../common';
+import { HealthDataErrorReason } from '../health_data.error-reasons';
 
 const actor = { id: 'user-1', roles: ['INGESTION_WORKER'] };
 const CONNECTION = '11111111-1111-1111-1111-111111111111';
@@ -24,6 +26,49 @@ const RESOURCE = '44444444-4444-4444-4444-444444444444';
 const VERSION = '55555555-5555-5555-5555-555555555555';
 const TYPE = '66666666-6666-6666-6666-666666666666';
 const TENANT = '77777777-7777-7777-7777-777777777777';
+const OTHER_TENANT = '88888888-8888-8888-8888-888888888888';
+const SYSTEM = '99999999-9999-9999-9999-999999999999';
+
+/**
+ * Ejecuta cada método del servicio dentro del contexto de tenant, como lo hace
+ * `TenantContextInterceptor` en una petición real.
+ *
+ * @param service - Servicio bajo prueba.
+ * @param tenantId - Tenant activo del contexto.
+ * @returns Proxy que fija el tenant en cada llamada.
+ */
+function scoped<S extends object>(service: S, tenantId: string): S {
+  return new Proxy(service, {
+    get(target, key) {
+      const value = (target as any)[key];
+      return typeof value === 'function'
+        ? (...args: unknown[]) =>
+            runWithTenant(tenantId, () => value.apply(target, args))
+        : value;
+    },
+  });
+}
+
+/**
+ * Afirma que la promesa falla como "no existe": 404, el `reason` dado y sin `details`.
+ *
+ * @param promise - Operación bajo prueba.
+ * @param reason - Sub-código esperado.
+ */
+async function expectNotAvailable(
+  promise: Promise<unknown>,
+  reason: HealthDataErrorReason,
+): Promise<void> {
+  const error: any = await promise.then(
+    () => undefined,
+    (e: unknown) => e,
+  );
+  expect(error).toBeInstanceOf(ResourceNotFoundException);
+  expect(error.getStatus()).toBe(404);
+  expect(error.code).toBe('NOT_FOUND');
+  expect(error.reason).toBe(reason);
+  expect(error.details).toBeUndefined();
+}
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -34,11 +79,23 @@ function build() {
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const ingestionRepo = {
     findSourceSystemByCode: mockFn().mockResolvedValue(null),
+    findSourceSystemById: mockFn().mockResolvedValue({
+      id: SYSTEM,
+      tenantId: TENANT,
+    }),
+    findConnectionById: mockFn().mockResolvedValue({
+      id: CONNECTION,
+      healthSourceSystemId: SYSTEM,
+    }),
     createSourceSystem: mockFn(),
     createConnection: mockFn(),
     findConnectionForUpdate: mockFn(),
     createBatch: mockFn(() => ({ id: BATCH })),
-    findBatchById: mockFn(),
+    findBatchById: mockFn().mockResolvedValue({
+      id: BATCH,
+      tenantId: TENANT,
+      healthSourceConnectionId: CONNECTION,
+    }),
     findBatchForUpdate: mockFn(),
     findBatchByIdentifier: mockFn(() => Promise.resolve(null)),
     createRecord: mockFn(() => ({ id: RECORD })),
@@ -59,14 +116,23 @@ function build() {
     createLineageEdge: mockFn(() => ({ id: 'edge-1' })),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new HealthIngestionService(
+  const raw = new HealthIngestionService(
     em as any,
     ingestionRepo,
     resourcesRepo as any,
     provenanceRepo,
     logger as any,
   );
-  return { service, tx, ingestionRepo, resourcesRepo, provenanceRepo, logger };
+  const service = scoped(raw, TENANT);
+  return {
+    service,
+    rawService: raw,
+    tx,
+    ingestionRepo,
+    resourcesRepo,
+    provenanceRepo,
+    logger,
+  };
 }
 
 /**
@@ -78,6 +144,7 @@ function build() {
 function activeConnection(overrides: Record<string, unknown> = {}): any {
   return {
     id: CONNECTION,
+    healthSourceSystemId: SYSTEM,
     statusConceptId: CONCEPTS.STATE_ACTIVE,
     ...overrides,
   };
@@ -90,7 +157,12 @@ function activeConnection(overrides: Record<string, unknown> = {}): any {
  * @returns Resultado de receiving batch conforme al contrato `any`.
  */
 function receivingBatch(overrides: Record<string, unknown> = {}): any {
-  return { id: BATCH, statusConceptId: CONCEPTS.BATCH_RECEIVING, ...overrides };
+  return {
+    id: BATCH,
+    tenantId: TENANT,
+    statusConceptId: CONCEPTS.BATCH_RECEIVING,
+    ...overrides,
+  };
 }
 
 /**
@@ -102,6 +174,7 @@ function receivingBatch(overrides: Record<string, unknown> = {}): any {
 function queuedRecord(overrides: Record<string, unknown> = {}): any {
   return {
     id: RECORD,
+    healthIngestionBatchId: BATCH,
     resourceTypeConceptId: TYPE,
     processingStatusConceptId: CONCEPTS.RECORD_QUEUED,
     ...overrides,
@@ -447,6 +520,194 @@ describe('HealthIngestionService', () => {
       await expect(
         d.service.projectResource(dto, actor as any),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
+  describe('alcance por tenant (HD-02)', () => {
+    const openDto: any = {
+      healthSourceConnectionId: CONNECTION,
+      batchIdentifier: 'BATCH-2026-07-20',
+      ingestionModeConceptId: TYPE,
+    };
+    const projectDto: any = {
+      healthIngestionRecordId: RECORD,
+      logicalIdentifier: 'Patient/123',
+      normalizedPayloadJson: { resourceType: 'Patient', id: '123' },
+    };
+
+    it('createSourceConnection toma el tenant del contexto e ignora el del cuerpo', async () => {
+      const d = build();
+      d.ingestionRepo.createSourceSystem.mockReturnValue({ id: SYSTEM });
+      d.ingestionRepo.createConnection.mockReturnValue({
+        id: CONNECTION,
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+      });
+
+      await d.service.createSourceConnection(
+        {
+          tenantId: OTHER_TENANT,
+          sourceSystemCode: 'HIS',
+          sourceSystemName: 'HIS',
+        } as any,
+        actor as any,
+      );
+
+      expect(d.ingestionRepo.findSourceSystemByCode).toHaveBeenCalledWith(
+        d.tx,
+        TENANT,
+        'HIS',
+      );
+      expect(d.ingestionRepo.createSourceSystem).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ tenantId: TENANT }),
+      );
+    });
+
+    it('openBatch persiste el tenant del contexto, no el del cuerpo', async () => {
+      const d = build();
+      d.ingestionRepo.findConnectionForUpdate.mockResolvedValue(
+        activeConnection(),
+      );
+      await d.service.openBatch(
+        { ...openDto, tenantId: OTHER_TENANT },
+        actor as any,
+      );
+      expect(d.ingestionRepo.createBatch).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ tenantId: TENANT }),
+      );
+    });
+
+    it('openBatch con la conexión de otro tenant responde como inexistente y no crea el lote', async () => {
+      const d = build();
+      d.ingestionRepo.findConnectionForUpdate.mockResolvedValue(
+        activeConnection(),
+      );
+      d.ingestionRepo.findSourceSystemById.mockResolvedValue({
+        id: SYSTEM,
+        tenantId: OTHER_TENANT,
+      });
+      await expectNotAvailable(
+        d.service.openBatch(openDto, actor as any),
+        HealthDataErrorReason.SOURCE_CONNECTION_NOT_AVAILABLE,
+      );
+      expect(d.ingestionRepo.createBatch).not.toHaveBeenCalled();
+    });
+
+    it('registrar o cerrar sobre el lote de otro tenant responde como inexistente', async () => {
+      const d = build();
+      const foreign = receivingBatch({ tenantId: OTHER_TENANT });
+      d.ingestionRepo.findBatchForUpdate.mockResolvedValue(foreign);
+      await expectNotAvailable(
+        d.service.recordIngestionRecord(BATCH, {
+          sourceRecordIdentifier: 'Patient/1',
+          resourceTypeConceptId: TYPE,
+          payloadHash: 'h',
+        } as any),
+        HealthDataErrorReason.INGESTION_BATCH_NOT_AVAILABLE,
+      );
+      await expectNotAvailable(
+        d.service.closeBatch(BATCH, {} as any),
+        HealthDataErrorReason.INGESTION_BATCH_NOT_AVAILABLE,
+      );
+      expect(d.ingestionRepo.createRecord).not.toHaveBeenCalled();
+      expect(foreign.statusConceptId).toBe(CONCEPTS.BATCH_RECEIVING);
+    });
+
+    it('un lote ajeno y uno inexistente responden idéntico', async () => {
+      const foreign = build();
+      foreign.ingestionRepo.findBatchForUpdate.mockResolvedValue(
+        receivingBatch({ tenantId: OTHER_TENANT }),
+      );
+      const missing = build();
+      missing.ingestionRepo.findBatchForUpdate.mockResolvedValue(null);
+      const a: any = await foreign.service
+        .closeBatch(BATCH, {} as any)
+        .catch((e: unknown) => e);
+      const b: any = await missing.service
+        .closeBatch(BATCH, {} as any)
+        .catch((e: unknown) => e);
+      expect(a.getResponse()).toEqual(b.getResponse());
+    });
+
+    it('projectResource usa el custodio del contexto e ignora custodianTenantId del cuerpo', async () => {
+      const d = build();
+      d.ingestionRepo.findRecordForUpdate.mockResolvedValue(queuedRecord());
+      await d.service.projectResource(
+        { ...projectDto, custodianTenantId: OTHER_TENANT },
+        actor as any,
+      );
+      expect(
+        d.resourcesRepo.findResourceByLogicalIdForUpdate,
+      ).toHaveBeenCalledWith(d.tx, TENANT, TYPE, 'Patient/123');
+      expect(d.resourcesRepo.createResource).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ custodianTenantId: TENANT }),
+      );
+      expect(d.provenanceRepo.createProvenanceRecord).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ custodianTenantId: TENANT }),
+      );
+    });
+
+    it('projectResource sobre un registro cuyo lote es de otro tenant no crea versión ni procedencia', async () => {
+      const d = build();
+      d.ingestionRepo.findRecordForUpdate.mockResolvedValue(queuedRecord());
+      d.ingestionRepo.findBatchById.mockResolvedValue({
+        id: BATCH,
+        tenantId: OTHER_TENANT,
+        healthSourceConnectionId: CONNECTION,
+      });
+      await expectNotAvailable(
+        d.service.projectResource(projectDto, actor as any),
+        HealthDataErrorReason.INGESTION_RECORD_NOT_AVAILABLE,
+      );
+      expect(d.resourcesRepo.createResource).not.toHaveBeenCalled();
+      expect(d.resourcesRepo.createResourceVersion).not.toHaveBeenCalled();
+      expect(d.provenanceRepo.createProvenanceRecord).not.toHaveBeenCalled();
+    });
+
+    it('projectResource con un sistema de origen de otro tenant responde como inexistente', async () => {
+      const d = build();
+      d.ingestionRepo.findRecordForUpdate.mockResolvedValue(queuedRecord());
+      d.ingestionRepo.findSourceSystemById.mockResolvedValue({
+        id: SYSTEM,
+        tenantId: OTHER_TENANT,
+      });
+      await expectNotAvailable(
+        d.service.projectResource(
+          { ...projectDto, sourceSystemId: SYSTEM },
+          actor as any,
+        ),
+        HealthDataErrorReason.SOURCE_SYSTEM_NOT_AVAILABLE,
+      );
+      expect(d.resourcesRepo.createResource).not.toHaveBeenCalled();
+    });
+
+    it('projectResource con un sistema distinto al de la conexión del lote se rechaza (422)', async () => {
+      const d = build();
+      d.ingestionRepo.findRecordForUpdate.mockResolvedValue(queuedRecord());
+      d.ingestionRepo.findConnectionById.mockResolvedValue({
+        id: CONNECTION,
+        healthSourceSystemId: 'otro-sistema',
+      });
+      const error: any = await d.service
+        .projectResource(
+          { ...projectDto, sourceSystemId: SYSTEM },
+          actor as any,
+        )
+        .catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(PreconditionFailedException);
+      expect(error.reason).toBe(HealthDataErrorReason.SOURCE_SYSTEM_MISMATCH);
+      expect(d.resourcesRepo.createResource).not.toHaveBeenCalled();
+    });
+
+    it('sin tenant en el contexto la cadena de ingesta se rechaza (412) antes de tocar datos', async () => {
+      const d = build();
+      await expect(
+        d.rawService.openBatch(openDto, actor as any),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.ingestionRepo.findConnectionForUpdate).not.toHaveBeenCalled();
     });
   });
 });

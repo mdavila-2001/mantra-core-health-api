@@ -1,0 +1,142 @@
+format-version: 1.2
+subsetdef: clingen "Disease classes available in the ClinGen resource"
+subsetdef: disease_grouping "disease_grouping"
+subsetdef: do_inheritance_inconsistent "classes where the corresponding DO term is both AR and AD https://github.com/monarch-initiative/monarch-disease-ontology/issues/406"
+subsetdef: doid "DOID equivalent subset"
+[Term]
+id: MONDO:0005271
+name: allergic disease
+def: "An immune response that occurs following re-exposure to an innocuous antigen, and that requires the presence of existing antibodies against that antigen. This response involves the binding of IgE to mast cells, and may worsen with repeated exposures." [NCIT:C114476]
+subset: doid {source="DOID:1205"}
+subset: ncit {source="NCIT:C114476"}
+subset: otar {source="MONDO:OTAR"}
+synonym: "allergic disease or disorder" EXACT []
+synonym: "allergic form of disease or disorder" EXACT [MONDO:patterns/allergic_form_of_disease]
+synonym: "allergic form of immune system disease" EXACT [MONDO:patterns/allergic_form_of_disease]
+synonym: "allergic reaction" EXACT [NCIT:C114476]
+synonym: "allergic response" EXACT []
+synonym: "allergy" EXACT [NCIT:C114476]
+synonym: "disorder of type I hypersensitivity" EXACT [MONDO:design_pattern, MONDO:patterns/basis_in_disruption_of_process]
+synonym: "type I hypersensitivity disease" EXACT [MONDO:design_pattern]
+xref: DOID:1205 {source="EFO:0003785", source="MONDO:equivalentTo"}
+xref: ICD10CM:T78.40 {source="DOID:1205"}
+xref: ICD9:995.3 {source="MONDO:relatedTo", source="MONDO:i2s"}
+xref: ICD9:V15.09 {source="MONDO:relatedTo", source="MONDO:i2s"}
+xref: MEDGEN:9370 {source="MONDO:equivalentTo", source="MONDO:MEDGEN"}
+xref: MESH:D006967 {source="EFO:0003785", source="MONDO:equivalentTo", source="DOID:1205"}
+xref: NCIT:C114476 {source="EFO:0003785", source="MONDO:equivalentTo"}
+xref: SCTID:106190000 {source="DOID:1205"}
+xref: SCTID:127072000 {source="DOID:1205"}
+xref: SCTID:157754004 {source="DOID:1205"}
+xref: SCTID:157758001 {source="DOID:1205"}
+xref: SCTID:212998004 {source="DOID:1205"}
+xref: SCTID:212999007 {source="DOID:1205"}
+xref: SCTID:21957007 {source="DOID:1205"}
+xref: SCTID:257550005 {source="DOID:1205"}
+xref: SCTID:269284003 {source="DOID:1205"}
+xref: SCTID:269432007 {source="DOID:1205"}
+xref: SCTID:274211000 {source="DOID:1205"}
+xref: SCTID:282092005 {source="DOID:1205"}
+xref: SCTID:418168000 {source="DOID:1205"}
+xref: SCTID:418634005 {source="DOID:1205"}
+xref: SCTID:418925002 {source="DOID:1205"}
+xref: SCTID:419076005 {source="EFO:0003785"}
+xref: SCTID:421668005 {source="DOID:1205"}
+xref: SCTID:421961002 {source="DOID:1205"}
+xref: SCTID:609328004 {source="MONDO:equivalentTo"}
+xref: SCTID:91232002 {source="DOID:1205"}
+xref: UMLS:C0020517 {source="MONDO:equivalentTo", source="MONDO:MEDGEN", source="MEDGEN:9370"}
+is_a: MONDO:0000605 {source="DOID:1205", source="MONDO:Entailed", source="NCIT:C114476"} ! hypersensitivity reaction disease
+intersection_of: MONDO:0000001 ! disease
+intersection_of: disease_has_basis_in_disruption_of GO:0016068 ! type I hypersensitivity
+disjoint_from: MONDO:0007179 ! autoimmune disease
+property_value: curated_content_resource "https://www.malacards.org/card/allergic_disease" xsd:anyURI {source="MONDO:MalaCards"}
+
+[Term]
+id: MONDO:0000605
+name: hypersensitivity reaction disease
+def: "An immune system disease that has basis in dysregulation of the hypersensitivity reaction, an inflammatory response to an exogenous environmental antigen or an endogenous antigen initiated by the adaptive immune system." [ISBN-13:978-0-7817-3514-8]
+subset: doid {source="DOID:0060056"}
+subset: ncit {source="NCIT:C3114"}
+subset: otar {source="MONDO:OTAR"}
+synonym: "allergic reaction" BROAD []
+synonym: "hypersensitive" EXACT [NCIT:C3114]
+synonym: "hypersensitivity" EXACT [NCIT:C3114]
+synonym: "hypersensitivity reaction" EXACT [NCIT:C3114]
+synonym: "sensitive" BROAD []
+synonym: "sensitivity" BROAD []
+xref: DOID:0060056 {source="MONDO:equivalentTo"}
+xref: EFO:1002003 {source="MONDO:equivalentTo", source="MONDO:EFO"}
+xref: MEDGEN:759636 {source="MONDO:equivalentTo", source="MONDO:MEDGEN"}
+xref: NCIT:C3114 {source="MONDO:equivalentTo"}
+xref: SCTID:473010000 {source="MONDO:equivalentTo"}
+xref: UMLS:C3532523 {source="MEDGEN:759636", source="MONDO:equivalentTo", source="MONDO:MEDGEN"}
+is_a: MONDO:0005046 {source="DOID:0060056", source="EFO:1002003", source="MONDO:Redundant", source="NCIT:C3114"} ! immune system disorder
+intersection_of: MONDO:0005046 ! immune system disorder
+intersection_of: disease_has_basis_in_disruption_of GO:0002524 ! hypersensitivity
+
+[Term]
+id: MONDO:0005551
+name: eye allergy
+def: "An allergic disease involving a pathogenic inflammatory response in the camera-type eye." [MONDO:patterns/specific_inflammatory_disease_by_site]
+subset: otar {source="MONDO:OTAR"}
+xref: EFO:0005751 {source="MONDO:equivalentTo", source="MONDO:EFO"}
+xref: MEDGEN:1843485 {source="MONDO:equivalentTo", source="MONDO:MEDGEN"}
+xref: UMLS:C0852875 {source="MEDGEN:1843485", source="MONDO:equivalentTo", source="MONDO:MEDGEN"}
+is_a: MONDO:0005271 {source="EFO:0005751", source="MONDO:Entailed", source="MONDO:Redundant"} ! allergic disease
+is_a: MONDO:0005328 {source="EFO:0005751", source="MONDO:Entailed"} ! eye disorder
+intersection_of: MONDO:0005271 ! allergic disease
+intersection_of: disease_has_location UBERON:0000019 ! camera-type eye
+
+[Term]
+id: MONDO:0011786
+name: allergic rhinitis
+def: "Inflammation of the nasal mucous membranes caused by an IgE-mediated response to external allergens. The inflammation may also involve the mucous membranes of the sinuses, eyes, middle ear, and pharynx. Symptoms include sneezing, nasal congestion, rhinorrhea, and itching. It may lead to fatigue, drowsiness, and malaise thus causing impairment of the quality of life." [NCIT:C79532]
+subset: doid {source="DOID:4481"}
+subset: ncit {source="NCIT:C79532"}
+subset: otar {source="MONDO:OTAR"}
+synonym: "allergic form of rhinitis" EXACT [MONDO:patterns/allergic_form_of_disease]
+synonym: "allergic rhinitis" EXACT [DOID:4481, icd11.foundation:1711769234, NCIT:C79532]
+synonym: "atopic rhinitis" NARROW []
+synonym: "hay fever" RELATED EXCLUDE []
+synonym: "non-seasonal allergic rhinitis" NARROW []
+synonym: "Perenial allergic rhinitis" NARROW []
+synonym: "perennial allergic rhinitis" NARROW []
+synonym: "seasonal allergic rhinitis" NARROW []
+xref: DOID:4481 {source="EFO:0005854", source="MONDO:equivalentTo"}
+xref: EFO:0005854 {source="MONDO:equivalentTo", source="MONDO:EFO"}
+xref: HP:0003193 {source="EFO:0005854", source="MONDO:otherHierarchy"}
+xref: icd11.foundation:1711769234 {source="MONDO:equivalentTo"}
+xref: ICD9:477 {source="EFO:0005854"}
+xref: ICD9:477.8 {source="MONDO:relatedTo", source="MONDO:i2s"}
+xref: ICD9:477.9 {source="MONDO:equivalentTo", source="MONDO:i2s"}
+xref: MEDGEN:382012 {source="MONDO:equivalentTo", source="MONDO:MEDGEN"}
+xref: NCIT:C34987 {source="DOID:4481"}
+xref: NCIT:C79532 {source="EFO:0005854", source="MONDO:equivalentTo"}
+xref: SCTID:38103000 {source="DOID:4481"}
+xref: SCTID:61582004 {source="EFO:0005854", source="MONDO:equivalentTo"}
+xref: UMLS:C2607914 {source="MONDO:equivalentTo", source="MONDO:MEDGEN", source="MEDGEN:382012"}
+is_a: MONDO:0000771 {source="DOID:4481"} ! allergic respiratory disease
+is_a: MONDO:0003014 {source="DOID:4481", source="MONDO:Redundant", source="NCIT:C79532"} ! rhinitis
+is_a: MONDO:0005271 {source="EFO:0005854", source="MONDO:Redundant", source="MONDO:indirect"} ! allergic disease
+intersection_of: MONDO:0003014 ! rhinitis
+intersection_of: disease_has_basis_in_disruption_of GO:0016068 ! type I hypersensitivity
+property_value: curated_content_resource "https://www.malacards.org/card/allergic_rhinitis" xsd:anyURI {source="MONDO:MalaCards"}
+property_value: IAO:0000233 "https://github.com/monarch-initiative/mondo/issues/4521" xsd:anyURI
+
+[Term]
+id: MONDO:0005324
+name: seasonal allergic rhinitis
+def: "Allergic rhinitis caused by outdoor allergens." [NCIT:C92188]
+subset: ncit {source="NCIT:C92188"}
+subset: otar {source="MONDO:OTAR"}
+synonym: "hay fever" EXACT [NCIT:C92188]
+synonym: "seasonal allergic rhinitis" EXACT [NCIT:C92188]
+xref: EFO:0003956 {source="MONDO:equivalentTo", source="MONDO:EFO"}
+xref: MEDGEN:42335 {source="MONDO:equivalentTo", source="MONDO:MEDGEN"}
+xref: MESH:D006255 {source="MONDO:equivalentTo", source="EFO:0003956"}
+xref: NCIT:C92188 {source="MONDO:equivalentTo", source="EFO:0003956"}
+xref: SCTID:367498001 {source="MONDO:equivalentTo", source="EFO:0003956"}
+xref: UMLS:C0018621 {source="MEDGEN:42335", source="MONDO:equivalentTo", source="MONDO:MEDGEN"}
+is_a: MONDO:0011786 {source="EFO:0003956", source="NCIT:C92188"} ! allergic rhinitis
+

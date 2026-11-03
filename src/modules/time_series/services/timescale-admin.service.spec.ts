@@ -8,6 +8,7 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
+import { ResourceNotFoundException } from '../../../common';
 import { TimescaleAdminService } from './timescale-admin.service';
 
 const actor = { id: 'user-1', roles: ['DATA_PLATFORM_ADMIN'] } as any;
@@ -19,8 +20,14 @@ const BATCH_ID = '22222222-2222-2222-2222-222222222222';
  * @returns Resultado de build.
  */
 function build() {
-  const tx = { flush: mockFn() };
-  const em = { transactional: mockFn((cb: any) => cb(tx)) };
+  const tx = {
+    flush: mockFn(),
+    findOne: mockFn(async () => ({ id: TENANT_ID })),
+  };
+  const em = {
+    transactional: mockFn((cb: any) => cb(tx)),
+    fork: mockFn(() => tx),
+  };
   const timescaleRepo = {
     createHypertable: mockFn(async () => undefined),
     setChunkTimeInterval: mockFn(async () => undefined),
@@ -297,5 +304,88 @@ describe('TimescaleAdminService', () => {
       ).rejects.toThrow(/antes de terminar/);
       expect(d.timescaleRepo.refreshContinuousAggregate).not.toHaveBeenCalled();
     });
+  });
+
+  describe('tenant declarado en el cuerpo (WJ-01)', () => {
+    const BASE = { batchId: BATCH_ID, tenantId: TENANT_ID };
+    const OPERACIONES: ReadonlyArray<
+      [string, (d: ReturnType<typeof build>) => Promise<unknown>]
+    > = [
+      [
+        'runCompression',
+        (d) =>
+          d.service.runCompression(
+            {
+              ...BASE,
+              table: 'device_raw_reading_series',
+              olderThan: '30 days',
+            } as any,
+            actor,
+          ),
+      ],
+      [
+        'applyRetention',
+        (d) =>
+          d.service.applyRetention(
+            {
+              ...BASE,
+              table: 'device_raw_reading_series',
+              olderThan: '90 days',
+            } as any,
+            actor,
+          ),
+      ],
+      [
+        'refreshRollup',
+        (d) =>
+          d.service.refreshRollup(
+            'continuous_audit_daily',
+            {
+              ...BASE,
+              from: '2026-01-01T00:00:00.000Z',
+              to: '2026-01-02T00:00:00.000Z',
+            } as any,
+            actor,
+          ),
+      ],
+    ];
+
+    it.each(OPERACIONES)(
+      '%s rechaza con 404 un tenant que no existe, sin tocar el motor ni escribir métricas',
+      async (_nombre, operar) => {
+        const d = build();
+        d.tx.findOne.mockResolvedValue(null);
+
+        await expect(operar(d)).rejects.toBeInstanceOf(
+          ResourceNotFoundException,
+        );
+
+        expect(d.timescaleRepo.enableCompression).not.toHaveBeenCalled();
+        expect(d.timescaleRepo.dropChunksOlderThan).not.toHaveBeenCalled();
+        expect(
+          d.timescaleRepo.ensureContinuousAggregate,
+        ).not.toHaveBeenCalled();
+        expect(
+          d.timescaleRepo.refreshContinuousAggregate,
+        ).not.toHaveBeenCalled();
+        expect(d.ingestRepo.createPipelineMetric).not.toHaveBeenCalled();
+        expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      },
+    );
+
+    it.each(OPERACIONES)(
+      '%s busca exactamente el tenant del cuerpo',
+      async (_nombre, operar) => {
+        const d = build();
+
+        await operar(d);
+
+        expect(d.tx.findOne).toHaveBeenCalledWith(
+          expect.anything(),
+          { id: TENANT_ID },
+          { fields: ['id'] },
+        );
+      },
+    );
   });
 });

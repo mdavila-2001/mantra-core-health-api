@@ -1,15 +1,20 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsBoolean,
-  IsIn,
   IsISO8601,
+  IsIn,
   IsNumberString,
   IsOptional,
   IsString,
-  IsUrl,
   IsUUID,
+  IsUrl,
+  Matches,
   MaxLength,
 } from 'class-validator';
+import {
+  BOUNDED_DECIMAL_MESSAGE,
+  BOUNDED_DECIMAL_REGEX,
+} from '../services/payment-money';
 
 /** Cuerpo de `POST /payments/checkout-sessions` (UC-42-02). */
 export class OpenCheckoutSessionDto {
@@ -171,6 +176,7 @@ export class CreateFxLockDto {
    */
   @ApiProperty({ description: 'Cotización bloqueada', example: '6.96' })
   @IsNumberString()
+  @Matches(BOUNDED_DECIMAL_REGEX, { message: BOUNDED_DECIMAL_MESSAGE })
   lockedRate!: string;
 
   /**
@@ -236,6 +242,7 @@ export class CreateRiskAssessmentDto {
    */
   @ApiProperty({ description: 'Score de riesgo (0-100)', example: '12.5' })
   @IsNumberString()
+  @Matches(BOUNDED_DECIMAL_REGEX, { message: BOUNDED_DECIMAL_MESSAGE })
   riskScore!: string;
 
   /**
@@ -337,6 +344,7 @@ export class CreateSplitDto {
   @ApiPropertyOptional({ description: 'Importe fijo cuando splitType=AMOUNT' })
   @IsOptional()
   @IsNumberString()
+  @Matches(BOUNDED_DECIMAL_REGEX, { message: BOUNDED_DECIMAL_MESSAGE })
   amount?: string;
 
   /**
@@ -348,6 +356,7 @@ export class CreateSplitDto {
   })
   @IsOptional()
   @IsNumberString()
+  @Matches(BOUNDED_DECIMAL_REGEX, { message: BOUNDED_DECIMAL_MESSAGE })
   percentage?: string;
 
   /**

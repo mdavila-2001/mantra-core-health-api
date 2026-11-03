@@ -428,41 +428,6 @@ function dayUtc(days) {
  */
 const ZONA = 'America/La_Paz';
 
-/**
- * Cuántas horas hay que sumar a una hora de pared de {@link ZONA} para expresarla
- * en UTC. Para La Paz (UTC-4) son 4.
- *
- * ## Por qué esto existe, y por qué no debería
- *
- * `generateSlots` interpreta el `startTime` de una franja **en UTC**
- * (`scheduling-catalog.service.ts`, `atTime()` usa `setUTCHours`) y **no lee**
- * `schedulable_resources.time_zone`, aunque el recurso la declare y el modelo la
- * exija. Consecuencia: una agenda que publica «mañanas de 08:00 a 12:00»
- * materializa cupos a las **04:00–08:00 hora de La Paz**, y el portal del
- * paciente ofrece turnos de madrugada.
- *
- * Mientras el generador no respete la zona del recurso, el seeder declara la
- * hora ya convertida para que los datos de desarrollo se vean como se verían si
- * el generador fuera correcto. Es una compensación deliberada, no un descuido:
- * cuando el backend lea `time_zone`, esto se borra y las franjas vuelven a
- * declararse en hora local.
- */
-function horaUtcDeLocal(horaLocal) {
-  const referencia = new Date();
-  // El desfase sale de la propia base de datos de zonas horarias, no de una
-  // constante: si alguien cambia ZONA por una con horario de verano, esto sigue
-  // dando el desfase vigente en vez de un número escrito a mano que caduca.
-  const enZona = new Date(referencia.toLocaleString('en-US', { timeZone: ZONA }));
-  const enUtc = new Date(referencia.toLocaleString('en-US', { timeZone: 'UTC' }));
-  const desfaseHoras = Math.round((enUtc.getTime() - enZona.getTime()) / 3_600_000);
-
-  const [hh, mm, ss] = horaLocal.split(':').map(Number);
-  const total = (hh + desfaseHoras + 24) % 24;
-  return [total, mm, ss ?? 0]
-    .map((n) => String(n).padStart(2, '0'))
-    .join(':');
-}
-
 /** Imprime una línea de avance (se puede silenciar con --quiet). */
 function step(message) {
   if (!flag('quiet')) console.log(message);
@@ -1112,11 +1077,12 @@ for (let index = 0; index < DOCTORS; index += 1) {
         name: `Mañanas L-V — ${apellido}`,
         slotMinutes: 30,
         bookingPolicyId: policy.ok ? policy.body.id : undefined,
-        // Las horas se declaran locales y se convierten acá: ver `horaUtcDeLocal`.
+        // Hora de pared de la sede: `generateSlots` la convierte a UTC con el
+        // `timeZone` del recurso.
         rules: [1, 2, 3, 4, 5].map((dayOfWeek) => ({
           dayOfWeek,
-          startTime: horaUtcDeLocal('08:00:00'),
-          endTime: horaUtcDeLocal('12:00:00'),
+          startTime: '08:00:00',
+          endTime: '12:00:00',
         })),
       },
       expect: [200, 201],
@@ -1790,6 +1756,48 @@ for (const [n, cita] of conHistoria.entries()) {
     );
   }
 
+  // Servicios recibidos: una intervención y una vacuna por la API REAL. La fila de
+  // «Servicios recibidos» la escribe la propia API, en la misma transacción que el
+  // procedimiento o la vacuna: aquí no se siembra esa tabla a mano. Cada dos
+  // pacientes, para que haya historias con servicios y historias sin ninguno
+  // (la lista vacía también se tiene que poder ver). La vacuna varía por paciente:
+  // la API rechaza repetir la misma dosis de la misma vacuna.
+  if (n % 2 === 0) {
+    await call(
+      'Historia clínica',
+      `Intervención de ${patient.apellido}`,
+      'POST',
+      '/clinical/procedures',
+      {
+        body: {
+          custodianTenantId: tenantId,
+          patientProfileId: patient.profileId,
+          encounterId,
+          codeConceptId: conceptIds[(n + 3) % conceptIds.length],
+          performerProfileId: doctor.profileId,
+          occurrenceStartAt: new Date().toISOString(),
+        },
+        expect: [200, 201],
+      },
+    );
+    await call(
+      'Historia clínica',
+      `Vacuna de ${patient.apellido}`,
+      'POST',
+      '/clinical/immunizations',
+      {
+        body: {
+          custodianTenantId: tenantId,
+          patientProfileId: patient.profileId,
+          vaccineConceptId: conceptIds[(n + 4) % conceptIds.length],
+          doseNumber: 1,
+          administeredByProfileId: doctor.profileId,
+        },
+        expect: [200, 201],
+      },
+    );
+  }
+
   // Signos vitales: dos observaciones por atención dan gráficos con más de un punto.
   for (const [medida, valor] of [
     ['temperatura', 36.4 + rand() * 2],
@@ -2028,6 +2036,12 @@ await call(
 );
 await call(
   'Lecturas',
+  'Servicios recibidos del paciente (intervenciones y vacunas)',
+  'GET',
+  `/clinical/patients/${patients[0].profileId}/received-services`,
+);
+await call(
+  'Lecturas',
   'Expediente completo del paciente',
   'GET',
   `/charts/patients/${patients[0].profileId}/chart`,
@@ -2059,6 +2073,17 @@ await call(
   'Resumen clínico de un id inexistente: 200 con bloques vacíos',
   'GET',
   '/clinical/patients/00000000-0000-4000-8000-0000000000ff/summary',
+  {
+    expect: [200],
+  },
+);
+// Igual que el resumen: la lectura no comprueba la existencia del paciente, y un
+// id inexistente es una lista vacía, no un error.
+await call(
+  'Lecturas',
+  'Servicios recibidos de un id inexistente: 200 con la lista vacía',
+  'GET',
+  '/clinical/patients/00000000-0000-4000-8000-0000000000ff/received-services',
   {
     expect: [200],
   },

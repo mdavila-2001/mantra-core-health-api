@@ -32,6 +32,10 @@ function build() {
   const agendaRepo = {
     findResources: mockFn().mockResolvedValue([]),
     findSlots: mockFn().mockResolvedValue([]),
+    findResourcePractices: mockFn().mockResolvedValue(new Map()),
+  };
+  const billing = {
+    findConsultationPrices: mockFn().mockResolvedValue(new Map()),
   };
   const sitesService = {
     resolveSitesForResources: mockFn().mockResolvedValue(new Map()),
@@ -42,9 +46,10 @@ function build() {
     em as any,
     agendaRepo as any,
     new PracticeProfilesDirectoryAdapter(sitesService as any, {} as any),
+    billing as any,
     logger as any,
   );
-  return { service, em, agendaRepo, sitesService, logger };
+  return { service, em, agendaRepo, sitesService, billing, logger };
 }
 
 /** Un recurso agendable de profesional, con lo mínimo del contrato. */
@@ -170,6 +175,79 @@ describe('SchedulingAgendaService', () => {
       await d.service.listResources({ tenantId: TENANT } as any);
 
       expect(d.sitesService.resolveSitesForResources).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('listSlots · el precio de la consulta (FAC-01)', () => {
+    const slot = (over: Record<string, unknown> = {}): any => ({
+      id: 'slot-1',
+      resourceId: 'res-1',
+      startAt: new Date('2026-11-02T13:00:00Z'),
+      endAt: new Date('2026-11-02T13:30:00Z'),
+      capacity: 1,
+      remainingCapacity: 1,
+      statusConceptId: 'concept-open',
+      ...over,
+    });
+    const query = {
+      from: '2026-11-02T00:00:00Z',
+      to: '2026-11-03T00:00:00Z',
+    } as any;
+
+    it('cada cupo trae el precio de la consulta de la práctica de su recurso, en lote', async () => {
+      const d = build();
+      d.agendaRepo.findSlots.mockResolvedValue([
+        slot(),
+        slot({ id: 'slot-2' }),
+        slot({ id: 'slot-3', resourceId: 'res-2' }),
+      ]);
+      d.agendaRepo.findResourcePractices.mockResolvedValue(
+        new Map([
+          ['res-1', 'practice-1'],
+          ['res-2', 'practice-2'],
+        ]),
+      );
+      d.billing.findConsultationPrices.mockResolvedValue(
+        new Map([['practice-1', { price: '150.00' }]]),
+      );
+
+      const res = await d.service.listSlots(query);
+
+      expect(res.items.map((i) => i.price)).toEqual([
+        { amount: 150, currencyCode: 'BOB' },
+        { amount: 150, currencyCode: 'BOB' },
+        null,
+      ]);
+      expect(d.billing.findConsultationPrices).toHaveBeenCalledTimes(1);
+      expect(d.billing.findConsultationPrices).toHaveBeenCalledWith(
+        expect.anything(),
+        ['practice-1', 'practice-2'],
+      );
+    });
+
+    it('un precio de 0 no se publica: va null, nunca 0', async () => {
+      const d = build();
+      d.agendaRepo.findSlots.mockResolvedValue([slot()]);
+      d.agendaRepo.findResourcePractices.mockResolvedValue(
+        new Map([['res-1', 'practice-1']]),
+      );
+      d.billing.findConsultationPrices.mockResolvedValue(
+        new Map([['practice-1', { price: '0.00' }]]),
+      );
+
+      const res = await d.service.listSlots(query);
+
+      expect(res.items[0].price).toBeNull();
+    });
+
+    it('sin práctica no pregunta precios', async () => {
+      const d = build();
+      d.agendaRepo.findSlots.mockResolvedValue([slot()]);
+
+      const res = await d.service.listSlots(query);
+
+      expect(res.items[0].price).toBeNull();
+      expect(d.billing.findConsultationPrices).not.toHaveBeenCalled();
     });
   });
 });

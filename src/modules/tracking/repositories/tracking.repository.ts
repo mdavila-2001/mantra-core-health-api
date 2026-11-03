@@ -249,8 +249,32 @@ export class TrackingRepository {
     return em.findOne(TrackableSubjects, { id });
   }
 
-  /** Toda escritura del timeline mueve el sujeto: se toma bloqueado. */
+  /**
+   * Toda escritura del timeline mueve el sujeto: se toma bloqueado.
+   *
+   * El tenant es parte del criterio: un sujeto de otra organización no se
+   * encuentra (ni se bloquea) aunque se conozca su UUID.
+   */
   findSubjectForUpdate(
+    em: EntityManager,
+    id: string,
+    tenantId: string,
+  ): Promise<TrackableSubjects | null> {
+    return em.findOne(
+      TrackableSubjects,
+      { id, tenantId },
+      { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
+  }
+
+  /**
+   * Bloquea un sujeto **sin** acotar por tenant.
+   *
+   * Sólo para quien ya resolvió el sujeto por una vía propia y no por un UUID
+   * que le llegó de afuera: el webhook del transportista lo localiza por número
+   * de seguimiento y su autenticidad no es una sesión con tenant.
+   */
+  lockSubjectById(
     em: EntityManager,
     id: string,
   ): Promise<TrackableSubjects | null> {
@@ -275,17 +299,23 @@ export class TrackingRepository {
     return em.findOne(TrackableSubjects, { trackingNumber });
   }
 
-  /** Sujeto ya abierto para la misma referencia: abrir dos veces lo duplicaría. */
+  /**
+   * Sujeto ya abierto para la misma referencia **en el tenant**: abrir dos veces
+   * lo duplicaría, pero el de otra organización no es un duplicado ni debe
+   * revelarse.
+   */
   findOpenSubjectByRef(
     em: EntityManager,
     subjectRefType: string,
     subjectRefId: string,
     openStateConceptId: string,
+    tenantId: string,
   ): Promise<TrackableSubjects | null> {
     return em.findOne(TrackableSubjects, {
       subjectRefType,
       subjectRefId,
       stateConceptId: openStateConceptId,
+      tenantId,
     });
   }
 
@@ -329,21 +359,38 @@ export class TrackingRepository {
   }
 
   /**
-   * Obtiene find shipment for update.
+   * Obtiene el envío bloqueado, acotado al tenant.
+   *
+   * El bloqueo pesimista resuelve la concurrencia, no la autorización: el
+   * tenant es parte del criterio para que un envío ajeno no se encuentre.
    *
    * @param em - Contexto de persistencia o transacción activa.
-   * @param id - Identificador de id.
-   * @returns Resultado de find shipment for update conforme al contrato `Promise<Shipments | null>`.
+   * @param id - Identificador del envío.
+   * @param tenantId - Tenant activo de la petición.
+   * @returns Resultado conforme al contrato `Promise<Shipments | null>`.
    */
   findShipmentForUpdate(
     em: EntityManager,
     id: string,
+    tenantId: string,
   ): Promise<Shipments | null> {
     return em.findOne(
       Shipments,
-      { id },
+      { id, tenantId },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
+  }
+
+  /**
+   * Envío del sujeto, sin bloquear. Sirve para decidir si el actor puede operar
+   * el sujeto sin invertir el orden de bloqueo (envío antes que sujeto) que
+   * siguen las demás operaciones.
+   */
+  findShipmentBySubject(
+    em: EntityManager,
+    trackableSubjectId: string,
+  ): Promise<Shipments | null> {
+    return em.findOne(Shipments, { trackableSubjectId });
   }
 
   /**

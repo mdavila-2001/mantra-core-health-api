@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   StorageGovernanceService,
   DatasetGovernanceService,
@@ -58,6 +63,11 @@ export class StorageGovernanceController {
   ) {}
 
   /** UC-54-01. */
+  @Audited({
+    action: 'STORAGE_BACKEND_REGISTERED',
+    entity: 'storage_backend',
+    entityId: 'result.id',
+  })
   @Post('storage-backends')
   @Roles('PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -73,6 +83,11 @@ export class StorageGovernanceController {
   }
 
   /** UC-54-02. */
+  @Audited({
+    action: 'STORAGE_DATASET_DEFINED',
+    entity: 'dataset_definition',
+    entityId: 'result.id',
+  })
   @Post('datasets')
   @Roles('GOVERNANCE_ADMIN', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -86,6 +101,11 @@ export class StorageGovernanceController {
   }
 
   /** UC-54-03. */
+  @Audited({
+    action: 'STORAGE_DATASET_VERSION_PUBLISHED',
+    entity: 'dataset_version',
+    entityId: 'result.id',
+  })
   @Post('datasets/:id/versions')
   @Roles('GOVERNANCE_ADMIN', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -102,6 +122,11 @@ export class StorageGovernanceController {
   }
 
   /** UC-54-04. */
+  @Audited({
+    action: 'STORAGE_COLLECTION_DEFINED',
+    entity: 'collection_definition',
+    entityId: 'result.id',
+  })
   @Post('collections')
   @Roles('GOVERNANCE_ADMIN', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -117,6 +142,11 @@ export class StorageGovernanceController {
   }
 
   /** UC-54-05. */
+  @Audited({
+    action: 'STORAGE_DATASET_PLACEMENT_APPROVED',
+    entity: 'dataset_placement',
+    entityId: 'result.id',
+  })
   @Post('placements/approve')
   @Roles('GOVERNANCE_ADMIN', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -132,6 +162,11 @@ export class StorageGovernanceController {
   }
 
   /** UC-54-06. */
+  @Audited({
+    action: 'STORAGE_CONSISTENCY_POLICY_DEFINED',
+    entity: 'consistency_policy',
+    entityId: 'result.id',
+  })
   @Post('consistency-policies')
   @Roles('GOVERNANCE_ADMIN', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -147,6 +182,11 @@ export class StorageGovernanceController {
   }
 
   /** UC-54-07. */
+  @Audited({
+    action: 'STORAGE_DATA_ACCESS_POLICY_DEFINED',
+    entity: 'data_access_policy',
+    entityId: 'result.id',
+  })
   @Post('datasets/:id/data-access-policies')
   @Roles('GOVERNANCE_ADMIN', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -161,6 +201,11 @@ export class StorageGovernanceController {
   }
 
   /** UC-54-08. */
+  @Audited({
+    action: 'TENANT_STORAGE_BOUND',
+    entity: 'tenant_storage_binding',
+    entityId: 'result.id',
+  })
   @Post('tenants/:tenantId/storage-bindings')
   @Roles('GOVERNANCE_ADMIN', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -177,6 +222,11 @@ export class StorageGovernanceController {
   }
 
   /** UC-54-09. */
+  @Audited({
+    action: 'STORAGE_ENCRYPTION_PROFILE_DEFINED',
+    entity: 'encryption_profile',
+    entityId: 'result.id',
+  })
   @Post('encryption-profiles')
   @Roles('SECURITY_ADMIN', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -191,6 +241,10 @@ export class StorageGovernanceController {
   }
 
   /** UC-54-10. */
+  @Audited({
+    action: 'STORAGE_POLICIES_DEFINED',
+    entity: 'retention_policy',
+  })
   @Post('policies')
   @Roles('GOVERNANCE_ADMIN', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -206,6 +260,11 @@ export class StorageGovernanceController {
   }
 
   /** UC-54-11. */
+  @Audited({
+    action: 'STORAGE_DATASET_PLACEMENT_FAILED_OVER',
+    entity: 'dataset_placement',
+    entityId: 'param:id',
+  })
   @Post('placements/:id/failover')
   @Roles('PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)

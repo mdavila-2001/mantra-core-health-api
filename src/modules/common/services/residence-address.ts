@@ -2,26 +2,14 @@ import { BadRequestException } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 
 import { CONCEPTS } from '../../../common';
-import { boDepartmentConceptId } from '../../../common/seed/bo-geography.catalog';
+import { adminDivisionLineage } from '../../../common/seed/admin-divisions.catalog';
+import {
+  boDepartmentConceptId,
+  departmentSiglaOfMunicipalityCode,
+} from '../../../common/seed/bo-geography.catalog';
 import type { CatalogConceptsRepository } from '../../terminology/repositories';
 import type { Addresses } from '../entities';
 import type { AddressesRepository } from '../repositories';
-
-/**
- * La sigla del departamento, a partir del `code` del municipio.
- *
- * Los 340 municipios de `VS_BO_MUNICIPALITY` —los que de verdad sembró el
- * generador del modelo, ver el aviso arriba de `writeAddress`— codifican
- * `<SIGLA>-<NOMBRE>` (`SC-SANTA_CRUZ_DE_LA_SIERRA`, `LP-EL_ALTO`...);
- * verificado contra los 340 códigos de Neon, sin una sola excepción. No hay
- * una relación explícita municipio→departamento en
- * `terminology.concept_relationships` —se buscó y no existe—, así que esto
- * es lo único que hay para derivarlo sin inventar un vínculo que el modelo
- * no declara.
- */
-function departmentSiglaFromMunicipalityCode(code: string): string | undefined {
-  return code.match(/^([A-Z]{2})-/)?.[1];
-}
 
 /** Lo que hace falta para escribir una dirección de una persona. */
 export interface ResidenceAddressData {
@@ -35,6 +23,11 @@ export interface ResidenceAddressData {
    * La columna es un varchar único (`common.addresses.lines`), no un arreglo.
    */
   readonly lines?: string;
+  /**
+   * Distrito o zona, como texto (ADR-0028): el que da el mapa. Antes viajaba
+   * pegado al final de `lines`.
+   */
+  readonly district?: string;
   /**
    * Latitud, si la persona compartió su ubicación.
    *
@@ -91,6 +84,10 @@ export interface ResidenceAddressData {
  * uuid pasaba las dos capas a la vez. El departamento no tiene este problema
  * —`geo:bo:department:SC` sí está sembrado— así que su derivación no cambió.
  *
+ * Una base sembrada por la propia API (`BoGeographySeedService`, que corre en el
+ * arranque) sí trae el esquema `geo:bo:municipality:<INE>`; el departamento se
+ * deriva de las dos formas de código con `departmentSiglaOfMunicipalityCode`.
+ *
  * No hace nada si no se eligió municipio: el domicilio es opcional y una
  * dirección con país y nada más no es un dato, es una fila.
  *
@@ -143,6 +140,28 @@ export function createWorkAddress(
  * El cuerpo compartido por los dos usos: lo único que los distingue es el
  * concepto de uso.
  */
+/** Una dirección de la libreta: la de {@link ResidenceAddressData} con nombre y preferencia. */
+export interface SavedAddressData extends ResidenceAddressData {
+  readonly label?: string;
+  readonly isPreferred?: boolean;
+}
+
+/**
+ * Guarda una dirección de la libreta del paciente (uso `ADDR_USE_SAVED`).
+ *
+ * Mismo camino que el domicilio —municipio validado contra el catálogo,
+ * departamento derivado, `city` legible—, más el nombre y la preferencia.
+ * Devuelve la fila creada, o `null` si no había nada que guardar.
+ */
+export async function createSavedAddress(
+  repo: AddressesRepository,
+  tx: EntityManager,
+  concepts: CatalogConceptsRepository,
+  data: SavedAddressData,
+): Promise<Addresses | null> {
+  return writeAddressRow(repo, tx, concepts, data, CONCEPTS.ADDR_USE_SAVED);
+}
+
 async function writeAddress(
   repo: AddressesRepository,
   tx: EntityManager,
@@ -150,12 +169,24 @@ async function writeAddress(
   data: ResidenceAddressData,
   useConceptId: string,
 ): Promise<boolean> {
-  const coordenadas = coordinatesOf(data);
+  return (
+    (await writeAddressRow(repo, tx, concepts, data, useConceptId)) !== null
+  );
+}
+
+async function writeAddressRow(
+  repo: AddressesRepository,
+  tx: EntityManager,
+  concepts: CatalogConceptsRepository,
+  data: SavedAddressData,
+  useConceptId: string,
+): Promise<Addresses | null> {
+  const coordinates = coordinatesOf(data);
 
   // Sin municipio, sin calle y sin coordenadas no hay dirección: una fila con
   // país y nada más no es un dato, es una fila.
-  if (!data.municipalityConceptId && !data.lines && !coordenadas) {
-    return false;
+  if (!data.municipalityConceptId && !data.lines && !coordinates) {
+    return null;
   }
 
   const municipality = data.municipalityConceptId
@@ -167,10 +198,18 @@ async function writeAddress(
     );
   }
   const departmentSigla = municipality
-    ? departmentSiglaFromMunicipalityCode(municipality.code)
+    ? departmentSiglaOfMunicipalityCode(municipality.code)
     : undefined;
+  // El árbol de divisiones (ADR-0028) da la provincia —y el departamento,
+  // para un municipio cuyo código no lo trae— de cualquier país con catálogo.
+  // Un municipio que no está en el árbol (sembrado por el paquete del modelo
+  // con otra forma de código) queda sin provincia: no se adivina.
+  const lineage = data.municipalityConceptId
+    ? adminDivisionLineage(data.municipalityConceptId)
+    : undefined;
+  const district = data.district?.trim() || undefined;
 
-  repo.create(tx, {
+  return repo.create(tx, {
     ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
     ownerId: data.personId,
     countryConceptId: CONCEPTS.COUNTRY_BO,
@@ -178,19 +217,22 @@ async function writeAddress(
     // Derivado, nunca recibido: ver arriba.
     administrativeAreaConceptId: departmentSigla
       ? boDepartmentConceptId(departmentSigla)
-      : undefined,
+      : lineage?.level1ConceptId,
+    administrativeArea2ConceptId: lineage?.level2ConceptId,
+    districtText: district,
     // `city` es texto libre y el municipio ya es el dato de catálogo; se copia
     // el nombre para que quien lea la dirección sin resolver conceptos —un
     // export, un sobre— tenga algo legible.
     city: municipality?.display,
     lines: data.lines,
-    latitude: coordenadas?.latitude,
-    longitude: coordenadas?.longitude,
+    latitude: coordinates?.latitude,
+    longitude: coordinates?.longitude,
     useConceptId,
     typeConceptId: CONCEPTS.ADDR_TYPE_POSTAL,
+    label: data.label,
+    isPreferred: data.isPreferred,
     actorUserId: data.actorUserId,
   });
-  return true;
 }
 
 /**
@@ -238,6 +280,8 @@ export interface ReplaceResidenceAddressData {
    * sólo el municipio, sigue siendo un dato).
    */
   readonly lines?: string;
+  /** Distrito o zona. Mismos tres estados que `lines`: `''` lo borra. */
+  readonly district?: string;
   /**
    * Ambas o ninguna: el DTO ya rechaza el par incompleto.
    *
@@ -259,8 +303,8 @@ export interface ReplaceResidenceAddressData {
  * `Number(undefined)` es `NaN`, y un `NaN !== NaN` rompería la comparación
  * de "sin cambios" de más abajo aunque nada haya cambiado.
  */
-function numeroDeColumna(valor: string | undefined): number | undefined {
-  return valor === undefined ? undefined : Number(valor);
+function columnNumber(value: string | undefined): number | undefined {
+  return value === undefined ? undefined : Number(value);
 }
 
 /**
@@ -275,61 +319,69 @@ function numeroDeColumna(valor: string | undefined): number | undefined {
  * @param concepts - Repositorio de `terminology.catalog_concepts`, para
  *   validar el municipio. Ver {@link createResidenceAddress}.
  * @param data - Persona, uso, lo que trae el cuerpo y el actor.
- * @param ahora - Instante de la edición, fin de vigencia de la anterior.
+ * @param now - Instante de la edición, fin de vigencia de la anterior.
  */
 export async function replaceResidenceAddress(
   repo: AddressesRepository,
   tx: EntityManager,
   concepts: CatalogConceptsRepository,
   data: ReplaceResidenceAddressData,
-  ahora: Date,
+  now: Date,
 ): Promise<void> {
-  const vigente = await repo.findVigenteByOwnerAndUse(
+  const current = await repo.findCurrentByOwnerAndUse(
     tx,
     data.personId,
     data.useConceptId,
   );
 
   const municipalityConceptId =
-    data.municipalityConceptId ?? vigente?.municipalityConceptId;
+    data.municipalityConceptId ?? current?.municipalityConceptId;
   const lines =
     data.lines === undefined
-      ? vigente?.lines
+      ? current?.lines
       : data.lines.trim() === ''
         ? undefined
         : data.lines.trim();
+  const district =
+    data.district === undefined
+      ? current?.districtText
+      : data.district.trim() === ''
+        ? undefined
+        : data.district.trim();
   // Quitar el punto: los dos extremos en `null` (ver `latitude` en la interfaz).
-  const quitaGps = data.latitude === null && data.longitude === null;
-  const tieneGps =
-    !quitaGps && data.latitude !== undefined && data.longitude !== undefined;
-  const latitude = quitaGps
+  const removesGps = data.latitude === null && data.longitude === null;
+  const hasGps =
+    !removesGps && data.latitude !== undefined && data.longitude !== undefined;
+  const latitude = removesGps
     ? undefined
-    : tieneGps
+    : hasGps
       ? (data.latitude ?? undefined)
-      : numeroDeColumna(vigente?.latitude);
-  const longitude = quitaGps
+      : columnNumber(current?.latitude);
+  const longitude = removesGps
     ? undefined
-    : tieneGps
+    : hasGps
       ? (data.longitude ?? undefined)
-      : numeroDeColumna(vigente?.longitude);
+      : columnNumber(current?.longitude);
 
-  const sinCambios =
-    (vigente?.municipalityConceptId ?? undefined) === municipalityConceptId &&
-    (vigente?.lines ?? undefined) === lines &&
-    numeroDeColumna(vigente?.latitude) === latitude &&
-    numeroDeColumna(vigente?.longitude) === longitude;
-  if (sinCambios) return;
+  const withoutChanges =
+    (current?.municipalityConceptId ?? undefined) === municipalityConceptId &&
+    (current?.lines ?? undefined) === lines &&
+    (current?.districtText ?? undefined) === district &&
+    columnNumber(current?.latitude) === latitude &&
+    columnNumber(current?.longitude) === longitude;
+  if (withoutChanges) return;
 
-  if (vigente) repo.closeVigente(vigente, ahora, data.actorUserId);
+  if (current) repo.closeCurrent(current, now, data.actorUserId);
 
-  const escribir =
+  const write =
     data.useConceptId === CONCEPTS.ADDR_USE_WORK
       ? createWorkAddress
       : createResidenceAddress;
-  await escribir(repo, tx, concepts, {
+  await write(repo, tx, concepts, {
     personId: data.personId,
     municipalityConceptId,
     lines,
+    district,
     latitude,
     longitude,
     actorUserId: data.actorUserId,
@@ -341,6 +393,10 @@ export interface AddressSummary {
   readonly lines?: string;
   readonly city?: string;
   readonly municipalityConceptId?: string;
+  /** Provincia o condado, deducida del municipio (ADR-0028). */
+  readonly administrativeArea2ConceptId?: string;
+  /** Distrito o zona (ADR-0028). */
+  readonly district?: string;
   readonly latitude?: number;
   readonly longitude?: number;
 }
@@ -352,21 +408,25 @@ export interface AddressSummary {
  * distingue «no lo declaró» de «lo declaró sin datos».
  */
 export function summarizeAddress(
-  fila?: Addresses | null,
+  row?: Addresses | null,
 ): AddressSummary | undefined {
-  if (!fila) return undefined;
+  if (!row) return undefined;
   return {
-    ...(fila.lines === undefined ? {} : { lines: fila.lines }),
-    ...(fila.city === undefined ? {} : { city: fila.city }),
-    ...(fila.municipalityConceptId === undefined
+    ...(row.lines === undefined ? {} : { lines: row.lines }),
+    ...(row.city === undefined ? {} : { city: row.city }),
+    ...(row.municipalityConceptId === undefined
       ? {}
-      : { municipalityConceptId: fila.municipalityConceptId }),
+      : { municipalityConceptId: row.municipalityConceptId }),
+    ...(row.administrativeArea2ConceptId == null
+      ? {}
+      : { administrativeArea2ConceptId: row.administrativeArea2ConceptId }),
+    ...(row.districtText == null ? {} : { district: row.districtText }),
     // Las coordenadas viajan juntas o no viajan: media coordenada no ubica
     // nada. Se compara con `== null` y no `=== undefined`: la columna es
     // nullable y la base devuelve `null`, no `undefined` — con la
     // comparación estricta `Number(null)` (que es 0) se cuela.
-    ...(fila.latitude == null || fila.longitude == null
+    ...(row.latitude == null || row.longitude == null
       ? {}
-      : { latitude: Number(fila.latitude), longitude: Number(fila.longitude) }),
+      : { latitude: Number(row.latitude), longitude: Number(row.longitude) }),
   };
 }

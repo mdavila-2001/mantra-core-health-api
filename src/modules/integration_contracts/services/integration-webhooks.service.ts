@@ -5,11 +5,15 @@ import {
   ConflictException,
   HttpDispatcherService,
   PreconditionFailedException,
-  ResourceNotFoundException,
   deriveWebhookSecret,
+  requireTenantId,
   type AuthenticatedUser,
 } from '../../../common';
 import { ICON } from '../integration_contracts.concepts';
+import {
+  assertContractInTenant,
+  integrationResourceOutOfScope,
+} from '../integration_contracts.tenant-scope';
 import {
   ContractsRepository,
   ContractVersionsRepository,
@@ -70,13 +74,12 @@ export class IntegrationWebhooksService {
       },
       'Subscribing webhook',
     );
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const contract = await this.contractsRepo.findById(tx, contractId);
-      if (!contract) {
-        throw new ResourceNotFoundException('Contrato no encontrado', {
-          contractId,
-        });
-      }
+      const contract = assertContractInTenant(
+        await this.contractsRepo.findByIdInTenant(tx, tenantId, contractId),
+        tenantId,
+      );
       if (contract.statusConceptId !== ICON.CONTRACT_ACTIVE) {
         throw new PreconditionFailedException(
           'El contrato debe estar ACTIVE para suscribir webhooks',
@@ -148,14 +151,24 @@ export class IntegrationWebhooksService {
       },
       'Delivering signed webhook',
     );
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
+      // Suscripción → contrato → tenant, antes de firmar ni entregar nada.
       const sub = await this.subscriptionsRepo.findById(tx, subscriptionId);
       if (!sub) {
-        throw new ResourceNotFoundException(
+        throw integrationResourceOutOfScope(
           'Suscripción de webhook no encontrada',
-          { subscriptionId },
         );
       }
+      assertContractInTenant(
+        await this.contractsRepo.findByIdInTenant(
+          tx,
+          tenantId,
+          sub.integrationContractId,
+        ),
+        tenantId,
+        'Suscripción de webhook no encontrada',
+      );
       if (sub.statusConceptId !== ICON.SUBSCRIPTION_ACTIVE) {
         throw new PreconditionFailedException('La suscripción no está ACTIVE', {
           subscriptionId,
@@ -198,7 +211,7 @@ export class IntegrationWebhooksService {
         );
       }
       const secret =
-        sub.secretReference ?? deriveWebhookSecret('subscription', sub.id); // TODO secreto por conexión
+        sub.secretReference ?? deriveWebhookSecret('subscription', sub.id);
       const body = {
         contractVersionId: version.id,
         eventTypeConceptId: sub.eventTypeConceptId,

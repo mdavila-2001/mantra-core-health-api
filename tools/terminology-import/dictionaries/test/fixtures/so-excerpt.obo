@@ -1,0 +1,52 @@
+format-version: 1.2
+data-version: 2026-08-07
+
+[Typedef]
+id: part_of
+name: part_of
+def: "X part_of Y if X is a subregion of Y." [http://precedings.nature.com/documents/3495/version/1]
+comment: Example: amino_acid part_of polypeptide.
+subset: SOFA
+is_transitive: true
+
+[Term]
+id: SO:0001583
+name: missense_variant
+alt_id: SO:0001584
+alt_id: SO:0001783
+def: "A sequence variant, that changes one or more bases, resulting in a different amino acid sequence but where the length is preserved." [EBI:fc, EBI:gr, SO:ke]
+comment: EBI term: Non-synonymous SNPs. SNPs that are located in the coding sequence and result in an amino acid change in the encoded peptide sequence. A change that causes a non_synonymous_codon can be more than 3 bases - for example 4 base substitution.
+synonym: "ANNOVAR:nonsynonymous SNV" RELATED VAR [http://www.openbioinformatics.org/annovar/annovar_download.html]
+synonym: "Jannovar:missense_variant" EXACT VAR [http://doc-openbio.readthedocs.org/projects/jannovar/en/master/var_effects.html]
+synonym: "missense" EXACT [ftp://ftp.ncbi.nih.gov/snp/specs/docsum_3.1.xsd]
+synonym: "missense codon" EXACT []
+synonym: "Seattleseq:missense" EXACT VAR []
+synonym: "Seattleseq:missense-near-splice" RELATED VAR []
+synonym: "snpEff:NON_SYNONYMOUS_CODING" EXACT VAR []
+synonym: "VAAST:missense_variant" EXACT VAR []
+synonym: "VAAST:non_synonymous_codon" RELATED VAR []
+synonym: "VAT:nonsynonymous" EXACT VAR []
+synonym: "VEP:missense_variant" EXACT VAR []
+xref: http://en.wikipedia.org/wiki/Missense_mutation
+xref: http://snp.gs.washington.edu/SeattleSeqAnnotation137/HelpHowToUse.jsp "Seattleseq"
+xref: http://snpeff.sourceforge.net/SnpEff_manual.html
+xref: http://vat.gersteinlab.org/formats.php "VAT"
+xref: http:www.ensembl.org/info/genome/variation/predicted_data.html#consequences
+xref: loinc:LA6698-0 "Missense"
+is_a: SO:0001992 ! nonsynonymous_variant
+created_by: kareneilbeck
+creation_date: 2010-03-22T02:35:49Z
+
+[Term]
+id: SO:0001576
+name: transcript_variant
+def: "A sequence variant that changes the structure of the transcript." [SO:ke]
+synonym: "Jannovar:transcript_variant" EXACT VAR [http://doc-openbio.readthedocs.org/projects/jannovar/en/master/var_effects.html]
+synonym: "snpEff:TRANSCRIPT" EXACT VAR []
+synonym: "transcript variant" EXACT []
+synonym: "VAAST:transcript_variant" EXACT VAR []
+xref: http://snpeff.sourceforge.net/SnpEff_manual.html
+is_a: SO:0001564 ! gene_variant
+created_by: kareneilbeck
+creation_date: 2010-03-22T02:32:41Z
+

@@ -11,10 +11,15 @@ import {
 import {
   PharmaciesRepository,
   PharmacyPriceListsRepository,
+  PharmacyReferencesRepository,
   PharmacyProductsRepository,
   PharmacyProductPricesRepository,
 } from '../repositories';
 import { PHARM, PRICE_LIST_TYPE_CONCEPT_BY_CODE } from '../pharmacy.concepts';
+import {
+  assertReferenceInScope,
+  requireManagedPharmacy,
+} from './pharmacy-scope';
 import {
   CreatePriceDto,
   CreatePriceListDto,
@@ -40,6 +45,7 @@ export class PharmacyPricingService {
    * @param priceListsRepo - Valor de price lists repo requerido por la operación.
    * @param productsRepo - Valor de products repo requerido por la operación.
    * @param pricesRepo - Valor de prices repo requerido por la operación.
+   * @param referencesRepo - Comprobación de propiedad de las referencias del cuerpo.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -48,6 +54,7 @@ export class PharmacyPricingService {
     private readonly priceListsRepo: PharmacyPriceListsRepository,
     private readonly productsRepo: PharmacyProductsRepository,
     private readonly pricesRepo: PharmacyProductPricesRepository,
+    private readonly referencesRepo: PharmacyReferencesRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(PharmacyPricingService.name);
@@ -64,11 +71,12 @@ export class PharmacyPricingService {
       'Creating price list',
     );
     return this.em.transactional(async (tx) => {
-      const pharmacy = await this.pharmaciesRepo.findById(tx, pharmacyId);
-      if (!pharmacy)
-        throw new ResourceNotFoundException('Farmacia no encontrada', {
-          pharmacyId,
-        });
+      const pharmacy = await requireManagedPharmacy(
+        this.pharmaciesRepo,
+        tx,
+        pharmacyId,
+        actor,
+      );
       if (pharmacy.statusConceptId !== PHARM.PHARMACY_ACTIVE) {
         throw new PreconditionFailedException('La farmacia no está activa', {
           pharmacyId,
@@ -80,6 +88,25 @@ export class PharmacyPricingService {
           {
             code: dto.code,
           },
+        );
+      }
+
+      // La sede debe ser de esta farmacia; la aseguradora, una aseguradora registrada.
+      if (dto.pharmacySiteId) {
+        assertReferenceInScope(
+          (await this.referencesRepo.findPharmacySiteInPharmacy(
+            tx,
+            dto.pharmacySiteId,
+            pharmacy.id,
+          )) !== null,
+        );
+      }
+      if (dto.insurerTenantId) {
+        assertReferenceInScope(
+          await this.referencesRepo.isRegisteredInsurer(
+            tx,
+            dto.insurerTenantId,
+          ),
         );
       }
 
@@ -149,6 +176,7 @@ export class PharmacyPricingService {
       'Versioning product price',
     );
     return this.em.transactional(async (tx) => {
+      await requireManagedPharmacy(this.pharmaciesRepo, tx, pharmacyId, actor);
       const priceList = await this.priceListsRepo.findById(tx, priceListId);
       if (!priceList || priceList.pharmacyId !== pharmacyId) {
         throw new ResourceNotFoundException('Lista de precios no encontrada', {
@@ -253,6 +281,7 @@ export class PharmacyPricingService {
       'Closing price list',
     );
     return this.em.transactional(async (tx) => {
+      await requireManagedPharmacy(this.pharmaciesRepo, tx, pharmacyId, actor);
       const priceList = await this.priceListsRepo.findById(tx, priceListId);
       if (!priceList || priceList.pharmacyId !== pharmacyId) {
         throw new ResourceNotFoundException('Lista de precios no encontrada', {

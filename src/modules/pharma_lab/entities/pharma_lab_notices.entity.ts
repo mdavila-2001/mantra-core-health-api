@@ -19,10 +19,9 @@ import { randomUUID } from 'node:crypto';
  * aceptada cuyo aviso se perdió es un doctor esperando a alguien que no sabe que
  * fue aceptado.
  *
- * Los canales externos —correo, WhatsApp, SMS, push— siguen siendo de
- * `messaging`: cuando el despliegue tenga sus canales dados de alta, el
- * integrador puede enganchar estos avisos a `NotificationsService.createRequest`
- * sin tocar los casos de uso. Ver `CARRIL_REPORT.md`, «Deuda restante».
+ * Los canales externos —correo, WhatsApp, SMS, push— son de `messaging`:
+ * engancharlos a `NotificationsService.createRequest` no toca los casos de
+ * uso.
  */
 @Entity({ schema: 'pharma_lab', tableName: 'pharma_lab_notices' })
 export class PharmaLabNotices {

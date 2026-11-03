@@ -22,13 +22,21 @@ import {
   UpdateGroupMemberDto,
 } from '../dto';
 import { CommunityGroupAccessService } from './community-group-access.service';
+import { AUDIENCE_VISIBILITIES } from './community-group-audience.service';
 import { CommunityGroupNotificationsService } from './community-group-notifications.service';
 import { CommunityVisibilityService } from './community-visibility.service';
+import { CommunityErrorReason } from '../community.error-reasons';
 
 const GROUP_VISIBILITY_BY_CODE: Record<string, string> = {
   PUBLIC: COMM.GROUP_VISIBILITY_PUBLIC,
   PRIVATE: COMM.GROUP_VISIBILITY_PRIVATE,
   SECRET: COMM.GROUP_VISIBILITY_SECRET,
+  // Público autorizado (API#837): doctores verificados, personal de la
+  // organización y pacientes atendidos. «Invitados» es PRIVATE y «público
+  // general» es PUBLIC.
+  VERIFIED_DOCTORS: COMM.GROUP_VISIBILITY_VERIFIED_DOCTORS,
+  ORGANIZATION_STAFF: COMM.GROUP_VISIBILITY_ORGANIZATION_STAFF,
+  ATTENDED_PATIENTS: COMM.GROUP_VISIBILITY_ATTENDED_PATIENTS,
 };
 
 const GROUP_TYPE_BY_CODE: Record<string, string> = {
@@ -150,22 +158,39 @@ export class CommunityGroupsService {
     return this.em.transactional(async (tx) => {
       const tenantId = getCurrentTenantId();
 
+      // API#837 · ORG-FOR-001 / DOC-SOC-010: una aseguradora no abre foros. Va
+      // antes que cualquier lectura para que la negativa no dependa de si el
+      // slug o el tema existen.
+      await this.access.assertOrganizationMayStartForums(
+        tx,
+        tenantId,
+        'CREATE_GROUP',
+      );
+
       const duplicate = await this.groupsRepo.findBySlug(
         tx,
         tenantId,
         dto.slug,
       );
       if (duplicate)
-        throw new ConflictException('Ya hay un grupo con ese slug', {
-          slug: dto.slug,
-        });
+        throw new ConflictException(
+          'Ya hay un grupo con ese slug',
+          {
+            slug: dto.slug,
+          },
+          CommunityErrorReason.GROUP_SLUG_ALREADY_IN_USE,
+        );
 
       if (dto.topicId) {
         const topic = await this.groupsRepo.findTopicById(tx, dto.topicId);
         if (!topic)
-          throw new ResourceNotFoundException('Tema no encontrado', {
-            topicId: dto.topicId,
-          });
+          throw new ResourceNotFoundException(
+            'Tema no encontrado',
+            {
+              topicId: dto.topicId,
+            },
+            CommunityErrorReason.GROUP_TOPIC_NOT_FOUND,
+          );
       }
 
       const ownerProfileId = await this.visibility.resolveActorProfileId(
@@ -189,6 +214,7 @@ export class CommunityGroupsService {
         throw new PreconditionFailedException(
           'Para crear un grupo necesita su perfil público configurado',
           { code: PUBLIC_REQUIRED_PROFILE },
+          CommunityErrorReason.OWNER_PUBLIC_PROFILE_REQUIRED,
         );
       }
 
@@ -202,13 +228,21 @@ export class CommunityGroupsService {
         await this.assertPublicCompleteProfile(tx, ownerProfileId);
       }
 
+      const visibilityConceptId =
+        GROUP_VISIBILITY_BY_CODE[dto.visibility ?? 'PUBLIC'];
+      await this.access.assertActorBelongsToAudience(
+        tx,
+        visibilityConceptId,
+        tenantId,
+        actor,
+      );
+
       const group = this.groupsRepo.create(tx, {
         tenantId,
         slug: dto.slug,
         name: dto.name,
         description: dto.description,
-        visibilityConceptId:
-          GROUP_VISIBILITY_BY_CODE[dto.visibility ?? 'PUBLIC'],
+        visibilityConceptId,
         groupTypeConceptId: GROUP_TYPE_BY_CODE[dto.groupType ?? 'GENERAL'],
         topicId: dto.topicId,
         ownerProfileId,
@@ -246,7 +280,21 @@ export class CommunityGroupsService {
     return this.em.transactional(async (tx) => {
       const group = await this.groupsRepo.findById(tx, groupId);
       if (!group)
-        throw new ResourceNotFoundException('Grupo no encontrado', { groupId });
+        throw new ResourceNotFoundException(
+          'Grupo no encontrado',
+          { groupId },
+          CommunityErrorReason.GROUP_NOT_FOUND,
+        );
+
+      // API#837: en un foro de público autorizado el ingreso lo decide la
+      // sesión, no el cuerpo. `resolve` responde 404 a quien no pertenece al
+      // público y verifica que `memberProfileId` sea un perfil suyo: sin eso,
+      // un integrante del público podría inscribir a quien no lo es.
+      const audienceGroup = AUDIENCE_VISIBILITIES.includes(
+        group.visibilityConceptId,
+      );
+      if (audienceGroup)
+        await this.access.resolve(tx, groupId, actor, dto.memberProfileId);
 
       const dup = await this.groupsRepo.findMember(
         tx,
@@ -257,13 +305,20 @@ export class CommunityGroupsService {
       // fallar: si no, quien se dio de baja de un grupo público no podría volver
       // nunca, porque la fila sigue estando ahí.
       if (dup && this.isLiveMembership(dup))
-        throw new ConflictException('El perfil ya es miembro del grupo', {
-          groupId,
-          memberProfileId: dto.memberProfileId,
-        });
+        throw new ConflictException(
+          'El perfil ya es miembro del grupo',
+          {
+            groupId,
+            memberProfileId: dto.memberProfileId,
+          },
+          CommunityErrorReason.ALREADY_GROUP_MEMBER,
+        );
 
+      // El público autorizado ya es la autorización: quien pertenece a él entra
+      // activo, como en un grupo público; quien no, no llegó hasta acá.
       const isPublic =
-        group.visibilityConceptId === COMM.GROUP_VISIBILITY_PUBLIC;
+        group.visibilityConceptId === COMM.GROUP_VISIBILITY_PUBLIC ||
+        audienceGroup;
       const joinStatus = isPublic
         ? COMM.GROUP_JOIN_ACTIVE
         : COMM.GROUP_JOIN_PENDING;
@@ -335,7 +390,11 @@ export class CommunityGroupsService {
       // lo único que tiene que ser atómico acá.
       const group = await this.groupsRepo.findByIdForUpdate(tx, groupId);
       if (!group)
-        throw new ResourceNotFoundException('Grupo no encontrado', { groupId });
+        throw new ResourceNotFoundException(
+          'Grupo no encontrado',
+          { groupId },
+          CommunityErrorReason.GROUP_NOT_FOUND,
+        );
 
       const member = await this.groupsRepo.findMember(
         tx,
@@ -343,10 +402,14 @@ export class CommunityGroupsService {
         memberProfileId,
       );
       if (!member)
-        throw new ResourceNotFoundException('El perfil no es del grupo', {
-          groupId,
-          memberProfileId,
-        });
+        throw new ResourceNotFoundException(
+          'El perfil no es del grupo',
+          {
+            groupId,
+            memberProfileId,
+          },
+          CommunityErrorReason.MEMBER_NOT_IN_GROUP,
+        );
 
       const wasActive = member.joinStatusConceptId === COMM.GROUP_JOIN_ACTIVE;
       const wasOwner = member.memberRoleConceptId === COMM.GROUP_ROLE_OWNER;
@@ -363,6 +426,7 @@ export class CommunityGroupsService {
         throw new ConflictException(
           'Al dueño del grupo no lo puede sacar otro: sólo él puede irse, o transferir el grupo antes',
           { groupId, memberProfileId },
+          CommunityErrorReason.GROUP_OWNER_CANNOT_BE_REMOVED,
         );
 
       member.joinStatusConceptId = isSelf
@@ -399,11 +463,7 @@ export class CommunityGroupsService {
         // Antes esto ni siquiera podía pasar: el dueño tenía prohibido irse
         // «hasta transferirlo», lo que en la práctica lo dejaba atado a un
         // grupo del que quería salir.
-        const heir = await this.chooseHeir(
-          tx,
-          groupId,
-          memberProfileId,
-        );
+        const heir = await this.chooseHeir(tx, groupId, memberProfileId);
         if (heir) {
           heir.memberRoleConceptId = COMM.GROUP_ROLE_OWNER;
           touch(heir, actor.id);
@@ -439,6 +499,7 @@ export class CommunityGroupsService {
       throw new PreconditionFailedException(
         'Hay que indicar una decisión o un rol',
         { groupId, memberId },
+        CommunityErrorReason.MEMBER_UPDATE_NO_CHANGE_REQUESTED,
       );
 
     this.logger.info(
@@ -461,16 +522,21 @@ export class CommunityGroupsService {
         memberId,
       );
       if (!member)
-        throw new ResourceNotFoundException('Membresía no encontrada', {
-          groupId,
-          memberId,
-        });
+        throw new ResourceNotFoundException(
+          'Membresía no encontrada',
+          {
+            groupId,
+            memberId,
+          },
+          CommunityErrorReason.GROUP_MEMBERSHIP_NOT_FOUND,
+        );
 
       if (dto.decision) {
         if (member.joinStatusConceptId !== COMM.GROUP_JOIN_PENDING)
           throw new PreconditionFailedException(
             'La solicitud de ingreso ya estaba resuelta',
             { groupId, memberId },
+            CommunityErrorReason.JOIN_REQUEST_ALREADY_RESOLVED,
           );
 
         if (dto.decision === 'APPROVE') {
@@ -588,6 +654,7 @@ export class CommunityGroupsService {
       throw new PreconditionFailedException(
         'Para crear un grupo público necesita su perfil público configurado',
         { code: PUBLIC_REQUIRED_PROFILE },
+        CommunityErrorReason.PUBLIC_GROUP_OWNER_PROFILE_MISSING,
       );
     }
 
@@ -602,6 +669,7 @@ export class CommunityGroupsService {
       throw new PreconditionFailedException(
         'Para crear un grupo público, su perfil público tiene que estar completo',
         { code: PUBLIC_REQUIRED_PROFILE, missing: missing },
+        CommunityErrorReason.PUBLIC_GROUP_OWNER_PROFILE_INCOMPLETE,
       );
     }
   }

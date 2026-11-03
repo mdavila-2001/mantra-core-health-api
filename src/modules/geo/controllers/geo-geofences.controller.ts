@@ -1,6 +1,11 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { GeoGeofencesService } from '../services';
 import {
   CreateGeofenceDto,
@@ -25,6 +30,11 @@ export class GeoGeofencesController {
   constructor(private readonly service: GeoGeofencesService) {}
 
   /** UC-13-04. */
+  @Audited({
+    action: 'GEOFENCE_DEFINED',
+    entity: 'geofence',
+    entityId: 'result.id',
+  })
   @Post('geofences')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -37,6 +47,11 @@ export class GeoGeofencesController {
   }
 
   /** UC-13-05. */
+  @Audited({
+    action: 'GEOFENCE_EVENT_RECORDED',
+    entity: 'geofence_event',
+    entityId: 'result.id',
+  })
   @Post('geofence-events')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

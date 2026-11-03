@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 19 · schema community
+-- SALUD v4.2.83 · módulo 19 · schema community
 -- Generado de diagram_19_community.puml — NO editar a mano.
 
 
@@ -76,6 +76,7 @@ CREATE TABLE IF NOT EXISTS "community"."service_reviews" (
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
+    "verified_crm_case_id" uuid,
     CONSTRAINT "pk_service_reviews" PRIMARY KEY ("id")
 );
 
@@ -101,6 +102,27 @@ CREATE TABLE IF NOT EXISTS "community"."review_responses" (
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_review_responses" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "community"."party_ratings" (
+    "id" uuid NOT NULL,
+    "reviewer_patient_profile_id" uuid,
+    "reviewer_practitioner_profile_id" uuid,
+    "reviewer_practice_id" uuid,
+    "target_patient_profile_id" uuid,
+    "target_practitioner_profile_id" uuid,
+    "target_practice_id" uuid,
+    "verified_encounter_id" uuid,
+    "verified_role_assignment_id" uuid,
+    "overall_rating" smallint NOT NULL,
+    "comment_text" text,
+    "moderation_status_concept_id" uuid NOT NULL,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_party_ratings" PRIMARY KEY ("id")
 );
 
 CREATE TABLE IF NOT EXISTS "community"."content_reports" (
@@ -419,6 +441,10 @@ CREATE TABLE IF NOT EXISTS "community"."direct_messages" (
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
+    "authored_by_user_id" uuid,
+    "on_behalf_of_profile_id" uuid,
+    "delegate_assignment_id" uuid,
+    "disclosure_shown" boolean NOT NULL DEFAULT false,
     CONSTRAINT "pk_direct_messages" PRIMARY KEY ("id")
 );
 
@@ -677,4 +703,46 @@ CREATE TABLE IF NOT EXISTS "community"."comment_media" (
     "created_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     CONSTRAINT "pk_comment_media" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "community"."conversation_assignments" (
+    "id" uuid NOT NULL,
+    "tenant_id" uuid NOT NULL,
+    "conversation_id" uuid NOT NULL,
+    "practitioner_profile_id" uuid NOT NULL,
+    "assigned_user_id" uuid,
+    "status_concept_id" uuid NOT NULL,
+    "sla_due_at" timestamptz,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_conversation_assignments" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "community"."conversation_internal_notes" (
+    "id" uuid NOT NULL,
+    "tenant_id" uuid NOT NULL,
+    "conversation_id" uuid NOT NULL,
+    "author_user_id" uuid NOT NULL,
+    "body_text" text NOT NULL,
+    "created_at" timestamptz NOT NULL,
+    CONSTRAINT "pk_conversation_internal_notes" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "community"."reply_templates" (
+    "id" uuid NOT NULL,
+    "tenant_id" uuid NOT NULL,
+    "practitioner_profile_id" uuid,
+    "category_concept_id" uuid NOT NULL,
+    "title" varchar NOT NULL,
+    "body_text" text NOT NULL,
+    "status_concept_id" uuid NOT NULL,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_reply_templates" PRIMARY KEY ("id")
 );

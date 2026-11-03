@@ -29,7 +29,7 @@ gh auth refresh --remove-scopes delete_repo
 ## 2. Pull requests
 
 ```bash
-gh pr create --draft --base develop --title "fix(agenda): …" --body-file pr.md
+gh pr create --base dev --title "fix(agenda): …" --body-file pr.md   # nunca --draft: el PR se abre listo
 gh pr create --fill                 # título y cuerpo desde los commits
 gh pr create --dry-run              # muestra qué haría (puede pushear igual)
 gh pr ready                         # draft → listo para review

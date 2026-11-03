@@ -1,7 +1,11 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import { getCurrentTenantId, type AuthenticatedUser } from '../../../common';
+import {
+  getCurrentTenantId,
+  roleAuthorizesInTenant,
+  type AuthenticatedUser,
+} from '../../../common';
 import { CONCEPTS } from '../../../common/constants/concepts';
 import { SCHED } from '../../scheduling/domain/scheduling.concepts';
 import { SchedulingBookingsRepository } from '../../scheduling/infrastructure/repositories';
@@ -26,7 +30,7 @@ import {
   HealthPractitionerProfilesRepository,
   PatientProfilesRepository,
   PersonAccountLinksRepository,
-} from '../../profiles/repositories';
+} from '../../profiles/infrastructure/repositories';
 // FT-07-R05/R08: el PDP resuelve si hay grant/relación/representación vigente
 // más allá del turno de hoy. `AuthzModule` lo exporta justamente para esto.
 import { AuthzPdpService } from '../../authz/services';
@@ -37,7 +41,7 @@ import { AuthzPdpService } from '../../authz/services';
 // archivo: es una clase sin estado que recibe el `EntityManager` por
 // parámetro, y `authz` no depende de `clinical`, así que no cierra ciclo.
 import { CareRelationshipsRepository } from '../../authz/repositories';
-import { PatientRepresentationService } from '../../profiles/services/patient-representation.service';
+import { PatientRepresentationService } from '../../profiles/application/services/patient-representation.service';
 // N-04 (BR-13 / M3): toda lectura del resumen clínico deja su fila en
 // `audit.data_access_log`, como ya hace el break-the-glass. Repositorio sin
 // estado por `EntityManager`, provisto en `ClinicalModule` sin importar más de
@@ -216,7 +220,9 @@ export class ClinicalReadService {
     patientProfileId: string,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    if (actor.roles.includes('SUPERADMIN')) return;
+    // Comodín sólo el global, como en `RolesGuard`: la historia no es de ningún
+    // tenant, así que un `SUPERADMIN` acotado en `scopedRoles` no pasa (#1241).
+    if (roleAuthorizesInTenant(actor, 'SUPERADMIN', undefined)) return;
 
     if (!actor.roles.some((role) => ROLES_THAT_ATTEND.includes(role))) {
       await this.assertOwnRecord(patientProfileId, actor);
@@ -312,7 +318,9 @@ export class ClinicalReadService {
     patientProfileId: string,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    if (actor.roles.includes('SUPERADMIN')) return;
+    // Comodín sólo el global, como en `RolesGuard`: la historia no es de ningún
+    // tenant, así que un `SUPERADMIN` acotado en `scopedRoles` no pasa (#1241).
+    if (roleAuthorizesInTenant(actor, 'SUPERADMIN', undefined)) return;
 
     if (actor.roles.some((role) => ROLES_THAT_ATTEND.includes(role))) {
       const em = this.em.fork();
@@ -479,7 +487,7 @@ export class ClinicalReadService {
     practitionerProfileId: string,
     patientProfileId: string,
   ): Promise<boolean> {
-    const ahora = Date.now();
+    const now = Date.now();
     const relations =
       await this.careRelationshipsRepo.findActiveForPractitionerPatient(
         em,
@@ -488,8 +496,8 @@ export class ClinicalReadService {
       );
     return relations.some((relation) => {
       if (relation.purposeConceptId) return false;
-      if (relation.validFrom.getTime() > ahora) return false;
-      if (relation.validTo && relation.validTo.getTime() <= ahora) {
+      if (relation.validFrom.getTime() > now) return false;
+      if (relation.validTo && relation.validTo.getTime() <= now) {
         return false;
       }
       return true;
@@ -513,23 +521,25 @@ export class ClinicalReadService {
     practitionerProfileId: string,
     patientProfileId: string,
   ): Promise<boolean> {
-    const ahora = new Date();
+    const now = new Date();
     const reservations =
       await this.bookingsRepo.findConfirmedWithPatientBetween(
         em,
         practitionerProfileId,
         patientProfileId,
-        new Date(ahora.getTime() - WINDOW_MS),
-        new Date(ahora.getTime() + WINDOW_MS),
+        new Date(now.getTime() - WINDOW_MS),
+        new Date(now.getTime() + WINDOW_MS),
         STATES_THAT_ENABLE,
       );
 
     return reservations.some((reservation) => {
       const zone = reservation.timeZone ?? DEFAULT_ZONE;
-      const hoy = localDayOf(ahora, zone);
+      const today = localDayOf(now, zone);
       const day = localDayOf(reservation.startAt, zone);
       return (
-        day.year === hoy.year && day.month === hoy.month && day.day === hoy.day
+        day.year === today.year &&
+        day.month === today.month &&
+        day.day === today.day
       );
     });
   }
@@ -642,7 +652,7 @@ export class ClinicalReadService {
       'Leyendo historial clínico del paciente',
     );
 
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const over = limit + 1;
 
     this.dataAccessLogRepo.record(em, {
@@ -773,6 +783,7 @@ export class ClinicalReadService {
         formInstanceId: row.formInstanceId,
         doseText: row.doseText,
         frequencyText: row.frequencyText,
+        quantityDecimal: quantityOf(row.quantityDecimal),
         validFrom: row.validFrom,
         validTo: row.validTo,
         patientInstructionsText: row.patientInstructionsText,
@@ -855,4 +866,11 @@ export class ClinicalReadService {
     }
     return rows;
   }
+}
+
+/** `numeric` de la cantidad recetada (texto) a número; sin cantidad, ausente. */
+function quantityOf(value: string | null | undefined): number | undefined {
+  if (value === null || value === undefined) return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
 }

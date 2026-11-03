@@ -1,0 +1,267 @@
+format-version: 1.2
+data-version: releases/2024-05-07
+property_value: owl:versionInfo "24.04e" xsd:string
+
+[Term]
+id: NCIT:C100104
+name: Sign or Symptom
+def: "Objective evidence of disease perceptible to the examining practitioner (sign) and subjective evidence of disease perceived by the patient (symptom)." [] {http://purl.obolibrary.org/obo/NCIT_P378="NCI"}
+is_a: NCIT:C3367 ! Finding
+property_value: NCIT:A24 NCIT:C173262
+property_value: NCIT:NHC0 "C100104" xsd:string
+property_value: NCIT:P106 "Finding" xsd:string
+property_value: NCIT:P108 "Sign or Symptom" xsd:string
+property_value: NCIT:P207 "C0037088" xsd:string
+property_value: NCIT:P322 "CDISC" xsd:string
+property_value: NCIT:P322 "NICHD" xsd:string
+property_value: NCIT:P322 "PCDC" xsd:string
+property_value: NCIT:P325 "Objective evidence of disease perceptible to the examiner (sign) and subjective evidence of disease perceived by the subject (symptom)." xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="CDISC"}
+
+[Term]
+id: NCIT:C26801
+name: Intestinal Disorder
+def: "A non-neoplastic or neoplastic disorder that affects the small or large intestine." [] {http://purl.obolibrary.org/obo/NCIT_P378="NCI"}
+is_a: NCIT:C2990 ! Digestive System Disorder
+relationship: NCIT:R100 NCIT:C12736 ! Intestine
+property_value: NCIT:NHC0 "C26801" xsd:string
+property_value: NCIT:P106 "Disease or Syndrome" xsd:string
+property_value: NCIT:P108 "Intestinal Disorder" xsd:string
+property_value: NCIT:P207 "C3810108" xsd:string
+property_value: NCIT:P366 "Intestinal_Disorder" xsd:string
+property_value: NCIT:P375 "Other and unspecified diseases of appendix" xsd:string {http://purl.obolibrary.org/obo/NCIT_P393="Related To", http://purl.obolibrary.org/obo/NCIT_P394="PT", http://purl.obolibrary.org/obo/NCIT_P395="543.9", http://purl.obolibrary.org/obo/NCIT_P396="ICD9CM 2014"}
+
+[Term]
+id: NCIT:C27550
+name: Non-Neoplastic Digestive System Disorder
+def: "A non-neoplastic disorder that affects the gastrointestinal tract, anus, liver, biliary system, and pancreas. Representative examples include infections, ulcers, cirrhosis, and diverticulosis." [] {http://purl.obolibrary.org/obo/NCIT_P378="NCI"}
+is_a: NCIT:C2990 ! Digestive System Disorder
+is_a: NCIT:C53531 ! Non-Neoplastic Disorder by Site
+relationship: NCIT:R101 NCIT:C12378 ! Digestive System
+property_value: NCIT:NHC0 "C27550" xsd:string
+property_value: NCIT:P106 "Disease or Syndrome" xsd:string
+property_value: NCIT:P108 "Non-Neoplastic Digestive System Disorder" xsd:string
+property_value: NCIT:P207 "C1335011" xsd:string
+property_value: NCIT:P366 "Non-Neoplastic_Gastrointestinal_Disorder" xsd:string
+
+[Term]
+id: NCIT:C27551
+name: Disorder by Site
+def: "A term that refers to the classification of a disorder according to the anatomic site that is involved in the pathologic process." [] {http://purl.obolibrary.org/obo/NCIT_P378="NCI"}
+is_a: NCIT:C2991 ! Disease or Disorder
+property_value: NCIT:NHC0 "C27551" xsd:string
+property_value: NCIT:P106 "Disease or Syndrome" xsd:string
+property_value: NCIT:P108 "Disorder by Site" xsd:string
+property_value: NCIT:P207 "C1333305" xsd:string
+property_value: NCIT:P310 "Header_Concept" xsd:string
+property_value: NCIT:P366 "Disorder_by_Site" xsd:string
+
+[Term]
+id: NCIT:C2990
+name: Digestive System Disorder
+def: "A non-neoplastic or neoplastic disorder that affects the gastrointestinal tract, anus, liver, biliary system, and pancreas." [] {http://purl.obolibrary.org/obo/NCIT_P378="NCI"}
+xref: IMDRF:E1033
+is_a: NCIT:C27551 ! Disorder by Site
+relationship: NCIT:R100 NCIT:C12378 ! Digestive System
+property_value: NCIT:NHC0 "C2990" xsd:string
+property_value: NCIT:P106 "Disease or Syndrome" xsd:string
+property_value: NCIT:P108 "Digestive System Disorder" xsd:string
+property_value: NCIT:P207 "C0017178" xsd:string
+property_value: NCIT:P322 "CPTAC" xsd:string
+property_value: NCIT:P322 "FDA" xsd:string
+property_value: NCIT:P322 "NICHD" xsd:string
+property_value: NCIT:P322 "PCDC" xsd:string
+property_value: NCIT:P325 "The report describes a non-specific problem with the gastrointestinal system. Note: Please use \"Appropriate Term / Code Not Available\" if the report describes a specific problem but the relevant term does not exist." xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="FDA", http://purl.obolibrary.org/obo/NCIT_P381="CDRH"}
+property_value: NCIT:P366 "Gastrointestinal_Disorder" xsd:string
+
+[Term]
+id: NCIT:C2991
+name: Disease or Disorder
+def: "Any abnormal condition of the body or mind that causes discomfort, dysfunction, or distress to the person affected or those in contact with the person. The term is often used broadly to include injuries, disabilities, syndromes, symptoms, deviant behaviors, and atypical variations of structure and function." [] {http://purl.obolibrary.org/obo/NCIT_P378="NCI"}
+xref: IMDRF:E23
+is_a: NCIT:C7057 ! Disease, Disorder or Finding
+property_value: NCIT:A31 NCIT:C17998
+property_value: NCIT:A31 NCIT:C184783
+property_value: NCIT:A31 NCIT:C184784
+property_value: NCIT:A31 NCIT:C3055
+property_value: NCIT:A31 NCIT:C3059
+property_value: NCIT:A31 NCIT:C3161
+property_value: NCIT:A31 NCIT:C3172
+property_value: NCIT:A31 NCIT:C3208
+property_value: NCIT:A31 NCIT:C3230
+property_value: NCIT:A31 NCIT:C3247
+property_value: NCIT:A31 NCIT:C3262
+property_value: NCIT:A31 NCIT:C3286
+property_value: NCIT:A31 NCIT:C3411
+property_value: NCIT:A31 NCIT:C3422
+property_value: NCIT:A31 NCIT:C3468
+property_value: NCIT:A31 NCIT:C3708
+property_value: NCIT:A31 NCIT:C3709
+property_value: NCIT:A31 NCIT:C3723
+property_value: NCIT:A31 NCIT:C3743
+property_value: NCIT:A31 NCIT:C3784
+property_value: NCIT:A31 NCIT:C3786
+property_value: NCIT:A31 NCIT:C3787
+property_value: NCIT:A31 NCIT:C3792
+property_value: NCIT:A31 NCIT:C40141
+property_value: NCIT:A31 NCIT:C4063
+property_value: NCIT:A31 NCIT:C4197
+property_value: NCIT:A31 NCIT:C4198
+property_value: NCIT:A31 NCIT:C4248
+property_value: NCIT:A31 NCIT:C43234
+property_value: NCIT:A31 NCIT:C4345
+property_value: NCIT:A31 NCIT:C4463
+property_value: NCIT:A31 NCIT:C4665
+property_value: NCIT:A31 NCIT:C48660
+property_value: NCIT:A31 NCIT:C4972
+property_value: NCIT:A31 NCIT:C7056
+property_value: NCIT:A31 NCIT:C7387
+property_value: NCIT:A31 NCIT:C7539
+property_value: NCIT:A31 NCIT:C9295
+property_value: NCIT:A31 NCIT:C9343
+property_value: NCIT:A31 NCIT:C9357
+property_value: NCIT:A31 NCIT:C9360
+property_value: NCIT:NHC0 "C2991" xsd:string
+property_value: NCIT:P106 "Disease or Syndrome" xsd:string
+property_value: NCIT:P107 "Disease or Disorder" xsd:string
+property_value: NCIT:P108 "Disease or Disorder" xsd:string
+property_value: NCIT:P207 "C0012634" xsd:string
+property_value: NCIT:P322 "CDISC-GLOSS" xsd:string
+property_value: NCIT:P322 "CTDC" xsd:string
+property_value: NCIT:P322 "CTRP" xsd:string
+property_value: NCIT:P322 "GDC" xsd:string
+property_value: NCIT:P322 "ICDC" xsd:string
+property_value: NCIT:P322 "NICHD" xsd:string
+property_value: NCIT:P325 "Any abnormal condition of the body or mind that causes discomfort, dysfunction, or distress to the affected person. NOTE: The term is often used broadly to include injuries, disabilities, syndromes, symptoms, deviant behaviors, and atypical variations of structure and function. [After NCI Thesaurus] See also diagnosis." xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="CDISC-GLOSS"}
+property_value: NCIT:P325 "In medicine, a health problem with certain characteristics or symptoms." xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="NCI-GLOSS"}
+property_value: NCIT:P366 "Diseases_and_Disorders" xsd:string
+
+[Term]
+id: NCIT:C3038
+name: Fever
+def: "Elevation of body temperature above normal due to inflammatory or immune responses." [] {http://purl.obolibrary.org/obo/NCIT_P378="NCI"}
+xref: IMDRF:E230101
+is_a: NCIT:C53458 ! Sign
+property_value: NCIT:A23 NCIT:C25162
+property_value: NCIT:A32 NCIT:C43283
+property_value: NCIT:A37 NCIT:C17998
+property_value: NCIT:A37 NCIT:C48660
+property_value: NCIT:A37 NCIT:C49487
+property_value: NCIT:A37 NCIT:C49488
+property_value: NCIT:A39 NCIT:C49487
+property_value: NCIT:A39 NCIT:C49488
+property_value: NCIT:A48 NCIT:C17998
+property_value: NCIT:A48 NCIT:C49487
+property_value: NCIT:A48 NCIT:C49488
+property_value: NCIT:NHC0 "C3038" xsd:string
+property_value: NCIT:P106 "Sign or Symptom" xsd:string
+property_value: NCIT:P108 "Fever" xsd:string
+property_value: NCIT:P207 "C0015967" xsd:string
+property_value: NCIT:P317 "Patient Code (Appendix B)" xsd:string
+property_value: NCIT:P322 "ACC/AHA" xsd:string
+property_value: NCIT:P322 "CTCAE" xsd:string
+property_value: NCIT:P322 "FDA" xsd:string
+property_value: NCIT:P322 "GDC" xsd:string
+property_value: NCIT:P322 "MedDRA" xsd:string
+property_value: NCIT:P322 "NICHD" xsd:string
+property_value: NCIT:P322 "PCDC" xsd:string
+property_value: NCIT:P322 "SeroNet" xsd:string
+property_value: NCIT:P325 "A disorder characterized by elevation of the body's temperature above the upper limit of normal." xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="CTCAE"}
+property_value: NCIT:P325 "An increase in body temperature above normal (98.6 degrees F), usually caused by disease." xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="NCI-GLOSS"}
+property_value: NCIT:P325 "Elevation of body temperature above normal due to the bodies own responses." xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="FDA", http://purl.obolibrary.org/obo/NCIT_P381="CDRH"}
+property_value: NCIT:P325 "Elevation of body temperature above normal due to the production of more heat than the body is able to dissipate." xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="NICHD"}
+property_value: NCIT:P325 "Temperature greater than or equal to 100.4 degrees F (38.0 degrees C)" xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="ACC/AHA", http://purl.obolibrary.org/obo/NCIT_P381="SARS2"}
+property_value: NCIT:P325 "The elevation of the body's temperature above the upper limit of normal, usually taken as 37.7 degrees Celsius." xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="ACC/AHA"}
+property_value: NCIT:P333 "Pyrogenic" xsd:string
+property_value: NCIT:P333 "Pyrogenic reaction" xsd:string
+property_value: NCIT:P333 "Reaction, pyrogenic" xsd:string
+property_value: NCIT:P366 "Fever" xsd:string
+property_value: NCIT:P375 "Fever" xsd:string {http://purl.obolibrary.org/obo/NCIT_P393="Has Synonym", http://purl.obolibrary.org/obo/NCIT_P394="LLT", http://purl.obolibrary.org/obo/NCIT_P395="10016558", http://purl.obolibrary.org/obo/NCIT_P396="MedDRA", http://purl.obolibrary.org/obo/NCIT_P397="18.1"}
+property_value: NCIT:P375 "Fever" xsd:string {http://purl.obolibrary.org/obo/NCIT_P393="Has Synonym", http://purl.obolibrary.org/obo/NCIT_P394="PT", http://purl.obolibrary.org/obo/NCIT_P395="ann_arbor_b_symptoms_described", http://purl.obolibrary.org/obo/NCIT_P396="GDC"}
+
+[Term]
+id: NCIT:C3367
+name: Finding
+def: "Clinical, laboratory or molecular evidence, or absence of evidence of disease." [] {http://purl.obolibrary.org/obo/NCIT_P378="NCI"}
+is_a: NCIT:C7057 ! Disease, Disorder or Finding
+property_value: NCIT:NHC0 "C3367" xsd:string
+property_value: NCIT:P106 "Finding" xsd:string
+property_value: NCIT:P107 "Finding" xsd:string
+property_value: NCIT:P108 "Finding" xsd:string
+property_value: NCIT:P207 "C1285578" xsd:string
+property_value: NCIT:P322 "CDISC-GLOSS" xsd:string
+property_value: NCIT:P322 "CTRP" xsd:string
+property_value: NCIT:P322 "NICHD" xsd:string
+property_value: NCIT:P325 "A meaningful interpretation of data or observations resulting from planned evaluations. Compare to conclusion, hypothesis. See also general observation class, intervention, event." xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="CDISC-GLOSS"}
+property_value: NCIT:P366 "Finding" xsd:string
+
+[Term]
+id: NCIT:C34494
+name: Colic
+def: "Paroxysms of discomfort characterized by abrupt onset and remission. This typically occurs when a hollow organ or supporting structure is obstructed." [] {http://purl.obolibrary.org/obo/NCIT_P378="NCI"}
+is_a: NCIT:C53500 ! Non-Neoplastic Intestinal Disorder
+property_value: NCIT:NHC0 "C34494" xsd:string
+property_value: NCIT:P106 "Sign or Symptom" xsd:string
+property_value: NCIT:P108 "Colic" xsd:string
+property_value: NCIT:P207 "C0232488" xsd:string
+property_value: NCIT:P366 "Colic" xsd:string
+
+[Term]
+id: NCIT:C53458
+name: Sign
+def: "Objective evidence of disease perceptible to the examining healthcare provider." [] {http://purl.obolibrary.org/obo/NCIT_P378="NCI"}
+is_a: NCIT:C100104 ! Sign or Symptom
+property_value: NCIT:NHC0 "C53458" xsd:string
+property_value: NCIT:P106 "Finding" xsd:string
+property_value: NCIT:P108 "Sign" xsd:string
+property_value: NCIT:P207 "C0311392" xsd:string
+property_value: NCIT:P322 "CDISC-GLOSS" xsd:string
+property_value: NCIT:P325 "An observation by a medical professional obtained from examination, test result, or questionnaire that indicates a patient may have a disease. NOTE: Some examples of signs are fever, swelling, skin rash, high blood pressure, and high blood glucose. [After NCI Glossary] See also diagnosis, symptom." xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="CDISC-GLOSS"}
+property_value: NCIT:P366 "Sign" xsd:string
+
+[Term]
+id: NCIT:C53500
+name: Non-Neoplastic Intestinal Disorder
+def: "A disorder that affects the small or large intestine and is non-neoplastic in nature. Representative examples include acute appendicitis, colitis, and inflammatory bowel disease." [] {http://purl.obolibrary.org/obo/NCIT_P378="NCI"}
+is_a: NCIT:C26801 ! Intestinal Disorder
+is_a: NCIT:C27550 ! Non-Neoplastic Digestive System Disorder
+relationship: NCIT:R100 NCIT:C12736 ! Intestine
+property_value: NCIT:NHC0 "C53500" xsd:string
+property_value: NCIT:P106 "Disease or Syndrome" xsd:string
+property_value: NCIT:P108 "Non-Neoplastic Intestinal Disorder" xsd:string
+property_value: NCIT:P207 "C1882107" xsd:string
+property_value: NCIT:P366 "Non-Neoplastic_Intestinal_Disorder" xsd:string
+
+[Term]
+id: NCIT:C53529
+name: Non-Neoplastic Disorder
+def: "Any disorder other than abnormal tissue growth resulting from uncontrolled cell proliferation." [] {http://purl.obolibrary.org/obo/NCIT_P378="NCI"}
+is_a: NCIT:C2991 ! Disease or Disorder
+property_value: NCIT:NHC0 "C53529" xsd:string
+property_value: NCIT:P106 "Disease or Syndrome" xsd:string
+property_value: NCIT:P108 "Non-Neoplastic Disorder" xsd:string
+property_value: NCIT:P207 "C1709246" xsd:string
+property_value: NCIT:P322 "CDISC" xsd:string
+property_value: NCIT:P322 "CTEP" xsd:string
+property_value: NCIT:P325 "Any disorder other than abnormal tissue growth resulting from uncontrolled cell proliferation. (NCI)" xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="CDISC"}
+property_value: NCIT:P366 "Non-Neoplastic_Disorder" xsd:string
+
+[Term]
+id: NCIT:C53531
+name: Non-Neoplastic Disorder by Site
+is_a: NCIT:C53529 ! Non-Neoplastic Disorder
+property_value: NCIT:NHC0 "C53531" xsd:string
+property_value: NCIT:P106 "Disease or Syndrome" xsd:string
+property_value: NCIT:P108 "Non-Neoplastic Disorder by Site" xsd:string
+property_value: NCIT:P207 "C1709247" xsd:string
+property_value: NCIT:P366 "Non-Neoplastic_Disorder_by_Site" xsd:string
+
+[Term]
+id: NCIT:C7057
+name: Disease, Disorder or Finding
+def: "A condition that is relevant to human neoplasms and non-neoplastic disorders.  This includes observations, test results, history and other concepts relevant to the characterization of human pathologic conditions." [] {http://purl.obolibrary.org/obo/NCIT_P378="NCI"}
+disjoint_from: NCIT:C97325 ! Manufactured Object
+property_value: NCIT:NHC0 "C7057" xsd:string
+property_value: NCIT:P106 "Conceptual Entity" xsd:string
+property_value: NCIT:P108 "Disease, Disorder or Finding" xsd:string
+property_value: NCIT:P207 "C1511989" xsd:string
+property_value: NCIT:P366 "Diseases_Disorders_and_Findings" xsd:string

@@ -9,7 +9,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { GraphAnalyticsService, GraphTraversalService } from '../services';
 import {
   DefineAccessScopeDto,
@@ -50,6 +55,11 @@ export class GraphQueryController {
   ) {}
 
   /** UC-61-04 (alta). */
+  @Audited({
+    action: 'GRAPH_ACCESS_SCOPE_DEFINED',
+    entity: 'graph_access_scope',
+    entityId: 'result.id',
+  })
   @Post('access-scopes')
   @Roles('DATA_GOVERNANCE_ADMIN', 'COMPLIANCE_OFFICER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -66,6 +76,11 @@ export class GraphQueryController {
   }
 
   /** UC-61-04 (cambio). */
+  @Audited({
+    action: 'GRAPH_ACCESS_SCOPE_UPDATED',
+    entity: 'graph_access_scope',
+    entityId: 'param:id',
+  })
   @Patch('access-scopes/:id')
   @Roles('DATA_GOVERNANCE_ADMIN', 'COMPLIANCE_OFFICER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -83,6 +98,10 @@ export class GraphQueryController {
   }
 
   /** UC-61-05 (recorrido). */
+  @Audited({
+    action: 'GRAPH_TRAVERSED',
+    entity: 'graph_node',
+  })
   @Post('traverse')
   @Roles(
     'GRAPH_ANALYST',
@@ -104,6 +123,10 @@ export class GraphQueryController {
   }
 
   /** UC-61-05 (ruta). */
+  @Audited({
+    action: 'GRAPH_PATH_QUERIED',
+    entity: 'graph_path_cache',
+  })
   @Post('paths')
   @Roles(
     'GRAPH_ANALYST',
@@ -125,6 +148,10 @@ export class GraphQueryController {
   }
 
   /** UC-61-06. */
+  @Audited({
+    action: 'GRAPH_COMMUNITIES_DETECTED',
+    entity: 'graph_community',
+  })
   @Post('analytics/community-detection')
   @Roles('SYSTEM', 'GRAPH_ANALYTICS_WORKER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -141,6 +168,10 @@ export class GraphQueryController {
   }
 
   /** UC-61-07. */
+  @Audited({
+    action: 'GRAPH_RISK_SCORES_COMPUTED',
+    entity: 'graph_risk_score',
+  })
   @Post('analytics/risk-scoring')
   @Roles('SYSTEM', 'GRAPH_ANALYTICS_WORKER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -157,6 +188,11 @@ export class GraphQueryController {
   }
 
   /** UC-61-08. */
+  @Audited({
+    action: 'GRAPH_RULE_EVALUATED',
+    entity: 'graph_rule_definition',
+    entityId: 'param:id',
+  })
   @Post('rules/:id/evaluate')
   @Roles(
     'SYSTEM',
@@ -179,6 +215,11 @@ export class GraphQueryController {
   }
 
   /** UC-61-09. */
+  @Audited({
+    action: 'GRAPH_RULE_HIT_TRIAGED',
+    entity: 'graph_rule_hit',
+    entityId: 'param:id',
+  })
   @Patch('rule-hits/:id')
   @Roles('COMPLIANCE_OFFICER', 'GRAPH_ANALYST', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -196,6 +237,11 @@ export class GraphQueryController {
   }
 
   /** UC-61-11. */
+  @Audited({
+    action: 'GRAPH_DELETION_REQUESTED',
+    entity: 'graph_deletion_job',
+    entityId: 'result.id',
+  })
   @Post('deletion-jobs')
   @Roles('DATA_GOVERNANCE_ADMIN', 'SYSTEM', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)

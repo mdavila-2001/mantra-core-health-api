@@ -1,0 +1,122 @@
+{
+  "generatedAt": "2026-10-24T00:49:57.917Z",
+  "cache": "/home/user/glossary-data-build/cache/drug-treatments",
+  "entries": {
+    "dhimmel__indications@11d535ba0884": {
+      "repo": "https://github.com/dhimmel/indications.git",
+      "commit": "11d535ba0884ee56c3cd5756fdfb4985f313bd80",
+      "committedAt": "2016-03-15T12:38:50-07:00",
+      "retrievedAt": "2026-10-24T00:49:53.353Z",
+      "sources": [
+        "labeledin",
+        "pharmacotherapydb"
+      ],
+      "files": {
+        "labeledin/download/LabeledIn_Structured_Results.txt": {
+          "sha256": "f3c2852d30f7d0b8200cfc71544b94b8812f2dfd2e72da47e9088118979b9f45",
+          "bytes": 70793
+        },
+        "labeledin/download/Crowdsourcing/Crowdsourced_Results.txt": {
+          "sha256": "b23d179d6bb0e01e4c6c4ad71e465acc5217189e3fde480df48e5828573454f8",
+          "bytes": 360250
+        },
+        "labeledin/download/README.txt": {
+          "sha256": "24c9e834e28b51606fb15cdf1a8e1f8423822712f0a7b5524f6cd4ec7f474d4b",
+          "bytes": 5057
+        },
+        "catalog/indications.tsv": {
+          "sha256": "bc956b0092fab88975a07932b89382a0ed593d3d21df23395440cfd9a067a917",
+          "bytes": 76754
+        },
+        "README.md": {
+          "sha256": "402bca50f8589da7e404b74122426cae193405432b5b78bdd588dc771b83bec2",
+          "bytes": 5613
+        }
+      }
+    },
+    "olegursu__drugtarget@64630f7c2bc0": {
+      "repo": "https://github.com/olegursu/drugtarget.git",
+      "commit": "64630f7c2bc050f5af0a7cac7b08e778125284bc",
+      "committedAt": "2016-11-16T08:48:25-07:00",
+      "retrievedAt": "2026-10-24T00:49:54.429Z",
+      "sources": [
+        "drugcentral-2016"
+      ],
+      "files": {
+        "drug_indication.tsv": {
+          "sha256": "2da87919e94da16f2824cd104b05e7c853822a7eeb9c40d555827c96843ab7f1",
+          "bytes": 755678
+        },
+        "identifiers.tsv": {
+          "sha256": "094929bd3fe7004f2389b85f88486e17aa4693cf303808e3cd1b1e47792ae321",
+          "bytes": 2579009
+        },
+        "README.md": {
+          "sha256": "5ba5ec3cc2cbf7d95b4c6ada5c118ddaf7ba893326d4f3758438cdef58a1a3e9",
+          "bytes": 3932
+        },
+        "LICENSE": {
+          "sha256": "7183ef9749eb9b75e710a81a4c812a9405cc184f087500581a973e5929ac3f5e",
+          "bytes": 18650
+        }
+      }
+    },
+    "SuLab__DrugMechDB@aef224217071": {
+      "repo": "https://github.com/SuLab/DrugMechDB.git",
+      "commit": "aef224217071216748740c10faeb6db8e3f15901",
+      "committedAt": "2026-06-02T18:25:55-07:00",
+      "retrievedAt": "2026-10-24T00:49:55.676Z",
+      "sources": [
+        "drugmechdb"
+      ],
+      "files": {
+        "indication_paths.yaml": {
+          "sha256": "622da21fae80061d0910de4c7feea530d6fa07cc8e400e23650c761a6a081de7",
+          "bytes": 8274378
+        },
+        "LICENSE": {
+          "sha256": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499",
+          "bytes": 7048
+        },
+        "CITATION.cff": {
+          "sha256": "d1c70a67748202c416c885c21c86a52e7b7f012b054001111f1bf7b4326423c2",
+          "bytes": 1196
+        }
+      }
+    },
+    "monarch-initiative__maxo-annotations@42edd966faac": {
+      "repo": "https://github.com/monarch-initiative/maxo-annotations.git",
+      "commit": "42edd966faac5229ce7c35fc3848f2e6b3d45bda",
+      "committedAt": "2026-08-18T11:41:20-06:00",
+      "retrievedAt": "2026-10-24T00:49:56.621Z",
+      "sources": [
+        "maxo"
+      ],
+      "files": {
+        "data/maxo-annotations.tsv": {
+          "sha256": "325ad81efdf29ce03d5fdcb6d9c545d07909835c27928a83586ef065ad503690",
+          "bytes": 158701
+        },
+        "LICENSE": {
+          "sha256": "7e7170e3cebf88a9f60c7b8421418323c09304da1af4d5e90f4da1dc1c8a2661",
+          "bytes": 18650
+        }
+      }
+    },
+    "monarch-initiative__mondo@a645ab571f5b": {
+      "repo": "https://github.com/monarch-initiative/mondo.git",
+      "commit": "a645ab571f5b0881a184c28b84d0f9050432dc53",
+      "committedAt": "2026-10-22T17:12:17-04:00",
+      "retrievedAt": "2026-10-24T00:49:57.867Z",
+      "sources": [
+        "mondo"
+      ],
+      "files": {
+        "src/ontology/mappings/mondo.sssom.tsv": {
+          "sha256": "ec15afdb32fab3d3cb679d357e25ef4fb38b5e2c468ff4ac5456da10e2f6c80b",
+          "bytes": 13124886
+        }
+      }
+    }
+  }
+}

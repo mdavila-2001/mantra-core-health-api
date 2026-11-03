@@ -83,6 +83,10 @@ export class MedicalGroupsRepository {
       .then((rows) => rows.map((row) => row.id));
   }
 
+  remove(em: EntityManager, group: MedicalGroups): void {
+    em.remove(group);
+  }
+
   save(em: EntityManager): Promise<void> {
     return em.flush();
   }

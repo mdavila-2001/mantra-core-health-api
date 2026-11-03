@@ -283,6 +283,13 @@ export class BookingServiceDto {
 
 /** Una cita, tal como la devuelven el listado y el detalle (UC-41-15). */
 export class BookingItemDto {
+  /** F5d: consultorio de la cita, o `null`. */
+  @ApiPropertyOptional({
+    nullable: true,
+    description: 'Consultorio de la cita {id, code, name} (F5d)',
+  })
+  careSpace?: { id: string; code: string; name: string } | null;
+
   /**
    * El estado de pago, si alguien lo marcó (TAREA-13 punto 5).
    *

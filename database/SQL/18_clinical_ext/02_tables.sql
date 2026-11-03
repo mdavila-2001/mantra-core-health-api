@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 18 · schema clinical_ext
+-- SALUD v4.2.83 · módulo 18 · schema clinical_ext
 -- Generado de diagram_18_clinical_ext.puml — NO editar a mano.
 
 
@@ -51,8 +51,46 @@ CREATE TABLE IF NOT EXISTS "clinical_ext"."referrals" (
     "reason_text" text,
     "priority_concept_id" uuid,
     "status_concept_id" uuid NOT NULL,
+    "referral_type_concept_id" uuid,
+    "target_service_catalog_id" uuid,
     "valid_until" date,
     "responded_at" timestamptz,
+    "target_branch_id" uuid,
+    "target_external_name" varchar(200),
+    "target_external_contact" varchar(200),
+    "requested_service_text" varchar(500),
+    "requested_service_concept_id" uuid,
+    "diagnosis_text" text,
+    "clinical_summary" text,
+    "treatment_given_text" text,
+    "informed_consent_id" uuid,
+    "reject_reason" text,
+    "counter_referral_text" text,
+    "counter_referral_at" timestamptz,
+    "transfer_required" boolean,
+    "transport_mode" varchar(24),
+    "transport_detail" varchar(200),
+    "companion_name" varchar(200),
+    "companion_relationship" varchar(80),
+    "companion_phone" varchar(40),
+    "escort_professional_name" varchar(200),
+    "escort_professional_role" varchar(80),
+    "departure_condition" varchar(16),
+    "vitals_recorded_at" timestamptz,
+    "vital_systolic_bp" smallint,
+    "vital_diastolic_bp" smallint,
+    "vital_heart_rate" smallint,
+    "vital_respiratory_rate" smallint,
+    "vital_temperature_c" numeric(4,1),
+    "vital_oxygen_saturation" smallint,
+    "vital_glasgow" smallint,
+    "receiver_contacted" boolean,
+    "receiver_contact_name" varchar(200),
+    "receiver_contacted_at" timestamptz,
+    "departed_at" timestamptz,
+    "arrived_at" timestamptz,
+    "arrival_condition" varchar(16),
+    "arrival_notes" text,
     "created_at" timestamptz NOT NULL,
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
@@ -121,6 +159,20 @@ CREATE TABLE IF NOT EXISTS "clinical_ext"."cds_rules" (
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_cds_rules" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "clinical_ext"."cds_rule_versions" (
+    "id" uuid NOT NULL,
+    "cds_rule_id" uuid NOT NULL,
+    "version_number" integer NOT NULL,
+    "logic_json" jsonb,
+    "message_template" text,
+    "severity_concept_id" uuid NOT NULL,
+    "approved_by_user_id" uuid,
+    "approved_at" timestamptz,
+    "created_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    CONSTRAINT "pk_cds_rule_versions" PRIMARY KEY ("id")
 );
 
 CREATE TABLE IF NOT EXISTS "clinical_ext"."drug_interactions" (

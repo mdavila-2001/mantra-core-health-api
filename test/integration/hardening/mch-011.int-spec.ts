@@ -91,9 +91,7 @@ describe('MCH-011 · callbacks fuera de orden no hacen retroceder estados (integ
       await f.estadoTransaccion(refA),
     );
     expect(await f.estadoTransaccion(refB)).toBe(CONCEPTS.TXN_CAPTURED);
-    expect(await f.intentState(permutado)).toBe(
-      await f.intentState(enOrden),
-    );
+    expect(await f.intentState(permutado)).toBe(await f.intentState(enOrden));
   });
 
   it('la reentrega exacta se acusa como duplicada y no archiva el hecho dos veces', async () => {

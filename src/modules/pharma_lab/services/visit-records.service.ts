@@ -26,6 +26,7 @@ import {
 import { PHL } from '../pharma_lab.concepts';
 import { PharmaLabAccessService } from './pharma-lab-access.service';
 import { PharmaLabNotificationsService } from './pharma-lab-notifications.service';
+import { PharmaLabErrorReason } from '../pharma_lab.error-reasons';
 
 /** Promedio por dimensión de las calificaciones internas de un laboratorio. */
 export interface RatingAggregate {
@@ -106,9 +107,11 @@ export class VisitRecordsService {
       );
       const request = await this.repo.findRequest(tx, dto.visitRequestId);
       if (!request || request.medicalVisitorId !== visitor.id) {
-        throw new ResourceNotFoundException('Solicitud no encontrada', {
-          visitRequestId: dto.visitRequestId,
-        });
+        throw new ResourceNotFoundException(
+          'Solicitud no encontrada',
+          { visitRequestId: dto.visitRequestId },
+          PharmaLabErrorReason.VISIT_REQUEST_NOT_FOUND,
+        );
       }
       if (
         request.statusConceptId !== PHL.VISIT_CONFIRMED &&
@@ -117,14 +120,16 @@ export class VisitRecordsService {
         throw new PreconditionFailedException(
           'Solo se registra una visita confirmada',
           { visitRequestId: request.id },
+          PharmaLabErrorReason.VISIT_RECORD_NOT_YET_RECORDABLE,
         );
       }
       const already = await this.repo.findRecordByRequest(tx, request.id);
       if (already) {
-        throw new ConflictException('La visita ya fue registrada', {
-          visitRequestId: request.id,
-          visitRecordId: already.id,
-        });
+        throw new ConflictException(
+          'La visita ya fue registrada',
+          { visitRequestId: request.id, visitRecordId: already.id },
+          PharmaLabErrorReason.VISIT_RECORD_ALREADY_EXISTS,
+        );
       }
 
       const materials = await this.resolveApprovedMaterials(
@@ -240,9 +245,11 @@ export class VisitRecordsService {
       if (
         record.confirmationConceptId !== PHL.RECORD_PENDING_DOCTOR_CONFIRMATION
       ) {
-        throw new ConflictException('El registro ya fue resuelto', {
-          visitRecordId,
-        });
+        throw new ConflictException(
+          'El registro ya fue resuelto',
+          { visitRecordId },
+          PharmaLabErrorReason.VISIT_RECORD_ALREADY_RESOLVED,
+        );
       }
       record.confirmationConceptId = dto.occurred
         ? PHL.RECORD_CONFIRMED
@@ -289,6 +296,7 @@ export class VisitRecordsService {
         throw new PreconditionFailedException(
           'Solo se califica una visita completada',
           { visitRecordId },
+          PharmaLabErrorReason.VISIT_NOT_COMPLETED_FOR_RATING,
         );
       }
       const clash = await this.repo.findRating(
@@ -300,6 +308,7 @@ export class VisitRecordsService {
         throw new ConflictException(
           'Ya existe una calificación de esa naturaleza para la visita',
           { visitRecordId },
+          PharmaLabErrorReason.VISIT_RATING_ALREADY_EXISTS,
         );
       }
 
@@ -407,9 +416,11 @@ export class VisitRecordsService {
   ): Promise<VisitRecords> {
     const record = await this.repo.findRecord(tx, visitRecordId);
     if (!record || record.doctorUserId !== actor.id) {
-      throw new ResourceNotFoundException('Registro de visita no encontrado', {
-        visitRecordId,
-      });
+      throw new ResourceNotFoundException(
+        'Registro de visita no encontrado',
+        { visitRecordId },
+        PharmaLabErrorReason.VISIT_RECORD_NOT_FOUND,
+      );
     }
     return record;
   }
@@ -436,12 +447,14 @@ export class VisitRecordsService {
         throw new ResourceNotFoundException(
           'Material informativo no encontrado en el laboratorio',
           { informationalMaterialId: item.informationalMaterialId },
+          PharmaLabErrorReason.MATERIAL_NOT_FOUND,
         );
       }
       if (material.statusConceptId !== PHL.MATERIAL_APPROVED) {
         throw new PreconditionFailedException(
           'Un visitador no puede compartir material que no está aprobado',
           { informationalMaterialId: material.id },
+          PharmaLabErrorReason.MATERIAL_NOT_APPROVED_FOR_SHARING,
         );
       }
       if (
@@ -451,6 +464,7 @@ export class VisitRecordsService {
         throw new PreconditionFailedException(
           'El material no estaba vigente en la fecha de la visita',
           { informationalMaterialId: material.id },
+          PharmaLabErrorReason.MATERIAL_NOT_VALID_ON_VISIT_DATE,
         );
       }
       return {

@@ -95,6 +95,26 @@ export class CreateEquipmentDto {
 
 /** Cuerpo de `PATCH /diagnostic-equipment/{id}` (UC-23-09). */
 export class UpdateEquipmentDto {
+  /** F5a (CONTRATO-F2-F5 §F5a): sala del equipo (`null` la quita). */
+  @ApiPropertyOptional({ format: 'uuid', nullable: true, type: String })
+  @IsOptional()
+  @IsUUID()
+  careSpaceId?: string | null;
+
+  /** DICOM AE Title (≤ 16 ASCII imprimibles, sin barra invertida). */
+  @ApiPropertyOptional({ maxLength: 16, nullable: true, type: String })
+  @IsOptional()
+  @IsString()
+  @MaxLength(64)
+  aeTitle?: string | null;
+
+  /** DICOM Station Name. */
+  @ApiPropertyOptional({ maxLength: 16, nullable: true, type: String })
+  @IsOptional()
+  @IsString()
+  @MaxLength(16)
+  stationName?: string | null;
+
   /**
    * Valor de manufacturer mantenido por la instancia.
    */

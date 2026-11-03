@@ -49,7 +49,41 @@ describe('FrontendViewsController', () => {
       'route',
       'v',
       user,
+      { filters: {} },
     );
+  });
+
+  it('serveData separa las claves reservadas de los filtros (UC-30-05)', async () => {
+    const d = build();
+    d.service.serveData.mockResolvedValue({ data: [] });
+    await d.controller.serveData('portal', 'route', 'v', user, {
+      limit: '25',
+      sort: 'name_asc',
+      cursor: 'abc.def',
+      status: 'ACTIVE',
+    });
+    expect(d.service.serveData).toHaveBeenCalledWith(
+      'portal',
+      'route',
+      'v',
+      user,
+      expect.objectContaining({
+        limit: 25,
+        sort: 'name_asc',
+        cursor: 'abc.def',
+        filters: { status: 'ACTIVE' },
+      }),
+    );
+  });
+
+  it('serveData rechaza un valor no escalar antes de llegar al servicio', () => {
+    const d = build();
+    expect(() =>
+      d.controller.serveData('portal', 'route', 'v', user, {
+        status: ['a', 'b'],
+      }),
+    ).toThrow();
+    expect(d.service.serveData).not.toHaveBeenCalled();
   });
 
   it('delegates deriveActions (UC-30-11)', async () => {
@@ -61,6 +95,7 @@ describe('FrontendViewsController', () => {
       'v',
       'OPEN',
       user,
+      { purposeOfUse: undefined, patientProfileId: undefined },
     );
   });
 

@@ -48,7 +48,7 @@ rechazo es la respuesta del validador, no un error de la petición.
 
 `ParseUUIDPipe` en `:defId` y `:id`; `ParseIntPipe` en `:version`.
 
-## Permisos
+## Permissions
 
 `PLATFORM_ADMIN` en todo. Además: `TERMINOLOGY_ENGINEER` (01–03), `MODULE_OWNER` (04, 05, 10),
 `WRITE_SERVICE` (05), `GOVERNANCE` (06) y `SYSTEM` (07).
@@ -56,7 +56,7 @@ rechazo es la respuesta del validador, no un error de la petición.
 Ninguna ruta es `@Public()`, incluida la resolución: la llama el servicio de escritura con su propia
 sesión.
 
-## Pruebas
+## Tests
 
 `system-context.controller.spec.ts` (11): una por endpoint, comprobando que delega en el servicio
 correcto y que pasa el id, el número de versión, el cuerpo y el actor.

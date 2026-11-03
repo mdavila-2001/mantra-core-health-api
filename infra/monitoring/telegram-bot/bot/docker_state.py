@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Any, Callable
 
-from .http_json import get_json
+from .http_json import HttpError, get_json
 
 # Políticas con las que Docker promete mantener el contenedor vivo. Un
 # contenedor con `restart: "no"` (los *-init, api-migrate) termina a propósito.
@@ -77,7 +77,17 @@ JsonGetter = Callable[[str], Any]
 def fetch_container_states(docker_url: str, getter: JsonGetter | None = None) -> list[ContainerState]:
     get = getter or (lambda path: get_json(f"{docker_url}{path}"))
     summaries = get("/containers/json?all=1")
-    return [parse_inspect(get(f"/containers/{summary['Id']}/json")) for summary in summaries]
+    states = []
+    for summary in summaries:
+        try:
+            states.append(parse_inspect(get(f"/containers/{summary['Id']}/json")))
+        except HttpError:
+            # Se borró entre el listado y la inspección: pasa en cada despliegue
+            # (Coolify reemplaza contenedores) y no es una caída. Antes, este
+            # único 404 tiraba la lectura entera y Prometheus dejaba de ver
+            # TODOS los contenedores justo durante los despliegues.
+            continue
+    return states
 
 
 def parse_inspect(inspect: dict[str, Any]) -> ContainerState:

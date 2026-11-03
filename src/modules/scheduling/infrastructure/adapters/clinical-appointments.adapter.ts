@@ -54,6 +54,16 @@ export class ClinicalAppointmentsAdapter implements ClinicalAppointmentsPort {
     return this.encounters.findLatestIdsByAppointmentIds(uow, appointmentIds);
   }
 
+  async findCareSpaces(
+    uow: UnitOfWork,
+    appointmentIds: readonly string[],
+  ): Promise<Map<string, { id: string; code: string; name: string }>> {
+    return (
+      (await this.appointments.findCareSpaces?.(uow, appointmentIds)) ??
+      new Map()
+    );
+  }
+
   findEncounterIds(
     uow: UnitOfWork,
     appointmentIds: readonly string[],

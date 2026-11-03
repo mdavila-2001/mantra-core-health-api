@@ -1,0 +1,28 @@
+# sha256 de los archivos crudos usados por las instantáneas (tools/clinical-forms/fetch-sources.sh).
+# Rutas relativas al directorio de descarga. Generado el 2026-10-24.
+d469df2c0a22e3cdd93cb29eedf442e496f1c51081bb087e1bc0ac6a08ed9801  ckm-mirror/local/archetypes/entry/observation/openEHR-EHR-OBSERVATION.apgar.v2.adl
+52d157e4e72b9ff33cf280b5dd04eb6d13c0982ac1bd6bd1e8a4a3e27cca1a6b  ckm-mirror/local/archetypes/entry/observation/openEHR-EHR-OBSERVATION.has_bled.v0.adl
+a8181c10d97d9aa433b28f841cfe80f3dea74945a40afcd3fa997995a8ebc895  ckm-mirror/local/archetypes/entry/observation/openEHR-EHR-OBSERVATION.child_pugh_score.v0.adl
+543a86c19b024e78f16faa44e9127bf946948fc86f8987b6885f8952a54724a2  ckm-mirror/local/archetypes/entry/observation/openEHR-EHR-OBSERVATION.sofa_score.v0.adl
+e9e38b7df1a4384cd5d0d36e1bc3ea5c4c4e827e578b61276b333625fb25181a  ckm-mirror/local/archetypes/entry/observation/openEHR-EHR-OBSERVATION.bishop_score.v0.adl
+9725fe90dd343e9ab2f272362ac84b7b0b68a7525d1365f237b999413fb099aa  ckm-mirror/local/archetypes/entry/observation/openEHR-EHR-OBSERVATION.revised_cardiac_risk_index.v1.adl
+7dc56426632f5ceb1a00ccdbcc84ed549e8f7895cc2afe8e2ca358654120f7bb  ckm-mirror/local/archetypes/entry/observation/openEHR-EHR-OBSERVATION.charlson_comorbidity_index.v2.adl
+e0dbe9cae0cba5f2ac4d168356d19a8e5b08c1606a135d5484d7f61316aba047  ckm-mirror/local/archetypes/entry/observation/openEHR-EHR-OBSERVATION.diabetic_wound_wagner.v0.adl
+8a6ca4505b8afc4f0f8911a4cc752ddafa2f810cfd9fd6389ba5185e8d7f7414  ckm-mirror/local/archetypes/entry/observation/openEHR-EHR-OBSERVATION.karnofsky_performance_status_scale.v1.adl
+4d14ca292bf57e13dac73d41cfc524394a5a5d294295c06634d5a976f0f32520  ckm-mirror/local/archetypes/entry/observation/openEHR-EHR-OBSERVATION.mayo_score.v1.adl
+9cf58e683983bed3a3e153c8ae2194527571574cf52ed82977d4f188b63eabdc  ckm-mirror/local/archetypes/entry/observation/openEHR-EHR-OBSERVATION.nihss.v0.adl
+31a403cfa9841fc8a2cf13031b5614fc1e4c0c46fcc5829da9ad328485f7bc7a  ckm-mirror/local/archetypes/entry/observation/openEHR-EHR-OBSERVATION.heart_score.v0.adl
+86e5d631e9fd5a27257d6dc7946632612d8b7e62003f2a84909fb41017abd169  ckm-mirror/local/archetypes/entry/observation/openEHR-EHR-OBSERVATION.abcd2_score.v0.adl
+1556308d88150c1fe7355797c3bf9b11450094bd2841a405e7602dcb5e629c21  ckm-mirror/local/archetypes/entry/observation/openEHR-EHR-OBSERVATION.downton_fall_risk_index.v0.adl
+a81f1a0eec002a191c7c6cc72688f0f3ce4123e48ace8a01d53ee6232e643b81  ckm-mirror/local/archetypes/entry/observation/openEHR-EHR-OBSERVATION.padss.v0.adl
+d5a0842b395564a05c0c5de93d9dd58242aefd84f8f4672e68cfadab202b39dd  ckm-mirror/local/archetypes/entry/observation/openEHR-EHR-OBSERVATION.tanner.v1.adl
+dc6b8dac7595570470b24dffeb2f5831825d1340df6326a13239d15048789c57  ckm-mirror/local/archetypes/cluster/openEHR-EHR-CLUSTER.gleason_score.v0.adl
+800071a488c7a8066e410a28cc8e0c7eccf7aafa9db8cb9516c934c027788ba9  ckm-mirror/local/archetypes/cluster/openEHR-EHR-CLUSTER.exam_tendon_reflexes.v0.adl
+270e1e99fa845b06b3f3a68dd3963f2fe3df2424fe397d2ccf1f6e9e6ff5eb75  ckm-mirror/remote/no.nasjonalikt/archetypes/entry/observation/openEHR-EHR-OBSERVATION.nutritional_risk_screening.v1.adl
+127940cff6b3834c7efa19ad1fd7d425257e9b1c11a01ad49c84305d9683d2b9  ckm-mirror/remote/uk.org.clinicalmodels/archetypes/entry/observation/openEHR-EHR-OBSERVATION.beighton_score.v0.adl
+af010230fc049957336cc8edaea5559e146a5c3a5271f0b303ec7082e0d3b199  ckm-mirror/local/archetypes/entry/observation/openEHR-EHR-OBSERVATION.hirsutism_scales.v1.adl
+686ea2359dd769a88efc4c3654d6ff647d52311b65841d595f2095315eb9a183  smart-dak-pnc/input/dictionary/PNC DAK_core data dictionary.xlsx
+0c8a0db6d7f52cf752675de827011239e0c5f27620249c36f5a35239a493ba0f  smart-hiv/input/l2/HIV_DAK_2023-Web_Annex_A.Data_dictionary_231117_CLEAN.xlsx
+5588489e7ea6afce22ed8837834d76d4cc00a2c1718b52727054c20b85204725  smart-fp/input/datadictionary/WHO-DD.xlsx
+d90ddec4977b2c005b34c8d784261d1906738dee089369207779ef96c5590e2c  smart-anc/input/l2/WHO-ANC.xlsx
+d71c67873fb5c64c581a5a53bfaddd26c17029ec656e17b27233cd1060c59e1d  smart-immunizations/input/L2/IMMZ DAK_core data dictionary.xlsx

@@ -3,6 +3,7 @@ export * from './read-responses.dto';
 export * from './create-definition-set.dto';
 export * from './publish-version.dto';
 export * from './create-field-definition.dto';
+export * from './update-field-definition.dto';
 export * from './create-field-dependency.dto';
 export * from './upsert-localization.dto';
 export * from './create-access-rule.dto';

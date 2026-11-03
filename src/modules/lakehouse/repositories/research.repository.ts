@@ -17,13 +17,30 @@ export class ResearchRepository {
   // --- Proyectos (UC-63-09, 10) ---
 
   /**
-   * Obtiene find project by id.
+   * Proyecto del tenant activo; uno ajeno cuenta como inexistente.
    *
    * @param em - Contexto de persistencia o transacción activa.
-   * @param id - Identificador de id.
-   * @returns Resultado de find project by id conforme al contrato `Promise<ResearchProjects | null>`.
+   * @param tenantId - Tenant activo del actor.
+   * @param id - Identificador del proyecto.
+   * @returns El proyecto o `null`.
    */
   findProjectById(
+    em: EntityManager,
+    tenantId: string,
+    id: string,
+  ): Promise<ResearchProjects | null> {
+    return em.findOne(ResearchProjects, { id, tenantId });
+  }
+
+  /**
+   * Proyecto por id sin acotar por tenant. Sólo para detectar que el id ya lo
+   * ocupa otro tenant antes de un alta por id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador del proyecto.
+   * @returns El proyecto o `null`.
+   */
+  findProjectByIdAnyTenant(
     em: EntityManager,
     id: string,
   ): Promise<ResearchProjects | null> {
@@ -31,19 +48,21 @@ export class ResearchRepository {
   }
 
   /**
-   * Obtiene find project for update.
+   * Proyecto del tenant activo, bloqueado para actualizar.
    *
    * @param em - Contexto de persistencia o transacción activa.
-   * @param id - Identificador de id.
-   * @returns Resultado de find project for update conforme al contrato `Promise<ResearchProjects | null>`.
+   * @param tenantId - Tenant activo del actor.
+   * @param id - Identificador del proyecto.
+   * @returns El proyecto o `null`.
    */
   findProjectForUpdate(
     em: EntityManager,
+    tenantId: string,
     id: string,
   ): Promise<ResearchProjects | null> {
     return em.findOne(
       ResearchProjects,
-      { id },
+      { id, tenantId },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
   }
@@ -258,19 +277,23 @@ export class ResearchRepository {
   }
 
   /**
-   * Obtiene find release request for update.
+   * Solicitud de release bloqueada para actualizar. Con `tenantId` sólo alcanza
+   * las del tenant (una ajena cuenta como inexistente y no se bloquea); sin él
+   * (barrido interno de `SYSTEM`) no filtra.
    *
    * @param em - Contexto de persistencia o transacción activa.
-   * @param id - Identificador de id.
-   * @returns Resultado de find release request for update conforme al contrato `Promise<DatasetReleaseRequests | null>`.
+   * @param tenantId - Tenant activo, o `undefined` para el barrido interno.
+   * @param id - Identificador de la solicitud.
+   * @returns La solicitud o `null`.
    */
   findReleaseRequestForUpdate(
     em: EntityManager,
+    tenantId: string | undefined,
     id: string,
   ): Promise<DatasetReleaseRequests | null> {
     return em.findOne(
       DatasetReleaseRequests,
-      { id },
+      tenantId === undefined ? { id } : { id, tenantId },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
   }
@@ -302,20 +325,50 @@ export class ResearchRepository {
   }
 
   /**
-   * Manifiestos vencidos (`expires_at <= now`), para el descubrimiento del
-   * worker de revocación (UC-63-12): `revoke` exige un `requestId` puntual y
-   * no había forma de listar qué releases cerrar al vencer. Sin lock: el
-   * cierre real (`revokeRelease`) vuelve a bloquear la solicitud por su
-   * cuenta y es idempotente vía `CLOSEABLE_RELEASE_STATUSES`.
+   * Ids de las solicitudes de un tenant que siguen abiertas (en alguno de los
+   * estados dados). El manifiesto no tiene `tenant_id`: su tenant es el de su
+   * solicitud, así que acotar el barrido de vencidos pasa por aquí.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Tenant activo.
+   * @param statuses - Estados que cuentan como abiertos.
+   * @returns Los ids de las solicitudes.
+   */
+  async findOpenRequestIds(
+    em: EntityManager,
+    tenantId: string,
+    statuses: readonly string[],
+  ): Promise<string[]> {
+    const rows = await em.find(
+      DatasetReleaseRequests,
+      { tenantId, status: { $in: [...statuses] } },
+      { fields: ['id'] },
+    );
+    return rows.map((row) => row.id);
+  }
+
+  /**
+   * Manifiestos vencidos. Con `requestIds` sólo los de esas solicitudes (las de
+   * un tenant); sin él, todos (barrido interno de `SYSTEM`).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param now - Instante de corte.
+   * @param limit - Tope de filas.
+   * @param requestIds - Solicitudes a las que acotar, si las hay.
+   * @returns Los manifiestos vencidos, del más antiguo al más nuevo.
    */
   findExpiredManifests(
     em: EntityManager,
     now: Date,
     limit: number,
+    requestIds?: string[],
   ): Promise<DatasetReleaseManifests[]> {
     return em.find(
       DatasetReleaseManifests,
-      { expiresAt: { $lte: now } },
+      {
+        expiresAt: { $lte: now },
+        ...(requestIds ? { datasetReleaseRequestId: { $in: requestIds } } : {}),
+      },
       { orderBy: { expiresAt: 'ASC' }, limit },
     );
   }

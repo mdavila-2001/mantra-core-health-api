@@ -1,13 +1,20 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
-import type { AuthenticatedUser } from '../../../common';
+import {
+  roleAuthorizesInTenant,
+  type AuthenticatedUser,
+} from '../../../common';
 import { DIR } from '../directory.concepts';
 import { TenantMembershipsRepository } from '../repositories';
 
 /** Roles de membresía que pueden administrar la organización desde dentro. */
 const ADMIN_TENANT_ROLES = new Set<string>([DIR.ROLE_OWNER, DIR.ROLE_ADMIN]);
 
-/** Roles globales de plataforma que pasan por encima de la membresía. */
+/**
+ * Roles de plataforma que pasan por encima de la membresía. Sólo pasan en el
+ * tenant en que autorizan (`roleAuthorizesInTenant`): concedidos sin ámbito
+ * valen en cualquiera; acotados en `scopedRoles`, sólo en su tenant (#1241).
+ */
 const PLATFORM_ROLES = ['SECURITY_ADMIN', 'SUPERADMIN'];
 
 /**
@@ -26,7 +33,8 @@ const PLATFORM_ROLES = ['SECURITY_ADMIN', 'SUPERADMIN'];
  * Esta clase cierra ese hueco en un solo lugar, porque las seis operaciones comparten la regla y
  * repartirla por los servicios invitaría a que una se quedara atrás:
  *
- * - pasa quien tiene un rol de plataforma (`SECURITY_ADMIN`, `SUPERADMIN`);
+ * - pasa quien tiene un rol de plataforma (`SECURITY_ADMIN`, `SUPERADMIN`) que autoriza **en ese
+ *   tenant**: global (sin ámbito) en cualquiera, acotado en `scopedRoles` sólo en el suyo;
  * - pasa quien tiene membresía **activa** con rol `OWNER` o `ADMIN` **en ese tenant**;
  * - el resto recibe 403, incluido el `STAFF` del propio tenant.
  *
@@ -73,11 +81,40 @@ export class TenantAdministrationService {
     tenantId: string,
     actor: AuthenticatedUser,
   ): Promise<boolean> {
-    if (this.isPlatform(actor)) return true;
+    if (this.isPlatformIn(tenantId, actor)) return true;
+    return this.administersByMembership(em, tenantId, actor);
+  }
+
+  /**
+   * Devuelve si el actor es `OWNER` o `ADMIN` **activo de ese tenant**, y nada más.
+   *
+   * A diferencia de {@link TenantAdministrationService.canAdminister}, no tiene el atajo de plataforma.
+   * Lo usa quien ya resolvió los roles de plataforma por su cuenta (con `roleAuthorizesInTenant` u otra
+   * regla propia) y sólo necesita saber si la membresía alcanza.
+   */
+  async administersByMembership(
+    em: EntityManager,
+    tenantId: string,
+    actor: AuthenticatedUser,
+  ): Promise<boolean> {
     const membership = await this.activeMembershipOf(em, tenantId, actor);
     return Boolean(
       membership && ADMIN_TENANT_ROLES.has(membership.tenantRoleConceptId),
     );
+  }
+
+  /**
+   * Devuelve si el actor tiene membresía activa **en ese tenant**, con
+   * cualquier rol, y nada más: sin el atajo de plataforma. Es el escalón de
+   * lectura de {@link TenantAdministrationService.administersByMembership},
+   * para quien ya resolvió los roles de plataforma con `roleAuthorizesInTenant`.
+   */
+  async belongsByMembership(
+    em: EntityManager,
+    tenantId: string,
+    actor: AuthenticatedUser,
+  ): Promise<boolean> {
+    return (await this.activeMembershipOf(em, tenantId, actor)) !== null;
   }
 
   /**
@@ -102,9 +139,15 @@ export class TenantAdministrationService {
     tenantId: string,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    if (this.isPlatform(actor)) return;
+    if (this.isPlatformIn(tenantId, actor)) return;
 
-    if (await this.activeMembershipOf(em, tenantId, actor)) return;
+    // La membresía del personal de apoyo abre el tenant para el token, no para
+    // leer la organización entera: la secretaria ve sólo las sedes, servicios,
+    // pisos y doctores de sus vínculos aceptados (`GET /me/support-access`).
+    const membership = await this.activeMembershipOf(em, tenantId, actor);
+    if (membership && membership.tenantRoleConceptId !== DIR.ROLE_SUPPORT) {
+      return;
+    }
 
     throw new ForbiddenException(
       'Se requiere pertenecer a la organización, o ser administrador de la plataforma',
@@ -128,7 +171,7 @@ export class TenantAdministrationService {
     tenantId: string,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    if (this.isPlatform(actor)) return;
+    if (this.isPlatformIn(tenantId, actor)) return;
 
     const membership = await this.activeMembershipOf(em, tenantId, actor);
     if (membership?.tenantRoleConceptId === DIR.ROLE_OWNER) return;
@@ -171,10 +214,18 @@ export class TenantAdministrationService {
     return false;
   }
 
-  /** `true` si el actor tiene un rol global de plataforma. */
-  private isPlatform(actor: AuthenticatedUser): boolean {
-    const roles = actor.roles ?? [];
-    return PLATFORM_ROLES.some((role) => roles.includes(role));
+  /**
+   * `true` si un rol de plataforma del actor autoriza **en ese tenant**.
+   *
+   * Mirar sólo `actor.roles` dejaba pasar a un `SECURITY_ADMIN` acotado al
+   * tenant A en cualquier otro (#1241): el código figura en `roles` aunque
+   * `scopedRoles` lo limite. `roleAuthorizesInTenant` aplica la misma regla
+   * que `RolesGuard`: sin ámbito es global, con ámbito sólo vale en su tenant.
+   */
+  private isPlatformIn(tenantId: string, actor: AuthenticatedUser): boolean {
+    return PLATFORM_ROLES.some((role) =>
+      roleAuthorizesInTenant(actor, role, tenantId),
+    );
   }
 
   /** Membresía activa del actor en el tenant, o `null` si no pertenece. */

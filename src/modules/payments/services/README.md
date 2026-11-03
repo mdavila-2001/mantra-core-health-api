@@ -37,8 +37,7 @@ Aquí vive la lógica de negocio. Cada método público resuelve un caso de uso 
 ## Dependencias
 
 `EntityManager` (transacciones), los repositorios del módulo y `PinoLogger`. No dependen de otros
-módulos: el estado se deja consistente en PostgreSQL y la proyección a los stores queda para el
-outbox (módulo 35, pendiente).
+módulos: el estado se deja consistente en PostgreSQL; el módulo no publica eventos al outbox.
 
 ## Transacciones
 
@@ -58,7 +57,7 @@ que no habilitan la operación) y `ConflictException` (duplicado o límite exced
 merecen atención (intent rechazado por riesgo, conciliación con excepciones abiertas). Nunca se
 loguean tokens, secretos del gateway ni datos del pagador.
 
-## Pruebas
+## Tests
 
 `payments-intents.service.spec.ts`, `payments-transactions.service.spec.ts` y
 `payments-operations.service.spec.ts` (incluye `PaymentsCheckoutService`) con los repositorios

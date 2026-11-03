@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { DraftService } from '../services';
 import { CreateDraftDto, DraftResponseDto, PublishDraftDto } from '../dto';
 
@@ -25,6 +30,11 @@ export class DraftController {
   constructor(private readonly service: DraftService) {}
 
   /** UC-11-15. */
+  @Audited({
+    action: 'GOVERNANCE_DRAFT_CREATED',
+    entity: 'draft_record',
+    entityId: 'result.id',
+  })
   @Post('drafts')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -37,6 +47,11 @@ export class DraftController {
   }
 
   /** UC-11-15. */
+  @Audited({
+    action: 'GOVERNANCE_DRAFT_PUBLISHED',
+    entity: 'draft_record',
+    entityId: 'param:id',
+  })
   @Post('drafts/:id/publish')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

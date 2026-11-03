@@ -127,12 +127,11 @@ El aprovisionamiento automático está **prohibido** en producción:
 ejecute. No contiene contraseñas y no puede contenerlas: un `CREATE ROLE ... PASSWORD 'literal'` en
 un archivo versionado es una credencial filtrada, aunque el entorno sea local.
 
-## Pendiente
+## Estado en los despliegues
 
-Los roles existen y están verificados, pero **`DB_READ_USER` no está fijado en ningún despliegue**.
-Hasta que se fije, las lecturas siguen ejecutándose con la credencial de escritura y la separación
-es una capacidad disponible, no un hecho. Activarla es una decisión operativa, no un cambio de
-código.
+Los roles existen y están verificados, pero **`DB_READ_USER` no está fijado en ningún despliegue**:
+las lecturas se ejecutan con la credencial de escritura y la separación es una capacidad
+disponible, no un hecho. Activarla es una decisión operativa, no un cambio de código.
 
 Migrar el runtime completo a `mantra_writer` —en vez de `mantra`— exige además que
 `ORM_SCHEMA_SYNC` esté en `off`, porque el escritor no puede alterar el esquema. Ver

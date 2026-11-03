@@ -199,7 +199,7 @@ export class BoOccupationsSeedService {
     counters.memberships += await this.seedMemberships(em, now);
 
     const total = Object.values(counters).reduce(
-      (sum, valor) => sum + valor,
+      (sum, value) => sum + value,
       0,
     );
     if (total > 0) {
@@ -219,14 +219,14 @@ export class BoOccupationsSeedService {
    * `BoGeographySeedService.assertUniqueCodes`.
    */
   private assertUniqueCodes(): void {
-    const vistos = new Set<string>();
+    const seen = new Set<string>();
     for (const occupation of BO_OCCUPATIONS) {
-      if (vistos.has(occupation.code)) {
+      if (seen.has(occupation.code)) {
         throw new Error(
           `El catálogo de ocupaciones declara el código "${occupation.code}" más de una vez`,
         );
       }
-      vistos.add(occupation.code);
+      seen.add(occupation.code);
     }
   }
 
@@ -314,17 +314,40 @@ export class BoOccupationsSeedService {
     em: ReturnType<MikroORM['em']['fork']>,
     now: Date,
   ): Promise<number> {
-    const existing = await this.existingIds(
-      em,
+    // Se leen con su `ordinal`: al ampliar el catálogo las ocupaciones nuevas
+    // caen entre medio de las viejas, y si las ya sembradas conservan su
+    // posición original el desplegable queda desordenado (dos filas con el
+    // mismo ordinal, «Otra ocupación» a mitad de la lista).
+    const rows = await em.find(
       ValueSetMembers,
-      BO_OCCUPATIONS.map((occupation) => boOccupationMemberId(occupation.code)),
+      {
+        id: {
+          $in: BO_OCCUPATIONS.map((occupation) =>
+            boOccupationMemberId(occupation.code),
+          ),
+        },
+      },
+      { fields: ['id', 'ordinal'] as never },
+    );
+    const existing = new Map(
+      rows.map((row) => [
+        (row as { id: string }).id,
+        row as { ordinal?: number },
+      ]),
     );
 
     let created = 0;
     const versionIdentifier = boOccupationVersionId();
     BO_OCCUPATIONS.forEach((occupation, ordinal) => {
       const id = boOccupationMemberId(occupation.code);
-      if (existing.has(id)) return;
+      const current = existing.get(id);
+      if (current !== undefined) {
+        if (current.ordinal !== ordinal) {
+          current.ordinal = ordinal;
+          (current as { updatedAt?: Date }).updatedAt = now;
+        }
+        return;
+      }
       em.create(
         ValueSetMembers,
         {

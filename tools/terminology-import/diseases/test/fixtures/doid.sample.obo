@@ -1,0 +1,85 @@
+format-version: 1.2
+data-version: releases/2026-09-30/doid.obo
+remark: The Disease Ontology content is available via the Creative Commons Public Domain Dedication CC0 1.0 Universal license (https://creativecommons.org/publicdomain/zero/1.0/).
+property_value: owl:versionInfo "2026-09-30" xsd:string
+
+[Term]
+id: DOID:0014667
+name: disease of metabolism
+def: "A disease that involves errors in metabolic processes of building or degradation of molecules." [url:http\://www.ncbi.nlm.nih.gov/books/NBK22259/]
+subset: DO_AGR_slim
+subset: DO_CFDE_slim
+subset: DO_GXD_slim
+subset: NCIthesaurus
+synonym: "metabolic disease" EXACT []
+xref: ICD10CM:E88.9
+xref: ICD9CM:277.9
+xref: MESH:D008659
+xref: NCI:C3235
+xref: SNOMEDCT_US_2025_09_01:75934005
+xref: UMLS_CUI:C0025517
+is_a: DOID:4 ! disease
+
+[Term]
+id: DOID:14323
+name: Marfan syndrome
+def: "A connective tissue disease that is characterized by tall stature, elongated extremities, mitral valve prolapse, aortic dilatation, aortic dissection, and subluxation of the lens." [url:https\://ghr.nlm.nih.gov/condition/marfan-syndrome#inheritance, url:https\://ncit.nci.nih.gov/ncitbrowser/ConceptReport.jsp?dictionary=NCI_Thesaurus&version=16.12d&ns=NCI_Thesaurus&code=C34807, url:https\://rarediseases.org/rare-diseases/marfan-syndrome/]
+comment: OMIM mapping confirmed by DO. [SN].
+subset: DO_rare_slim
+subset: NCIthesaurus
+synonym: "Marfan's syndrome" EXACT []
+xref: GARD:6975
+xref: ICD10CM:Q87.4
+xref: ICD9CM:759.82
+xref: MESH:D008382
+xref: MIM:154700
+xref: NCI:C34807
+xref: SNOMEDCT_US_2025_09_01:19346006
+xref: UMLS_CUI:C0024796
+is_a: DOID:520 ! aortic disease
+is_a: DOID:5614 ! eye disease
+is_a: DOID:65 ! connective tissue disease
+property_value: skos:exactMatch "MESH:D008382" xsd:string
+
+[Term]
+id: DOID:2914
+name: immune system disease
+def: "A disease of anatomical entity that is located_in the immune system." [url:http\://en.wikipedia.org/wiki/Immune_system]
+subset: DO_AGR_slim
+subset: DO_CFDE_slim
+subset: DO_FlyBase_slim
+subset: DO_GXD_slim
+subset: DO_MGI_slim
+xref: EFO:0000540
+xref: ICD10CM:D89.9
+xref: ICD9CM:279.9
+xref: SNOMEDCT_US_2025_09_01:154782004
+xref: UMLS_CUI:C0041806
+is_a: DOID:7 ! disease of anatomical entity
+
+[Term]
+id: DOID:4
+name: disease
+def: "A disease is a disposition (i) to undergo pathological processes that (ii) exists in an organism because of one or more disorders in that organism." [url:https\://www.ncbi.nlm.nih.gov/pmc/articles/PMC3041577/]
+subset: DO_RAD_slim
+subset: NCIthesaurus
+xref: MESH:D004194
+xref: NCI:C2991
+xref: SNOMEDCT_US_2025_09_01:64572001
+xref: UMLS_CUI:C0012634
+
+[Term]
+id: DOID:9351
+name: diabetes mellitus
+alt_id: DOID:0081062
+def: "A glucose metabolism disease that is characterized by chronic hyperglycaemia with disturbances of carbohydrate, fat and protein metabolism resulting from defects in insulin secretion, insulin action, or both." [url:http\://www.who.int/diabetes/action_online/basics/en/, url:https\://en.wikipedia.org/wiki/Diabetes_mellitus, url:https\://medlineplus.gov/diabetes.html, url:https\://www.ncbi.nlm.nih.gov/pubmed/9686693]
+subset: NCIthesaurus
+synonym: "diabetes" EXACT []
+xref: ICD10CM:E08-E13
+xref: ICD9CM:250
+xref: MESH:D003920
+xref: NCI:C2985
+xref: SNOMEDCT_US_2025_09_01:267467004
+xref: UMLS_CUI:C0011849
+is_a: DOID:4194 ! glucose metabolism disease
+

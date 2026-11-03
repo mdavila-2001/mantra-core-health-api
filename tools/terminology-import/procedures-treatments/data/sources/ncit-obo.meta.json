@@ -1,0 +1,18 @@
+{
+  "source": "ncit-obo",
+  "name": "NCI Thesaurus OBO Edition",
+  "publisher": "NCIt OBO Edition project (derivado de NCI Thesaurus, NCI EVS)",
+  "license": "CC BY 4.0 (términos de uso de NCI Thesaurus). Edición OBO derivada: no se presenta como la edición oficial de NCI.",
+  "licenseUrl": "https://evs.nci.nih.gov/ftp1/NCI_Thesaurus/ThesaurusTermsofUse.htm",
+  "homepage": "https://github.com/NCI-Thesaurus/thesaurus-obo-edition",
+  "retrievedAt": "2026-10-24T00:46:40.151Z",
+  "tag": "v2024-05-07",
+  "files": {
+    "ncit.obo": {
+      "url": "https://github.com/NCI-Thesaurus/thesaurus-obo-edition/releases/download/v2024-05-07/ncit.obo",
+      "fileUrl": "https://github.com/NCI-Thesaurus/thesaurus-obo-edition/releases/download/v2024-05-07/ncit.obo",
+      "sha256": "e90ebb7e55f49cf2c43f14bbf9edc8969f0c327897547086187ed877998d5d1a",
+      "bytes": 283269323
+    }
+  }
+}

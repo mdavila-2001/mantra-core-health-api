@@ -9,7 +9,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   DiagnosticPricingService,
   DiagnosticStudiesService,
@@ -42,6 +47,11 @@ export class DiagnosticPricingController {
   ) {}
 
   /** UC-23-07. */
+  @Audited({
+    action: 'DIAGNOSTIC_STUDY_PRICE_ADDED',
+    entity: 'diagnostic_study_price',
+    entityId: 'result.id',
+  })
   @Post('price-schedules/:scheduleId/study-prices')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -57,6 +67,11 @@ export class DiagnosticPricingController {
   }
 
   /** UC-23-08. */
+  @Audited({
+    action: 'DIAGNOSTIC_STUDY_PRICE_CLOSED',
+    entity: 'diagnostic_study_price',
+    entityId: 'param:priceId',
+  })
   @Post('study-prices/:priceId/close')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -69,6 +84,11 @@ export class DiagnosticPricingController {
   }
 
   /** UC-23-08. */
+  @Audited({
+    action: 'DIAGNOSTIC_STUDY_OFFERING_RETIRED',
+    entity: 'diagnostic_study_offering',
+    entityId: 'param:id',
+  })
   @Delete('diagnostic-study-offerings/:id')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

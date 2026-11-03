@@ -1,13 +1,22 @@
+import { MessagingModule } from '../messaging/messaging.module';
+import { BillingSpaceChargesController } from './controllers/billing-space-charges.controller';
+import {
+  InfraF5ePolicyRegistrar,
+  SpaceChargesService,
+} from './services/space-charges.service';
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
+import { CommonModule } from '../common/common.module';
 import { PracticeModule } from '../practice/practice.module';
-import { SurveysModule } from '../surveys/surveys.module';
 import {
   BillingReceivablesController,
   BillingPayablesController,
   BillingOperationsController,
   BillingServiceCatalogController,
+  AdminServiceCatalogController,
+  BillingSimulatedController,
+  PatientSpendingController,
 } from './controllers';
 import {
   InvoicesService,
@@ -21,7 +30,11 @@ import {
   DunningService,
   KpiSnapshotsService,
   BillingServiceCatalogService,
+  AdminServiceCatalogService,
   ProcedureNomenclatureService,
+  ProcedureImportService,
+  BillingSimulatedService,
+  PatientSpendingService,
 } from './services';
 import {
   InvoicesRepository,
@@ -29,12 +42,19 @@ import {
   PaymentsReceivedRepository,
   PaymentsMadeRepository,
   BillingDocumentLinksRepository,
+  BillingLinkTargetsRepository,
   ReimbursementsRepository,
   PatientStatementsRepository,
   DunningRepository,
   KpiSnapshotsRepository,
   ServiceCatalogRepository,
+  PatientSpendingRepository,
 } from './repositories';
+import { SIAT_EMITTER_PORT } from './application/ports';
+import {
+  SiatSimulatedAdapter,
+  SiatRealAdapter,
+} from './infrastructure/adapters';
 
 /**
  * Módulo Billing (17): facturación al paciente (CxC), cuentas por pagar (CxP),
@@ -48,29 +68,41 @@ import {
     // Puerto de lectura público para agrupar facturas por tenant sin importar
     // la entidad ORM de Practice dentro del dominio Billing.
     PracticeModule,
-    // FT-31 — reutiliza sus repositorios para auto-crear la encuesta de
-    // satisfacción por defecto de un servicio médico nuevo, en la misma
-    // transacción que lo da de alta.
-    SurveysModule,
+    // Bytes de la imagen de un servicio (P-22-8): la autorización por contexto
+    // la decide `billing`; `common` solo los sirve.
+    CommonModule,
+    // F5e: eventos `billing.charge_capture.*` / `space_tariff.*` por outbox.
+    MessagingModule,
   ],
   controllers: [
+    BillingSpaceChargesController,
     BillingReceivablesController,
     BillingPayablesController,
     BillingOperationsController,
     BillingServiceCatalogController,
+    // H3 — editor administrativo global del catálogo de servicios.
+    AdminServiceCatalogController,
+    BillingSimulatedController,
+    // P44 — «Mis gastos» del paciente: lectura sobre sus facturas.
+    PatientSpendingController,
   ],
   providers: [
+    // F5e cargos de espacio (CONTRATO-F2-F5 §F5e).
+    SpaceChargesService,
+    InfraF5ePolicyRegistrar,
     // Repositorios
     InvoicesRepository,
     BillsRepository,
     PaymentsReceivedRepository,
     PaymentsMadeRepository,
     BillingDocumentLinksRepository,
+    BillingLinkTargetsRepository,
     ReimbursementsRepository,
     PatientStatementsRepository,
     DunningRepository,
     KpiSnapshotsRepository,
     ServiceCatalogRepository,
+    PatientSpendingRepository,
     // Servicios
     InvoicesService,
     PaymentsReceivedService,
@@ -83,12 +115,24 @@ import {
     DunningService,
     KpiSnapshotsService,
     BillingServiceCatalogService,
+    AdminServiceCatalogService,
     ProcedureNomenclatureService,
+    ProcedureImportService,
+    BillingSimulatedService,
+    PatientSpendingService,
+    // Puerto SIAT — el adaptador se selecciona por SIAT_MODE (default: simulado).
+    {
+      provide: SIAT_EMITTER_PORT,
+      useClass:
+        process.env['SIAT_MODE'] === 'real'
+          ? SiatRealAdapter
+          : SiatSimulatedAdapter,
+    },
   ],
   // Carril 18 — `accounting` reutiliza `LedgerService.postToLedger` (anclar
   // `transaction_id` en el documento de origen, idempotente por documento)
   // para que el asiento de un ingreso de consulta quede enlazado a la factura
   // pagada que lo originó, sin reimplementar esa guarda en otro módulo.
-  exports: [LedgerService],
+  exports: [LedgerService, SIAT_EMITTER_PORT],
 })
 export class BillingModule {}

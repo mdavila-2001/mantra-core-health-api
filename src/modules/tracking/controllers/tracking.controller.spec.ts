@@ -93,11 +93,27 @@ describe('TrackingController', () => {
       duplicate: false,
     });
 
+    await d.controller.ingestCarrierWebhook('DHL', dto, 'sha256=abc', '1700');
+
+    // La firma y la marca de tiempo viajan al servicio, que es quien autentica.
+    expect(d.trackingService.ingestCarrierWebhook).toHaveBeenCalledWith(
+      'DHL',
+      dto,
+      { signature: 'sha256=abc', timestamp: '1700' },
+    );
+  });
+
+  it('forwards a carrier webhook without auth headers so the service rejects it', async () => {
+    const d = build();
+    const dto = { trackingNumber: 'ABC' } as any;
+    d.trackingService.ingestCarrierWebhook.mockResolvedValue({});
+
     await d.controller.ingestCarrierWebhook('DHL', dto);
 
     expect(d.trackingService.ingestCarrierWebhook).toHaveBeenCalledWith(
       'DHL',
       dto,
+      { signature: undefined, timestamp: undefined },
     );
   });
 

@@ -17,6 +17,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   Public,
   Roles,
@@ -156,6 +157,11 @@ export class SystemContextController {
   }
 
   /** UC-45-01. */
+  @Audited({
+    action: 'DYNAMIC_ENUM_DEFINITION_CREATED',
+    entity: 'dynamic_enum_definition',
+    entityId: 'result.id',
+  })
   @Post('dynamic-enums/definitions')
   @Roles('TERMINOLOGY_ENGINEER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -172,6 +178,11 @@ export class SystemContextController {
   }
 
   /** UC-45-02. */
+  @Audited({
+    action: 'DYNAMIC_ENUM_VERSION_DRAFTED',
+    entity: 'dynamic_enum_version',
+    entityId: 'result.id',
+  })
   @Post('dynamic-enums/definitions/:defId/versions')
   @Roles('TERMINOLOGY_ENGINEER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -189,6 +200,11 @@ export class SystemContextController {
   }
 
   /** UC-45-03. */
+  @Audited({
+    action: 'DYNAMIC_ENUM_VERSION_PUBLISHED',
+    entity: 'dynamic_enum_definition',
+    entityId: 'param:defId',
+  })
   @Post('dynamic-enums/definitions/:defId/versions/:version/publish')
   @Roles('TERMINOLOGY_ENGINEER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -206,6 +222,11 @@ export class SystemContextController {
   }
 
   /** UC-45-04. */
+  @Audited({
+    action: 'DYNAMIC_ENUM_BINDING_CREATED',
+    entity: 'dynamic_enum_binding',
+    entityId: 'result.id',
+  })
   @Post('dynamic-enums/definitions/:defId/bindings')
   @Roles('MODULE_OWNER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -223,6 +244,10 @@ export class SystemContextController {
   }
 
   /** UC-45-05. */
+  @Audited({
+    action: 'DYNAMIC_ENUM_VALUE_RESOLVED',
+    entity: 'dynamic_enum_option',
+  })
   @Post('dynamic-enums/resolve')
   @Roles('WRITE_SERVICE', 'MODULE_OWNER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -239,6 +264,11 @@ export class SystemContextController {
   }
 
   /** UC-45-11. */
+  @Audited({
+    action: 'DYNAMIC_ENUM_DEFINITION_RETIRED',
+    entity: 'dynamic_enum_definition',
+    entityId: 'param:defId',
+  })
   @Post('dynamic-enums/definitions/:defId/retire')
   @Roles('PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -256,6 +286,11 @@ export class SystemContextController {
   }
 
   /** UC-45-06. */
+  @Audited({
+    action: 'SYSTEM_CONTEXT_CREATED',
+    entity: 'system_context',
+    entityId: 'result.id',
+  })
   @Post('contexts')
   @Roles('PLATFORM_ADMIN', 'GOVERNANCE')
   @HttpCode(HttpStatus.CREATED)
@@ -272,6 +307,11 @@ export class SystemContextController {
   }
 
   /** UC-45-07 (incluye UC-45-08). */
+  @Audited({
+    action: 'SYSTEM_CONTEXT_REFRESHED',
+    entity: 'system_context_refresh_run',
+    entityId: 'result.id',
+  })
   @Post('contexts/:id/refresh')
   @Roles('SYSTEM', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -289,6 +329,11 @@ export class SystemContextController {
   }
 
   /** UC-45-09. */
+  @Audited({
+    action: 'SYSTEM_CONTEXT_VERSION_ACTIVATED',
+    entity: 'system_context',
+    entityId: 'param:id',
+  })
   @Post('contexts/:id/versions/:version/activate')
   @Roles('PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -306,6 +351,11 @@ export class SystemContextController {
   }
 
   /** UC-45-10. */
+  @Audited({
+    action: 'SYSTEM_CONTEXT_BINDING_CREATED',
+    entity: 'system_context_binding',
+    entityId: 'result.id',
+  })
   @Post('contexts/:id/bindings')
   @Roles('MODULE_OWNER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -323,6 +373,11 @@ export class SystemContextController {
   }
 
   /** UC-45-12. */
+  @Audited({
+    action: 'SYSTEM_CONTEXT_ROLLED_BACK',
+    entity: 'system_context',
+    entityId: 'param:id',
+  })
   @Post('contexts/:id/rollback')
   @Roles('PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)

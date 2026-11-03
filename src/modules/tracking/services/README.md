@@ -8,7 +8,7 @@ Un solo servicio, `TrackingService`, cubre los 11 casos de uso. El módulo tiene
 —el sujeto rastreable— y todas las operaciones lo mueven; separarlas obligaría a que cada mitad
 cargara el mismo estado.
 
-## Reglas de negocio
+## Business rules
 
 - **Apertura (01)**: número de seguimiento opaco, una entidad un seguimiento abierto, transportista
   activo si se indica.
@@ -83,7 +83,7 @@ prueba ya verificada, imposible generar número libre).
 `operation: 'tracking.<área>.<acción>'`. `warn` ante código sin mapear, excepción, cancelación e
 incumplimientos del barrido. Nunca se loguea qué se transporta ni datos del destinatario.
 
-## Pruebas
+## Tests
 
 `tracking.service.spec.ts` (45): opacidad del número, un seguimiento por entidad, único hito
 terminal, idempotencia del webhook, código sin mapear como excepción, webhook tardío sobre envío

@@ -138,7 +138,13 @@ export class GetBookingUseCase {
       ? await this.representation.findActiveProxiedPatientIds(actor!.id, em)
       : undefined;
 
-    return this.assembler.toBookingItem(
+    const careSpaces =
+      booking.appointmentId == null
+        ? new Map<string, { id: string; code: string; name: string }>()
+        : ((await this.clinical.findCareSpaces?.(em, [
+            booking.appointmentId,
+          ])) ?? new Map<string, { id: string; code: string; name: string }>());
+    const item = this.assembler.toBookingItem(
       booking,
       slot,
       reasons.get(booking.id),
@@ -160,5 +166,12 @@ export class GetBookingUseCase {
       // P42: el detalle dice lo mismo que el listado; lote de uno.
       await this.assembler.followUpLinks(em, [booking]),
     );
+    return {
+      careSpace:
+        booking.appointmentId == null
+          ? null
+          : (careSpaces.get(booking.appointmentId) ?? null),
+      ...item,
+    };
   }
 }

@@ -6,24 +6,33 @@ import { randomUUID } from 'node:crypto';
  */
 @Entity({ schema: 'qa_execution', tableName: 'plan_events' })
 export class PlanEvents {
+  /**
+   * Identificador único de la instancia.
+   */
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
   /** FK → qa_execution.execution_plans */
-  @Property({ fieldName: 'plan_id', type: 'uuid' })
+  @Property({ fieldName: 'plan_id', type: 'uuid' }) // FK → qa_execution.execution_plans
   planId!: string;
 
   /** Orden dentro del plan. */
-  @Property({ fieldName: 'seq', columnType: 'int' })
+  @Property({ columnType: 'int' })
   seq!: number;
 
-  @Property({ fieldName: 'kind', columnType: 'varchar' })
+  /**
+   * Valor de kind mantenido por la instancia.
+   */
+  @Property({ columnType: 'varchar' })
   kind!: string;
 
   /** FK → qa_lab.test_cases */
-  @Property({ fieldName: 'case_id', type: 'uuid', nullable: true })
+  @Property({ fieldName: 'case_id', type: 'uuid', nullable: true }) // FK → qa_lab.test_cases
   caseId?: string;
 
+  /**
+   * Valor de detail json mantenido por la instancia.
+   */
   @Property({
     fieldName: 'detail_json',
     type: 'json',
@@ -32,6 +41,9 @@ export class PlanEvents {
   })
   detailJson?: unknown;
 
+  /**
+   * Fecha y hora en que se creó el registro.
+   */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
   createdAt!: Date;
 }

@@ -1,6 +1,7 @@
 export * from './care_gaps.entity';
 export * from './care_team_members.entity';
 export * from './care_teams.entity';
+export * from './cds_rule_versions.entity';
 export * from './cds_rules.entity';
 export * from './clinical_alerts.entity';
 export * from './drug_interactions.entity';

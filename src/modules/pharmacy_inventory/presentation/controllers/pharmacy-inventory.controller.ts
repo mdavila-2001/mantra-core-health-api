@@ -1,0 +1,211 @@
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../../common';
+import {
+  InventoryLocationsService,
+  InventoryReservationsService,
+  InventoryTransfersService,
+  InventoryCountService,
+  InventoryRecallService,
+} from '../../services';
+import {
+  CreateLocationDto,
+  RelocateLocationDto,
+  CreateReservationDto,
+  CreateTransferDto,
+  CreateCountSessionDto,
+  ApproveCountSessionDto,
+  CreateRecallHoldDto,
+  ReleaseRecallHoldDto,
+  IdResponseDto,
+  MovementResponseDto,
+  TransferResponseDto,
+  CountSessionResponseDto,
+  StatusResultDto,
+} from '../dto';
+
+/**
+ * Operaciones de inventario de farmacia: ubicaciones (bootstrap), reservas
+ * (UC-25-04), transferencias (UC-25-10), conteo cíclico (UC-25-06/07) y
+ * recall/holds (UC-25-08/09).
+ */
+@ApiTags('pharmacy-inventory')
+@ApiBearerAuth()
+@Controller('pharmacy')
+export class PharmacyInventoryController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param locations - Valor de locations requerido por la operación.
+   * @param reservations - Valor de reservations requerido por la operación.
+   * @param transfers - Valor de transfers requerido por la operación.
+   * @param counts - Valor de counts requerido por la operación.
+   * @param recalls - Valor de recalls requerido por la operación.
+   */
+  constructor(
+    private readonly locations: InventoryLocationsService,
+    private readonly reservations: InventoryReservationsService,
+    private readonly transfers: InventoryTransfersService,
+    private readonly counts: InventoryCountService,
+    private readonly recalls: InventoryRecallService,
+  ) {}
+
+  /** Bootstrap: alta de ubicación de inventario. */
+  @Audited({
+    action: 'INVENTORY_LOCATION_CREATED',
+    entity: 'inventory_location',
+    entityId: 'result.id',
+  })
+  @Post(':siteId/inventory-locations')
+  @Roles('SECURITY_ADMIN')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Crear una ubicación de inventario' })
+  createLocation(
+    @Param('siteId', ParseUUIDPipe) siteId: string,
+    @Body() dto: CreateLocationDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<IdResponseDto> {
+    return this.locations.create(siteId, dto, actor);
+  }
+
+  /** F5c: reubicar una ubicación en otro espacio (el stock la sigue). */
+  @Audited({
+    action: 'INVENTORY_LOCATION_RELOCATED',
+    entity: 'inventory_location',
+    entityId: 'param:id',
+  })
+  @Post('inventory-locations/:id/relocate')
+  @Roles('SECURITY_ADMIN')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Reubicar una ubicación de inventario (F5c)' })
+  relocateLocation(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: RelocateLocationDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    return this.locations.relocate(id, dto, actor);
+  }
+
+  /** UC-25-04: reservar stock. */
+  @Audited({
+    action: 'INVENTORY_RESERVED',
+    entity: 'inventory_reservation',
+    entityId: 'result.id',
+  })
+  @Post(':pharmacyId/reservations')
+  @Roles('SECURITY_ADMIN')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Reservar stock para una prescripción (UC-25-04)' })
+  reserve(
+    @Param('pharmacyId', ParseUUIDPipe) pharmacyId: string,
+    @Body() dto: CreateReservationDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<MovementResponseDto> {
+    return this.reservations.reserve(pharmacyId, dto, actor);
+  }
+
+  /** UC-25-10: transferir stock entre ubicaciones. */
+  @Audited({
+    action: 'INVENTORY_TRANSFERRED',
+    entity: 'inventory_ledger_entry',
+  })
+  @Post(':pharmacyId/transfers')
+  @Roles('SECURITY_ADMIN')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Transferir stock entre ubicaciones (UC-25-10)' })
+  transfer(
+    @Param('pharmacyId', ParseUUIDPipe) pharmacyId: string,
+    @Body() dto: CreateTransferDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<TransferResponseDto> {
+    return this.transfers.transfer(pharmacyId, dto, actor);
+  }
+
+  /** UC-25-06: abrir sesión de conteo cíclico. */
+  @Audited({
+    action: 'INVENTORY_COUNT_SESSION_OPENED',
+    entity: 'inventory_count_session',
+    entityId: 'result.id',
+  })
+  @Post(':siteId/count-sessions')
+  @Roles('SECURITY_ADMIN')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Iniciar y congelar una sesión de conteo (UC-25-06)',
+  })
+  openCountSession(
+    @Param('siteId', ParseUUIDPipe) siteId: string,
+    @Body() dto: CreateCountSessionDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<CountSessionResponseDto> {
+    return this.counts.openSession(siteId, dto, actor);
+  }
+
+  /** UC-25-07: aprobar conteo y ajustar por varianza. */
+  @Audited({
+    action: 'INVENTORY_COUNT_SESSION_APPROVED',
+    entity: 'inventory_count_session',
+    entityId: 'param:id',
+  })
+  @Post('count-sessions/:id/approve')
+  @Roles('SECURITY_ADMIN')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Aprobar conteo y ajustar ledger por varianza (UC-25-07)',
+  })
+  approveCountSession(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ApproveCountSessionDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<CountSessionResponseDto> {
+    return this.counts.approve(id, dto, actor);
+  }
+
+  /** UC-25-08: aplicar recall/hold sobre un lote. */
+  @Audited({
+    action: 'INVENTORY_RECALL_HOLD_CREATED',
+    entity: 'inventory_recall_hold',
+    entityId: 'result.id',
+  })
+  @Post('recall-holds')
+  @Roles('SECURITY_ADMIN')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Aplicar retiro/recall de lote (UC-25-08)' })
+  createRecallHold(
+    @Body() dto: CreateRecallHoldDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<IdResponseDto> {
+    return this.recalls.createHold(dto, actor);
+  }
+
+  /** UC-25-09: liberar recall y reactivar lote. */
+  @Audited({
+    action: 'INVENTORY_RECALL_HOLD_RELEASED',
+    entity: 'inventory_recall_hold',
+    entityId: 'param:id',
+  })
+  @Post('recall-holds/:id/release')
+  @Roles('SECURITY_ADMIN')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Liberar recall y reactivar lote (UC-25-09)' })
+  releaseRecallHold(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ReleaseRecallHoldDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<StatusResultDto> {
+    return this.recalls.release(id, dto, actor);
+  }
+}

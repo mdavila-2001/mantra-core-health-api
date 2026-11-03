@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { ClaimReadRepository } from '../../../insurance/repositories/claim-read.repository';
-import { CoverageRepository } from '../../../insurance/repositories/coverage.repository';
+import { ClaimReadRepository } from '../../../insurance/infrastructure/repositories/claim-read.repository';
+import { CoverageRepository } from '../../../insurance/infrastructure/repositories/coverage.repository';
 import type {
   InsuranceClaimSummary,
   InsuranceReadPort,

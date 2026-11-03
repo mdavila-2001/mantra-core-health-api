@@ -1,0 +1,184 @@
+{
+  "code": "GASTRO_CTRL_COLITIS_ULCEROSA",
+  "name": "Control de colitis ulcerosa (puntaje de Mayo)",
+  "specialty": { "code": "GASTROENTEROLOGIA", "display": "Gastroenterología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Mayo score (openEHR-EHR-OBSERVATION.mayo_score.v1), International Clinical Knowledge Manager",
+    "organization": "openEHR Foundation",
+    "url": "https://ckm.openehr.org/ckm/",
+    "sourceVersion": "rev. 1.0.0 (publicado); espejo github.com/openEHR/CKM-mirror",
+    "license": "Arquetipo CC BY-SA 4.0; el puntaje (Schroeder KW et al., NEJM 1987) se usa como categorías clínicas",
+    "retrievedAt": "2026-10-24",
+    "note": "Estructura de control crónico del catálogo (NT 022) y los cuatro ítems del puntaje de Mayo del arquetipo openEHR-EHR-OBSERVATION.mayo_score.v1 (traducción propia del inglés, no oficial). Puntaje total 0 a 12; el parcial, sin endoscopia, 0 a 9."
+  },
+  "fields": [
+    {
+      "section": "Seguimiento",
+      "code": "tipo_de_control",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Primera evaluación de la condición",
+        "Control programado",
+        "Descompensación o consulta no programada",
+        "Control posterior a internación"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "fecha_del_diagnostico",
+      "name": "Fecha del diagnóstico de colitis ulcerosa",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "tratamiento_actual",
+      "name": "Tratamiento actual (fármaco, dosis y frecuencia)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma el tratamiento como está indicado",
+        "Olvida dosis algunas veces",
+        "Abandonó el tratamiento",
+        "Todavía sin tratamiento"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos",
+      "name": "¿Tuvo efectos adversos del tratamiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos_cuales",
+      "name": "¿Cuáles y con qué fármaco?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "efectos_adversos", "equals": true }
+    },
+    {
+      "section": "Seguimiento",
+      "code": "evolucion_desde_ultimo_control",
+      "name": "Evolución desde el último control",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: colitis ulcerosa",
+      "code": "mayo_frecuencia_deposiciones",
+      "name": "Mayo — frecuencia de deposiciones",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Número normal de deposiciones",
+        "1 — 1 a 2 deposiciones más de lo normal",
+        "2 — 3 a 4 deposiciones más de lo normal",
+        "3 — 5 o más deposiciones más de lo normal"
+      ],
+      "description": "Fuente: puntaje de Mayo para colitis ulcerosa (Schroeder KW et al. N Engl J Med. 1987;317:1625-9), según el arquetipo openEHR openEHR-EHR-OBSERVATION.mayo_score.v1 (rev. 1.0.0, publicado; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: colitis ulcerosa",
+      "code": "mayo_sangrado_rectal",
+      "name": "Mayo — sangrado rectal (el más intenso del día)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Sin sangre visible",
+        "1 — Hilos de sangre con las heces, menos de la mitad de las veces",
+        "2 — Sangre evidente con las heces la mayoría de las veces",
+        "3 — Sólo sangre"
+      ],
+      "description": "Fuente: puntaje de Mayo para colitis ulcerosa (Schroeder KW et al. N Engl J Med. 1987;317:1625-9), según el arquetipo openEHR openEHR-EHR-OBSERVATION.mayo_score.v1 (rev. 1.0.0, publicado; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: colitis ulcerosa",
+      "code": "mayo_endoscopia",
+      "name": "Mayo — hallazgo endoscópico",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Normal o enfermedad inactiva",
+        "1 — Enfermedad leve (eritema, patrón vascular disminuido, friabilidad leve)",
+        "2 — Enfermedad moderada (eritema marcado, patrón vascular ausente, friabilidad, erosiones)",
+        "3 — Enfermedad grave (sangrado espontáneo, ulceración)"
+      ],
+      "description": "Sólo si hay endoscopia reciente; sin ella se informa el Mayo parcial (tres ítems). Fuente: puntaje de Mayo para colitis ulcerosa (Schroeder KW et al. N Engl J Med. 1987;317:1625-9), según el arquetipo openEHR openEHR-EHR-OBSERVATION.mayo_score.v1 (rev. 1.0.0, publicado; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: colitis ulcerosa",
+      "code": "mayo_evaluacion_global",
+      "name": "Mayo — evaluación global del médico",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Normal o enfermedad inactiva",
+        "1 — Enfermedad leve",
+        "2 — Enfermedad moderada",
+        "3 — Enfermedad grave"
+      ],
+      "description": "Fuente: puntaje de Mayo para colitis ulcerosa (Schroeder KW et al. N Engl J Med. 1987;317:1625-9), según el arquetipo openEHR openEHR-EHR-OBSERVATION.mayo_score.v1 (rev. 1.0.0, publicado; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: colitis ulcerosa",
+      "code": "mayo_total",
+      "name": "Mayo — puntaje total (0 a 12, o parcial 0 a 9)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: colitis ulcerosa",
+      "code": "cu_manifestaciones_extraintestinales",
+      "name": "Manifestaciones extraintestinales",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: colitis ulcerosa",
+      "code": "cu_extraintestinales_cual",
+      "name": "¿Cuál?",
+      "dataType": "string",
+      "required": true,
+      "options": ["Articular", "Cutánea", "Ocular", "Hepatobiliar"],
+      "allowOther": true,
+      "showWhen": {
+        "field": "cu_manifestaciones_extraintestinales",
+        "equals": true
+      }
+    },
+    {
+      "section": "Metas y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

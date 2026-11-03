@@ -17,6 +17,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   ParseOptionalLimitPipe,
   ParseUuidListPipe,
@@ -313,6 +314,18 @@ export class TerminologyConceptsController {
     );
   }
 
+  /** Devuelve el documento enciclopédico guardado como propiedad del concepto. */
+  @Get(':conceptId/glossary-article')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Lee el artículo enciclopédico de un término del glosario',
+  })
+  readGlossaryArticle(
+    @Param('conceptId', ParseUUIDPipe) conceptId: string,
+  ): Promise<unknown> {
+    return this.conceptsService.readGlossaryArticle(conceptId);
+  }
+
   /**
    * La ficha de un término: sus textos, sus etiquetas y sus sinónimos.
    *
@@ -325,6 +338,7 @@ export class TerminologyConceptsController {
    *
    * @param conceptId - Término a leer.
    * @param lang - Idioma preferido de los textos.
+   * @param user - Usuario autenticado: decide si ve las propiedades `professional`.
    * @returns La ficha completa del término.
    */
   @Get(':conceptId')
@@ -341,9 +355,14 @@ export class TerminologyConceptsController {
   })
   readConcept(
     @Param('conceptId', ParseUUIDPipe) conceptId: string,
+    @CurrentUser() user: AuthenticatedUser,
     @Query('lang') lang?: string,
   ): Promise<ConceptDetailDto> {
-    return this.conceptsService.readConcept(conceptId, parseLanguage(lang));
+    return this.conceptsService.readConcept(
+      conceptId,
+      parseLanguage(lang),
+      user,
+    );
   }
 
   /**
@@ -354,6 +373,11 @@ export class TerminologyConceptsController {
    * @param user - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de add designation conforme al contrato `Promise<DesignationResponseDto>`.
    */
+  @Audited({
+    action: 'CONCEPT_DESIGNATION_ADDED',
+    entity: 'concept_designation',
+    entityId: 'result.id',
+  })
   @Post(':conceptId/designations')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -376,6 +400,11 @@ export class TerminologyConceptsController {
    * @param user - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de add relationship conforme al contrato `Promise<RelationshipResponseDto>`.
    */
+  @Audited({
+    action: 'CONCEPT_RELATIONSHIP_ADDED',
+    entity: 'concept_relationship',
+    entityId: 'result.id',
+  })
   @Post(':conceptId/relationships')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -398,6 +427,11 @@ export class TerminologyConceptsController {
    * @param user - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de upsert properties conforme al contrato `Promise<ConceptPropertiesResponseDto>`.
    */
+  @Audited({
+    action: 'CONCEPT_PROPERTIES_UPSERTED',
+    entity: 'catalog_concept',
+    entityId: 'param:conceptId',
+  })
   @Post(':conceptId/properties')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -420,6 +454,11 @@ export class TerminologyConceptsController {
    * @param user - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de deprecate concept conforme al contrato `Promise<DeprecateConceptResponseDto>`.
    */
+  @Audited({
+    action: 'CATALOG_CONCEPT_DEPRECATED',
+    entity: 'catalog_concept',
+    entityId: 'param:conceptId',
+  })
   @Post(':conceptId/$deprecate')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

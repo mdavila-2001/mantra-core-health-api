@@ -4,7 +4,6 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   CONCEPTS,
   PreconditionFailedException,
-  ResourceNotFoundException,
   type AuthenticatedUser,
 } from '../../../common';
 import { OutboxService } from '../../messaging/services';
@@ -15,6 +14,12 @@ import {
   LakehouseRuntimeRepository,
 } from '../repositories';
 import { LIVE_RUN_STATUSES } from '../constants';
+import {
+  activeLakehouseTenant,
+  assertLakehouseResourceInTenant,
+  lakehouseOutsideTenant,
+  requireFields,
+} from '../lakehouse.tenant-scope';
 import {
   RunTransformationDto,
   TransformationRunResponseDto,
@@ -95,19 +100,13 @@ export class TransformationService {
     dto: RunTransformationDto,
     actor: AuthenticatedUser,
   ): Promise<TransformationRunResponseDto> {
+    const tenantId = activeLakehouseTenant(dto.tenantId);
     return this.em.transactional(async (tx) => {
-      const definition = await this.runtimeRepo.findDefinitionById(
-        tx,
-        definitionId,
+      const definition = assertLakehouseResourceInTenant(
+        await this.runtimeRepo.findDefinitionById(tx, tenantId, definitionId),
+        tenantId,
+        'Definición de transformación no encontrada.',
       );
-      if (!definition) {
-        throw new ResourceNotFoundException(
-          'Definición de transformación no encontrada.',
-          {
-            definitionId,
-          },
-        );
-      }
       if (definition.state !== 'active') {
         throw new PreconditionFailedException(
           'La definición de transformación no está activa.',
@@ -134,24 +133,37 @@ export class TransformationService {
 
       const target = await this.requireWritableDataset(
         tx,
+        tenantId,
         definition.targetDatasetId,
       );
+      // Los datasets de origen entran al linaje de esta corrida: todos deben
+      // ser del tenant.
+      const sourceDatasetIds = definition.sourceDatasetIds ?? [];
+      for (const sourceDatasetId of sourceDatasetIds) {
+        assertLakehouseResourceInTenant(
+          await this.catalogRepo.findDatasetById(tx, tenantId, sourceDatasetId),
+          tenantId,
+          'Dataset de origen no encontrado.',
+        );
+      }
 
       const now = new Date();
       const run = this.runtimeRepo.createRun(tx, {
         transformationDefinitionId: definitionId,
-        tenantId: dto.tenantId,
-        sourceCheckpoint: dto.sourceCheckpoint,
+        tenantId,
+        // Una corrida sin punto de control de origen (recarga completa) lo
+        // registra vacío.
+        sourceCheckpoint: dto.sourceCheckpoint ?? '',
         status: 'running',
         startedAt: now,
       });
 
       const result = await this.materialize(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         dataset: target,
         partitions: dto.partitions,
         runId: run.id,
-        sourceDatasetIds: definition.sourceDatasetIds ?? [],
+        sourceDatasetIds,
       });
 
       run.inputRecordCount = dto.inputRecordCount;
@@ -161,7 +173,7 @@ export class TransformationService {
       run.completedAt = new Date();
 
       await this.outbox.publishDomainEvent(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         eventType: 'TransformationRunCompleted',
         aggregateType: 'lakehouse.transformation_runs',
         aggregateId: run.id,
@@ -177,7 +189,7 @@ export class TransformationService {
 
       if (result.lineageEdges > 0) {
         await this.outbox.publishDomainEvent(tx, {
-          tenantId: dto.tenantId,
+          tenantId,
           eventType: 'LineageRecorded',
           aggregateType: 'lakehouse.lakehouse_lineage_edges',
           aggregateId: run.id,
@@ -223,9 +235,11 @@ export class TransformationService {
     dto: CuratedIngestionDto,
     actor: AuthenticatedUser,
   ): Promise<CuratedIngestionResponseDto> {
+    const tenantId = activeLakehouseTenant(dto.tenantId);
     return this.em.transactional(async (tx) => {
       const dataset = await this.requireWritableDataset(
         tx,
+        tenantId,
         dto.targetDatasetId,
       );
 
@@ -240,21 +254,18 @@ export class TransformationService {
         );
       }
 
-      const profile = await this.dataReleaseRepo.findDeidProfileById(
-        tx,
-        dto.deidentificationProfileId,
+      // Un perfil de otro tenant responde igual que uno inexistente.
+      assertLakehouseResourceInTenant(
+        await this.dataReleaseRepo.findDeidProfileById(
+          tx,
+          dto.deidentificationProfileId,
+        ),
+        tenantId,
+        'Perfil de de-identificación no encontrado.',
       );
-      if (!profile) {
-        throw new ResourceNotFoundException(
-          'Perfil de de-identificación no encontrado.',
-          {
-            deidentificationProfileId: dto.deidentificationProfileId,
-          },
-        );
-      }
 
       const deidRun = this.dataReleaseRepo.createDeidRun(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         healthDeidentificationProfileId: dto.deidentificationProfileId,
         purposeConceptId: dto.purposeConceptId,
         consentDirectiveId: dto.consentDirectiveId,
@@ -266,14 +277,14 @@ export class TransformationService {
       });
 
       const result = await this.materialize(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         dataset,
         partitions: dto.partitions,
         sourceDatasetIds: [],
       });
 
       await this.outbox.publishDomainEvent(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         eventType: 'HealthBatchDeidentified',
         aggregateType: 'health_data.health_deidentification_runs',
         aggregateId: deidRun.id,
@@ -322,15 +333,46 @@ export class TransformationService {
     dto: RunQualityCheckDto,
     actor: AuthenticatedUser,
   ): Promise<QualityRunResponseDto> {
-    return this.em.transactional(async (tx) => {
-      const dataset = await this.catalogRepo.findDatasetForUpdate(
-        tx,
-        datasetId,
+    const tenantId = activeLakehouseTenant(dto.tenantId);
+    // La corrida evaluada es obligatoria: la tabla la exige y no hay corrida
+    // por defecto.
+    requireFields(
+      dto,
+      ['transformationRunId'],
+      'registrar la corrida de calidad',
+    );
+    for (const finding of dto.findings ?? []) {
+      requireFields(
+        finding,
+        ['partitionId', 'sampleObjectManifestId'],
+        'registrar un hallazgo de calidad',
       );
-      if (!dataset) {
-        throw new ResourceNotFoundException('Dataset no encontrado.', {
-          datasetId,
-        });
+    }
+    return this.em.transactional(async (tx) => {
+      const dataset = assertLakehouseResourceInTenant(
+        await this.catalogRepo.findDatasetForUpdate(tx, tenantId, datasetId),
+        tenantId,
+        'Dataset no encontrado.',
+      );
+      // La corrida de transformación y las particiones citadas deben ser del
+      // mismo tenant (y las particiones, del dataset evaluado).
+      assertLakehouseResourceInTenant(
+        await this.runtimeRepo.findRunById(
+          tx,
+          tenantId,
+          dto.transformationRunId as string,
+        ),
+        tenantId,
+        'Corrida de transformación no encontrada.',
+      );
+      for (const finding of dto.findings ?? []) {
+        const partition = await this.runtimeRepo.findPartitionById(
+          tx,
+          finding.partitionId as string,
+        );
+        if (!partition || partition.lakehouseDatasetId !== dataset.id) {
+          throw lakehouseOutsideTenant('Partición no encontrada.');
+        }
       }
 
       const rules = await this.catalogRepo.findActiveQualityRules(
@@ -341,7 +383,7 @@ export class TransformationService {
       const ruleByCode = new Map(rules.map((rule) => [rule.ruleCode, rule]));
 
       const run = this.runtimeRepo.createQualityRun(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         lakehouseDatasetId: datasetId,
         transformationRunId: dto.transformationRunId,
         status: 'running',
@@ -393,7 +435,7 @@ export class TransformationService {
       }
 
       await this.outbox.publishDomainEvent(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         eventType: 'QualityRunEvaluated',
         aggregateType: 'lakehouse.lakehouse_quality_runs',
         aggregateId: run.id,
@@ -451,14 +493,14 @@ export class TransformationService {
    */
   private async requireWritableDataset(
     tx: EntityManager,
+    tenantId: string,
     datasetId: string,
   ): Promise<LakehouseDatasets> {
-    const dataset = await this.catalogRepo.findDatasetById(tx, datasetId);
-    if (!dataset) {
-      throw new ResourceNotFoundException('Dataset objetivo no encontrado.', {
-        datasetId,
-      });
-    }
+    const dataset = assertLakehouseResourceInTenant(
+      await this.catalogRepo.findDatasetById(tx, tenantId, datasetId),
+      tenantId,
+      'Dataset objetivo no encontrado.',
+    );
     // Escribir en un dataset en cuarentena añadiría datos a algo que ya se sabe
     // que está mal, y el problema sería más difícil de acotar después.
     if (dataset.lifecycleState !== 'active') {
@@ -508,6 +550,10 @@ export class TransformationService {
     let filesWritten = 0;
     let lineageEdges = 0;
 
+    // Partición de origen → dataset, verificada contra los orígenes de la
+    // definición (que ya son del tenant): una partición ajena no entra al linaje.
+    const sourcePartitionOwner = new Map<string, string>();
+
     for (const input$ of input.partitions) {
       const existing = await this.runtimeRepo.findPartitionByHash(
         tx,
@@ -515,20 +561,26 @@ export class TransformationService {
         input$.partitionSpecHash,
       );
 
+      if (!existing) {
+        // La tabla exige la ventana de eventos de la partición y no hay una
+        // por defecto: se rechaza antes de persistir.
+        requireFields(
+          input$,
+          ['minEventAt', 'maxEventAt'],
+          'registrar la partición',
+        );
+      }
       const partition =
         existing ??
         this.runtimeRepo.createPartition(tx, {
           lakehouseDatasetId: input.dataset.id,
           partitionSpecHash: input$.partitionSpecHash,
-          partitionValuesJson: input$.partitionValuesJson,
+          // Tabla sin particionar: valores de partición vacíos.
+          partitionValuesJson: input$.partitionValuesJson ?? {},
           recordCount: input$.recordCount,
           sizeBytes: input$.sizeBytes,
-          minEventAt: input$.minEventAt
-            ? new Date(input$.minEventAt)
-            : undefined,
-          maxEventAt: input$.maxEventAt
-            ? new Date(input$.maxEventAt)
-            : undefined,
+          minEventAt: new Date(input$.minEventAt as string),
+          maxEventAt: new Date(input$.maxEventAt as string),
           state: 'committed',
         });
 
@@ -543,6 +595,8 @@ export class TransformationService {
         );
         if (duplicate) continue;
 
+        // El archivo apunta a su objeto en el almacén: no hay uno por defecto.
+        requireFields(file, ['objectManifestId'], 'registrar el archivo');
         this.runtimeRepo.createFile(tx, {
           lakehousePartitionId: partition.id,
           objectManifestId: file.objectManifestId,
@@ -550,38 +604,52 @@ export class TransformationService {
           rowCount: file.rowCount,
           sizeBytes: file.sizeBytes,
           contentHash: file.contentHash,
-          minMaxStatisticsJson: file.minMaxStatisticsJson,
+          // Sin estadísticas declaradas no hay poda por mínimos y máximos.
+          minMaxStatisticsJson: file.minMaxStatisticsJson ?? {},
         });
         filesWritten += 1;
       }
 
       // El linaje se registra en la misma transacción que la corrida (UC-63-06):
       // un linaje que se escribe después puede no escribirse nunca.
-      if (input.runId) {
-        for (const sourceDatasetId of input.sourceDatasetIds) {
-          const sourcePartitionIds = input$.sourcePartitionIds ?? [];
-          if (sourcePartitionIds.length === 0) {
-            this.runtimeRepo.createLineageEdge(tx, {
-              tenantId: input.tenantId,
-              sourceDatasetId,
-              targetDatasetId: input.dataset.id,
-              transformationRunId: input.runId,
-              targetPartitionId: partition.id,
-            });
-            lineageEdges += 1;
-            continue;
-          }
-          for (const sourcePartitionId of sourcePartitionIds) {
-            this.runtimeRepo.createLineageEdge(tx, {
-              tenantId: input.tenantId,
-              sourceDatasetId,
-              targetDatasetId: input.dataset.id,
-              transformationRunId: input.runId,
+      if (input.runId && input.sourceDatasetIds.length > 0) {
+        // La arista exige la partición de origen: sin ella no hay linaje.
+        requireFields(
+          {
+            sourcePartitionIds: input$.sourcePartitionIds?.length || undefined,
+          },
+          ['sourcePartitionIds'],
+          'registrar el linaje de la partición',
+        );
+        for (const sourcePartitionId of input$.sourcePartitionIds ?? []) {
+          let ownerDatasetId = sourcePartitionOwner.get(sourcePartitionId);
+          if (ownerDatasetId === undefined) {
+            const sourcePartition = await this.runtimeRepo.findPartitionById(
+              tx,
               sourcePartitionId,
-              targetPartitionId: partition.id,
-            });
-            lineageEdges += 1;
+            );
+            if (
+              !sourcePartition ||
+              !input.sourceDatasetIds.includes(
+                sourcePartition.lakehouseDatasetId,
+              )
+            ) {
+              throw lakehouseOutsideTenant(
+                'Partición de origen no encontrada.',
+              );
+            }
+            ownerDatasetId = sourcePartition.lakehouseDatasetId;
+            sourcePartitionOwner.set(sourcePartitionId, ownerDatasetId);
           }
+          this.runtimeRepo.createLineageEdge(tx, {
+            tenantId: input.tenantId,
+            sourceDatasetId: ownerDatasetId,
+            targetDatasetId: input.dataset.id,
+            transformationRunId: input.runId,
+            sourcePartitionId,
+            targetPartitionId: partition.id,
+          });
+          lineageEdges += 1;
         }
       }
     }

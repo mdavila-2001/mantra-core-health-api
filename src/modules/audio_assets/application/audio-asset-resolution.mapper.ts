@@ -11,8 +11,8 @@ import type {
   AudioSynthesisProfile,
 } from '../domain/audio.types';
 import type { AudioAssets, AudioTemplates } from '../entities';
-import type { AudioAssetsRepository } from '../repositories/audio-assets.repository';
-import type { CreateAudioAssetInput } from '../repositories/audio-assets.repository.types';
+import type { AudioAssetsRepository } from '../infrastructure/repositories/audio-assets.repository';
+import type { CreateAudioAssetInput } from '../infrastructure/repositories/audio-assets.repository.types';
 
 interface BuildCreateAudioAssetInput {
   template: AudioTemplates;

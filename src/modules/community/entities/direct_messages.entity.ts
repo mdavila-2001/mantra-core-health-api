@@ -105,4 +105,36 @@ export class DirectMessages {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  /**
+   * Identificador asociado a authored by user.
+   */
+  @Property({ fieldName: 'authored_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
+  authoredByUserId?: string;
+
+  /**
+   * Identificador asociado a on behalf of profile.
+   */
+  @Property({
+    fieldName: 'on_behalf_of_profile_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK (destino no resuelto)
+  onBehalfOfProfileId?: string;
+
+  /**
+   * Identificador asociado a delegate assignment.
+   */
+  @Property({
+    fieldName: 'delegate_assignment_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK (destino no resuelto)
+  delegateAssignmentId?: string;
+
+  /**
+   * Valor de disclosure shown mantenido por la instancia.
+   */
+  @Property({ fieldName: 'disclosure_shown', type: 'boolean', default: false })
+  disclosureShown!: boolean;
 }

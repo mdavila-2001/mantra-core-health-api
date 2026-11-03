@@ -11,7 +11,9 @@ import { CONCEPTS } from '../../../common';
 import { GroupsRepository } from '../repositories';
 import { CommunityVisibilityService } from './community-visibility.service';
 import { CommunityGroupAccessService } from './community-group-access.service';
+import { CommunityGroupAudienceService } from './community-group-audience.service';
 import { COMM } from '../community.concepts';
+import { CommunityErrorReason } from '../community.error-reasons';
 import type {
   GroupPageDto,
   GroupMemberPageDto,
@@ -38,6 +40,7 @@ export class CommunityGroupsReadService {
    * @param groupsRepo - Acceso a `community.groups` y `group_members`.
    * @param visibility - Resuelve el perfil del lector contra la sesión.
    * @param access - Reglas de quién ve qué dentro de un grupo.
+   * @param audience - Público autorizado de cada foro.
    * @param logger - Logger estructurado.
    */
   constructor(
@@ -45,6 +48,7 @@ export class CommunityGroupsReadService {
     private readonly groupsRepo: GroupsRepository,
     private readonly visibility: CommunityVisibilityService,
     private readonly access: CommunityGroupAccessService,
+    private readonly audience: CommunityGroupAudienceService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CommunityGroupsReadService.name);
@@ -55,10 +59,13 @@ export class CommunityGroupsReadService {
    *
    * Los grupos secretos quedan fuera del listado por definición: existen para
    * quien ya fue invitado, y aparecer en un directorio los volvería no
-   * secretos.
+   * secretos. Los foros de público autorizado (API#837) quedan fuera para
+   * quien no pertenece a ese público, que es quien no puede ni saber que
+   * existen.
    *
    * @param tenantId - Organización cuyos grupos se listan.
    * @param options - Cursor y tope.
+   * @param actor - Quien pide el directorio; define qué foros restringidos ve.
    * @returns Página de grupos.
    */
   async listGroups(
@@ -73,9 +80,16 @@ export class CommunityGroupsReadService {
       /** Texto libre que se busca en nombre y descripción (P7). */
       query?: string;
     },
+    actor: AuthenticatedUser,
   ): Promise<GroupPageDto> {
     const em = this.em.fork();
     const afterKey = this.decodeCreatedAtCursor(options.cursor);
+    const hiddenVisibilityConceptIds = this.visibility.isPlatform(
+      actor,
+      tenantId,
+    )
+      ? []
+      : await this.audience.hiddenFrom(em, tenantId, actor);
 
     const rows = await this.groupsRepo.searchPage(
       em,
@@ -83,7 +97,11 @@ export class CommunityGroupsReadService {
       COMM.GROUP_VISIBILITY_SECRET,
       afterKey,
       options.limit + 1,
-      { topicId: options.topicId, query: options.query?.trim() || undefined },
+      {
+        topicId: options.topicId,
+        query: options.query?.trim() || undefined,
+        hiddenVisibilityConceptIds,
+      },
     );
     const hasMore = rows.length > options.limit;
     const page = hasMore ? rows.slice(0, options.limit) : rows;
@@ -120,7 +138,8 @@ export class CommunityGroupsReadService {
    * @param requestedProfileId - Perfil del lector **propuesto**; se verifica.
    * @param options - Cursor y tope.
    * @returns Página de integrantes.
-   * @throws ResourceNotFoundException si el grupo no existe o es secreto y ajeno.
+   * @throws ResourceNotFoundException si el grupo no existe, es secreto y ajeno,
+   *   o restringe su público y el actor no pertenece a él.
    */
   async listMembers(
     groupId: string,
@@ -146,14 +165,24 @@ export class CommunityGroupsReadService {
     );
     const group = await this.groupsRepo.findById(em, groupId);
     if (!group)
-      throw new ResourceNotFoundException('Grupo no encontrado', { groupId });
+      throw new ResourceNotFoundException(
+        'Grupo no encontrado',
+        { groupId },
+        CommunityErrorReason.GROUP_NOT_FOUND,
+      );
+
+    await this.access.assertAudienceVisible(em, group, actor);
 
     if (group.visibilityConceptId === COMM.GROUP_VISIBILITY_SECRET) {
       const member = actorProfileId
         ? await this.groupsRepo.findMember(em, groupId, actorProfileId)
         : null;
       if (!member || member.joinStatusConceptId !== COMM.GROUP_JOIN_ACTIVE)
-        throw new ResourceNotFoundException('Grupo no encontrado', { groupId });
+        throw new ResourceNotFoundException(
+          'Grupo no encontrado',
+          { groupId },
+          CommunityErrorReason.GROUP_SECRET_NOT_VISIBLE,
+        );
     }
 
     const afterKey = this.decodeCreatedAtCursor(options.cursor);

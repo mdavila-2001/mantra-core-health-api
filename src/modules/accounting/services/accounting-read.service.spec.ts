@@ -25,6 +25,8 @@ const TENANT = 'tenant-1';
 function build(
   overrides: {
     practica?: { id: string; tenantId: string } | null;
+    /** Puerto de `practice`; sin él el servicio no puede cortar a un PRACTITIONER. */
+    practiceTenantLookup?: unknown;
   } = {},
 ) {
   const tx: any = {
@@ -55,11 +57,13 @@ function build(
     findOpenItemById: mockFn(),
     createOpenItem: mockFn(),
     findOpenItemsByReconciliationAccounts: mockFn(() => Promise.resolve([])),
+    findCompanyBankAccountById: mockFn(),
     findClearingByNumber: mockFn(),
     createClearingDocument: mockFn(),
     createClearingItem: mockFn(),
   };
   const journalRepo = {
+    findLedgerEntryById: mockFn(() => Promise.resolve(null)),
     findTransactionById: mockFn(() => Promise.resolve(null)),
     findByTransactionNumber: mockFn(),
     findTransactions: mockFn(() => Promise.resolve([])),
@@ -75,6 +79,7 @@ function build(
     findPostedEntriesWithAssignments: mockFn(() => Promise.resolve([])),
     ledgerEntriesForTransaction: mockFn(),
     assignmentForEntry: mockFn(),
+    assignmentsForEntries: mockFn(),
     createFile: mockFn(),
   };
   const accountsRepo = {
@@ -102,6 +107,8 @@ function build(
     listCostCentersByPractice: mockFn(() => Promise.resolve([])),
     listProfitCentersByTenant: mockFn(() => Promise.resolve([])),
     listSegmentsByTenant: mockFn(() => Promise.resolve([])),
+    findCostCentersByIds: mockFn(() => Promise.resolve([])),
+    findProfitCentersByIds: mockFn(() => Promise.resolve([])),
   };
   const assetRepo = {
     findById: mockFn(),
@@ -115,7 +122,9 @@ function build(
     createAssignment: mockFn(),
     createPosting: mockFn(),
     findDepreciation: mockFn(),
+    listDepreciations: mockFn(),
     createDepreciation: mockFn(),
+    findDepreciationAreaById: mockFn(),
   };
 
   const service = new AccountingReadService(
@@ -127,6 +136,7 @@ function build(
     accrualRepo,
     controllingRepo,
     assetRepo,
+    overrides.practiceTenantLookup as any,
   );
 
   return {
@@ -165,8 +175,8 @@ describe('AccountingReadService', () => {
 
     it('elige el ejercicio que cubre hoy sobre uno más viejo', async () => {
       const { service, fiscalRepo } = build();
-      const hoy = new Date();
-      hoy.setUTCHours(0, 0, 0, 0);
+      const today = new Date();
+      today.setUTCHours(0, 0, 0, 0);
       const old = {
         id: 'fy-viejo',
         code: '2020',
@@ -176,18 +186,18 @@ describe('AccountingReadService', () => {
       const current = {
         id: 'fy-vigente',
         code: '2026',
-        startDate: new Date(hoy.getFullYear(), 0, 1),
-        endDate: new Date(hoy.getFullYear(), 11, 31),
+        startDate: new Date(today.getFullYear(), 0, 1),
+        endDate: new Date(today.getFullYear(), 11, 31),
       };
       fiscalRepo.findYearsByPractice.mockResolvedValue([current, old]);
-      const abierto = period(
+      const open = period(
         'p1',
         '2026-01',
-        new Date(hoy.getFullYear(), 0, 1),
-        new Date(hoy.getFullYear(), 11, 31),
+        new Date(today.getFullYear(), 0, 1),
+        new Date(today.getFullYear(), 11, 31),
         ACCT.PERIOD_OPEN,
       );
-      fiscalRepo.findPeriodsByYear.mockResolvedValue([abierto]);
+      fiscalRepo.findPeriodsByYear.mockResolvedValue([open]);
 
       const result = await service.fiscalYear(PRACTICE, ACTOR_ADMIN);
 
@@ -273,6 +283,42 @@ describe('AccountingReadService', () => {
     });
   });
 
+  /**
+   * `SECURITY_ADMIN`/`ACCOUNTING_APPROVER` acotado a otro tenant en
+   * `scopedRoles` no salta el corte 422 de `PRACTITIONER`: el rol se mide en
+   * el tenant de la práctica (#1241).
+   */
+  describe('administración acotada a un tenant (D-8)', () => {
+    const lookup = {
+      findActivePracticeIdsForPractitioner: mockFn(() => Promise.resolve([])),
+      findTenantOfPractice: mockFn(() => Promise.resolve(TENANT)),
+    };
+    const doctorAdmin = (role: string, tenant?: string) =>
+      ({
+        id: 'u-doc',
+        roles: ['PRACTITIONER', role],
+        practitionerProfileId: 'hpp-doc',
+        ...(tenant ? { scopedRoles: { [tenant]: [role] } } : {}),
+      }) as any;
+
+    it.each(['SECURITY_ADMIN', 'ACCOUNTING_APPROVER'])(
+      '%s acotado a otro tenant sin vinculación recibe 422; en el de la práctica o global, lee',
+      async (role) => {
+        const read = (actor: unknown) => {
+          const { service } = build({ practiceTenantLookup: lookup });
+          return runWithTenant(TENANT, () =>
+            service.dimensions(PRACTICE, actor as any),
+          );
+        };
+        await expect(
+          read(doctorAdmin(role, 'otro-tenant')),
+        ).rejects.toMatchObject({ status: 422 });
+        await expect(read(doctorAdmin(role, TENANT))).resolves.toBeDefined();
+        await expect(read(doctorAdmin(role))).resolves.toBeDefined();
+      },
+    );
+  });
+
   describe('openItems (D-7)', () => {
     it('excluye partidas con saldo cero, filtra por lado, y arma los cinco tramos', async () => {
       const { service, accountsRepo, subledgerRepo } = build();
@@ -284,8 +330,8 @@ describe('AccountingReadService', () => {
       };
       accountsRepo.findByPractice.mockResolvedValue([account]);
 
-      const hoy = new Date();
-      const overdue120DaysAgo = new Date(hoy.getTime() - 120 * 86400000);
+      const today = new Date();
+      const overdue120DaysAgo = new Date(today.getTime() - 120 * 86400000);
 
       subledgerRepo.findOpenItemsByReconciliationAccounts.mockResolvedValue([
         {
@@ -295,7 +341,7 @@ describe('AccountingReadService', () => {
             documentTypeConceptId: ACCT.DOC_TYPE_INVOICE,
             originalAmount: '100.00',
             outstandingAmount: '0.00',
-            createdAt: hoy,
+            createdAt: today,
           },
           subledger: {
             id: 'sl1',
@@ -312,7 +358,7 @@ describe('AccountingReadService', () => {
             originalAmount: '500.00',
             outstandingAmount: '500.00',
             dueDate: overdue120DaysAgo,
-            createdAt: hoy,
+            createdAt: today,
           },
           subledger: {
             id: 'sl1',
@@ -347,11 +393,11 @@ describe('AccountingReadService', () => {
       expect(result.totalReceivable).toBe('500.00');
       expect(result.totalPayable).toBe('0.00');
 
-      const soloPayable = await service.openItems(
+      const onlyPayable = await service.openItems(
         { practiceId: PRACTICE, side: 'PAYABLE' },
         ACTOR_ADMIN,
       );
-      expect(soloPayable.items).toHaveLength(0);
+      expect(onlyPayable.items).toHaveLength(0);
     });
   });
 

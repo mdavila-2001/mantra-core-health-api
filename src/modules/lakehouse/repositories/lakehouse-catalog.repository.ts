@@ -173,21 +173,37 @@ export class LakehouseCatalogRepository {
   }
 
   /**
-   * Obtiene find product for update.
+   * Producto del tenant activo, bloqueado para actualizar: un producto ajeno
+   * cuenta como inexistente y su fila no se bloquea.
    *
    * @param em - Contexto de persistencia o transacción activa.
-   * @param id - Identificador de id.
-   * @returns Resultado de find product for update conforme al contrato `Promise<DataProducts | null>`.
+   * @param tenantId - Tenant activo del actor.
+   * @param id - Identificador del producto.
+   * @returns El producto o `null`.
    */
   findProductForUpdate(
     em: EntityManager,
+    tenantId: string,
     id: string,
   ): Promise<DataProducts | null> {
     return em.findOne(
       DataProducts,
-      { id },
+      { id, tenantId },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
+  }
+
+  /**
+   * Producto por id sin acotar por tenant. Sólo para detectar que el id ya lo
+   * ocupa otro tenant antes de un alta por id (el upsert no debe colisionar con
+   * la clave primaria de una fila ajena ni confirmar que existe).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador del producto.
+   * @returns El producto o `null`.
+   */
+  findProductById(em: EntityManager, id: string): Promise<DataProducts | null> {
+    return em.findOne(DataProducts, { id });
   }
 
   /**
@@ -283,17 +299,26 @@ export class LakehouseCatalogRepository {
   }
 
   /**
-   * Obtiene find product version by id.
+   * Versión de producto del tenant activo. La versión no tiene `tenant_id`: el
+   * tenant es el de su producto, así que se resuelve versión → producto.
    *
    * @param em - Contexto de persistencia o transacción activa.
-   * @param id - Identificador de id.
-   * @returns Resultado de find product version by id conforme al contrato `Promise<DataProductVersions | null>`.
+   * @param tenantId - Tenant activo del actor.
+   * @param id - Identificador de la versión.
+   * @returns La versión o `null` si no existe o su producto es de otro tenant.
    */
-  findProductVersionById(
+  async findProductVersionInTenant(
     em: EntityManager,
+    tenantId: string,
     id: string,
   ): Promise<DataProductVersions | null> {
-    return em.findOne(DataProductVersions, { id });
+    const version = await em.findOne(DataProductVersions, { id });
+    if (!version) return null;
+    const product = await em.findOne(DataProducts, {
+      id: version.dataProductId,
+      tenantId,
+    });
+    return product ? version : null;
   }
 
   /**
@@ -466,45 +491,61 @@ export class LakehouseCatalogRepository {
   }
 
   /**
-   * Obtiene find dataset by id.
+   * Dataset del tenant activo; uno ajeno cuenta como inexistente.
    *
    * @param em - Contexto de persistencia o transacción activa.
-   * @param id - Identificador de id.
-   * @returns Resultado de find dataset by id conforme al contrato `Promise<LakehouseDatasets | null>`.
+   * @param tenantId - Tenant activo del actor.
+   * @param id - Identificador del dataset.
+   * @returns El dataset o `null`.
    */
   findDatasetById(
     em: EntityManager,
+    tenantId: string,
     id: string,
   ): Promise<LakehouseDatasets | null> {
-    return em.findOne(LakehouseDatasets, { id });
+    return em.findOne(LakehouseDatasets, { id, tenantId });
   }
 
   /**
-   * Obtiene find dataset for update.
+   * Dataset del tenant activo, bloqueado para actualizar.
    *
    * @param em - Contexto de persistencia o transacción activa.
-   * @param id - Identificador de id.
-   * @returns Resultado de find dataset for update conforme al contrato `Promise<LakehouseDatasets | null>`.
+   * @param tenantId - Tenant activo del actor.
+   * @param id - Identificador del dataset.
+   * @returns El dataset o `null`.
    */
   findDatasetForUpdate(
     em: EntityManager,
+    tenantId: string,
     id: string,
   ): Promise<LakehouseDatasets | null> {
     return em.findOne(
       LakehouseDatasets,
-      { id },
+      { id, tenantId },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
   }
 
-  /** Clave natural de la tabla física: `(catálogo, base de datos, tabla)`. */
+  /**
+   * Dataset registrado para esa tabla dentro del tenant: dos organizaciones
+   * pueden usar el mismo nombre de tabla en su propio catálogo.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Tenant activo del actor.
+   * @param lakehouseCatalogId - Catálogo donde vive la tabla.
+   * @param databaseName - Base de datos.
+   * @param tableName - Tabla.
+   * @returns El dataset o `null`.
+   */
   findDatasetByTable(
     em: EntityManager,
+    tenantId: string,
     lakehouseCatalogId: string,
     databaseName: string,
     tableName: string,
   ): Promise<LakehouseDatasets | null> {
     return em.findOne(LakehouseDatasets, {
+      tenantId,
       lakehouseCatalogId,
       databaseName,
       tableName,

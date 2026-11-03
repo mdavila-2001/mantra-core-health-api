@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { CONCEPTS, PreconditionFailedException } from '../../../../common';
+import { SchedulingErrorReason } from '../../scheduling.error-reasons';
 // Dónde se atiende lo sabe `practice`: es su dato y no se copia acá. La
 // dependencia va en un solo sentido —`practice` no importa `scheduling`— así
 // que no cierra ciclo.
@@ -10,6 +11,10 @@ import {
   PRACTITIONER_DIRECTORY_PORT,
   type PractitionerDirectoryPort,
 } from '../ports/practitioner-directory.port';
+import {
+  BOOKING_BILLING_PORT,
+  type BookingBillingPort,
+} from '../ports/booking-billing.port';
 import type { BookableSlots, SchedulableResources } from '../../entities';
 import {
   AGENDA_MAX_LIMIT,
@@ -20,6 +25,7 @@ import {
   ResourceListItemDto,
   ResourceSiteDto,
   SlotListItemDto,
+  SlotPriceDto,
   type ResourceType,
 } from '../../presentation/dto';
 import { PRACTITIONER_PROFILE_TABLES } from '../../domain/resource/practitioner-profile-tables';
@@ -55,6 +61,7 @@ export class SchedulingAgendaService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param agendaRepo - Repositorio de lectura de agenda.
    * @param directory - Sede y nombre de los profesionales (`practice` y `profiles`).
+   * @param billing - El precio de la consulta de cada práctica (FAC-01).
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -62,6 +69,8 @@ export class SchedulingAgendaService {
     private readonly agendaRepo: SchedulingAgendaRepository,
     @Inject(PRACTITIONER_DIRECTORY_PORT)
     private readonly directory: PractitionerDirectoryPort,
+    @Inject(BOOKING_BILLING_PORT)
+    private readonly billing: BookingBillingPort,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(SchedulingAgendaService.name);
@@ -161,7 +170,11 @@ export class SchedulingAgendaService {
     );
 
     const truncated = rows.length > limit;
-    const items = rows.slice(0, limit).map((slot) => this.toSlotItem(slot));
+    const page = rows.slice(0, limit);
+    const prices = await this.slotPrices(em, page);
+    const items = page.map((slot) =>
+      this.toSlotItem(slot, prices.get(slot.resourceId) ?? null),
+    );
     if (truncated) {
       this.logger.warn(
         { operation: 'scheduling.slots.list', limit },
@@ -177,12 +190,14 @@ export class SchedulingAgendaService {
       throw new PreconditionFailedException(
         'La ventana debe empezar antes de terminar',
         { from: from.toISOString(), to: to.toISOString() },
+        SchedulingErrorReason.AGENDA_WINDOW_INVERTED,
       );
     }
     if (to.getTime() - from.getTime() > MAX_WINDOW_MS) {
       throw new PreconditionFailedException(
         `La ventana no puede superar ${MAX_WINDOW_DAYS} días`,
         { maxWindowDays: MAX_WINDOW_DAYS, maxLimit: AGENDA_MAX_LIMIT },
+        SchedulingErrorReason.AGENDA_WINDOW_TOO_WIDE,
       );
     }
   }
@@ -209,8 +224,36 @@ export class SchedulingAgendaService {
     };
   }
 
+  /**
+   * El precio de la consulta por recurso, en lote: una consulta para las
+   * prácticas y otra para sus precios. Un precio que no es mayor que 0 no se
+   * publica: el paciente ve «todavía no publicó el precio», nunca «0,00».
+   */
+  private async slotPrices(
+    em: EntityManager,
+    slots: readonly BookableSlots[],
+  ): Promise<Map<string, SlotPriceDto>> {
+    const practices = await this.agendaRepo.findResourcePractices(em, [
+      ...new Set(slots.map((s) => s.resourceId)),
+    ]);
+    if (practices.size === 0) return new Map();
+    const prices = await this.billing.findConsultationPrices(em, [
+      ...new Set(practices.values()),
+    ]);
+    const byResource = new Map<string, SlotPriceDto>();
+    for (const [resourceId, practiceId] of practices) {
+      const amount = Number(prices.get(practiceId)?.price);
+      if (amount > 0)
+        byResource.set(resourceId, { amount, currencyCode: 'BOB' });
+    }
+    return byResource;
+  }
+
   /** Proyecta el cupo al contrato de lectura. */
-  private toSlotItem(slot: BookableSlots): SlotListItemDto {
+  private toSlotItem(
+    slot: BookableSlots,
+    price: SlotPriceDto | null,
+  ): SlotListItemDto {
     return {
       id: slot.id,
       resourceId: slot.resourceId,
@@ -221,6 +264,7 @@ export class SchedulingAgendaService {
       remainingCapacity: slot.remainingCapacity,
       statusConceptId: slot.statusConceptId,
       serviceConceptId: slot.serviceConceptId ?? null,
+      price,
     };
   }
 }

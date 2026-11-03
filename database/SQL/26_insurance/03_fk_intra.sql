@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 26 · schema insurance
+-- SALUD v4.2.83 · módulo 26 · schema insurance
 -- Generado de diagram_26_insurance.puml — NO editar a mano.
 
 
@@ -12,6 +12,24 @@ DO $$ BEGIN
     ALTER TABLE "insurance"."broker_carrier_agreements"
         ADD CONSTRAINT "fk_broker_carrier_agreements_insurance_carrier_id" FOREIGN KEY ("insurance_carrier_id")
         REFERENCES "insurance"."insurance_carriers" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "insurance"."insurance_terms_conditions"
+        ADD CONSTRAINT "fk_insurance_terms_conditions_insurance_carrier_id" FOREIGN KEY ("insurance_carrier_id")
+        REFERENCES "insurance"."insurance_carriers" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "insurance"."insurance_terms_conditions"
+        ADD CONSTRAINT "fk_insurance_terms_conditions_insurance_product_id" FOREIGN KEY ("insurance_product_id")
+        REFERENCES "insurance"."insurance_products" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "insurance"."insurance_terms_conditions"
+        ADD CONSTRAINT "fk_insurance_terms_conditions_insurance_plan_id" FOREIGN KEY ("insurance_plan_id")
+        REFERENCES "insurance"."insurance_plans" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -45,22 +63,28 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
+    ALTER TABLE "insurance"."practitioner_insurer_requests"
+        ADD CONSTRAINT "fk_practitioner_insurer_requests_insurance_carrier_id" FOREIGN KEY ("insurance_carrier_id")
+        REFERENCES "insurance"."insurance_carriers" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
     ALTER TABLE "insurance"."insurance_campaigns"
         ADD CONSTRAINT "fk_insurance_campaigns_insurance_carrier_id" FOREIGN KEY ("insurance_carrier_id")
         REFERENCES "insurance"."insurance_carriers" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
     ALTER TABLE "insurance"."insurance_campaign_partners"
         ADD CONSTRAINT "fk_insurance_campaign_partners_insurance_campaign_id" FOREIGN KEY ("insurance_campaign_id")
         REFERENCES "insurance"."insurance_campaigns" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
     ALTER TABLE "insurance"."insurance_campaign_partners"
         ADD CONSTRAINT "fk_insurance_campaign_partners_network_provider_membership_id" FOREIGN KEY ("network_provider_membership_id")
         REFERENCES "insurance"."network_provider_memberships" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
     ALTER TABLE "insurance"."patient_coverages"

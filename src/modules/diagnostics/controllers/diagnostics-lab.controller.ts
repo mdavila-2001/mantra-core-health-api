@@ -12,10 +12,11 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   requireTenantId,
-  type AuthenticatedUser,
   AccessLogged,
+  type AuthenticatedUser,
 } from '../../../common';
 import { LabStaffGuard } from '../guards';
 import { DiagnosticsLabService } from '../services';
@@ -71,6 +72,11 @@ export class DiagnosticsLabController {
     return this.service.listWorkOrders(requireTenantId(), query);
   }
 
+  @Audited({
+    action: 'LAB_WORK_ORDER_CREATED',
+    entity: 'laboratory_work_order',
+    entityId: 'result.id',
+  })
   @Post('work-orders')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Abrir orden de trabajo y desglosar pruebas' })
@@ -82,6 +88,11 @@ export class DiagnosticsLabController {
   }
 
   /** Soporte: abrir corrida de analizador. */
+  @Audited({
+    action: 'ANALYZER_RUN_CREATED',
+    entity: 'analyzer_run',
+    entityId: 'result.id',
+  })
   @Post('analyzer-runs')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -95,6 +106,11 @@ export class DiagnosticsLabController {
   }
 
   /** UC-20-05. */
+  @Audited({
+    action: 'ANALYZER_MESSAGE_INGESTED',
+    entity: 'analyzer_run',
+    entityId: 'param:id',
+  })
   @Post('analyzer-runs/:id/messages')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -109,6 +125,11 @@ export class DiagnosticsLabController {
   }
 
   /** UC-20-06. */
+  @Audited({
+    action: 'LAB_RESULT_VERIFIED',
+    entity: 'observation',
+    entityId: 'param:observationId',
+  })
   @Post('results/:observationId/verifications')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Verificar (técnica/facultativa) un resultado' })

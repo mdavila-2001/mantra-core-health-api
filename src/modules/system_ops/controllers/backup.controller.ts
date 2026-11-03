@@ -1,6 +1,11 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { BackupService } from '../services';
 import { CreateBackupPolicyDto, IdResultDto } from '../dto';
 
@@ -17,6 +22,11 @@ export class BackupController {
   constructor(private readonly service: BackupService) {}
 
   /** UC-11-09. */
+  @Audited({
+    action: 'BACKUP_POLICY_CREATED',
+    entity: 'backup_policy',
+    entityId: 'result.id',
+  })
   @Post('backup-policies')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

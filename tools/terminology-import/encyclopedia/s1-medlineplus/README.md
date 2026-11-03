@@ -63,9 +63,8 @@ Insumos (fuera de git, raíz del workspace): `glossary-data-build-catalogos/ndjs
 `mantra-core-health/public/glossary-seed/shards/` y `wikidata-images.ndjson`.
 Salida por defecto: `docs/progress/evidence/lane-41/F9/s1-medlineplus/output/`.
 
-> Las pruebas de este corte no están enganchadas al script `test:terminology-import` del
-> `package.json` (su glob es `tools/terminology-import/test/*.test.mjs`); correrlas con el
-> comando de arriba o ampliar el glob en otra tarjeta.
+> Las pruebas de este corte las corre `yarn test:terminology-import`, cuyo glob recursivo
+> (`tools/terminology-import/**/*.test.mjs`) alcanza todos los importadores.
 
 Idempotente: con las mismas entradas y la misma caché, `articles.ndjson` sale
 byte a byte igual (la fecha de consulta a Commons se guarda dentro de su caché).

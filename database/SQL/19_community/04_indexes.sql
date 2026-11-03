@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 19 · schema community
+-- SALUD v4.2.83 · módulo 19 · schema community
 -- Generado de diagram_19_community.puml — NO editar a mano.
 
 
@@ -75,6 +75,34 @@ CREATE INDEX IF NOT EXISTS "ix_service_reviews_updated_by_user_id" ON "community
 CREATE INDEX IF NOT EXISTS "gin_service_reviews_search" ON "community"."service_reviews" USING gin (to_tsvector('simple', (coalesce(review_text, ''))));
 
 CREATE UNIQUE INDEX IF NOT EXISTS "uq_service_reviews_verified_encounter" ON "community"."service_reviews" ("reviewer_patient_profile_id", "target_public_profile_id", "verified_encounter_id") WHERE verified_encounter_id IS NOT NULL;
+
+CREATE INDEX IF NOT EXISTS "ix_service_reviews_verified_crm_case_id" ON "community"."service_reviews" ("verified_crm_case_id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "uq_service_reviews_verified_crm_case" ON "community"."service_reviews" ("reviewer_patient_profile_id", "target_public_profile_id", "verified_crm_case_id") WHERE verified_crm_case_id IS NOT NULL;
+
+CREATE INDEX IF NOT EXISTS "ix_party_ratings_reviewer_patient_profile_id" ON "community"."party_ratings" ("reviewer_patient_profile_id");
+
+CREATE INDEX IF NOT EXISTS "ix_party_ratings_reviewer_practitioner_profile_id" ON "community"."party_ratings" ("reviewer_practitioner_profile_id");
+
+CREATE INDEX IF NOT EXISTS "ix_party_ratings_reviewer_practice_id" ON "community"."party_ratings" ("reviewer_practice_id");
+
+CREATE INDEX IF NOT EXISTS "ix_party_ratings_target_patient_profile_id" ON "community"."party_ratings" ("target_patient_profile_id");
+
+CREATE INDEX IF NOT EXISTS "ix_party_ratings_target_practitioner_profile_id" ON "community"."party_ratings" ("target_practitioner_profile_id");
+
+CREATE INDEX IF NOT EXISTS "ix_party_ratings_target_practice_id" ON "community"."party_ratings" ("target_practice_id");
+
+CREATE INDEX IF NOT EXISTS "ix_party_ratings_verified_encounter_id" ON "community"."party_ratings" ("verified_encounter_id");
+
+CREATE INDEX IF NOT EXISTS "ix_party_ratings_verified_role_assignment_id" ON "community"."party_ratings" ("verified_role_assignment_id");
+
+CREATE INDEX IF NOT EXISTS "ix_party_ratings_moderation_status_concept_id" ON "community"."party_ratings" ("moderation_status_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_party_ratings_created_by_user_id" ON "community"."party_ratings" ("created_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_party_ratings_updated_by_user_id" ON "community"."party_ratings" ("updated_by_user_id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "uq_party_ratings_basis" ON "community"."party_ratings" (coalesce(reviewer_patient_profile_id, reviewer_practitioner_profile_id, reviewer_practice_id), coalesce(target_patient_profile_id, target_practitioner_profile_id, target_practice_id), coalesce(verified_encounter_id, verified_role_assignment_id));
 
 CREATE INDEX IF NOT EXISTS "ix_review_dimension_scores_review_id" ON "community"."review_dimension_scores" ("review_id");
 
@@ -286,8 +314,6 @@ CREATE INDEX IF NOT EXISTS "ix_conversations_updated_by_user_id" ON "community".
 
 CREATE INDEX IF NOT EXISTS "ix_conversations_tenant_id_status_concept_id" ON "community"."conversations" ("tenant_id", "status_concept_id", "updated_at" DESC);
 
-CREATE INDEX IF NOT EXISTS "ix_conversation_participants_profile_pinned" ON "community"."conversation_participants" ("participant_profile_id", "is_pinned") WHERE is_pinned;
-
 CREATE UNIQUE INDEX IF NOT EXISTS "ux_chat_auto_replies_public_profile_id" ON "community"."chat_auto_replies" ("public_profile_id");
 
 CREATE INDEX IF NOT EXISTS "ix_chat_auto_replies_status_concept_id" ON "community"."chat_auto_replies" ("status_concept_id");
@@ -295,6 +321,8 @@ CREATE INDEX IF NOT EXISTS "ix_chat_auto_replies_status_concept_id" ON "communit
 CREATE INDEX IF NOT EXISTS "ix_chat_auto_replies_created_by_user_id" ON "community"."chat_auto_replies" ("created_by_user_id");
 
 CREATE INDEX IF NOT EXISTS "ix_chat_auto_replies_updated_by_user_id" ON "community"."chat_auto_replies" ("updated_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_conversation_participants_profile_pinned" ON "community"."conversation_participants" ("participant_profile_id", "is_pinned") WHERE is_pinned;
 
 CREATE INDEX IF NOT EXISTS "ix_conversation_participants_conversation_id" ON "community"."conversation_participants" ("conversation_id");
 
@@ -327,6 +355,12 @@ CREATE INDEX IF NOT EXISTS "ix_direct_messages_created_by_user_id" ON "community
 CREATE INDEX IF NOT EXISTS "ix_direct_messages_updated_by_user_id" ON "community"."direct_messages" ("updated_by_user_id");
 
 CREATE INDEX IF NOT EXISTS "gin_direct_messages_search" ON "community"."direct_messages" USING gin (to_tsvector('simple', (coalesce(body_text, ''))));
+
+CREATE INDEX IF NOT EXISTS "ix_direct_messages_authored_by_user_id" ON "community"."direct_messages" ("authored_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_direct_messages_on_behalf_of_profile_id" ON "community"."direct_messages" ("on_behalf_of_profile_id");
+
+CREATE INDEX IF NOT EXISTS "ix_direct_messages_delegate_assignment_id" ON "community"."direct_messages" ("delegate_assignment_id");
 
 CREATE INDEX IF NOT EXISTS "ix_message_receipts_direct_message_id" ON "community"."message_receipts" ("direct_message_id");
 
@@ -509,3 +543,37 @@ CREATE INDEX IF NOT EXISTS "ix_comment_media_file_id" ON "community"."comment_me
 CREATE INDEX IF NOT EXISTS "ix_comment_media_media_role_concept_id" ON "community"."comment_media" ("media_role_concept_id");
 
 CREATE INDEX IF NOT EXISTS "ix_comment_media_created_by_user_id" ON "community"."comment_media" ("created_by_user_id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "uq_conversation_assignments_conversation_id" ON "community"."conversation_assignments" ("conversation_id");
+
+CREATE INDEX IF NOT EXISTS "ix_conversation_assignments_tenant_id" ON "community"."conversation_assignments" ("tenant_id", "status_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_conversation_assignments_practitioner_profile_id" ON "community"."conversation_assignments" ("practitioner_profile_id", "status_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_conversation_assignments_assigned_user_id" ON "community"."conversation_assignments" ("assigned_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_conversation_assignments_status_concept_id" ON "community"."conversation_assignments" ("status_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_conversation_assignments_sla_due_at" ON "community"."conversation_assignments" ("sla_due_at") WHERE sla_due_at IS NOT NULL;
+
+CREATE INDEX IF NOT EXISTS "ix_conversation_assignments_created_by_user_id" ON "community"."conversation_assignments" ("created_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_conversation_assignments_updated_by_user_id" ON "community"."conversation_assignments" ("updated_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_conversation_internal_notes_tenant_id" ON "community"."conversation_internal_notes" ("tenant_id");
+
+CREATE INDEX IF NOT EXISTS "ix_conversation_internal_notes_conversation_created" ON "community"."conversation_internal_notes" ("conversation_id", "created_at" DESC);
+
+CREATE INDEX IF NOT EXISTS "ix_conversation_internal_notes_author_user_id" ON "community"."conversation_internal_notes" ("author_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_reply_templates_tenant_id" ON "community"."reply_templates" ("tenant_id", "status_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_reply_templates_practitioner_profile_id" ON "community"."reply_templates" ("practitioner_profile_id");
+
+CREATE INDEX IF NOT EXISTS "ix_reply_templates_category_concept_id" ON "community"."reply_templates" ("category_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_reply_templates_status_concept_id" ON "community"."reply_templates" ("status_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_reply_templates_created_by_user_id" ON "community"."reply_templates" ("created_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_reply_templates_updated_by_user_id" ON "community"."reply_templates" ("updated_by_user_id");

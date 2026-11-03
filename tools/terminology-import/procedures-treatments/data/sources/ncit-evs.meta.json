@@ -1,0 +1,19 @@
+{
+  "source": "ncit-evs",
+  "name": "NCI Thesaurus — edición oficial (OWL)",
+  "publisher": "National Cancer Institute — Enterprise Vocabulary Services",
+  "license": "CC BY 4.0 (términos de uso de NCI Thesaurus)",
+  "licenseUrl": "https://evs.nci.nih.gov/ftp1/NCI_Thesaurus/ThesaurusTermsofUse.htm",
+  "homepage": "https://ncit.nci.nih.gov/",
+  "retrievedAt": "2026-10-24T16:36:35.565Z",
+  "lastModified": "Wed, 30 Sep 2026 13:56:02 GMT",
+  "files": {
+    "Thesaurus.OWL.zip": {
+      "url": "https://evs.nci.nih.gov/ftp1/NCI_Thesaurus/Thesaurus.OWL.zip",
+      "fileUrl": "https://evs.nci.nih.gov/ftp1/NCI_Thesaurus/Thesaurus.OWL.zip",
+      "lastModified": "Wed, 30 Sep 2026 13:56:02 GMT",
+      "sha256": "a6b0897dc68ac9c9312e5d09db1c3d7caf1c6572452942e89cc4506c70f1877e",
+      "bytes": 45866376
+    }
+  }
+}

@@ -101,8 +101,8 @@ export class IdentifiersRepository {
     ids: readonly string[],
   ): Promise<Map<string, Identifiers>> {
     if (ids.length === 0) return new Map();
-    const filas = await em.find(Identifiers, { id: { $in: [...ids] } });
-    return new Map(filas.map((fila) => [fila.id, fila]));
+    const rows = await em.find(Identifiers, { id: { $in: [...ids] } });
+    return new Map(rows.map((row) => [row.id, row]));
   }
 
   /**

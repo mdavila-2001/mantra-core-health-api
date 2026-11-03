@@ -9,7 +9,7 @@ Lógica de negocio. Cada método público resuelve un caso de uso en **una trans
 | `EducationCatalogService` | 01, 02, 03, 04, 07, 13 | Cursos, versiones, instructores, cohortes, evaluaciones y reseñas |
 | `EducationLearningService` | 05, 06, 08, 09, 10, 11, 12, 14 | Inscripción, progreso, intentos, certificado y CME |
 
-## Reglas de negocio
+## Business rules
 
 - **Curso (01)**: código único, árbol de módulos y lecciones numerado en el orden recibido, duración
   derivada de las lecciones y versión 1 registrada con él. Acreditar exige declarar las horas CME.
@@ -79,7 +79,7 @@ titular, intento en curso, intento ya corregido, reseña repetida, certificado y
 `operation: 'education.<área>.<acción>'`. `warn` al revocar un certificado. No se loguean respuestas
 de evaluación ni datos del aprendiz más allá del identificador.
 
-## Pruebas
+## Tests
 
 `education-catalog.service.spec.ts` (26) y `education-learning.service.spec.ts` (46): derivación de
 la duración y del progreso, estado vigente de la lección, numeración de intentos, corrección

@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { LiabilityService } from '../services';
 import { PayLiabilityDto, LiabilityPaymentResponseDto } from '../dto';
 
@@ -25,6 +30,11 @@ export class AccountingLiabilityController {
   constructor(private readonly liabilityService: LiabilityService) {}
 
   /** UC-16-12. */
+  @Audited({
+    action: 'LIABILITY_PAID',
+    entity: 'liability',
+    entityId: 'param:id',
+  })
   @Post('liabilities/:id/payments')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

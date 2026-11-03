@@ -8,9 +8,20 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { DelegatedAccessEvaluationService } from './delegated-access-evaluation.service';
-import { ResourceNotFoundException } from '../../../common';
+import {
+  DomainException,
+  PreconditionFailedException,
+  ResourceNotFoundException,
+} from '../../../common';
 import { DELEG } from '../delegated_access.concepts';
+import { DelegatedAccessErrorReason } from '../delegated_access.error-reasons';
 import { STATUS } from './concept-maps';
+import {
+  ACTIVE_TENANT,
+  buildScope,
+  inTenant,
+  thrown,
+} from './delegation-scope.testing';
 
 const actor = { id: 'authz-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -31,21 +42,36 @@ function build() {
   };
   const orgAssignmentsRepo = {
     findOverdueActive: mockFn().mockResolvedValue([]),
+    findById: mockFn().mockResolvedValue({
+      id: 'org1',
+      tenantMembershipId: 'mem1',
+    }),
+  };
+  const setsRepo = {
+    findById: mockFn().mockResolvedValue({
+      id: 'set1',
+      tenantId: ACTIVE_TENANT,
+    }),
   };
   const itemsRepo = { findBySetAndPermission: mockFn() };
   const eventsRepo = { record: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new DelegatedAccessEvaluationService(
+  const scope = buildScope({ setsRepo, delegatesRepo, orgAssignmentsRepo });
+  const raw = new DelegatedAccessEvaluationService(
     em as any,
     grantsRepo as any,
     delegatesRepo as any,
     orgAssignmentsRepo as any,
     itemsRepo as any,
     eventsRepo,
+    scope.scope,
     logger as any,
   );
   return {
-    service,
+    service: inTenant(raw),
+    raw,
+    scope,
+    setsRepo,
     tx,
     grantsRepo,
     delegatesRepo,
@@ -109,6 +135,7 @@ describe('DelegatedAccessEvaluationService', () => {
         d.service.evaluate(
           {
             practitionerDelegateAssignmentId: 'del1',
+            effectiveUserId: 'delegate-user',
             purpose: 'TREATMENT',
           } as any,
           actor,
@@ -120,11 +147,14 @@ describe('DelegatedAccessEvaluationService', () => {
       const d = build();
       d.delegatesRepo.findById.mockResolvedValue({
         id: 'del1',
+        delegatedPermissionSetId: 'set1',
+        delegateUserAssignmentId: 'org1',
         statusConceptId: STATUS.REVOKED,
       });
       const res = await d.service.evaluate(
         {
           practitionerDelegateAssignmentId: 'del1',
+          effectiveUserId: 'delegate-user',
           purpose: 'TREATMENT',
         } as any,
         actor,
@@ -140,12 +170,15 @@ describe('DelegatedAccessEvaluationService', () => {
       const d = build();
       d.delegatesRepo.findById.mockResolvedValue({
         id: 'del1',
+        delegatedPermissionSetId: 'set1',
+        delegateUserAssignmentId: 'org1',
         statusConceptId: STATUS.ACTIVE,
       });
       d.grantsRepo.findActiveMatch.mockResolvedValue(null);
       const res = await d.service.evaluate(
         {
           practitionerDelegateAssignmentId: 'del1',
+          effectiveUserId: 'delegate-user',
           purpose: 'TREATMENT',
         } as any,
         actor,
@@ -158,8 +191,9 @@ describe('DelegatedAccessEvaluationService', () => {
       const d = build();
       d.delegatesRepo.findById.mockResolvedValue({
         id: 'del1',
-        statusConceptId: STATUS.ACTIVE,
         delegatedPermissionSetId: 'set1',
+        delegateUserAssignmentId: 'org1',
+        statusConceptId: STATUS.ACTIVE,
       });
       d.grantsRepo.findActiveMatch.mockResolvedValue({ id: 'g1' });
       d.itemsRepo.findBySetAndPermission.mockResolvedValue({
@@ -168,6 +202,7 @@ describe('DelegatedAccessEvaluationService', () => {
       const res = await d.service.evaluate(
         {
           practitionerDelegateAssignmentId: 'del1',
+          effectiveUserId: 'delegate-user',
           purpose: 'TREATMENT',
           permissionId: 'p1',
         } as any,
@@ -190,13 +225,15 @@ describe('DelegatedAccessEvaluationService', () => {
       const d = build();
       d.delegatesRepo.findById.mockResolvedValue({
         id: 'del1',
-        statusConceptId: STATUS.ACTIVE,
         delegatedPermissionSetId: 'set1',
+        delegateUserAssignmentId: 'org1',
+        statusConceptId: STATUS.ACTIVE,
       });
       d.grantsRepo.findActiveMatch.mockResolvedValue({ id: 'g1' });
       const res = await d.service.evaluate(
         {
           practitionerDelegateAssignmentId: 'del1',
+          effectiveUserId: 'delegate-user',
           purpose: 'TREATMENT',
         } as any,
         actor,
@@ -208,6 +245,113 @@ describe('DelegatedAccessEvaluationService', () => {
           eventTypeConceptId: DELEG.EVENT_ACCESS_EVALUATED,
         }),
       );
+    });
+  });
+
+  describe('sujeto efectivo y tenant (DLG-02)', () => {
+    const body = (extra: object = {}) =>
+      ({
+        practitionerDelegateAssignmentId: 'del1',
+        purpose: 'TREATMENT',
+        ...extra,
+      }) as any;
+    const activeDelegate = () => ({
+      id: 'del1',
+      delegatedPermissionSetId: 'set1',
+      delegateUserAssignmentId: 'org1',
+      statusConceptId: STATUS.ACTIVE,
+    });
+
+    it('Correcto: el propio delegado autenticado se evalúa sin declarar a nadie', async () => {
+      const d = build();
+      d.delegatesRepo.findById.mockResolvedValue(activeDelegate());
+      d.grantsRepo.findActiveMatch.mockResolvedValue({ id: 'g1' });
+      const res = await d.service.evaluate(body(), {
+        id: 'delegate-user',
+        roles: ['SECURITY_ADMIN'],
+      } as any);
+      expect(res).toEqual({ allowed: true, requiresStepUp: false });
+    });
+
+    it('Error: el actor que no es el delegado no recibe allowed:true aunque haya grant vigente', async () => {
+      const d = build();
+      d.delegatesRepo.findById.mockResolvedValue(activeDelegate());
+      d.grantsRepo.findActiveMatch.mockResolvedValue({ id: 'g1' });
+      const res = await d.service.evaluate(body(), actor);
+      expect(res).toEqual({
+        allowed: false,
+        requiresStepUp: false,
+        reason: DelegatedAccessErrorReason.DELEGATED_SUBJECT_MISMATCH,
+      });
+      expect(d.grantsRepo.findActiveMatch).not.toHaveBeenCalled();
+      expect(d.eventsRepo.record).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          eventTypeConceptId: DELEG.EVENT_ACCESS_EVALUATED,
+          actorUserId: 'authz-1',
+        }),
+      );
+    });
+
+    it('Error: un effectiveUserId que no es el titular de la asignación tampoco se permite', async () => {
+      const d = build();
+      d.delegatesRepo.findById.mockResolvedValue(activeDelegate());
+      d.grantsRepo.findActiveMatch.mockResolvedValue({ id: 'g1' });
+      const res = await d.service.evaluate(
+        body({ effectiveUserId: 'otra-persona' }),
+        actor,
+      );
+      expect(res.allowed).toBe(false);
+      expect(res.reason).toBe(
+        DelegatedAccessErrorReason.DELEGATED_SUBJECT_MISMATCH,
+      );
+    });
+
+    it('Error: la asignación del delegado en la membresía de otro tenant no habilita', async () => {
+      const d = build();
+      d.delegatesRepo.findById.mockResolvedValue(activeDelegate());
+      d.grantsRepo.findActiveMatch.mockResolvedValue({ id: 'g1' });
+      d.scope.scopeRepo.membershipOf.mockResolvedValue({
+        tenantId: 't2',
+        userId: 'delegate-user',
+      });
+      const res = await d.service.evaluate(
+        body({ effectiveUserId: 'delegate-user' }),
+        actor,
+      );
+      expect(res.allowed).toBe(false);
+      expect(res.reason).toBe(
+        DelegatedAccessErrorReason.DELEGATED_SUBJECT_MISMATCH,
+      );
+    });
+
+    it('Error: una delegación de otro tenant responde 404 idéntico a inexistente y no registra evaluación', async () => {
+      const d = build();
+      d.delegatesRepo.findById.mockResolvedValue(null);
+      const missing = await thrown(
+        d.service.evaluate(body({ effectiveUserId: 'delegate-user' }), actor),
+      );
+      d.delegatesRepo.findById.mockResolvedValue(activeDelegate());
+      d.setsRepo.findById.mockResolvedValue({ id: 'set1', tenantId: 't2' });
+      const foreign = await thrown(
+        d.service.evaluate(body({ effectiveUserId: 'delegate-user' }), actor),
+      );
+      expect(foreign).toBeInstanceOf(ResourceNotFoundException);
+      expect(foreign.getResponse()).toEqual(missing.getResponse());
+      expect(foreign.reason).toBe(
+        DelegatedAccessErrorReason.DELEGATED_DELEGATION_NOT_FOUND,
+      );
+      expect(foreign.details).toBeUndefined();
+      expect(d.eventsRepo.record).not.toHaveBeenCalled();
+      expect(d.grantsRepo.findActiveMatch).not.toHaveBeenCalled();
+    });
+
+    it('sin tenant en el contexto no se evalúa', async () => {
+      const d = build();
+      await expect(
+        d.raw.evaluate(body({ effectiveUserId: 'delegate-user' }), actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.delegatesRepo.findById).not.toHaveBeenCalled();
     });
   });
 });

@@ -11,7 +11,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   CreateMedicalVisitorDto,
   CreatedResourceDto,
@@ -48,6 +53,11 @@ export class MedicalVisitorsController {
   constructor(private readonly service: MedicalVisitorsService) {}
 
   /** UC-17-06. */
+  @Audited({
+    action: 'MEDICAL_VISITOR_LINKED',
+    entity: 'medical_visitor',
+    entityId: 'result.id',
+  })
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Registrar un visitador médico' })
@@ -69,6 +79,11 @@ export class MedicalVisitorsController {
   }
 
   /** UC-17-07. */
+  @Audited({
+    action: 'MEDICAL_VISITOR_VERIFICATION_RECORDED',
+    entity: 'medical_visitor',
+    entityId: 'param:medicalVisitorId',
+  })
   @Post(':medicalVisitorId/verifications')
   @ApiOperation({ summary: 'Registrar las verificaciones del visitador' })
   verify(
@@ -86,6 +101,11 @@ export class MedicalVisitorsController {
   }
 
   /** UC-17-09. */
+  @Audited({
+    action: 'MEDICAL_VISITOR_PRODUCTS_SET',
+    entity: 'medical_visitor',
+    entityId: 'param:medicalVisitorId',
+  })
   @Put(':medicalVisitorId/products')
   @ApiOperation({ summary: 'Fijar los productos que el visitador representa' })
   setProducts(
@@ -98,6 +118,11 @@ export class MedicalVisitorsController {
   }
 
   /** UC-17-10. */
+  @Audited({
+    action: 'MEDICAL_VISITOR_SPECIALTIES_SET',
+    entity: 'medical_visitor',
+    entityId: 'param:medicalVisitorId',
+  })
   @Put(':medicalVisitorId/specialties')
   @ApiOperation({ summary: 'Fijar las especialidades que el visitador visita' })
   setSpecialties(
@@ -115,6 +140,11 @@ export class MedicalVisitorsController {
   }
 
   /** UC-17-08: desvinculación con revocación efectiva de accesos. */
+  @Audited({
+    action: 'MEDICAL_VISITOR_UNLINKED',
+    entity: 'medical_visitor',
+    entityId: 'param:medicalVisitorId',
+  })
   @Post(':medicalVisitorId/unlink')
   @ApiOperation({
     summary: 'Desvincular al visitador y revocar sus accesos',
@@ -136,6 +166,11 @@ export class MedicalVisitorsController {
   }
 
   /** Revinculación autorizada (spec 5340). */
+  @Audited({
+    action: 'MEDICAL_VISITOR_RELINKED',
+    entity: 'medical_visitor',
+    entityId: 'param:medicalVisitorId',
+  })
   @Post(':medicalVisitorId/relink')
   @ApiOperation({ summary: 'Revincular a un visitador con nueva autorización' })
   relink(

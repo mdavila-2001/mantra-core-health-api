@@ -20,7 +20,10 @@ es un segmento literal: `path-to-regexp` v8 sólo trata `:` como inicio de
 parámetro.
 
 Permisos: todo exige `@Roles('SECURITY_ADMIN')` salvo `$translate` y `$lookup`,
-que el caso de uso asigna al consumidor FHIR y sólo exigen autenticación.
+que el caso de uso asigna al consumidor FHIR y sólo exigen autenticación. En
+`$translate` eso vale para la consulta: curar un mapeo (con `targetConceptId`)
+lo decide `ConceptMapsService` y exige `SECURITY_ADMIN`, `TERMINOLOGY_ENGINEER`
+o `SUPERADMIN`; cualquier otra sesión recibe 403.
 
 Códigos de estado: `201 Created` en las altas e importación; `200 OK` en las
 mutaciones de recursos existentes (publicación, propiedades, `$expand`,
@@ -30,7 +33,7 @@ mutaciones de recursos existentes (publicación, propiedades, `$expand`,
 la clave completa del concepto y resolver con uno solo devolvería un resultado
 arbitrario.
 
-## Pruebas
+## Tests
 
 `*.controller.spec.ts` — unitarias con el servicio mockeado; verifican la
 delegación con los argumentos correctos y el valor devuelto.

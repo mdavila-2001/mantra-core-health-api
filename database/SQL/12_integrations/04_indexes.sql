@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 12 · schema integrations
+-- SALUD v4.2.83 · módulo 12 · schema integrations
 -- Generado de diagram_12_integrations.puml — NO editar a mano.
 
 
@@ -73,6 +73,8 @@ CREATE INDEX IF NOT EXISTS "ix_inbound_messages_status_concept_id" ON "integrati
 CREATE INDEX IF NOT EXISTS "ix_inbound_messages_created_by_user_id" ON "integrations"."inbound_messages" ("created_by_user_id");
 
 CREATE INDEX IF NOT EXISTS "ix_inbound_messages_updated_by_user_id" ON "integrations"."inbound_messages" ("updated_by_user_id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "uq_inbound_messages_connection_id_signature" ON "integrations"."inbound_messages" ("connection_id", "signature") WHERE signature IS NOT NULL;
 
 CREATE INDEX IF NOT EXISTS "ix_message_responses_outbound_message_id" ON "integrations"."message_responses" ("outbound_message_id");
 

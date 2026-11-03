@@ -1,5 +1,6 @@
 import type { TechnicalDataType } from '../../../../modules/forms/dto';
 
+import citaMedica from './transversal/cita-medica.json';
 import anamnesisGeneral from './transversal/anamnesis-historia-clinica-general.json';
 import examenFisico from './transversal/examen-fisico-general.json';
 import consentimientoInformado from './transversal/consentimiento-informado.json';
@@ -47,6 +48,11 @@ import controlObstetrico from './obstetricia/control-obstetrico.json';
 import anamnesisOdontologica from './odontologia/anamnesis-odontologica.json';
 // v2 (2026-10-02) — las fichas específicas por condición, generadas.
 import { SPECIFIC_FORMS } from './specific-forms.generated';
+// v4.2.0 — los dos tamizajes de salud mental que el README dejaba como
+// «reemplazo libre propuesto» (PHQ-9/GAD-7/Beck/AUDIT ilustrado tienen
+// copyright comercial): SRQ-20 y AUDIT, ambos publicados por la OMS.
+import srq20TamizajeSaludMental from './psiquiatria/srq-20-tamizaje-salud-mental.json';
+import auditTamizajeConsumoAlcohol from './psiquiatria/audit-tamizaje-consumo-alcohol.json';
 
 /**
  * Los tipos de dato que un formulario del catálogo puede declarar.
@@ -246,7 +252,7 @@ export function validate(form: RawForm): StandardFormDefinition {
 /** El tipo tiene que ser uno que el motor sepa dibujar. */
 function validateType(
   field: RawForm['fields'][number],
-  failure: (motivo: string) => never,
+  failure: (reason: string) => never,
 ): void {
   const withControl =
     field.dataType === 'json' &&
@@ -273,14 +279,15 @@ function validateType(
  */
 function validateOptions(
   field: RawForm['fields'][number],
-  failure: (motivo: string) => never,
+  failure: (reason: string) => never,
 ): void {
   if (field.options === undefined) {
     if (field.multiple === true)
       failure('declara varias respuestas sin opciones');
     return;
   }
-  if (field.options.length === 0) failure('declara una lista de opciones vacía');
+  if (field.options.length === 0)
+    failure('declara una lista de opciones vacía');
   if (new Set(field.options).size !== field.options.length) {
     failure('repite una opción');
   }
@@ -300,29 +307,31 @@ function validateOptions(
 function validateCondition(
   showWhen: { field: string; equals: unknown },
   previous: ReadonlyMap<string, RawForm['fields'][number]>,
-  failure: (motivo: string) => never,
+  failure: (reason: string) => never,
 ): void {
-  const padre = previous.get(showWhen.field);
-  if (padre === undefined) {
+  const parent = previous.get(showWhen.field);
+  if (parent === undefined) {
     failure(`depende de "${showWhen.field}", que no está antes en la ficha`);
   }
   const values = Array.isArray(showWhen.equals)
     ? (showWhen.equals as unknown[])
     : [showWhen.equals];
   if (values.length === 0) failure('tiene una condición sin valores');
-  for (const valor of values) {
-    if (padre.dataType === 'boolean') {
-      if (typeof valor !== 'boolean') {
-        failure(`depende del sí/no "${padre.code}" con un valor que no es sí/no`);
-      }
-    } else if (padre.options !== undefined) {
-      if (typeof valor !== 'string' || !padre.options.includes(valor)) {
+  for (const value of values) {
+    if (parent.dataType === 'boolean') {
+      if (typeof value !== 'boolean') {
         failure(
-          `depende de "${padre.code}" con «${String(valor)}», que no es una de sus opciones`,
+          `depende del sí/no "${parent.code}" con un valor que no es sí/no`,
+        );
+      }
+    } else if (parent.options !== undefined) {
+      if (typeof value !== 'string' || !parent.options.includes(value)) {
+        failure(
+          `depende de "${parent.code}" con «${String(value)}», que no es una de sus opciones`,
         );
       }
     } else {
-      failure(`depende de "${padre.code}", que no es sí/no ni de lista`);
+      failure(`depende de "${parent.code}", que no es sí/no ni de lista`);
     }
   }
 }
@@ -341,6 +350,8 @@ function validateCondition(
  * import acá. Nada más.
  */
 export const STANDARD_FORMS: readonly StandardFormDefinition[] = [
+  // 2026-10-29 — la ficha por defecto de toda cita.
+  citaMedica,
   anamnesisGeneral,
   examenFisico,
   consentimientoInformado,
@@ -389,4 +400,7 @@ export const STANDARD_FORMS: readonly StandardFormDefinition[] = [
   controlObstetrico,
   anamnesisOdontologica,
   ...(SPECIFIC_FORMS as readonly RawForm[]),
+  // v4.2.0 — tamizajes de salud mental de dominio público (OMS)
+  srq20TamizajeSaludMental,
+  auditTamizajeConsumoAlcohol,
 ].map(validate);

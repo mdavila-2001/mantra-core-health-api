@@ -12,13 +12,8 @@ import {
 import { Tenants } from '../../modules/directory/entities';
 import { ProcessingPurposes } from '../../modules/consent/entities';
 import { Users } from '../../modules/iam/entities';
-import {
-  CONCEPT_DEFS,
-  CONCEPTS,
-  SEED,
-  deterministicId,
-} from '../constants/concepts';
-import { MODULE_CONCEPT_SEEDS } from './module-concepts';
+import { CONCEPTS, SEED, deterministicId } from '../constants/concepts';
+import { catalogConceptDefinitions } from './catalog-concept-definitions';
 import {
   SPANISH_DEFINITION_PROPERTY_CODE,
   SPANISH_DESIGNATIONS,
@@ -156,37 +151,9 @@ export class TerminologySeedService {
     }
 
     // Nivel 2: conceptos. Une el catálogo base (transversal) con los conceptos
-    // que declara cada módulo de dominio (MODULE_CONCEPT_SEEDS). Se deduplica por
-    // id y se consultan de golpe los ya presentes para evitar el patrón N+1.
-    const catalog = new Map<
-      string,
-      {
-        /**
-         * Valor de code mantenido por la instancia.
-         */
-        code: string; /**
-         * Valor de display mantenido por la instancia.
-         */
-        display: string;
-      }
-    >();
-    for (const name of Object.keys(CONCEPT_DEFS)) {
-      catalog.set(CONCEPTS[name], {
-        code: CONCEPT_DEFS[name].code,
-        display: CONCEPT_DEFS[name].display,
-      });
-    }
-    for (const seed of MODULE_CONCEPT_SEEDS) {
-      // El `code` almacenado es la CLAVE del concepto (única globalmente), no el
-      // `seed.code` humano: `catalog_concepts` tiene UNIQUE(code_system_version_id,
-      // code) y varios módulos declaran códigos genéricos coincidentes (p. ej.
-      // "ACTIVE"). Los servicios referencian los conceptos por id (mapa `ids`), no
-      // por este código, así que usar la clave garantiza unicidad sin efectos.
-      catalog.set(deterministicId(seed.key), {
-        code: seed.key,
-        display: seed.display,
-      });
-    }
+    // que declara cada módulo de dominio (`catalogConceptDefinitions`). Se
+    // consultan de golpe los ya presentes para evitar el patrón N+1.
+    const catalog = catalogConceptDefinitions();
 
     const ids = [...catalog.keys()];
     // `fields: ['id']` como en los otros nueve seeds: acá solo se necesita saber
@@ -394,7 +361,9 @@ export class TerminologySeedService {
     const designationAlreadyPresent = new Set(
       existingDesignations.map((row) => row.id),
     );
-    const propertyAlreadyPresent = new Set(existingProperties.map((row) => row.id));
+    const propertyAlreadyPresent = new Set(
+      existingProperties.map((row) => row.id),
+    );
     // Traducir un concepto que no existe violaría la FK y abortaría el arranque
     // entero. Se filtra y se avisa: el catálogo declarado y el sembrado pueden
     // divergir mientras alguien está a mitad de mover un concepto de módulo.
@@ -403,7 +372,7 @@ export class TerminologySeedService {
     let inserted = 0;
     const orphaned: string[] = [];
 
-    for (const [conceptId, traduccion] of SPANISH_DESIGNATIONS) {
+    for (const [conceptId, translation] of SPANISH_DESIGNATIONS) {
       if (!seededConcept.has(conceptId)) {
         orphaned.push(conceptId);
         continue;
@@ -416,7 +385,7 @@ export class TerminologySeedService {
           {
             id: designationId,
             conceptId,
-            value: traduccion.display,
+            value: translation.display,
             languageConceptId: CONCEPTS.LANG_ES,
             designationTypeConceptId: CONCEPTS.DESIG_PREFERRED,
             preferred: true,
@@ -437,7 +406,7 @@ export class TerminologySeedService {
             conceptId,
             propertyCode: SPANISH_DEFINITION_PROPERTY_CODE,
             dataType: SPANISH_DEFINITION_DATA_TYPE,
-            valueJson: traduccion.definition,
+            valueJson: translation.definition,
             createdAt: now,
             updatedAt: now,
           },

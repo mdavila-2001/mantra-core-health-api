@@ -12,7 +12,8 @@ import {
   SystemContextRefreshRuns,
   SystemContextBindings,
 } from '../entities';
-import { createdBy } from '../../../common';
+import { createdBy, CONCEPTS } from '../../../common';
+import { ConceptDesignations } from '../../terminology/entities';
 
 /**
  * Describe el contrato estructural de create enum definition data.
@@ -440,6 +441,28 @@ export class SystemContextRepository {
   }
 
   /**
+   * El nombre en castellano (designación `ES` preferida) de cada concepto que lo
+   * tenga. Los que no, no aparecen en el mapa.
+   *
+   * @param em - Contexto de persistencia.
+   * @param conceptIds - Conceptos a rotular.
+   */
+  async findSpanishDisplays(
+    em: EntityManager,
+    conceptIds: readonly string[],
+  ): Promise<Map<string, string>> {
+    const out = new Map<string, string>();
+    if (conceptIds.length === 0) return out;
+    const rows = await em.find(ConceptDesignations, {
+      conceptId: { $in: [...conceptIds] },
+      languageConceptId: CONCEPTS.LANG_ES,
+      preferred: true,
+    });
+    for (const row of rows) out.set(row.conceptId, row.value);
+    return out;
+  }
+
+  /**
    * Ejecuta la operación count enabled options.
    *
    * @param em - Contexto de persistencia o transacción activa.
@@ -526,6 +549,26 @@ export class SystemContextRepository {
       },
       { partial: true },
     );
+  }
+
+  /**
+   * Serializa a los que crean un binding para el mismo campo destino.
+   *
+   * El DDL no declara unicidad sobre `(esquema, entidad, campo)` activos, así
+   * que "leer y luego insertar" deja a dos transacciones ver el campo libre. El
+   * cerrojo es un `pg_advisory_xact_lock` sobre la clave estable del destino y
+   * se libera con la transacción: la segunda espera, ve el binding de la
+   * primera y responde conflicto.
+   */
+  async lockEnumTarget(
+    em: EntityManager,
+    targetSchemaName: string,
+    targetEntityName: string,
+    targetFieldName: string,
+  ): Promise<void> {
+    await em.execute('select pg_advisory_xact_lock(hashtextextended(?, 0))', [
+      `system_context:enum-binding:${targetSchemaName}.${targetEntityName}.${targetFieldName}`,
+    ]);
   }
 
   /** Un campo destino no puede tener dos enums gobernándolo a la vez. */
@@ -960,7 +1003,10 @@ export class SystemContextRepository {
       SystemContextRefreshRuns,
       {
         systemContextId: data.systemContextId,
-        idempotencyKey: data.idempotencyKey,
+        idempotencyKey: SystemContextRepository.refreshRunKey(
+          data.systemContextId,
+          data.idempotencyKey,
+        ),
         triggerConceptId: data.triggerConceptId,
         statusConceptId: data.statusConceptId,
         startedAt: new Date(),
@@ -971,12 +1017,42 @@ export class SystemContextRepository {
     );
   }
 
-  /** Clave de idempotencia del worker: reintentar no vuelve a refrescar. */
+  /**
+   * Clave física de idempotencia: el DDL la declara única a nivel global
+   * (`uq_system_context_refresh_runs_idempotency_key`), así que se prefija con
+   * el contexto para que dos contextos puedan usar la misma clave del worker
+   * sin que el segundo reciba la corrida del primero (ni choque con la
+   * unicidad).
+   */
+  static refreshRunKey(
+    systemContextId: string,
+    idempotencyKey: string,
+  ): string {
+    return `${systemContextId}:${idempotencyKey}`;
+  }
+
+  /**
+   * Clave de idempotencia del worker: reintentar no vuelve a refrescar. La
+   * búsqueda es por (contexto, clave); también reconoce las corridas anteriores
+   * al prefijo, que guardaron la clave sin él, siempre que sean del mismo contexto.
+   */
   findRefreshRunByKey(
     em: EntityManager,
+    systemContextId: string,
     idempotencyKey: string,
   ): Promise<SystemContextRefreshRuns | null> {
-    return em.findOne(SystemContextRefreshRuns, { idempotencyKey });
+    return em.findOne(SystemContextRefreshRuns, {
+      systemContextId,
+      idempotencyKey: {
+        $in: [
+          SystemContextRepository.refreshRunKey(
+            systemContextId,
+            idempotencyKey,
+          ),
+          idempotencyKey,
+        ],
+      },
+    });
   }
 
   // --- Bindings de consumo (UC-45-10) ---

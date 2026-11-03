@@ -17,6 +17,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   ParseOptionalLimitPipe,
   Roles,
@@ -107,6 +108,11 @@ export class AdminTenantsController {
   }
 
   /** UC-04-01. */
+  @Audited({
+    action: 'TENANT_PROVISIONED',
+    entity: 'tenant',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('SUPERADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -121,6 +127,11 @@ export class AdminTenantsController {
   }
 
   /** UC-04-02. */
+  @Audited({
+    action: 'TENANT_VERIFIED',
+    entity: 'tenant',
+    entityId: 'param:tenantId',
+  })
   @Post(':tenantId/verification')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -145,6 +156,11 @@ export class AdminTenantsController {
    * @param actor - Quién lo hace.
    * @returns La organización.
    */
+  @Audited({
+    action: 'TENANT_PUBLIC_PROFILE_UPDATED',
+    entity: 'tenant',
+    entityId: 'param:tenantId',
+  })
   @Put(':tenantId/public-profile')
   @Roles('SUPERADMIN', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -160,6 +176,11 @@ export class AdminTenantsController {
   }
 
   /** UC-04-10. */
+  @Audited({
+    action: 'TENANT_SUSPENDED',
+    entity: 'tenant',
+    entityId: 'param:tenantId',
+  })
   @Post(':tenantId/suspend')
   @Roles('SUPERADMIN')
   @HttpCode(HttpStatus.OK)

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
+import { ClinicalErrorReason } from '../clinical.error-reasons';
 import {
   ResourceNotFoundException,
   touch,
@@ -22,6 +23,7 @@ import { CLIN } from '../clinical.concepts';
 import { FilesService } from '../../common/services';
 import { OwnerType, type FileLinkResponseDto } from '../../common/dto';
 import { ClinicalReadService } from './clinical-read.service';
+import { ReceivedServicesProjector } from './received-services-projector';
 
 /** UC-08-12: registro de procedimientos completados; cierra la orden si aplica. */
 @Injectable()
@@ -35,6 +37,7 @@ export class ProceduresService {
    * @param filesService - Vincula archivos ya subidos a un procedimiento puntual.
    * @param logger - Valor de logger requerido por la operación.
    * @param clinicalRead - Política de escritura sobre la historia (MCH-007).
+   * @param receivedServices - Proyecta el procedimiento a «Servicios recibidos».
    */
   constructor(
     private readonly em: EntityManager,
@@ -43,6 +46,7 @@ export class ProceduresService {
     private readonly filesService: FilesService,
     private readonly logger: PinoLogger,
     private readonly clinicalRead: ClinicalReadService,
+    private readonly receivedServices: ReceivedServicesProjector,
   ) {
     this.logger.setContext(ProceduresService.name);
   }
@@ -71,6 +75,7 @@ export class ProceduresService {
             {
               serviceRequestId: dto.serviceRequestId,
             },
+            ClinicalErrorReason.SERVICE_REQUEST_NOT_FOUND,
           );
         }
         sr.statusConceptId = CLIN.SERVICE_REQUEST_COMPLETED;
@@ -87,6 +92,7 @@ export class ProceduresService {
             {
               parentProcedureId: dto.parentProcedureId,
             },
+            ClinicalErrorReason.PARENT_PROCEDURE_NOT_FOUND,
           );
         }
       }
@@ -115,6 +121,11 @@ export class ProceduresService {
         operativeReportFileId: dto.operativeReportFileId,
         actorUserId: actor.id,
       });
+      await tx.flush();
+      // Misma transacción: o el procedimiento y su servicio recibido, o ninguno. El
+      // primer flush va antes porque las FK de la entidad son columnas, no
+      // relaciones: el ORM no sabe que el servicio depende del procedimiento.
+      await this.receivedServices.projectProcedure(tx, procedure, actor.id);
       await tx.flush();
 
       this.logger.info(

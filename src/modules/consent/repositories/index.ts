@@ -7,3 +7,4 @@ export * from './patient-objections.repository';
 export * from './privacy-restrictions.repository';
 export * from './processing-legal-bases.repository';
 export * from './treatment-informed-consents.repository';
+export * from './processing-purposes.repository';

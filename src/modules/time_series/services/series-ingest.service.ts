@@ -4,10 +4,12 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   PreconditionFailedException,
+  requireTenantId,
   type AuthenticatedUser,
 } from '../../../common';
 import { OutboxService } from '../../messaging/services';
 import { SeriesIngestRepository } from '../repositories';
+import { LocationConsentPolicy } from './location-consent.policy';
 import {
   METRIC_CODES,
   PIPELINE_CODE,
@@ -43,12 +45,14 @@ export class SeriesIngestService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param ingestRepo - Valor de ingest repo requerido por la operación.
    * @param outbox - Valor de outbox requerido por la operación.
+   * @param locationConsent - Política de consentimiento de la ubicación.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly ingestRepo: SeriesIngestRepository,
     private readonly outbox: OutboxService,
+    private readonly locationConsent: LocationConsentPolicy,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(SeriesIngestService.name);
@@ -379,19 +383,36 @@ export class SeriesIngestService {
    * el dato más fácil de recoger sin darse cuenta de que hace falta permiso, y por
    * eso el permiso es un campo obligatorio de la petición y no una comprobación
    * que se pueda olvidar.
+   *
+   * El permiso no se da por bueno: antes de insertar nada, `LocationConsentPolicy`
+   * lo contrasta con `consent.consents` (tenant, vigencia y retiro, propósito de
+   * ubicación y titular). El tenant sale del contexto autenticado, no del cuerpo.
+   * Si no se autoriza, `403 TIME_SERIES_LOCATION_CONSENT_INVALID` y no se
+   * persiste ninguna coordenada, métrica ni evento.
    */
   async batchIngestLocationPings(
     dto: BatchIngestLocationDto,
     actor: AuthenticatedUser,
   ): Promise<BatchIngestResponseDto> {
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
       const now = new Date();
       const seriesId = dto.seriesId ?? 'location-tracking';
 
+      const capturedAt = dto.pings.map((ping) => new Date(ping.time).getTime());
+      await this.locationConsent.assertAllowed(tx, {
+        tenantId,
+        consentId: dto.consentId,
+        subjectIds: [...new Set(dto.pings.map((ping) => ping.subjectId))],
+        capturedFrom: new Date(Math.min(...capturedAt)),
+        capturedTo: new Date(Math.max(...capturedAt)),
+        now,
+      });
+
       for (const ping of dto.pings) {
         this.ingestRepo.createLocationPing(tx, {
           time: new Date(ping.time),
-          tenantId: dto.tenantId,
+          tenantId,
           seriesId,
           ingestionId: dto.ingestionId,
           sourceVersion: DEFAULT_SOURCE_VERSION,
@@ -409,7 +430,7 @@ export class SeriesIngestService {
 
       this.recordPipelineMetric(tx, {
         time: now,
-        tenantId: dto.tenantId,
+        tenantId,
         seriesId,
         ingestionId: dto.ingestionId,
         batchId: dto.ingestionId,
@@ -419,7 +440,7 @@ export class SeriesIngestService {
       });
 
       await this.outbox.publishDomainEvent(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         eventType: 'LocationPingsIngested',
         aggregateType: 'time_series.location_ping_series',
         aggregateId: dto.ingestionId,

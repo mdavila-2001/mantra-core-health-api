@@ -1,0 +1,111 @@
+{
+  "generatedAt": "2026-10-24T00:50:45.258Z",
+  "buildDir": "/home/user/glossary-data-build",
+  "assertions": 18032,
+  "sources": {
+    "labeledin": {
+      "pass": 1,
+      "stats": {
+        "expert": {
+          "rows": 500,
+          "excluded:CUI con formato inválido": 1,
+          "assertions": 1334
+        },
+        "crowd": {
+          "rows": 3004,
+          "excluded:answer=no-not-disease": 212,
+          "excluded:answer=no-contra": 131,
+          "excluded:answer=no-char_risk": 211,
+          "excluded:answer=no-unrelated": 58,
+          "excluded:answer=uncertain": 15,
+          "assertions": 1516
+        }
+      },
+      "name": "LabeledIn — indicaciones rotuladas en fichas de la FDA (NLM/NCBI)",
+      "owner": "National Library of Medicine, NCBI (Khare R, Li J, Lu Z)",
+      "officialUrl": "https://ftp.ncbi.nlm.nih.gov/pub/lu/LabeledIn/",
+      "repo": "https://github.com/dhimmel/indications.git",
+      "commit": "11d535ba0884ee56c3cd5756fdfb4985f313bd80",
+      "version": "LabeledIn 2014-09-04 (experto) y 2015-01-31 (crowdsourcing); DailyMed 2012-08-28",
+      "license": "Dominio público (United States Government Work, NLM/NCBI); citar a los autores.",
+      "licenseUrl": "labeledin/download/README.txt («PUBLIC DOMAIN NOTICE»)",
+      "mirrorNote": "Copia íntegra del FTP de NCBI dentro del repositorio de PharmacotherapyDB (CC0). El original (ftp.ncbi.nlm.nih.gov) está bloqueado por la red del entorno: el hash no se contrastó contra él."
+    },
+    "pharmacotherapydb": {
+      "pass": 1,
+      "stats": {
+        "rows": 1388,
+        "assertions": 1388
+      },
+      "name": "PharmacotherapyDB 1.0 — catálogo de indicaciones curado por médicos",
+      "owner": "Himmelstein DS et al. (proyecto Rephetio / Hetionet)",
+      "officialUrl": "https://github.com/dhimmel/indications",
+      "repo": "https://github.com/dhimmel/indications.git",
+      "commit": "11d535ba0884ee56c3cd5756fdfb4985f313bd80",
+      "version": "PharmacotherapyDB 1.0 (initial release, figshare doi:10.6084/m9.figshare.3103054)",
+      "license": "CC0 1.0 (contenido original del repositorio). Identificadores DOID (CC0) y DrugBank (vocabulario abierto CC0).",
+      "licenseUrl": "https://github.com/dhimmel/indications#license"
+    },
+    "drugcentral-2016": {
+      "pass": 1,
+      "stats": {
+        "rows": 12175,
+        "dropped:SNOMEDCT_CUI (Bolivia no es miembro de SNOMED International)": 9387,
+        "excluded:fila sin DRUG_ID o sin UMLS_CUI/DOID": 2788,
+        "assertions": 9094
+      },
+      "name": "DrugCentral — tabla de indicaciones (extracto 2016 publicado por su autor)",
+      "owner": "Ursu O et al., University of New Mexico (DrugCentral)",
+      "officialUrl": "https://drugcentral.org/",
+      "repo": "https://github.com/olegursu/drugtarget.git",
+      "commit": "64630f7c2bc050f5af0a7cac7b08e778125284bc",
+      "version": "drugtarget @ 2016-11-16 (indicaciones tomadas de OMOP v4)",
+      "license": "CC BY 4.0 (archivo LICENSE del repositorio). Atribución: DrugCentral.",
+      "licenseUrl": "https://github.com/olegursu/drugtarget/blob/master/LICENSE",
+      "dropNote": "La columna SNOMEDCT_CUI se descarta: Bolivia no es miembro de SNOMED International. Se conservan UMLS CUI y DOID tal cual los da la fuente."
+    },
+    "drugmechdb": {
+      "pass": 1,
+      "stats": {
+        "paths": 4846,
+        "excluded:camino sin código de fármaco o de enfermedad": 2,
+        "assertions": 4662
+      },
+      "name": "DrugMechDB — caminos mecanísticos curados de indicaciones",
+      "owner": "Su Lab, Scripps Research (Gonzalez-Cavazos AC et al., Sci Data 2023)",
+      "officialUrl": "https://sulab.github.io/DrugMechDB/",
+      "repo": "https://github.com/SuLab/DrugMechDB.git",
+      "commit": "aef224217071216748740c10faeb6db8e3f15901",
+      "version": "DrugMechDB 2.0.1 (CITATION.cff) @ commit aef22421 (2026-06-02)",
+      "license": "CC0 1.0 (archivo LICENSE del repositorio)",
+      "licenseUrl": "https://github.com/SuLab/DrugMechDB/blob/main/LICENSE"
+    },
+    "maxo": {
+      "pass": 2,
+      "stats": {
+        "rows": 976,
+        "excluded:sin extensión CHEBI (acción no farmacológica o sin sustancia)": 938,
+        "assertions": 38
+      },
+      "name": "MAxO annotations — acciones médicas para enfermedades raras (Monarch Initiative)",
+      "owner": "Monarch Initiative (Medical Action Ontology)",
+      "officialUrl": "https://github.com/monarch-initiative/maxo-annotations",
+      "repo": "https://github.com/monarch-initiative/maxo-annotations.git",
+      "commit": "42edd966faac5229ce7c35fc3848f2e6b3d45bda",
+      "version": "maxo-annotations @ commit 42edd966 (2026-08-18)",
+      "license": "CC BY 4.0 (archivo LICENSE del repositorio)",
+      "licenseUrl": "https://github.com/monarch-initiative/maxo-annotations/blob/main/LICENSE"
+    }
+  },
+  "crosswalks": {
+    "mondo": {
+      "name": "MONDO — mapeos SSSOM (skos:exactMatch)",
+      "repo": "https://github.com/monarch-initiative/mondo.git",
+      "commit": "a645ab571f5b0881a184c28b84d0f9050432dc53",
+      "version": "mondo @ commit a645ab57 (2026-10-22)",
+      "license": "CC BY 4.0 (ontología MONDO)"
+    }
+  },
+  "regla": "Cada afirmación conserva el tipo que declara su fuente. Los códigos agregados por cruce van en crosswalk con via y predicate. Nada se deduce por nombre.",
+  "segundos": 2
+}

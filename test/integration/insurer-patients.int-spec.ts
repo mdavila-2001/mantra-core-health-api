@@ -5,7 +5,7 @@ import { CONCEPTS, TokenService, createdBy } from '../../src/common';
 import { DIR } from '../../src/modules/directory/directory.concepts';
 import { COMM } from '../../src/modules/community/community.concepts';
 import { PublicProfiles } from '../../src/modules/community/entities';
-import { INS } from '../../src/modules/insurance/insurance.concepts';
+import { INS } from '../../src/modules/insurance/domain/insurance.concepts';
 import { PatientCoverages } from '../../src/modules/insurance/entities';
 import { PROF } from '../../src/modules/profiles/profiles.concepts';
 import {

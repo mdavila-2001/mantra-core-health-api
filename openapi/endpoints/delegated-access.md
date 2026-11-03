@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `delegated_access`
 
-Referencia exhaustiva de 12 operación(es) del módulo `delegated_access`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 17 operación(es) del módulo `delegated_access`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `delegated-access-authz`, `delegated-access-org`, `delegated-access-permission-sets`, `delegated-access-practitioner-delegates`, `delegated-access-requests`
-- **Controladores:** `AccessRequestsController`, `DelegatedAccessAuthzController`, `DelegatedPermissionSetsController`, `OrgUserAssignmentsController`, `PractitionerDelegatesController`
+- **Etiquetas OpenAPI:** `clinical-prescription-shares`, `clinical-prescription-shares-public`, `delegated-access-authz`, `delegated-access-org`, `delegated-access-permission-sets`, `delegated-access-practitioner-delegates`, `delegated-access-requests`
+- **Controladores:** `AccessRequestsController`, `DelegatedAccessAuthzController`, `DelegatedPermissionSetsController`, `OrgUserAssignmentsController`, `PractitionerDelegatesController`, `PrescriptionSharesController`, `PrescriptionSharesPublicController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -13,16 +13,21 @@ Referencia exhaustiva de 12 operación(es) del módulo `delegated_access`, deriv
 
 1. [POST /access-requests/{id}/decision](#1-post-access-requests-id-decision) — Aprobar/Denegar solicitud y emitir grant scoped
 2. [POST /authz/effective-actor/evaluate](#2-post-authz-effective-actor-evaluate) — Evaluar actor efectivo por propósito (step-up)
-3. [POST /delegated-access/expiry-sweep](#3-post-delegated-access-expiry-sweep) — Expirar delegaciones y grants vencidos (barrido)
-4. [GET /delegated-permission-sets](#4-get-delegated-permission-sets) — Listar los sets de permisos delegados del tenant
-5. [POST /delegated-permission-sets](#5-post-delegated-permission-sets) — Publicar set de permisos delegados (scoped)
-6. [POST /delegated-permission-sets/{id}/versions](#6-post-delegated-permission-sets-id-versions) — Versionar set de permisos delegados
-7. [POST /org/{tenantMembershipId}/user-assignments](#7-post-org-tenantmembershipid-user-assignments) — Asignar usuario de organización con alcance y vigencia
-8. [PATCH /org/user-assignments/{id}](#8-patch-org-user-assignments-id) — Reasignar supervisor / suspender asignación de organización
-9. [POST /practitioner-delegates](#9-post-practitioner-delegates) — Crear asignación de delegado de practitioner
-10. [POST /practitioner-delegates/{id}/access-requests](#10-post-practitioner-delegates-id-access-requests) — Solicitar acceso delegado (aprobación previa)
-11. [POST /practitioner-delegates/{id}/grants](#11-post-practitioner-delegates-id-grants) — Otorgar grant delegado por-propósito y temporal
-12. [POST /practitioner-delegates/{id}/revoke](#12-post-practitioner-delegates-id-revoke) — Revocar delegación de forma inmediata (cascada authz)
+3. [GET /clinical/prescription-shares](#3-get-clinical-prescription-shares) — Enlaces de receta de un paciente
+4. [POST /clinical/prescription-shares](#4-post-clinical-prescription-shares) — Compartir una receta con un enlace
+5. [POST /clinical/prescription-shares/{shareId}/revoke](#5-post-clinical-prescription-shares-shareid-revoke) — Revocar un enlace de receta
+6. [GET /clinical/prescription-shares/by-token/{token}](#6-get-clinical-prescription-shares-by-token-token) — Saber si un enlace es de la sesión
+7. [POST /delegated-access/expiry-sweep](#7-post-delegated-access-expiry-sweep) — Expirar delegaciones y grants vencidos (barrido)
+8. [GET /delegated-permission-sets](#8-get-delegated-permission-sets) — Listar los sets de permisos delegados del tenant
+9. [POST /delegated-permission-sets](#9-post-delegated-permission-sets) — Publicar set de permisos delegados (scoped)
+10. [POST /delegated-permission-sets/{id}/versions](#10-post-delegated-permission-sets-id-versions) — Versionar set de permisos delegados
+11. [POST /org/{tenantMembershipId}/user-assignments](#11-post-org-tenantmembershipid-user-assignments) — Asignar usuario de organización con alcance y vigencia
+12. [PATCH /org/user-assignments/{id}](#12-patch-org-user-assignments-id) — Reasignar supervisor / suspender asignación de organización
+13. [POST /practitioner-delegates](#13-post-practitioner-delegates) — Crear asignación de delegado de practitioner
+14. [POST /practitioner-delegates/{id}/access-requests](#14-post-practitioner-delegates-id-access-requests) — Solicitar acceso delegado (aprobación previa)
+15. [POST /practitioner-delegates/{id}/grants](#15-post-practitioner-delegates-id-grants) — Otorgar grant delegado por-propósito y temporal
+16. [POST /practitioner-delegates/{id}/revoke](#16-post-practitioner-delegates-id-revoke) — Revocar delegación de forma inmediata (cascada authz)
+17. [GET /public/prescription-shares/{token}](#17-get-public-prescription-shares-token) — Comprobar un enlace de receta compartida
 
 ---
 
@@ -115,6 +120,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DecisionResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DecisionResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DecisionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DecisionResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DecisionResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -213,6 +219,7 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `practitionerDelegateAssignmentId` | Sí | `string` | formato `uuid` | Delegación a evaluar | `00000000-0000-4000-8000-000000000001` |
+| `effectiveUserId` | No | `string` | formato `uuid` | Usuario que ejercería el acceso. Si se omite se evalúa al usuario autenticado. Tiene que ser el titular de la asignación del delegado; si no, el acceso no se permite | `00000000-0000-4000-8000-000000000001` |
 | `purpose` | Sí | `string` | valores: `TREATMENT`, `BILLING`, `OPERATIONS` | Propósito de uso del acceso | `TREATMENT` |
 | `permissionId` | No | `string` | formato `uuid` | Permiso concreto que se ejerce | `00000000-0000-4000-8000-000000000001` |
 | `patientProfileId` | No | `string` | formato `uuid` | Paciente sobre el que se accede | `00000000-0000-4000-8000-000000000001` |
@@ -231,6 +238,7 @@ Content-Type: application/json
 
 {
   "practitionerDelegateAssignmentId": "00000000-0000-4000-8000-000000000001",
+  "effectiveUserId": "00000000-0000-4000-8000-000000000001",
   "purpose": "TREATMENT",
   "permissionId": "00000000-0000-4000-8000-000000000001",
   "patientProfileId": "00000000-0000-4000-8000-000000000001",
@@ -252,6 +260,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<EvaluationResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<EvaluationResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<EvaluationResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<EvaluationResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `EvaluationResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -280,7 +289,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Delegación no encontrada | Excepción explícita en src/modules/delegated_access/services/delegated-access-evaluation.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -299,7 +307,459 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. POST /delegated-access/expiry-sweep
+## 3. GET /clinical/prescription-shares
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `clinical-prescription-shares`
+- **Nombre:** Enlaces de receta de un paciente
+- **Operation ID:** `PrescriptionSharesController_list`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PrescriptionSharesController.list](../../src/modules/delegated_access/controllers/prescription-shares.controller.ts)
+
+### Descripción de negocio
+
+El paciente ve los suyos; una médica, los que creó para ese paciente. Sin token.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /clinical/prescription-shares` en `PrescriptionSharesController_list`. El controlador delega en `PrescriptionSharesService.listForPatient`. No recibe body. El tipo de retorno estático es `Promise<PrescriptionShareSummaryDto[]>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `patientProfileId` | query | Sí | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /clinical/prescription-shares?patientProfileId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PATIENT`, `PRACTITIONER`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /clinical/prescription-shares?patientProfileId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PrescriptionShareSummaryDto[]>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<PrescriptionShareSummaryDto[]>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PrescriptionShareSummaryDto[]>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PrescriptionShareSummaryDto[]>` | No |
+| 404 | Es otro paciente | `Promise<PrescriptionShareSummaryDto[]>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PrescriptionShareSummaryDto[]>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PrescriptionShareSummaryDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PrescriptionShareSummaryDto[]>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PrescriptionShareSummaryDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "shareId": "00000000-0000-4000-8000-000000000001",
+    "resourceType": "PRESCRIPTION_ENCOUNTER",
+    "resourceId": "00000000-0000-4000-8000-000000000001",
+    "createdAt": "2026-07-31T12:00:00.000Z",
+    "expiresAt": "2026-07-31T12:00:00.000Z",
+    "status": "VALID",
+    "uses": 1
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/delegated_access/services/prescription-shares.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/clinical/prescription-shares"
+}
+```
+
+---
+
+## 4. POST /clinical/prescription-shares
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `clinical-prescription-shares`
+- **Nombre:** Compartir una receta con un enlace
+- **Operation ID:** `PrescriptionSharesController_create`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PrescriptionSharesController.create](../../src/modules/delegated_access/controllers/prescription-shares.controller.ts)
+
+### Descripción de negocio
+
+Exactamente uno de `encounterId` o `medicationRequestId`. Devuelve el token en claro una sola vez.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /clinical/prescription-shares` en `PrescriptionSharesController_create`. El controlador delega en `PrescriptionSharesService.create`. Valida el body como `CreatePrescriptionShareDto` y consume `application/json`. El tipo de retorno estático es `Promise<PrescriptionShareCreatedDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreatePrescriptionShareDto`; los campos opcionales se omiten.
+
+```http
+POST /clinical/prescription-shares HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PATIENT`, `PRACTITIONER`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `encounterId` | No | `string` | formato `uuid` | Encuentro de la receta. Excluye a `medicationRequestId`. | `00000000-0000-4000-8000-000000000001` |
+| `medicationRequestId` | No | `string` | formato `uuid` | Fármaco suelto. Excluye a `encounterId`. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /clinical/prescription-shares HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "encounterId": "00000000-0000-4000-8000-000000000001",
+  "medicationRequestId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<PrescriptionShareCreatedDto>` | Sí |
+| 400 | No vino exactamente uno de los dos ids | `Promise<PrescriptionShareCreatedDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<PrescriptionShareCreatedDto>` | No |
+| 403 | Una médica que no emitió la receta | `Promise<PrescriptionShareCreatedDto>` | No |
+| 404 | La receta no existe o es de otro paciente | `Promise<PrescriptionShareCreatedDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<PrescriptionShareCreatedDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<PrescriptionShareCreatedDto>` | No |
+| 422 | Sin ítems emitidos y vigentes (PRESCRIPTION_SHARE_NO_ACTIVE_ITEMS) | `Promise<PrescriptionShareCreatedDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<PrescriptionShareCreatedDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<PrescriptionShareCreatedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PrescriptionShareCreatedDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PrescriptionShareCreatedDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "shareId": "00000000-0000-4000-8000-000000000001",
+  "url": "valor-ejemplo",
+  "token": "valor-ejemplo",
+  "expiresAt": "2026-07-31T12:00:00.000Z",
+  "itemCount": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `shareId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `url` | Sí | `string` | Sin restricción adicional declarada | Enlace para compartir: `<web>/rx/<token>` | `valor-ejemplo` |
+| `token` | Sí | `string` | Sin restricción adicional declarada | Token en claro; se devuelve una sola vez | `valor-ejemplo` |
+| `expiresAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `itemCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 400 | `VALIDATION_FAILED` | {         code: ErrorCode.VALIDATION_FAILED,         message:           'Indicá la consulta o el medicamento que querés compartir, uno de los dos.',         reason,         details: { reason },       } | Excepción explícita en src/modules/delegated_access/services/prescription-shares.service.ts |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | {         code: ErrorCode.FORBIDDEN,         message:           'Solo el paciente o quien emitió la receta pueden compartirla.',       } | Excepción explícita en src/modules/delegated_access/services/prescription-shares.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La receta no tiene medicamentos emitidos y vigentes para compartir. | Excepción explícita en src/modules/delegated_access/services/prescription-shares.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/clinical/prescription-shares"
+}
+```
+
+---
+
+## 5. POST /clinical/prescription-shares/{shareId}/revoke
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `clinical-prescription-shares`
+- **Nombre:** Revocar un enlace de receta
+- **Operation ID:** `PrescriptionSharesController_revoke`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PrescriptionSharesController.revoke](../../src/modules/delegated_access/controllers/prescription-shares.controller.ts)
+
+### Descripción de negocio
+
+Solo el paciente dueño o quien lo creó. Revocar uno ya revocado no cambia nada.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /clinical/prescription-shares/{shareId}/revoke` en `PrescriptionSharesController_revoke`. El controlador delega en `PrescriptionSharesService.revoke`. No recibe body. El tipo de retorno estático es `Promise<void>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `shareId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /clinical/prescription-shares/00000000-0000-4000-8000-000000000001/revoke HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PATIENT`, `PRACTITIONER`.
+- Deben ser UUID válidos: `shareId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /clinical/prescription-shares/00000000-0000-4000-8000-000000000001/revoke HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 204 | Revocado | `Promise<void>` | No |
+| 400 | Operación completada correctamente. | `Promise<void>` | No |
+| 401 | Operación completada correctamente. | `Promise<void>` | No |
+| 403 | Operación completada correctamente. | `Promise<void>` | No |
+| 404 | El enlace no existe o no es suyo | `Promise<void>` | No |
+| 409 | Operación completada correctamente. | `Promise<void>` | No |
+| 422 | Operación completada correctamente. | `Promise<void>` | No |
+| 429 | Operación completada correctamente. | `Promise<void>` | No |
+| 500 | Operación completada correctamente. | `Promise<void>` | No |
+| 504 | Operación completada correctamente. | `Promise<void>` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/clinical/prescription-shares/{shareId}/revoke"
+}
+```
+
+---
+
+## 6. GET /clinical/prescription-shares/by-token/{token}
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `clinical-prescription-shares`
+- **Nombre:** Saber si un enlace es de la sesión
+- **Operation ID:** `PrescriptionSharesController_resolveOwnership`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PrescriptionSharesController.resolveOwnership](../../src/modules/delegated_access/controllers/prescription-shares.controller.ts)
+
+### Descripción de negocio
+
+200 solo para el paciente dueño o quien lo creó; 404 para cualquier otro. No registra uso.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /clinical/prescription-shares/by-token/{token}` en `PrescriptionSharesController_resolveOwnership`. El controlador delega en `PrescriptionSharesService.resolveOwnership`. No recibe body. El tipo de retorno estático es `Promise<PrescriptionShareOwnershipDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `token` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /clinical/prescription-shares/by-token/valor-ejemplo HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PATIENT`, `PRACTITIONER`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /clinical/prescription-shares/by-token/valor-ejemplo HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PrescriptionShareOwnershipDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<PrescriptionShareOwnershipDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PrescriptionShareOwnershipDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PrescriptionShareOwnershipDto>` | No |
+| 404 | El enlace no existe o no es suyo | `Promise<PrescriptionShareOwnershipDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PrescriptionShareOwnershipDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PrescriptionShareOwnershipDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PrescriptionShareOwnershipDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PrescriptionShareOwnershipDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "shareId": "00000000-0000-4000-8000-000000000001",
+  "resourceType": "PRESCRIPTION_ENCOUNTER",
+  "resourceId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `shareId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `resourceType` | Sí | `string` | valores: `PRESCRIPTION_ENCOUNTER`, `MEDICATION_REQUEST` | Sin descripción específica en el contrato OpenAPI. | `PRESCRIPTION_ENCOUNTER` |
+| `resourceId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/clinical/prescription-shares/by-token/{token}"
+}
+```
+
+---
+
+## 7. POST /delegated-access/expiry-sweep
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-authz`
@@ -363,6 +823,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<ExpirySweepResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ExpirySweepResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ExpirySweepResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ExpirySweepResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ExpirySweepResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -407,7 +868,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. GET /delegated-permission-sets
+## 8. GET /delegated-permission-sets
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-permission-sets`
@@ -472,6 +933,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<ListPermissionSetsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ListPermissionSetsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ListPermissionSetsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListPermissionSetsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListPermissionSetsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -538,7 +1000,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /delegated-permission-sets
+## 9. POST /delegated-permission-sets
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-permission-sets`
@@ -642,6 +1104,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PermissionSetVersionDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PermissionSetVersionDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PermissionSetVersionDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PermissionSetVersionDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PermissionSetVersionDto`. Ejemplo completo derivado de ese DTO:
 
@@ -689,7 +1152,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /delegated-permission-sets/{id}/versions
+## 10. POST /delegated-permission-sets/{id}/versions
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-permission-sets`
@@ -784,6 +1247,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PermissionSetVersionDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PermissionSetVersionDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PermissionSetVersionDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PermissionSetVersionDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PermissionSetVersionDto`. Ejemplo completo derivado de ese DTO:
 
@@ -812,7 +1276,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Set de permisos no encontrado | Excepción explícita en src/modules/delegated_access/services/permission-sets.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -831,7 +1294,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /org/{tenantMembershipId}/user-assignments
+## 11. POST /org/{tenantMembershipId}/user-assignments
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-org`
@@ -930,6 +1393,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResourceCreatedDto`. Ejemplo completo derivado de ese DTO:
 
@@ -975,7 +1439,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. PATCH /org/user-assignments/{id}
+## 12. PATCH /org/user-assignments/{id}
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-org`
@@ -1060,6 +1524,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OperationResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1108,7 +1573,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /practitioner-delegates
+## 13. POST /practitioner-delegates
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-practitioner-delegates`
@@ -1205,6 +1670,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResourceCreatedDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1231,8 +1697,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Asignación de usuario de organización no encontrada | Excepción explícita en src/modules/delegated_access/services/practitioner-delegates.service.ts |
-| 404 | `NOT_FOUND` | Set de permisos no encontrado | Excepción explícita en src/modules/delegated_access/services/practitioner-delegates.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El usuario de organización no está activo | Excepción explícita en src/modules/delegated_access/services/practitioner-delegates.service.ts |
 | 422 | `PRECONDITION_FAILED` | El set de permisos no está activo | Excepción explícita en src/modules/delegated_access/services/practitioner-delegates.service.ts |
@@ -1253,7 +1717,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /practitioner-delegates/{id}/access-requests
+## 14. POST /practitioner-delegates/{id}/access-requests
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-practitioner-delegates`
@@ -1340,6 +1804,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResourceCreatedDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1387,7 +1852,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /practitioner-delegates/{id}/grants
+## 15. POST /practitioner-delegates/{id}/grants
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-practitioner-delegates`
@@ -1479,6 +1944,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResourceCreatedDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1505,7 +1971,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Delegación no encontrada | Excepción explícita en src/modules/delegated_access/services/practitioner-delegates.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La delegación no está activa | Excepción explícita en src/modules/delegated_access/services/practitioner-delegates.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1525,7 +1990,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /practitioner-delegates/{id}/revoke
+## 16. POST /practitioner-delegates/{id}/revoke
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-practitioner-delegates`
@@ -1604,6 +2069,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OperationResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1630,7 +2096,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Delegación no encontrada | Excepción explícita en src/modules/delegated_access/services/practitioner-delegates.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -1644,6 +2109,123 @@ Ejemplo de error normalizado:
   "correlationId": "req-01J00000000000000000000000",
   "timestamp": "2026-07-31T12:00:00.000Z",
   "path": "/practitioner-delegates/{id}/revoke"
+}
+```
+
+---
+
+## 17. GET /public/prescription-shares/{token}
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `clinical-prescription-shares-public`
+- **Nombre:** Comprobar un enlace de receta compartida
+- **Operation ID:** `PrescriptionSharesPublicController_read`
+- **Autenticación:** Pública
+- **Implementación:** [PrescriptionSharesPublicController.read](../../src/modules/delegated_access/controllers/prescription-shares-public.controller.ts)
+
+### Descripción de negocio
+
+Sin autenticación y sin datos del paciente ni de los fármacos: estado, emisión, nombre y matrícula del prescriptor.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /public/prescription-shares/{token}` en `PrescriptionSharesPublicController_read`. El controlador delega en `PrescriptionSharesService.readPublic`. No recibe body. El tipo de retorno estático es `Promise<PublicPrescriptionShareDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `token` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `user-agent` | header | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /public/prescription-shares/valor-ejemplo HTTP/1.1
+Host: localhost:3000
+user-agent: valor-ejemplo
+```
+
+### Restricciones a considerar
+
+- Endpoint público: no exige JWT según el contrato y `@Public()` del código.
+- Rate limit particular: `Throttle(PRESCRIPTION_SHARE_PUBLIC_RATE_LIMIT)`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /public/prescription-shares/valor-ejemplo HTTP/1.1
+Host: localhost:3000
+user-agent: valor-ejemplo
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PublicPrescriptionShareDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<PublicPrescriptionShareDto>` | No |
+| 404 | El enlace no existe | `Promise<PublicPrescriptionShareDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PublicPrescriptionShareDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PublicPrescriptionShareDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PublicPrescriptionShareDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PublicPrescriptionShareDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "status": "VALID",
+  "issuedAt": "2026-07-31T12:00:00.000Z",
+  "prescriberName": "Nombre de ejemplo",
+  "prescriberLicense": {
+    "number": "valor-ejemplo",
+    "authority": {},
+    "state": "ACTIVE"
+  },
+  "itemCount": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `status` | Sí | `string` | valores: `VALID`, `EXPIRED`, `REVOKED` | Sin descripción específica en el contrato OpenAPI. | `VALID` |
+| `issuedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `prescriberName` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `prescriberLicense` | No | `PrescriberLicenseDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"number":"valor-ejemplo","authority":{},"state":"ACTIVE"}` |
+| `prescriberLicense.number` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `prescriberLicense.authority` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `prescriberLicense.state` | No | `string` | valores: `ACTIVE`, `PENDING` | Sin descripción específica en el contrato OpenAPI. | `ACTIVE` |
+| `itemCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PRESCRIPTION_SHARE_PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/public/prescription-shares/{token}"
 }
 ```
 

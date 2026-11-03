@@ -226,6 +226,9 @@ describe('TJ-2 · reglas finas de la cita (integración)', () => {
       .get('/scheduling/bookings')
       .query({ patientProfileId })
       .set(admin())
+      // Desde ba1b7c0e4 (alcance de tenant en scheduling) el listado toma el
+      // tenant del contexto: el SUPERADMIN sin cabecera recibe 422 TENANT_REQUIRED.
+      .set('X-Tenant-Id', SEED.tenantId)
       .expect(200);
 
     expect(res.body.count).toBeGreaterThan(0);

@@ -6,3 +6,4 @@ export * from './diagnostic-units-read.service';
 export * from './diagnostic-units-admin-read.service';
 export * from './diagnostic-units-search.service';
 export * from './diagnostic-unit-provisioning.service';
+export * from './diagnostic-unit-scope.service';

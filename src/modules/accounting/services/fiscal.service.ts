@@ -4,12 +4,16 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
+  roleAuthorizesInTenant,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { InsufficientRoleException } from '../../../common/errors/domain.exception';
+import { PracticeTenantLookupService } from '../../practice/services';
 import { ACCT } from '../accounting.concepts';
+import { AccountingErrorReason } from '../accounting.error-reasons';
 import { FiscalRepository } from '../repositories';
+import { AccountingScopeService } from './accounting-scope.service';
 import {
   CreateFiscalYearDto,
   LockPeriodDto,
@@ -29,12 +33,17 @@ export class FiscalService {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param fiscalRepo - Valor de fiscal repo requerido por la operación.
+   * @param scope - Política de alcance de tenant (ACC-01).
    * @param logger - Valor de logger requerido por la operación.
+   * @param practices - Puerto de `practice`: dice si la práctica es el
+   *   consultorio propio del actor.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly fiscalRepo: FiscalRepository,
+    private readonly scope: AccountingScopeService,
     private readonly logger: PinoLogger,
+    private readonly practices: PracticeTenantLookupService,
   ) {
     this.logger.setContext(FiscalService.name);
   }
@@ -53,15 +62,25 @@ export class FiscalService {
       'Opening fiscal year',
     );
     return this.em.transactional(async (tx) => {
+      const practiceTenantId = await this.scope.practice(dto.practiceId);
+      await this.assertCanOpenFiscalYear(
+        actor,
+        dto.practiceId,
+        practiceTenantId,
+      );
       const clash = await this.fiscalRepo.findYearByCode(
         tx,
         dto.practiceId,
         dto.code,
       );
       if (clash) {
-        throw new ConflictException('El ejercicio ya existe en la práctica', {
-          code: dto.code,
-        });
+        throw new ConflictException(
+          'El ejercicio ya existe en la práctica',
+          {
+            code: dto.code,
+          },
+          AccountingErrorReason.FISCAL_YEAR_ALREADY_EXISTS,
+        );
       }
 
       const year = this.fiscalRepo.createYear(tx, {
@@ -98,6 +117,44 @@ export class FiscalService {
     });
   }
 
+  /**
+   * Quién abre el ejercicio de una práctica (S-8): su administración
+   * (`SECURITY_ADMIN` o `ACCOUNTING_APPROVER`; `SUPERADMIN`, que `RolesGuard`
+   * deja pasar por comodín, sigue pudiendo) o el médico titular de su
+   * consultorio propio. Otro médico, aunque atienda en esa práctica, recibe 403.
+   * Corre después de `scope.practice`: una práctica de otra organización ya
+   * respondió 404 y no se distingue de una inexistente.
+   *
+   * El rol administrativo se mide en el tenant de la práctica (#1241): el
+   * acotado en `scopedRoles` a otra organización no abre ejercicios de esta
+   * por tener membresía en ella.
+   */
+  private async assertCanOpenFiscalYear(
+    actor: AuthenticatedUser,
+    practiceId: string,
+    practiceTenantId: string,
+  ): Promise<void> {
+    const { roles } = actor;
+    if (
+      ['SUPERADMIN', 'SECURITY_ADMIN', 'ACCOUNTING_APPROVER'].some((role) =>
+        roleAuthorizesInTenant(actor, role, practiceTenantId),
+      )
+    ) {
+      return;
+    }
+    if (
+      roles.includes('PRACTITIONER') &&
+      (await this.practices.isOwnOffice(practiceId, actor.id))
+    ) {
+      return;
+    }
+    throw new InsufficientRoleException(
+      'Solo la administración de la práctica o el médico titular de su consultorio pueden abrir el ejercicio fiscal',
+      undefined,
+      AccountingErrorReason.FISCAL_YEAR_OPEN_NOT_ALLOWED,
+    );
+  }
+
   /** UC-16-05: bloquea (cierra) un periodo ABIERTO. */
   async lockPeriod(
     periodId: string,
@@ -113,17 +170,17 @@ export class FiscalService {
       'Locking fiscal period',
     );
     return this.em.transactional(async (tx) => {
-      const period = await this.fiscalRepo.findPeriodById(tx, periodId);
-      if (!period) {
-        throw new ResourceNotFoundException('Periodo fiscal no encontrado', {
-          periodId,
-        });
-      }
+      // ACC-01: el periodo es de un ejercicio de una práctica del tenant activo.
+      const period = await this.scope.periodInTenant(tx, periodId);
       if (period.statusConceptId !== ACCT.PERIOD_OPEN) {
-        throw new PreconditionFailedException('El periodo no está ABIERTO', {
-          periodId,
-          status: period.statusConceptId,
-        });
+        throw new PreconditionFailedException(
+          'El periodo no está ABIERTO',
+          {
+            periodId,
+            status: period.statusConceptId,
+          },
+          AccountingErrorReason.FISCAL_PERIOD_NOT_OPEN,
+        );
       }
       period.statusConceptId = ACCT.PERIOD_LOCKED;
       touch(period, actor.id);

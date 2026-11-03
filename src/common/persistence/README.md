@@ -1,17 +1,17 @@
 # src / common / persistence
 
-Agrupa los componentes relacionados con **persistence** y mantiene cohesionada esta responsabilidad del sistema.
+Groups **persistence**-related components and keeps this system responsibility cohesive.
 
-## Contenido
+## Contents
 
-### Archivos
+### Files
 
 | Archivo | Responsabilidad |
 | --- | --- |
-| `audit-fields.ts` | Implementación o recurso de soporte de esta carpeta. |
+| `audit-fields.ts` | Support implementation or resource for this folder. |
 
-## Criterios de mantenimiento
+## Maintenance guidelines
 
-- Mantener las reglas de negocio fuera de los adaptadores de transporte.
-- Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
-- Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
+- Keep business rules outside transport adapters.
+- Document decisions, preconditions, parameters, return values, and relevant errors with TSDoc.
+- Update this index when a component is added, removed, or its responsibility changes.

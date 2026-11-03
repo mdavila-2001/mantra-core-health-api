@@ -22,12 +22,51 @@ donde el equipo guarde los adjuntos. Un formulario clínico guardado como imagen
 formulario: es un adjunto. Lo que sirve —y lo que este directorio contiene— es la transcripción a
 campos, que es lo que el motor captura.
 
-## Cobertura (v4.1.6 · 2026-08-21)
+## Ficha por defecto de la cita médica (2026-10-29)
 
-**43 formularios**: 4 transversales —que sirven para cualquier consulta— y 39 repartidos entre las
+**375 fichas.** `transversal/cita-medica.json` (`TRANSV_CITA_MEDICA`, clase `GENERAL`) es la ficha
+que el front muestra **por defecto** en «Mis formularios»: el registro de cualquier cita
+ambulatoria, de cualquier especialidad, en el orden de la consulta externa de la NT 022 —datos de
+la cita, motivo, antecedentes relevantes, signos vitales, examen dirigido, diagnóstico con su tipo
+P/D/R y plan—. Es corta a propósito: lo propio de cada especialidad sigue en su ficha base.
+
+- Pregunta lo que evita dañar antes de indicar algo: alergias, medicación habitual y embarazo.
+- Cierra con signos de alarma explicados, comprensión verificada por «teach-back» (AHRQ, dominio
+  público) y el destino de la cita: un control programado pide la fecha; una referencia, su motivo.
+- Se escribe desde `tools/clinical-forms/fichas-otras.mjs` como las demás transversales; nace en
+  versión 1 y conserva su nota (`POSTERIORES_A_V2` en `build-forms.mjs`).
+
+## Ampliación internacional (2026-10-24)
+
+**374 fichas, 6 373 campos** (antes 370 y 6 164): 29 fichas mejoradas —cada una sube `version`— y
+4 nuevas (colitis ulcerosa, ITS, vacunación y ESAVI, biopsia de próstata). Las escalas salen del
+CKM de openEHR (Apgar, HAS-BLED, Child-Pugh, SOFA, Bishop, Lee, Charlson, Wagner, Karnofsky,
+NIHSS, Mayo, HEART, ABCD², Downton, PADSS, Tanner, NRS 2002, Beighton, Gleason/ISUP,
+Ferriman-Gallwey, reflejos); las listas de puerperio, recién nacido, VIH, ITS, planificación,
+prenatal y vacunación, de los Digital Adaptation Kits de la OMS; la epicrisis suma las secciones
+del International Patient Summary de HL7.
+
+- Los campos nuevos se escriben en `tools/clinical-forms/mejoras-intl.mjs` sobre las fichas que ya
+  arma el generador; nunca cambian el tipo ni quitan opciones de un campo existente.
+- Las fuentes se congelan en el repo (`tools/clinical-forms/openehr/ckm-snapshot.json`,
+  `tools/clinical-forms/who-dak/dak-snapshot.json`): el generador no necesita red.
+- Cada campo nuevo cita en su ayuda la publicación, el arquetipo o el elemento de la DAK y su
+  licencia; toda traducción propia dice que no es oficial. Lo fija `catalog.spec.ts`.
+- Fuentes: [`SOURCES.md`](SOURCES.md). Pasadas, licencias y huecos:
+  [`docs/seed-research/clinical-forms.md`](../../../../../docs/seed-research/clinical-forms.md).
+
+## Cobertura (v4.2.0 · 2026-10-04)
+
+**45 formularios**: 4 transversales —que sirven para cualquier consulta— y 41 repartidos entre las
 **36 especialidades** de `VS_MEDICAL_SPECIALTY`, que quedan **todas cubiertas**. Antes eran 15
 sobre 9 especialidades: a un neurólogo, a un nutricionista o a un radiólogo el selector no le
 ofrecía nada suyo.
+
+v4.2.0 suma los dos tamizajes de salud mental que la tabla de «lo que quedó afuera por licencia»
+dejaba como reemplazo propuesto y nunca se cargó: **SRQ-20** (tamizaje de trastornos mentales
+comunes) y **AUDIT** (consumo de alcohol), los dos publicados directamente por la OMS. Siguen
+afuera PHQ-9, GAD-7, Beck y MMSE — eso no cambia: son propiedad de terceros y entran solo con
+licencia.
 
 Tres criterios que se aplicaron al escribir las 28 nuevas y que conviene respetar al agregar más:
 
@@ -83,11 +122,13 @@ ficha declara su clase en `kind`:
 | `kind`     | Qué es                                                                                                                                        | Cuántas                  |
 | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
 | `BASE`     | La consulta inicial de la especialidad («Cardiología — consulta inicial (ficha base)»)                                                        | 36, una por especialidad |
-| `SPECIFIC` | El control o la evaluación estándar de una condición (control de HTA, de asma, de diabetes, dengue, trabajo de parto, informe de mamografía…) | 97                       |
+| `SPECIFIC` | El control o la evaluación estándar de una condición (control de HTA, de asma, de diabetes, dengue, trabajo de parto, informe de mamografía y tamizajes focalizados como SRQ-20 o AUDIT) | 99                       |
 | `GENERAL`  | Las transversales: anamnesis, examen físico, consentimiento, epicrisis                                                                        | 4                        |
 
 - La base pregunta el **diagnóstico presuntivo de una lista**; lo que hay que observar de cada
   cuadro está en su ficha específica.
+- Los tamizajes SRQ-20 y AUDIT son fichas `SPECIFIC`: se aplican para evaluar condiciones concretas y
+  no sustituyen la consulta inicial ni la pregunta de diagnóstico presuntivo de la ficha base.
 - Las específicas comparten un armazón (`control()` en `tools/clinical-forms/lib.mjs`), según el
   tipo de ficha:
   - **controles crónicos:** tipo de control, fecha del diagnóstico, tratamiento, adherencia y
@@ -140,20 +181,23 @@ de ministerios de salud. Lo que no cumple, no entra.
 | MINSA (Perú)        | [NT N.º 022-MINSA/DGSP-V.02, Gestión de la Historia Clínica](https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf)                                                                   | Norma técnica estatal, acceso público |
 | MinSalud (Colombia) | [Resolución 1995 de 1999](https://www.minsalud.gov.co/normatividad_nuevo/resoluci%C3%93n%201995%20de%201999.pdf)                                                                  | Norma estatal, acceso público         |
 | MinSalud (Colombia) | [Modelo de consentimiento informado, Res. 1738](https://www.minsalud.gov.co/sites/rid/Lists/BibliotecaDigital/RIDE/VS/ED/VSP/modelo-consentimiento-informado-resolucion-1738.pdf) | Documento oficial, acceso público     |
+| OMS                 | [SRQ-20 — Self Reporting Questionnaire](https://iris.who.int/handle/10665/61113)                                                                                                  | Publicación OMS, dominio público      |
+| OMS                 | [AUDIT — Alcohol Use Disorders Identification Test](https://iris.who.int/handle/10665/67205)                                                                                      | Publicación OMS, dominio público      |
 
 ## 🟡 Lo que quedó afuera por licencia, y con qué se reemplazaría
 
 **No se omitió nada en silencio.** Estos instrumentos son los que un médico esperaría encontrar y
 **no se cargaron** porque son propiedad de un tercero. El cliente decide: consigue la licencia, o
-se queda el reemplazo libre.
+se queda el reemplazo libre — que para SRQ-20 y AUDIT ya está cargado (v4.2.0); para MMSE no hay
+reemplazo cargado.
 
 | Instrumento                                                                 | Titular                | Por qué no entró                                                                                                                                                        | Reemplazo libre propuesto                                                                                                                  |
 | --------------------------------------------------------------------------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| PHQ-9 (Cuestionario de Salud del Paciente)                                  | Pfizer Inc.            | Los PDF que circulan llevan «Copyright © Pfizer Inc.». El permiso de reproducción es amplio pero **no consta por escrito para uso comercial incorporado a un producto** | **SRQ-20** de la OMS, tamizaje de trastornos mentales comunes en atención primaria, publicado por la propia OMS                            |
-| GAD-7 (Ansiedad Generalizada)                                               | Pfizer Inc.            | Mismo caso que PHQ-9                                                                                                                                                    | Sección de ansiedad del **SRQ-20**                                                                                                         |
-| Inventario de Depresión de Beck (BDI-II)                                    | Pearson / NCS Pearson  | Instrumento comercial con licencia por uso                                                                                                                              | **SRQ-20** de la OMS                                                                                                                       |
+| PHQ-9 (Cuestionario de Salud del Paciente)                                  | Pfizer Inc.            | Los PDF que circulan llevan «Copyright © Pfizer Inc.». El permiso de reproducción es amplio pero **no consta por escrito para uso comercial incorporado a un producto** | ✅ Cargado — **SRQ-20** de la OMS (`psiquiatria/srq-20-tamizaje-salud-mental.json`)                            |
+| GAD-7 (Ansiedad Generalizada)                                               | Pfizer Inc.            | Mismo caso que PHQ-9                                                                                                                                                    | ✅ Cargado — sección de ansiedad del **SRQ-20**                                                                                                         |
+| Inventario de Depresión de Beck (BDI-II)                                    | Pearson / NCS Pearson  | Instrumento comercial con licencia por uso                                                                                                                              | ✅ Cargado — **SRQ-20** de la OMS                                                                                                                       |
 | Mini-Mental State Examination (MMSE)                                        | PAR Inc.               | Licenciado por PAR desde 2001; se cobra por formulario                                                                                                                  | **Prueba cognitiva breve de dominio público** a definir con el cliente; no se cargó ninguna por las dudas                                  |
-| AUDIT (versión editorial ilustrada)                                         | Ediciones derivadas    | El instrumento base es de la OMS, pero las versiones ilustradas que circulan son ediciones con derechos propios                                                         | **AUDIT publicado por la OMS**, pendiente de fichar la URL oficial antes de cargarlo                                                       |
+| AUDIT (versión editorial ilustrada)                                         | Ediciones derivadas    | El instrumento base es de la OMS, pero las versiones ilustradas que circulan son ediciones con derechos propios                                                         | ✅ Cargado — **AUDIT publicado por la OMS** (`psiquiatria/audit-tamizaje-consumo-alcohol.json`)                                                       |
 | Escalas funcionales de traumatología (p. ej. las de sociedades ortopédicas) | Sociedades científicas | Licencia por institución                                                                                                                                                | Se cargó la **evaluación musculoesquelética base** (rango de movilidad, fuerza, estabilidad, estado neurovascular), sin escala con puntaje |
 | Escalas de riesgo de sociedades de cardiología                              | Sociedades científicas | Licencia por institución                                                                                                                                                | **Tablas de predicción de riesgo cardiovascular OMS/OPS**, ya cargadas                                                                     |
 

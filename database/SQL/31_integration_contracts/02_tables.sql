@@ -1,9 +1,10 @@
--- SALUD v4.0.10 · módulo 31 · schema integration_contracts
+-- SALUD v4.2.83 · módulo 31 · schema integration_contracts
 -- Generado de diagram_31_integration_contracts.puml — NO editar a mano.
 
 
 CREATE TABLE IF NOT EXISTS "integration_contracts"."integration_contracts" (
     "id" uuid NOT NULL,
+    "tenant_id" uuid,
     "external_provider_id" uuid NOT NULL,
     "contract_code" varchar NOT NULL,
     "capability_concept_id" uuid NOT NULL,

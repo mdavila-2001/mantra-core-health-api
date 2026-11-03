@@ -87,7 +87,7 @@ INSTANCIAS
   instances/sweep-timeouts > vencidas → ESCALATED (instancia y tareas), SKIP LOCKED
 ```
 
-## Reglas de negocio
+## Business rules
 
 - **La definición nace en borrador.** Una máquina recién declarada no tiene estados ni transiciones:
   activarla permitiría disparar comandos contra un grafo vacío y dejar al agregado en un estado del
@@ -155,7 +155,7 @@ observable —evaluar en orden y devolver el `failure_code` estable— aunque no
 
 Cualquier otra forma —u otro tipo de guarda— **falla cerrado**.
 
-## Permisos
+## Permissions
 
 `WORKFLOW_ARCHITECT` y `GOVERNANCE_ADMIN` definen y publican. Los actores de dominio (`CLINICIAN`,
 `BILLING_AGENT`, `SCHEDULER`) disparan transiciones, crean instancias y completan tareas. `SYSTEM`
@@ -164,7 +164,7 @@ historial. `PLATFORM_ADMIN` cubre todo.
 
 Ninguna ruta es pública.
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE` sobre la definición al declarar estados/transiciones y al publicar, sobre la versión
 activa que se retira, sobre el agregado antes de moverlo, sobre la instancia y sobre la tarea.
@@ -179,7 +179,7 @@ lleva `and row_version = ?` y cero filas afectadas se traduce en `409`.
 vencimiento —los tres momentos en que algo no salió como se esperaba—. No se loguean expresiones de
 guarda ni el contenido de `payloadJson`.
 
-## Pruebas
+## Tests
 
 `corepack yarn test src/modules/workflow --runInBand --silent` — 5 suites y 87 pruebas
 aprobadas durante la revisión.
@@ -192,30 +192,32 @@ aprobadas durante la revisión.
   posición del segmento, así que `{id}:retry` declararía un parámetro llamado `id}:retry`. Se
   publican como segmentos separados.
 
-## Pendiente
+## Fuera de este módulo
 
 - **UC-32-07, el relay**: el caso de uso lo marca explícitamente como *worker interno, no REST
   público*. La parte transaccional está aquí (un mensaje de outbox por efecto, dentro de la
-  transacción de la transición); despacharlos es
-  `POST /internal/outbox/relay/run` del módulo 35, ya implementado. Lo que falta es que ese relay lea
-  `transition_side_effects.action_spec_json` y `execution_mode_concept_id` para elegir el despacho:
-  hoy publica el mensaje con el modo en `metadataJson` y el consumidor decide.
+  transacción de la transición); despacharlos es `POST /internal/outbox/relay/run` del módulo 35.
+  El relay publica el mensaje con el modo de ejecución en `metadataJson` y el consumidor decide; no
+  lee `transition_side_effects.action_spec_json` ni `execution_mode_concept_id`.
 - **Efectos sin `outbox_event_type`** (crear tarea, notificar): se registran en la definición pero no
   se ejecutan. `action_spec_json` no tiene gramática declarada en el modelo, y ejecutarlos a ciegas
   sería inventarla.
 - **`redis_runtime.idempotency_entries`** (UC-32-06, cortocircuito rápido con TTL): aquí la
-  idempotencia la da el unique parcial sobre `state_transition_events`, que es la garantía dura. La
-  caché de Redis es del módulo 56, **sin asignar**.
-- **`transition_timeout_seconds`**: se guarda en la definición pero el barrido usa `workflow_instances.due_at`
-  y `workflow_tasks.due_at`. Calcular el vencimiento por transición exige un planificador que
-  programe el `due_at` al aplicar la transición.
+  idempotencia la da el unique parcial sobre `state_transition_events`, que es la garantía dura.
+- **`transition_timeout_seconds`**: se guarda en la definición pero el barrido usa
+  `workflow_instances.due_at` y `workflow_tasks.due_at`; el vencimiento no se calcula por
+  transición.
 - **Tablas `*_history`**: el caso de uso las declara junto a `audit.audit_events`. El registro de
   auditoría es del módulo 06; las tablas de historial por entidad no están generadas en este esquema.
-- **`purpose_of_use_concept_id`**: se guarda en la definición de la transición y se exige que exista,
-  pero no se contrasta contra el propósito declarado por el llamante. Eso vive en `authz`
-  (`access_policies`), que es de la parte de Pablo.
+- **`purpose_of_use_concept_id`**: `POST .../transitions/:commandCode` exige que el comando declare
+  `purposeOfUseConceptId` y que coincida con el de la transición; si falta o difiere responde
+  `403 FORBIDDEN / WORKFLOW_PURPOSE_NOT_ALLOWED` (igual en ambos casos, sin `details`) antes de la
+  idempotencia, las guardas y cualquier mutación. Lo que sigue pendiente de `authz` es **qué
+  propósitos puede declarar cada actor** (el módulo no tiene una fuente de propósitos autorizados
+  por actor para esta ruta): hoy el propósito declarado se compara con la definición, no con una
+  autorización por actor. `compensate` y `retry` no piden propósito.
 
 ## Revisión ALOVIDA
 
-El propósito de uso configurado en una transición todavía no se comprueba contra la política del
-actor; ver [el informe](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/workflow.md).
+El propósito de uso del comando se compara con el de la transición (WF-02); la autorización del
+propósito por actor depende de `authz` (ver arriba).

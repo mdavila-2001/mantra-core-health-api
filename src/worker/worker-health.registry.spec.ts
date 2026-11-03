@@ -49,13 +49,13 @@ describe('WorkerHealthRegistry', () => {
 
   it('cuenta fallos consecutivos y los reinicia con el primer éxito', () => {
     registry.tickStarted('t');
-    registry.tickFinished('t', 'failed', new Error('uno'));
+    registry.tickFinished('t', 'failed');
     registry.tickStarted('t');
-    registry.tickFinished('t', 'failed', new Error('dos'));
+    registry.tickFinished('t', 'failed');
 
     expect(registry.snapshot().ticks[0]).toMatchObject({
       consecutiveFailures: 2,
-      lastError: 'dos',
+      lastErrorCode: 'TICK_FAILED',
     });
 
     registry.tickStarted('t');
@@ -63,15 +63,65 @@ describe('WorkerHealthRegistry', () => {
 
     expect(registry.snapshot().ticks[0]).toMatchObject({
       consecutiveFailures: 0,
-      lastError: undefined,
+      lastErrorCode: undefined,
     });
   });
 
-  it('recorta el mensaje de error para que un stack no inunde la respuesta', () => {
+  it('un fallo sólo deja un código estable: el mensaje no entra en el registro', () => {
     registry.tickStarted('t');
-    registry.tickFinished('t', 'failed', new Error('x'.repeat(1_000)));
+    registry.tickFinished('t', 'failed');
+    registry.tickStarted('t');
+    registry.tickFinished('t', 'timeout');
 
-    expect(registry.snapshot().ticks[0].lastError).toHaveLength(300);
+    const [tick] = registry.snapshot().ticks;
+    expect(tick.lastErrorCode).toBe('TICK_TIMEOUT');
+    expect(Object.keys(tick)).not.toContain('lastError');
+  });
+
+  describe('capacidades de proveedor', () => {
+    let production = true;
+    beforeEach(() => {
+      production = true;
+      registry = new WorkerHealthRegistry(
+        () => now,
+        () => production,
+      );
+      registry.configure('messaging', 10_000);
+      registry.setStatus('running');
+    });
+
+    it('en producción, el adapter por defecto degrada la readiness pero no la liveness', () => {
+      registry.registerProviderCapability('vector_rag.embeddings', 'none');
+
+      const readiness = registry.readiness();
+      expect(readiness.healthy).toBe(false);
+      expect(readiness.reasons).toEqual([
+        'la capacidad "vector_rag.embeddings" no tiene proveedor productivo (conserva el adapter por defecto)',
+      ]);
+      expect(registry.liveness().healthy).toBe(true);
+    });
+
+    it('en producción, el emulador tampoco cuenta como proveedor', () => {
+      registry.registerProviderCapability('identity_assurance.checks', 'mock');
+
+      expect(registry.readiness().reasons.join(' ')).toContain('sólo emulador');
+    });
+
+    it('un adapter productivo deja la readiness sana', () => {
+      registry.registerProviderCapability('vector_rag.embeddings', 'real');
+
+      expect(registry.readiness().healthy).toBe(true);
+    });
+
+    it('fuera de producción no degrada, pero /status lo muestra', () => {
+      production = false;
+      registry.registerProviderCapability('vector_rag.embeddings', 'none');
+
+      expect(registry.readiness().healthy).toBe(true);
+      expect(registry.snapshot().providerCapabilities).toEqual([
+        { capability: 'vector_rag.embeddings', binding: 'none' },
+      ]);
+    });
   });
 
   describe('liveness', () => {
@@ -86,7 +136,7 @@ describe('WorkerHealthRegistry', () => {
       registry.setStatus('running');
       for (let i = 0; i < 10; i += 1) {
         registry.tickStarted('t');
-        registry.tickFinished('t', 'failed', new Error('la API no responde'));
+        registry.tickFinished('t', 'failed');
       }
 
       expect(registry.liveness().healthy).toBe(true);

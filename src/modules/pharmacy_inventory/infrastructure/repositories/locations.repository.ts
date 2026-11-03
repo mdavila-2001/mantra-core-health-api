@@ -1,0 +1,130 @@
+import { Injectable } from '@nestjs/common';
+import type { EntityManager } from '@mikro-orm/postgresql';
+import { InventoryLocations } from '../../entities';
+import { createdBy } from '../../../../common';
+import { PINV } from '../../domain/pharmacy_inventory.concepts';
+
+/** Datos para crear una ubicación de inventario. */
+export interface CreateLocationData {
+  /**
+   * Identificador asociado a pharmacy site.
+   */
+  pharmacySiteId: string;
+  /**
+   * Identificador asociado a parent location.
+   */
+  parentLocationId?: string;
+  /**
+   * Valor de code mantenido por la instancia.
+   */
+  code: string;
+  /**
+   * Valor de name mantenido por la instancia.
+   */
+  name: string;
+  /**
+   * Identificador asociado a location type concept.
+   */
+  locationTypeConceptId: string;
+  /**
+   * Identificador asociado a temperature zone concept.
+   */
+  temperatureZoneConceptId?: string;
+  /**
+   * Valor de controlled access mantenido por la instancia.
+   */
+  controlledAccess?: boolean;
+  /**
+   * Identificador asociado a status concept.
+   */
+  statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
+  actorUserId?: string;
+  /** F5c: espacio físico. */
+  careSpaceId?: string;
+  /** F5c: unidad clínica dueña. */
+  clinicalUnitId?: string;
+}
+
+/** Acceso a datos de `pharmacy_inventory.inventory_locations`. */
+@Injectable()
+export class LocationsRepository {
+  /**
+   * Obtiene find by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find by id conforme al contrato `Promise<InventoryLocations | null>`.
+   */
+  findById(em: EntityManager, id: string): Promise<InventoryLocations | null> {
+    return em.findOne(InventoryLocations, { id });
+  }
+
+  /**
+   * La primera ubicación activa de una sede, por fecha de alta: donde el stock
+   * por sede (FAR-06) guarda sus posiciones.
+   */
+  findFirstActiveInSite(
+    em: EntityManager,
+    pharmacySiteId: string,
+  ): Promise<InventoryLocations | null> {
+    return em.findOne(
+      InventoryLocations,
+      { pharmacySiteId, statusConceptId: PINV.LOCATION_ACTIVE },
+      { orderBy: { createdAt: 'asc', id: 'asc' } },
+    );
+  }
+
+  /** El botiquín activo de una unidad (F5c), si existe. */
+  findActiveWardStock(
+    em: EntityManager,
+    clinicalUnitId: string,
+  ): Promise<InventoryLocations | null> {
+    return em.findOne(InventoryLocations, {
+      clinicalUnitId,
+      locationTypeConceptId: PINV.LOCATION_TYPE_WARD_STOCK,
+      statusConceptId: PINV.LOCATION_ACTIVE,
+    });
+  }
+
+  /** Todas las ubicaciones activas de una sede, la primera creada primero. */
+  findActiveInSite(
+    em: EntityManager,
+    pharmacySiteId: string,
+  ): Promise<InventoryLocations[]> {
+    return em.find(
+      InventoryLocations,
+      { pharmacySiteId, statusConceptId: PINV.LOCATION_ACTIVE },
+      { orderBy: { createdAt: 'asc', id: 'asc' } },
+    );
+  }
+
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `InventoryLocations`.
+   */
+  create(em: EntityManager, data: CreateLocationData): InventoryLocations {
+    return em.create(
+      InventoryLocations,
+      {
+        pharmacySiteId: data.pharmacySiteId,
+        parentLocationId: data.parentLocationId,
+        code: data.code,
+        name: data.name,
+        locationTypeConceptId: data.locationTypeConceptId,
+        temperatureZoneConceptId: data.temperatureZoneConceptId,
+        controlledAccess: data.controlledAccess,
+        statusConceptId: data.statusConceptId,
+        ...(data.careSpaceId ? { careSpaceId: data.careSpaceId } : {}),
+        ...(data.clinicalUnitId ? { clinicalUnitId: data.clinicalUnitId } : {}),
+        ...createdBy(data.actorUserId),
+      },
+      { partial: true },
+    );
+  }
+}

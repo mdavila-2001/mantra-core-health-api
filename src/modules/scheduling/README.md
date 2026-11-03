@@ -28,7 +28,7 @@ scheduling/
 │   ├── bookings/               fachada + support/ (colaboradores) + use-cases/ (18)
 │   ├── catalog/                fachada + support/ + use-cases/ (16)
 │   ├── agenda/ confirmation/ delay/ notices/ professional-time/ affiliation/ walk-in/
-│   ├── waitlist/ service-offerings/
+│   ├── waitlist/
 ├── infrastructure/
 │   ├── repositories/           acceso a datos propio (clases sin estado, reciben el EntityManager)
 │   ├── adapters/               puertos implementados: audit, profiles, clinical, insurance,
@@ -72,6 +72,7 @@ Los casos de uso dependen de un token Nest + interfaz propia (`application/ports
 | `TenantDirectoryPort` | directory + profiles | `DirectoryTenantDirectoryAdapter` |
 | `WalkInPatientRegistryPort` | profiles + common | `ProfilesWalkInPatientAdapter` |
 | `AgendaNoticePort` | messaging | `MessagingAgendaNoticeAdapter` |
+| `BookingChatPort` | community | `CommunityBookingChatAdapter` |
 | `WaitlistReadPort` / `WaitlistWritePort` | persistencia (Postgres) | `PostgresWaitlistAdapter` |
 
 ## Rutas (leídas de los controllers)
@@ -140,7 +141,7 @@ Los casos de uso dependen de un token Nest + interfaz propia (`application/ports
 Los endpoints `internal/*` son de workers (`SYSTEM`, `SYSTEM_WORKER`). `GET /tenants/:tenantId/agenda`
 no lleva `@Roles`: lo decide `TenantDirectoryPort.assertCanRead`.
 
-## Reglas de negocio
+## Business rules
 
 - **Anti-double-booking**: el slot se toma con `SELECT ... FOR UPDATE` antes de decrementar
   `remaining_capacity`; nunca baja de cero. Al llegar a cero el slot pasa a `held`/`booked`.
@@ -156,13 +157,13 @@ no lleva `@Roles`: lo decide `TenantDirectoryPort.assertCanRead`.
 - **Promoción de lista de espera**: marca candidatos, **no reserva por ellos**. La cita la confirma
   el paciente por el flujo normal.
 
-## Permisos
+## Permissions
 
 Cada handler declara sus `@Roles` (tabla de rutas). Además, el servicio comprueba **quién** es el
 actor sobre **qué** cita (`BookingAccess`): el titular o su representante, quien opera cualquier
 agenda (`SCHEDULING_ADMIN`, `SCHEDULING_AGENT`, `SUPERADMIN`) o el profesional del recurso.
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE` sobre cupo, retención y cita antes de mutarlos. El worker de expiración usa
 `FOR UPDATE SKIP LOCKED`. `row_version` da bloqueo optimista automático.
@@ -172,7 +173,7 @@ agenda (`SCHEDULING_ADMIN`, `SCHEDULING_AGENT`, `SUPERADMIN`) o el profesional d
 `operation: 'scheduling.<área>.<acción>'`. Se registran ids y contadores, nunca el `holdToken`
 ni datos personales del paciente. El contexto del logger es ahora el de cada caso de uso.
 
-## Pruebas
+## Tests
 
 ```bash
 corepack yarn test --maxWorkers=1 --testPathPatterns 'src/modules/scheduling' 'src/architecture'
@@ -191,15 +192,13 @@ tenants ni nada contra una base real.
 - Los veredictos del vínculo (`'sin-vinculos'`, `'aprobado'`, `'pendiente'`, `'ausente'`,
   `'no-vigente'`) viajan en `details.vinculo` de los 422; por eso no se tradujeron.
 
-## Pendiente
+## Structural boundaries
 
-- Separar el modelo de dominio de la entidad ORM (A3): `application/` aún usa las entidades
-  generadas y los repositorios propios (única excepción de capas, declarada en el spec de
-  arquitectura).
-- `dto/` sigue en archivos de 1 100+ líneas por área.
-- La proyección vía `messaging.outbox_events` (recordatorios reales) depende del módulo 35.
+- `application/` usa las entidades generadas y los repositorios propios como puerto de
+  persistencia (decisión A3: única excepción de capas, declarada en el spec de arquitectura).
+- `dto/` está en archivos de 1 100+ líneas por área.
 
-### `generateSlots` respeta la zona horaria del recurso
+## `generateSlots` respeta la zona horaria del recurso
 
 `schedulable_resources.time_zone` se usa para materializar cupos: las reglas de una plantilla
 declaran **hora de pared de la sede** («los lunes de 08:00 a 12:00» son las ocho de la mañana
@@ -224,7 +223,5 @@ Tres cosas que el arreglo tuvo que resolver, y que conviene no deshacer:
 Como el barrido de días locales se ensancha un día por lado, los cupos se recortan a la ventana
 pedida: sin ese recorte, una zona al oeste de UTC materializaría cupos del día anterior.
 
-**Pendiente relacionado:** `tools/alovida/seed-dev-data.mjs` declara sus franjas ya convertidas con
-`horaUtcDeLocal`, una compensación deliberada de cuando el generador era incorrecto. Ahora que
-`generateSlots` lee `time_zone`, esa función sobra y las franjas deberían volver a declararse en
-hora local — vive en `salud-db`/`tools`, fuera del alcance de este cambio.
+`tools/alovida/seed-dev-data.mjs` declara sus franjas en hora local de la sede (`08:00`–`12:00`)
+y crea el recurso con `timeZone: 'America/La_Paz'`; la conversión a UTC la hace `generateSlots`.

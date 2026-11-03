@@ -1,6 +1,15 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsIn, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import {
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+  Matches,
+  Max,
+  MaxLength,
+  Min,
+} from 'class-validator';
 
 /**
  * Query de paginación compartida por todos los listados. Los límites duros
@@ -50,11 +59,18 @@ export class PaginationQueryDto {
    * Valor de sort by mantenido por la instancia.
    */
   @ApiPropertyOptional({
-    description: 'Campo de ordenamiento',
+    description:
+      'Campo de ordenamiento. Debe ser un identificador de columna ' +
+      '(letras, números, guión bajo); el servicio aplica además su propia ' +
+      'allowlist de columnas ordenables',
     default: 'createdAt',
   })
   @IsOptional()
   @IsString()
+  @MaxLength(100)
+  @Matches(/^[A-Za-z_][A-Za-z0-9_]*$/, {
+    message: 'sortBy debe ser un identificador de columna válido',
+  })
   sortBy: string = 'createdAt';
 
   /** Offset derivado para el ORM. */

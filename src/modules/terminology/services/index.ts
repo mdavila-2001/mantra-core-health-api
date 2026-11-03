@@ -8,3 +8,4 @@ export * from './concept-file-import.service';
 export * from './code-systems-read.service';
 export * from './import-parsers.provider';
 export * from './import-template.service';
+export * from './admin-glossary.service';

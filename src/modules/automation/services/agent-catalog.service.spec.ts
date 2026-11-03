@@ -8,8 +8,31 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
-import { CONCEPTS } from '../../../common';
+import { CONCEPTS, runWithTenant } from '../../../common';
+import { AutomationErrorReason } from '../automation.error-reasons';
 import { AgentCatalogService } from './agent-catalog.service';
+
+const TENANT_A = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+const TENANT_B = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+
+/**
+ * Ejecuta cada método del servicio dentro del contexto de tenant dado, como lo
+ * hace `TenantContextInterceptor` en una petición real.
+ *
+ * @param service - Servicio bajo prueba.
+ * @param tenantId - Tenant del contexto de la petición.
+ * @returns Un proxy que ejecuta cada método dentro de `runWithTenant`.
+ */
+function inTenant<T extends object>(service: T, tenantId: string): T {
+  return new Proxy(service, {
+    get(target, property, receiver) {
+      const value = Reflect.get(target, property, receiver);
+      if (typeof value !== 'function') return value;
+      return (...args: unknown[]) =>
+        runWithTenant(tenantId, () => value.apply(target, args));
+    },
+  });
+}
 
 const actor = { id: 'user-1', roles: ['AUTOMATION_ENGINEER'] } as any;
 const AGENT_ID = '11111111-1111-1111-1111-111111111111';
@@ -68,14 +91,24 @@ function build() {
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
-  const service = new AgentCatalogService(
+  const raw = new AgentCatalogService(
     em as any,
     agentsRepo as any,
     governanceRepo as any,
     outbox as any,
     logger as any,
   );
-  return { service, em, tx, agentsRepo, governanceRepo, outbox, logger };
+  return {
+    service: inTenant(raw, TENANT_A),
+    raw,
+    asTenantB: inTenant(raw, TENANT_B),
+    em,
+    tx,
+    agentsRepo,
+    governanceRepo,
+    outbox,
+    logger,
+  };
 }
 
 const REGISTER_DTO = {
@@ -146,6 +179,7 @@ describe('AgentCatalogService', () => {
       const d = build();
       const agent = {
         id: AGENT_ID,
+        tenantId: TENANT_A,
         stateConceptId: CONCEPTS.AUTO_AGENT_DRAFT,
         currentVersion: 1,
         updatedAt: new Date(),
@@ -175,6 +209,7 @@ describe('AgentCatalogService', () => {
       const d = build();
       d.agentsRepo.findAgentForUpdate.mockResolvedValue({
         id: AGENT_ID,
+        tenantId: TENANT_A,
         stateConceptId: CONCEPTS.AUTO_AGENT_ACTIVE,
         currentVersion: 2,
         updatedAt: new Date(),
@@ -196,6 +231,7 @@ describe('AgentCatalogService', () => {
       const d = build();
       d.agentsRepo.findAgentForUpdate.mockResolvedValue({
         id: AGENT_ID,
+        tenantId: TENANT_A,
         stateConceptId: CONCEPTS.AUTO_AGENT_ACTIVE,
         currentVersion: 1,
         updatedAt: new Date(),
@@ -210,6 +246,7 @@ describe('AgentCatalogService', () => {
       const d = build();
       d.agentsRepo.findAgentForUpdate.mockResolvedValue({
         id: AGENT_ID,
+        tenantId: TENANT_A,
         stateConceptId: CONCEPTS.AUTO_AGENT_ACTIVE,
         currentVersion: 1,
         updatedAt: new Date(),
@@ -289,6 +326,10 @@ describe('AgentCatalogService', () => {
      * @returns Resultado de with version and tool.
      */
     function withVersionAndTool(d: ReturnType<typeof build>) {
+      d.agentsRepo.findAgentById.mockResolvedValue({
+        id: AGENT_ID,
+        tenantId: TENANT_A,
+      });
       d.agentsRepo.findVersionById.mockResolvedValue({
         id: VERSION_ID,
         agentId: AGENT_ID,
@@ -363,6 +404,10 @@ describe('AgentCatalogService', () => {
 
     it('rechaza una versión que no es del agente', async () => {
       const d = build();
+      d.agentsRepo.findAgentById.mockResolvedValue({
+        id: AGENT_ID,
+        tenantId: TENANT_A,
+      });
       d.agentsRepo.findVersionById.mockResolvedValue({
         id: VERSION_ID,
         agentId: 'otro-agente',
@@ -426,10 +471,12 @@ describe('AgentCatalogService', () => {
     function withAgentAndPolicy(d: ReturnType<typeof build>, isActive = true) {
       d.agentsRepo.findAgentForUpdate.mockResolvedValue({
         id: AGENT_ID,
+        tenantId: TENANT_A,
         updatedAt: new Date(),
       });
       d.governanceRepo.findGuardrailPolicyById.mockResolvedValue({
         id: POLICY_ID,
+        tenantId: TENANT_A,
         code: 'phi-block',
         isActive,
       });
@@ -476,7 +523,10 @@ describe('AgentCatalogService', () => {
 
     it('crea la memoria cuando no existía', async () => {
       const d = build();
-      d.agentsRepo.findAgentById.mockResolvedValue({ id: AGENT_ID });
+      d.agentsRepo.findAgentById.mockResolvedValue({
+        id: AGENT_ID,
+        tenantId: TENANT_A,
+      });
 
       const result = await d.service.upsertMemory(AGENT_ID, DTO, actor);
 
@@ -486,7 +536,10 @@ describe('AgentCatalogService', () => {
 
     it('actualiza la existente en vez de crear otra', async () => {
       const d = build();
-      d.agentsRepo.findAgentById.mockResolvedValue({ id: AGENT_ID });
+      d.agentsRepo.findAgentById.mockResolvedValue({
+        id: AGENT_ID,
+        tenantId: TENANT_A,
+      });
       const existing = {
         id: 'memory-previa',
         contentText: 'viejo',
@@ -505,7 +558,10 @@ describe('AgentCatalogService', () => {
 
     it('exige referencia fuera del ámbito global', async () => {
       const d = build();
-      d.agentsRepo.findAgentById.mockResolvedValue({ id: AGENT_ID });
+      d.agentsRepo.findAgentById.mockResolvedValue({
+        id: AGENT_ID,
+        tenantId: TENANT_A,
+      });
 
       await expect(
         d.service.upsertMemory(
@@ -518,7 +574,10 @@ describe('AgentCatalogService', () => {
 
     it('acepta el ámbito global sin referencia', async () => {
       const d = build();
-      d.agentsRepo.findAgentById.mockResolvedValue({ id: AGENT_ID });
+      d.agentsRepo.findAgentById.mockResolvedValue({
+        id: AGENT_ID,
+        tenantId: TENANT_A,
+      });
 
       await expect(
         d.service.upsertMemory(
@@ -528,6 +587,219 @@ describe('AgentCatalogService', () => {
             scopeConceptId: CONCEPTS.AUTO_MEMORY_SCOPE_GLOBAL,
             scopeRefId: undefined,
           },
+          actor,
+        ),
+      ).resolves.toBeDefined();
+    });
+  });
+  describe('alcance de tenant (AUTO-01)', () => {
+    /**
+     * Captura el rechazo para inspeccionar status, reason y details.
+     *
+     * @param promise - Operación que debe fallar.
+     * @returns La excepción lanzada.
+     */
+    async function rejection(promise: Promise<unknown>): Promise<any> {
+      try {
+        await promise;
+      } catch (error) {
+        return error;
+      }
+      throw new Error('Se esperaba un rechazo');
+    }
+
+    const AGENT_OF_B = {
+      id: AGENT_ID,
+      tenantId: TENANT_B,
+      stateConceptId: CONCEPTS.AUTO_AGENT_ACTIVE,
+      currentVersion: 1,
+      updatedAt: new Date(),
+    };
+
+    it('el agente se registra en el tenant del contexto, no en el del cuerpo', async () => {
+      const d = build();
+
+      await d.service.registerAgent(
+        { ...REGISTER_DTO, tenantId: TENANT_B },
+        actor,
+      );
+
+      expect(d.agentsRepo.createAgent.mock.calls[0][1].tenantId).toBe(TENANT_A);
+      expect(d.outbox.publishDomainEvent.mock.calls[0][1].tenantId).toBe(
+        TENANT_A,
+      );
+    });
+
+    it('sin tenant en el contexto no registra nada (denegar por defecto)', async () => {
+      const d = build();
+
+      const error = await rejection(d.raw.registerAgent(REGISTER_DTO, actor));
+
+      expect(error.details).toEqual({ reason: 'TENANT_REQUIRED' });
+      expect(d.agentsRepo.createAgent).not.toHaveBeenCalled();
+    });
+
+    it('el engineer de A no publica una versión del agente de B: igual que inexistente', async () => {
+      const d = build();
+      d.agentsRepo.findAgentForUpdate.mockResolvedValue(AGENT_OF_B);
+      const absent = build();
+      absent.agentsRepo.findAgentForUpdate.mockResolvedValue(null);
+      const dto = { promptTemplate: 'nuevo' } as any;
+
+      const foreign = await rejection(
+        d.service.publishAgentVersion(AGENT_ID, dto, actor),
+      );
+      const missing = await rejection(
+        absent.service.publishAgentVersion(AGENT_ID, dto, actor),
+      );
+
+      expect(foreign.getStatus()).toBe(404);
+      expect(foreign.reason).toBe(AutomationErrorReason.AGENT_NOT_FOUND);
+      expect(foreign.details).toBeUndefined();
+      expect(foreign.getResponse()).toEqual(missing.getResponse());
+      expect(d.agentsRepo.createAgentVersion).not.toHaveBeenCalled();
+      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      expect(AGENT_OF_B.currentVersion).toBe(1);
+    });
+
+    it('no enlaza herramientas a una versión de un agente de B', async () => {
+      const d = build();
+      d.agentsRepo.findAgentById.mockResolvedValue(AGENT_OF_B);
+      d.agentsRepo.findVersionById.mockResolvedValue({
+        id: VERSION_ID,
+        agentId: AGENT_ID,
+      });
+
+      await expect(
+        d.service.bindTools(
+          AGENT_ID,
+          VERSION_ID,
+          {
+            bindings: [
+              {
+                agentToolId: TOOL_ID,
+                permissionEffectConceptId: CONCEPTS.AUTO_PERMISSION_ALLOW,
+              },
+            ],
+          } as any,
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        reason: AutomationErrorReason.AGENT_VERSION_NOT_FOUND_FOR_AGENT,
+      });
+      expect(d.agentsRepo.createBinding).not.toHaveBeenCalled();
+    });
+
+    it('la política de guardrail se define en el tenant del contexto', async () => {
+      const d = build();
+
+      await d.service.defineGuardrail(
+        {
+          code: 'g',
+          name: 'G',
+          policyTypeConceptId: CONCEPTS.AUTO_GUARDRAIL_COST,
+          maxCostAmount: '10',
+          enforcementConceptId: CONCEPTS.AUTO_ENFORCEMENT_BLOCK,
+          tenantId: TENANT_B,
+        } as any,
+        actor,
+      );
+
+      expect(
+        d.governanceRepo.createGuardrailPolicy.mock.calls[0][1].tenantId,
+      ).toBe(TENANT_A);
+    });
+
+    it('no adjunta al agente de A una política de B', async () => {
+      const d = build();
+      d.agentsRepo.findAgentForUpdate.mockResolvedValue({
+        id: AGENT_ID,
+        tenantId: TENANT_A,
+        updatedAt: new Date(),
+      });
+      d.governanceRepo.findGuardrailPolicyById.mockResolvedValue({
+        id: POLICY_ID,
+        tenantId: TENANT_B,
+        code: 'phi-block',
+        isActive: true,
+      });
+
+      const error = await rejection(
+        d.service.attachGuardrail(
+          AGENT_ID,
+          { guardrailPolicyId: POLICY_ID } as any,
+          actor,
+        ),
+      );
+
+      expect(error.getStatus()).toBe(404);
+      expect(error.reason).toBe(
+        AutomationErrorReason.GUARDRAIL_POLICY_NOT_FOUND,
+      );
+      expect(error.details).toBeUndefined();
+      expect(d.governanceRepo.createAgentGuardrail).not.toHaveBeenCalled();
+    });
+
+    it('no adjunta una política a un agente de B', async () => {
+      const d = build();
+      d.agentsRepo.findAgentForUpdate.mockResolvedValue(AGENT_OF_B);
+
+      await expect(
+        d.service.attachGuardrail(
+          AGENT_ID,
+          { guardrailPolicyId: POLICY_ID } as any,
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        reason: AutomationErrorReason.AGENT_NOT_FOUND,
+      });
+      expect(d.governanceRepo.createAgentGuardrail).not.toHaveBeenCalled();
+    });
+
+    it('no escribe memoria en un agente de B', async () => {
+      const d = build();
+      d.agentsRepo.findAgentById.mockResolvedValue(AGENT_OF_B);
+
+      await expect(
+        d.service.upsertMemory(
+          AGENT_ID,
+          {
+            scopeConceptId: CONCEPTS.AUTO_MEMORY_SCOPE_GLOBAL,
+            memoryTypeConceptId: 'tipo',
+            contentText: 'x',
+          } as any,
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        reason: AutomationErrorReason.AGENT_NOT_FOUND,
+      });
+      expect(d.agentsRepo.createMemory).not.toHaveBeenCalled();
+      expect(d.agentsRepo.findMemoryForUpdate).not.toHaveBeenCalled();
+    });
+
+    it('el mismo agente sí es operable desde su propio tenant y ajeno desde B', async () => {
+      const d = build();
+      d.agentsRepo.findAgentForUpdate.mockResolvedValue({
+        id: AGENT_ID,
+        tenantId: TENANT_A,
+        stateConceptId: CONCEPTS.AUTO_AGENT_ACTIVE,
+        currentVersion: 1,
+        updatedAt: new Date(),
+      });
+
+      await expect(
+        d.asTenantB.publishAgentVersion(
+          AGENT_ID,
+          { promptTemplate: 'x' } as any,
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        reason: AutomationErrorReason.AGENT_NOT_FOUND,
+      });
+      await expect(
+        d.service.publishAgentVersion(
+          AGENT_ID,
+          { promptTemplate: 'x' } as any,
           actor,
         ),
       ).resolves.toBeDefined();

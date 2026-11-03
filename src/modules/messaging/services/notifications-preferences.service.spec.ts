@@ -92,7 +92,7 @@ function preference(overrides: Record<string, unknown> = {}): any {
 
 describe('NotificationsService · carril P9 (preferencias)', () => {
   describe('readMyPreferences', () => {
-    it('devuelve las cuatro categorías aunque no haya ninguna fila', async () => {
+    it('devuelve todas las categorías (incluida ADMISSION) aunque no haya ninguna fila', async () => {
       const d = build();
 
       const res = await d.service.readMyPreferences(actor as any);
@@ -104,8 +104,24 @@ describe('NotificationsService · carril P9 (preferencias)', () => {
         { category: 'SCHEDULING', optedIn: true },
         { category: 'MESSAGES', optedIn: true },
         { category: 'SOCIAL', optedIn: true },
+        { category: 'ADMISSION', optedIn: true },
       ]);
       expect(res.quietHours).toBeNull();
+    });
+
+    it('ADMISSION se puede silenciar como cualquier categoría', async () => {
+      const d = build();
+      d.notificationsRepo.findPreferences.mockResolvedValue([
+        preference({
+          categoryConceptId: NOTIFICATION_CATEGORY_CONCEPT.ADMISSION,
+          optedIn: false,
+        }),
+      ]);
+      const res = await d.service.readMyPreferences(actor as any);
+      expect(res.categories).toContainEqual({
+        category: 'ADMISSION',
+        optedIn: false,
+      });
     });
 
     it('refleja lo silenciado y la ventana de silencio del canal', async () => {
@@ -195,19 +211,19 @@ describe('NotificationsService · carril P9 (preferencias)', () => {
 
     it('`null` quita la ventana; ausente no la toca', async () => {
       const d = build();
-      const canal = preference({
+      const channel = preference({
         quietHoursJson: { start: '22:00', end: '07:00' },
       });
-      d.notificationsRepo.findPreferences.mockResolvedValue([canal]);
+      d.notificationsRepo.findPreferences.mockResolvedValue([channel]);
 
       await d.service.updateMyPreferences(actor as any, { quietHours: null });
-      expect(canal.quietHoursJson).toBeUndefined();
+      expect(channel.quietHoursJson).toBeUndefined();
 
-      canal.quietHoursJson = { start: '23:00', end: '06:00' };
+      channel.quietHoursJson = { start: '23:00', end: '06:00' };
       await d.service.updateMyPreferences(actor as any, {
         categories: [{ category: 'SOCIAL', optedIn: false }],
       });
-      expect(canal.quietHoursJson).toEqual({ start: '23:00', end: '06:00' });
+      expect(channel.quietHoursJson).toEqual({ start: '23:00', end: '06:00' });
     });
   });
 
@@ -272,10 +288,10 @@ describe('NotificationsService · carril P9 (preferencias)', () => {
       // `available_at` al final de la ventana y aparece a la mañana.
       expect(res.suppressed).toBe(false);
       expect(d.notificationsRepo.createInAppNotification).toHaveBeenCalled();
-      const [, fila] = d.notificationsRepo.createInAppNotification.mock
+      const [, row] = d.notificationsRepo.createInAppNotification.mock
         .calls[0] as any[];
-      expect(fila.availableAt.getUTCHours()).toBe(23);
-      expect(fila.availableAt.getUTCMinutes()).toBe(59);
+      expect(row.availableAt.getUTCHours()).toBe(23);
+      expect(row.availableAt.getUTCMinutes()).toBe(59);
     });
 
     it('fuera de la ventana la deja disponible en el acto', async () => {
@@ -290,11 +306,11 @@ describe('NotificationsService · carril P9 (preferencias)', () => {
         subject: 'Mensaje nuevo',
       });
 
-      const [, fila] = d.notificationsRepo.createInAppNotification.mock
+      const [, row] = d.notificationsRepo.createInAppNotification.mock
         .calls[0] as any[];
       // Sin aplazamiento el instante es «ahora»: no cae en la ventana de un
       // minuto salvo que la prueba corra justo dentro de ella.
-      expect(fila.availableAt).toBeInstanceOf(Date);
+      expect(row.availableAt).toBeInstanceOf(Date);
     });
   });
 });

@@ -8,7 +8,7 @@ import {
   FrontendViewKpis,
   FrontendViewStates,
 } from '../entities';
-import { createdBy } from '../../../common';
+import { CONCEPTS, createdBy } from '../../../common';
 
 /**
  * Describe el contrato estructural de create field data.
@@ -380,6 +380,42 @@ export class FrontendViewChildrenRepository {
     return em.find(
       FrontendViewFields,
       { frontendPageViewId },
+      { orderBy: { ordinal: 'asc' } },
+    );
+  }
+
+  /**
+   * Filtros declarados por el contrato de la vista, en orden.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param frontendPageViewId - Vista.
+   * @returns Los filtros activos de la vista.
+   */
+  listFilters(
+    em: EntityManager,
+    frontendPageViewId: string,
+  ): Promise<FrontendViewFilters[]> {
+    return em.find(
+      FrontendViewFilters,
+      { frontendPageViewId, statusConceptId: CONCEPTS.STATE_ACTIVE },
+      { orderBy: { ordinal: 'asc' } },
+    );
+  }
+
+  /**
+   * Opciones de orden declaradas por el contrato de la vista, en orden.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param frontendPageViewId - Vista.
+   * @returns Las opciones de orden activas de la vista.
+   */
+  listSortOptions(
+    em: EntityManager,
+    frontendPageViewId: string,
+  ): Promise<FrontendViewSortOptions[]> {
+    return em.find(
+      FrontendViewSortOptions,
+      { frontendPageViewId, statusConceptId: CONCEPTS.STATE_ACTIVE },
       { orderBy: { ordinal: 'asc' } },
     );
   }

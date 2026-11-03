@@ -4,13 +4,19 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
+  requireTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
-import { TripsRepository, TrackingSessionsRepository } from '../repositories';
+import {
+  TripsRepository,
+  TrackingSessionsRepository,
+  TrackedSubjectsRepository,
+} from '../repositories';
 import { StartTripDto, CloseTripDto, TripResponseDto } from '../dto';
 import { GEO } from '../geo.concepts';
+import { GeoErrorReason } from '../geo.error-reasons';
+import { assertResourceInTenant } from '../../../common/tenant/resource-scope';
 
 /**
  * Casos de uso sobre `geo.trips`: iniciar viaje (UC-13-06) y cerrarlo con
@@ -25,12 +31,14 @@ export class GeoTripsService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param tripsRepo - Valor de trips repo requerido por la operación.
    * @param sessionsRepo - Valor de sessions repo requerido por la operación.
+   * @param subjectsRepo - Sujetos rastreados: portan el tenant de sesiones y viajes.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly tripsRepo: TripsRepository,
     private readonly sessionsRepo: TrackingSessionsRepository,
+    private readonly subjectsRepo: TrackedSubjectsRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(GeoTripsService.name);
@@ -49,19 +57,13 @@ export class GeoTripsService {
       },
       'Starting trip',
     );
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const session = await this.sessionsRepo.findById(
+      const session = await this.loadSessionInTenant(
         tx,
         dto.trackingSessionId,
+        tenantId,
       );
-      if (!session) {
-        throw new ResourceNotFoundException(
-          'Sesión de tracking no encontrada',
-          {
-            trackingSessionId: dto.trackingSessionId,
-          },
-        );
-      }
       if (session.statusConceptId !== GEO.SESSION_OPEN) {
         throw new PreconditionFailedException(
           'La sesión de tracking no está abierta',
@@ -113,10 +115,18 @@ export class GeoTripsService {
       { operation: 'geo.trip.close', tripId, actorId: actor.id },
       'Closing trip',
     );
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const trip = await this.tripsRepo.findById(tx, tripId);
-      if (!trip)
-        throw new ResourceNotFoundException('Viaje no encontrado', { tripId });
+      // El viaje no lleva tenant propio: lo hereda de su sesión y ésta del sujeto.
+      const found = await this.tripsRepo.findById(tx, tripId);
+      const parentSession = found?.trackingSessionId
+        ? await this.sessionsRepo.findById(tx, found.trackingSessionId)
+        : null;
+      const owner = await this.sessionTenant(tx, parentSession);
+      const trip = assertResourceInTenant(found, owner, tenantId, {
+        message: 'Viaje no encontrado',
+        reason: GeoErrorReason.TRIP_NOT_AVAILABLE,
+      });
 
       if (trip.statusConceptId !== GEO.TRIP_IN_PROGRESS) {
         throw new PreconditionFailedException('El viaje no está en progreso', {
@@ -144,6 +154,51 @@ export class GeoTripsService {
       );
       return this.toResponse(trip);
     });
+  }
+
+  /**
+   * Tenant de una sesión de tracking, heredado de su sujeto rastreado.
+   *
+   * @param tx - Transacción activa.
+   * @param session - Sesión ya cargada, o `null`.
+   * @returns Tenant del sujeto, o `undefined` si la sesión o el sujeto no existen.
+   */
+  private async sessionTenant(
+    tx: EntityManager,
+    session: { trackedSubjectId: string } | null,
+  ): Promise<string | undefined> {
+    if (!session) return undefined;
+    const subject = await this.subjectsRepo.findById(
+      tx,
+      session.trackedSubjectId,
+    );
+    return subject?.tenantId ?? undefined;
+  }
+
+  /**
+   * Carga una sesión de tracking exigiendo que su sujeto pertenezca al tenant.
+   *
+   * @param tx - Transacción activa.
+   * @param sessionId - Sesión de tracking.
+   * @param tenantId - Tenant activo.
+   * @returns La sesión, ya acotada al tenant.
+   * @throws ResourceNotFoundException uniforme si no existe o es ajena.
+   */
+  private async loadSessionInTenant(
+    tx: EntityManager,
+    sessionId: string,
+    tenantId: string,
+  ) {
+    const found = await this.sessionsRepo.findById(tx, sessionId);
+    return assertResourceInTenant(
+      found,
+      await this.sessionTenant(tx, found),
+      tenantId,
+      {
+        message: 'Sesión de tracking no encontrada',
+        reason: GeoErrorReason.TRACKING_SESSION_NOT_AVAILABLE,
+      },
+    );
   }
 
   /**

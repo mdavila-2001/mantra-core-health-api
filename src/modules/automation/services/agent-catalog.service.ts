@@ -5,15 +5,18 @@ import {
   CONCEPTS,
   ConflictException,
   PreconditionFailedException,
+  requireTenantId,
   ResourceNotFoundException,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
 import { OutboxService } from '../../messaging/services';
+import { AutomationErrorReason } from '../automation.error-reasons';
 import {
   AgentsRepository,
   AutomationGovernanceRepository,
 } from '../repositories';
+import { AUTOMATION_SCOPE_FAILURES, inTenantScope } from './automation-scope';
 import {
   RegisterAgentDto,
   AgentResponseDto,
@@ -74,17 +77,24 @@ export class AgentCatalogService {
    * Un agente que actúa —con aprobación o solo— necesita `acts_as_user_id`. Sin
    * identidad de servicio, sus escrituras no quedarían atribuidas a nadie, y la
    * pregunta "quién cambió esto" no tendría respuesta.
+   *
+   * El tenant propietario es el del contexto de la petición, nunca el del cuerpo.
    */
   async registerAgent(
     dto: RegisterAgentDto,
     actor: AuthenticatedUser,
   ): Promise<AgentResponseDto> {
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
       const existing = await this.agentsRepo.findAgentByCode(tx, dto.code);
       if (existing) {
-        throw new ConflictException('Ya existe un agente con ese código.', {
-          code: dto.code,
-        });
+        throw new ConflictException(
+          'Ya existe un agente con ese código.',
+          {
+            code: dto.code,
+          },
+          AutomationErrorReason.AGENT_CODE_ALREADY_EXISTS,
+        );
       }
 
       if (
@@ -94,11 +104,12 @@ export class AgentCatalogService {
         throw new PreconditionFailedException(
           'Un agente que actúa necesita una identidad de servicio (`actsAsUserId`).',
           { code: dto.code },
+          AutomationErrorReason.ACTING_AGENT_MISSING_SERVICE_IDENTITY,
         );
       }
 
       const agent = this.agentsRepo.createAgent(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         code: dto.code,
         name: dto.name,
         agentTypeConceptId: dto.agentTypeConceptId,
@@ -125,7 +136,7 @@ export class AgentCatalogService {
       });
 
       await this.outbox.publishDomainEvent(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         eventType: 'AgentRegistered',
         aggregateType: 'automation.agents',
         aggregateId: agent.id,
@@ -158,19 +169,22 @@ export class AgentCatalogService {
    *
    * Publicar la primera versión activa el agente: es el momento en que deja de ser
    * una declaración y pasa a poder ejecutarse.
+   *
+   * El agente tiene que ser del tenant del contexto; uno ajeno responde igual que
+   * uno inexistente y no se publica nada.
    */
   async publishAgentVersion(
     agentId: string,
     dto: PublishAgentVersionDto,
     actor: AuthenticatedUser,
   ): Promise<AgentVersionResponseDto> {
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const agent = await this.agentsRepo.findAgentForUpdate(tx, agentId);
-      if (!agent) {
-        throw new ResourceNotFoundException('Agente no encontrado.', {
-          agentId,
-        });
-      }
+      const agent = inTenantScope(
+        await this.agentsRepo.findAgentForUpdate(tx, agentId),
+        tenantId,
+        AUTOMATION_SCOPE_FAILURES.agent,
+      );
 
       const now = new Date();
       let version;
@@ -179,10 +193,9 @@ export class AgentCatalogService {
         version = await this.agentsRepo.findVersionById(tx, dto.agentVersionId);
         if (!version || version.agentId !== agentId) {
           throw new ResourceNotFoundException(
-            'La versión no existe para ese agente.',
-            {
-              agentVersionId: dto.agentVersionId,
-            },
+            AUTOMATION_SCOPE_FAILURES.agentVersion.message,
+            undefined,
+            AUTOMATION_SCOPE_FAILURES.agentVersion.reason,
           );
         }
         if (version.statusConceptId !== CONCEPTS.AUTO_VERSION_DRAFT) {
@@ -191,6 +204,7 @@ export class AgentCatalogService {
             {
               agentVersionId: version.id,
             },
+            AutomationErrorReason.AGENT_VERSION_NOT_DRAFT,
           );
         }
         version.statusConceptId = CONCEPTS.AUTO_VERSION_PUBLISHED;
@@ -202,6 +216,7 @@ export class AgentCatalogService {
           throw new PreconditionFailedException(
             'Para crear una versión nueva hace falta su plantilla de prompt.',
             { agentId },
+            AutomationErrorReason.NEW_VERSION_MISSING_PROMPT_TEMPLATE,
           );
         }
         const maxVersion = await this.agentsRepo.findMaxVersion(tx, agentId);
@@ -275,6 +290,7 @@ export class AgentCatalogService {
           {
             code: dto.code,
           },
+          AutomationErrorReason.TOOL_CODE_ALREADY_EXISTS,
         );
       }
 
@@ -285,6 +301,7 @@ export class AgentCatalogService {
         throw new PreconditionFailedException(
           'Una herramienta de llamada HTTP necesita un endpoint de integración.',
           { code: dto.code },
+          AutomationErrorReason.HTTP_TOOL_MISSING_INTEGRATION_ENDPOINT,
         );
       }
 
@@ -345,15 +362,19 @@ export class AgentCatalogService {
     dto: BindToolsDto,
     actor: AuthenticatedUser,
   ): Promise<BindToolsResponseDto> {
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
+      inTenantScope(
+        await this.agentsRepo.findAgentById(tx, agentId),
+        tenantId,
+        AUTOMATION_SCOPE_FAILURES.agentVersion,
+      );
       const version = await this.agentsRepo.findVersionById(tx, agentVersionId);
       if (!version || version.agentId !== agentId) {
         throw new ResourceNotFoundException(
-          'La versión no existe para ese agente.',
-          {
-            agentId,
-            agentVersionId,
-          },
+          AUTOMATION_SCOPE_FAILURES.agentVersion.message,
+          undefined,
+          AUTOMATION_SCOPE_FAILURES.agentVersion.reason,
         );
       }
 
@@ -367,6 +388,7 @@ export class AgentCatalogService {
             {
               agentToolId: binding.agentToolId,
             },
+            AutomationErrorReason.DUPLICATE_TOOL_IN_BINDING_BATCH,
           );
         }
         seen.add(binding.agentToolId);
@@ -376,9 +398,13 @@ export class AgentCatalogService {
           binding.agentToolId,
         );
         if (!tool) {
-          throw new ResourceNotFoundException('Herramienta no encontrada.', {
-            agentToolId: binding.agentToolId,
-          });
+          throw new ResourceNotFoundException(
+            'Herramienta no encontrada.',
+            {
+              agentToolId: binding.agentToolId,
+            },
+            AutomationErrorReason.TOOL_NOT_FOUND,
+          );
         }
         if (tool.stateConceptId !== CONCEPTS.AUTO_TOOL_ACTIVE) {
           throw new PreconditionFailedException(
@@ -386,6 +412,7 @@ export class AgentCatalogService {
             {
               agentToolId: tool.id,
             },
+            AutomationErrorReason.TOOL_NOT_ACTIVE,
           );
         }
 
@@ -400,6 +427,7 @@ export class AgentCatalogService {
             {
               agentToolId: binding.agentToolId,
             },
+            AutomationErrorReason.TOOL_ALREADY_BOUND_TO_VERSION,
           );
         }
 
@@ -445,6 +473,7 @@ export class AgentCatalogService {
     dto: DefineGuardrailDto,
     actor: AuthenticatedUser,
   ): Promise<GuardrailResponseDto> {
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
       const existing = await this.governanceRepo.findGuardrailPolicyByCode(
         tx,
@@ -456,6 +485,7 @@ export class AgentCatalogService {
           {
             code: dto.code,
           },
+          AutomationErrorReason.GUARDRAIL_CODE_ALREADY_EXISTS,
         );
       }
 
@@ -466,6 +496,7 @@ export class AgentCatalogService {
         throw new PreconditionFailedException(
           'Una política de coste tiene que declarar su tope.',
           { code: dto.code },
+          AutomationErrorReason.COST_GUARDRAIL_MISSING_CAP,
         );
       }
       if (
@@ -475,11 +506,12 @@ export class AgentCatalogService {
         throw new PreconditionFailedException(
           'Una política de datos de paciente tiene que declarar cómo se tratan.',
           { code: dto.code },
+          AutomationErrorReason.PHI_GUARDRAIL_MISSING_HANDLING,
         );
       }
 
       const policy = this.governanceRepo.createGuardrailPolicy(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         code: dto.code,
         name: dto.name,
         policyTypeConceptId: dto.policyTypeConceptId,
@@ -509,32 +541,29 @@ export class AgentCatalogService {
     dto: AttachGuardrailDto,
     actor: AuthenticatedUser,
   ): Promise<AttachGuardrailResponseDto> {
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const agent = await this.agentsRepo.findAgentForUpdate(tx, agentId);
-      if (!agent) {
-        throw new ResourceNotFoundException('Agente no encontrado.', {
-          agentId,
-        });
-      }
-
-      const policy = await this.governanceRepo.findGuardrailPolicyById(
-        tx,
-        dto.guardrailPolicyId,
+      const agent = inTenantScope(
+        await this.agentsRepo.findAgentForUpdate(tx, agentId),
+        tenantId,
+        AUTOMATION_SCOPE_FAILURES.agent,
       );
-      if (!policy) {
-        throw new ResourceNotFoundException(
-          'Política de guardrail no encontrada.',
-          {
-            guardrailPolicyId: dto.guardrailPolicyId,
-          },
-        );
-      }
+
+      const policy = inTenantScope(
+        await this.governanceRepo.findGuardrailPolicyById(
+          tx,
+          dto.guardrailPolicyId,
+        ),
+        tenantId,
+        AUTOMATION_SCOPE_FAILURES.guardrailPolicy,
+      );
       if (!policy.isActive) {
         throw new PreconditionFailedException(
           'La política de guardrail no está activa.',
           {
             guardrailPolicyId: policy.id,
           },
+          AutomationErrorReason.GUARDRAIL_POLICY_NOT_ACTIVE,
         );
       }
 
@@ -550,6 +579,7 @@ export class AgentCatalogService {
             agentId,
             guardrailPolicyId: policy.id,
           },
+          AutomationErrorReason.GUARDRAIL_ALREADY_ATTACHED,
         );
       }
 
@@ -607,13 +637,13 @@ export class AgentCatalogService {
     dto: UpsertAgentMemoryDto,
     actor: AuthenticatedUser,
   ): Promise<AgentMemoryResponseDto> {
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const agent = await this.agentsRepo.findAgentById(tx, agentId);
-      if (!agent) {
-        throw new ResourceNotFoundException('Agente no encontrado.', {
-          agentId,
-        });
-      }
+      const agent = inTenantScope(
+        await this.agentsRepo.findAgentById(tx, agentId),
+        tenantId,
+        AUTOMATION_SCOPE_FAILURES.agent,
+      );
 
       if (
         dto.scopeConceptId !== CONCEPTS.AUTO_MEMORY_SCOPE_GLOBAL &&
@@ -622,6 +652,7 @@ export class AgentCatalogService {
         throw new PreconditionFailedException(
           'Fuera del ámbito global la memoria tiene que declarar a qué se refiere.',
           { agentId },
+          AutomationErrorReason.MEMORY_SCOPE_MISSING_REFERENCE,
         );
       }
 
