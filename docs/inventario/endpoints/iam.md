@@ -150,7 +150,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:358` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 10, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:358` |
 
@@ -248,7 +248,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/iam/presentation/controllers/iam-account-security.controller.ts:45` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/iam/presentation/controllers/iam-account-security.controller.ts:45` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 5, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-account-security.controller.ts:45` |
 
@@ -343,7 +343,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:410` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 5, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:410` |
 
@@ -410,7 +410,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:187` |
+| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:257` |
 
 ### Flujos
 
@@ -442,7 +442,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:377` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 10, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:377` |
 
@@ -455,7 +455,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `common.contact_points` | LEE | LEE | DIRECTA | IamAuthController.login → IamAuthService.login → IamAuthService.performLogin → CredentialsRepository.findActivePasswordByLoginIdentifier | `src/modules/iam/infrastructure/repositories/credentials.repository.ts:108` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | IamAuthController.login → IamAuthService.login → IamAuthService.performLogin → IamAuthService.loadActiveTenantIds → DirectoryTenantClaimsAdapter.listActiveTenantIds | `src/modules/iam/infrastructure/adapters/directory-tenant-claims.adapter.ts:26` |
 | `directory.tenants` | LEE | LEE | DIRECTA | IamAuthController.login → IamAuthService.login → IamAuthService.performLogin → IamAuthService.loadTenantDisplay → DirectoryTenantClaimsAdapter.describeTenants | `src/modules/iam/infrastructure/adapters/directory-tenant-claims.adapter.ts:47` |
-| `iam.account_lockouts` | ESCRIBE | ACTUALIZA | POR_TIPO | IamAuthController.login → IamAuthService.login → IamAuthService.performLogin → IamAuthService.handleFailedPassword | `src/modules/iam/application/services/iam-auth.service.ts:826` |
+| `iam.account_lockouts` | ESCRIBE | ACTUALIZA | POR_TIPO | IamAuthController.login → IamAuthService.login → IamAuthService.performLogin → IamAuthService.handleFailedPassword | `src/modules/iam/application/services/iam-auth.service.ts:841` |
 | `iam.account_lockouts` | ESCRIBE | CREA | DIRECTA | IamAuthController.login → IamAuthService.login → IamAuthService.performLogin → IamAuthService.handleFailedPassword → AccountLockoutsRepository.create | `src/modules/iam/infrastructure/repositories/account-lockouts.repository.ts:35` |
 | `iam.account_lockouts` | LEE | LEE | DIRECTA | IamAuthController.login → IamAuthService.login → IamAuthService.performLogin → IamAuthService.handleFailedPassword → AccountLockoutsRepository.findActiveForUser | `src/modules/iam/infrastructure/repositories/account-lockouts.repository.ts:55` |
 | `iam.authentication_credentials` | LEE | LEE | DIRECTA | IamAuthController.login → IamAuthService.login → IamAuthService.performLogin → CredentialsRepository.findActivePasswordByLoginIdentifier | `src/modules/iam/infrastructure/repositories/credentials.repository.ts:100` |
@@ -468,7 +468,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `iam.sessions` | ESCRIBE | CREA | DIRECTA | IamAuthController.login → IamAuthService.login → IamAuthService.performLogin → SessionsRepository.create | `src/modules/iam/infrastructure/repositories/sessions.repository.ts:43` |
 | `iam.sessions` | LEE | LEE | DIRECTA | IamAuthController.login → IamAuthService.login → IamAuthService.performLogin → IamAuthService.handleFailedPassword → SessionsRepository.activeSessionIdsForUser | `src/modules/iam/infrastructure/repositories/sessions.repository.ts:94` |
 | `iam.user_global_roles` | LEE | LEE | DIRECTA | IamAuthController.login → IamAuthService.login → IamAuthService.performLogin → UserGlobalRolesRepository.findActiveForUser | `src/modules/iam/infrastructure/repositories/user-global-roles.repository.ts:57` |
-| `iam.users` | ESCRIBE | ACTUALIZA | POR_TIPO | IamAuthController.login → IamAuthService.login → IamAuthService.performLogin | `src/modules/iam/application/services/iam-auth.service.ts:448` |
+| `iam.users` | ESCRIBE | ACTUALIZA | POR_TIPO | IamAuthController.login → IamAuthService.login → IamAuthService.performLogin | `src/modules/iam/application/services/iam-auth.service.ts:452` |
 | `iam.users` | LEE | LEE | DIRECTA | IamAuthController.login → IamAuthService.login → IamAuthService.performLogin → UsersRepository.findById | `src/modules/iam/infrastructure/repositories/users.repository.ts:45` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | IamAuthController.login → IamAuthService.login → IamAuthService.performLogin → IamAuthService.loadPractitionerProfileId → ProfilesAccountProfileIdsAdapter.findPractitionerProfileId → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.patient_profiles` | LEE | LEE | DIRECTA | IamAuthController.login → IamAuthService.login → IamAuthService.performLogin → IamAuthService.loadPatientProfileId → ProfilesAccountProfileIdsAdapter.findPatientProfileId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
@@ -535,13 +535,13 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | INTEGRACION | `test/integration/community-pharmacy-inbox.int-spec.ts:60` |
 | INTEGRACION | `test/integration/community-realtime-chat.int-spec.ts:104` |
 | INTEGRACION | `test/integration/dependent-link-requests.int-spec.ts:72` |
-| INTEGRACION | `test/integration/diagnostics-release.int-spec.ts:61` |
+| INTEGRACION | `test/integration/diagnostics-release.int-spec.ts:67` |
 | INTEGRACION | `test/integration/fx1-doctor-publica-agenda.int-spec.ts:51` |
 | INTEGRACION | `test/integration/fx10-mostrador-atomico.int-spec.ts:142` |
-| INTEGRACION | `test/integration/fx11-notas-de-evolucion-coleccion.int-spec.ts:73` |
+| INTEGRACION | `test/integration/fx11-notas-de-evolucion-coleccion.int-spec.ts:74` |
 | INTEGRACION | `test/integration/fx12-check-in-idempotente-por-cita.int-spec.ts:136` |
 | INTEGRACION | `test/integration/fx13-encuentro-en-la-reserva.int-spec.ts:78` |
-| INTEGRACION | `test/integration/fx15-documentos-del-expediente.int-spec.ts:77` |
+| INTEGRACION | `test/integration/fx15-documentos-del-expediente.int-spec.ts:84` |
 | INTEGRACION | `test/integration/fx16-dependientes-y-tutor-legal.int-spec.ts:79` |
 | INTEGRACION | `test/integration/fx17-sello-del-encuentro.int-spec.ts:94` |
 | INTEGRACION | `test/integration/fx2-medico-multisede-publica-agenda.int-spec.ts:73` |
@@ -556,7 +556,8 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | INTEGRACION | `test/integration/hardening/mch-005.int-spec.ts:50` |
 | INTEGRACION | `test/integration/hardening/mch-034.int-spec.ts:81` |
 | INTEGRACION | `test/integration/iam.int-spec.ts:80` |
-| INTEGRACION | `test/integration/identity-verification-self-service.int-spec.ts:73` |
+| INTEGRACION | `test/integration/identity-verification-cycle.int-spec.ts:67` |
+| INTEGRACION | `test/integration/identity-verification-self-service.int-spec.ts:88` |
 | INTEGRACION | `test/integration/infrastructure-fixture.ts:75` |
 | INTEGRACION | `test/integration/infrastructure-or-f4.int-spec.ts:94` |
 | INTEGRACION | `test/integration/insurance-campaigns.int-spec.ts:76` |
@@ -564,7 +565,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | INTEGRACION | `test/integration/insurance-portability.int-spec.ts:65` |
 | INTEGRACION | `test/integration/insurer-patients.int-spec.ts:66` |
 | INTEGRACION | `test/integration/lab-reception-inbox.int-spec.ts:66` |
-| INTEGRACION | `test/integration/medical-centers.int-spec.ts:182` |
+| INTEGRACION | `test/integration/medical-centers.int-spec.ts:208` |
 | INTEGRACION | `test/integration/observability.int-spec.ts:76` |
 | INTEGRACION | `test/integration/organization-headquarters-location.int-spec.ts:111` |
 | INTEGRACION | `test/integration/organization-legal-representative.int-spec.ts:96` |
@@ -586,8 +587,8 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | INTEGRACION | `test/integration/practitioner-profile-identity-fields.int-spec.ts:53` |
 | INTEGRACION | `test/integration/practitioner-registration.int-spec.ts:137` |
 | INTEGRACION | `test/integration/practitioner-signature-registration.int-spec.ts:72` |
-| INTEGRACION | `test/integration/quitar-punto-del-mapa.int-spec.ts:91` |
-| INTEGRACION | `test/integration/refresh-cookie.int-spec.ts:57` |
+| INTEGRACION | `test/integration/quitar-punto-del-mapa.int-spec.ts:94` |
+| INTEGRACION | `test/integration/refresh-cookie.int-spec.ts:53` |
 | INTEGRACION | `test/integration/tj1-onboarding-medico.int-spec.ts:108` |
 | INTEGRACION | `test/integration/tj2-reglas-cita.int-spec.ts:140` |
 | INTEGRACION | `test/integration/virtual-encounter-auth.int-spec.ts:50` |
@@ -655,6 +656,7 @@ La operación no recibe cuerpo.
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Redis no está disponible para revocar sesiones |
 
 El árbol de decisión completo está en [flujos](../flujos/iam.md).
 
@@ -663,7 +665,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/hardening/mch-004.int-spec.ts:76` |
-| INTEGRACION | `test/integration/refresh-cookie.int-spec.ts:151` |
+| INTEGRACION | `test/integration/refresh-cookie.int-spec.ts:148` |
 
 ### Flujos
 
@@ -735,7 +737,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 |---|---|
 | INTEGRACION | `test/integration/hardening/mch-004.int-spec.ts:87` |
 | INTEGRACION | `test/integration/iam.int-spec.ts:177` |
-| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:114` |
+| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:184` |
 
 ### Flujos
 
@@ -767,7 +769,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:160` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 10, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:160` |
 
@@ -1263,8 +1265,8 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | INTEGRACION | `test/integration/lab-reception-inbox.int-spec.ts:52` |
 | INTEGRACION | `test/integration/laboratory-registration.int-spec.ts:206` |
 | INTEGRACION | `test/integration/medical-center-registration.int-spec.ts:35` |
-| INTEGRACION | `test/integration/medical-centers.int-spec.ts:129` |
-| INTEGRACION | `test/integration/medical-facility-registration.int-spec.ts:112` |
+| INTEGRACION | `test/integration/medical-centers.int-spec.ts:144` |
+| INTEGRACION | `test/integration/medical-facility-registration.int-spec.ts:120` |
 | INTEGRACION | `test/integration/organization-headquarters-location.int-spec.ts:141` |
 | INTEGRACION | `test/integration/organization-legal-documents.int-spec.ts:97` |
 | INTEGRACION | `test/integration/organization-legal-entity-type.int-spec.ts:46` |
@@ -1274,7 +1276,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | INTEGRACION | `test/integration/practice-infrastructure.int-spec.ts:61` |
 | INTEGRACION | `test/integration/practice-structure-tenancy.int-spec.ts:60` |
 | INTEGRACION | `test/integration/tenant-external-verification-requirements.int-spec.ts:46` |
-| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:158` |
+| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:228` |
 
 ### Flujos
 
@@ -1306,7 +1308,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:114` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 10, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:114` |
 
@@ -1489,9 +1491,11 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | INTEGRACION | `test/integration/community-pharmacy-inbox.int-spec.ts:49` |
 | INTEGRACION | `test/integration/community-realtime-chat.int-spec.ts:124` |
 | INTEGRACION | `test/integration/dependent-link-requests.int-spec.ts:59` |
-| INTEGRACION | `test/integration/diagnostics-release.int-spec.ts:51` |
+| INTEGRACION | `test/integration/diagnostics-release.int-spec.ts:57` |
+| INTEGRACION | `test/integration/fx11-notas-de-evolucion-coleccion.int-spec.ts:114` |
 | INTEGRACION | `test/integration/fx12-check-in-idempotente-por-cita.int-spec.ts:67` |
 | INTEGRACION | `test/integration/fx13-encuentro-en-la-reserva.int-spec.ts:160` |
+| INTEGRACION | `test/integration/fx15-documentos-del-expediente.int-spec.ts:121` |
 | INTEGRACION | `test/integration/fx16-dependientes-y-tutor-legal.int-spec.ts:68` |
 | INTEGRACION | `test/integration/fx3-agenda-respiro-y-avisos.int-spec.ts:122` |
 | INTEGRACION | `test/integration/fx4-retirar-horario-publicado.int-spec.ts:103` |
@@ -1500,12 +1504,13 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | INTEGRACION | `test/integration/hardening/mch-001.int-spec.ts:89` |
 | INTEGRACION | `test/integration/hardening/mch-004.int-spec.ts:41` |
 | INTEGRACION | `test/integration/hardening/mch-005.int-spec.ts:40` |
-| INTEGRACION | `test/integration/identity-verification-self-service.int-spec.ts:61` |
-| INTEGRACION | `test/integration/infrastructure-fixture.ts:309` |
+| INTEGRACION | `test/integration/identity-verification-cycle.int-spec.ts:57` |
+| INTEGRACION | `test/integration/identity-verification-self-service.int-spec.ts:76` |
+| INTEGRACION | `test/integration/infrastructure-fixture.ts:312` |
 | INTEGRACION | `test/integration/insurance-portability.int-spec.ts:51` |
 | INTEGRACION | `test/integration/issuer-administrative-area.int-spec.ts:50` |
 | INTEGRACION | `test/integration/lab-reception-inbox.int-spec.ts:135` |
-| INTEGRACION | `test/integration/medical-centers.int-spec.ts:200` |
+| INTEGRACION | `test/integration/medical-centers.int-spec.ts:226` |
 | INTEGRACION | `test/integration/p23-cambiar-horario-con-citas.int-spec.ts:176` |
 | INTEGRACION | `test/integration/p36-horario-flexible.int-spec.ts:69` |
 | INTEGRACION | `test/integration/p39-nota-medica-filas.int-spec.ts:109` |
@@ -1513,12 +1518,12 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | INTEGRACION | `test/integration/patient-diagnostic-orders.int-spec.ts:56` |
 | INTEGRACION | `test/integration/patient-own-profile.int-spec.ts:45` |
 | INTEGRACION | `test/integration/patient-spending-http.int-spec.ts:66` |
-| INTEGRACION | `test/integration/quitar-punto-del-mapa.int-spec.ts:78` |
+| INTEGRACION | `test/integration/quitar-punto-del-mapa.int-spec.ts:81` |
 | INTEGRACION | `test/integration/tj1-onboarding-medico.int-spec.ts:237` |
 | INTEGRACION | `test/integration/tj2-reglas-cita.int-spec.ts:130` |
 | INTEGRACION | `test/integration/virtual-encounter-auth.int-spec.ts:75` |
 | INTEGRACION | `test/integration/waitlist-cupo-liberado.int-spec.ts:108` |
-| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:141` |
+| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:211` |
 
 ### Flujos
 
@@ -1550,7 +1555,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:292` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 10, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:292` |
 
@@ -1872,13 +1877,13 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | INTEGRACION | `test/integration/clinical-c14-c23-notas-e-internacion.int-spec.ts:81` |
 | INTEGRACION | `test/integration/clinical-prescriptions-pdf.int-spec.ts:93` |
 | INTEGRACION | `test/integration/community-realtime-chat.int-spec.ts:92` |
-| INTEGRACION | `test/integration/diagnostics-release.int-spec.ts:214` |
+| INTEGRACION | `test/integration/diagnostics-release.int-spec.ts:220` |
 | INTEGRACION | `test/integration/fx1-doctor-publica-agenda.int-spec.ts:37` |
 | INTEGRACION | `test/integration/fx10-mostrador-atomico.int-spec.ts:128` |
-| INTEGRACION | `test/integration/fx11-notas-de-evolucion-coleccion.int-spec.ts:59` |
+| INTEGRACION | `test/integration/fx11-notas-de-evolucion-coleccion.int-spec.ts:60` |
 | INTEGRACION | `test/integration/fx12-check-in-idempotente-por-cita.int-spec.ts:122` |
 | INTEGRACION | `test/integration/fx13-encuentro-en-la-reserva.int-spec.ts:64` |
-| INTEGRACION | `test/integration/fx15-documentos-del-expediente.int-spec.ts:63` |
+| INTEGRACION | `test/integration/fx15-documentos-del-expediente.int-spec.ts:70` |
 | INTEGRACION | `test/integration/fx17-sello-del-encuentro.int-spec.ts:80` |
 | INTEGRACION | `test/integration/fx2-medico-multisede-publica-agenda.int-spec.ts:152` |
 | INTEGRACION | `test/integration/fx3-agenda-respiro-y-avisos.int-spec.ts:100` |
@@ -1889,7 +1894,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | INTEGRACION | `test/integration/fx9-carreras-de-la-agenda.int-spec.ts:155` |
 | INTEGRACION | `test/integration/hardening/mch-034.int-spec.ts:68` |
 | INTEGRACION | `test/integration/issuer-administrative-area.int-spec.ts:139` |
-| INTEGRACION | `test/integration/medical-centers.int-spec.ts:170` |
+| INTEGRACION | `test/integration/medical-centers.int-spec.ts:196` |
 | INTEGRACION | `test/integration/p23-cambiar-horario-con-citas.int-spec.ts:143` |
 | INTEGRACION | `test/integration/p36-horario-flexible.int-spec.ts:122` |
 | INTEGRACION | `test/integration/p39-nota-medica-filas.int-spec.ts:57` |
@@ -1936,7 +1941,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:138` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 10, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:138` |
 
@@ -2079,7 +2084,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:325` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 5, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:325` |
 
@@ -2174,7 +2179,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:431` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 10, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:431` |
 
@@ -2240,7 +2245,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:197` |
+| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:267` |
 
 ### Flujos
 
@@ -2311,7 +2316,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/iam.int-spec.ts:148` |
-| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:121` |
+| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:191` |
 
 ### Flujos
 
@@ -2343,7 +2348,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:447` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 20, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:447` |
 
@@ -2414,8 +2419,8 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 |---|---|
 | INTEGRACION | `test/integration/hardening/mch-005.int-spec.ts:57` |
 | INTEGRACION | `test/integration/iam.int-spec.ts:97` |
-| INTEGRACION | `test/integration/refresh-cookie.int-spec.ts:83` |
-| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:105` |
+| INTEGRACION | `test/integration/refresh-cookie.int-spec.ts:80` |
+| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:141` |
 
 ### Flujos
 
@@ -2512,6 +2517,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 
 | Tipo | Archivo |
 |---|---|
+| INTEGRACION | `test/integration/community-pharmacy-inbox.int-spec.ts:125` |
 | INTEGRACION | `test/integration/laboratory-registration.int-spec.ts:391` |
 | INTEGRACION | `test/integration/organization-legal-documents.int-spec.ts:37` |
 | INTEGRACION | `test/integration/organization-legal-representative.int-spec.ts:41` |
@@ -2519,7 +2525,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | INTEGRACION | `test/integration/pharmacy-registration.int-spec.ts:54` |
 | INTEGRACION | `test/integration/practitioner-credential-registration-files.int-spec.ts:25` |
 | INTEGRACION | `test/integration/practitioner-license-registration-files.int-spec.ts:32` |
-| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:171` |
+| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:241` |
 
 ### Flujos
 
@@ -2743,7 +2749,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:342` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 10, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:342` |
 
@@ -2751,9 +2757,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `iam.email_verifications` | ESCRIBE | ACTUALIZA | POR_TIPO | IamAuthController.verifyEmail → IamPatientSelfRegistrationService.verifyEmail | `src/modules/iam/application/services/iam-patient-self-registration.service.ts:552` |
+| `iam.email_verifications` | ESCRIBE | ACTUALIZA | POR_TIPO | IamAuthController.verifyEmail → IamPatientSelfRegistrationService.verifyEmail | `src/modules/iam/application/services/iam-patient-self-registration.service.ts:555` |
 | `iam.email_verifications` | LEE | LEE | DIRECTA | IamAuthController.verifyEmail → IamPatientSelfRegistrationService.verifyEmail → EmailVerificationsRepository.findByTokenHash | `src/modules/iam/infrastructure/repositories/email-verifications.repository.ts:60` |
-| `iam.users` | ESCRIBE | ACTUALIZA | POR_TIPO | IamAuthController.verifyEmail → IamPatientSelfRegistrationService.verifyEmail | `src/modules/iam/application/services/iam-patient-self-registration.service.ts:566` |
+| `iam.users` | ESCRIBE | ACTUALIZA | POR_TIPO | IamAuthController.verifyEmail → IamPatientSelfRegistrationService.verifyEmail | `src/modules/iam/application/services/iam-patient-self-registration.service.ts:569` |
 | `iam.users` | LEE | LEE | DIRECTA | IamAuthController.verifyEmail → IamPatientSelfRegistrationService.verifyEmail → UsersRepository.findById | `src/modules/iam/infrastructure/repositories/users.repository.ts:45` |
 
 ### Cuerpo — DTO `VerifyEmailDto` · `application/json`
@@ -2802,7 +2808,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:180` |
+| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:250` |
 
 ### Flujos
 
@@ -3244,6 +3250,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 
 | Tipo | Archivo |
 |---|---|
+| INTEGRACION | `test/integration/refresh-cookie.int-spec.ts:159` |
 | CONTROLADOR | `src/modules/iam/presentation/controllers/iam-users.controller.spec.ts:147` |
 
 ### Flujos
@@ -3278,7 +3285,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:372` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3356,7 +3363,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/iam.int-spec.ts:41` |
-| INTEGRACION | `test/integration/refresh-cookie.int-spec.ts:36` |
+| INTEGRACION | `test/integration/refresh-cookie.int-spec.ts:33` |
 | CONTROLADOR | `src/modules/iam/presentation/controllers/iam-users.controller.spec.ts:73` |
 
 ### Flujos
@@ -3722,7 +3729,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:391` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:391` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3831,7 +3838,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:533` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:533` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4027,7 +4034,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/iam/presentation/controllers/iam-users.controller.ts:444` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:444` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4216,7 +4223,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:561` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:561` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4413,7 +4420,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:461` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:461` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4598,7 +4605,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/iam/presentation/controllers/iam-users.controller.ts:427` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:427` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4714,7 +4721,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:507` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:507` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4910,7 +4917,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:479` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:479` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -5023,7 +5030,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:349` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -5364,7 +5371,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:318` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -5484,7 +5491,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:197` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 

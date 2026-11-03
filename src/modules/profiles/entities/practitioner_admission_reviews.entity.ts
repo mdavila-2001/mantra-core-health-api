@@ -16,13 +16,13 @@ export class PractitionerAdmissionReviews {
   /**
    * Admisión a la que pertenece la revisión.
    */
-  @Property({ fieldName: 'admission_id', type: 'uuid' }) // FK → profiles.practitioner_admissions
+  @Property({ fieldName: 'admission_id', type: 'uuid' }) // FK (destino no resuelto)
   admissionId!: string;
 
   /**
    * Requisito del catálogo que se revisa.
    */
-  @Property({ fieldName: 'requirement_id', type: 'uuid' }) // FK → profiles.admission_requirements
+  @Property({ fieldName: 'requirement_id', type: 'uuid' }) // FK (destino no resuelto)
   requirementId!: string;
 
   /**
@@ -35,13 +35,13 @@ export class PractitionerAdmissionReviews {
   /**
    * Estado vigente de la revisión.
    */
-  @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts (inferida)
   statusConceptId!: string;
 
   /**
    * Archivo que respalda el ítem, si lo hay.
    */
-  @Property({ fieldName: 'file_id', type: 'uuid', nullable: true }) // FK → common.files
+  @Property({ fieldName: 'file_id', type: 'uuid', nullable: true }) // FK → common.files (inferida)
   fileId?: string;
 
   /**
@@ -61,7 +61,7 @@ export class PractitionerAdmissionReviews {
     fieldName: 'source_type_concept_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → terminology.catalog_concepts
+  }) // FK → terminology.catalog_concepts (inferida)
   sourceTypeConceptId?: string;
 
   /**
@@ -97,7 +97,7 @@ export class PractitionerAdmissionReviews {
     fieldName: 'reason_code_concept_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → terminology.catalog_concepts
+  }) // FK → terminology.catalog_concepts (inferida)
   reasonCodeConceptId?: string;
 
   /**
@@ -115,7 +115,7 @@ export class PractitionerAdmissionReviews {
   /**
    * Quién revisó.
    */
-  @Property({ fieldName: 'reviewed_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'reviewed_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   reviewedByUserId?: string;
 
   /**
@@ -143,13 +143,13 @@ export class PractitionerAdmissionReviews {
   /**
    * Identificador asociado a created by user.
    */
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   createdByUserId?: string;
 
   /**
    * Identificador asociado a updated by user.
    */
-  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   updatedByUserId?: string;
 
   /**

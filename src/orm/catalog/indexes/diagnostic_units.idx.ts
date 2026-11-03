@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `diagnostic_units`.
- * 75 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 115 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const diagnosticUnitsIndexes: readonly IndexTuple[] = [
@@ -82,4 +82,44 @@ export const diagnosticUnitsIndexes: readonly IndexTuple[] = [
   ['diagnostic_units', 'ix_diagnostic_units_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['diagnostic_units', 'ix_diagnostic_units_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['diagnostic_units', 'ix_diagnostic_units_tenant_id_status_concept_id', ['tenant_id', 'status_concept_id', 'updated_at desc'], false, 'btree'],
+  ['unit_medical_visitors', 'ux_unit_medical_visitors_user_id', ['user_id'], true, 'btree'],
+  ['unit_medical_visitors', 'ix_unit_medical_visitors_diagnostic_unit_id', ['diagnostic_unit_id'], false, 'btree'],
+  ['unit_medical_visitors', 'ix_unit_medical_visitors_supervisor_user_id', ['supervisor_user_id'], false, 'btree'],
+  ['unit_medical_visitors', 'ix_unit_medical_visitors_branch_id', ['branch_id'], false, 'btree'],
+  ['unit_medical_visitors', 'ix_unit_medical_visitors_identity_verification_concept_id', ['identity_verification_concept_id'], false, 'btree'],
+  ['unit_medical_visitors', 'ix_unit_medical_visitors_contract_verification_concept_id', ['contract_verification_concept_id'], false, 'btree'],
+  ['unit_medical_visitors', 'ix_unit_medical_visitors_credential_verification_concept_id', ['credential_verification_concept_id'], false, 'btree'],
+  ['unit_medical_visitors', 'ix_unit_medical_visitors_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['unit_medical_visitors', 'ix_unit_medical_visitors_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['unit_medical_visitors', 'ix_unit_medical_visitors_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['unit_visit_ratings', 'ix_unit_visit_ratings_unit_visit_record_id', ['unit_visit_record_id'], false, 'btree'],
+  ['unit_visit_ratings', 'ix_unit_visit_ratings_doctor_user_id', ['doctor_user_id'], false, 'btree'],
+  ['unit_visit_ratings', 'ix_unit_visit_ratings_kind_concept_id', ['kind_concept_id'], false, 'btree'],
+  ['unit_visit_ratings', 'ix_unit_visit_ratings_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['unit_visit_ratings', 'ix_unit_visit_ratings_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['unit_visit_records', 'ux_unit_visit_records_unit_visit_request_id', ['unit_visit_request_id'], true, 'btree'],
+  ['unit_visit_records', 'ix_unit_visit_records_doctor_user_id', ['doctor_user_id'], false, 'btree'],
+  ['unit_visit_records', 'ix_unit_visit_records_unit_medical_visitor_id', ['unit_medical_visitor_id'], false, 'btree'],
+  ['unit_visit_records', 'ix_unit_visit_records_diagnostic_unit_id', ['diagnostic_unit_id'], false, 'btree'],
+  ['unit_visit_records', 'ix_unit_visit_records_modality_concept_id', ['modality_concept_id'], false, 'btree'],
+  ['unit_visit_records', 'ix_unit_visit_records_visitor_attendance_concept_id', ['visitor_attendance_concept_id'], false, 'btree'],
+  ['unit_visit_records', 'ix_unit_visit_records_doctor_attendance_concept_id', ['doctor_attendance_concept_id'], false, 'btree'],
+  ['unit_visit_records', 'ix_unit_visit_records_confirmation_concept_id', ['confirmation_concept_id'], false, 'btree'],
+  ['unit_visit_records', 'ix_unit_visit_records_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['unit_visit_records', 'ix_unit_visit_records_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['unit_visit_request_events', 'ix_unit_visit_request_events_unit_visit_request_id', ['unit_visit_request_id'], false, 'btree'],
+  ['unit_visit_request_events', 'ix_unit_visit_request_events_action_concept_id', ['action_concept_id'], false, 'btree'],
+  ['unit_visit_request_events', 'ix_unit_visit_request_events_previous_status_concept_id', ['previous_status_concept_id'], false, 'btree'],
+  ['unit_visit_request_events', 'ix_unit_visit_request_events_new_status_concept_id', ['new_status_concept_id'], false, 'btree'],
+  ['unit_visit_request_events', 'ix_unit_visit_request_events_actor_user_id', ['actor_user_id'], false, 'btree'],
+  ['unit_visit_request_events', 'ix_unit_visit_request_events_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['unit_visit_requests', 'ix_unit_visit_requests_unit_medical_visitor_id', ['unit_medical_visitor_id'], false, 'btree'],
+  ['unit_visit_requests', 'ix_unit_visit_requests_diagnostic_unit_id', ['diagnostic_unit_id'], false, 'btree'],
+  ['unit_visit_requests', 'ix_unit_visit_requests_doctor_user_id', ['doctor_user_id'], false, 'btree'],
+  ['unit_visit_requests', 'ix_unit_visit_requests_doctor_tenant_id', ['doctor_tenant_id'], false, 'btree'],
+  ['unit_visit_requests', 'ix_unit_visit_requests_modality_concept_id', ['modality_concept_id'], false, 'btree'],
+  ['unit_visit_requests', 'ix_unit_visit_requests_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['unit_visit_requests', 'ix_unit_visit_requests_rescheduled_from_id', ['rescheduled_from_id'], false, 'btree'],
+  ['unit_visit_requests', 'ix_unit_visit_requests_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['unit_visit_requests', 'ix_unit_visit_requests_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
 ];

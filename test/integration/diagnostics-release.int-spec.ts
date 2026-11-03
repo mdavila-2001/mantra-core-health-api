@@ -42,6 +42,12 @@ describe('BR-17 · liberación de diagnósticos, un solo camino (integración)',
 
   const http = () => request(ctx.app.getHttpServer());
   const admin = () => bearer(ctx.adminToken);
+  // Desde a3c114f7a (DIAG-01/02, #744, #786) la liberación resuelve el informe
+  // dentro del tenant del contexto (`DiagnosticsScopeService` →
+  // `requireTenantId()`). El SUPERADMIN sin `X-Tenant-Id` opera en modo sistema,
+  // sin tenant, y recibe 422 TENANT_REQUIRED; el alta del informe no lo necesita
+  // porque declara `custodianTenantId` en el cuerpo.
+  const adminEnTenant = () => ({ ...admin(), 'X-Tenant-Id': SEED.tenantId });
   const CID = CONCEPTS.STATE_ACTIVE;
 
   async function registrarPaciente(etiqueta: string): Promise<string> {
@@ -112,7 +118,7 @@ describe('BR-17 · liberación de diagnósticos, un solo camino (integración)',
 
     await http()
       .post(`/diagnostics/reports/${reportId}/versions/${versionId}/release`)
-      .set(admin())
+      .set(adminEnTenant())
       .send({ patientVisibility: 'VISIBLE' })
       .expect(200);
 
@@ -129,7 +135,7 @@ describe('BR-17 · liberación de diagnósticos, un solo camino (integración)',
 
     await http()
       .post(`/diagnostics/reports/${reportId}/versions/${versionId}/release`)
-      .set(admin())
+      .set(adminEnTenant())
       .send({ patientVisibility: 'HIDDEN' })
       .expect(200);
 
@@ -146,13 +152,13 @@ describe('BR-17 · liberación de diagnósticos, un solo camino (integración)',
 
     await http()
       .post(`/diagnostics/reports/${reportId}/versions/${versionId}/release`)
-      .set(admin())
+      .set(adminEnTenant())
       .send({ patientVisibility: 'VISIBLE' })
       .expect(200);
 
     await http()
       .post(`/diagnostics/reports/${reportId}/versions/${versionId}/release`)
-      .set(admin())
+      .set(adminEnTenant())
       .send({ patientVisibility: 'VISIBLE' })
       .expect(409);
 
@@ -190,7 +196,7 @@ describe('BR-17 · liberación de diagnósticos, un solo camino (integración)',
     const { reportId, versionId } = await crearInformeConVersion(perfilAna);
     await http()
       .post(`/diagnostics/reports/${reportId}/versions/${versionId}/release`)
-      .set(admin())
+      .set(adminEnTenant())
       .send({ patientVisibility: 'VISIBLE' })
       .expect(200);
 
@@ -235,7 +241,7 @@ describe('BR-17 · liberación de diagnósticos, un solo camino (integración)',
       const { reportId, versionId } = await crearInformeConVersion(perfilAna);
       await http()
         .post(`/diagnostics/reports/${reportId}/versions/${versionId}/release`)
-        .set(admin())
+        .set(adminEnTenant())
         .send({ patientVisibility: 'VISIBLE' })
         .expect(200);
 
@@ -253,7 +259,7 @@ describe('BR-17 · liberación de diagnósticos, un solo camino (integración)',
       const { reportId, versionId } = await crearInformeConVersion(perfilAna);
       await http()
         .post(`/diagnostics/reports/${reportId}/versions/${versionId}/release`)
-        .set(admin())
+        .set(adminEnTenant())
         .send({ patientVisibility: 'VISIBLE' })
         .expect(200);
 
@@ -272,7 +278,7 @@ describe('BR-17 · liberación de diagnósticos, un solo camino (integración)',
       const { reportId, versionId } = await crearInformeConVersion(perfilAna);
       await http()
         .post(`/diagnostics/reports/${reportId}/versions/${versionId}/release`)
-        .set(admin())
+        .set(adminEnTenant())
         .send({ patientVisibility: 'VISIBLE' })
         .expect(200);
 

@@ -65,7 +65,10 @@ describe('IamPatientSelfRegistrationService', () => {
    * @returns Resultado de build.
    */
   function build() {
-    const tx = { flush: fn().mockResolvedValue(undefined) };
+    const tx = {
+      flush: fn().mockResolvedValue(undefined),
+      execute: fn().mockResolvedValue(undefined),
+    };
     const em = {
       transactional: fn((cb: (tx: unknown) => unknown) => cb(tx)),
     };
@@ -251,6 +254,21 @@ describe('IamPatientSelfRegistrationService', () => {
           userId: 'user-1',
           statusConceptId: DIR.MEMBERSHIP_ACTIVE,
         }),
+      );
+    });
+
+    it('abre el contexto de sistema de RLS antes de escribir la membresía (todavía no hay tenant)', async () => {
+      const d = build();
+
+      await d.service.registerPatient(dto);
+
+      // `directory.tenant_memberships` tiene RLS forzado: sin el contexto, el
+      // INSERT viola la política y el alta responde 500.
+      expect(d.tx.execute).toHaveBeenCalledWith(
+        "select set_config('app.system_context', 'true', true)",
+      );
+      expect(d.tx.execute.mock.invocationCallOrder[0]).toBeLessThan(
+        d.tenantMembershipsRepo.create.mock.invocationCallOrder[0],
       );
     });
 

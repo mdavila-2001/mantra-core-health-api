@@ -6,21 +6,21 @@ import { runWithTenant } from '../tenant/tenant-context';
 import { PublicProfiles } from '../../modules/community/entities';
 import { CommunitySocialService } from '../../modules/community/services';
 
-/** Datos de la vitrina de un profesional sembrado. */
+/** Showcase metadata for a seeded practitioner profile. */
 export interface PractitionerShowcaseInput {
-  /** Cuenta del profesional (`iam.users.id`). */
+  /** User UUID (`iam.users.id`). */
   userId: string;
-  /** Perfil profesional, que es el sujeto de la vitrina. */
+  /** Practitioner profile UUID. */
   practitionerProfileId: string;
-  /** Nombre visible. */
+  /** Presentation display name. */
   displayName: string;
-  /** Correo de la cuenta; solo deriva el enlace público estable. */
+  /** Email used to derive deterministic public slug. */
   email: string;
-  /** Titular de una línea (ocupación o especialidad), si se conoce. */
+  /** Optional headline summarizing occupation or specialty. */
   headline?: string;
 }
 
-/** `Juan Pérez` → `juan-perez`; vacío si no queda ninguna letra. */
+/** Formats text into URL-safe slug, fallback to empty string if no valid characters. */
 function slugOf(text: string): string {
   return text
     .normalize('NFKD')
@@ -32,35 +32,17 @@ function slugOf(text: string): string {
 }
 
 /**
- * Crea la vitrina pública de un profesional sembrado, sin iniciar sesión como
- * él.
- *
- * Es el mismo caso de uso que `PUT /community/profiles/me`
- * (`CommunitySocialService.upsertOwnProfile`): el sujeto sale del actor, así que
- * se lo invoca con la identidad del profesional en proceso. Eso reemplaza el
- * login de cada médico que hacían los scripts anteriores.
- *
- * El enlace público es determinista (`<nombre>-<sufijo estable>`), por lo que
- * una organización o un enlace compartido sirven igual en todos los entornos.
- * La presentación dice que la información profesional viene del padrón público y
- * no la verificó el profesional.
+ * Idempotently provisions public showcase profiles for seeded practitioners and patients.
+ * Uses deterministic slugs and invokes profile projection services directly.
  */
 @Injectable()
 export class PractitionerShowcaseSeed {
-  /**
-   * @param orm - Acceso al `EntityManager` para comprobar si ya hay vitrina.
-   * @param social - Caso de uso de la vitrina propia.
-   */
   constructor(
     private readonly orm: MikroORM,
     private readonly social: CommunitySocialService,
   ) {}
 
-  /**
-   * Deja al profesional con vitrina pública.
-   *
-   * @returns `true` si la creó en esta pasada; `false` si ya la tenía.
-   */
+  /** Ensures public showcase exists for practitioner. Returns true if created. */
   async ensure(input: PractitionerShowcaseInput): Promise<boolean> {
     const em = this.orm.em.fork();
     const existing = await em.findOne(PublicProfiles, {
@@ -88,6 +70,36 @@ export class PractitionerShowcaseSeed {
           roles: ['PRACTITIONER'],
           practitionerProfileId: input.practitionerProfileId,
         },
+      ),
+    );
+    return true;
+  }
+
+  /** Ensures public showcase exists for patient messaging. Returns true if created. */
+  async ensurePatient(input: {
+    userId: string;
+    displayName: string;
+    email: string;
+    headline?: string;
+  }): Promise<boolean> {
+    const em = this.orm.em.fork();
+    const existing = await em.findOne(PublicProfiles, { targetId: input.userId });
+    if (existing) return false;
+
+    const suffix = deterministicId(`seed:showcase:${input.email}`).slice(0, 6);
+    const slug = `${slugOf(input.displayName) || 'paciente'}-${suffix}`;
+    await runWithTenant(SEED.tenantId, () =>
+      this.social.upsertOwnProfile(
+        {
+          tenantId: SEED.tenantId,
+          slug,
+          displayName: input.displayName.slice(0, 200),
+          headline: input.headline?.slice(0, 200) || 'Paciente',
+          biography: 'Perfil de paciente en AloVida.',
+          acceptsReviews: false,
+          visibility: 'PUBLIC',
+        },
+        { id: input.userId, roles: ['PATIENT'] },
       ),
     );
     return true;

@@ -52,7 +52,9 @@ export class TelemetryClientErrorsReadRepository {
     if (scope.routes) {
       if (scope.routes.length === 0) clauses.push('FALSE');
       else {
-        clauses.push(`e.route_template IN (${scope.routes.map(() => '?').join(', ')})`);
+        clauses.push(
+          `e.route_template IN (${scope.routes.map(() => '?').join(', ')})`,
+        );
         params.push(...scope.routes);
       }
     }
@@ -75,12 +77,27 @@ export class TelemetryClientErrorsReadRepository {
          FROM telemetry.client_error_events e WHERE ${where}`,
       params,
     );
-    return row ?? { events: 0, suppressed: 0, fingerprints: 0, sessions: 0, users: 0, anonymous: 0 };
+    return (
+      row ?? {
+        events: 0,
+        suppressed: 0,
+        fingerprints: 0,
+        sessions: 0,
+        users: 0,
+        anonymous: 0,
+      }
+    );
   }
 
   byRoute(scope: ErrorsScope) {
     const { where, params } = this.where(scope);
-    return this.sql<{ route: string | null; portal: string; errors: number; fingerprints: number; users: number }>(
+    return this.sql<{
+      route: string | null;
+      portal: string;
+      errors: number;
+      fingerprints: number;
+      users: number;
+    }>(
       `SELECT e.route_template AS route,
               CASE WHEN e.portal_type_concept_id = ? THEN 'MOBILE' ELSE 'WEB' END AS portal,
               count(*)::int AS errors, count(DISTINCT e.fingerprint)::int AS fingerprints,
@@ -93,7 +110,11 @@ export class TelemetryClientErrorsReadRepository {
 
   byClass(scope: ErrorsScope) {
     const { where, params } = this.where(scope);
-    return this.sql<{ class_concept_id: string; errors: number; fingerprints: number }>(
+    return this.sql<{
+      class_concept_id: string;
+      errors: number;
+      fingerprints: number;
+    }>(
       `SELECT e.error_class_concept_id AS class_concept_id, count(*)::int AS errors,
               count(DISTINCT e.fingerprint)::int AS fingerprints
          FROM telemetry.client_error_events e WHERE ${where}
@@ -114,7 +135,12 @@ export class TelemetryClientErrorsReadRepository {
 
   byApiRoute(scope: ErrorsScope) {
     const { where, params } = this.where(scope);
-    return this.sql<{ method: string | null; route: string; errors: number; last_request_id: string | null }>(
+    return this.sql<{
+      method: string | null;
+      route: string;
+      errors: number;
+      last_request_id: string | null;
+    }>(
       `SELECT e.http_method AS method, e.api_route_template AS route, count(*)::int AS errors,
               (array_agg(e.request_id ORDER BY e.received_at DESC) FILTER (WHERE e.request_id IS NOT NULL))[1] AS last_request_id
          FROM telemetry.client_error_events e WHERE ${where} AND e.api_route_template IS NOT NULL
@@ -141,7 +167,11 @@ export class TelemetryClientErrorsReadRepository {
   }
 
   s9Shown(scope: ErrorsScope) {
-    const clauses = ['u.occurred_at >= ?', 'u.occurred_at < ?', `u.event_name = 'estado_error_mostrado'`];
+    const clauses = [
+      'u.occurred_at >= ?',
+      'u.occurred_at < ?',
+      `u.event_name = 'estado_error_mostrado'`,
+    ];
     const params: unknown[] = [scope.window.from, scope.window.to];
     if (scope.tenantId) {
       clauses.push('u.tenant_id = ?');
@@ -182,9 +212,16 @@ export class TelemetryClientErrorsReadRepository {
   }
 
   /** Conteo por huella en otra ventana (la anterior), para la tendencia. */
-  async countsFor(scope: ErrorsScope, window: AnalyticsWindow, fingerprints: readonly string[]) {
+  async countsFor(
+    scope: ErrorsScope,
+    window: AnalyticsWindow,
+    fingerprints: readonly string[],
+  ) {
     if (fingerprints.length === 0) return new Map<string, number>();
-    const { where, params } = this.where({ ...scope, fingerprint: undefined }, window);
+    const { where, params } = this.where(
+      { ...scope, fingerprint: undefined },
+      window,
+    );
     const rows = await this.sql<{ fingerprint: string; n: number }>(
       `SELECT e.fingerprint, count(*)::int AS n FROM telemetry.client_error_events e
         WHERE ${where} AND e.fingerprint IN (${fingerprints.map(() => '?').join(', ')})
@@ -195,7 +232,10 @@ export class TelemetryClientErrorsReadRepository {
   }
 
   routesOfFingerprints(scope: ErrorsScope, fingerprints: readonly string[]) {
-    if (fingerprints.length === 0) return Promise.resolve([] as { fingerprint: string; route: string | null; n: number }[]);
+    if (fingerprints.length === 0)
+      return Promise.resolve(
+        [] as { fingerprint: string; route: string | null; n: number }[],
+      );
     const { where, params } = this.where({ ...scope, fingerprint: undefined });
     return this.sql<{ fingerprint: string; route: string | null; n: number }>(
       `SELECT e.fingerprint, e.route_template AS route, count(*)::int AS n
@@ -217,7 +257,11 @@ export class TelemetryClientErrorsReadRepository {
 
   recentRequestIds(scope: ErrorsScope, limit: number) {
     const { where, params } = this.where(scope);
-    return this.sql<{ request_id: string; received_at: Date; http_status: number | null }>(
+    return this.sql<{
+      request_id: string;
+      received_at: Date;
+      http_status: number | null;
+    }>(
       `SELECT e.request_id, e.received_at, e.http_status
          FROM telemetry.client_error_events e WHERE ${where} AND e.request_id IS NOT NULL
         ORDER BY e.received_at DESC LIMIT ?`,
@@ -226,8 +270,17 @@ export class TelemetryClientErrorsReadRepository {
   }
 
   routesNotFound(scope: ErrorsScope, routeClassConceptId: string) {
-    const { where, params } = this.where({ ...scope, classConceptId: routeClassConceptId });
-    return this.sql<{ route: string | null; errors: number; first_seen: Date; last_seen: Date; users: number }>(
+    const { where, params } = this.where({
+      ...scope,
+      classConceptId: routeClassConceptId,
+    });
+    return this.sql<{
+      route: string | null;
+      errors: number;
+      first_seen: Date;
+      last_seen: Date;
+      users: number;
+    }>(
       `SELECT e.route_template AS route, count(*)::int AS errors,
               min(e.received_at) AS first_seen, max(e.received_at) AS last_seen,
               count(DISTINCT e.user_id)::int AS users

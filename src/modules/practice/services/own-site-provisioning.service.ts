@@ -13,6 +13,8 @@ import {
 import type { CreateOwnSiteDto } from '../dto';
 import type { PracticeSites } from '../entities';
 import { siteCodeBase, uniqueCode } from '../site-code';
+import { ServiceCatalogRepository } from '../../billing/repositories';
+import { ensureDefaultAppointmentService } from '../../billing/default-services';
 
 /**
  * A quién pertenece el consultorio que se va a provisionar: el tenant en el
@@ -65,6 +67,7 @@ export class OwnSiteProvisioningService {
     private readonly sitesRepo: PracticeSitesRepository,
     private readonly rolesRepo: PractitionerRoleAssignmentsRepository,
     private readonly addressesRepo: AddressesRepository,
+    private readonly serviceCatalogRepo: ServiceCatalogRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(OwnSiteProvisioningService.name);
@@ -110,6 +113,13 @@ export class OwnSiteProvisioningService {
       });
       await tx.flush();
     }
+
+    await ensureDefaultAppointmentService(
+      tx,
+      this.serviceCatalogRepo,
+      practice.id,
+      actorUserId,
+    );
 
     let addressId: string | undefined;
     if (dto.address) {

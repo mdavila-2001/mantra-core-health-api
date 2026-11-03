@@ -40,7 +40,10 @@ describe('IamOrganizationSelfRegistrationService', () => {
    * @returns Resultado de build.
    */
   function build() {
-    const tx = { flush: fn().mockResolvedValue(undefined) };
+    const tx = {
+      flush: fn().mockResolvedValue(undefined),
+      execute: fn().mockResolvedValue(undefined),
+    };
     const em = {
       transactional: fn((cb: (tx: unknown) => unknown) => cb(tx)),
     };

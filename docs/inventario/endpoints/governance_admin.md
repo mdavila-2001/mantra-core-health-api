@@ -175,7 +175,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminDataQualityController.resolve` — `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:82`
+- **Implementación:** `AdminDataQualityController.resolve` — `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:79`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -185,16 +185,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/governance/data-quality/issues/{id}/resolution` la atiende `AdminDataQualityController.resolve` (src/modules/governance_admin/controllers/admin-data-quality.controller.ts:82). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD, PLATFORM_ADMIN. Valida el cuerpo como `ResolveIssueDto` (2 campos, 2 obligatorios). Delega en `DataQualityService.resolve`. Actualiza health_data.health_data_quality_issues. Lee health_data.health_data_quality_issues, health_data.health_data_quality_rules, health_data.health_data_quality_runs.
+`POST /admin/governance/data-quality/issues/{id}/resolution` la atiende `AdminDataQualityController.resolve` (src/modules/governance_admin/controllers/admin-data-quality.controller.ts:79). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD, PLATFORM_ADMIN. Valida el cuerpo como `ResolveIssueDto` (2 campos, 2 obligatorios). Delega en `DataQualityService.resolve`. Actualiza health_data.health_data_quality_issues. Lee health_data.health_data_quality_issues, health_data.health_data_quality_rules, health_data.health_data_quality_runs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD, PLATFORM_ADMIN | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:82` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:82` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| ROL | Alguno de: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD, PLATFORM_ADMIN | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:79` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:79` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -275,7 +275,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminDataQualityController.rules` — `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:107`
+- **Implementación:** `AdminDataQualityController.rules` — `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:105`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -285,15 +285,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/governance/data-quality/rules` la atiende `AdminDataQualityController.rules` (src/modules/governance_admin/controllers/admin-data-quality.controller.ts:107). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `DataQualityService.listRules`. Lee health_data.health_data_quality_rule_sets, health_data.health_data_quality_rules, terminology.catalog_concepts.
+`GET /admin/governance/data-quality/rules` la atiende `AdminDataQualityController.rules` (src/modules/governance_admin/controllers/admin-data-quality.controller.ts:105). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `DataQualityService.listRules`. Lee health_data.health_data_quality_rule_sets, health_data.health_data_quality_rules, terminology.catalog_concepts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:107` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:107` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:105` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:105` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -350,7 +350,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminDataQualityController.rule` — `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:116`
+- **Implementación:** `AdminDataQualityController.rule` — `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:114`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -360,15 +360,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/governance/data-quality/rules/{id}` la atiende `AdminDataQualityController.rule` (src/modules/governance_admin/controllers/admin-data-quality.controller.ts:116). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `DataQualityService.getRule`. Lee health_data.health_data_quality_issues, health_data.health_data_quality_rule_sets, health_data.health_data_quality_rules, health_data.health_data_quality_runs, terminology.catalog_concepts.
+`GET /admin/governance/data-quality/rules/{id}` la atiende `AdminDataQualityController.rule` (src/modules/governance_admin/controllers/admin-data-quality.controller.ts:114). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `DataQualityService.getRule`. Lee health_data.health_data_quality_issues, health_data.health_data_quality_rule_sets, health_data.health_data_quality_rules, health_data.health_data_quality_runs, terminology.catalog_concepts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:116` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:116` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:114` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:114` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta

@@ -19,6 +19,7 @@ export * from './observation_notes.entity';
 export * from './observation_performers.entity';
 export * from './observation_reference_ranges.entity';
 export * from './observations.entity';
+export * from './patient_admission_footprints.entity';
 export * from './patient_reported_health_statements.entity';
 export * from './placement_incidents.entity';
 export * from './prescription_signature_policies.entity';

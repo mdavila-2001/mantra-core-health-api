@@ -9,7 +9,7 @@ Lógica de negocio. Cada método público resuelve un caso de uso en **una trans
 | `ReportingDefinitionsService` | 01, 02, 03, 10, 12 | Fuentes, definiciones, versiones, tableros y deprecación     |
 | `ReportingRunsService`        | 04 … 09, 11        | Corridas, snapshots, programación, distribución y reintentos |
 
-## Reglas de negocio
+## Business rules
 
 - **Fuente (01)**: código único; una `READ_MODEL` exige su read model gobernado y una `VIEW` el
   nombre de la vista. No hay tercer camino: sin uno de los dos no habría dónde aplicar la seguridad
@@ -77,7 +77,7 @@ repetido, definición ya deprecada).
 `operation: 'reporting.<área>.<acción>'`. `warn` al deprecar una definición. No se loguean
 parámetros de ejecución ni direcciones de destinatarios.
 
-## Pruebas
+## Tests
 
 `reporting-definitions.service.spec.ts` (24) y `reporting-runs.service.spec.ts` (34): gobernanza de
 la fuente, numeración de parámetros y columnas, congelado de la versión, resolución y descarte de

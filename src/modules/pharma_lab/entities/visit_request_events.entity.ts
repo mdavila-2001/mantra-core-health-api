@@ -20,25 +20,25 @@ export class VisitRequestEvents {
   /**
    * Solicitud afectada.
    */
-  @Property({ fieldName: 'visit_request_id', type: 'uuid' }) // FK → pharma_lab.visit_requests
+  @Property({ fieldName: 'visit_request_id', type: 'uuid' }) // FK → pharma_lab.visit_requests (inferida)
   visitRequestId!: string;
 
   /**
    * Acción ejecutada.
    */
-  @Property({ fieldName: 'action_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'action_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts (inferida)
   actionConceptId!: string;
 
   /**
    * Estado antes de la acción.
    */
-  @Property({ fieldName: 'previous_status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'previous_status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts (inferida)
   previousStatusConceptId!: string;
 
   /**
    * Estado después de la acción.
    */
-  @Property({ fieldName: 'new_status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'new_status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts (inferida)
   newStatusConceptId!: string;
 
   /**
@@ -60,7 +60,7 @@ export class VisitRequestEvents {
   /**
    * Quién ejecutó la acción.
    */
-  @Property({ fieldName: 'actor_user_id', type: 'uuid' }) // FK → iam.users
+  @Property({ fieldName: 'actor_user_id', type: 'uuid' }) // FK → iam.users (inferida)
   actorUserId!: string;
 
   /**
@@ -78,6 +78,6 @@ export class VisitRequestEvents {
   /**
    * Identificador asociado a created by user.
    */
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   createdByUserId?: string;
 }

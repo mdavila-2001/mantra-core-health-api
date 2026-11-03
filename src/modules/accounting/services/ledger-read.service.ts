@@ -11,7 +11,7 @@ import {
 import { Practices } from '../../practice/entities';
 import {
   PracticeTenantLookupService,
-  practiceAccessScope,
+  practiceAccessScopeFor,
 } from '../../practice/services';
 import { AccountsRepository, JournalRepository } from '../repositories';
 import { ACCT } from '../accounting.concepts';
@@ -126,9 +126,16 @@ export class LedgerReadService {
     actor: AuthenticatedUser,
     practiceId: string,
   ): Promise<void> {
-    // La regla de roles vive en `practiceAccessScope` (un solo dueño); acá
-    // sólo se traduce a los errores 422 propios de contabilidad.
-    if (practiceAccessScope(actor.roles) !== 'ACTIVE_ASSIGNMENTS') {
+    // La regla de roles vive en `practiceAccessScope` (un solo dueño, medida en
+    // el tenant de la práctica); acá sólo se traduce a los errores 422 propios
+    // de contabilidad.
+    if (
+      (await practiceAccessScopeFor(
+        actor,
+        practiceId,
+        this.practiceTenantLookup,
+      )) !== 'ACTIVE_ASSIGNMENTS'
+    ) {
       return;
     }
     if (!actor.practitionerProfileId) {

@@ -1,3 +1,4 @@
+import { assertPricePositive } from './billing-service-catalog-price';
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
@@ -5,12 +6,12 @@ import {
   CONCEPTS,
   CONCEPT_DEFS,
   ConflictException,
-  PreconditionFailedException,
   ResourceNotFoundException,
   decodeKeysetCursor,
   encodeKeysetCursor,
   getCurrentTenantId,
   requireTenantId,
+  roleAuthorizesInTenant,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -23,6 +24,7 @@ import {
 import type { FileContentDto } from '../../common/dto';
 import { PracticeTenantLookupService } from '../../practice/services';
 import { ServiceCatalogRepository } from '../repositories';
+import { ensureDefaultAppointmentService } from '../default-services';
 import {
   CreateServiceCatalogItemDto,
   SearchServiceCatalogResponseDto,
@@ -56,31 +58,6 @@ const CURRENCY_CODE_BY_CONCEPT: Readonly<Record<string, string>> =
     [CONCEPTS.CURRENCY_BOB]: CONCEPT_DEFS.CURRENCY_BOB.code,
     [CONCEPTS.CURRENCY_USD]: CONCEPT_DEFS.CURRENCY_USD.code,
   });
-
-/**
- * Catálogo maestro de servicios (`billing.service_catalog`): lista fija sobre la
- * que cada doctor arma su presupuesto. El precio de catálogo es sólo referencia
- * — cada presupuesto lleva el precio propio que puso el profesional, nunca
- * `defaultPrice` a ciegas.
- */
-/**
- * Un precio en 0 no se acepta al dar de alta ni al corregir un servicio: la
- * cita se cobraría en 0,00 (FAC-06). Un negativo ya lo rechaza el DTO con 400;
- * acá solo llega un importe no negativo con hasta dos decimales. Lo que crea
- * el sistema («Cita médica» en `0.00` al dar de alta una práctica) no pasa por
- * este servicio y sigue igual.
- *
- * @param price - Importe validado por el DTO, como texto.
- * @throws PreconditionFailedException (422) si el importe es 0.
- */
-function assertPricePositive(price: string): void {
-  if (Number(price) > 0) return;
-  throw new PreconditionFailedException(
-    'El precio tiene que ser mayor que 0',
-    { defaultPrice: price },
-    BillingErrorReason.SERVICE_CATALOG_PRICE_NOT_POSITIVE,
-  );
-}
 
 @Injectable()
 export class BillingServiceCatalogService {
@@ -124,6 +101,11 @@ export class BillingServiceCatalogService {
     limit?: number;
   }): Promise<SearchServiceCatalogResponseDto> {
     const em = this.em.fork();
+    await ensureDefaultAppointmentService(
+      em,
+      this.serviceCatalogRepo,
+      options.practiceId,
+    );
     const limit = options.limit ?? DEFAULT_PAGE_SIZE;
     const after = options.cursor
       ? decodeKeysetCursor(options.cursor)
@@ -372,10 +354,25 @@ export class BillingServiceCatalogService {
     actor: AuthenticatedUser,
     practiceId: string,
   ): Promise<void> {
-    const administra =
-      actor.roles.includes('SECURITY_ADMIN') ||
-      actor.roles.includes('SUPERADMIN');
-    if (administra) return;
+    const roles = ['SECURITY_ADMIN', 'SUPERADMIN'] as const;
+    // El global administra cualquier práctica sin leer nada, como siempre; el
+    // acotado en `scopedRoles`, sólo las de sus tenants (#1241): se mide en el
+    // tenant de la práctica, y una inexistente cuenta como sin tenant.
+    if (roles.some((role) => roleAuthorizesInTenant(actor, role, undefined))) {
+      return;
+    }
+    if (roles.some((role) => actor.roles.includes(role))) {
+      const tenantPractice =
+        await this.practiceTenantLookup.findTenantOfPractice(practiceId);
+      if (
+        tenantPractice !== null &&
+        roles.some((role) =>
+          roleAuthorizesInTenant(actor, role, tenantPractice),
+        )
+      ) {
+        return;
+      }
+    }
     if (await this.practiceTenantLookup.isOwnOffice(practiceId, actor.id)) {
       return;
     }
@@ -483,10 +480,13 @@ export class BillingServiceCatalogService {
       const tenantPractice =
         await this.practiceTenantLookup.findTenantOfPractice(practiceId);
       // Sin tenant en contexto son los carriles internos, que no pasan por la
-      // cabecera: lo único que se exige es que la práctica exista.
+      // cabecera: se exige que la práctica exista. En los dos casos el rol se
+      // mide en el tenant de la práctica (#1241): el acotado en `scopedRoles`
+      // a otra organización no la alcanza por tener membresía en la suya.
       if (
         tenantPractice !== null &&
-        (tenantId === undefined || tenantPractice === tenantId)
+        (tenantId === undefined || tenantPractice === tenantId) &&
+        roleAuthorizesInTenant(actor, 'SECURITY_ADMIN', tenantPractice)
       ) {
         return;
       }

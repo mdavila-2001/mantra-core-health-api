@@ -62,7 +62,7 @@ export class PharmacyReadService {
   /** El directorio: farmacias publicadas del tenant, con sus números. */
   async listPharmacies(): Promise<PharmacyDirectoryResponseDto> {
     const tenantId = marketplaceTenantScope();
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const pharmacies = await this.readRepo.findVisibleByTenant(em, tenantId);
     if (pharmacies.length === 0) return { items: [], count: 0 };
 
@@ -100,7 +100,7 @@ export class PharmacyReadService {
   /** El perfil de una farmacia: su ficha y sus sedes con dirección resuelta. */
   async getPharmacy(id: string): Promise<PharmacyDetailDto> {
     const tenantId = marketplaceTenantScope();
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const pharmacy = await this.readRepo.findVisibleById(em, tenantId, id);
     // 404 también para la de otro tenant o la no publicada: confirmar que ese
     // uuid existe ya filtra información.
@@ -231,7 +231,7 @@ export class PharmacyReadService {
     now: Date = new Date(),
   ): Promise<PharmacySiteListResponseDto> {
     const tenantId = marketplaceTenantScope();
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const pharmacies = await this.readRepo.findVisibleByTenant(em, tenantId);
     if (pharmacies.length === 0) return { items: [], count: 0 };
 
@@ -327,7 +327,7 @@ export class PharmacyReadService {
     limit: number,
   ): Promise<PharmacyProductSearchResponseDto> {
     const tenantId = marketplaceTenantScope();
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const pharmacies = await this.readRepo.findVisibleByTenant(em, tenantId);
     if (pharmacies.length === 0) {
       return { items: [], limit, truncated: false };
@@ -445,7 +445,7 @@ export class PharmacyReadService {
     productId?: string,
   ): Promise<PharmacySitePricesResponseDto> {
     const tenantId = marketplaceTenantScope();
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
 
     const site = await this.readRepo.findActiveSiteById(em, siteId);
     const pharmacy = site

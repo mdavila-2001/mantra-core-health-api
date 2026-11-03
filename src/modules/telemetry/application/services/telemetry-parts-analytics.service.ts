@@ -25,8 +25,10 @@ export interface PartsQuery {
 
 const TOP_UNMAPPED = 50;
 const iso = (d: Date | string | null) => (d ? new Date(d).toISOString() : null);
-const num = (v: string | null) => (v === null ? null : Math.round(Number(v) * 10_000) / 10_000);
-const rate = (n: number, d: number) => (d > 0 ? Math.round((n / d) * 10_000) / 10_000 : null);
+const num = (v: string | null) =>
+  v === null ? null : Math.round(Number(v) * 10_000) / 10_000;
+const rate = (n: number, d: number) =>
+  d > 0 ? Math.round((n / d) * 10_000) / 10_000 : null;
 const VITALS = [
   ['LCP', TELE.METRIC_LCP],
   ['INP', TELE.METRIC_INP],
@@ -63,12 +65,18 @@ export class TelemetryPartsAnalyticsService {
   }
 
   private small(actor: AnalyticsActorScope, n: number): boolean {
-    return actor.platform && actor.minSample !== undefined && n < actor.minSample;
+    return (
+      actor.platform && actor.minSample !== undefined && n < actor.minSample
+    );
   }
 
   private scopeView(actor: AnalyticsActorScope) {
     return actor.platform
-      ? { level: 'platform', tenantId: null, minSample: actor.minSample ?? null }
+      ? {
+          level: 'platform',
+          tenantId: null,
+          minSample: actor.minSample ?? null,
+        }
       : { level: 'tenant', tenantId: actor.tenantId ?? null, minSample: null };
   }
 
@@ -112,7 +120,8 @@ export class TelemetryPartsAnalyticsService {
       this.usage.dwellByRoute(scope),
       this.usage.errorsByRoute(scope),
     ]);
-    const previous = query.compare === 'previous' ? previousWindow(scope.window) : null;
+    const previous =
+      query.compare === 'previous' ? previousWindow(scope.window) : null;
     const [prevRows, prevErrors] = previous
       ? await Promise.all([
           this.usage.usageByRoute(scope, previous),
@@ -123,23 +132,56 @@ export class TelemetryPartsAnalyticsService {
       VITALS.map(async ([name, id]) => ({
         name,
         rows: await this.analytics.webVitalsByRoute(
-          { tenantId: actor.tenantId, minSample: actor.minSample, window: scope.window, portalConceptId: scope.portalConceptId },
+          {
+            tenantId: actor.tenantId,
+            minSample: actor.minSample,
+            window: scope.window,
+            portalConceptId: scope.portalConceptId,
+          },
           id,
         ),
       })),
     );
 
-    type Acc = { views: number; events: number; sessions: number; users: number; anonymous: number };
-    const zero = (): Acc => ({ views: 0, events: 0, sessions: 0, users: 0, anonymous: 0 });
+    type Acc = {
+      views: number;
+      events: number;
+      sessions: number;
+      users: number;
+      anonymous: number;
+    };
+    const zero = (): Acc => ({
+      views: 0,
+      events: 0,
+      sessions: 0,
+      users: 0,
+      anonymous: 0,
+    });
     const byCode = new Map<string, { part: PartRow; acc: Acc }>();
-    const unmapped: Array<{ routeTemplate: string | null; portal: string; views: number; events: number; errors: number }> = [];
+    const unmapped: Array<{
+      routeTemplate: string | null;
+      portal: string;
+      views: number;
+      events: number;
+      errors: number;
+    }> = [];
     const errorsOf = new Map<string, number>();
-    for (const e of errorRows) errorsOf.set(e.route ?? '', (errorsOf.get(e.route ?? '') ?? 0) + e.errors);
+    for (const e of errorRows)
+      errorsOf.set(
+        e.route ?? '',
+        (errorsOf.get(e.route ?? '') ?? 0) + e.errors,
+      );
 
     for (const r of rows) {
       const part = registry.resolve(r.route, r.portal);
       if (!part) {
-        unmapped.push({ routeTemplate: r.route, portal: r.portal, views: r.views, events: r.events, errors: errorsOf.get(r.route ?? '') ?? 0 });
+        unmapped.push({
+          routeTemplate: r.route,
+          portal: r.portal,
+          views: r.views,
+          events: r.events,
+          errors: errorsOf.get(r.route ?? '') ?? 0,
+        });
         continue;
       }
       const cur = byCode.get(part.routeCode) ?? { part, acc: zero() };
@@ -154,21 +196,36 @@ export class TelemetryPartsAnalyticsService {
     const seenRoutes = new Set(rows.map((r) => r.route));
     for (const e of errorRows) {
       const part = registry.resolve(e.route);
-      if (part && !byCode.has(part.routeCode)) byCode.set(part.routeCode, { part, acc: zero() });
+      if (part && !byCode.has(part.routeCode))
+        byCode.set(part.routeCode, { part, acc: zero() });
       // Ruta con errores pero sin eventos y sin parte registrada (p. ej. un 404 de ruta).
       if (!part && !seenRoutes.has(e.route)) {
-        unmapped.push({ routeTemplate: e.route, portal: 'WEB', views: 0, events: 0, errors: e.errors });
+        unmapped.push({
+          routeTemplate: e.route,
+          portal: 'WEB',
+          views: 0,
+          events: 0,
+          errors: e.errors,
+        });
       }
     }
 
     const prevByCode = new Map<string, { views: number; errors: number }>();
     for (const r of prevRows) {
       const part = registry.resolve(r.route, r.portal);
-      if (part) prevByCode.set(part.routeCode, { views: (prevByCode.get(part.routeCode)?.views ?? 0) + r.views, errors: prevByCode.get(part.routeCode)?.errors ?? 0 });
+      if (part)
+        prevByCode.set(part.routeCode, {
+          views: (prevByCode.get(part.routeCode)?.views ?? 0) + r.views,
+          errors: prevByCode.get(part.routeCode)?.errors ?? 0,
+        });
     }
     for (const e of prevErrors) {
       const part = registry.resolve(e.route);
-      if (part) prevByCode.set(part.routeCode, { views: prevByCode.get(part.routeCode)?.views ?? 0, errors: (prevByCode.get(part.routeCode)?.errors ?? 0) + e.errors });
+      if (part)
+        prevByCode.set(part.routeCode, {
+          views: prevByCode.get(part.routeCode)?.views ?? 0,
+          errors: (prevByCode.get(part.routeCode)?.errors ?? 0) + e.errors,
+        });
     }
 
     const parts = [...byCode.values()]
@@ -176,10 +233,17 @@ export class TelemetryPartsAnalyticsService {
         const errs = errorsOf.get(part.routePattern) ?? 0;
         const d = dwell.find((x) => x.route === part.routePattern);
         const pv = prevByCode.get(part.routeCode);
-        const vit: Record<string, { p75: number | null; samples: number | null }> = {};
+        const vit: Record<
+          string,
+          { p75: number | null; samples: number | null }
+        > = {};
         for (const v of vitals) {
           const hit = v.rows.find((x) => x.route === part.routePattern);
-          if (hit) vit[v.name] = { p75: this.small(actor, hit.subjects) ? null : num(hit.p75), samples: this.small(actor, hit.subjects) ? null : hit.samples };
+          if (hit)
+            vit[v.name] = {
+              p75: this.small(actor, hit.subjects) ? null : num(hit.p75),
+              samples: this.small(actor, hit.subjects) ? null : hit.samples,
+            };
         }
         return {
           routeCode: part.routeCode,
@@ -193,34 +257,66 @@ export class TelemetryPartsAnalyticsService {
           users: this.small(actor, acc.users) ? null : acc.users,
           anonymousEvents: acc.anonymous,
           dwellMs: d
-            ? { samples: this.small(actor, d.subjects) ? null : d.samples, p50: this.small(actor, d.subjects) ? null : num(d.p50), p75: this.small(actor, d.subjects) ? null : num(d.p75) }
+            ? {
+                samples: this.small(actor, d.subjects) ? null : d.samples,
+                p50: this.small(actor, d.subjects) ? null : num(d.p50),
+                p75: this.small(actor, d.subjects) ? null : num(d.p75),
+              }
             : null,
           errors: errs,
           errorRate: rate(errs, acc.views),
           vitals: vit,
-          ...(previous ? { previous: { views: pv?.views ?? 0, errors: pv?.errors ?? 0 } } : {}),
+          ...(previous
+            ? { previous: { views: pv?.views ?? 0, errors: pv?.errors ?? 0 } }
+            : {}),
         };
       })
-      .sort((a, b) => b.views - a.views || b.events - a.events || a.routeCode.localeCompare(b.routeCode));
+      .sort(
+        (a, b) =>
+          b.views - a.views ||
+          b.events - a.events ||
+          a.routeCode.localeCompare(b.routeCode),
+      );
 
     const notMeasured: Array<{ metric: string; reason: string }> = [
-      { metric: 'uniqueUsers', reason: 'Sólo cuentan personas identificadas (con consentimiento); las vistas anónimas no tienen sujeto. Ver anonymousEvents.' },
-      { metric: 'dntSessions', reason: 'Las sesiones con Do-Not-Track no envían nada: no se pueden contar.' },
+      {
+        metric: 'uniqueUsers',
+        reason:
+          'Sólo cuentan personas identificadas (con consentimiento); las vistas anónimas no tienen sujeto. Ver anonymousEvents.',
+      },
+      {
+        metric: 'dntSessions',
+        reason:
+          'Las sesiones con Do-Not-Track no envían nada: no se pueden contar.',
+      },
     ];
     if (registry.rows.length === 0) {
-      notMeasured.push({ metric: 'partsRegistry', reason: 'read_models.frontend_routes está vacía (falta la siembra «partes-del-frontend»): todo cae en unmapped.' });
+      notMeasured.push({
+        metric: 'partsRegistry',
+        reason:
+          'read_models.frontend_routes está vacía (falta la siembra «partes-del-frontend»): todo cae en unmapped.',
+      });
     }
     if (actor.platform) {
-      notMeasured.push({ metric: 'minSample', reason: `Alcance plataforma: usuarios, tiempo en pantalla y vitales se muestran sólo con al menos ${actor.minSample} sujetos/muestras.` });
+      notMeasured.push({
+        metric: 'minSample',
+        reason: `Alcance plataforma: usuarios, tiempo en pantalla y vitales se muestran sólo con al menos ${actor.minSample} sujetos/muestras.`,
+      });
     }
     if (rows.length === 0) {
-      notMeasured.push({ metric: 'views', reason: 'No hay eventos en la ventana: la captura de uso está apagada, sin consentimiento, o nadie navegó.' });
+      notMeasured.push({
+        metric: 'views',
+        reason:
+          'No hay eventos en la ventana: la captura de uso está apagada, sin consentimiento, o nadie navegó.',
+      });
     }
 
     return {
       window: windowJson(scope.window, query.portal),
       scope: this.scopeView(actor),
-      compare: previous ? { from: previous.from.toISOString(), to: previous.to.toISOString() } : null,
+      compare: previous
+        ? { from: previous.from.toISOString(), to: previous.to.toISOString() }
+        : null,
       tree: this.tree(registry),
       parts,
       unmapped: unmapped.slice(0, TOP_UNMAPPED),
@@ -241,28 +337,79 @@ export class TelemetryPartsAnalyticsService {
       this.usage.screenSizes(scope, part.routePattern),
       this.usage.keyActions(scope, part.routePattern, 10),
       this.usage.dwellByRoute(scope),
-      this.errors.fingerprints({ tenantId: actor.tenantId, window: scope.window, routes: [part.routePattern] }, 10),
+      this.errors.fingerprints(
+        {
+          tenantId: actor.tenantId,
+          window: scope.window,
+          routes: [part.routePattern],
+        },
+        10,
+      ),
     ]);
-    const aScope = { tenantId: actor.tenantId, minSample: actor.minSample, window: scope.window, portalConceptId: scope.portalConceptId };
-    const { percentiles } = await this.analytics.webVitals(aScope, part.routePattern);
-    const mine = rows.filter((r) => r.route === part.routePattern && r.portal === portal);
+    const aScope = {
+      tenantId: actor.tenantId,
+      minSample: actor.minSample,
+      window: scope.window,
+      portalConceptId: scope.portalConceptId,
+    };
+    const { percentiles } = await this.analytics.webVitals(
+      aScope,
+      part.routePattern,
+    );
+    const mine = rows.filter(
+      (r) => r.route === part.routePattern && r.portal === portal,
+    );
     const total = mine.reduce(
-      (a, r) => ({ views: a.views + r.views, events: a.events + r.events, sessions: a.sessions + r.sessions, users: a.users + r.users, anonymous: a.anonymous + r.anonymous }),
+      (a, r) => ({
+        views: a.views + r.views,
+        events: a.events + r.events,
+        sessions: a.sessions + r.sessions,
+        users: a.users + r.users,
+        anonymous: a.anonymous + r.anonymous,
+      }),
       { views: 0, events: 0, sessions: 0, users: 0, anonymous: 0 },
     );
     const d = dwell.find((x) => x.route === part.routePattern);
-    const hiddenActions = actions.filter((a) => this.small(actor, a.users)).length;
+    const hiddenActions = actions.filter((a) =>
+      this.small(actor, a.users),
+    ).length;
     const hiddenSizes = sizes.filter((s) => this.small(actor, s.users)).length;
-    const metricName = new Map<string, string>(VITALS.map(([n, id]) => [id, n]));
+    const metricName = new Map<string, string>(
+      VITALS.map(([n, id]) => [id, n]),
+    );
     return {
       window: windowJson(scope.window, query.portal),
       scope: this.scopeView(actor),
-      part: { routeCode: part.routeCode, routePattern: part.routePattern, pageTitle: part.pageTitle, surface: part.surface, domain: part.domain, status: part.active ? 'ACTIVE' : 'DEPRECATED' },
-      totals: { ...total, users: this.small(actor, total.users) ? null : total.users, anonymousEvents: total.anonymous },
-      dwellMs: d ? { samples: this.small(actor, d.subjects) ? null : d.samples, p50: this.small(actor, d.subjects) ? null : num(d.p50), p75: this.small(actor, d.subjects) ? null : num(d.p75) } : null,
-      viewsSeries: series.map((s) => ({ bucket: iso(s.bucket), views: Number(s.views) })),
-      screenSizes: sizes.filter((s) => !this.small(actor, s.users)).map((s) => ({ screenSize: s.screen_size, events: s.events })),
-      keyActions: actions.filter((a) => !this.small(actor, a.users)).map((a) => ({ target: a.target, clicks: a.clicks })),
+      part: {
+        routeCode: part.routeCode,
+        routePattern: part.routePattern,
+        pageTitle: part.pageTitle,
+        surface: part.surface,
+        domain: part.domain,
+        status: part.active ? 'ACTIVE' : 'DEPRECATED',
+      },
+      totals: {
+        ...total,
+        users: this.small(actor, total.users) ? null : total.users,
+        anonymousEvents: total.anonymous,
+      },
+      dwellMs: d
+        ? {
+            samples: this.small(actor, d.subjects) ? null : d.samples,
+            p50: this.small(actor, d.subjects) ? null : num(d.p50),
+            p75: this.small(actor, d.subjects) ? null : num(d.p75),
+          }
+        : null,
+      viewsSeries: series.map((s) => ({
+        bucket: iso(s.bucket),
+        views: Number(s.views),
+      })),
+      screenSizes: sizes
+        .filter((s) => !this.small(actor, s.users))
+        .map((s) => ({ screenSize: s.screen_size, events: s.events })),
+      keyActions: actions
+        .filter((a) => !this.small(actor, a.users))
+        .map((a) => ({ target: a.target, clicks: a.clicks })),
       vitals: percentiles.map((p) => ({
         metric: metricName.get(p.metric_concept_id) ?? p.metric_concept_id,
         samples: this.small(actor, p.subjects) ? null : p.samples,
@@ -270,11 +417,25 @@ export class TelemetryPartsAnalyticsService {
         p75: this.small(actor, p.subjects) ? null : num(p.p75),
         p95: this.small(actor, p.subjects) ? null : num(p.p95),
       })),
-      recentErrors: errs.map((e) => ({ fingerprint: e.fingerprint, errorType: e.error_type, sanitizedMessage: e.sanitized_message, count: e.count, lastSeen: iso(e.last_seen) })),
+      recentErrors: errs.map((e) => ({
+        fingerprint: e.fingerprint,
+        errorType: e.error_type,
+        sanitizedMessage: e.sanitized_message,
+        count: e.count,
+        lastSeen: iso(e.last_seen),
+      })),
       notMeasured: [
-        { metric: 'funnel', reason: 'Aún no hay embudos sembrados para esta parte.' },
+        {
+          metric: 'funnel',
+          reason: 'Aún no hay embudos sembrados para esta parte.',
+        },
         ...(hiddenActions + hiddenSizes > 0
-          ? [{ metric: 'minSample', reason: `${hiddenActions + hiddenSizes} grupo(s) con menos de ${actor.minSample} sujetos se suprimieron (alcance plataforma).` }]
+          ? [
+              {
+                metric: 'minSample',
+                reason: `${hiddenActions + hiddenSizes} grupo(s) con menos de ${actor.minSample} sujetos se suprimieron (alcance plataforma).`,
+              },
+            ]
           : []),
       ],
     };

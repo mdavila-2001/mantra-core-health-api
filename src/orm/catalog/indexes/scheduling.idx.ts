@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `scheduling`.
- * 140 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 145 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const schedulingIndexes: readonly IndexTuple[] = [
@@ -24,6 +24,9 @@ export const schedulingIndexes: readonly IndexTuple[] = [
   ['appointment_bookings', 'ix_appointment_bookings_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['appointment_bookings', 'ix_appointment_bookings_tenant_id_status_concept_id', ['tenant_id', 'status_concept_id', 'updated_at desc'], false, 'btree'],
   ['appointment_bookings', 'ix_appointment_bookings_patient_profile_id_updated_at', ['tenant_id', 'patient_profile_id', 'updated_at desc'], false, 'btree'],
+  ['appointment_bookings', 'ix_appointment_bookings_care_space_id', ['care_space_id'], false, 'btree'],
+  ['appointment_bookings', 'ix_appointment_bookings_healthcare_service_id', ['healthcare_service_id'], false, 'btree'],
+  ['appointment_bookings', 'ix_appointment_bookings_booked_via_grant_id', ['booked_via_grant_id'], false, 'btree'],
   ['appointment_payment_receipts', 'ix_appointment_payment_receipts_tenant_id', ['tenant_id'], false, 'btree'],
   ['appointment_payment_receipts', 'ix_appointment_payment_receipts_appointment_booking_id', ['appointment_booking_id'], false, 'btree'],
   ['appointment_payment_receipts', 'ix_appointment_payment_receipts_file_id', ['file_id'], false, 'btree'],
@@ -64,6 +67,8 @@ export const schedulingIndexes: readonly IndexTuple[] = [
   ['bookable_slots', 'ix_bookable_slots_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['bookable_slots', 'ix_bookable_slots_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['bookable_slots', 'ix_bookable_slots_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['bookable_slots', 'ix_bookable_slots_care_space_id', ['care_space_id'], false, 'btree'],
+  ['bookable_slots', 'ix_bookable_slots_healthcare_service_id', ['healthcare_service_id'], false, 'btree'],
   ['booking_cancellations', 'ix_booking_cancellations_booking_id', ['booking_id'], false, 'btree'],
   ['booking_cancellations', 'ix_booking_cancellations_reason_concept_id', ['reason_concept_id'], false, 'btree'],
   ['booking_cancellations', 'ix_booking_cancellations_cancelled_by_user_id', ['cancelled_by_user_id'], false, 'btree'],

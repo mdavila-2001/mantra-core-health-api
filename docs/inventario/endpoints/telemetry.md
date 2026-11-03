@@ -82,9 +82,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `telemetry.client_contexts` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.devices → TelemetryAnalyticsService.devices → TelemetryAnalyticsRepository.devices | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:511` |
+| `telemetry.client_contexts` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.devices → TelemetryAnalyticsService.devices → TelemetryAnalyticsRepository.devices | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:521` |
 | `telemetry.user_activity_events` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.devices → TelemetryAnalyticsService.devices → TelemetryAnalyticsRepository.devices → TelemetryAnalyticsRepository.sessionInTenant | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:98` |
-| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.devices → TelemetryAnalyticsService.devices → TelemetryAnalyticsRepository.devices | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:523` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.devices → TelemetryAnalyticsService.devices → TelemetryAnalyticsRepository.devices | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:533` |
 
 ### Parámetros
 
@@ -132,7 +132,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TelemetryErrorsAnalyticsController.summary` — `src/modules/telemetry/presentation/controllers/telemetry-errors-analytics.controller.ts:28`
+- **Implementación:** `TelemetryErrorsAnalyticsController.summary` — `src/modules/telemetry/presentation/controllers/telemetry-errors-analytics.controller.ts:33`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -142,14 +142,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/analytics/errors` la atiende `TelemetryErrorsAnalyticsController.summary` (src/modules/telemetry/presentation/controllers/telemetry-errors-analytics.controller.ts:28). Exige sesión con alguno de los roles PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO. Delega en `TelemetryErrorsAnalyticsService.errors`. Lee read_models.frontend_routes, read_models.portal_surfaces, telemetry.client_error_events, telemetry.user_activity_events.
+`GET /admin/analytics/errors` la atiende `TelemetryErrorsAnalyticsController.summary` (src/modules/telemetry/presentation/controllers/telemetry-errors-analytics.controller.ts:33). Exige sesión con alguno de los roles PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO. Delega en `TelemetryErrorsAnalyticsService.errors`. Lee read_models.frontend_routes, read_models.portal_surfaces, telemetry.client_error_events, telemetry.user_activity_events.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO | `src/modules/telemetry/presentation/controllers/telemetry-errors-analytics.controller.ts:28` |
+| ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO | `src/modules/telemetry/presentation/controllers/telemetry-errors-analytics.controller.ts:33` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -157,10 +157,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `read_models.frontend_routes` | LEE | LEE | POR_SQL | TelemetryErrorsAnalyticsController.summary → TelemetryErrorsAnalyticsService.errors → TelemetryErrorsAnalyticsService.registry → TelemetryClientErrorsReadRepository.partsRegistry | `src/modules/telemetry/infrastructure/repositories/telemetry-client-errors-read.repository.ts:250` |
-| `read_models.portal_surfaces` | LEE | LEE | POR_SQL | TelemetryErrorsAnalyticsController.summary → TelemetryErrorsAnalyticsService.errors → TelemetryErrorsAnalyticsService.registry → TelemetryClientErrorsReadRepository.partsRegistry | `src/modules/telemetry/infrastructure/repositories/telemetry-client-errors-read.repository.ts:250` |
-| `telemetry.client_error_events` | LEE | LEE | POR_SQL | TelemetryErrorsAnalyticsController.summary → TelemetryErrorsAnalyticsService.errors → TelemetryClientErrorsReadRepository.totals | `src/modules/telemetry/infrastructure/repositories/telemetry-client-errors-read.repository.ts:69` |
-| `telemetry.user_activity_events` | LEE | LEE | POR_SQL | TelemetryErrorsAnalyticsController.summary → TelemetryErrorsAnalyticsService.errors → TelemetryClientErrorsReadRepository.s9Shown | `src/modules/telemetry/infrastructure/repositories/telemetry-client-errors-read.repository.ts:151` |
+| `read_models.frontend_routes` | LEE | LEE | POR_SQL | TelemetryErrorsAnalyticsController.summary → TelemetryErrorsAnalyticsService.errors → TelemetryErrorsAnalyticsService.registry → TelemetryClientErrorsReadRepository.partsRegistry | `src/modules/telemetry/infrastructure/repositories/telemetry-client-errors-read.repository.ts:303` |
+| `read_models.portal_surfaces` | LEE | LEE | POR_SQL | TelemetryErrorsAnalyticsController.summary → TelemetryErrorsAnalyticsService.errors → TelemetryErrorsAnalyticsService.registry → TelemetryClientErrorsReadRepository.partsRegistry | `src/modules/telemetry/infrastructure/repositories/telemetry-client-errors-read.repository.ts:303` |
+| `telemetry.client_error_events` | LEE | LEE | POR_SQL | TelemetryErrorsAnalyticsController.summary → TelemetryErrorsAnalyticsService.errors → TelemetryClientErrorsReadRepository.totals | `src/modules/telemetry/infrastructure/repositories/telemetry-client-errors-read.repository.ts:71` |
+| `telemetry.user_activity_events` | LEE | LEE | POR_SQL | TelemetryErrorsAnalyticsController.summary → TelemetryErrorsAnalyticsService.errors → TelemetryClientErrorsReadRepository.s9Shown | `src/modules/telemetry/infrastructure/repositories/telemetry-client-errors-read.repository.ts:181` |
 
 ### Parámetros
 
@@ -211,7 +211,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TelemetryErrorsAnalyticsController.fingerprints` — `src/modules/telemetry/presentation/controllers/telemetry-errors-analytics.controller.ts:36`
+- **Implementación:** `TelemetryErrorsAnalyticsController.fingerprints` — `src/modules/telemetry/presentation/controllers/telemetry-errors-analytics.controller.ts:51`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -221,14 +221,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/analytics/errors/fingerprints` la atiende `TelemetryErrorsAnalyticsController.fingerprints` (src/modules/telemetry/presentation/controllers/telemetry-errors-analytics.controller.ts:36). Exige sesión con alguno de los roles PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO. Delega en `TelemetryErrorsAnalyticsService.fingerprints`. Lee read_models.frontend_routes, read_models.portal_surfaces, telemetry.client_error_events.
+`GET /admin/analytics/errors/fingerprints` la atiende `TelemetryErrorsAnalyticsController.fingerprints` (src/modules/telemetry/presentation/controllers/telemetry-errors-analytics.controller.ts:51). Exige sesión con alguno de los roles PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO. Delega en `TelemetryErrorsAnalyticsService.fingerprints`. Lee read_models.frontend_routes, read_models.portal_surfaces, telemetry.client_error_events.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO | `src/modules/telemetry/presentation/controllers/telemetry-errors-analytics.controller.ts:36` |
+| ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO | `src/modules/telemetry/presentation/controllers/telemetry-errors-analytics.controller.ts:51` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -236,9 +236,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `read_models.frontend_routes` | LEE | LEE | POR_SQL | TelemetryErrorsAnalyticsController.fingerprints → TelemetryErrorsAnalyticsService.fingerprints → TelemetryErrorsAnalyticsService.registry → TelemetryClientErrorsReadRepository.partsRegistry | `src/modules/telemetry/infrastructure/repositories/telemetry-client-errors-read.repository.ts:250` |
-| `read_models.portal_surfaces` | LEE | LEE | POR_SQL | TelemetryErrorsAnalyticsController.fingerprints → TelemetryErrorsAnalyticsService.fingerprints → TelemetryErrorsAnalyticsService.registry → TelemetryClientErrorsReadRepository.partsRegistry | `src/modules/telemetry/infrastructure/repositories/telemetry-client-errors-read.repository.ts:250` |
-| `telemetry.client_error_events` | LEE | LEE | POR_SQL | TelemetryErrorsAnalyticsController.fingerprints → TelemetryErrorsAnalyticsService.fingerprints → TelemetryClientErrorsReadRepository.fingerprints | `src/modules/telemetry/infrastructure/repositories/telemetry-client-errors-read.repository.ts:170` |
+| `read_models.frontend_routes` | LEE | LEE | POR_SQL | TelemetryErrorsAnalyticsController.fingerprints → TelemetryErrorsAnalyticsService.fingerprints → TelemetryErrorsAnalyticsService.registry → TelemetryClientErrorsReadRepository.partsRegistry | `src/modules/telemetry/infrastructure/repositories/telemetry-client-errors-read.repository.ts:303` |
+| `read_models.portal_surfaces` | LEE | LEE | POR_SQL | TelemetryErrorsAnalyticsController.fingerprints → TelemetryErrorsAnalyticsService.fingerprints → TelemetryErrorsAnalyticsService.registry → TelemetryClientErrorsReadRepository.partsRegistry | `src/modules/telemetry/infrastructure/repositories/telemetry-client-errors-read.repository.ts:303` |
+| `telemetry.client_error_events` | LEE | LEE | POR_SQL | TelemetryErrorsAnalyticsController.fingerprints → TelemetryErrorsAnalyticsService.fingerprints → TelemetryClientErrorsReadRepository.fingerprints | `src/modules/telemetry/infrastructure/repositories/telemetry-client-errors-read.repository.ts:200` |
 
 ### Parámetros
 
@@ -289,7 +289,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TelemetryErrorsAnalyticsController.fingerprint` — `src/modules/telemetry/presentation/controllers/telemetry-errors-analytics.controller.ts:52`
+- **Implementación:** `TelemetryErrorsAnalyticsController.fingerprint` — `src/modules/telemetry/presentation/controllers/telemetry-errors-analytics.controller.ts:82`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -299,14 +299,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/analytics/errors/fingerprints/{fingerprint}` la atiende `TelemetryErrorsAnalyticsController.fingerprint` (src/modules/telemetry/presentation/controllers/telemetry-errors-analytics.controller.ts:52). Exige sesión con alguno de los roles PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO. Delega en `TelemetryErrorsAnalyticsService.fingerprint`. Lee read_models.frontend_routes, read_models.portal_surfaces, telemetry.client_error_events.
+`GET /admin/analytics/errors/fingerprints/{fingerprint}` la atiende `TelemetryErrorsAnalyticsController.fingerprint` (src/modules/telemetry/presentation/controllers/telemetry-errors-analytics.controller.ts:82). Exige sesión con alguno de los roles PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO. Delega en `TelemetryErrorsAnalyticsService.fingerprint`. Lee read_models.frontend_routes, read_models.portal_surfaces, telemetry.client_error_events.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO | `src/modules/telemetry/presentation/controllers/telemetry-errors-analytics.controller.ts:52` |
+| ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO | `src/modules/telemetry/presentation/controllers/telemetry-errors-analytics.controller.ts:82` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -314,9 +314,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `read_models.frontend_routes` | LEE | LEE | POR_SQL | TelemetryErrorsAnalyticsController.fingerprint → TelemetryErrorsAnalyticsService.fingerprint → TelemetryErrorsAnalyticsService.registry → TelemetryClientErrorsReadRepository.partsRegistry | `src/modules/telemetry/infrastructure/repositories/telemetry-client-errors-read.repository.ts:250` |
-| `read_models.portal_surfaces` | LEE | LEE | POR_SQL | TelemetryErrorsAnalyticsController.fingerprint → TelemetryErrorsAnalyticsService.fingerprint → TelemetryErrorsAnalyticsService.registry → TelemetryClientErrorsReadRepository.partsRegistry | `src/modules/telemetry/infrastructure/repositories/telemetry-client-errors-read.repository.ts:250` |
-| `telemetry.client_error_events` | LEE | LEE | POR_SQL | TelemetryErrorsAnalyticsController.fingerprint → TelemetryErrorsAnalyticsService.fingerprint → TelemetryClientErrorsReadRepository.fingerprints | `src/modules/telemetry/infrastructure/repositories/telemetry-client-errors-read.repository.ts:170` |
+| `read_models.frontend_routes` | LEE | LEE | POR_SQL | TelemetryErrorsAnalyticsController.fingerprint → TelemetryErrorsAnalyticsService.fingerprint → TelemetryErrorsAnalyticsService.registry → TelemetryClientErrorsReadRepository.partsRegistry | `src/modules/telemetry/infrastructure/repositories/telemetry-client-errors-read.repository.ts:303` |
+| `read_models.portal_surfaces` | LEE | LEE | POR_SQL | TelemetryErrorsAnalyticsController.fingerprint → TelemetryErrorsAnalyticsService.fingerprint → TelemetryErrorsAnalyticsService.registry → TelemetryClientErrorsReadRepository.partsRegistry | `src/modules/telemetry/infrastructure/repositories/telemetry-client-errors-read.repository.ts:303` |
+| `telemetry.client_error_events` | LEE | LEE | POR_SQL | TelemetryErrorsAnalyticsController.fingerprint → TelemetryErrorsAnalyticsService.fingerprint → TelemetryClientErrorsReadRepository.fingerprints | `src/modules/telemetry/infrastructure/repositories/telemetry-client-errors-read.repository.ts:200` |
 
 ### Parámetros
 
@@ -368,7 +368,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TelemetryErrorsAnalyticsController.routesNotFound` — `src/modules/telemetry/presentation/controllers/telemetry-errors-analytics.controller.ts:44`
+- **Implementación:** `TelemetryErrorsAnalyticsController.routesNotFound` — `src/modules/telemetry/presentation/controllers/telemetry-errors-analytics.controller.ts:66`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -378,14 +378,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/analytics/errors/routes-not-found` la atiende `TelemetryErrorsAnalyticsController.routesNotFound` (src/modules/telemetry/presentation/controllers/telemetry-errors-analytics.controller.ts:44). Exige sesión con alguno de los roles PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO. Delega en `TelemetryErrorsAnalyticsService.routesNotFound`. Lee read_models.frontend_routes, read_models.portal_surfaces, telemetry.client_error_events.
+`GET /admin/analytics/errors/routes-not-found` la atiende `TelemetryErrorsAnalyticsController.routesNotFound` (src/modules/telemetry/presentation/controllers/telemetry-errors-analytics.controller.ts:66). Exige sesión con alguno de los roles PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO. Delega en `TelemetryErrorsAnalyticsService.routesNotFound`. Lee read_models.frontend_routes, read_models.portal_surfaces, telemetry.client_error_events.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO | `src/modules/telemetry/presentation/controllers/telemetry-errors-analytics.controller.ts:44` |
+| ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO | `src/modules/telemetry/presentation/controllers/telemetry-errors-analytics.controller.ts:66` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -393,9 +393,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `read_models.frontend_routes` | LEE | LEE | POR_SQL | TelemetryErrorsAnalyticsController.routesNotFound → TelemetryErrorsAnalyticsService.routesNotFound → TelemetryErrorsAnalyticsService.registry → TelemetryClientErrorsReadRepository.partsRegistry | `src/modules/telemetry/infrastructure/repositories/telemetry-client-errors-read.repository.ts:250` |
-| `read_models.portal_surfaces` | LEE | LEE | POR_SQL | TelemetryErrorsAnalyticsController.routesNotFound → TelemetryErrorsAnalyticsService.routesNotFound → TelemetryErrorsAnalyticsService.registry → TelemetryClientErrorsReadRepository.partsRegistry | `src/modules/telemetry/infrastructure/repositories/telemetry-client-errors-read.repository.ts:250` |
-| `telemetry.client_error_events` | LEE | LEE | POR_SQL | TelemetryErrorsAnalyticsController.routesNotFound → TelemetryErrorsAnalyticsService.routesNotFound → TelemetryClientErrorsReadRepository.routesNotFound | `src/modules/telemetry/infrastructure/repositories/telemetry-client-errors-read.repository.ts:231` |
+| `read_models.frontend_routes` | LEE | LEE | POR_SQL | TelemetryErrorsAnalyticsController.routesNotFound → TelemetryErrorsAnalyticsService.routesNotFound → TelemetryErrorsAnalyticsService.registry → TelemetryClientErrorsReadRepository.partsRegistry | `src/modules/telemetry/infrastructure/repositories/telemetry-client-errors-read.repository.ts:303` |
+| `read_models.portal_surfaces` | LEE | LEE | POR_SQL | TelemetryErrorsAnalyticsController.routesNotFound → TelemetryErrorsAnalyticsService.routesNotFound → TelemetryErrorsAnalyticsService.registry → TelemetryClientErrorsReadRepository.partsRegistry | `src/modules/telemetry/infrastructure/repositories/telemetry-client-errors-read.repository.ts:303` |
+| `telemetry.client_error_events` | LEE | LEE | POR_SQL | TelemetryErrorsAnalyticsController.routesNotFound → TelemetryErrorsAnalyticsService.routesNotFound → TelemetryClientErrorsReadRepository.routesNotFound | `src/modules/telemetry/infrastructure/repositories/telemetry-client-errors-read.repository.ts:284` |
 
 ### Parámetros
 
@@ -471,9 +471,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `telemetry.activity_event_schema_definitions` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.listFunnels → TelemetryAnalyticsService.listFunnels → TelemetryAnalyticsRepository.listFunnels | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:367` |
-| `telemetry.funnel_definitions` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.listFunnels → TelemetryAnalyticsService.listFunnels → TelemetryAnalyticsRepository.listFunnels | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:367` |
-| `telemetry.funnel_steps` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.listFunnels → TelemetryAnalyticsService.listFunnels → TelemetryAnalyticsRepository.listFunnels | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:367` |
+| `telemetry.activity_event_schema_definitions` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.listFunnels → TelemetryAnalyticsService.listFunnels → TelemetryAnalyticsRepository.listFunnels | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:377` |
+| `telemetry.funnel_definitions` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.listFunnels → TelemetryAnalyticsService.listFunnels → TelemetryAnalyticsRepository.listFunnels | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:377` |
+| `telemetry.funnel_steps` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.listFunnels → TelemetryAnalyticsService.listFunnels → TelemetryAnalyticsRepository.listFunnels | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:377` |
 
 ### Cuerpo
 
@@ -537,12 +537,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `telemetry.activity_event_schema_definitions` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.funnelReport → TelemetryAnalyticsService.funnelReport → TelemetryAnalyticsService.listFunnels → TelemetryAnalyticsRepository.listFunnels | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:367` |
-| `telemetry.conversion_events` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.funnelReport → TelemetryAnalyticsService.funnelReport → TelemetryAnalyticsRepository.serverConversions | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:441` |
-| `telemetry.funnel_definitions` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.funnelReport → TelemetryAnalyticsService.funnelReport → TelemetryAnalyticsService.listFunnels → TelemetryAnalyticsRepository.listFunnels | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:367` |
-| `telemetry.funnel_steps` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.funnelReport → TelemetryAnalyticsService.funnelReport → TelemetryAnalyticsService.listFunnels → TelemetryAnalyticsRepository.listFunnels | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:367` |
+| `telemetry.activity_event_schema_definitions` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.funnelReport → TelemetryAnalyticsService.funnelReport → TelemetryAnalyticsService.listFunnels → TelemetryAnalyticsRepository.listFunnels | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:377` |
+| `telemetry.conversion_events` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.funnelReport → TelemetryAnalyticsService.funnelReport → TelemetryAnalyticsRepository.serverConversions | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:451` |
+| `telemetry.funnel_definitions` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.funnelReport → TelemetryAnalyticsService.funnelReport → TelemetryAnalyticsService.listFunnels → TelemetryAnalyticsRepository.listFunnels | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:377` |
+| `telemetry.funnel_steps` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.funnelReport → TelemetryAnalyticsService.funnelReport → TelemetryAnalyticsService.listFunnels → TelemetryAnalyticsRepository.listFunnels | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:377` |
 | `telemetry.session_journeys` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.funnelReport → TelemetryAnalyticsService.funnelReport → TelemetryAnalyticsRepository.serverConversions → TelemetryAnalyticsRepository.rowInTenant | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:124` |
-| `telemetry.user_activity_events` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.funnelReport → TelemetryAnalyticsService.funnelReport → TelemetryAnalyticsRepository.funnelReach | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:397` |
+| `telemetry.user_activity_events` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.funnelReport → TelemetryAnalyticsService.funnelReport → TelemetryAnalyticsRepository.funnelReach | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:407` |
 
 ### Parámetros
 
@@ -622,8 +622,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `telemetry.user_activity_event_properties` | LEE | LEE | POR_SQL | TelemetryClickHeatmapController.getHeatmap → TelemetryClickHeatmapService.heatmap → TelemetryClickHeatmapRepository.scroll | `src/modules/telemetry/infrastructure/repositories/telemetry-click-heatmap.repository.ts:218` |
-| `telemetry.user_activity_events` | LEE | LEE | POR_SQL | TelemetryClickHeatmapController.getHeatmap → TelemetryClickHeatmapService.heatmap → TelemetryClickHeatmapRepository.scroll | `src/modules/telemetry/infrastructure/repositories/telemetry-click-heatmap.repository.ts:218` |
+| `telemetry.user_activity_event_properties` | LEE | LEE | POR_SQL | TelemetryClickHeatmapController.getHeatmap → TelemetryClickHeatmapService.heatmap → TelemetryClickHeatmapRepository.scroll | `src/modules/telemetry/infrastructure/repositories/telemetry-click-heatmap.repository.ts:226` |
+| `telemetry.user_activity_events` | LEE | LEE | POR_SQL | TelemetryClickHeatmapController.getHeatmap → TelemetryClickHeatmapService.heatmap → TelemetryClickHeatmapRepository.scroll | `src/modules/telemetry/infrastructure/repositories/telemetry-click-heatmap.repository.ts:226` |
 
 ### Parámetros
 
@@ -910,11 +910,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `telemetry.client_error_events` | LEE | LEE | POR_SQL | TelemetryPartsAnalyticsController.list → TelemetryPartsAnalyticsService.parts → TelemetryPartsRepository.errorsByRoute | `src/modules/telemetry/infrastructure/repositories/telemetry-parts.repository.ts:156` |
+| `telemetry.client_error_events` | LEE | LEE | POR_SQL | TelemetryPartsAnalyticsController.list → TelemetryPartsAnalyticsService.parts → TelemetryPartsRepository.errorsByRoute | `src/modules/telemetry/infrastructure/repositories/telemetry-parts.repository.ts:168` |
 | `telemetry.session_journeys` | LEE | LEE | POR_SQL | TelemetryPartsAnalyticsController.list → TelemetryPartsAnalyticsService.parts → TelemetryAnalyticsRepository.webVitalsByRoute → TelemetryAnalyticsRepository.rowInTenant | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:124` |
-| `telemetry.user_activity_event_properties` | LEE | LEE | POR_SQL | TelemetryPartsAnalyticsController.list → TelemetryPartsAnalyticsService.parts → TelemetryPartsRepository.dwellByRoute | `src/modules/telemetry/infrastructure/repositories/telemetry-parts.repository.ts:73` |
+| `telemetry.user_activity_event_properties` | LEE | LEE | POR_SQL | TelemetryPartsAnalyticsController.list → TelemetryPartsAnalyticsService.parts → TelemetryPartsRepository.dwellByRoute | `src/modules/telemetry/infrastructure/repositories/telemetry-parts.repository.ts:79` |
 | `telemetry.user_activity_events` | LEE | LEE | POR_SQL | TelemetryPartsAnalyticsController.list → TelemetryPartsAnalyticsService.parts → TelemetryPartsRepository.usageByRoute | `src/modules/telemetry/infrastructure/repositories/telemetry-parts.repository.ts:55` |
-| `telemetry.web_vitals` | LEE | LEE | POR_SQL | TelemetryPartsAnalyticsController.list → TelemetryPartsAnalyticsService.parts → TelemetryAnalyticsRepository.webVitalsByRoute | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:267` |
+| `telemetry.web_vitals` | LEE | LEE | POR_SQL | TelemetryPartsAnalyticsController.list → TelemetryPartsAnalyticsService.parts → TelemetryAnalyticsRepository.webVitalsByRoute | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:277` |
 
 ### Parámetros
 
@@ -963,7 +963,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TelemetryPartsAnalyticsController.detail` — `src/modules/telemetry/presentation/controllers/telemetry-parts-analytics.controller.ts:25`
+- **Implementación:** `TelemetryPartsAnalyticsController.detail` — `src/modules/telemetry/presentation/controllers/telemetry-parts-analytics.controller.ts:31`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -973,14 +973,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/analytics/parts/{routeCode}` la atiende `TelemetryPartsAnalyticsController.detail` (src/modules/telemetry/presentation/controllers/telemetry-parts-analytics.controller.ts:25). Exige sesión con alguno de los roles PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO. Delega en `TelemetryPartsAnalyticsService.part`. Lee telemetry.client_error_events, telemetry.session_journeys, telemetry.user_activity_event_properties, telemetry.user_activity_events, telemetry.web_vitals.
+`GET /admin/analytics/parts/{routeCode}` la atiende `TelemetryPartsAnalyticsController.detail` (src/modules/telemetry/presentation/controllers/telemetry-parts-analytics.controller.ts:31). Exige sesión con alguno de los roles PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO. Delega en `TelemetryPartsAnalyticsService.part`. Lee telemetry.client_error_events, telemetry.session_journeys, telemetry.user_activity_event_properties, telemetry.user_activity_events, telemetry.web_vitals.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO | `src/modules/telemetry/presentation/controllers/telemetry-parts-analytics.controller.ts:25` |
+| ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO | `src/modules/telemetry/presentation/controllers/telemetry-parts-analytics.controller.ts:31` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -988,11 +988,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `telemetry.client_error_events` | LEE | LEE | POR_SQL | TelemetryPartsAnalyticsController.detail → TelemetryPartsAnalyticsService.part → TelemetryClientErrorsReadRepository.fingerprints | `src/modules/telemetry/infrastructure/repositories/telemetry-client-errors-read.repository.ts:170` |
+| `telemetry.client_error_events` | LEE | LEE | POR_SQL | TelemetryPartsAnalyticsController.detail → TelemetryPartsAnalyticsService.part → TelemetryClientErrorsReadRepository.fingerprints | `src/modules/telemetry/infrastructure/repositories/telemetry-client-errors-read.repository.ts:200` |
 | `telemetry.session_journeys` | LEE | LEE | POR_SQL | TelemetryPartsAnalyticsController.detail → TelemetryPartsAnalyticsService.part → TelemetryAnalyticsRepository.webVitals → TelemetryAnalyticsRepository.rowInTenant | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:124` |
-| `telemetry.user_activity_event_properties` | LEE | LEE | POR_SQL | TelemetryPartsAnalyticsController.detail → TelemetryPartsAnalyticsService.part → TelemetryPartsRepository.screenSizes | `src/modules/telemetry/infrastructure/repositories/telemetry-parts.repository.ts:132` |
+| `telemetry.user_activity_event_properties` | LEE | LEE | POR_SQL | TelemetryPartsAnalyticsController.detail → TelemetryPartsAnalyticsService.part → TelemetryPartsRepository.screenSizes | `src/modules/telemetry/infrastructure/repositories/telemetry-parts.repository.ts:144` |
 | `telemetry.user_activity_events` | LEE | LEE | POR_SQL | TelemetryPartsAnalyticsController.detail → TelemetryPartsAnalyticsService.part → TelemetryPartsRepository.usageByRoute | `src/modules/telemetry/infrastructure/repositories/telemetry-parts.repository.ts:55` |
-| `telemetry.web_vitals` | LEE | LEE | POR_SQL | TelemetryPartsAnalyticsController.detail → TelemetryPartsAnalyticsService.part → TelemetryAnalyticsRepository.webVitals | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:231` |
+| `telemetry.web_vitals` | LEE | LEE | POR_SQL | TelemetryPartsAnalyticsController.detail → TelemetryPartsAnalyticsService.part → TelemetryAnalyticsRepository.webVitals | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:236` |
 
 ### Parámetros
 
@@ -1068,8 +1068,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `telemetry.client_contexts` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.pipelineHealth → TelemetryAnalyticsService.pipelineHealth → TelemetryAnalyticsRepository.pipelineHealth | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:481` |
-| `telemetry.user_activity_events` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.pipelineHealth → TelemetryAnalyticsService.pipelineHealth → TelemetryAnalyticsRepository.pipelineHealth | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:461` |
+| `telemetry.client_contexts` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.pipelineHealth → TelemetryAnalyticsService.pipelineHealth → TelemetryAnalyticsRepository.pipelineHealth | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:491` |
+| `telemetry.user_activity_events` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.pipelineHealth → TelemetryAnalyticsService.pipelineHealth → TelemetryAnalyticsRepository.pipelineHealth | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:471` |
 
 ### Parámetros
 
@@ -1145,7 +1145,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `telemetry.session_journeys` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.listSessions → TelemetryAnalyticsService.listSessions → TelemetryAnalyticsRepository.listSessions | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:299` |
+| `telemetry.session_journeys` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.listSessions → TelemetryAnalyticsService.listSessions → TelemetryAnalyticsRepository.listSessions | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:309` |
 | `telemetry.user_activity_events` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.listSessions → TelemetryAnalyticsService.listSessions → TelemetryAnalyticsRepository.listSessions → TelemetryAnalyticsRepository.sessionInTenant | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:98` |
 
 ### Parámetros
@@ -1225,9 +1225,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `telemetry.session_journeys` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.getSession → TelemetryAnalyticsService.getSession → TelemetryAnalyticsRepository.findSession | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:322` |
-| `telemetry.user_activity_event_properties` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.getSession → TelemetryAnalyticsService.getSession → TelemetryAnalyticsRepository.sessionTimeline | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:342` |
-| `telemetry.user_activity_events` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.getSession → TelemetryAnalyticsService.getSession → TelemetryAnalyticsRepository.sessionTimeline | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:342` |
+| `telemetry.session_journeys` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.getSession → TelemetryAnalyticsService.getSession → TelemetryAnalyticsRepository.findSession | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:332` |
+| `telemetry.user_activity_event_properties` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.getSession → TelemetryAnalyticsService.getSession → TelemetryAnalyticsRepository.sessionTimeline | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:352` |
+| `telemetry.user_activity_events` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.getSession → TelemetryAnalyticsService.getSession → TelemetryAnalyticsRepository.sessionTimeline | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:352` |
 
 ### Parámetros
 
@@ -1300,7 +1300,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `telemetry.user_activity_events` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.timeseries → TelemetryAnalyticsService.timeseries → TelemetryAnalyticsRepository.timeseries | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:189` |
+| `telemetry.user_activity_events` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.timeseries → TelemetryAnalyticsService.timeseries → TelemetryAnalyticsRepository.timeseries | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:194` |
 
 ### Parámetros
 
@@ -1378,7 +1378,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `telemetry.session_journeys` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.webVitals → TelemetryAnalyticsService.webVitals → TelemetryAnalyticsRepository.webVitals → TelemetryAnalyticsRepository.rowInTenant | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:124` |
 | `telemetry.user_activity_events` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.webVitals → TelemetryAnalyticsService.webVitals → TelemetryAnalyticsRepository.webVitals → TelemetryAnalyticsRepository.rowInTenant | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:124` |
-| `telemetry.web_vitals` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.webVitals → TelemetryAnalyticsService.webVitals → TelemetryAnalyticsRepository.webVitals | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:231` |
+| `telemetry.web_vitals` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.webVitals → TelemetryAnalyticsService.webVitals → TelemetryAnalyticsRepository.webVitals | `src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts:236` |
 
 ### Parámetros
 
@@ -1450,7 +1450,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:45` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1595,7 +1595,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/telemetry/presentation/controllers/telemetry-consent.controller.ts:90` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1696,7 +1696,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:62` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1803,7 +1803,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** ALTO — Ruta pública que escribe en la base
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TelemetryClientErrorsController.capture` — `src/modules/telemetry/presentation/controllers/telemetry-client-errors.controller.ts:27`
+- **Implementación:** `TelemetryClientErrorsController.capture` — `src/modules/telemetry/presentation/controllers/telemetry-client-errors.controller.ts:34`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1813,48 +1813,48 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /telemetry/client-errors` la atiende `TelemetryClientErrorsController.capture` (src/modules/telemetry/presentation/controllers/telemetry-client-errors.controller.ts:27). Es una ruta pública: no exige token. Valida el cuerpo como `CaptureClientErrorsDto` (19 campos, 4 obligatorios). Delega en `TelemetryClientErrorsService.ingest`. Crea filas en telemetry.client_error_events. Lee iam.sessions, iam.users.
+`POST /telemetry/client-errors` la atiende `TelemetryClientErrorsController.capture` (src/modules/telemetry/presentation/controllers/telemetry-client-errors.controller.ts:34). Es una ruta pública: no exige token. Valida el cuerpo como `CaptureClientErrorsDto` (19 campos, 4 obligatorios). Delega en `TelemetryClientErrorsService.ingest`. Crea filas en telemetry.client_error_events. Lee iam.sessions, iam.users.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
-| AUTENTICACION | Ruta pública: no exige token | `src/modules/telemetry/presentation/controllers/telemetry-client-errors.controller.ts:27` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| AUTENTICACION | Ruta pública: no exige token | `src/modules/telemetry/presentation/controllers/telemetry-client-errors.controller.ts:34` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | Límite propio: Throttle(CLIENT_ERRORS_RATE_LIMIT) | `src/modules/telemetry/presentation/controllers/telemetry-client-errors.controller.ts:27` |
+| RATE_LIMIT | Límite propio: Throttle(CLIENT_ERRORS_RATE_LIMIT) | `src/modules/telemetry/presentation/controllers/telemetry-client-errors.controller.ts:34` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `iam.sessions` | LEE | LEE | POR_SQL | TelemetryClientErrorsController.capture → TelemetryClientErrorsService.ingest → TelemetryClientErrorsService.optionalActor → SessionValidator.assertActive | `src/common/auth/session-validator.ts:51` |
-| `iam.users` | LEE | LEE | POR_SQL | TelemetryClientErrorsController.capture → TelemetryClientErrorsService.ingest → TelemetryClientErrorsService.optionalActor → SessionValidator.assertActive | `src/common/auth/session-validator.ts:51` |
-| `telemetry.client_error_events` | ESCRIBE | CREA | POR_SQL | TelemetryClientErrorsController.capture → TelemetryClientErrorsService.ingest → TelemetryClientErrorsRepository.insertMany | `src/modules/telemetry/infrastructure/repositories/telemetry-client-errors.repository.ts:63` |
+| `iam.sessions` | LEE | LEE | POR_SQL | TelemetryClientErrorsController.capture → TelemetryClientErrorsService.ingest → TelemetryClientErrorsService.optionalActor → SessionValidator.assertActive | `src/common/auth/session-validator.ts:82` |
+| `iam.users` | LEE | LEE | POR_SQL | TelemetryClientErrorsController.capture → TelemetryClientErrorsService.ingest → TelemetryClientErrorsService.optionalActor → SessionValidator.assertActive | `src/common/auth/session-validator.ts:82` |
+| `telemetry.client_error_events` | ESCRIBE | CREA | POR_SQL | TelemetryClientErrorsController.capture → TelemetryClientErrorsService.ingest → TelemetryClientErrorsRepository.insertMany | `src/modules/telemetry/infrastructure/repositories/telemetry-client-errors.repository.ts:81` |
 
 ### Cuerpo — DTO `CaptureClientErrorsDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `errors` | `array<ClientErrorItemDto>` | Sí | mínimo 1 elemento(s); máximo 50 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ArrayMaxSize(50)` `@ValidateNested({ each: true })` `@Type(() => ClientErrorItemDto)` | — | `src/modules/telemetry/presentation/dto/client-error.dto.ts:138` |
-| `errors[].errorClass` | `string` | Sí | valores: JS, PROMISE, HTTP, ROUTE, CHUNK, HYDRATION, TEMPLATE, NATIVE | `@IsIn(CLIENT_ERROR_CLASSES)` | — | `src/modules/telemetry/presentation/dto/client-error.dto.ts:27` |
-| `errors[].errorType` | `string` | Sí | longitud mínima 1; longitud máxima 120 | `@IsString()` `@MinLength(1)` `@MaxLength(120)` | — | `src/modules/telemetry/presentation/dto/client-error.dto.ts:33` |
-| `errors[].message` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(2000)` | Sin stack ni cuerpo; se redacta de nuevo en el servidor. | `src/modules/telemetry/presentation/dto/client-error.dto.ts:39` |
-| `errors[].routeTemplate` | `string` | No | longitud máxima 300 | `@IsOptional()` `@IsString()` `@MaxLength(300)` | Plantilla de ruta sin ids (misma lista cerrada que la ruta anónima). | `src/modules/telemetry/presentation/dto/client-error.dto.ts:45` |
-| `errors[].occurredAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | — | `src/modules/telemetry/presentation/dto/client-error.dto.ts:50` |
-| `errors[].portal` | `string` | No | valores: WEB, MOBILE | `@IsOptional()` `@IsIn(['WEB', 'MOBILE'])` | — | `src/modules/telemetry/presentation/dto/client-error.dto.ts:55` |
-| `errors[].httpMethod` | `string` | No | longitud máxima 8 | `@IsOptional()` `@IsString()` `@MaxLength(8)` | — | `src/modules/telemetry/presentation/dto/client-error.dto.ts:61` |
-| `errors[].apiRouteTemplate` | `string` | No | longitud máxima 300 | `@IsOptional()` `@IsString()` `@MaxLength(300)` | — | `src/modules/telemetry/presentation/dto/client-error.dto.ts:67` |
-| `errors[].httpStatus` | `number` | No | mínimo 0; máximo 599 | `@IsOptional()` `@IsInt()` `@Min(0)` `@Max(599)` | — | `src/modules/telemetry/presentation/dto/client-error.dto.ts:74` |
-| `errors[].apiErrorCode` | `string` | No | longitud máxima 60 | `@IsOptional()` `@IsString()` `@MaxLength(60)` | — | `src/modules/telemetry/presentation/dto/client-error.dto.ts:80` |
-| `errors[].requestId` | `string` | No | longitud máxima 80 | `@IsOptional()` `@IsString()` `@MaxLength(80)` | X-Request-Id de la respuesta; enlaza con observability.error_events. | `src/modules/telemetry/presentation/dto/client-error.dto.ts:86` |
-| `errors[].supportCode` | `string` | No | longitud máxima 40 | `@IsOptional()` `@IsString()` `@MaxLength(40)` | Código dictable E-… que ve la persona. | `src/modules/telemetry/presentation/dto/client-error.dto.ts:92` |
-| `errors[].appVersion` | `string` | Sí | longitud mínima 1; longitud máxima 40 | `@IsString()` `@MinLength(1)` `@MaxLength(40)` | — | `src/modules/telemetry/presentation/dto/client-error.dto.ts:98` |
-| `errors[].buildId` | `string` | No | longitud máxima 40 | `@IsOptional()` `@IsString()` `@MaxLength(40)` | — | `src/modules/telemetry/presentation/dto/client-error.dto.ts:104` |
-| `errors[].screenSize` | `string` | No | valores: movil, tableta, escritorio | `@IsOptional()` `@IsIn(SCREEN_SIZES)` | — | `src/modules/telemetry/presentation/dto/client-error.dto.ts:109` |
-| `errors[].isOnline` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | — | `src/modules/telemetry/presentation/dto/client-error.dto.ts:114` |
-| `errors[].suppressedCount` | `number` | No | mínimo 0; máximo 100000 | `@IsOptional()` `@IsInt()` `@Min(0)` `@Max(100000)` | Repeticiones suprimidas en el cliente. | `src/modules/telemetry/presentation/dto/client-error.dto.ts:121` |
-| `errors[].fingerprint` | `string` | No | longitud máxima 64 | `@IsOptional()` `@IsString()` `@MaxLength(64)` | Se ignora: la huella la calcula el servidor. | `src/modules/telemetry/presentation/dto/client-error.dto.ts:127` |
+| `errors` | `array<ClientErrorItemDto>` | Sí | mínimo 1 elemento(s); máximo 50 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ArrayMaxSize(50)` `@ValidateNested({ each: true })` `@Type(() => ClientErrorItemDto)` | — | `src/modules/telemetry/presentation/dto/client-error.dto.ts:161` |
+| `errors[].errorClass` | `string` | Sí | valores: JS, PROMISE, HTTP, ROUTE, CHUNK, HYDRATION, TEMPLATE, NATIVE | `@IsIn(CLIENT_ERROR_CLASSES)` | — | `src/modules/telemetry/presentation/dto/client-error.dto.ts:30` |
+| `errors[].errorType` | `string` | Sí | longitud mínima 1; longitud máxima 120 | `@IsString()` `@MinLength(1)` `@MaxLength(120)` | — | `src/modules/telemetry/presentation/dto/client-error.dto.ts:36` |
+| `errors[].message` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(2000)` | Sin stack ni cuerpo; se redacta de nuevo en el servidor. | `src/modules/telemetry/presentation/dto/client-error.dto.ts:45` |
+| `errors[].routeTemplate` | `string` | No | longitud máxima 300 | `@IsOptional()` `@IsString()` `@MaxLength(300)` | Plantilla de ruta sin ids (misma lista cerrada que la ruta anónima). | `src/modules/telemetry/presentation/dto/client-error.dto.ts:55` |
+| `errors[].occurredAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | — | `src/modules/telemetry/presentation/dto/client-error.dto.ts:60` |
+| `errors[].portal` | `string` | No | valores: WEB, MOBILE | `@IsOptional()` `@IsIn(['WEB', 'MOBILE'])` | — | `src/modules/telemetry/presentation/dto/client-error.dto.ts:65` |
+| `errors[].httpMethod` | `string` | No | longitud máxima 8 | `@IsOptional()` `@IsString()` `@MaxLength(8)` | — | `src/modules/telemetry/presentation/dto/client-error.dto.ts:71` |
+| `errors[].apiRouteTemplate` | `string` | No | longitud máxima 300 | `@IsOptional()` `@IsString()` `@MaxLength(300)` | — | `src/modules/telemetry/presentation/dto/client-error.dto.ts:77` |
+| `errors[].httpStatus` | `number` | No | mínimo 0; máximo 599 | `@IsOptional()` `@IsInt()` `@Min(0)` `@Max(599)` | — | `src/modules/telemetry/presentation/dto/client-error.dto.ts:84` |
+| `errors[].apiErrorCode` | `string` | No | longitud máxima 60 | `@IsOptional()` `@IsString()` `@MaxLength(60)` | — | `src/modules/telemetry/presentation/dto/client-error.dto.ts:90` |
+| `errors[].requestId` | `string` | No | longitud máxima 80 | `@IsOptional()` `@IsString()` `@MaxLength(80)` | X-Request-Id de la respuesta; enlaza con observability.error_events. | `src/modules/telemetry/presentation/dto/client-error.dto.ts:100` |
+| `errors[].supportCode` | `string` | No | longitud máxima 40 | `@IsOptional()` `@IsString()` `@MaxLength(40)` | Código dictable E-… que ve la persona. | `src/modules/telemetry/presentation/dto/client-error.dto.ts:109` |
+| `errors[].appVersion` | `string` | Sí | longitud mínima 1; longitud máxima 40 | `@IsString()` `@MinLength(1)` `@MaxLength(40)` | — | `src/modules/telemetry/presentation/dto/client-error.dto.ts:115` |
+| `errors[].buildId` | `string` | No | longitud máxima 40 | `@IsOptional()` `@IsString()` `@MaxLength(40)` | — | `src/modules/telemetry/presentation/dto/client-error.dto.ts:121` |
+| `errors[].screenSize` | `string` | No | valores: movil, tableta, escritorio | `@IsOptional()` `@IsIn(SCREEN_SIZES)` | — | `src/modules/telemetry/presentation/dto/client-error.dto.ts:126` |
+| `errors[].isOnline` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | — | `src/modules/telemetry/presentation/dto/client-error.dto.ts:131` |
+| `errors[].suppressedCount` | `number` | No | mínimo 0; máximo 100000 | `@IsOptional()` `@IsInt()` `@Min(0)` `@Max(100000)` | Repeticiones suprimidas en el cliente. | `src/modules/telemetry/presentation/dto/client-error.dto.ts:142` |
+| `errors[].fingerprint` | `string` | No | longitud máxima 64 | `@IsOptional()` `@IsString()` `@MaxLength(64)` | Se ignora: la huella la calcula el servidor. | `src/modules/telemetry/presentation/dto/client-error.dto.ts:150` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1913,6 +1913,7 @@ _No se identificó un DTO de respuesta con campos._
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Redis no está disponible para validar sesiones |
 
 El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 
@@ -1952,7 +1953,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:97` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2059,7 +2060,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/telemetry/presentation/controllers/telemetry-consent.controller.ts:46` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2161,7 +2162,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/telemetry/presentation/controllers/telemetry-governance.controller.ts:74` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2266,7 +2267,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/telemetry/presentation/controllers/telemetry-governance.controller.ts:55` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2381,7 +2382,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/telemetry/presentation/controllers/telemetry-governance.controller.ts:91` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2507,7 +2508,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/telemetry/presentation/controllers/telemetry-onboarding-analytics.controller.ts:126` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2604,7 +2605,7 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** ALTO — Borra filas
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TelemetryRetentionController.purge` — `src/modules/telemetry/presentation/controllers/telemetry-retention.controller.ts:40`
+- **Implementación:** `TelemetryRetentionController.purge` — `src/modules/telemetry/presentation/controllers/telemetry-retention.controller.ts:53`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2614,16 +2615,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /telemetry/retention/purge` la atiende `TelemetryRetentionController.purge` (src/modules/telemetry/presentation/controllers/telemetry-retention.controller.ts:40). Exige sesión con alguno de los roles SYSTEM. Valida el cuerpo como `RetentionPurgeDto` (2 campos, 0 obligatorios). Delega en `TelemetryRetentionService.purge`. Actualiza telemetry.conversion_events, telemetry.session_journeys, telemetry.web_vitals. Borra de telemetry.client_error_events, telemetry.user_activity_event_properties, telemetry.user_activity_events. Lee telemetry.activity_event_schema_definitions, telemetry.client_error_events, telemetry.tracking_purpose_definitions, telemetry.user_activity_events.
+`POST /telemetry/retention/purge` la atiende `TelemetryRetentionController.purge` (src/modules/telemetry/presentation/controllers/telemetry-retention.controller.ts:53). Exige sesión con alguno de los roles SYSTEM. Valida el cuerpo como `RetentionPurgeDto` (2 campos, 0 obligatorios). Delega en `TelemetryRetentionService.purge`. Actualiza telemetry.conversion_events, telemetry.session_journeys, telemetry.web_vitals. Borra de telemetry.client_error_events, telemetry.user_activity_event_properties, telemetry.user_activity_events. Lee telemetry.activity_event_schema_definitions, telemetry.client_error_events, telemetry.tracking_purpose_definitions, telemetry.user_activity_events.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM | `src/modules/telemetry/presentation/controllers/telemetry-retention.controller.ts:40` |
+| ROL | Alguno de: SYSTEM | `src/modules/telemetry/presentation/controllers/telemetry-retention.controller.ts:53` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2631,23 +2632,23 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `telemetry.activity_event_schema_definitions` | LEE | LEE | POR_SQL | TelemetryRetentionController.purge → TelemetryRetentionService.purge → TelemetryRetentionService.purgePurpose | `src/modules/telemetry/application/services/telemetry-retention.service.ts:133` |
-| `telemetry.client_error_events` | BORRA | BORRA | POR_SQL | TelemetryRetentionController.purge → TelemetryRetentionService.purge → TelemetryRetentionService.purgeClientErrors | `src/modules/telemetry/application/services/telemetry-retention.service.ts:177` |
-| `telemetry.client_error_events` | LEE | LEE | POR_SQL | TelemetryRetentionController.purge → TelemetryRetentionService.purge → TelemetryRetentionService.purgeClientErrors | `src/modules/telemetry/application/services/telemetry-retention.service.ts:177` |
-| `telemetry.conversion_events` | ESCRIBE | ACTUALIZA | POR_SQL | TelemetryRetentionController.purge → TelemetryRetentionService.purge → TelemetryRetentionService.purgePurpose | `src/modules/telemetry/application/services/telemetry-retention.service.ts:146` |
-| `telemetry.session_journeys` | ESCRIBE | ACTUALIZA | POR_SQL | TelemetryRetentionController.purge → TelemetryRetentionService.purge → TelemetryRetentionService.purgePurpose | `src/modules/telemetry/application/services/telemetry-retention.service.ts:143` |
-| `telemetry.tracking_purpose_definitions` | LEE | LEE | POR_SQL | TelemetryRetentionController.purge → TelemetryRetentionService.purge | `src/modules/telemetry/application/services/telemetry-retention.service.ts:77` |
-| `telemetry.user_activity_event_properties` | BORRA | BORRA | POR_SQL | TelemetryRetentionController.purge → TelemetryRetentionService.purge → TelemetryRetentionService.purgePurpose | `src/modules/telemetry/application/services/telemetry-retention.service.ts:148` |
-| `telemetry.user_activity_events` | BORRA | BORRA | POR_SQL | TelemetryRetentionController.purge → TelemetryRetentionService.purge → TelemetryRetentionService.purgePurpose | `src/modules/telemetry/application/services/telemetry-retention.service.ts:154` |
-| `telemetry.user_activity_events` | LEE | LEE | POR_SQL | TelemetryRetentionController.purge → TelemetryRetentionService.purge → TelemetryRetentionService.purgePurpose | `src/modules/telemetry/application/services/telemetry-retention.service.ts:133` |
-| `telemetry.web_vitals` | ESCRIBE | ACTUALIZA | POR_SQL | TelemetryRetentionController.purge → TelemetryRetentionService.purge → TelemetryRetentionService.purgePurpose | `src/modules/telemetry/application/services/telemetry-retention.service.ts:145` |
+| `telemetry.activity_event_schema_definitions` | LEE | LEE | POR_SQL | TelemetryRetentionController.purge → TelemetryRetentionService.purge → TelemetryRetentionService.purgePurpose | `src/modules/telemetry/application/services/telemetry-retention.service.ts:167` |
+| `telemetry.client_error_events` | BORRA | BORRA | POR_SQL | TelemetryRetentionController.purge → TelemetryRetentionService.purge → TelemetryRetentionService.purgeClientErrors | `src/modules/telemetry/application/services/telemetry-retention.service.ts:240` |
+| `telemetry.client_error_events` | LEE | LEE | POR_SQL | TelemetryRetentionController.purge → TelemetryRetentionService.purge → TelemetryRetentionService.purgeClientErrors | `src/modules/telemetry/application/services/telemetry-retention.service.ts:240` |
+| `telemetry.conversion_events` | ESCRIBE | ACTUALIZA | POR_SQL | TelemetryRetentionController.purge → TelemetryRetentionService.purge → TelemetryRetentionService.purgePurpose | `src/modules/telemetry/application/services/telemetry-retention.service.ts:193` |
+| `telemetry.session_journeys` | ESCRIBE | ACTUALIZA | POR_SQL | TelemetryRetentionController.purge → TelemetryRetentionService.purge → TelemetryRetentionService.purgePurpose | `src/modules/telemetry/application/services/telemetry-retention.service.ts:178` |
+| `telemetry.tracking_purpose_definitions` | LEE | LEE | POR_SQL | TelemetryRetentionController.purge → TelemetryRetentionService.purge | `src/modules/telemetry/application/services/telemetry-retention.service.ts:94` |
+| `telemetry.user_activity_event_properties` | BORRA | BORRA | POR_SQL | TelemetryRetentionController.purge → TelemetryRetentionService.purge → TelemetryRetentionService.purgePurpose | `src/modules/telemetry/application/services/telemetry-retention.service.ts:198` |
+| `telemetry.user_activity_events` | BORRA | BORRA | POR_SQL | TelemetryRetentionController.purge → TelemetryRetentionService.purge → TelemetryRetentionService.purgePurpose | `src/modules/telemetry/application/services/telemetry-retention.service.ts:204` |
+| `telemetry.user_activity_events` | LEE | LEE | POR_SQL | TelemetryRetentionController.purge → TelemetryRetentionService.purge → TelemetryRetentionService.purgePurpose | `src/modules/telemetry/application/services/telemetry-retention.service.ts:167` |
+| `telemetry.web_vitals` | ESCRIBE | ACTUALIZA | POR_SQL | TelemetryRetentionController.purge → TelemetryRetentionService.purge → TelemetryRetentionService.purgePurpose | `src/modules/telemetry/application/services/telemetry-retention.service.ts:188` |
 
 ### Cuerpo — DTO `RetentionPurgeDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `batchSize` | `number` | No | mínimo 1; máximo 5000 | `@IsOptional()` `@Type(() => Number)` `@IsInt()` `@Min(1)` `@Max(RETENTION_MAX_BATCH)` | — | `src/modules/telemetry/presentation/controllers/telemetry-retention.controller.ts:19` |
-| `maxBatches` | `number` | No | mínimo 1; máximo 100 | `@IsOptional()` `@Type(() => Number)` `@IsInt()` `@Min(1)` `@Max(RETENTION_MAX_BATCHES)` | — | `src/modules/telemetry/presentation/controllers/telemetry-retention.controller.ts:27` |
+| `batchSize` | `number` | No | mínimo 1; máximo 5000 | `@IsOptional()` `@Type(() => Number)` `@IsInt()` `@Min(1)` `@Max(RETENTION_MAX_BATCH)` | — | `src/modules/telemetry/presentation/controllers/telemetry-retention.controller.ts:28` |
+| `maxBatches` | `number` | No | mínimo 1; máximo 100 | `@IsOptional()` `@Type(() => Number)` `@IsInt()` `@Min(1)` `@Max(RETENTION_MAX_BATCHES)` | — | `src/modules/telemetry/presentation/controllers/telemetry-retention.controller.ts:40` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2719,7 +2720,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:113` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:113` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2728,7 +2729,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `iam.sessions` | LEE | LEE | DIRECTA | TelemetryEventsController.closeJourney → TelemetryEventsService.closeJourney → TelemetryEventsService.assertOwnedJourney → ActorSessionsRepository.belongsToUser | `src/modules/telemetry/infrastructure/repositories/actor-sessions.repository.ts:45` |
-| `telemetry.session_journeys` | ESCRIBE | ACTUALIZA | POR_TIPO | TelemetryEventsController.closeJourney → TelemetryEventsService.closeJourney | `src/modules/telemetry/application/services/telemetry-events.service.ts:604` |
+| `telemetry.session_journeys` | ESCRIBE | ACTUALIZA | POR_TIPO | TelemetryEventsController.closeJourney → TelemetryEventsService.closeJourney | `src/modules/telemetry/application/services/telemetry-events.service.ts:607` |
 | `telemetry.session_journeys` | LEE | LEE | DIRECTA | TelemetryEventsController.closeJourney → TelemetryEventsService.closeJourney → TelemetryEventsService.assertOwnedJourney → SessionJourneysRepository.findById | `src/modules/telemetry/infrastructure/repositories/session-journeys.repository.ts:48` |
 | `telemetry.user_activity_events` | LEE | LEE | DIRECTA | TelemetryEventsController.closeJourney → TelemetryEventsService.closeJourney → TelemetryEventsService.assertOwnedEvent → UserActivityEventsRepository.findById | `src/modules/telemetry/infrastructure/repositories/user-activity-events.repository.ts:97` |
 
@@ -2821,7 +2822,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/telemetry/presentation/controllers/telemetry-consent.controller.ts:64` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3085,7 +3086,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/telemetry/presentation/controllers/telemetry-governance.controller.ts:38` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3197,7 +3198,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:80` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 

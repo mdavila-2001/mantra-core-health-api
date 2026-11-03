@@ -16,6 +16,7 @@ import {
   Audited,
   CurrentUser,
   type AuthenticatedUser,
+  Roles,
 } from '../../../../common';
 import { PractitionerAdmissionsReadService } from '../../application/services/practitioner-admissions-read.service';
 import {
@@ -29,9 +30,9 @@ import { RequestIdParam } from './admissions.controller';
  * La verificación del propio médico: ve su estado y qué falta, reenvía o retira.
  *
  * Todas las rutas son `me`: el sujeto sale de la sesión, nunca del cuerpo ni de
- * la URL, así que nadie lee ni mueve la admisión de otro. **Sin `@Roles`**, como
- * el resto de las rutas `me` del módulo; el filtro real es tener perfil
- * profesional.
+ * la URL, así que nadie lee ni mueve la admisión de otro. **`@Roles()` vacío**
+ * —sin rol global—, como el resto de las rutas `me` del módulo; el filtro real
+ * es tener perfil profesional, que el servicio comprueba.
  */
 @ApiTags('profiles-practitioner-admission')
 @ApiBearerAuth()
@@ -43,6 +44,7 @@ export class OwnAdmissionController {
   ) {}
 
   @Get()
+  @Roles()
   @ApiOperation({
     summary: 'Estado de mi verificación',
     description:
@@ -54,6 +56,7 @@ export class OwnAdmissionController {
   }
 
   @Post('resubmit')
+  @Roles()
   @HttpCode(HttpStatus.OK)
   @Audited({
     action: 'ADMISSION_RESUBMITTED',
@@ -76,6 +79,7 @@ export class OwnAdmissionController {
   }
 
   @Post('withdraw')
+  @Roles()
   @HttpCode(HttpStatus.OK)
   @Audited({ action: 'ADMISSION_WITHDRAWN', entity: 'practitioner_admission' })
   @ApiOperation({

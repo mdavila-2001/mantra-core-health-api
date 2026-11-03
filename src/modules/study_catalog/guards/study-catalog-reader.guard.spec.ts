@@ -81,6 +81,21 @@ describe('StudyCatalogReaderGuard (matriz §3.g)', () => {
     );
   });
 
+  it('SUPERADMIN acotado a otro tenant no lee en este; acotado a éste sí (#1241)', async () => {
+    const { guard, ctx } = build();
+    const scopedTo = (tenantId: string) => ({
+      id: 'root-scoped',
+      roles: ['SUPERADMIN'],
+      scopedRoles: { [tenantId]: ['SUPERADMIN'] },
+    });
+    await expect(
+      guard.canActivate(ctx(scopedTo(LAB), CLINIC)),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    await expect(
+      guard.canActivate(ctx(scopedTo(CLINIC), CLINIC)),
+    ).resolves.toBe(true);
+  });
+
   it('sin tenant resuelto y sin rol: 403 sin consultar membresías', async () => {
     const { guard, ctx, repo } = build();
     await expect(

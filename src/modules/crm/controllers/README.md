@@ -38,7 +38,7 @@ Inyecta `CrmSalesService` (ciclo comercial) y `CrmServiceService` (actividades, 
 consentimiento y 360). `resolveCase` delega en `changeCaseStatus` con `RESOLVED`: es un atajo del
 caso de uso 13 sobre la misma transición, no una regla aparte.
 
-## Pruebas
+## Tests
 
 `crm.controller.spec.ts` con ambos servicios mockeados: delegación, argumentos (incluido el actor y
 los ids de ruta) y propagación de errores.

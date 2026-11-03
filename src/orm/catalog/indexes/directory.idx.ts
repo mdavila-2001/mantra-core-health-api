@@ -2,11 +2,25 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `directory`.
- * 65 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 80 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const directoryIndexes: readonly IndexTuple[] = [
   // [tabla, nombre, columnas, único, método]
+  ['affiliation_invitation_uses', 'ix_affiliation_invitation_uses_tenant_id', ['tenant_id'], false, 'btree'],
+  ['affiliation_invitation_uses', 'uq_affiliation_invitation_uses_accepted', ['affiliation_invitation_id', 'used_by_user_id'], true, 'btree', 'outcome_concept_id = \'659f9beb-ad4d-583e-828b-05a808ad08dc\''],
+  ['affiliation_invitation_uses', 'ix_affiliation_invitation_uses_invitation_occurred', ['affiliation_invitation_id', 'occurred_at desc'], false, 'btree'],
+  ['affiliation_invitation_uses', 'ix_affiliation_invitation_uses_used_by_user_id', ['used_by_user_id'], false, 'btree'],
+  ['affiliation_invitation_uses', 'ix_affiliation_invitation_uses_outcome_concept_id', ['outcome_concept_id'], false, 'btree'],
+  ['affiliation_invitation_uses', 'brin_affiliation_invitation_uses_occurred_at', ['occurred_at'], false, 'brin'],
+  ['affiliation_invitations', 'uq_affiliation_invitations_token_hash', ['token_hash'], true, 'btree'],
+  ['affiliation_invitations', 'ix_affiliation_invitations_tenant_id', ['tenant_id', 'status_concept_id', 'expires_at'], false, 'btree'],
+  ['affiliation_invitations', 'ix_affiliation_invitations_kind_concept_id', ['kind_concept_id'], false, 'btree'],
+  ['affiliation_invitations', 'ix_affiliation_invitations_target_person_id', ['target_person_id'], false, 'btree'],
+  ['affiliation_invitations', 'ix_affiliation_invitations_role_template_id', ['role_template_id'], false, 'btree'],
+  ['affiliation_invitations', 'ix_affiliation_invitations_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['affiliation_invitations', 'ix_affiliation_invitations_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['affiliation_invitations', 'ix_affiliation_invitations_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['branch_memberships', 'ix_branch_memberships_tenant_membership_id', ['tenant_membership_id'], false, 'btree'],
   ['branch_memberships', 'ix_branch_memberships_branch_id', ['branch_id'], false, 'btree'],
   ['branch_memberships', 'ix_branch_memberships_local_role_concept_id', ['local_role_concept_id'], false, 'btree'],
@@ -56,6 +70,7 @@ export const directoryIndexes: readonly IndexTuple[] = [
   ['tenant_memberships', 'ix_tenant_memberships_tenant_id_status_concept_id', ['tenant_id', 'status_concept_id', 'updated_at desc'], false, 'btree'],
   ['tenant_memberships', 'ix_tenant_memberships_workday_concept_id', ['workday_concept_id'], false, 'btree'],
   ['tenant_memberships', 'ix_tenant_memberships_responsible_user_id', ['responsible_user_id'], false, 'btree'],
+  ['tenant_memberships', 'ix_tenant_memberships_origin_concept_id', ['origin_concept_id'], false, 'btree'],
   ['tenant_memberships', 'uq_tenant_memberships_active_user_tenant', ['user_id', 'tenant_id'], true, 'btree', 'status_concept_id = \'13ca1b46-61d5-5c25-9d49-8247bcd7769c\''],
   ['tenant_web_configs', 'uk_tenant_web_configs_domain', ['domain'], true, 'btree'],
   ['tenant_web_configs', 'ix_tenant_web_configs_tenant_id', ['tenant_id'], false, 'btree'],

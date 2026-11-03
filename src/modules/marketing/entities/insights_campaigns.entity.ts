@@ -120,7 +120,7 @@ export class InsightsCampaigns {
     fieldName: 'marketing_campaign_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → marketing.marketing_campaigns
+  }) // FK → marketing.marketing_campaigns (inferida)
   marketingCampaignId?: string;
 
   /**

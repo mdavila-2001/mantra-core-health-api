@@ -915,7 +915,6 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `integrationMode` | Sí | `string` | valores: `REALTIME`, `BATCH` | Modo de integración | `REALTIME` |
-| `connectionId` | No | `string` | formato `uuid` | Conexión de integración externa registrada; si se omite, la fila se auto-referencia | `00000000-0000-4000-8000-000000000001` |
 | `pharmacySiteId` | No | `string` | formato `uuid` | Sede a la que aplica la conexión | `00000000-0000-4000-8000-000000000001` |
 | `inventoryAuthorityConceptId` | No | `string` | formato `uuid` | Concept id de la autoridad de inventario | `00000000-0000-4000-8000-000000000001` |
 | `supportsStockQuery` | No | `boolean` | Sin restricción adicional declarada | Soporta consulta de stock | `true` |
@@ -936,7 +935,6 @@ Content-Type: application/json
 
 {
   "integrationMode": "REALTIME",
-  "connectionId": "00000000-0000-4000-8000-000000000001",
   "pharmacySiteId": "00000000-0000-4000-8000-000000000001",
   "inventoryAuthorityConceptId": "00000000-0000-4000-8000-000000000001",
   "supportsStockQuery": true,
@@ -981,7 +979,7 @@ Campos de la respuesta:
 |---|:---:|---|---|---|---|
 | `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `pharmacyId` | Sí | `string` | formato `uuid` | Identificador asociado a pharmacy. | `00000000-0000-4000-8000-000000000001` |
-| `connectionId` | Sí | `string` | formato `uuid` | Identificador asociado a connection. | `00000000-0000-4000-8000-000000000001` |
+| `connectionId` | Sí | `string` | formato `uuid`; admite null | Conexión registrada en integraciones; nulo mientras la farmacia no tiene configurado su sistema externo. | `00000000-0000-4000-8000-000000000001` |
 | `status` | Sí | `string` | formato `uuid` | Concept id del estado | `00000000-0000-4000-8000-000000000001` |
 | `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
 
@@ -994,7 +992,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PHARMACY_STAFF. | Roles/tenant/guards de autorización |
-| 409 | `CONFLICT` | Ya existe una conexión para esa integración | Excepción explícita en src/modules/pharmacy/services/pharmacy-integration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La farmacia no está activa | Excepción explícita en src/modules/pharmacy/services/pharmacy-integration.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |

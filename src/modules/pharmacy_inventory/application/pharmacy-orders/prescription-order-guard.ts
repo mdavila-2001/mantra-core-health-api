@@ -91,6 +91,16 @@ export class PrescriptionOrderGuard {
     return this.balances.lockRequest(em, id, patientProfileId, now);
   }
 
+  /** Read-only preflight; authoritative validation still locks the prescription. */
+  readOwnRequest(
+    em: EntityManager,
+    id: string,
+    patientProfileId: string,
+    now: Date,
+  ): Promise<LockedPrescription | null> {
+    return this.balances.readRequest(em, id, patientProfileId, now);
+  }
+
   /**
    * Lanza el 422 del primer motivo por el que el pedido no respeta la receta.
    *

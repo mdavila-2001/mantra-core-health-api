@@ -7,6 +7,8 @@ import type { IndexTuple } from '../catalog.types';
  */
 export const auditIndexes2: readonly IndexTuple[] = [
   // [tabla, nombre, columnas, único, método]
+  ['consents_history', 'brin_consents_history_recorded_at', ['recorded_at'], false, 'brin'],
+  ['contacts_history', 'ix_contacts_history_contacts_id', ['contacts_id'], false, 'btree'],
   ['contacts_history', 'ix_contacts_history_operation_concept_id', ['operation_concept_id'], false, 'btree'],
   ['contacts_history', 'ix_contacts_history_changed_by_user_id', ['changed_by_user_id'], false, 'btree'],
   ['contacts_history', 'ix_contacts_history_change_reason_concept_id', ['change_reason_concept_id'], false, 'btree'],
@@ -180,11 +182,9 @@ export const auditIndexes2: readonly IndexTuple[] = [
   ['insurance_decision_access_log', 'ix_insurance_decision_access_log_outcome_concept_id', ['outcome_concept_id'], false, 'btree'],
   ['insurance_decision_access_log', 'ix_insurance_decision_access_log_patient_profile_id_occurred_at', ['patient_profile_id', 'occurred_at desc'], false, 'btree'],
   ['insurance_decision_access_log', 'brin_insurance_decision_access_log_occurred_at', ['occurred_at'], false, 'brin'],
-  ['integration_endpoints_history', 'ix_integration_endpoints_history_integration_endpoint_id', ['integration_endpoint_id'], false, 'btree'],
-  ['integration_endpoints_history', 'ix_integration_endpoints_history_operation_concept_id', ['operation_concept_id'], false, 'btree'],
-  ['integration_endpoints_history', 'ix_integration_endpoints_history_changed_by_user_id', ['changed_by_user_id'], false, 'btree'],
-  ['integration_endpoints_history', 'ix_integration_endpoints_history_change_reason_concept_id', ['change_reason_concept_id'], false, 'btree'],
-  ['integration_endpoints_history', 'brin_integration_endpoints_history_recorded_at', ['recorded_at'], false, 'brin'],
-  ['invoices_history', 'ix_invoices_history_invoice_id', ['invoice_id'], false, 'btree'],
-  ['invoices_history', 'ix_invoices_history_operation_concept_id', ['operation_concept_id'], false, 'btree'],
+  ['insurance_products_history', 'ix_insurance_products_history_insurance_product_id', ['insurance_product_id'], false, 'btree'],
+  ['insurance_products_history', 'ix_insurance_products_history_operation_concept_id', ['operation_concept_id'], false, 'btree'],
+  ['insurance_products_history', 'ix_insurance_products_history_changed_by_user_id', ['changed_by_user_id'], false, 'btree'],
+  ['insurance_products_history', 'ix_insurance_products_history_change_reason_concept_id', ['change_reason_concept_id'], false, 'btree'],
+  ['insurance_products_history', 'brin_insurance_products_history_recorded_at', ['recorded_at'], false, 'brin'],
 ];

@@ -59,7 +59,7 @@ Contratos de entrada y salida. La validación vive en `class-validator`; la docu
 - **`CreateSystemContextDto.contextJson` documenta que nunca lleva secretos**, sólo referencias
   gobernadas. Es la regla del caso de uso y el sitio donde un desarrollador la va a leer.
 
-## Pruebas
+## Tests
 
 Sin suite propia: los DTOs se validan por el `ValidationPipe` global y se ejercitan desde las
 pruebas de servicio y de controlador.

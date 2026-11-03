@@ -33,7 +33,7 @@ export class SurveyTemplates {
     fieldName: 'owner_practitioner_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → profiles.practitioner_profiles
+  }) // FK → profiles.health_practitioner_profiles
   ownerPractitionerId?: string;
 
   /**
@@ -45,7 +45,7 @@ export class SurveyTemplates {
     fieldName: 'owner_type_concept_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → terminology.catalog_concepts
+  }) // FK → terminology.catalog_concepts (inferida)
   ownerTypeConceptId?: string;
 
   /**
@@ -58,13 +58,13 @@ export class SurveyTemplates {
   /**
    * Título visible del instrumento.
    */
-  @Property({ fieldName: 'title', columnType: 'text' })
+  @Property({ columnType: 'text' })
   title!: string;
 
   /**
    * Descripción o consigna que se muestra al paciente antes de responder.
    */
-  @Property({ fieldName: 'description', columnType: 'text', nullable: true })
+  @Property({ columnType: 'text', nullable: true })
   description?: string;
 
   /**

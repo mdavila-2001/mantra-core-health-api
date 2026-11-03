@@ -130,6 +130,9 @@ export class PharmacyProducts {
   }) // FK → terminology.catalog_concepts (inferida)
   catalogProductConceptId?: string;
 
+  /**
+   * Valor de catalog presentation code mantenido por la instancia.
+   */
   @Property({
     fieldName: 'catalog_presentation_code',
     columnType: 'varchar',
@@ -137,6 +140,9 @@ export class PharmacyProducts {
   })
   catalogPresentationCode?: string;
 
+  /**
+   * Identificador asociado a pharmacy product category.
+   */
   @Property({
     fieldName: 'pharmacy_product_category_id',
     type: 'uuid',
@@ -144,6 +150,9 @@ export class PharmacyProducts {
   }) // FK → pharmacy.pharmacy_product_categories (inferida)
   pharmacyProductCategoryId?: string;
 
+  /**
+   * Valor de description text mantenido por la instancia.
+   */
   @Property({
     fieldName: 'description_text',
     columnType: 'text',
@@ -151,9 +160,15 @@ export class PharmacyProducts {
   })
   descriptionText?: string;
 
+  /**
+   * Valor de stock quantity mantenido por la instancia.
+   */
   @Property({ fieldName: 'stock_quantity', columnType: 'int', nullable: true })
   stockQuantity?: number;
 
+  /**
+   * Valor de min stock quantity mantenido por la instancia.
+   */
   @Property({
     fieldName: 'min_stock_quantity',
     columnType: 'int',
@@ -161,6 +176,9 @@ export class PharmacyProducts {
   })
   minStockQuantity?: number;
 
+  /**
+   * Valor de out of stock declared mantenido por la instancia.
+   */
   @Property({
     fieldName: 'out_of_stock_declared',
     type: 'boolean',
@@ -168,6 +186,9 @@ export class PharmacyProducts {
   })
   outOfStockDeclared!: boolean;
 
+  /**
+   * Identificador asociado a status concept.
+   */
   @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   statusConceptId!: string;
 

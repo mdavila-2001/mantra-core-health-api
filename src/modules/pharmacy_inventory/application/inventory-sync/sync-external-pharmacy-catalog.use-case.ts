@@ -1,3 +1,4 @@
+import { unitProblems, type UnitProblem } from './sync-unit-problems';
 import { Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
@@ -17,9 +18,7 @@ import {
 } from '../../domain/sync/external-catalog';
 import {
   mappedCodesNotSent,
-  resolveExternalCodes,
   translateExternalStock,
-  unitIssue,
   type ExternalMapping,
   type TranslatedSyncItem,
   type UnmappedExternalProduct,
@@ -36,6 +35,10 @@ import {
   type ExternalPharmacyCatalogPort,
 } from '../ports/external-pharmacy-catalog.port';
 import {
+  EXTERNAL_PHARMACY_SYSTEM_PORT,
+  type ExternalPharmacySystemPort,
+} from '../ports/external-pharmacy-system.port';
+import {
   PharmacyInventoryScopePolicy,
   type PharmacyScope,
 } from '../scope/pharmacy-inventory-scope.policy';
@@ -43,6 +46,7 @@ import { SiteStockWriter } from '../site-availability/site-stock-writer';
 import { CreateInventorySyncBatchUseCase } from './create-inventory-sync-batch.use-case';
 import {
   integrationConnectionInactive,
+  integrationHostNotAllowed,
   integrationNotConfigured,
   integrationUnavailable,
 } from './integration-errors';
@@ -61,6 +65,8 @@ interface SyncPlan {
   readonly pharmacyCode: string;
   readonly sites: readonly ActiveSiteRow[];
   readonly mappings: readonly ExternalMapping[];
+  /** El sistema con que se habla: el de la farmacia o el del servidor. */
+  readonly external: ExternalPharmacyCatalogPort;
 }
 
 /** Lo que se le pide a la sede para un producto, con su línea de origen. */
@@ -77,13 +83,6 @@ interface SiteOutcome {
   readonly applied: number;
   readonly unchanged: number;
   readonly skipped: IntegrationSyncSkippedDto[];
-}
-
-/** Un problema de unidad de un producto, por su código externo. */
-interface UnitProblem {
-  readonly reason: 'UNIT_MISMATCH' | 'UNIT_NOT_REPORTED';
-  readonly mappingUnitCode: string | null;
-  readonly externalUnitCode: string | null;
 }
 
 /**
@@ -130,7 +129,9 @@ export class SyncExternalPharmacyCatalogUseCase {
     private readonly reconcile: ReconcileInventorySyncBatchUseCase,
     private readonly writer: SiteStockWriter,
     @Inject(EXTERNAL_PHARMACY_CATALOG_PORT)
-    private readonly external: ExternalPharmacyCatalogPort,
+    private readonly serverCatalog: ExternalPharmacyCatalogPort,
+    @Inject(EXTERNAL_PHARMACY_SYSTEM_PORT)
+    private readonly systems: ExternalPharmacySystemPort,
     private readonly logger: PinoLogger,
   ) {}
 
@@ -147,7 +148,6 @@ export class SyncExternalPharmacyCatalogUseCase {
       'Syncing external pharmacy catalog',
     );
     const plan = await this.plan(ref, actor);
-    if (!this.external.isConfigured()) throw integrationNotConfigured();
 
     const { catalog, stockBySite } = await this.fetch(plan);
 
@@ -270,7 +270,24 @@ export class SyncExternalPharmacyCatalogUseCase {
           externalUnitCode: mapping.externalUnitCode ?? null,
         }),
       );
-      return { pharmacy, pharmacyCode, sites, mappings };
+      const system = await this.systems.resolve(
+        tx,
+        pharmacy.tenantId,
+        connection.connectionId ?? null,
+      );
+      if (system.status === 'UNAVAILABLE')
+        throw integrationUnavailable(system.errorReason);
+      if (system.status === 'NOT_CONFIGURED') throw integrationNotConfigured();
+      if (system.status === 'HOST_NOT_ALLOWED') {
+        throw integrationHostNotAllowed();
+      }
+      return {
+        pharmacy,
+        pharmacyCode,
+        sites,
+        mappings,
+        external: system.client,
+      };
     });
   }
 
@@ -279,12 +296,12 @@ export class SyncExternalPharmacyCatalogUseCase {
     stockBySite: Map<string, ExternalStockLine[]>;
   }> {
     try {
-      const catalog = await this.external.listProducts();
+      const catalog = await plan.external.listProducts();
       const stockBySite = new Map<string, ExternalStockLine[]>();
       for (const site of plan.sites) {
         stockBySite.set(
           site.id,
-          await this.external.stockForSite(site.code, plan.pharmacyCode),
+          await plan.external.stockForSite(site.code, plan.pharmacyCode),
         );
       }
       return { catalog, stockBySite };
@@ -468,30 +485,4 @@ export class SyncExternalPharmacyCatalogUseCase {
     );
     return lots > 0 ? 'SITE_PRODUCT_KEPT_BY_LOTS' : null;
   }
-}
-
-/**
- * Los productos cuya línea no se puede leer en su unidad: el vínculo declara
- * una unidad y el catálogo externo cuenta ese código en otra, o no dice en
- * cuál.
- */
-function unitProblems(
-  mappings: readonly ExternalMapping[],
-  catalog: readonly ExternalProduct[],
-): Map<string, UnitProblem> {
-  const units = new Map(catalog.map((product) => [product.code, product]));
-  const problems = new Map<string, UnitProblem>();
-  for (const [code, resolution] of resolveExternalCodes(mappings)) {
-    if (resolution.status !== 'MAPPED') continue;
-    const externalUnitCode = units.get(code)?.unitCode ?? null;
-    const reason = unitIssue(resolution.externalUnitCode, externalUnitCode);
-    if (reason) {
-      problems.set(resolution.productId, {
-        reason,
-        mappingUnitCode: resolution.externalUnitCode,
-        externalUnitCode,
-      });
-    }
-  }
-  return problems;
 }

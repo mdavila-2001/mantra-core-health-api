@@ -25,6 +25,17 @@ export const pharmacyErpEnvSchema = Joi.object({
     .min(200)
     .max(60_000)
     .default(5_000),
+  /**
+   * FAR-C9 · C9-3: hosts que la API puede llamar como sistema propio de una
+   * farmacia (`api.farmacia.bo,*.cadena.bo`). Vacía = ninguno, en cualquier
+   * entorno (ver `externalSystemUrlProblem`).
+   */
+  PHARMACY_EXTERNAL_ALLOWED_HOSTS: Joi.string().allow('').default(''),
+  /** Sin lista, cualquier host: solo una máquina local; en producción, no. */
+  PHARMACY_EXTERNAL_ALLOW_ANY_HOST: Joi.string()
+    .valid('true', 'false')
+    .default('false')
+    .when('NODE_ENV', { is: 'production', then: Joi.invalid('true') }),
 }).unknown(true);
 
 /** Configuración ya leída del entorno. */

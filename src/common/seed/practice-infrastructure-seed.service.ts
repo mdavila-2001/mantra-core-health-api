@@ -13,7 +13,7 @@ import {
 } from '../../modules/practice/domain/structure/structure-catalog';
 import { createdBy } from '../persistence/audit-fields';
 
-/** Lo que insertó una corrida. */
+/** Output metrics from infrastructure seed execution. */
 export interface PracticeInfrastructureSeedResult {
   parentRules: number;
   typologyRules: number;
@@ -23,28 +23,11 @@ export interface PracticeInfrastructureSeedResult {
 const idOf = (code: string): string => PRACTICE_CONCEPT_BY_CODE.get(code)!.id;
 
 /**
- * Reglas del árbol físico y backfill de forma (F1 de infraestructura,
- * contrato §2 y «Desvíos» del modelo).
- *
- * - `practice.space_form_parent_rules` y `practice.facility_typology_rules`:
- *   el patch del modelo crea las tablas vacías porque los concept ids los
- *   deriva la API. Se insertan las filas que falten de `PARENT_RULE_SEED` y
- *   `TYPOLOGY_RULE_SEED`; una fila que ya está no se toca (puede haberla
- *   ajustado quien opera el catálogo).
- * - `practice.care_spaces.form_concept_id`: los espacios anteriores a F1
- *   quedan en `LOC_FORM_ROOM` (eran todos locales: el único tipo era
- *   `SPACE_TYPE_ROOM`).
- *
- * Idempotente: la segunda corrida inserta y actualiza cero filas. Corre en
- * contexto SYSTEM (SET LOCAL) porque `care_spaces` tiene RLS forzada y el
- * backfill cruza tenants.
+ * Seeds physical tree rules and backfills care space form concepts.
+ * Runs in SYSTEM context to bypass RLS during cross-tenant backfill.
  */
 @Injectable()
 export class PracticeInfrastructureSeedService {
-  /**
-   * @param orm - Para abrir un fork propio.
-   * @param logger - Logger del arranque.
-   */
   constructor(
     private readonly orm: MikroORM,
     private readonly logger: PinoLogger,
@@ -52,7 +35,7 @@ export class PracticeInfrastructureSeedService {
     this.logger.setContext(PracticeInfrastructureSeedService.name);
   }
 
-  /** Siembra lo que falte. */
+  /** Seeds missing parent rules, typology rules, and backfills null room forms. */
   async run(): Promise<PracticeInfrastructureSeedResult> {
     const em = this.orm.em.fork();
     return em.transactional(async (tx) => {
@@ -116,7 +99,7 @@ export class PracticeInfrastructureSeedService {
       if (parentRules + typologyRules + formBackfill > 0) {
         this.logger.info(
           { parentRules, typologyRules, formBackfill },
-          'Reglas de infraestructura sembradas y forma completada',
+          'Infrastructure rules seeded and forms backfilled',
         );
       }
       return { parentRules, typologyRules, formBackfill };

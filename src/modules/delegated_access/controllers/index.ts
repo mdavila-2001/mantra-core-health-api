@@ -7,3 +7,4 @@ export * from './prescription-shares.controller';
 export * from './prescription-shares-public.controller';
 export * from './support-staff.controller';
 export * from './practitioner-support.controller';
+export * from './org-support-staff-provisioning.controller';

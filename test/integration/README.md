@@ -98,7 +98,7 @@ producción se proporcionan `DB_APP_USER` y `DB_APP_PASSWORD` reales y se omite
   borra al final) un concepto `I10` sintético si el real no está
   (`icd10-fixture.ts`).
 
-## Criterios de mantenimiento
+## Maintenance guidelines
 
 - Toda dependencia de red, credencial, dataset precargado o mutación destructiva
   debe tener una bandera opt-in documentada; el comando base nunca debe fallar

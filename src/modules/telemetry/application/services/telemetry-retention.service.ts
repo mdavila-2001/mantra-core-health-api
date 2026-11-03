@@ -26,7 +26,13 @@ export interface RetentionPurposeResult {
 export interface RetentionResult {
   now: string;
   purposes: RetentionPurposeResult[];
-  clientErrors: { retentionDays: number; cutoff: string; deleted: number; batches: number; more: boolean };
+  clientErrors: {
+    retentionDays: number;
+    cutoff: string;
+    deleted: number;
+    batches: number;
+    more: boolean;
+  };
   totalEvents: number;
   totalProperties: number;
   totalClientErrors: number;
@@ -40,7 +46,8 @@ export interface RetentionOptions {
   now?: Date;
 }
 
-const placeholders = (n: number) => Array.from({ length: n }, () => '?').join(', ');
+const placeholders = (n: number) =>
+  Array.from({ length: n }, () => '?').join(', ');
 
 /**
  * Purga por retención de `telemetry.user_activity_events` (y sus propiedades)
@@ -70,10 +77,20 @@ export class TelemetryRetentionService {
 
   async purge(options: RetentionOptions = {}): Promise<RetentionResult> {
     const now = options.now ?? new Date();
-    const batchSize = Math.min(RETENTION_MAX_BATCH, Math.max(1, options.batchSize ?? RETENTION_DEFAULT_BATCH));
-    const maxBatches = Math.min(RETENTION_MAX_BATCHES, Math.max(1, options.maxBatches ?? RETENTION_DEFAULT_MAX_BATCHES));
+    const batchSize = Math.min(
+      RETENTION_MAX_BATCH,
+      Math.max(1, options.batchSize ?? RETENTION_DEFAULT_BATCH),
+    );
+    const maxBatches = Math.min(
+      RETENTION_MAX_BATCHES,
+      Math.max(1, options.maxBatches ?? RETENTION_DEFAULT_MAX_BATCHES),
+    );
 
-    const purposes = await this.sql<{ id: string; purpose_code: string; days: number | null }>(
+    const purposes = await this.sql<{
+      id: string;
+      purpose_code: string;
+      days: number | null;
+    }>(
       `SELECT id, purpose_code, default_retention_days AS days
          FROM telemetry.tracking_purpose_definitions ORDER BY purpose_code`,
     );
@@ -85,12 +102,29 @@ export class TelemetryRetentionService {
         withoutRetention.push(purpose.purpose_code);
         continue;
       }
-      results.push(await this.purgePurpose(purpose.id, purpose.purpose_code, days, now, batchSize, maxBatches));
+      results.push(
+        await this.purgePurpose(
+          purpose.id,
+          purpose.purpose_code,
+          days,
+          now,
+          batchSize,
+          maxBatches,
+        ),
+      );
     }
 
     const errDays = Number(process.env.TELEMETRY_CLIENT_ERROR_RETENTION_DAYS);
-    const clientDays = Number.isInteger(errDays) && errDays > 0 ? errDays : CLIENT_ERROR_RETENTION_DEFAULT_DAYS;
-    const clientErrors = await this.purgeClientErrors(clientDays, now, batchSize, maxBatches);
+    const clientDays =
+      Number.isInteger(errDays) && errDays > 0
+        ? errDays
+        : CLIENT_ERROR_RETENTION_DEFAULT_DAYS;
+    const clientErrors = await this.purgeClientErrors(
+      clientDays,
+      now,
+      batchSize,
+      maxBatches,
+    );
 
     const result: RetentionResult = {
       now: now.toISOString(),
@@ -140,10 +174,26 @@ export class TelemetryRetentionService {
       if (ids.length === 0) break;
       const removed = await this.em.transactional(async (tx) => {
         const ph = placeholders(ids.length);
-        await tx.execute(`UPDATE telemetry.session_journeys SET entry_event_id = NULL WHERE entry_event_id IN (${ph})`, ids, 'run');
-        await tx.execute(`UPDATE telemetry.session_journeys SET exit_event_id = NULL WHERE exit_event_id IN (${ph})`, ids, 'run');
-        await tx.execute(`UPDATE telemetry.web_vitals SET user_activity_event_id = NULL WHERE user_activity_event_id IN (${ph})`, ids, 'run');
-        await tx.execute(`UPDATE telemetry.conversion_events SET completion_event_id = NULL WHERE completion_event_id IN (${ph})`, ids, 'run');
+        await tx.execute(
+          `UPDATE telemetry.session_journeys SET entry_event_id = NULL WHERE entry_event_id IN (${ph})`,
+          ids,
+          'run',
+        );
+        await tx.execute(
+          `UPDATE telemetry.session_journeys SET exit_event_id = NULL WHERE exit_event_id IN (${ph})`,
+          ids,
+          'run',
+        );
+        await tx.execute(
+          `UPDATE telemetry.web_vitals SET user_activity_event_id = NULL WHERE user_activity_event_id IN (${ph})`,
+          ids,
+          'run',
+        );
+        await tx.execute(
+          `UPDATE telemetry.conversion_events SET completion_event_id = NULL WHERE completion_event_id IN (${ph})`,
+          ids,
+          'run',
+        );
         const props = await tx.execute<{ n: number }[]>(
           `WITH d AS (DELETE FROM telemetry.user_activity_event_properties WHERE user_activity_event_id IN (${ph}) RETURNING 1)
            SELECT count(*)::int AS n FROM d`,
@@ -164,10 +214,23 @@ export class TelemetryRetentionService {
       if (ids.length < batchSize) break;
       if (batches === maxBatches) more = true;
     }
-    return { purposeCode, retentionDays: days, cutoff: cutoff.toISOString(), events, properties, batches, more };
+    return {
+      purposeCode,
+      retentionDays: days,
+      cutoff: cutoff.toISOString(),
+      events,
+      properties,
+      batches,
+      more,
+    };
   }
 
-  private async purgeClientErrors(days: number, now: Date, batchSize: number, maxBatches: number) {
+  private async purgeClientErrors(
+    days: number,
+    now: Date,
+    batchSize: number,
+    maxBatches: number,
+  ) {
     const cutoff = new Date(now.getTime() - days * DAY_MS);
     let deleted = 0;
     let batches = 0;
@@ -188,6 +251,12 @@ export class TelemetryRetentionService {
       if (n < batchSize) break;
       if (batches === maxBatches) more = true;
     }
-    return { retentionDays: days, cutoff: cutoff.toISOString(), deleted, batches, more };
+    return {
+      retentionDays: days,
+      cutoff: cutoff.toISOString(),
+      deleted,
+      batches,
+      more,
+    };
   }
 }

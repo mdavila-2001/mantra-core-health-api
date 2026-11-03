@@ -1,3 +1,4 @@
+import { EXTERNAL_SYSTEM_PROVIDERS } from './external-system.providers';
 import { DirectoryAuthorizationModule } from '../directory/directory-authorization.module';
 import { InsurancePatientSettlementModule } from '../insurance/insurance-patient-settlement.module';
 import { Module } from '@nestjs/common';
@@ -231,6 +232,8 @@ import { PharmacyInventoryScopePolicy } from './application/scope/pharmacy-inven
       provide: EXTERNAL_PHARMACY_CATALOG_PORT,
       useExisting: HttpExternalPharmacyCatalogAdapter,
     },
+    // FAR-C9 · C9-3: el sistema propio de cada farmacia, por conexión.
+    ...EXTERNAL_SYSTEM_PROVIDERS,
     // Servicios
     InventoryLocationsService,
     OpenInventoryCountUseCase,

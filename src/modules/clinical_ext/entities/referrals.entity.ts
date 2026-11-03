@@ -49,27 +49,6 @@ export class Referrals {
   specialtyConceptId?: string;
 
   /**
-   * Tipo de derivación (tratamiento, consulta, estudio, procedimiento,
-   * segunda opinión). Concepto `CEXT.REFERRAL_TYPE_*`.
-   */
-  @Property({
-    fieldName: 'referral_type_concept_id',
-    type: 'uuid',
-    nullable: true,
-  }) // FK → terminology.catalog_concepts
-  referralTypeConceptId?: string;
-
-  /**
-   * Servicio puntual del destino al que se deriva.
-   */
-  @Property({
-    fieldName: 'target_service_catalog_id',
-    type: 'uuid',
-    nullable: true,
-  }) // FK → billing.service_catalog
-  targetServiceCatalogId?: string;
-
-  /**
    * Identificador asociado a service request.
    */
   @Property({ fieldName: 'service_request_id', type: 'uuid', nullable: true }) // FK → clinical.service_requests
@@ -100,6 +79,27 @@ export class Referrals {
   statusConceptId!: string;
 
   /**
+   * Tipo de derivación (tratamiento, consulta, estudio, procedimiento,
+   * segunda opinión). Concepto `CEXT.REFERRAL_TYPE_*`.
+   */
+  @Property({
+    fieldName: 'referral_type_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  referralTypeConceptId?: string;
+
+  /**
+   * Servicio puntual del destino al que se deriva.
+   */
+  @Property({
+    fieldName: 'target_service_catalog_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK (destino no resuelto)
+  targetServiceCatalogId?: string;
+
+  /**
    * Valor de valid until mantenido por la instancia.
    */
   @Property({ fieldName: 'valid_until', columnType: 'date', nullable: true })
@@ -118,7 +118,7 @@ export class Referrals {
   /**
    * Sede u organización médica destino (FK → directory.branches).
    */
-  @Property({ fieldName: 'target_branch_id', type: 'uuid', nullable: true })
+  @Property({ fieldName: 'target_branch_id', type: 'uuid', nullable: true }) // FK → directory.branches
   targetBranchId?: string;
 
   /**
@@ -158,7 +158,7 @@ export class Referrals {
     fieldName: 'requested_service_concept_id',
     type: 'uuid',
     nullable: true,
-  })
+  }) // FK → terminology.catalog_concepts (inferida)
   requestedServiceConceptId?: string;
 
   /**
@@ -190,7 +190,7 @@ export class Referrals {
   /**
    * Consentimiento informado asociado (FK → consent.treatment_informed_consents).
    */
-  @Property({ fieldName: 'informed_consent_id', type: 'uuid', nullable: true })
+  @Property({ fieldName: 'informed_consent_id', type: 'uuid', nullable: true }) // FK → consent.treatment_informed_consents
   informedConsentId?: string;
 
   /**
@@ -222,11 +222,7 @@ export class Referrals {
   /**
    * ¿El paciente se traslada físicamente? (v4274)
    */
-  @Property({
-    fieldName: 'transfer_required',
-    type: 'boolean',
-    nullable: true,
-  })
+  @Property({ fieldName: 'transfer_required', type: 'boolean', nullable: true })
   transferRequired?: boolean;
 
   /**
@@ -452,11 +448,7 @@ export class Referrals {
   /**
    * Observaciones de la llegada.
    */
-  @Property({
-    fieldName: 'arrival_notes',
-    columnType: 'text',
-    nullable: true,
-  })
+  @Property({ fieldName: 'arrival_notes', columnType: 'text', nullable: true })
   arrivalNotes?: string;
 
   /**

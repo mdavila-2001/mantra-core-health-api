@@ -84,7 +84,7 @@ export class PracticeSites {
    * Archivo del QR de cobro bancario de la sede, en `common.files`. Nulo si la
    * sede no cobra por QR.
    */
-  @Property({ fieldName: 'bank_qr_file_id', type: 'uuid', nullable: true }) // FK → common.files (inferida)
+  @Property({ fieldName: 'bank_qr_file_id', type: 'uuid', nullable: true }) // FK → common.files
   bankQrFileId?: string;
 
   /**
@@ -129,29 +129,47 @@ export class PracticeSites {
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
 
+  /**
+   * Identificador asociado a tenant.
+   */
   @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants (inferida)
   tenantId!: string;
 
+  /**
+   * Valor de snis code mantenido por la instancia.
+   */
   @Property({ fieldName: 'snis_code', columnType: 'varchar', nullable: true })
   snisCode?: string;
 
+  /**
+   * Identificador asociado a subsector concept.
+   */
   @Property({ fieldName: 'subsector_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts (inferida)
   subsectorConceptId?: string;
 
+  /**
+   * Identificador asociado a care level concept.
+   */
   @Property({
     fieldName: 'care_level_concept_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → terminology.catalog_concepts
+  }) // FK → terminology.catalog_concepts (inferida)
   careLevelConceptId?: string;
 
+  /**
+   * Identificador asociado a facility typology concept.
+   */
   @Property({
     fieldName: 'facility_typology_concept_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → terminology.catalog_concepts
+  }) // FK → terminology.catalog_concepts (inferida)
   facilityTypologyConceptId?: string;
 
+  /**
+   * Valor de managing entity name mantenido por la instancia.
+   */
   @Property({
     fieldName: 'managing_entity_name',
     columnType: 'varchar',
@@ -159,6 +177,9 @@ export class PracticeSites {
   })
   managingEntityName?: string;
 
+  /**
+   * Valor de health network name mantenido por la instancia.
+   */
   @Property({
     fieldName: 'health_network_name',
     columnType: 'varchar',
@@ -166,13 +187,19 @@ export class PracticeSites {
   })
   healthNetworkName?: string;
 
+  /**
+   * Identificador asociado a sedes department concept.
+   */
   @Property({
     fieldName: 'sedes_department_concept_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → terminology.catalog_concepts
+  }) // FK → terminology.catalog_concepts (inferida)
   sedesDepartmentConceptId?: string;
 
+  /**
+   * Valor de municipality name mantenido por la instancia.
+   */
   @Property({
     fieldName: 'municipality_name',
     columnType: 'varchar',
@@ -180,6 +207,9 @@ export class PracticeSites {
   })
   municipalityName?: string;
 
+  /**
+   * Valor de snis verified at mantenido por la instancia.
+   */
   @Property({
     fieldName: 'snis_verified_at',
     columnType: 'timestamptz',
@@ -187,6 +217,9 @@ export class PracticeSites {
   })
   snisVerifiedAt?: Date;
 
+  /**
+   * Identificador asociado a snis verified by user.
+   */
   @Property({
     fieldName: 'snis_verified_by_user_id',
     type: 'uuid',

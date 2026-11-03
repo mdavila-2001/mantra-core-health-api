@@ -16,8 +16,9 @@ function build() {
   const surfaces: Record<string, any>[] = [];
   const routes: Record<string, any>[] = [];
   const em = {
-    findOne: fn(async (_e: unknown, where: { portalCode: string }) =>
-      surfaces.find((s) => s.portalCode === where.portalCode) ?? null,
+    findOne: fn(
+      async (_e: unknown, where: { portalCode: string }) =>
+        surfaces.find((s) => s.portalCode === where.portalCode) ?? null,
     ),
     find: fn(async (_e: unknown, where: { portalSurfaceId: string }) =>
       routes.filter((r) => r.portalSurfaceId === where.portalSurfaceId),
@@ -46,8 +47,9 @@ describe('FrontendRoutesSeedService (H2.S1.M2)', () => {
       new Set(['WEB', 'MOBILE', 'WEB_PUBLICO', 'INSIGHTS']),
     );
     expect(() => validateParts(parts)).not.toThrow();
-    expect(parts.find((p) => p.routePattern === '/administration/web-analytics'))
-      .toMatchObject({ group: 'Administración', module: 'M28 telemetry' });
+    expect(
+      parts.find((p) => p.routePattern === '/administration/web-analytics'),
+    ).toMatchObject({ group: 'Administración', module: 'M28 telemetry' });
   });
 
   it('1.ª corrida inserta todo; 2.ª corrida = 0 inserciones y 0 cambios', async () => {
@@ -61,9 +63,16 @@ describe('FrontendRoutesSeedService (H2.S1.M2)', () => {
     });
     expect(surfaces).toHaveLength(4);
     expect(routes).toHaveLength(parts.length);
-    expect(routes.every((r) => r.statusConceptId === CONCEPTS.STATE_ACTIVE)).toBe(true);
+    expect(
+      routes.every((r) => r.statusConceptId === CONCEPTS.STATE_ACTIVE),
+    ).toBe(true);
     const second = await service.run();
-    expect(second).toEqual({ surfaces: 0, routes: 0, updated: 0, deprecated: 0 });
+    expect(second).toEqual({
+      surfaces: 0,
+      routes: 0,
+      updated: 0,
+      deprecated: 0,
+    });
     expect(routes).toHaveLength(parts.length);
   });
 
@@ -80,9 +89,21 @@ describe('FrontendRoutesSeedService (H2.S1.M2)', () => {
       updated: 1,
       deprecated: 1,
     });
-    expect(routes.filter((r) => r.statusConceptId === RM.ROUTE_DEPRECATED)).toHaveLength(1);
-    expect(await service.run(dropped)).toEqual({ surfaces: 0, routes: 0, updated: 0, deprecated: 0 });
-    expect(await service.run(changed)).toEqual({ surfaces: 0, routes: 0, updated: 1, deprecated: 0 });
+    expect(
+      routes.filter((r) => r.statusConceptId === RM.ROUTE_DEPRECATED),
+    ).toHaveLength(1);
+    expect(await service.run(dropped)).toEqual({
+      surfaces: 0,
+      routes: 0,
+      updated: 0,
+      deprecated: 0,
+    });
+    expect(await service.run(changed)).toEqual({
+      surfaces: 0,
+      routes: 0,
+      updated: 1,
+      deprecated: 0,
+    });
   });
 
   it('rechaza un archivo con códigos duplicados o patrones sin barra, sin sembrar nada', async () => {
@@ -91,7 +112,9 @@ describe('FrontendRoutesSeedService (H2.S1.M2)', () => {
     await expect(
       service.run([{ ...parts[0], routePattern: 'sin-barra' }]),
     ).rejects.toThrow(/empezar con/);
-    await expect(service.run([{ ...parts[0], portal: 'X' as never }])).rejects.toThrow(/portal desconocido/);
+    await expect(
+      service.run([{ ...parts[0], portal: 'X' as never }]),
+    ).rejects.toThrow(/portal desconocido/);
     expect(routes).toHaveLength(0);
   });
 });

@@ -2,11 +2,20 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `audit` (parte 4/4).
- * 53 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 62 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const auditForeignKeys4: readonly ForeignKeyTuple[] = [
   // [tablaOrigen, columnaOrigen, schemaDestino, tablaDestino, columnaDestino]
+  ['service_reviews_history', 'service_review_id', 'community', 'service_reviews', 'id'],
+  ['shipments_history', 'change_reason_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['shipments_history', 'changed_by_user_id', 'iam', 'users', 'id'],
+  ['shipments_history', 'operation_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['shipments_history', 'shipment_id', 'tracking', 'shipments', 'id'],
+  ['social_posts_history', 'change_reason_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['social_posts_history', 'changed_by_user_id', 'iam', 'users', 'id'],
+  ['social_posts_history', 'operation_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['social_posts_history', 'social_post_id', 'community', 'social_posts', 'id'],
   ['space_tariffs_history', 'change_reason_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['space_tariffs_history', 'changed_by_user_id', 'iam', 'users', 'id'],
   ['space_tariffs_history', 'operation_concept_id', 'terminology', 'catalog_concepts', 'id'],

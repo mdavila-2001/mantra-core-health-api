@@ -64,17 +64,38 @@ export const { seeds: TELEMETRY_CONCEPT_SEEDS, ids: TELE } =
     RATING_POOR: { code: 'POOR', display: 'Poor' },
     NAV_NAVIGATE: { code: 'NAVIGATE', display: 'Navigate' },
     // Clase de error del cliente (client_error_events.error_class_concept_id)
-    ERROR_CLASS_JS: { code: 'ERROR_CLASS_JS', display: 'Client JavaScript error' },
+    ERROR_CLASS_JS: {
+      code: 'ERROR_CLASS_JS',
+      display: 'Client JavaScript error',
+    },
     ERROR_CLASS_PROMISE: {
       code: 'ERROR_CLASS_PROMISE',
       display: 'Client unhandled promise rejection',
     },
-    ERROR_CLASS_HTTP: { code: 'ERROR_CLASS_HTTP', display: 'Client-observed HTTP failure' },
-    ERROR_CLASS_ROUTE: { code: 'ERROR_CLASS_ROUTE', display: 'Client route not found' },
-    ERROR_CLASS_CHUNK: { code: 'ERROR_CLASS_CHUNK', display: 'Client lazy chunk load failure' },
-    ERROR_CLASS_HYDRATION: { code: 'ERROR_CLASS_HYDRATION', display: 'Client hydration error' },
-    ERROR_CLASS_TEMPLATE: { code: 'ERROR_CLASS_TEMPLATE', display: 'Client template error' },
-    ERROR_CLASS_NATIVE: { code: 'ERROR_CLASS_NATIVE', display: 'Native (mobile) error' },
+    ERROR_CLASS_HTTP: {
+      code: 'ERROR_CLASS_HTTP',
+      display: 'Client-observed HTTP failure',
+    },
+    ERROR_CLASS_ROUTE: {
+      code: 'ERROR_CLASS_ROUTE',
+      display: 'Client route not found',
+    },
+    ERROR_CLASS_CHUNK: {
+      code: 'ERROR_CLASS_CHUNK',
+      display: 'Client lazy chunk load failure',
+    },
+    ERROR_CLASS_HYDRATION: {
+      code: 'ERROR_CLASS_HYDRATION',
+      display: 'Client hydration error',
+    },
+    ERROR_CLASS_TEMPLATE: {
+      code: 'ERROR_CLASS_TEMPLATE',
+      display: 'Client template error',
+    },
+    ERROR_CLASS_NATIVE: {
+      code: 'ERROR_CLASS_NATIVE',
+      display: 'Native (mobile) error',
+    },
     // Estado de un esquema de evento reemplazado por una versión nueva: sigue
     // existiendo (sus filas viejas lo referencian) pero ya no acepta eventos.
     SCHEMA_DEPRECATED: { code: 'DEPRECATED', display: 'Schema deprecated' },

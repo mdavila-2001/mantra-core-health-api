@@ -261,7 +261,7 @@ payouts           -> importe derivado de los ítems, neto de comisiones
 reconciliation    -> registros del proveedor vs ledger; descuadres abren excepción
 ```
 
-## Reglas de negocio
+## Business rules
 
 - **Idempotencia del intent**: el servicio consulta por tenant y clave antes de crear. El índice
   versionado actual es global sobre `idempotency_key`, así que no es una idempotencia por
@@ -276,13 +276,13 @@ reconciliation    -> registros del proveedor vs ledger; descuadres abren excepci
 - **Payout derivado**: el importe sale de los ítems menos comisiones, no del cliente.
 - **Conciliación sin autocorrección**: todo descuadre abre una excepción `open` para revisión.
 
-## Permisos
+## Permissions
 
 `PAYMENTS_ADMIN` en todos los endpoints; `CASHIER` además en creación de intent, checkout,
 procesamiento de transacción y solicitud de anulación. El callback del gateway es `@Public()`:
 no hay usuario detrás de un webhook.
 
-## Concurrencia
+## Concurrency
 
 `SELECT ... FOR UPDATE` sobre intent, transacción y deuda antes de mutarlos (el caso de uso lo
 exige). `row_version` da bloqueo optimista automático vía MikroORM. Las UNIQUE de
@@ -294,7 +294,7 @@ Todas las operaciones emiten Pino con `operation: 'payments.<área>.<acción>'`.
 identificadores y estados, nunca tokens de sesión, secretos del gateway ni datos del pagador.
 El token de checkout se devuelve una vez y solo se persiste su hash SHA-256.
 
-## Pruebas
+## Tests
 
 La pasada dirigida del 2026-10-05 ejecutó 7 suites y 104 tests con:
 `corepack yarn test src/modules/payments --runInBand --silent`. Son pruebas unitarias; faltan

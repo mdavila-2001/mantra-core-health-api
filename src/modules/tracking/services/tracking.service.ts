@@ -1194,7 +1194,9 @@ export class TrackingService {
     actor: AuthenticatedUser,
     tenantId: string,
   ): boolean {
-    if (actor.roles.includes('SUPERADMIN')) return true;
+    // El comodín de plataforma se mide en el tenant del envío: global en
+    // cualquiera; acotado en `scopedRoles`, sólo en el suyo (#1241).
+    if (roleAuthorizesInTenant(actor, 'SUPERADMIN', tenantId)) return true;
     return SHIPMENT_MANAGER_ROLES.some((role) =>
       roleAuthorizesInTenant(actor, role, tenantId),
     );

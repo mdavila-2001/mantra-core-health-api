@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `clinical_ext`.
- * 108 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 112 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const clinicalExtIndexes: readonly IndexTuple[] = [
@@ -30,6 +30,10 @@ export const clinicalExtIndexes: readonly IndexTuple[] = [
   ['care_teams', 'ix_care_teams_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['care_teams', 'ix_care_teams_tenant_id_status_concept_id', ['tenant_id', 'status_concept_id', 'updated_at desc'], false, 'btree'],
   ['care_teams', 'ix_care_teams_patient_profile_id_updated_at', ['tenant_id', 'patient_profile_id', 'updated_at desc'], false, 'btree'],
+  ['cds_rule_versions', 'uq_cds_rule_versions_rule_version', ['cds_rule_id', 'version_number'], true, 'btree'],
+  ['cds_rule_versions', 'ix_cds_rule_versions_severity_concept_id', ['severity_concept_id'], false, 'btree'],
+  ['cds_rule_versions', 'ix_cds_rule_versions_approved_by_user_id', ['approved_by_user_id'], false, 'btree'],
+  ['cds_rule_versions', 'ix_cds_rule_versions_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['cds_rules', 'uq_cds_rules_code', ['code'], true, 'btree'],
   ['cds_rules', 'ix_cds_rules_tenant_id', ['tenant_id'], false, 'btree'],
   ['cds_rules', 'ix_cds_rules_rule_type_concept_id', ['rule_type_concept_id'], false, 'btree'],

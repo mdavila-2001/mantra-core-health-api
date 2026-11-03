@@ -17,13 +17,13 @@ export class PractitionerAdmissionEvents {
   /**
    * Admisión a la que pertenece el evento.
    */
-  @Property({ fieldName: 'admission_id', type: 'uuid' }) // FK → profiles.practitioner_admissions
+  @Property({ fieldName: 'admission_id', type: 'uuid' }) // FK (destino no resuelto)
   admissionId!: string;
 
   /**
    * Qué ocurrió.
    */
-  @Property({ fieldName: 'event_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'event_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts (inferida)
   eventTypeConceptId!: string;
 
   /**
@@ -33,27 +33,19 @@ export class PractitionerAdmissionEvents {
     fieldName: 'from_status_concept_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → terminology.catalog_concepts
+  }) // FK → terminology.catalog_concepts (inferida)
   fromStatusConceptId?: string;
 
   /**
    * Estado de la admisión después del evento.
    */
-  @Property({
-    fieldName: 'to_status_concept_id',
-    type: 'uuid',
-    nullable: true,
-  }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'to_status_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts (inferida)
   toStatusConceptId?: string;
 
   /**
    * Clase de ficha a la que se refiere el evento.
    */
-  @Property({
-    fieldName: 'item_type_concept_id',
-    type: 'uuid',
-    nullable: true,
-  }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'item_type_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts (inferida)
   itemTypeConceptId?: string;
 
   /**
@@ -65,7 +57,7 @@ export class PractitionerAdmissionEvents {
   /**
    * Requisito del catálogo al que se refiere el evento.
    */
-  @Property({ fieldName: 'requirement_id', type: 'uuid', nullable: true }) // FK → profiles.admission_requirements
+  @Property({ fieldName: 'requirement_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
   requirementId?: string;
 
   /**
@@ -85,7 +77,7 @@ export class PractitionerAdmissionEvents {
     fieldName: 'reason_code_concept_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → terminology.catalog_concepts
+  }) // FK → terminology.catalog_concepts (inferida)
   reasonCodeConceptId?: string;
 
   /**
@@ -97,7 +89,7 @@ export class PractitionerAdmissionEvents {
   /**
    * Quién actuó (la cuenta de sistema en las acciones automáticas).
    */
-  @Property({ fieldName: 'actor_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'actor_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   actorUserId?: string;
 
   /**

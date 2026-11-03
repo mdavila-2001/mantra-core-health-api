@@ -206,9 +206,9 @@ export function matchTariffSpecialties(
  *
  * ## Lo que reutiliza del alta individual
  *
- * El alcance (`assertRegistrationCanRegister`: la administración en cualquier
- * práctica, un profesional sólo en su consultorio propio, 404 en cualquier
- * otra). El resultado de cada fila es el que daría `POST /billing/service-catalog`: `name` = nombre del
+ * El alcance (`assertRegistrationCanRegister`: la administración global en
+ * cualquier práctica y la acotada en las de sus tenants, un profesional sólo en
+ * su consultorio propio, 404 en cualquier otra). El resultado de cada fila es el que daría `POST /billing/service-catalog`: `name` = nombre del
  * procedimiento, `code` = código del arancel, `serviceConceptId` = concepto
  * del arancel (por donde cruzan seguros y reembolsos), `defaultPrice` = precio de
  * referencia, activo. Como en el alta individual, no se declara moneda: el

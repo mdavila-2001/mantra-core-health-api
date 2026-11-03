@@ -87,7 +87,7 @@ INSTANCIAS
   instances/sweep-timeouts > vencidas → ESCALATED (instancia y tareas), SKIP LOCKED
 ```
 
-## Reglas de negocio
+## Business rules
 
 - **La definición nace en borrador.** Una máquina recién declarada no tiene estados ni transiciones:
   activarla permitiría disparar comandos contra un grafo vacío y dejar al agregado en un estado del
@@ -155,7 +155,7 @@ observable —evaluar en orden y devolver el `failure_code` estable— aunque no
 
 Cualquier otra forma —u otro tipo de guarda— **falla cerrado**.
 
-## Permisos
+## Permissions
 
 `WORKFLOW_ARCHITECT` y `GOVERNANCE_ADMIN` definen y publican. Los actores de dominio (`CLINICIAN`,
 `BILLING_AGENT`, `SCHEDULER`) disparan transiciones, crean instancias y completan tareas. `SYSTEM`
@@ -164,7 +164,7 @@ historial. `PLATFORM_ADMIN` cubre todo.
 
 Ninguna ruta es pública.
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE` sobre la definición al declarar estados/transiciones y al publicar, sobre la versión
 activa que se retira, sobre el agregado antes de moverlo, sobre la instancia y sobre la tarea.
@@ -179,7 +179,7 @@ lleva `and row_version = ?` y cero filas afectadas se traduce en `409`.
 vencimiento —los tres momentos en que algo no salió como se esperaba—. No se loguean expresiones de
 guarda ni el contenido de `payloadJson`.
 
-## Pruebas
+## Tests
 
 `corepack yarn test src/modules/workflow --runInBand --silent` — 5 suites y 87 pruebas
 aprobadas durante la revisión.

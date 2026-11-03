@@ -1,3 +1,5 @@
+export * from './affiliation_invitation_uses.entity';
+export * from './affiliation_invitations.entity';
 export * from './branch_memberships.entity';
 export * from './branches.entity';
 export * from './tenant_affiliation_documents.entity';

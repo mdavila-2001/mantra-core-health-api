@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `clinical_ext`.
- * 96 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 100 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const clinicalExtForeignKeys: readonly ForeignKeyTuple[] = [
@@ -27,6 +27,10 @@ export const clinicalExtForeignKeys: readonly ForeignKeyTuple[] = [
   ['care_teams', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['care_teams', 'tenant_id', 'directory', 'tenants', 'id'],
   ['care_teams', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['cds_rule_versions', 'approved_by_user_id', 'iam', 'users', 'id'],
+  ['cds_rule_versions', 'cds_rule_id', 'clinical_ext', 'cds_rules', 'id'],
+  ['cds_rule_versions', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['cds_rule_versions', 'severity_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['cds_rules', 'created_by_user_id', 'iam', 'users', 'id'],
   ['cds_rules', 'rule_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['cds_rules', 'severity_concept_id', 'terminology', 'catalog_concepts', 'id'],

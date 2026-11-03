@@ -23,6 +23,7 @@ import {
 import {
   Audited,
   CurrentUser,
+  Roles,
   requireTenantId,
   type AuthenticatedUser,
 } from '../../../common';
@@ -180,13 +181,18 @@ export class SiteInfrastructureController {
     );
   }
 
-  /** Verificar el código SNIS (sólo plataforma). */
+  /**
+   * Verificar el código SNIS (sólo plataforma). `@Roles` declara la misma regla
+   * que `SiteEstablishmentService.verifySnis` sigue comprobando (SECURITY_ADMIN
+   * o SUPERADMIN): el resto de esta clase autoriza por membresía, esta ruta no.
+   */
   @Audited({
     action: 'SITE_SNIS_VERIFIED',
     entity: 'practice_site',
     entityId: 'param:siteId',
   })
   @Post(':siteId/regulatory/verify-snis')
+  @Roles('SECURITY_ADMIN', 'SUPERADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Verificar el código SNIS del establecimiento (plataforma)',

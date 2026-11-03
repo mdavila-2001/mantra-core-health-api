@@ -732,9 +732,9 @@ export class SupportLinksRepository {
    * Crea un vínculo de lugar `PENDING`.
    *
    * Con SQL y no con la entidad: el modelo v4.2.79 agrega
-   * `organization_user_assignments.tenant_id` (NOT NULL) y la entidad todavía
-   * no lo mapea. Se escribe cuando la columna existe, así el alta funciona con
-   * el DDL de hoy y con el que viene.
+   * `organization_user_assignments.tenant_id` (NOT NULL). La entidad ya lo
+   * mapea; este alta lo escribe solo cuando la columna existe, así funciona
+   * también contra un DDL anterior a v4.2.79.
    */
   async createLocationLink(
     em: EntityManager,

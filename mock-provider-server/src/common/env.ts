@@ -1,3 +1,8 @@
+import {
+  parsePharmacyKeys,
+  type PharmacyKeys,
+} from '../pharmacy-erp/pharmacy-keys';
+
 /**
  * Entorno del emulador. Sin `@nestjs/config`/Joi como en el backend real a
  * propósito: este servicio no tiene esquema de negocio que proteger, así que
@@ -27,6 +32,13 @@ export interface MockProviderEnv {
    * tengan que nombrarla.
    */
   pharmacyErpFailureRate?: number;
+  /**
+   * Clave de cada farmacia simulada (código → clave) para los formatos por
+   * farmacia: Estándar ALOVIDA y cadena simulada. Ver `pharmacy-erp/pharmacy-keys.ts`.
+   * Opcional para que los dobles de entorno de las otras pruebas no tengan que
+   * nombrarla.
+   */
+  pharmacyKeys?: PharmacyKeys;
 }
 
 /** Lee y acota el entorno del proceso. Tasas fuera de [0,1] se recortan. */
@@ -54,6 +66,10 @@ export function loadEnv(): MockProviderEnv {
       0,
     ),
     pharmacyErpFailureRate: clampRate(process.env.PHARMACY_ERP_FAILURE_RATE, 0),
+    pharmacyKeys: parsePharmacyKeys(
+      process.env.PHARMACY_ERP_PHARMACY_KEYS,
+      process.env.PHARMACY_ERP_PHARMACY_KEYS_FILE,
+    ),
   };
 }
 

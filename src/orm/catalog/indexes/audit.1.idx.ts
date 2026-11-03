@@ -72,6 +72,8 @@ export const auditIndexes1: readonly IndexTuple[] = [
   ['audit_log', 'ix_audit_log_branch_id', ['branch_id'], false, 'btree'],
   ['audit_log', 'ix_audit_log_outcome_concept_id', ['outcome_concept_id'], false, 'btree'],
   ['audit_log', 'ix_audit_log_device_id', ['device_id'], false, 'btree'],
+  ['audit_log', 'ix_audit_log_session_id', ['session_id'], false, 'btree'],
+  ['audit_log', 'ix_audit_log_correlation_id', ['correlation_id'], false, 'btree', 'correlation_id IS NOT NULL'],
   ['audit_log', 'ix_audit_log_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
   ['audit_log', 'ix_audit_log_tenant_id_recorded_at', ['tenant_id', 'recorded_at desc'], false, 'btree'],
   ['audit_log', 'brin_audit_log_recorded_at', ['recorded_at'], false, 'brin'],
@@ -185,6 +187,4 @@ export const auditIndexes1: readonly IndexTuple[] = [
   ['consents_history', 'ix_consents_history_operation_concept_id', ['operation_concept_id'], false, 'btree'],
   ['consents_history', 'ix_consents_history_changed_by_user_id', ['changed_by_user_id'], false, 'btree'],
   ['consents_history', 'ix_consents_history_change_reason_concept_id', ['change_reason_concept_id'], false, 'btree'],
-  ['consents_history', 'brin_consents_history_recorded_at', ['recorded_at'], false, 'brin'],
-  ['contacts_history', 'ix_contacts_history_contacts_id', ['contacts_id'], false, 'btree'],
 ];

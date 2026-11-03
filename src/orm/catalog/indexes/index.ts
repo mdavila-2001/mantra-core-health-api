@@ -28,7 +28,8 @@ import { crmIndexes1 } from './crm.1.idx';
 import { crmIndexes2 } from './crm.2.idx';
 import { crossStoreConsistencyIndexes } from './cross_store_consistency.idx';
 import { dataCatalogIndexes } from './data_catalog.idx';
-import { delegatedAccessIndexes } from './delegated_access.idx';
+import { delegatedAccessIndexes1 } from './delegated_access.1.idx';
+import { delegatedAccessIndexes2 } from './delegated_access.2.idx';
 import { diagnosticUnitsIndexes } from './diagnostic_units.idx';
 import { diagnosticsIndexes1 } from './diagnostics.1.idx';
 import { diagnosticsIndexes2 } from './diagnostics.2.idx';
@@ -66,7 +67,8 @@ import { pharmacyInventoryIndexes } from './pharmacy_inventory.idx';
 import { platformOpsIndexes1 } from './platform_ops.1.idx';
 import { platformOpsIndexes2 } from './platform_ops.2.idx';
 import { polyglotStorageIndexes } from './polyglot_storage.idx';
-import { practiceIndexes } from './practice.idx';
+import { practiceIndexes1 } from './practice.1.idx';
+import { practiceIndexes2 } from './practice.2.idx';
 import { proceduresPerioperativeIndexes1 } from './procedures_perioperative.1.idx';
 import { proceduresPerioperativeIndexes2 } from './procedures_perioperative.2.idx';
 import { profilesIndexes } from './profiles.idx';
@@ -108,7 +110,7 @@ export const indexCatalog: Readonly<Record<string, readonly (readonly IndexTuple
   crm: [crmIndexes1, crmIndexes2],
   cross_store_consistency: [crossStoreConsistencyIndexes],
   data_catalog: [dataCatalogIndexes],
-  delegated_access: [delegatedAccessIndexes],
+  delegated_access: [delegatedAccessIndexes1, delegatedAccessIndexes2],
   diagnostic_units: [diagnosticUnitsIndexes],
   diagnostics: [diagnosticsIndexes1, diagnosticsIndexes2],
   directory: [directoryIndexes],
@@ -136,7 +138,7 @@ export const indexCatalog: Readonly<Record<string, readonly (readonly IndexTuple
   pharmacy_inventory: [pharmacyInventoryIndexes],
   platform_ops: [platformOpsIndexes1, platformOpsIndexes2],
   polyglot_storage: [polyglotStorageIndexes],
-  practice: [practiceIndexes],
+  practice: [practiceIndexes1, practiceIndexes2],
   procedures_perioperative: [proceduresPerioperativeIndexes1, proceduresPerioperativeIndexes2],
   profiles: [profilesIndexes],
   promotions: [promotionsIndexes],

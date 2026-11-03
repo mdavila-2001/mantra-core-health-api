@@ -143,4 +143,25 @@ export class BookingPolicies {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  /**
+   * Valor de no show fee percentage mantenido por la instancia.
+   */
+  @Property({
+    fieldName: 'no_show_fee_percentage',
+    columnType: 'numeric',
+    nullable: true,
+  })
+  noShowFeePercentage?: string;
+
+  /**
+   * Valor de no show retains deposit mantenido por la instancia.
+   */
+  @Property({
+    fieldName: 'no_show_retains_deposit',
+    type: 'boolean',
+    nullable: true,
+    default: false,
+  })
+  noShowRetainsDeposit?: boolean;
 }

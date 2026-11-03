@@ -309,6 +309,33 @@ describe('PracticeWorkforceService', () => {
       expect(d.rolesRepo.findByPracticePage).not.toHaveBeenCalled();
     });
 
+    it('una práctica de otro tenant responde 404 antes de mirar quién administra (CV-14)', async () => {
+      const d = build();
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'p1',
+        tenantId: TENANT_B,
+      });
+      await expect(
+        d.service.listPracticeAssignments('p1', actor, {}),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      // Ni 403 ni lista: el código de estado no confirma que la práctica ajena exista.
+      expect(
+        d.administration.assertCanAdministerPractice,
+      ).not.toHaveBeenCalled();
+      expect(d.rolesRepo.findByPracticePage).not.toHaveBeenCalled();
+    });
+
+    it('sin tenant en el contexto (plataforma sin cabecera) decide sólo A-6', async () => {
+      const d = build();
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'p1',
+        tenantId: TENANT_B,
+      });
+      await d.raw.listPracticeAssignments('p1', actor, {});
+      expect(d.practicesRepo.findById).not.toHaveBeenCalled();
+      expect(d.administration.assertCanAdministerPractice).toHaveBeenCalled();
+    });
+
     it('una práctica inexistente responde 404', async () => {
       const d = build();
       d.administration.assertCanAdministerPractice.mockRejectedValue(

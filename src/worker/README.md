@@ -44,7 +44,7 @@ El mapa refleja archivos y scripts de esta rama; no significa que los 25 proceso
 - `time_series` (compresión, retención, refresco de rollups): operan sobre tablas compartidas, así que sus métricas y eventos de outbox se atribuyen al sujeto de plataforma `TS_ADMIN_TENANT_ID` (UUID; por defecto el tenant `DEFAULT` del seed), no a un tenant escondido en el job. Un valor que no es UUID aborta el arranque.
 - `worker.env.ts`: esquema Joi y defaults de URL de API, plazos, salud, reintentos, concurrencia y proveedores. Los esquemas específicos se agregan desde el entrypoint cuando corresponde.
 
-## Pruebas
+## Tests
 
 ```bash
 corepack yarn test --runInBand --silent src/worker

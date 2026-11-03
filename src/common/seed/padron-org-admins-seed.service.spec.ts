@@ -21,10 +21,7 @@ const OPEN: DemoGateEnv = {
 interface Existing {
   credentials?: string[];
   memberships?: boolean;
-  /**
-   * Organizaciones con un administrador de una carga anterior: su membresía
-   * ADMIN activa y el correo con que ese usuario entra.
-   */
+  /** Organizations with pre-existing legacy administrators: active ADMIN membership and login email. */
   legacyAdmins?: { tenantIds: string[]; email: string };
 }
 
@@ -41,7 +38,7 @@ function build(existing: Existing = {}) {
       if (entity === TenantMemberships) {
         return Promise.resolve(existing.memberships ? { id: 'm' } : null);
       }
-      // El actor semilla.
+      // Seed actor mock.
       return Promise.resolve({ id: SEED_ACTOR_ID });
     }),
     find: jest.fn((entity: unknown, where: any) => {

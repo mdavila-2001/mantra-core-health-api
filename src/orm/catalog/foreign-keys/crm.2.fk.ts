@@ -2,11 +2,16 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `crm` (parte 2/2).
- * 47 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 52 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const crmForeignKeys2: readonly ForeignKeyTuple[] = [
   // [tablaOrigen, columnaOrigen, schemaDestino, tablaDestino, columnaDestino]
+  ['opportunities', 'lost_reason_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['opportunities', 'owner_user_id', 'iam', 'users', 'id'],
+  ['opportunities', 'pipeline_id', 'crm', 'pipelines', 'id'],
+  ['opportunities', 'primary_contact_id', 'crm', 'contacts', 'id'],
+  ['opportunities', 'sales_order_id', 'erp', 'sales_orders', 'id'],
   ['opportunities', 'stage_id', 'crm', 'pipeline_stages', 'id'],
   ['opportunities', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['opportunities', 'tenant_id', 'directory', 'tenants', 'id'],

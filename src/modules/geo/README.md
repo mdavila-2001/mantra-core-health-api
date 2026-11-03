@@ -57,7 +57,7 @@ Entidades (`tableName`, 6 de 6 archivos `*.entity.ts`): `geofence_events`, `geof
 - `geofence_events` — cruces append-only (ENTER/EXIT).
 - `trips` — viajes de una sesión (IN_PROGRESS/COMPLETED).
 
-## Reglas de negocio
+## Business rules
 
 - **Alta única**: no se permite un segundo sujeto ACTIVE con el mismo
   `(tenant, subject_type, subject_id)` → 409.

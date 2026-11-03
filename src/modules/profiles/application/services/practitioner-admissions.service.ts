@@ -7,6 +7,7 @@ import {
   ConcurrencyConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  roleAuthorizesInTenant,
   touch,
   type AuthenticatedUser,
 } from '../../../../common';
@@ -1401,18 +1402,25 @@ export class PractitionerAdmissionsService {
    * `SECURITY_ADMIN` hereda ambos niveles sólo si `ADMISSIONS_SECURITY_ADMIN_INHERITS`
    * (por defecto no en producción): allí los roles `ADMISSIONS_*` se asignan
    * explícitamente.
+   *
+   * La admisión es de la plataforma: `practitioner_admissions` no tiene
+   * tenant y los roles `ADMISSIONS_*` se siembran con ámbito `GLOBAL`. Por eso
+   * cada rol sólo cuenta si es **global** (`roleAuthorizesInTenant` sin
+   * tenant, #1241): uno acotado en `scopedRoles` a una organización no
+   * verifica ni habilita a ningún profesional.
    */
   private roleFor(
     user: AuthenticatedUser,
     level: 'REVIEWER' | 'APPROVER',
   ): string {
-    const roles = user.roles;
-    if (roles.includes('SUPERADMIN')) return 'SUPERADMIN';
+    const holdsGlobal = (role: string) =>
+      roleAuthorizesInTenant(user, role, undefined);
+    if (holdsGlobal('SUPERADMIN')) return 'SUPERADMIN';
     const explicit =
       level === 'REVIEWER' ? 'ADMISSIONS_REVIEWER' : 'ADMISSIONS_APPROVER';
-    if (roles.includes(explicit)) return explicit;
+    if (holdsGlobal(explicit)) return explicit;
     if (
-      roles.includes('SECURITY_ADMIN') &&
+      holdsGlobal('SECURITY_ADMIN') &&
       loadAdmissionsConfig().securityAdminInherits
     ) {
       return 'SECURITY_ADMIN';

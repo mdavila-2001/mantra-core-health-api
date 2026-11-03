@@ -7,6 +7,7 @@ import {
   type TraceSpan,
 } from '../../../../observability';
 import * as argon2 from 'argon2';
+import { SessionValidator } from '../../../../common/auth/session-validator';
 import { verify as verifyTotp } from 'otplib';
 import {
   CONCEPTS,
@@ -35,6 +36,7 @@ import {
   PurgeResultDto,
 } from '../../presentation/dto';
 import { conceptIdsToRoleCodes } from './role-mapping';
+import { enterAuthBoundaryContext } from './auth-boundary-context';
 import {
   ACCOUNT_PROFILE_IDS_PORT,
   type AccountProfileIdsPort,
@@ -123,6 +125,7 @@ export class IamAuthService {
     private readonly tenantClaims: TenantClaimsPort,
     private readonly logger: PinoLogger,
     private readonly tracing: TracingService,
+    private readonly sessionValidator: SessionValidator,
     private readonly mfaRepo?: MfaFactorsRepository,
   ) {
     this.logger.setContext(IamAuthService.name);
@@ -400,6 +403,7 @@ export class IamAuthService {
     await this.assertMfaChallenge(readEm, user.id, dto.mfaCode, span, ip);
 
     return this.em.transactional(async (tx) => {
+      await enterAuthBoundaryContext(tx);
       const activeRoles = await this.rolesRepo.findActiveForUser(tx, user.id);
       const { roles, scopedRoles } = await this.mergeRoleCodes(
         tx,
@@ -546,6 +550,7 @@ export class IamAuthService {
     // la política de reuso, igual que un token repetido más tarde.
     const outcome = await this.em.transactional(
       async (tx): Promise<RefreshOutcome> => {
+        await enterAuthBoundaryContext(tx);
         const rt = await this.refreshRepo.findByHashForUpdate(tx, tokenHash);
         if (!rt) return { kind: 'invalid' };
 
@@ -711,7 +716,7 @@ export class IamAuthService {
     // tokens de sistema que firman los workers.
     if (!actor.sessionId) return { revoked: false };
 
-    return this.em.transactional(async (tx) => {
+    const result = await this.em.transactional(async (tx) => {
       const session = await this.sessionsRepo.findActiveByTokenId(
         tx,
         actor.sessionId as string,
@@ -735,6 +740,13 @@ export class IamAuthService {
 
       return { revoked: true };
     });
+    if (result.revoked && actor.sessionId) {
+      await this.sessionValidator.revokeSession(
+        actor.sessionId,
+        actor.tokenExpiresAt,
+      );
+    }
+    return result;
   }
 
   /** UC-01-11: expira sesiones y refresh tokens ya vencidos. */
@@ -786,6 +798,9 @@ export class IamAuthService {
     ip: string | undefined,
   ): Promise<void> {
     await this.em.transactional(async (tx) => {
+      // `iam.account_lockouts` tiene RLS forzado: sin esto el bloqueo no se ve
+      // ni se puede insertar, y el intento que alcanza el umbral daba 500.
+      await enterAuthBoundaryContext(tx);
       this.eventsRepo.record(tx, {
         eventTypeConceptId: CONCEPTS.SEC_LOGIN_FAILED,
         outcomeConceptId: CONCEPTS.OUTCOME_FAILURE,

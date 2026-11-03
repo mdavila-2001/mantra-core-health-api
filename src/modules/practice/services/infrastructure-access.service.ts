@@ -258,8 +258,14 @@ export class InfrastructureAccessService {
     site: PracticeSites,
   ): Promise<ActorScope> {
     const base: InfraRole[] = [];
-    const roles = actor.roles ?? [];
-    if (PLATFORM_ROLES.some((r) => roles.includes(r))) base.push('SUPERADMIN');
+    // Plataforma sólo donde autoriza: global en cualquier sede; acotada en
+    // `scopedRoles`, sólo en las de su tenant (#1241).
+    if (
+      PLATFORM_ROLES.some((r) =>
+        roleAuthorizesInTenant(actor, r, site.tenantId),
+      )
+    )
+      base.push('SUPERADMIN');
     const globals: InfraRole[] = [];
     for (const [global, mapped] of Object.entries(GLOBAL_ROLE_MAP)) {
       // Un rol con ámbito (MCH-001) sólo vale en el tenant que lo indexa.

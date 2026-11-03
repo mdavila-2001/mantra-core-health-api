@@ -109,5 +109,25 @@ describe('ExchangeRateService (UC-16-14)', () => {
       );
       expect(d.ratesRepo.create).not.toHaveBeenCalled();
     });
+
+    it('un SUPERADMIN acotado a un tenant no la escribe; el global sí (#1241)', async () => {
+      const denied = build();
+      await expect(
+        denied.service.registerRate(dto, {
+          id: 'sa-scoped',
+          roles: ['SUPERADMIN'],
+          scopedRoles: { 'tenant-1': ['SUPERADMIN'] },
+        } as any),
+      ).rejects.toBeInstanceOf(InsufficientRoleException);
+      expect(denied.ratesRepo.create).not.toHaveBeenCalled();
+
+      const d = build();
+      d.ratesRepo.findForPair.mockResolvedValue(null);
+      const res = await d.service.registerRate(dto, {
+        id: 'sa-g',
+        roles: ['SUPERADMIN'],
+      } as any);
+      expect(res.created).toBe(true);
+    });
   });
 });

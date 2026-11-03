@@ -11,7 +11,7 @@ Las dos piezas cubren los dos extremos del mismo problema —**que un proceso
 termine de forma observable**—: `installProcessGuards` para la muerte imprevista
 y `installShutdownWatchdog` para la prevista que se atasca.
 
-## Contenido
+## Contents
 
 | Archivo | Responsabilidad |
 | --- | --- |
@@ -51,7 +51,7 @@ En los workers se complementa con
 [`WorkerLifecycleService`](../../worker/worker-lifecycle.service.ts), que drena
 los ticks en vuelo antes de que NestJS cierre las conexiones.
 
-## Criterios de mantenimiento
+## Maintenance guidelines
 
 - El plazo de apagado debe quedar **por debajo** del plazo de gracia del
   orquestador (`stop_grace_period` en `docker-compose.yml`,

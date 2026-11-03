@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
 import { ClinicalModule } from '../clinical/clinical.module';
+import { IamModule } from '../iam/iam.module';
 import {
   OrgUserAssignmentsController,
   DelegatedPermissionSetsController,
@@ -13,6 +14,7 @@ import {
   PrescriptionSharesPublicController,
   SupportStaffController,
   PractitionerSupportController,
+  OrgSupportStaffProvisioningController,
 } from './controllers';
 import {
   OrgUserAssignmentsService,
@@ -23,6 +25,7 @@ import {
   DelegationScopeService,
   PrescriptionSharesService,
   SupportStaffService,
+  SupportStaffProvisioningService,
 } from './services';
 import {
   OrganizationUserAssignmentsRepository,
@@ -35,6 +38,7 @@ import {
   DelegationScopeRepository,
   SharedAccessLinksRepository,
   SupportLinksRepository,
+  SupportStaffProvisioningRepository,
 } from './repositories';
 
 /**
@@ -50,6 +54,7 @@ import {
     MikroOrmModule.forFeature(Object.values(entities)),
     ClinicalModule,
     MessagingModule,
+    IamModule,
   ],
   controllers: [
     OrgUserAssignmentsController,
@@ -61,6 +66,7 @@ import {
     PrescriptionSharesPublicController,
     SupportStaffController,
     PractitionerSupportController,
+    OrgSupportStaffProvisioningController,
   ],
   providers: [
     // Repositorios
@@ -74,6 +80,7 @@ import {
     DelegationScopeRepository,
     SharedAccessLinksRepository,
     SupportLinksRepository,
+    SupportStaffProvisioningRepository,
     // Servicios
     DelegationScopeService,
     OrgUserAssignmentsService,
@@ -83,8 +90,9 @@ import {
     DelegatedAccessEvaluationService,
     PrescriptionSharesService,
     SupportStaffService,
+    SupportStaffProvisioningService,
   ],
   // La farmacia abre el enlace con `openForPharmacy` (FAR-02).
-  exports: [PrescriptionSharesService],
+  exports: [PrescriptionSharesService, SupportStaffProvisioningService],
 })
 export class DelegatedAccessModule {}

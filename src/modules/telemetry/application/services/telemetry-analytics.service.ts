@@ -131,7 +131,11 @@ export class TelemetryAnalyticsService {
   private scopeView(scope: AnalyticsScope) {
     return scope.tenantId
       ? { level: 'tenant' as const, tenantId: scope.tenantId, minSample: null }
-      : { level: 'platform' as const, tenantId: null, minSample: scope.minSample ?? null };
+      : {
+          level: 'platform' as const,
+          tenantId: null,
+          minSample: scope.minSample ?? null,
+        };
   }
 
   /** `true` si el grupo es demasiado pequeño para mostrarse en alcance plataforma. */
@@ -173,18 +177,21 @@ export class TelemetryAnalyticsService {
     return {
       window: this.windowView(scope, query),
       scope: this.scopeView(scope),
-      totals: totalsHidden ? null : {
-        events: totals?.events ?? 0,
-        sessions: totals?.sessions ?? 0,
-        pseudonymousSubjects: totals?.subjects ?? 0,
-        pageViews: totals?.page_views ?? 0,
-        lastEventAt: iso(totals?.last_event_at),
-      },
+      totals: totalsHidden
+        ? null
+        : {
+            events: totals?.events ?? 0,
+            sessions: totals?.sessions ?? 0,
+            pseudonymousSubjects: totals?.subjects ?? 0,
+            pageViews: totals?.page_views ?? 0,
+            lastEventAt: iso(totals?.last_event_at),
+          },
       definitions: {
         sessions: 'session_id distintos con al menos un evento en la ventana',
         pseudonymousSubjects:
           'analytics_subject_id distintos: sujetos seudónimos con consentimiento, no usuarios únicos',
-        pageViews: "eventos con event_name = 'pagina_vista' (o el histórico 'page_view')",
+        pageViews:
+          "eventos con event_name = 'pagina_vista' (o el histórico 'page_view')",
       },
       topRoutes: keepRoutes.map(({ sample: _sample, ...row }) => row),
       topEvents: keepEvents.map((row) => ({
@@ -194,12 +201,19 @@ export class TelemetryAnalyticsService {
       })),
       notMeasured: [
         ...(totalsHidden
-          ? [{ metric: 'totals', reason: `Menos de ${scope.minSample} sujetos en toda la ventana: el total se suprime (alcance plataforma).` }]
+          ? [
+              {
+                metric: 'totals',
+                reason: `Menos de ${scope.minSample} sujetos en toda la ventana: el total se suprime (alcance plataforma).`,
+              },
+            ]
           : []),
         ...this.suppressedNote(
           scope,
           'ruta(s) o evento(s)',
-          topRoutes.length - keepRoutes.length + (topEvents.length - keepEvents.length),
+          topRoutes.length -
+            keepRoutes.length +
+            (topEvents.length - keepEvents.length),
         ),
       ],
     };
@@ -213,7 +227,9 @@ export class TelemetryAnalyticsService {
       scope: this.scopeView(scope),
       points: rows.map((row) => ({
         bucket: iso(row.bucket),
-        events: this.tooSmall(scope, Number(row.sample)) ? null : Number(row.events),
+        events: this.tooSmall(scope, Number(row.sample))
+          ? null
+          : Number(row.events),
         sessions: this.tooSmall(scope, Number(row.sample))
           ? null
           : Number(row.sessions),
@@ -270,9 +286,11 @@ export class TelemetryAnalyticsService {
           p50: this.tooSmall(scope, row.subjects) ? null : num(row.p50),
           p75: this.tooSmall(scope, row.subjects) ? null : num(row.p75),
           p95: this.tooSmall(scope, row.subjects) ? null : num(row.p95),
-          ratings: hiddenRatings.has(row.metric_concept_id) || this.tooSmall(scope, row.subjects)
-            ? null
-            : (ratingByMetric.get(row.metric_concept_id) ?? {}),
+          ratings:
+            hiddenRatings.has(row.metric_concept_id) ||
+            this.tooSmall(scope, row.subjects)
+              ? null
+              : (ratingByMetric.get(row.metric_concept_id) ?? {}),
           deprecated:
             metric === 'FID' ? 'Sustituida por INP en Core Web Vitals' : null,
         };

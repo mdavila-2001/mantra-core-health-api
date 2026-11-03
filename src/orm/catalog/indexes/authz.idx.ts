@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `authz`.
- * 101 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 106 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const authzIndexes: readonly IndexTuple[] = [
@@ -53,6 +53,11 @@ export const authzIndexes: readonly IndexTuple[] = [
   ['permissions', 'ix_permissions_state_concept_id', ['state_concept_id'], false, 'btree'],
   ['permissions', 'ix_permissions_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['permissions', 'ix_permissions_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['permissions', 'ix_permissions_sensitivity_concept_id', ['sensitivity_concept_id'], false, 'btree'],
+  ['permissions', 'ix_permissions_approval_mode_concept_id', ['approval_mode_concept_id'], false, 'btree'],
+  ['permissions', 'ix_permissions_purpose_of_use_concept_id', ['purpose_of_use_concept_id'], false, 'btree'],
+  ['permissions', 'ix_permissions_legal_basis_concept_id', ['legal_basis_concept_id'], false, 'btree'],
+  ['permissions', 'ix_permissions_support_assignable', ['support_assignable'], false, 'btree', 'support_assignable'],
   ['resource_scope_grants', 'ix_resource_scope_grants_subject_type_concept_id', ['subject_type_concept_id'], false, 'btree'],
   ['resource_scope_grants', 'ix_resource_scope_grants_permission_id', ['permission_id'], false, 'btree'],
   ['resource_scope_grants', 'ix_resource_scope_grants_resource_type_concept_id', ['resource_type_concept_id'], false, 'btree'],

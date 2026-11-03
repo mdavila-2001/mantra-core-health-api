@@ -8,14 +8,12 @@ import { DIR } from '../../modules/directory/directory.concepts';
 import { InsuranceCarriers } from '../../modules/insurance/entities';
 import { IamUsersService } from '../../modules/iam/application/services';
 import { deterministicId } from '../constants/concepts';
+import { SEED_ACTOR_ID, ensureSeedActor } from './seed-actor';
 import { createdBy } from '../persistence/audit-fields';
 import {
   INSURER_ACCOUNTS,
   type InsurerAccountSeed,
 } from './insurer-accounts.catalog';
-
-/** Mismo actor de arranque que usan los demás seeds de cuentas. */
-const SEED_ACTOR_ID = deterministicId('seed:user:bootstrap-actor');
 
 /** Lo que el seed dejó hecho. */
 export interface InsurerAccountsResult {
@@ -77,6 +75,9 @@ export class InsurerAccountsSeedService {
     }
 
     const em = this.orm.em.fork();
+    // Toda cuenta y membresía que siembra cita al actor por `created_by_user_id`
+    // (FK a `iam.users`): en una base nueva tiene que existir antes (api#1230).
+    await ensureSeedActor(em);
     let created = 0;
     for (const account of INSURER_ACCOUNTS) {
       if (await this.ensureAccount(em, account, password)) created += 1;

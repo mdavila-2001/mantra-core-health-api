@@ -12,7 +12,7 @@ import { AuthzPlatformPermissionsSeedService } from '../../src/common/seed/authz
 import { PILOT_PERMISSION_DEFINITIONS } from '../../src/modules/authz/authz.permission-pilot.seed';
 import { clinicalRoleId } from '../../src/modules/authz/authz.seed';
 import {
-  isDisposableDatabaseName,
+  assertPermanentResidueTarget,
   resolveResetTarget,
 } from './disposable-database';
 
@@ -34,8 +34,7 @@ describe('IAM global → PDP y semillas del piloto (PostgreSQL)', () => {
 
   beforeAll(async () => {
     const target = resolveResetTarget(process.env);
-    if (!isDisposableDatabaseName(target.database))
-      throw new Error('Se requiere una base descartable');
+    assertPermanentResidueTarget(target, process.env);
     orm = await MikroORM.init({
       host: target.host,
       port: target.port,

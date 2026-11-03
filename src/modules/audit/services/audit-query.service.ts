@@ -338,15 +338,20 @@ function conceptoDeResultado(resultado: 'SUCCESS' | 'FAILURE'): string {
     : CONCEPTS.OUTCOME_FAILURE;
 }
 
-/** Rango pedido; sin él, la ventana por omisión. Un rango invertido es un error del cliente. */
+/**
+ * Rango pedido; sin `from`, la ventana por omisión de {@link AUDIT_DEFAULT_WINDOW_DAYS} días que
+ * termina en `to` (o en `now` si tampoco viene `to`), igual que la vista agregada. Un rango
+ * invertido es un error del cliente.
+ */
 function rango(
   q: { from?: string; to?: string },
   now: Date,
 ): { from: Date; to?: Date } {
+  const to = q.to ? new Date(q.to) : undefined;
+  const fin = to ?? now;
   const from = q.from
     ? new Date(q.from)
-    : new Date(now.getTime() - AUDIT_DEFAULT_WINDOW_DAYS * MS_PER_DAY);
-  const to = q.to ? new Date(q.to) : undefined;
+    : new Date(fin.getTime() - AUDIT_DEFAULT_WINDOW_DAYS * MS_PER_DAY);
   if (to && to <= from)
     throw new BadRequestException('«to» debe ser posterior a «from»');
   return { from, to };

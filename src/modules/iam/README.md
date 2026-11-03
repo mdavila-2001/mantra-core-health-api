@@ -174,7 +174,7 @@ each operation. Secrets, password hashes, raw tokens and PHI are never logged.
 - `services/` — business logic, transaction owners.
 - `controllers/` — thin HTTP layer.
 
-## Pruebas
+## Tests
 
 Ejecutar `corepack yarn test src/modules/iam --runInBand --silent`. El 2026-10-05
 pasaron 22 suites y 359 pruebas. Son principalmente unitarias con repositorios y

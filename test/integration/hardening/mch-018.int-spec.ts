@@ -18,7 +18,14 @@ import { ACCT } from '../../../src/modules/accounting/accounting.concepts';
 describe('MCH-018 · sin reglas no hay auto-clasificación (integración)', () => {
   let ctx: TestContext;
   const http = () => request(ctx.app.getHttpServer());
-  const auth = () => bearer(ctx.adminToken);
+  // Desde c38d2930f (ACC-01, #734) las escrituras contables toman el tenant del
+  // contexto (`AccountingScopeService` → `requireTenantId()`). El SUPERADMIN sin
+  // `X-Tenant-Id` opera en modo sistema, sin tenant, y la escritura da 422
+  // TENANT_REQUIRED: toda la suite trabaja sobre una práctica del tenant semilla.
+  const auth = () => ({
+    ...bearer(ctx.adminToken),
+    'X-Tenant-Id': SEED.tenantId,
+  });
   const sufijo = randomUUID().slice(0, 8);
   const anio = new Date().getFullYear();
 

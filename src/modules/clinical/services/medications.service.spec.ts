@@ -263,6 +263,24 @@ describe('MedicationsService', () => {
           'hp-otro',
         );
       });
+
+      it('SUPERADMIN acotado (al tenant custodio o a otro) no prescribe por otro profesional (#1241)', async () => {
+        for (const tenantId of ['t1', 't-otra']) {
+          const d = build();
+          await expect(
+            d.service.prescribe(
+              { ...registration, prescriberProfileId: 'hp-otro' },
+              {
+                id: 'root-scoped',
+                roles: ['SUPERADMIN'],
+                practitionerProfileId: 'hp-1',
+                scopedRoles: { [tenantId]: ['SUPERADMIN'] },
+              } as any,
+            ),
+          ).rejects.toBeInstanceOf(ForbiddenException);
+          expect(d.requestsRepo.create).not.toHaveBeenCalled();
+        }
+      });
     });
 
     // P24 / CL-03 — «otro motivo» escrito a mano.
@@ -1004,6 +1022,27 @@ describe('MedicationsService · MCH-007', () => {
     );
     await d.service.sign('mr1', author);
     expect((request as any).signedByUserId).toBe('user-autor');
+  });
+
+  it('SUPERADMIN acotado no firma por otro profesional; el global sí (#1241)', async () => {
+    for (const tenantId of ['t1', 't-otra']) {
+      const d = build();
+      const request = draft();
+      d.requestsRepo.findById.mockResolvedValue(request);
+      await expect(
+        d.service.sign('mr1', {
+          id: 'root-scoped',
+          roles: ['SUPERADMIN'],
+          scopedRoles: { [tenantId]: ['SUPERADMIN'] },
+        } as any),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect((request as any).signedAt).toBeUndefined();
+    }
+    const d = build();
+    const request = draft();
+    d.requestsRepo.findById.mockResolvedValue(request);
+    await d.service.sign('mr1', { id: 'root', roles: ['SUPERADMIN'] } as any);
+    expect((request as any).signedByUserId).toBe('root');
   });
 
   it('una receta ya firmada no devuelve 200 a quien no es su prescriptor', async () => {

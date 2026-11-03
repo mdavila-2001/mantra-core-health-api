@@ -1,11 +1,11 @@
 import type { IndexTuple } from '../catalog.types';
 
 /**
- * Índices secundarios declarados por el modelo oficial para el schema `practice`.
- * 175 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * Índices secundarios declarados por el modelo oficial para el schema `practice` (parte 1/2).
+ * 180 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
-export const practiceIndexes: readonly IndexTuple[] = [
+export const practiceIndexes1: readonly IndexTuple[] = [
   // [tabla, nombre, columnas, único, método]
   ['care_space_blocks', 'ix_care_space_blocks_tenant_id', ['tenant_id'], false, 'btree'],
   ['care_space_blocks', 'ix_care_space_blocks_care_space_id', ['care_space_id'], false, 'btree'],
@@ -47,6 +47,7 @@ export const practiceIndexes: readonly IndexTuple[] = [
   ['care_spaces', 'ix_care_spaces_bed_category_concept_id', ['bed_category_concept_id'], false, 'btree'],
   ['care_spaces', 'ux_care_spaces_site_code', ['practice_site_id', 'code'], true, 'btree'],
   ['care_spaces', 'ux_care_spaces_tenant_id_id', ['tenant_id', 'id'], true, 'btree'],
+  ['care_spaces', 'ix_care_spaces_location_path', ['location_path varchar_pattern_ops'], false, 'btree'],
   ['care_spaces', 'ix_care_spaces_availability_reason_concept_id', ['availability_reason_concept_id'], false, 'btree'],
   ['care_spaces', 'ix_care_spaces_hygiene_status_concept_id', ['hygiene_status_concept_id'], false, 'btree'],
   ['care_spaces', 'ix_care_spaces_isolation_concept_id', ['isolation_concept_id'], false, 'btree'],
@@ -148,6 +149,13 @@ export const practiceIndexes: readonly IndexTuple[] = [
   ['practices', 'ix_practices_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['practices', 'ix_practices_tenant_id_status_concept_id', ['tenant_id', 'status_concept_id', 'updated_at desc'], false, 'btree'],
   ['practices', 'ux_practices_tenant_id_id', ['tenant_id', 'id'], true, 'btree'],
+  ['practitioner_location_assignments', 'ix_practitioner_location_assignments_tenant_id', ['tenant_id', 'status_concept_id'], false, 'btree'],
+  ['practitioner_location_assignments', 'ix_practitioner_location_assignments_practitioner_role_a_id', ['practitioner_role_assignment_id'], false, 'btree'],
+  ['practitioner_location_assignments', 'ix_practitioner_location_assignments_care_space_id', ['care_space_id'], false, 'btree'],
+  ['practitioner_location_assignments', 'ix_practitioner_location_assignments_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['practitioner_location_assignments', 'uq_practitioner_location_assignments_current', ['practitioner_role_assignment_id', 'care_space_id'], true, 'btree', 'valid_to IS NULL'],
+  ['practitioner_location_assignments', 'ix_practitioner_location_assignments_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['practitioner_location_assignments', 'ix_practitioner_location_assignments_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['practitioner_role_assignments', 'ix_practitioner_role_assignments_practitioner_profile_id', ['practitioner_profile_id'], false, 'btree'],
   ['practitioner_role_assignments', 'ix_practitioner_role_assignments_practice_id', ['practice_id'], false, 'btree'],
   ['practitioner_role_assignments', 'ix_practitioner_role_assignments_practice_site_id', ['practice_site_id'], false, 'btree'],
@@ -166,6 +174,7 @@ export const practiceIndexes: readonly IndexTuple[] = [
   ['practitioner_support_assignments', 'ix_practitioner_support_assignments_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['practitioner_support_assignments', 'ix_practitioner_support_assignments_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['practitioner_support_assignments', 'ix_practitioner_support_assignments_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['practitioner_support_assignments', 'ix_prac_support_assignments_initiated_by_party', ['initiated_by_party_concept_id'], false, 'btree'],
   ['site_declared_capacities', 'ix_site_declared_capacities_tenant_id', ['tenant_id'], false, 'btree'],
   ['site_declared_capacities', 'ix_site_declared_capacities_practice_site_id', ['practice_site_id'], false, 'btree'],
   ['site_declared_capacities', 'ix_site_declared_capacities_capacity_kind_concept_id', ['capacity_kind_concept_id'], false, 'btree'],
@@ -178,8 +187,4 @@ export const practiceIndexes: readonly IndexTuple[] = [
   ['space_unit_assignments', 'ix_space_unit_assignments_tenant_id', ['tenant_id'], false, 'btree'],
   ['space_unit_assignments', 'ix_space_unit_assignments_care_space_id', ['care_space_id'], false, 'btree'],
   ['space_unit_assignments', 'ix_space_unit_assignments_clinical_unit_id', ['clinical_unit_id'], false, 'btree'],
-  ['space_unit_assignments', 'ix_space_unit_assignments_role_concept_id', ['role_concept_id'], false, 'btree'],
-  ['space_unit_assignments', 'ix_space_unit_assignments_created_by_user_id', ['created_by_user_id'], false, 'btree'],
-  ['space_unit_assignments', 'ix_space_unit_assignments_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
-  ['space_unit_assignments', 'ux_space_unit_assignments_current', ['care_space_id', 'clinical_unit_id'], true, 'btree', 'valid_to IS NULL'],
 ];

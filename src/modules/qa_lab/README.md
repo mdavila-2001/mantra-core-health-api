@@ -87,7 +87,7 @@ defecto: firma nueva ──> open        firma repetida ──> occurrences++ (y
               ↘ rejected        ↘ triaged        ↘ in_progress
 ```
 
-## Reglas de negocio
+## Business rules
 
 - **Un entorno de producción no puede declararse seguro** para capturar payloads: sería la vía por
   la que datos reales de pacientes acabarían en la evidencia de pruebas.
@@ -114,13 +114,13 @@ defecto: firma nueva ──> open        firma repetida ──> occurrences++ (y
 - **Sólo una corrida que pasó respalda un release**, y debe tener evidencia adjunta; el sello se
   calcula sobre los artefactos, que son inmutables.
 
-## Permisos
+## Permissions
 
 `QA_ADMIN` cubre el módulo. `QA_ENGINEER` define casos, publica, dispara corridas, adjunta evidencia
 y hace triage. `SYSTEM` es el runner: captura ejecuciones, evalúa, cierra corridas y registra
 defectos. `RELEASE_MANAGER` enlaza evidencia a un release.
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE` sobre suite (al añadir casos y al publicar), corrida, resultado de caso y defecto. Los
 casos de la suite se bloquean como colección al publicar, porque se activan todos a la vez. El
@@ -132,7 +132,7 @@ aporta bloqueo optimista automático.
 `operation: 'qa.<área>.<acción>'`. Nivel `warn` cuando una corrida termina con fallos. Nunca se
 loguean payloads ni valores capturados.
 
-## Pruebas
+## Tests
 
 `corepack yarn test src/modules/qa_lab --runInBand --silent` — 5 suites y 99 pruebas
 aprobadas durante la revisión.

@@ -71,7 +71,7 @@ Contratos de entrada y salida. La validación vive en `class-validator`; la docu
   observaciones enteras: el consumidor casi siempre quiere el dato con su respaldo comprobable, no
   el boletín completo.
 
-## Pruebas
+## Tests
 
 Sin suite propia: los DTOs se validan por el `ValidationPipe` global y se ejercitan desde las
 pruebas de servicio y de controlador.

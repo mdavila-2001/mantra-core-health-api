@@ -206,6 +206,7 @@ import { TENANT_CLAIMS_PORT } from './application/ports/tenant-claims.port';
     IamUsersService,
     IamPractitionerSelfRegistrationService,
     IamPatientSelfRegistrationService,
+    IamSupportStaffSelfRegistrationService,
     IamOnboardingDraftsService,
   ],
 })

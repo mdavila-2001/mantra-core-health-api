@@ -2,11 +2,18 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `crm` (parte 2/2).
- * 89 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 96 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const crmIndexes2: readonly IndexTuple[] = [
   // [tabla, nombre, columnas, único, método]
+  ['crm_events', 'ix_crm_events_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['crm_events', 'ix_crm_events_start_end', ['start_at', 'end_at'], false, 'btree'],
+  ['crm_notes', 'uq_crm_notes_crm_activity_id', ['crm_activity_id'], true, 'btree'],
+  ['crm_notes', 'ix_crm_notes_crm_activity_id', ['crm_activity_id'], false, 'btree'],
+  ['crm_notes', 'ix_crm_notes_document_file_id', ['document_file_id'], false, 'btree'],
+  ['crm_notes', 'ix_crm_notes_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['crm_notes', 'ix_crm_notes_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['crm_recurrence_rules', 'ix_crm_recurrence_rules_tenant_id', ['tenant_id'], false, 'btree'],
   ['crm_recurrence_rules', 'ix_crm_recurrence_rules_recurrence_frequency_concept_id', ['recurrence_frequency_concept_id'], false, 'btree'],
   ['crm_recurrence_rules', 'ix_crm_recurrence_rules_created_by_user_id', ['created_by_user_id'], false, 'btree'],

@@ -1,0 +1,163 @@
+# =========================================================================
+# AloVida Health Ecosystem — Stack Monolítico Esbelto (Producción / Coolify / Dev)
+# -------------------------------------------------------------------------
+# Infraestructura consolidada de 4 servicios clave (sin los 22 workers sueltos
+# que colapsan la memoria del VPS ni mock-provider-server).
+#
+# Servicios:
+#   1. postgres: PostgreSQL 16 con PostGIS nativo (geolocalización real).
+#   2. redis: Redis 7 para colas BullMQ unificadas y caché.
+#   3. minio: Almacenamiento S3 para PDFs y adjuntos clínicos/legales.
+#   4. api: Monolito modular NestJS en un único runtime de alto desempeño.
+# =========================================================================
+name: alovida-monolith
+
+x-app-env: &app-env
+  NODE_ENV: ${NODE_ENV:-production}
+  PORT: "3000"
+  DB_HOST: postgres
+  DB_PORT: "5432"
+  DB_USER: ${POSTGRES_USER:-alovida_admin}
+  DB_PASSWORD: ${POSTGRES_PASSWORD:-change-in-production}
+  DB_NAME: ${POSTGRES_DB:-alovida_health}
+  DB_SSL: ${DB_SSL:-false}
+  DB_APP_USER: ${DB_APP_USER:-alovida_app}
+  DB_APP_PASSWORD: ${DB_APP_PASSWORD:-app-change-in-production}
+  RLS_ENFORCE: "true"
+  REDIS_HOST: redis
+  REDIS_PORT: "6379"
+  MINIO_ENDPOINT: minio
+  MINIO_PORT: "9000"
+  MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-alovida_minio}
+  MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minio-change-in-production}
+  MINIO_BUCKET: ${MINIO_BUCKET:-alovida-files}
+  FILE_STORAGE_ADAPTER: s3
+  FILE_STORAGE_S3_ENDPOINT: http://minio:9000
+  FILE_STORAGE_S3_FORCE_PATH_STYLE: "true"
+  FILE_STORAGE_S3_BUCKET: ${MINIO_BUCKET:-alovida-files}
+  JWT_SECRET: ${JWT_SECRET:-mandatory-32-chars-jwt-secret-key-prod}
+  JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
+  REFRESH_TOKEN_EXPIRES_IN: ${REFRESH_TOKEN_EXPIRES_IN:-7d}
+  AUTH_REFRESH_COOKIE_ENABLED: "true"
+  AUTH_REFRESH_COOKIE_SECURE: ${AUTH_REFRESH_COOKIE_SECURE:-true}
+  RATE_LIMIT_TTL_SECONDS: "60"
+  RATE_LIMIT_MAX_REQUESTS: "300"
+  SIAT_MODE: simulated
+  SIAT_BASE_URL: ${SIAT_BASE_URL:-https://pilotosiat.impuestos.gob.bo}
+
+services:
+  postgres:
+    image: postgis/postgis:16-3.4-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-alovida_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-in-production}
+      POSTGRES_DB: ${POSTGRES_DB:-alovida_health}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_monolith_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-alovida_admin} -d ${POSTGRES_DB:-alovida_health}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    networks:
+      - alovida-net
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "200mb", "--maxmemory-policy", "noeviction"]
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_monolith_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    networks:
+      - alovida-net
+
+  minio:
+    image: minio/minio:RELEASE.2024-10-13T13-34-11Z
+    restart: unless-stopped
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-alovida_minio}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minio-change-in-production}
+    ports:
+      - "${MINIO_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - minio_monolith_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9000/minio/health/live || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    networks:
+      - alovida-net
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    restart: unless-stopped
+    environment:
+      <<: *app-env
+    ports:
+      - "${PORT:-3000}:3000"
+    volumes:
+      - api_storage:/app/storage
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:3000/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 1536M
+    networks:
+      - alovida-net
+
+volumes:
+  postgres_monolith_data:
+  redis_monolith_data:
+  minio_monolith_data:
+  api_storage:
+
+networks:
+  alovida-net:
+    name: alovida-monolith-net

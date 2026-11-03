@@ -135,7 +135,14 @@ export class TelemetryClickHeatmapRepository {
       params,
     );
     return (
-      row ?? { clicks: 0, positioned: 0, keyboard: 0, repeated: 0, dead: 0, subjects: 0 }
+      row ?? {
+        clicks: 0,
+        positioned: 0,
+        keyboard: 0,
+        repeated: 0,
+        dead: 0,
+        subjects: 0,
+      }
     );
   }
 
@@ -212,7 +219,8 @@ export class TelemetryClickHeatmapRepository {
     }
     const buckets = Array.from(
       { length: 10 },
-      (_, i) => `count(*) FILTER (WHERE depth >= ${(i + 1) / 10})::int AS r${i}`,
+      (_, i) =>
+        `count(*) FILTER (WHERE depth >= ${(i + 1) / 10})::int AS r${i}`,
     ).join(', ');
     const [row] = await this.sql<Record<string, number>>(
       `WITH pages AS (
@@ -234,7 +242,9 @@ export class TelemetryClickHeatmapRepository {
       pages: row?.pages ?? 0,
       measured: row?.measured ?? 0,
       subjects: row?.subjects ?? 0,
-      reached: Array.from({ length: 10 }, (_, i) => Number(row?.[`r${i}`] ?? 0)),
+      reached: Array.from({ length: 10 }, (_, i) =>
+        Number(row?.[`r${i}`] ?? 0),
+      ),
     };
   }
 

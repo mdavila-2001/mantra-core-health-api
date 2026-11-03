@@ -7,6 +7,7 @@ import { jest } from '@jest/globals';
  * @returns Resultado de mock fn conforme al contrato `any`.
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
+import { ROLES_KEY } from '../../../common/auth/roles.decorator';
 import { IntegrationsMessagesController } from './integrations-messages.controller';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
@@ -33,6 +34,18 @@ function build() {
 }
 
 describe('IntegrationsMessagesController', () => {
+  it('enqueueOutbound exige SYSTEM o SECURITY_ADMIN, como el resto de la clase (O3-3)', () => {
+    expect(
+      Reflect.getMetadata(
+        ROLES_KEY,
+        Object.getOwnPropertyDescriptor(
+          IntegrationsMessagesController.prototype,
+          'enqueueOutbound',
+        )!.value as object,
+      ),
+    ).toEqual(['SYSTEM', 'SECURITY_ADMIN']);
+  });
+
   it('delegates enqueueOutbound (UC-12-05)', async () => {
     const d = build();
     const dto = {

@@ -8,6 +8,7 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
   getCurrentTenantId,
+  roleAuthorizesInTenant,
   touch,
   type AuthenticatedUser,
 } from '../../../../common';
@@ -414,7 +415,8 @@ export class SchedulingServiceBookingService {
     site: SchedulableResources,
     actor: AuthenticatedUser,
   ): boolean {
-    if (actor.roles.includes('SUPERADMIN')) return true;
+    // `SUPERADMIN` global: cualquier sede; acotado (`scopedRoles`): sólo las de su tenant (#1241).
+    if (roleAuthorizesInTenant(actor, 'SUPERADMIN', site.tenantId)) return true;
     const active = getCurrentTenantId();
     return active
       ? active === site.tenantId

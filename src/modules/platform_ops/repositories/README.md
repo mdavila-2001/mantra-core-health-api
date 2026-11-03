@@ -61,6 +61,6 @@ Toda creación de tabla con columnas de auditoría pasa por `createdBy(actorUser
 append-only —corridas, timeline, comunicaciones, mediciones, quema, ejecuciones de runbook— no la
 usan: no tienen columnas de modificación que auditar, y llevan sus propias marcas de tiempo.
 
-## Pruebas
+## Tests
 
 Los repositorios no tienen suite propia; se ejercitan como dobles desde los cuatro servicios.

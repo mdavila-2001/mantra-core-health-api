@@ -159,9 +159,9 @@ describe('AdmissionsController.detail · S-3', () => {
 });
 
 describe('OwnAdmissionController · el sujeto sale de la sesión', () => {
-  it('las rutas me/* no declaran roles y están auditadas las que escriben', () => {
+  it('las rutas me/* declaran `@Roles()` vacío (sin rol global) y están auditadas las que escriben', () => {
     for (const name of ['get', 'resubmit', 'withdraw']) {
-      expect(Reflect.getMetadata(ROLES_KEY, ownProto[name])).toBeUndefined();
+      expect(Reflect.getMetadata(ROLES_KEY, ownProto[name])).toEqual([]);
     }
     for (const name of ['resubmit', 'withdraw']) {
       expect(Reflect.getMetadata(AUDITED_KEY, ownProto[name])).toBeDefined();

@@ -25,7 +25,8 @@ import { consentForeignKeys } from './consent.fk';
 import { crmForeignKeys1 } from './crm.1.fk';
 import { crmForeignKeys2 } from './crm.2.fk';
 import { dataCatalogForeignKeys } from './data_catalog.fk';
-import { delegatedAccessForeignKeys } from './delegated_access.fk';
+import { delegatedAccessForeignKeys1 } from './delegated_access.1.fk';
+import { delegatedAccessForeignKeys2 } from './delegated_access.2.fk';
 import { diagnosticUnitsForeignKeys } from './diagnostic_units.fk';
 import { diagnosticsForeignKeys1 } from './diagnostics.1.fk';
 import { diagnosticsForeignKeys2 } from './diagnostics.2.fk';
@@ -97,7 +98,7 @@ export const foreignKeyCatalog: Readonly<Record<string, readonly (readonly Forei
   consent: [consentForeignKeys],
   crm: [crmForeignKeys1, crmForeignKeys2],
   data_catalog: [dataCatalogForeignKeys],
-  delegated_access: [delegatedAccessForeignKeys],
+  delegated_access: [delegatedAccessForeignKeys1, delegatedAccessForeignKeys2],
   diagnostic_units: [diagnosticUnitsForeignKeys],
   diagnostics: [diagnosticsForeignKeys1, diagnosticsForeignKeys2],
   directory: [directoryForeignKeys],

@@ -123,7 +123,7 @@ describe('PharmacyIntegrationService', () => {
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
-    it('creates a self-referencing connection', async () => {
+    it('creates the connection without an integrations connection (connectionId null)', async () => {
       const d = build();
       d.pharmaciesRepo.findByIdInTenant.mockResolvedValue({
         tenantId: T1,
@@ -133,7 +133,6 @@ describe('PharmacyIntegrationService', () => {
       d.connectionsRepo.create.mockReturnValue({
         id: 'conn1',
         pharmacyId: 'ph1',
-        connectionId: 'conn1',
         statusConceptId: PHARM.CONNECTION_ACTIVE,
         createdAt: new Date(),
       });
@@ -146,6 +145,7 @@ describe('PharmacyIntegrationService', () => {
       );
       expect(res).toMatchObject({
         id: 'conn1',
+        connectionId: null,
         status: PHARM.CONNECTION_ACTIVE,
       });
     });

@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `surveys`.
- * 39 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 42 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const surveysForeignKeys: readonly ForeignKeyTuple[] = [
@@ -16,6 +16,9 @@ export const surveysForeignKeys: readonly ForeignKeyTuple[] = [
   ['survey_assignments', 'target_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['survey_assignments', 'tenant_id', 'directory', 'tenants', 'id'],
   ['survey_assignments', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['survey_invitation_reminders', 'channel_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['survey_invitation_reminders', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['survey_invitation_reminders', 'survey_invitation_id', 'surveys', 'survey_invitations', 'id'],
   ['survey_invitations', 'appointment_booking_id', 'scheduling', 'appointment_bookings', 'id'],
   ['survey_invitations', 'created_by_user_id', 'iam', 'users', 'id'],
   ['survey_invitations', 'extension_survey_version_id', 'surveys', 'survey_versions', 'id'],

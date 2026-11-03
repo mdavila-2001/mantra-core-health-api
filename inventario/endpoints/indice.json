@@ -1,20 +1,20 @@
 {
   "resumen": {
-    "total": 1930,
+    "total": 1938,
     "porOrigen": {
-      "CONTRATO": 1919,
-      "CONTRATO_AUSENTE": 11
+      "CONTRATO": 1916,
+      "CONTRATO_AUSENTE": 22
     },
     "porRiesgo": {
-      "BAJO": 718,
-      "MEDIO": 941,
-      "ALTO": 271
+      "BAJO": 730,
+      "MEDIO": 947,
+      "ALTO": 261
     },
-    "conTablas": 1848,
-    "sinTablasSinDeterminar": 14,
+    "conTablas": 1846,
+    "sinTablasSinDeterminar": 22,
     "sinExplicacionDeNegocio": 1,
     "conPruebas": 1047,
-    "conRequerimientos": 1930
+    "conRequerimientos": 1938
   },
   "endpoints": [
     {
@@ -1178,12 +1178,12 @@
     },
     {
       "id": "ReportTemplatesController_list",
-      "origen": "CONTRATO",
+      "origen": "CONTRATO_AUSENTE",
       "metodo": "GET",
       "ruta": "/admin/accounting/report-templates",
       "modulo": "accounting",
       "bloque": "Financiero y ERP",
-      "nombre": "Plantillas de presentación contable por tipo de usuario",
+      "nombre": null,
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -1200,12 +1200,12 @@
     },
     {
       "id": "ReportTemplatesController_create",
-      "origen": "CONTRATO",
+      "origen": "CONTRATO_AUSENTE",
       "metodo": "POST",
       "ruta": "/admin/accounting/report-templates",
       "modulo": "accounting",
       "bloque": "Financiero y ERP",
-      "nombre": "Crear una plantilla global sin modificar cuentas ni asientos",
+      "nombre": null,
       "riesgo": "MEDIO",
       "publica": false,
       "roles": [
@@ -1218,12 +1218,12 @@
     },
     {
       "id": "ReportTemplatesController_get",
-      "origen": "CONTRATO",
+      "origen": "CONTRATO_AUSENTE",
       "metodo": "GET",
       "ruta": "/admin/accounting/report-templates/{id}",
       "modulo": "accounting",
       "bloque": "Financiero y ERP",
-      "nombre": "Leer una plantilla de presentación contable",
+      "nombre": null,
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -1240,12 +1240,12 @@
     },
     {
       "id": "ReportTemplatesController_update",
-      "origen": "CONTRATO",
+      "origen": "CONTRATO_AUSENTE",
       "metodo": "PUT",
       "ruta": "/admin/accounting/report-templates/{id}",
       "modulo": "accounting",
       "bloque": "Financiero y ERP",
-      "nombre": "Editar presentación con control de versión (409 si cambió)",
+      "nombre": null,
       "riesgo": "MEDIO",
       "publica": false,
       "roles": [
@@ -1258,12 +1258,12 @@
     },
     {
       "id": "ReportTemplatesController_end",
-      "origen": "CONTRATO",
+      "origen": "CONTRATO_AUSENTE",
       "metodo": "POST",
       "ruta": "/admin/accounting/report-templates/{id}/end",
       "modulo": "accounting",
       "bloque": "Financiero y ERP",
-      "nombre": "Desactivar una plantilla sin borrarla (idempotente)",
+      "nombre": null,
       "riesgo": "MEDIO",
       "publica": false,
       "roles": [
@@ -1698,6 +1698,22 @@
       "modulo": "app",
       "bloque": null,
       "nombre": "Sonda de liveness sin dependencias externas",
+      "riesgo": "BAJO",
+      "publica": true,
+      "roles": [],
+      "tablas": 0,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AppController_metrics",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/metrics",
+      "modulo": "app",
+      "bloque": null,
+      "nombre": "Métricas de runtime y proceso en formato estándar Prometheus (OpenMetrics). Excluido de trazas OTLP para evitar polución de spans en muestreo.",
       "riesgo": "BAJO",
       "publica": true,
       "roles": [],
@@ -11133,6 +11149,26 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "PractitionerSupportController_activity",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/me/practitioner/support-activity",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Actividad reciente del equipo de apoyo.",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN",
+        "SUPPORT_STAFF"
+      ],
+      "tablas": 0,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "PractitionerSupportController_invite",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -11152,6 +11188,25 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "PractitionerSupportController_createSecretary",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "POST",
+      "ruta": "/me/practitioner/support-staff",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Crea la cuenta de una secretaria y la vincula de inmediato con estado ACTIVE.",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 36,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "PractitionerSupportController_team",
       "origen": "CONTRATO",
       "metodo": "GET",
@@ -11163,7 +11218,8 @@
       "publica": false,
       "roles": [
         "PRACTITIONER",
-        "CLINICIAN"
+        "CLINICIAN",
+        "SUPPORT_STAFF"
       ],
       "tablas": 12,
       "eventos": 0,
@@ -11328,7 +11384,7 @@
       "roles": [
         "SECURITY_ADMIN"
       ],
-      "tablas": 2,
+      "tablas": 3,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -11409,6 +11465,22 @@
       "publica": false,
       "roles": [],
       "tablas": 13,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "OrgSupportStaffProvisioningController_create",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "POST",
+      "ruta": "/org/support-staff",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Crea la cuenta de una secretaria y la vincula de inmediato con estado ACTIVE.",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 26,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -12721,7 +12793,7 @@
       "roles": [],
       "tablas": 13,
       "eventos": 0,
-      "pruebas": 3,
+      "pruebas": 4,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -15427,7 +15499,7 @@
       "roles": [],
       "tablas": 23,
       "eventos": 0,
-      "pruebas": 66,
+      "pruebas": 67,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -15491,7 +15563,7 @@
       "roles": [],
       "tablas": 21,
       "eventos": 0,
-      "pruebas": 38,
+      "pruebas": 41,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -15605,7 +15677,7 @@
       "roles": [],
       "tablas": 6,
       "eventos": 0,
-      "pruebas": 8,
+      "pruebas": 9,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -15751,7 +15823,7 @@
       ],
       "tablas": 2,
       "eventos": 0,
-      "pruebas": 1,
+      "pruebas": 2,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -18226,9 +18298,12 @@
       "modulo": "integrations",
       "bloque": "Integraciones y Contratos",
       "nombre": "Encolar un mensaje saliente (idempotente)",
-      "riesgo": "ALTO",
+      "riesgo": "MEDIO",
       "publica": false,
-      "roles": [],
+      "roles": [
+        "SYSTEM",
+        "SECURITY_ADMIN"
+      ],
       "tablas": 3,
       "eventos": 0,
       "pruebas": 1,
@@ -22923,7 +22998,7 @@
         "SECURITY_ADMIN",
         "PHARMACY_STAFF"
       ],
-      "tablas": 3,
+      "tablas": 2,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -23569,7 +23644,7 @@
         "SECURITY_ADMIN",
         "PHARMACY_STAFF"
       ],
-      "tablas": 3,
+      "tablas": 5,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -23588,9 +23663,66 @@
         "SECURITY_ADMIN",
         "PHARMACY_STAFF"
       ],
-      "tablas": 3,
+      "tablas": 5,
       "eventos": 0,
       "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PharmacyIntegrationSyncController_removeExternalSystem",
+      "origen": "CONTRATO",
+      "metodo": "DELETE",
+      "ruta": "/pharmacies/{pharmacyId}/integration-connections/{connectionId}/external-system",
+      "modulo": "pharmacy_inventory",
+      "bloque": "Farmacia",
+      "nombre": "Quitar el sistema propio de la farmacia",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PHARMACY_STAFF"
+      ],
+      "tablas": 6,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PharmacyIntegrationSyncController_configureExternalSystem",
+      "origen": "CONTRATO",
+      "metodo": "PUT",
+      "ruta": "/pharmacies/{pharmacyId}/integration-connections/{connectionId}/external-system",
+      "modulo": "pharmacy_inventory",
+      "bloque": "Farmacia",
+      "nombre": "Configurar el sistema propio de la farmacia",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PHARMACY_STAFF"
+      ],
+      "tablas": 12,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PharmacyIntegrationSyncController_probeExternalSystem",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/pharmacies/{pharmacyId}/integration-connections/{connectionId}/external-system/test",
+      "modulo": "pharmacy_inventory",
+      "bloque": "Farmacia",
+      "nombre": "Probar el sistema de la farmacia",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PHARMACY_STAFF"
+      ],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 0,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -23626,7 +23758,7 @@
         "SECURITY_ADMIN",
         "PHARMACY_STAFF"
       ],
-      "tablas": 17,
+      "tablas": 19,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -23966,7 +24098,7 @@
       "roles": [
         "PATIENT"
       ],
-      "tablas": 29,
+      "tablas": 33,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -24289,12 +24421,12 @@
     },
     {
       "id": "OpsToolsController_list",
-      "origen": "CONTRATO",
+      "origen": "CONTRATO_AUSENTE",
       "metodo": "GET",
       "ruta": "/admin/ops/tool-registry",
       "modulo": "platform_ops",
       "bloque": "Operaciones de Plataforma",
-      "nombre": "Herramientas del catálogo con su salud",
+      "nombre": null,
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -26253,9 +26385,12 @@
       "modulo": "practice",
       "bloque": "Práctica y Agenda",
       "nombre": "Verificar el código SNIS del establecimiento (plataforma)",
-      "riesgo": "ALTO",
+      "riesgo": "MEDIO",
       "publica": false,
-      "roles": [],
+      "roles": [
+        "SECURITY_ADMIN",
+        "SUPERADMIN"
+      ],
       "tablas": 6,
       "eventos": 0,
       "pruebas": 0,
@@ -27489,7 +27624,7 @@
       ],
       "tablas": 4,
       "eventos": 0,
-      "pruebas": 8,
+      "pruebas": 5,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -28087,10 +28222,10 @@
       "modulo": "profiles",
       "bloque": "Núcleo y Terminología",
       "nombre": "Quitar la foto del perfil profesional",
-      "riesgo": "ALTO",
+      "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 17,
+      "tablas": 16,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -28103,10 +28238,10 @@
       "modulo": "profiles",
       "bloque": "Núcleo y Terminología",
       "nombre": "Fijar la foto del perfil profesional",
-      "riesgo": "ALTO",
+      "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 19,
+      "tablas": 16,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -28279,10 +28414,10 @@
       "modulo": "profiles",
       "bloque": "Núcleo y Terminología",
       "nombre": "Agregar un título propio (diplomado, maestría, doctorado…)",
-      "riesgo": "ALTO",
+      "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 5,
+      "tablas": 0,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -28295,10 +28430,10 @@
       "modulo": "profiles",
       "bloque": "Núcleo y Terminología",
       "nombre": "Retirar un título propio pendiente",
-      "riesgo": "ALTO",
+      "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 4,
+      "tablas": 0,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -28311,10 +28446,10 @@
       "modulo": "profiles",
       "bloque": "Núcleo y Terminología",
       "nombre": "Editar un título propio pendiente de verificación",
-      "riesgo": "ALTO",
+      "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 6,
+      "tablas": 0,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -28327,10 +28462,10 @@
       "modulo": "profiles",
       "bloque": "Núcleo y Terminología",
       "nombre": "Retirar una matrícula propia pendiente de verificación",
-      "riesgo": "ALTO",
+      "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 6,
+      "tablas": 0,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -28346,7 +28481,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 6,
+      "tablas": 0,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -28378,7 +28513,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 7,
+      "tablas": 8,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -28439,10 +28574,10 @@
       "modulo": "profiles",
       "bloque": "Núcleo y Terminología",
       "nombre": "Retirar una especialidad propia pendiente de verificación",
-      "riesgo": "ALTO",
+      "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 4,
+      "tablas": 0,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -28455,10 +28590,10 @@
       "modulo": "profiles",
       "bloque": "Núcleo y Terminología",
       "nombre": "Corregir una especialidad propia pendiente de verificación",
-      "riesgo": "ALTO",
+      "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 7,
+      "tablas": 0,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -28471,10 +28606,10 @@
       "modulo": "profiles",
       "bloque": "Núcleo y Terminología",
       "nombre": "Marcar una especialidad propia como la principal",
-      "riesgo": "ALTO",
+      "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 4,
+      "tablas": 0,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -30406,7 +30541,7 @@
         "SCHEDULING_AGENT",
         "PRACTITIONER"
       ],
-      "tablas": 57,
+      "tablas": 55,
       "eventos": 0,
       "pruebas": 4,
       "revision": "AUTO_DETECTADA"
@@ -30427,7 +30562,7 @@
         "PRACTITIONER",
         "PATIENT"
       ],
-      "tablas": 49,
+      "tablas": 38,
       "eventos": 0,
       "pruebas": 6,
       "revision": "AUTO_DETECTADA"
@@ -30466,7 +30601,7 @@
         "SCHEDULING_AGENT",
         "PRACTITIONER"
       ],
-      "tablas": 26,
+      "tablas": 21,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -31694,6 +31829,25 @@
         "CLINICIAN"
       ],
       "tablas": 10,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SurveysCatalogController_list",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/surveys/catalog",
+      "modulo": "surveys",
+      "bloque": null,
+      "nombre": "Base surveys plus the practitioner's own, with their services.",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 11,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"

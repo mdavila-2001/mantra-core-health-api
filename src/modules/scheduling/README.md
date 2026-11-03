@@ -141,7 +141,7 @@ Los casos de uso dependen de un token Nest + interfaz propia (`application/ports
 Los endpoints `internal/*` son de workers (`SYSTEM`, `SYSTEM_WORKER`). `GET /tenants/:tenantId/agenda`
 no lleva `@Roles`: lo decide `TenantDirectoryPort.assertCanRead`.
 
-## Reglas de negocio
+## Business rules
 
 - **Anti-double-booking**: el slot se toma con `SELECT ... FOR UPDATE` antes de decrementar
   `remaining_capacity`; nunca baja de cero. Al llegar a cero el slot pasa a `held`/`booked`.
@@ -157,13 +157,13 @@ no lleva `@Roles`: lo decide `TenantDirectoryPort.assertCanRead`.
 - **Promoción de lista de espera**: marca candidatos, **no reserva por ellos**. La cita la confirma
   el paciente por el flujo normal.
 
-## Permisos
+## Permissions
 
 Cada handler declara sus `@Roles` (tabla de rutas). Además, el servicio comprueba **quién** es el
 actor sobre **qué** cita (`BookingAccess`): el titular o su representante, quien opera cualquier
 agenda (`SCHEDULING_ADMIN`, `SCHEDULING_AGENT`, `SUPERADMIN`) o el profesional del recurso.
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE` sobre cupo, retención y cita antes de mutarlos. El worker de expiración usa
 `FOR UPDATE SKIP LOCKED`. `row_version` da bloqueo optimista automático.
@@ -173,7 +173,7 @@ agenda (`SCHEDULING_ADMIN`, `SCHEDULING_AGENT`, `SUPERADMIN`) o el profesional d
 `operation: 'scheduling.<área>.<acción>'`. Se registran ids y contadores, nunca el `holdToken`
 ni datos personales del paciente. El contexto del logger es ahora el de cada caso de uso.
 
-## Pruebas
+## Tests
 
 ```bash
 corepack yarn test --maxWorkers=1 --testPathPatterns 'src/modules/scheduling' 'src/architecture'
@@ -192,7 +192,7 @@ tenants ni nada contra una base real.
 - Los veredictos del vínculo (`'sin-vinculos'`, `'aprobado'`, `'pendiente'`, `'ausente'`,
   `'no-vigente'`) viajan en `details.vinculo` de los 422; por eso no se tradujeron.
 
-## Límites de la estructura
+## Structural boundaries
 
 - `application/` usa las entidades generadas y los repositorios propios como puerto de
   persistencia (decisión A3: única excepción de capas, declarada en el spec de arquitectura).

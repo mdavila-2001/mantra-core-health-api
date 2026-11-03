@@ -72,7 +72,7 @@
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.review` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:320`
+- **Implementación:** `AdminCatalogController.review` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:321`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -82,16 +82,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/catalog/annotations/{id}/review` la atiende `AdminCatalogController.review` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:320). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. Valida el cuerpo como `ReviewInputDto` (3 campos, 2 obligatorios). Delega en `CatalogGovernanceService.review`. Crea filas en data_catalog.catalog_review_decisions. Actualiza data_catalog.catalog_annotations. Lee data_catalog.catalog_annotation_revisions, data_catalog.catalog_annotations, data_catalog.catalog_evidence_items.
+`POST /admin/catalog/annotations/{id}/review` la atiende `AdminCatalogController.review` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:321). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. Valida el cuerpo como `ReviewInputDto` (3 campos, 2 obligatorios). Delega en `CatalogGovernanceService.review`. Crea filas en data_catalog.catalog_review_decisions. Actualiza data_catalog.catalog_annotations. Lee data_catalog.catalog_annotation_revisions, data_catalog.catalog_annotations, data_catalog.catalog_evidence_items.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:320` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:320` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| ROL | Alguno de: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:321` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:321` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -177,7 +177,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.runClassification` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:352`
+- **Implementación:** `AdminCatalogController.runClassification` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:353`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -187,16 +187,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/catalog/classification/run` la atiende `AdminCatalogController.runClassification` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:352). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. Valida el cuerpo como `ClassificationRunDto` (1 campo, 0 obligatorios). Delega en `CatalogClassificationService.run`. Crea filas en data_catalog.catalog_annotation_revisions, data_catalog.catalog_annotations. Actualiza data_catalog.catalog_annotations. Lee data_catalog.catalog_annotations, data_catalog.catalog_change_events, data_catalog.catalog_columns, data_catalog.catalog_objects.
+`POST /admin/catalog/classification/run` la atiende `AdminCatalogController.runClassification` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:353). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. Valida el cuerpo como `ClassificationRunDto` (1 campo, 0 obligatorios). Delega en `CatalogClassificationService.run`. Crea filas en data_catalog.catalog_annotation_revisions, data_catalog.catalog_annotations. Actualiza data_catalog.catalog_annotations. Lee data_catalog.catalog_annotations, data_catalog.catalog_change_events, data_catalog.catalog_columns, data_catalog.catalog_objects.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:352` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:352` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| ROL | Alguno de: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:353` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:353` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -277,7 +277,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.saveColumnAnnotation` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:290`
+- **Implementación:** `AdminCatalogController.saveColumnAnnotation` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:291`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -287,16 +287,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`PUT /admin/catalog/columns/{id}/annotation` la atiende `AdminCatalogController.saveColumnAnnotation` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:290). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. Valida el cuerpo como `AnnotationPatchDto` (23 campos, 1 obligatorio). Delega en `CatalogGovernanceService.saveColumnAnnotation`. Crea filas en data_catalog.catalog_annotation_revisions, data_catalog.catalog_annotations. Actualiza data_catalog.catalog_annotations. Lee data_catalog.catalog_annotations, data_catalog.catalog_columns.
+`PUT /admin/catalog/columns/{id}/annotation` la atiende `AdminCatalogController.saveColumnAnnotation` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:291). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. Valida el cuerpo como `AnnotationPatchDto` (23 campos, 1 obligatorio). Delega en `CatalogGovernanceService.saveColumnAnnotation`. Crea filas en data_catalog.catalog_annotation_revisions, data_catalog.catalog_annotations. Actualiza data_catalog.catalog_annotations. Lee data_catalog.catalog_annotations, data_catalog.catalog_columns.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:290` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:290` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| ROL | Alguno de: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:291` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:291` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -425,7 +425,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.columnEvidence` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:199`
+- **Implementación:** `AdminCatalogController.columnEvidence` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:200`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -435,15 +435,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/catalog/columns/{id}/evidence` la atiende `AdminCatalogController.columnEvidence` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:199). Exige sesión con alguno de los roles ...PORTAL_VIEW_ROLES. Delega en `CatalogReadService.columnEvidence`. Lee data_catalog.catalog_columns, data_catalog.catalog_evidence_items.
+`GET /admin/catalog/columns/{id}/evidence` la atiende `AdminCatalogController.columnEvidence` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:200). Exige sesión con alguno de los roles ...PORTAL_VIEW_ROLES. Delega en `CatalogReadService.columnEvidence`. Lee data_catalog.catalog_columns, data_catalog.catalog_evidence_items.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:199` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:199` |
+| ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:200` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:200` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -496,7 +496,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.addColumnEvidence` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:210`
+- **Implementación:** `AdminCatalogController.addColumnEvidence` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:211`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -506,16 +506,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/catalog/columns/{id}/evidence` la atiende `AdminCatalogController.addColumnEvidence` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:210). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. Valida el cuerpo como `DataCatalogEvidenceInputDto` (4 campos, 2 obligatorios). Delega en `CatalogGovernanceService.addColumnEvidence`. Crea filas en data_catalog.catalog_evidence_items. Lee data_catalog.catalog_columns.
+`POST /admin/catalog/columns/{id}/evidence` la atiende `AdminCatalogController.addColumnEvidence` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:211). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. Valida el cuerpo como `DataCatalogEvidenceInputDto` (4 campos, 2 obligatorios). Delega en `CatalogGovernanceService.addColumnEvidence`. Crea filas en data_catalog.catalog_evidence_items. Lee data_catalog.catalog_columns.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:210` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:210` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| ROL | Alguno de: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:211` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:211` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -597,7 +597,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.coverage` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:385`
+- **Implementación:** `AdminCatalogController.coverage` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:386`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -607,15 +607,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/catalog/coverage` la atiende `AdminCatalogController.coverage` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:385). Exige sesión con alguno de los roles ...PORTAL_VIEW_ROLES. Delega en `CatalogReadService.coverage`. Lee data_catalog.catalog_annotations, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
+`GET /admin/catalog/coverage` la atiende `AdminCatalogController.coverage` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:386). Exige sesión con alguno de los roles ...PORTAL_VIEW_ROLES. Delega en `CatalogReadService.coverage`. Lee data_catalog.catalog_annotations, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:385` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:385` |
+| ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:386` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:386` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -785,14 +785,7 @@ La operación no recibe cuerpo.
 | `history[].failedChecks` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:144` |
 | `history[].blindSpots` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:145` |
 | `retention` | `FitRetentionDto` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:216` |
-| `retention.kind` | `string` | Sí | valores: BASE_DE_DATOS, MEMORIA_DEL_PROCESO | — | `BASE_DE_DATOS`: leído de data_catalog.catalog_fit_runs. `MEMORIA_DEL_PROCESO`: sin repositorio o con la base caída (ver `fallbackReason`) | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:172` |
-| `retention.fallbackReason` | `string` | Sí | admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:178` |
-| `retention.storedForSeconds` | `number` | Sí | admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:180` |
-| `retention.lastWrite` | `FitPersistenceStatusDto` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:182` |
-| `retention.lastWrite.state` | `string` | Sí | valores: GUARDADA, CLAVE_REPETIDA, NO_GUARDADA, SIN_INTENTO | — | Desenlace de la última escritura en data_catalog.catalog_fit_runs intentada por este proceso | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:154` |
-| `retention.lastWrite.runId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:156` |
-| `retention.lastWrite.at` | `string` | Sí | admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:157` |
-| `retention.lastWrite.errorCode` | `string` | Sí | admite null | — | Clase del error, nunca el mensaje | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:163` |
+| `retention.kind` | `string` | Sí | valores: MEMORIA_DEL_PROCESO | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:172` |
 | `retention.ttlSeconds` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:183` |
 | `retention.historySize` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:184` |
 | `retention.tickIntervalSeconds` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:185` |
@@ -909,7 +902,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.objects` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:137`
+- **Implementación:** `AdminCatalogController.objects` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:138`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -919,15 +912,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/catalog/objects` la atiende `AdminCatalogController.objects` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:137). Exige sesión con alguno de los roles ...PORTAL_VIEW_ROLES. Delega en `CatalogReadService.objects`. Lee data_catalog.catalog_annotations, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
+`GET /admin/catalog/objects` la atiende `AdminCatalogController.objects` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:138). Exige sesión con alguno de los roles ...PORTAL_VIEW_ROLES. Delega en `CatalogReadService.objects`. Lee data_catalog.catalog_annotations, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:137` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:137` |
+| ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:138` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:138` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -988,7 +981,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.object` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:147`
+- **Implementación:** `AdminCatalogController.object` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:148`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -998,15 +991,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/catalog/objects/{id}` la atiende `AdminCatalogController.object` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:147). Exige sesión con alguno de los roles ...PORTAL_VIEW_ROLES. Delega en `CatalogReadService.objectDetail`. Lee data_catalog.catalog_annotations, data_catalog.catalog_evidence_items, data_catalog.catalog_objects, data_catalog.catalog_scan_runs, system_ops.entity_registry.
+`GET /admin/catalog/objects/{id}` la atiende `AdminCatalogController.object` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:148). Exige sesión con alguno de los roles ...PORTAL_VIEW_ROLES. Delega en `CatalogReadService.objectDetail`. Lee data_catalog.catalog_annotations, data_catalog.catalog_evidence_items, data_catalog.catalog_objects, data_catalog.catalog_scan_runs, system_ops.entity_registry.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:147` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:147` |
+| ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:148` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:148` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -1062,7 +1055,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.saveAnnotation` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:262`
+- **Implementación:** `AdminCatalogController.saveAnnotation` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:263`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1072,16 +1065,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`PUT /admin/catalog/objects/{id}/annotation` la atiende `AdminCatalogController.saveAnnotation` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:262). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. Valida el cuerpo como `AnnotationPatchDto` (23 campos, 1 obligatorio). Delega en `CatalogGovernanceService.saveAnnotation`. Crea filas en data_catalog.catalog_annotation_revisions, data_catalog.catalog_annotations. Actualiza data_catalog.catalog_annotations. Lee data_catalog.catalog_annotations, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
+`PUT /admin/catalog/objects/{id}/annotation` la atiende `AdminCatalogController.saveAnnotation` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:263). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. Valida el cuerpo como `AnnotationPatchDto` (23 campos, 1 obligatorio). Delega en `CatalogGovernanceService.saveAnnotation`. Crea filas en data_catalog.catalog_annotation_revisions, data_catalog.catalog_annotations. Actualiza data_catalog.catalog_annotations. Lee data_catalog.catalog_annotations, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:262` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:262` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| ROL | Alguno de: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:263` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:263` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1211,7 +1204,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.changes` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:241`
+- **Implementación:** `AdminCatalogController.changes` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:242`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1221,15 +1214,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/catalog/objects/{id}/changes` la atiende `AdminCatalogController.changes` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:241). Exige sesión con alguno de los roles ...PORTAL_VIEW_ROLES. Delega en `CatalogReadService.changes`. Lee data_catalog.catalog_change_events, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
+`GET /admin/catalog/objects/{id}/changes` la atiende `AdminCatalogController.changes` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:242). Exige sesión con alguno de los roles ...PORTAL_VIEW_ROLES. Delega en `CatalogReadService.changes`. Lee data_catalog.catalog_change_events, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:241` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:241` |
+| ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:242` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:242` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -1286,7 +1279,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.columns` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:159`
+- **Implementación:** `AdminCatalogController.columns` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:160`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1296,15 +1289,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/catalog/objects/{id}/columns` la atiende `AdminCatalogController.columns` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:159). Exige sesión con alguno de los roles ...PORTAL_VIEW_ROLES. Delega en `CatalogReadService.columns`. Lee data_catalog.catalog_annotations, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
+`GET /admin/catalog/objects/{id}/columns` la atiende `AdminCatalogController.columns` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:160). Exige sesión con alguno de los roles ...PORTAL_VIEW_ROLES. Delega en `CatalogReadService.columns`. Lee data_catalog.catalog_annotations, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:159` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:159` |
+| ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:160` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:160` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -1359,7 +1352,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.evidence` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:169`
+- **Implementación:** `AdminCatalogController.evidence` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:170`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1369,15 +1362,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/catalog/objects/{id}/evidence` la atiende `AdminCatalogController.evidence` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:169). Exige sesión con alguno de los roles ...PORTAL_VIEW_ROLES. Delega en `CatalogReadService.evidence`. Lee data_catalog.catalog_evidence_items, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
+`GET /admin/catalog/objects/{id}/evidence` la atiende `AdminCatalogController.evidence` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:170). Exige sesión con alguno de los roles ...PORTAL_VIEW_ROLES. Delega en `CatalogReadService.evidence`. Lee data_catalog.catalog_evidence_items, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:169` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:169` |
+| ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:170` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:170` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -1431,7 +1424,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.addEvidence` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:179`
+- **Implementación:** `AdminCatalogController.addEvidence` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:180`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1441,16 +1434,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/catalog/objects/{id}/evidence` la atiende `AdminCatalogController.addEvidence` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:179). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. Valida el cuerpo como `DataCatalogEvidenceInputDto` (4 campos, 2 obligatorios). Delega en `CatalogGovernanceService.addEvidence`. Crea filas en data_catalog.catalog_evidence_items. Lee data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
+`POST /admin/catalog/objects/{id}/evidence` la atiende `AdminCatalogController.addEvidence` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:180). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. Valida el cuerpo como `DataCatalogEvidenceInputDto` (4 campos, 2 obligatorios). Delega en `CatalogGovernanceService.addEvidence`. Crea filas en data_catalog.catalog_evidence_items. Lee data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:179` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:179` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| ROL | Alguno de: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:180` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1533,7 +1526,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.history` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:231`
+- **Implementación:** `AdminCatalogController.history` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:232`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1543,15 +1536,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/catalog/objects/{id}/history` la atiende `AdminCatalogController.history` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:231). Exige sesión con alguno de los roles ...PORTAL_VIEW_ROLES. Delega en `CatalogReadService.history`. Lee data_catalog.catalog_annotation_revisions, data_catalog.catalog_annotations, data_catalog.catalog_objects, data_catalog.catalog_review_decisions, data_catalog.catalog_scan_runs.
+`GET /admin/catalog/objects/{id}/history` la atiende `AdminCatalogController.history` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:232). Exige sesión con alguno de los roles ...PORTAL_VIEW_ROLES. Delega en `CatalogReadService.history`. Lee data_catalog.catalog_annotation_revisions, data_catalog.catalog_annotations, data_catalog.catalog_objects, data_catalog.catalog_review_decisions, data_catalog.catalog_scan_runs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:231` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:231` |
+| ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:232` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:232` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -1607,7 +1600,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.impact` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:251`
+- **Implementación:** `AdminCatalogController.impact` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:252`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1617,15 +1610,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/catalog/objects/{id}/impact` la atiende `AdminCatalogController.impact` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:251). Exige sesión con alguno de los roles ...PORTAL_VIEW_ROLES. Delega en `CatalogReadService.impact`. Lee data_catalog.catalog_annotations, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
+`GET /admin/catalog/objects/{id}/impact` la atiende `AdminCatalogController.impact` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:252). Exige sesión con alguno de los roles ...PORTAL_VIEW_ROLES. Delega en `CatalogReadService.impact`. Lee data_catalog.catalog_annotations, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:251` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:251` |
+| ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:252` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:252` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -1682,7 +1675,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.permissionDrift` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:372`
+- **Implementación:** `AdminCatalogController.permissionDrift` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:373`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1692,15 +1685,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/catalog/permission-drift` la atiende `AdminCatalogController.permissionDrift` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:372). Exige sesión con alguno de los roles ...PORTAL_VIEW_ROLES. Delega en `PermissionDriftService.report`. Lee authz.roles.
+`GET /admin/catalog/permission-drift` la atiende `AdminCatalogController.permissionDrift` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:373). Exige sesión con alguno de los roles ...PORTAL_VIEW_ROLES. Delega en `PermissionDriftService.report`. Lee authz.roles.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:372` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:372` |
+| ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:373` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:373` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -1745,7 +1738,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.piiColumns` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:408`
+- **Implementación:** `AdminCatalogController.piiColumns` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:409`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1755,15 +1748,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/catalog/pii/columns` la atiende `AdminCatalogController.piiColumns` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:408). Exige sesión con alguno de los roles ...PORTAL_VIEW_ROLES. Delega en `CatalogInsightsService.piiColumns`. Lee data_catalog.catalog_annotations, data_catalog.catalog_columns, data_catalog.catalog_objects, system_ops.entity_registry, system_ops.field_registry.
+`GET /admin/catalog/pii/columns` la atiende `AdminCatalogController.piiColumns` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:409). Exige sesión con alguno de los roles ...PORTAL_VIEW_ROLES. Delega en `CatalogInsightsService.piiColumns`. Lee data_catalog.catalog_annotations, data_catalog.catalog_columns, data_catalog.catalog_objects, system_ops.entity_registry, system_ops.field_registry.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:408` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:408` |
+| ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:409` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:409` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -1826,7 +1819,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.piiReconciliation` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:421`
+- **Implementación:** `AdminCatalogController.piiReconciliation` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:422`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1836,15 +1829,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/catalog/pii/reconciliation` la atiende `AdminCatalogController.piiReconciliation` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:421). Exige sesión con alguno de los roles ...PORTAL_VIEW_ROLES. Delega en `CatalogInsightsService.piiReconciliation`. Lee data_catalog.catalog_annotations, data_catalog.catalog_columns, data_catalog.catalog_objects, system_ops.entity_registry, system_ops.field_registry.
+`GET /admin/catalog/pii/reconciliation` la atiende `AdminCatalogController.piiReconciliation` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:422). Exige sesión con alguno de los roles ...PORTAL_VIEW_ROLES. Delega en `CatalogInsightsService.piiReconciliation`. Lee data_catalog.catalog_annotations, data_catalog.catalog_columns, data_catalog.catalog_objects, system_ops.entity_registry, system_ops.field_registry.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:421` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:421` |
+| ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:422` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:422` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -1903,7 +1896,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.piiSummary` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:395`
+- **Implementación:** `AdminCatalogController.piiSummary` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:396`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1913,15 +1906,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/catalog/pii/summary` la atiende `AdminCatalogController.piiSummary` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:395). Exige sesión con alguno de los roles ...PORTAL_VIEW_ROLES. Delega en `CatalogInsightsService.piiSummary`. Lee data_catalog.catalog_annotations, data_catalog.catalog_columns, data_catalog.catalog_objects, system_ops.entity_registry, system_ops.field_registry.
+`GET /admin/catalog/pii/summary` la atiende `AdminCatalogController.piiSummary` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:396). Exige sesión con alguno de los roles ...PORTAL_VIEW_ROLES. Delega en `CatalogInsightsService.piiSummary`. Lee data_catalog.catalog_annotations, data_catalog.catalog_columns, data_catalog.catalog_objects, system_ops.entity_registry, system_ops.field_registry.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:395` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:395` |
+| ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:396` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:396` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -1970,7 +1963,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.qualityIssues` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:448`
+- **Implementación:** `AdminCatalogController.qualityIssues` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:450`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1980,15 +1973,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/catalog/quality/issues` la atiende `AdminCatalogController.qualityIssues` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:448). Exige sesión con alguno de los roles ...PORTAL_VIEW_ROLES. Delega en `CatalogInsightsService.qualityIssues`. Lee data_catalog.catalog_annotations, data_catalog.catalog_columns, data_catalog.catalog_objects.
+`GET /admin/catalog/quality/issues` la atiende `AdminCatalogController.qualityIssues` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:450). Exige sesión con alguno de los roles ...PORTAL_VIEW_ROLES. Delega en `CatalogInsightsService.qualityIssues`. Lee data_catalog.catalog_annotations, data_catalog.catalog_columns, data_catalog.catalog_objects.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:448` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:448` |
+| ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:450` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:450` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -2047,7 +2040,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.qualityRules` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:437`
+- **Implementación:** `AdminCatalogController.qualityRules` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:439`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2057,15 +2050,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/catalog/quality/rules` la atiende `AdminCatalogController.qualityRules` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:437). Exige sesión con alguno de los roles ...PORTAL_VIEW_ROLES. Delega en `CatalogInsightsService.qualityRules`. Lee data_catalog.catalog_annotations, data_catalog.catalog_columns, data_catalog.catalog_objects.
+`GET /admin/catalog/quality/rules` la atiende `AdminCatalogController.qualityRules` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:439). Exige sesión con alguno de los roles ...PORTAL_VIEW_ROLES. Delega en `CatalogInsightsService.qualityRules`. Lee data_catalog.catalog_annotations, data_catalog.catalog_columns, data_catalog.catalog_objects.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:437` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:437` |
+| ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:439` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:439` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -2112,7 +2105,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.listScans` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:461`
+- **Implementación:** `AdminCatalogController.listScans` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:463`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2122,15 +2115,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/catalog/scans` la atiende `AdminCatalogController.listScans` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:461). Exige sesión con alguno de los roles ...PORTAL_VIEW_ROLES. Delega en `CatalogReadService.scans`. Lee data_catalog.catalog_scan_runs.
+`GET /admin/catalog/scans` la atiende `AdminCatalogController.listScans` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:463). Exige sesión con alguno de los roles ...PORTAL_VIEW_ROLES. Delega en `CatalogReadService.scans`. Lee data_catalog.catalog_scan_runs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:461` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:461` |
+| ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:463` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:463` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -2182,7 +2175,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.requestScan` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:479`
+- **Implementación:** `AdminCatalogController.requestScan` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:481`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2192,15 +2185,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/catalog/scans` la atiende `AdminCatalogController.requestScan` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:479). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. Delega en `CatalogScanService.request`. Crea filas en data_catalog.catalog_annotation_revisions, data_catalog.catalog_annotations, data_catalog.catalog_change_events, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs. Actualiza data_catalog.catalog_annotations, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs. Lee data_catalog.catalog_annotations, data_catalog.catalog_change_events, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
+`POST /admin/catalog/scans` la atiende `AdminCatalogController.requestScan` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:481). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. Delega en `CatalogScanService.request`. Crea filas en data_catalog.catalog_annotation_revisions, data_catalog.catalog_annotations, data_catalog.catalog_change_events, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs. Actualiza data_catalog.catalog_annotations, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs. Lee data_catalog.catalog_annotations, data_catalog.catalog_change_events, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:479` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:479` |
+| ROL | Alguno de: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:481` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:481` |
 | CABECERA | Idempotency-Key (obligatoria) | `contrato (parameters)` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2274,7 +2267,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.scan` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:471`
+- **Implementación:** `AdminCatalogController.scan` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:473`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2284,15 +2277,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/catalog/scans/{id}` la atiende `AdminCatalogController.scan` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:471). Exige sesión con alguno de los roles ...PORTAL_VIEW_ROLES. Delega en `CatalogReadService.scan`. Lee data_catalog.catalog_scan_runs.
+`GET /admin/catalog/scans/{id}` la atiende `AdminCatalogController.scan` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:473). Exige sesión con alguno de los roles ...PORTAL_VIEW_ROLES. Delega en `CatalogReadService.scan`. Lee data_catalog.catalog_scan_runs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:471` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:471` |
+| ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:473` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:473` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -2344,7 +2337,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.schemas` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:126`
+- **Implementación:** `AdminCatalogController.schemas` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:127`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2354,15 +2347,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/catalog/schemas` la atiende `AdminCatalogController.schemas` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:126). Exige sesión con alguno de los roles ...PORTAL_VIEW_ROLES. Delega en `CatalogReadService.schemas`. Lee data_catalog.catalog_annotations, data_catalog.catalog_objects.
+`GET /admin/catalog/schemas` la atiende `AdminCatalogController.schemas` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:127). Exige sesión con alguno de los roles ...PORTAL_VIEW_ROLES. Delega en `CatalogReadService.schemas`. Lee data_catalog.catalog_annotations, data_catalog.catalog_objects.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:126` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:126` |
+| ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:127` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:127` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -4140,7 +4133,6 @@ La operación no recibe cuerpo.
 | `failedChecks` | `number` | No | — | — | Comprobaciones que fallaron | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:238` |
 | `blindSpots` | `number` | No | — | — | Comprobaciones que no pudieron medir | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:240` |
 | `errorCode` | `string` | No | admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:241` |
-| `persisted` | `boolean` | No | — | — | Si el desenlace quedó en data_catalog.catalog_fit_runs | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:246` |
 
 ### Respuestas posibles
 

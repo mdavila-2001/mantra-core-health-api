@@ -46,7 +46,7 @@ inicio de parámetro en cualquier posición del segmento — `members:materializ
 literal `members` seguido de un parámetro llamado `materialize`, y la ruta capturaría cualquier
 `members<algo>`.
 
-## Pruebas
+## Tests
 
 `marketing.controller.spec.ts` con ambos servicios mockeados: delegación, argumentos (incluido el
 actor y los ids de ruta), la variante anónima de la redirección y propagación de errores.

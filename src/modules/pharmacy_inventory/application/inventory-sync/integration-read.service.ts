@@ -16,8 +16,13 @@ import {
   EXTERNAL_PHARMACY_CATALOG_PORT,
   type ExternalPharmacyCatalogPort,
 } from '../ports/external-pharmacy-catalog.port';
+import {
+  EXTERNAL_PHARMACY_SYSTEM_PORT,
+  type ExternalPharmacySystemPort,
+} from '../ports/external-pharmacy-system.port';
 import { PharmacyInventoryScopePolicy } from '../scope/pharmacy-inventory-scope.policy';
 import {
+  integrationHostNotAllowed,
   integrationNotConfigured,
   integrationUnavailable,
 } from './integration-errors';
@@ -47,14 +52,16 @@ export class IntegrationReadService {
     private readonly scope: PharmacyInventoryScopePolicy,
     private readonly reads: IntegrationReadRepository,
     @Inject(EXTERNAL_PHARMACY_CATALOG_PORT)
-    private readonly external: ExternalPharmacyCatalogPort,
+    private readonly serverCatalog: ExternalPharmacyCatalogPort,
+    @Inject(EXTERNAL_PHARMACY_SYSTEM_PORT)
+    private readonly systems: ExternalPharmacySystemPort,
   ) {}
 
   async connections(
     pharmacyId: string,
     actor: AuthenticatedUser,
   ): Promise<IntegrationConnectionListDto> {
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const pharmacy = await this.scope.requireManagedPharmacy(
       em,
       pharmacyId,
@@ -72,11 +79,25 @@ export class IntegrationReadService {
         .filter((id): id is string => typeof id === 'string'),
     );
     const siteNames = new Map(sites.map((site) => [site.id, site.name]));
-    const providerConfigured = this.external.isConfigured();
+    const serverConfigured = this.systems.serverConfigured();
+    const own = await this.systems.describe(
+      em,
+      pharmacy.tenantId,
+      connections
+        .map((connection) => connection.connectionId)
+        .filter((id): id is string => typeof id === 'string'),
+    );
     return {
-      providerConfigured,
+      providerConfigured: serverConfigured || [...own.values()].length > 0,
       items: connections.map((connection) => ({
         id: connection.id,
+        system: connection.connectionId
+          ? (own.get(connection.connectionId) ?? null)
+          : null,
+        providerConfigured:
+          (connection.connectionId
+            ? own.has(connection.connectionId)
+            : false) || serverConfigured,
         pharmacySiteId: connection.pharmacySiteId ?? null,
         siteName: connection.pharmacySiteId
           ? (siteNames.get(connection.pharmacySiteId) ?? null)
@@ -91,7 +112,6 @@ export class IntegrationReadService {
           connection.statusConceptId === PHARM.CONNECTION_ACTIVE
             ? 'ACTIVE'
             : 'INACTIVE',
-        providerConfigured,
         createdAt: connection.createdAt.toISOString(),
       })),
     };
@@ -101,7 +121,7 @@ export class IntegrationReadService {
     ref: ConnectionRef,
     actor: AuthenticatedUser,
   ): Promise<IntegrationMappingListDto> {
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const connection = await this.requireConnection(em, ref, actor);
     const mappings = await this.reads.findMappings(em, connection.id);
     const products = await this.reads.findProducts(
@@ -132,13 +152,21 @@ export class IntegrationReadService {
     ref: ConnectionRef,
     actor: AuthenticatedUser,
   ): Promise<ExternalCatalogListDto> {
-    const em = this.em.fork();
-    const connection = await this.requireConnection(em, ref, actor);
+    const em = this.em.fork({ keepTransactionContext: true });
+    const { connection, tenantId } = await this.requireScoped(em, ref, actor);
     const mappings = await this.reads.findMappings(em, connection.id);
-    if (!this.external.isConfigured()) throw integrationNotConfigured();
+    const system = await this.systems.resolve(
+      em,
+      tenantId,
+      connection.connectionId ?? null,
+    );
+    if (system.status === 'UNAVAILABLE')
+      throw integrationUnavailable(system.errorReason);
+    if (system.status === 'NOT_CONFIGURED') throw integrationNotConfigured();
+    if (system.status === 'HOST_NOT_ALLOWED') throw integrationHostNotAllowed();
     let catalog;
     try {
-      catalog = await this.external.listProducts();
+      catalog = await system.client.listProducts();
     } catch (error) {
       if (error instanceof ExternalCatalogUnavailableError) {
         throw integrationUnavailable();
@@ -176,7 +204,7 @@ export class IntegrationReadService {
     limit: number | undefined,
     actor: AuthenticatedUser,
   ): Promise<IntegrationSyncBatchListDto> {
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const connection = await this.requireConnection(em, ref, actor);
     const batches = await this.reads.findBatches(
       em,
@@ -207,6 +235,15 @@ export class IntegrationReadService {
     ref: ConnectionRef,
     actor: AuthenticatedUser,
   ): Promise<FoundConnection> {
+    return (await this.requireScoped(em, ref, actor)).connection;
+  }
+
+  /** La conexión y el tenant de su farmacia; 404 si no es del actor. */
+  private async requireScoped(
+    em: EntityManager,
+    ref: ConnectionRef,
+    actor: AuthenticatedUser,
+  ): Promise<{ connection: FoundConnection; tenantId: string }> {
     const pharmacy = await this.scope.requireManagedPharmacy(
       em,
       ref.pharmacyId,
@@ -218,6 +255,6 @@ export class IntegrationReadService {
       ref.connectionId,
     );
     if (!connection) throw this.scope.notAvailable();
-    return connection;
+    return { connection, tenantId: pharmacy.tenantId };
   }
 }

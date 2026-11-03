@@ -80,6 +80,7 @@ import {
 } from '../ports/registration-files.port';
 import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
 import { BO_PROFESSION_CONCEPT_IDS } from '../../../../common/seed/bo-professions.catalog';
+import { enterAuthBoundaryContext } from './auth-boundary-context';
 
 /**
  * Los cinco tipos que el modelo admite para una credencial académica.
@@ -512,6 +513,7 @@ export class IamPractitionerSelfRegistrationService {
     );
 
     const created = await this.em.transactional(async (tx) => {
+      await enterAuthBoundaryContext(tx);
       // El correo es la identidad de login: comprobarlo antes de escribir nada
       // convierte una violación de constraint (500) en un 409 explicativo. Con
       // cerrojo y sin distinguir mayúsculas, como el alta de organización (#1000).

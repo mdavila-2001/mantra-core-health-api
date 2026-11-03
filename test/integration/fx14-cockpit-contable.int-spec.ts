@@ -109,6 +109,7 @@ describe('FX-14 · el cockpit contable (6.3)', () => {
       const res = await http()
         .post('/accounting/accounts')
         .set(auth())
+        .set(tenantHeader())
         .send({
           practiceId,
           code,
@@ -137,6 +138,7 @@ describe('FX-14 · el cockpit contable (6.3)', () => {
     const ejercicio = await http()
       .post('/accounting/fiscal-years')
       .set(auth())
+      .set(tenantHeader())
       .send({
         practiceId,
         code: `${anio}`,
@@ -166,6 +168,9 @@ describe('FX-14 · el cockpit contable (6.3)', () => {
     const cc = em.create(
       CostCenters,
       {
+        // `tenant_id NOT NULL` desde 305030df9 (entidades F2–F5 del modelo
+        // 81fbd16): el de la práctica, que es la del tenant semilla.
+        tenantId: SEED.tenantId,
         practiceId,
         code: `CC-${sufijo}`,
         name: 'Consulta externa',
@@ -181,6 +186,7 @@ describe('FX-14 · el cockpit contable (6.3)', () => {
     const asiento = await http()
       .post('/accounting/journal-transactions')
       .set(auth())
+      .set(tenantHeader())
       .send({
         practiceId,
         transactionDate: `${anio}-01-15`,
@@ -207,6 +213,7 @@ describe('FX-14 · el cockpit contable (6.3)', () => {
     const reversa = await http()
       .post(`/accounting/journal-transactions/${transactionId}/reverse`)
       .set(auth())
+      .set(tenantHeader())
       .send({ reason: 'Ajuste FX-14' })
       .expect(201);
     reversalId = reversa.body.id;
@@ -215,6 +222,7 @@ describe('FX-14 · el cockpit contable (6.3)', () => {
     const activo = await http()
       .post('/accounting/assets/capitalize')
       .set(auth())
+      .set(tenantHeader())
       .send({
         practiceId,
         code: `A-${sufijo}`,
@@ -233,6 +241,7 @@ describe('FX-14 · el cockpit contable (6.3)', () => {
     const devengo = await http()
       .post('/accounting/accrual-objects')
       .set(auth())
+      .set(tenantHeader())
       .send({
         tenantId: SEED.tenantId,
         objectNumber: `ACR-${sufijo}`,
@@ -252,6 +261,7 @@ describe('FX-14 · el cockpit contable (6.3)', () => {
     const partner = await http()
       .post('/erp/business-partners')
       .set(auth())
+      .set(tenantHeader())
       .send({
         tenantId: SEED.tenantId,
         partnerNumber: `BP-${sufijo}`,
@@ -286,6 +296,7 @@ describe('FX-14 · el cockpit contable (6.3)', () => {
     const partida = await http()
       .post('/accounting/open-items')
       .set(auth())
+      .set(tenantHeader())
       .send({
         tenantId: SEED.tenantId,
         subledgerAccountId,

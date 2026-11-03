@@ -59,6 +59,7 @@ import {
 import {
   PiiColumnsPageDto,
   PiiColumnsQueryDto,
+  PiiReconciliationPageDto,
   PiiReconciliationQueryDto,
   PiiSummaryDto,
   QualityIssuesPageDto,
@@ -429,6 +430,7 @@ export class AdminCatalogController {
   @ApiResponse({
     status: 200,
     description: 'Resumen y página de discrepancias',
+    type: PiiReconciliationPageDto,
   })
   piiReconciliation(@Query() q: PiiReconciliationQueryDto) {
     return this.insights.piiReconciliation(q);

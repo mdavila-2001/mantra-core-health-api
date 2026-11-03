@@ -40,7 +40,8 @@ const SURFACES: Record<PortalSurfaceCode, SurfaceSeed> = {
     name: 'Portal web público',
     internal: false,
     defaultRoute: '/search',
-    description: 'Rutas sin sesión: buscador, acceso, registro y verificaciones.',
+    description:
+      'Rutas sin sesión: buscador, acceso, registro y verificaciones.',
   },
   INSIGHTS: {
     name: 'AloVida Insights',
@@ -91,13 +92,20 @@ export function validateParts(raw: unknown): PartSeedEntry[] {
     if (!entry.portal || !PORTAL_SURFACE_CODES.includes(entry.portal)) {
       throw new Error(`${where}: portal desconocido (${String(entry.portal)})`);
     }
-    for (const key of ['routeCode', 'routePattern', 'pageTitle', 'group'] as const) {
-      if (typeof entry[key] !== 'string' || entry[key]!.trim() === '') {
+    for (const key of [
+      'routeCode',
+      'routePattern',
+      'pageTitle',
+      'group',
+    ] as const) {
+      if (typeof entry[key] !== 'string' || entry[key].trim() === '') {
         throw new Error(`${where}: falta ${key}`);
       }
     }
     if (entry.routeCode!.length > ROUTE_CODE_MAX) {
-      throw new Error(`${where}: routeCode excede ${ROUTE_CODE_MAX} caracteres`);
+      throw new Error(
+        `${where}: routeCode excede ${ROUTE_CODE_MAX} caracteres`,
+      );
     }
     if (!entry.routePattern!.startsWith('/')) {
       throw new Error(`${where}: routePattern debe empezar con «/»`);
@@ -105,7 +113,9 @@ export function validateParts(raw: unknown): PartSeedEntry[] {
     const codeKey = `${entry.portal}|${entry.routeCode}`;
     const patternKey = `${entry.portal}|${entry.routePattern}`;
     if (codes.has(codeKey) || patterns.has(patternKey)) {
-      throw new Error(`${where}: routeCode o routePattern duplicado en ${entry.portal}`);
+      throw new Error(
+        `${where}: routeCode o routePattern duplicado en ${entry.portal}`,
+      );
     }
     codes.add(codeKey);
     patterns.add(patternKey);
@@ -165,7 +175,9 @@ export class FrontendRoutesSeedService {
    *
    * @param parts - Rutas a sembrar; por omisión, las de la fuente configurada.
    */
-  async run(parts?: readonly PartSeedEntry[]): Promise<FrontendRoutesSeedCounters> {
+  async run(
+    parts?: readonly PartSeedEntry[],
+  ): Promise<FrontendRoutesSeedCounters> {
     const origin = parts ? 'argumento' : undefined;
     const source = parts
       ? { origin: origin!, parts: validateParts(parts) }
@@ -187,7 +199,11 @@ export class FrontendRoutesSeedService {
     await em.flush();
 
     this.logger.info(
-      { event: 'seed.read_models.frontend_routes', origin: source.origin, ...counters },
+      {
+        event: 'seed.read_models.frontend_routes',
+        origin: source.origin,
+        ...counters,
+      },
       'Superficies y rutas del frontend garantizadas',
     );
     return counters;
@@ -223,7 +239,7 @@ export class FrontendRoutesSeedService {
     );
     await em.flush();
     counters.surfaces += 1;
-    return created as { id: string };
+    return created;
   }
 
   private async syncRoutes(
@@ -240,7 +256,8 @@ export class FrontendRoutesSeedService {
     const keep = new Set<string>();
 
     for (const part of wanted) {
-      const row = byCode.get(part.routeCode) ?? byPattern.get(part.routePattern);
+      const row =
+        byCode.get(part.routeCode) ?? byPattern.get(part.routePattern);
       if (!row) {
         em.create(
           FrontendRoutes,

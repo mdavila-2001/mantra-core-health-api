@@ -18,6 +18,8 @@ import {
 import { InsufficientRoleException } from '../../../common/errors/domain.exception';
 import { AccountingErrorReason } from '../accounting.error-reasons';
 import {
+  TENANT_A,
+  TENANT_B,
   buildScope,
   expectScopeNotFound,
   inTenant,
@@ -29,7 +31,7 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
  * Construye el sistema bajo prueba con dependencias controladas.
  * @returns Resultado de build.
  */
-function build(ownOffice = false) {
+function build(ownOffice = false, tenantId: string = TENANT_A) {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const fiscalRepo = {
@@ -54,6 +56,7 @@ function build(ownOffice = false) {
       logger as any,
       practices as any,
     ),
+    tenantId,
   );
   return { service, tx, fiscalRepo, practices };
 }
@@ -155,6 +158,64 @@ describe('FiscalService', () => {
       );
       expect(d.practices.isOwnOffice).not.toHaveBeenCalled();
     });
+  });
+
+  /**
+   * Rol administrativo acotado a un tenant (`scopedRoles`, MCH-001): figura en
+   * `roles`, pero sólo abre ejercicios de las prácticas de su tenant, aunque
+   * tenga membresía en otro (#1241).
+   */
+  describe('quién abre el ejercicio · administración acotada a un tenant', () => {
+    const dto = {
+      code: 'FY2026',
+      startDate: '2026-01-01',
+      endDate: '2026-12-31',
+      periods: [
+        { code: '2026-01', startDate: '2026-01-01', endDate: '2026-01-31' },
+      ],
+    };
+    const ROLES = ['SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'SUPERADMIN'];
+    const scopedToA = (role: string) =>
+      ({
+        id: 'admin-a',
+        roles: [role],
+        scopedRoles: { [TENANT_A]: [role] },
+      }) as any;
+
+    it.each(ROLES)(
+      '%s acotado a A no abre el ejercicio de una práctica de B (403, nada escrito)',
+      async (role) => {
+        const d = build(false, TENANT_B);
+        await expect(
+          d.service.openFiscalYear(
+            { ...dto, practiceId: 'p-b' },
+            scopedToA(role),
+          ),
+        ).rejects.toBeInstanceOf(InsufficientRoleException);
+        expect(d.fiscalRepo.createYear).not.toHaveBeenCalled();
+      },
+    );
+
+    it.each(ROLES)(
+      '%s acotado a A abre el de A; el global, el de B',
+      async (role) => {
+        const own = build(false, TENANT_A);
+        await expect(
+          own.service.openFiscalYear(
+            { ...dto, practiceId: 'p1' },
+            scopedToA(role),
+          ),
+        ).resolves.toMatchObject({ status: ACCT.YEAR_OPEN });
+
+        const global = build(false, TENANT_B);
+        await expect(
+          global.service.openFiscalYear({ ...dto, practiceId: 'p-b' }, {
+            id: 'admin-g',
+            roles: [role],
+          } as any),
+        ).resolves.toMatchObject({ status: ACCT.YEAR_OPEN });
+      },
+    );
   });
 
   describe('lockPeriod (UC-16-05)', () => {

@@ -73,6 +73,6 @@ Todas las rutas de escritura reciben `@CurrentUser()`; va al `actorUserId` del e
 lectura de datos sensibles en `audit.audit_events`, que es del módulo 06 (ver *Fuera de este módulo* en el
 README del módulo).
 
-## Pruebas
+## Tests
 
 14 pruebas de delegación y validación de ruta en `time-series-controllers.spec.ts`.

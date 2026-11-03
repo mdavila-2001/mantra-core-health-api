@@ -6,12 +6,12 @@ contienen reglas de negocio, solo construcción de consultas y materialización.
 `em.create(...)` usan `{ partial: true }` y `createdBy(actor.id)`; nunca fijan
 `rowVersion`.
 
-| Repositorio | Entidad |
-|-------------|---------|
-| `OrganizationUserAssignmentsRepository` | `organization_user_assignments` |
-| `DelegatedPermissionSetsRepository` | `delegated_permission_sets` |
-| `DelegatedPermissionSetItemsRepository` | `delegated_permission_set_items` |
-| `PractitionerDelegateAssignmentsRepository` | `practitioner_delegate_assignments` |
-| `DelegatedAccessApprovalRequestsRepository` | `delegated_access_approval_requests` |
-| `DelegatedAccessGrantsRepository` | `delegated_access_grants` |
-| `DelegationEventsRepository` | `delegation_events` (ledger append-only) |
+| Repositorio                                 | Entidad                                  |
+| ------------------------------------------- | ---------------------------------------- |
+| `OrganizationUserAssignmentsRepository`     | `organization_user_assignments`          |
+| `DelegatedPermissionSetsRepository`         | `delegated_permission_sets`              |
+| `DelegatedPermissionSetItemsRepository`     | `delegated_permission_set_items`         |
+| `PractitionerDelegateAssignmentsRepository` | `practitioner_delegate_assignments`      |
+| `DelegatedAccessApprovalRequestsRepository` | `delegated_access_approval_requests`     |
+| `DelegatedAccessGrantsRepository`           | `delegated_access_grants`                |
+| `DelegationEventsRepository`                | `delegation_events` (ledger append-only) |

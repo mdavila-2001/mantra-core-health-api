@@ -60,7 +60,7 @@ de borrado para estas tablas: son el registro clínico y de seguridad del caso.
 Consultas por PK, FK o clave natural indexada. La de solape filtra por quirófano y rango de fechas,
 ambos indexados. Sin N+1: nada recorre relaciones fila por fila.
 
-## Pruebas
+## Tests
 
 Se ejercitan desde los specs de servicio, donde van mockeados. La cobertura real de los bloqueos,
 del solape y de las UNIQUE llega con las pruebas de integración.

@@ -1,3 +1,5 @@
+import { withTenantTransactionCompletion } from './tenant-transaction-completion';
+import { ownedTransaction } from './owned-transaction';
 import {
   CallHandler,
   ExecutionContext,
@@ -71,7 +73,17 @@ export class TenantContextInterceptor implements NestInterceptor {
   constructor(
     private readonly em: EntityManager,
     private readonly reflector: Reflector,
-  ) {}
+  ) {
+    if (process.env.NODE_ENV === 'production' && !this.enforceRls) {
+      process.stderr.write(
+        JSON.stringify({
+          level: 'warn',
+          name: 'tenant-security',
+          msg: 'ALERTA CRÍTICA DE AISLAMIENTO: RLS_ENFORCE no está activo en entorno de producción. El aislamiento multi-tenant depende exclusivamente de filtros de capa de aplicación.',
+        }) + '\n',
+      );
+    }
+  }
 
   /**
    * Resuelve, valida y propaga el tenant del request.
@@ -172,16 +184,18 @@ export class TenantContextInterceptor implements NestInterceptor {
       runWithTenant(
         tenantId,
         () =>
-          this.em.transactional(async () => {
-            await this.em.execute(
-              "select set_config('app.system_context', 'false', true)",
-            );
-            await this.em.execute(
-              "select set_config('app.current_tenant_id', ?, true)",
-              [tenantId],
-            );
-            return lastValueFrom(next.handle());
-          }),
+          withTenantTransactionCompletion(() =>
+            ownedTransaction(this.em, async () => {
+              await this.em.execute(
+                "select set_config('app.system_context', 'false', true)",
+              );
+              await this.em.execute(
+                "select set_config('app.current_tenant_id', ?, true)",
+                [tenantId],
+              );
+              return lastValueFrom(next.handle());
+            }),
+          ),
         options,
       ),
     );
@@ -209,12 +223,14 @@ export class TenantContextInterceptor implements NestInterceptor {
       return from(lastValueFrom(next.handle()));
     }
     return from(
-      this.em.transactional(async () => {
-        await this.em.execute(
-          "select set_config('app.system_context', 'true', true)",
-        );
-        return lastValueFrom(next.handle());
-      }),
+      withTenantTransactionCompletion(() =>
+        ownedTransaction(this.em, async () => {
+          await this.em.execute(
+            "select set_config('app.system_context', 'true', true)",
+          );
+          return lastValueFrom(next.handle());
+        }),
+      ),
     );
   }
 

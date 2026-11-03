@@ -36,6 +36,9 @@ export class ConceptRelationships {
   @Property({ columnType: 'int', nullable: true })
   ordinal?: number;
 
+  /**
+   * Valor de strength score mantenido por la instancia.
+   */
   @Property({
     fieldName: 'strength_score',
     columnType: 'numeric',
@@ -43,9 +46,15 @@ export class ConceptRelationships {
   })
   strengthScore?: string;
 
+  /**
+   * Valor de evidence count mantenido por la instancia.
+   */
   @Property({ fieldName: 'evidence_count', columnType: 'int', nullable: true })
   evidenceCount?: number;
 
+  /**
+   * Identificador asociado a best evidence tier concept.
+   */
   @Property({
     fieldName: 'best_evidence_tier_concept_id',
     type: 'uuid',
@@ -53,6 +62,9 @@ export class ConceptRelationships {
   }) // FK → terminology.catalog_concepts
   bestEvidenceTierConceptId?: string;
 
+  /**
+   * Identificador asociado a frequency concept.
+   */
   @Property({ fieldName: 'frequency_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts
   frequencyConceptId?: string;
 

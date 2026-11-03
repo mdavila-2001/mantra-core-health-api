@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `iam`.
- * 75 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 80 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const iamForeignKeys: readonly ForeignKeyTuple[] = [
@@ -64,6 +64,11 @@ export const iamForeignKeys: readonly ForeignKeyTuple[] = [
   ['security_events', 'outcome_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['security_events', 'recorded_by_user_id', 'iam', 'users', 'id'],
   ['security_events', 'user_id', 'iam', 'users', 'id'],
+  ['session_policies', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['session_policies', 'scope_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['session_policies', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['session_policies', 'tenant_id', 'directory', 'tenants', 'id'],
+  ['session_policies', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['sessions', 'created_by_user_id', 'iam', 'users', 'id'],
   ['sessions', 'device_id', 'iam', 'devices', 'id'],
   ['sessions', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],

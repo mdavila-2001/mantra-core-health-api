@@ -1943,6 +1943,41 @@ describe('EducationLearningService', () => {
       expect(res.statusConceptId).toBe(CONCEPTS.ENROLLMENT_STATE_COMPLETED);
     });
 
+    it('SUPERADMIN acotado a otro tenant no da la vía administrativa en este; acotado a éste o global sí (#1241)', async () => {
+      const scopedTo = (tenantId: string) => ({
+        ...learner,
+        roles: ['LEARNER', 'SUPERADMIN'],
+        scopedRoles: { [tenantId]: ['SUPERADMIN'] },
+      });
+      const denied = build();
+      denied.learningRepo.findEnrollmentById.mockResolvedValue(
+        patientEnrollment(OTHER_LEARNER),
+      );
+      await expectOutOfScope(
+        denied.service.completeEnrollment(ENROLLMENT, scopedTo(T2)),
+      );
+      expect(
+        denied.learningRepo.findEnrollmentForUpdate,
+      ).not.toHaveBeenCalled();
+
+      for (const who of [
+        scopedTo(T1),
+        { id: 'sa-g', roles: ['SUPERADMIN'] } as any,
+      ]) {
+        const d = build();
+        seedEnrollment(d, patientEnrollment(OTHER_LEARNER));
+        d.catalogRepo.findModulesByCourse.mockResolvedValue([{ id: 'mod-1' }]);
+        d.catalogRepo.countLessonsByModules.mockResolvedValue(1);
+        d.learningRepo.findProgressByEnrollment.mockResolvedValue([
+          { lessonId: LESSON, statusConceptId: CONCEPTS.LESSON_COMPLETED },
+        ]);
+        d.catalogRepo.findGradedAssessments.mockResolvedValue([]);
+        d.learningRepo.findPassedAttempts.mockResolvedValue([]);
+        const res = await d.service.completeEnrollment(ENROLLMENT, who);
+        expect(res.statusConceptId).toBe(CONCEPTS.ENROLLMENT_STATE_COMPLETED);
+      }
+    });
+
     it('un rol EDUCATION_ADMIN acotado a otro tenant no da la vía administrativa en este', async () => {
       const d = build();
       const adminElsewhere = {

@@ -143,10 +143,14 @@ describe('Mensajería en tiempo real — gateway WS (integración)', () => {
       // Misma organización que el médico: es la única forma que tiene HOY el
       // paciente de declarar `tenantId` en este `PUT` — no hay una noción de
       // "tenant del paciente" separada.
+      // Desde 3e60276fd (03/10/2026, búsqueda segura de personas) sólo se
+      // inicia una conversación con una vitrina PÚBLICA, y omitir `visibility`
+      // la deja privada: publicarse es opt-in explícito.
       .send({
         tenantId: doctorTenantId,
         slug: `chat-pac-${sufijo}`,
         displayName: 'Iván Mamani',
+        visibility: 'PUBLIC',
       })
       .expect(200);
     pacienteProfileId = perfilPaciente.body.id;
@@ -209,26 +213,45 @@ describe('Mensajería en tiempo real — gateway WS (integración)', () => {
   });
 
   it('unirse a una conversación ajena no une a nada (NOT_A_PARTICIPANT), y no llega nada de ella', async () => {
-    // Una tercera conversación de la que el paciente NO participa.
+    // Una tercera conversación de la que el paciente NO participa: el médico
+    // con OTRA persona. Desde bb5e38267 (04/10/2026) una conversación es
+    // `DIRECT` y de exactamente dos perfiles (`GROUP` da 400), y desde
+    // 3e60276fd el destinatario tiene que ser una vitrina pública activa. Antes
+    // esta prueba reusaba el `PUT /community/profiles/me` del médico, que
+    // devuelve su propia vitrina: no había una tercera persona.
+    const nationalIdTercero = `CI-CHAT3-${randomUUID().slice(0, 8)}`;
+    await http()
+      .post('/iam/auth/register-patient')
+      .send({
+        ...camposDePaciente,
+        nationalId: nationalIdTercero,
+        password: 'S3cret-passw0rd',
+        name: 'Otra',
+        lastName: 'Persona',
+        email: `chat-tercero-${randomUUID().slice(0, 8)}@example.test`,
+      })
+      .expect(201);
+    const loginTercero = await http()
+      .post('/iam/auth/login')
+      .send({ nationalId: nationalIdTercero, password: 'S3cret-passw0rd' })
+      .expect(200);
     const otraPersona = await http()
       .put('/community/profiles/me')
-      .set(bearer(doctorToken))
+      .set(bearer(loginTercero.body.accessToken as string))
       .send({
         tenantId: doctorTenantId,
         slug: `chat-tercero-${randomUUID().slice(0, 8)}`,
         displayName: 'Otra persona',
+        visibility: 'PUBLIC',
       })
       .expect(200);
-    // El médico ya tiene su propia vitrina; se abre una conversación entre esa
-    // vitrina y una tercera cualquiera creada arriba (reusa el token del
-    // médico porque `createConversation` no exige titularidad de los
-    // participantes — es el mismo comportamiento que ya tiene en producción).
+    expect(otraPersona.body.id).not.toBe(doctorProfileId);
+    expect(otraPersona.body.id).not.toBe(pacienteProfileId);
     const conversacionAjena = await http()
       .post('/community/conversations')
       .set(bearer(doctorToken))
       .send({
         participantProfileIds: [doctorProfileId, otraPersona.body.id],
-        conversationType: 'GROUP',
       })
       .expect(201);
 

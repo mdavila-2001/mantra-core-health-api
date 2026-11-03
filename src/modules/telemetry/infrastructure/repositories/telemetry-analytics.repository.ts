@@ -185,7 +185,12 @@ export class TelemetryAnalyticsRepository {
   timeseries(scope: AnalyticsScope) {
     const { where, params } = this.eventScope('occurred_at', scope);
     const unit = scope.window.interval;
-    return this.sql<{ bucket: Date; events: number; sessions: number; sample: number }>(
+    return this.sql<{
+      bucket: Date;
+      events: number;
+      sessions: number;
+      sample: number;
+    }>(
       `WITH buckets AS (
          SELECT generate_series(date_trunc('${unit}', ?::timestamptz, 'UTC'),
                                 ?::timestamptz - interval '1 microsecond',
@@ -263,7 +268,12 @@ export class TelemetryAnalyticsRepository {
       'w.session_journey_id',
       scope.tenantId,
     );
-    return this.sql<{ route: string; samples: number; subjects: number; p75: string | null }>(
+    return this.sql<{
+      route: string;
+      samples: number;
+      subjects: number;
+      p75: string | null;
+    }>(
       `SELECT coalesce(w.route_template, '(sin ruta)') AS route, count(*)::int AS samples,
               count(DISTINCT coalesce(w.analytics_subject_id::text, w.session_journey_id::text))::int AS subjects,
               percentile_cont(0.75) WITHIN GROUP (ORDER BY w.metric_value)::text AS p75

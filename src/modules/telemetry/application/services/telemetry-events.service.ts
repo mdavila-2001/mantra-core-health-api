@@ -295,7 +295,10 @@ export class TelemetryEventsService {
         // evento cuenta como duplicado sin tumbar el lote (hallazgo 2, F0).
         let event: { id: string };
         if (anonymous) {
-          const insertedId = await this.eventsRepo.insertAnonymous(tx, eventData);
+          const insertedId = await this.eventsRepo.insertAnonymous(
+            tx,
+            eventData,
+          );
           if (insertedId === null) {
             skipped += 1;
             continue;

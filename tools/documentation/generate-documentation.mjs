@@ -1,8 +1,37 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 
-const root = process.cwd();
+/**
+ * Alcance del generador (ADR-0022, paso 3): el JSDoc templado de las entidades
+ * de `src/modules/<módulo>/…/entities/`. Fuera de ese alcance no escribe nada:
+ * `src/common`, `src/worker`, los DTO, `database/`, `mock-provider-server/`,
+ * `test/` y las herramientas tienen documentación escrita a mano o no son código
+ * generado (issue #1246).
+ */
+export const SCOPE_ROOT = 'src/modules';
+export const SCOPE_FOLDERS = ['entities'];
+
+/**
+ * Indica si un archivo, con ruta relativa a la raíz del repositorio y separador
+ * `/`, cae dentro del alcance del generador.
+ *
+ * @param relativeFile - Ruta relativa a la raíz del repositorio.
+ * @returns `true` si es TypeScript de una carpeta `entities/` bajo `src/modules/`.
+ */
+export function isInScope(relativeFile) {
+  const parts = relativeFile.split('/');
+  if (parts.length < 3 || `${parts[0]}/${parts[1]}` !== SCOPE_ROOT)
+    return false;
+  const name = parts.at(-1);
+  if (!sourceExtensions.has(path.extname(name))) return false;
+  if (name.endsWith('.d.ts') || /\.(spec|test)\.[cm]?ts$/.test(name))
+    return false;
+  return parts.slice(2, -1).some((part) => SCOPE_FOLDERS.includes(part));
+}
+
+let root = process.cwd();
 const ignored = new Set([
   '.git',
   'node_modules',
@@ -230,10 +259,12 @@ function documentSource(file) {
     if (shouldDocument(node) && !hasDocumentation(source, node)) {
       const position = node.getStart(source);
       const indent = indentationAt(text, position);
-      const comment = buildDocumentation(source, node, relativeFile)
-        .map((line) => indent + line)
-        .join('\n');
-      insertions.push({ position, value: `${comment}\n` });
+      const comment = buildDocumentation(source, node, relativeFile).join(
+        `\n${indent}`,
+      );
+      // La posición cae después de la sangría: el comentario la hereda y la
+      // declaración la recupera tras el salto de línea.
+      insertions.push({ position, value: `${comment}\n${indent}` });
     }
     const arrow = namedArrowStatement(node);
     if (arrow && !hasDocumentation(source, node)) {
@@ -243,10 +274,12 @@ function documentSource(file) {
         ...arrow.functionNode,
         name: ts.factory.createIdentifier(arrow.name),
       };
-      const comment = buildDocumentation(source, proxy, relativeFile)
-        .map((line) => indent + line)
-        .join('\n');
-      insertions.push({ position, value: `${comment}\n` });
+      const comment = buildDocumentation(source, proxy, relativeFile).join(
+        `\n${indent}`,
+      );
+      // La posición cae después de la sangría: el comentario la hereda y la
+      // declaración la recupera tras el salto de línea.
+      insertions.push({ position, value: `${comment}\n${indent}` });
     }
     ts.forEachChild(node, visit);
   }
@@ -259,8 +292,9 @@ function documentSource(file) {
       output.slice(insertion.position);
   }
   output = refineGeneratedText(output);
-  if (output !== text) fs.writeFileSync(file, output);
-  return insertions.length;
+  const changed = output !== text;
+  if (changed) fs.writeFileSync(file, output);
+  return { inserted: insertions.length, changed };
 }
 
 const folderPurpose = {
@@ -374,23 +408,44 @@ function createReadme(directory) {
   return true;
 }
 
-const files = walk(root);
-let comments = 0;
-for (const file of files) {
-  if (sourceExtensions.has(path.extname(file)) && !file.endsWith('.d.ts'))
-    comments += documentSource(file);
+/**
+ * Ejecuta el generador sobre su alcance.
+ *
+ * @param options - `root` es la raíz del repositorio; `readmes` (opcional, por
+ *   defecto `false`) crea el `README.md` que falte en las carpetas del alcance.
+ * @returns Declaraciones documentadas, archivos modificados y README creados.
+ */
+export function run({
+  root: repositoryRoot = process.cwd(),
+  readmes = false,
+} = {}) {
+  root = repositoryRoot;
+  const scopeRoot = path.join(root, SCOPE_ROOT);
+  const files = fs.existsSync(scopeRoot)
+    ? walk(scopeRoot).filter((file) =>
+        isInScope(path.relative(root, file).split(path.sep).join('/')),
+      )
+    : [];
+  let comments = 0;
+  let changedFiles = 0;
+  for (const file of files) {
+    const { inserted, changed } = documentSource(file);
+    comments += inserted;
+    if (changed) changedFiles += 1;
+  }
+  let createdReadmes = 0;
+  if (readmes) {
+    const directories = [...new Set(files.map((file) => path.dirname(file)))];
+    for (const directory of directories)
+      if (createReadme(directory)) createdReadmes += 1;
+  }
+  return { documentedDeclarations: comments, changedFiles, createdReadmes };
 }
 
-const directories = [...new Set(files.map((file) => path.dirname(file)))].sort(
-  (a, b) => b.length - a.length,
-);
-let readmes = 0;
-for (const directory of directories) if (createReadme(directory)) readmes += 1;
-
-console.log(
-  JSON.stringify(
-    { documentedDeclarations: comments, createdReadmes: readmes },
-    null,
-    2,
-  ),
-);
+if (
+  process.argv[1] &&
+  fileURLToPath(import.meta.url) === path.resolve(process.argv[1])
+) {
+  const result = run({ readmes: process.argv.includes('--readmes') });
+  console.log(JSON.stringify(result, null, 2));
+}

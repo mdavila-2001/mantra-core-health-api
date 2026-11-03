@@ -3,7 +3,7 @@
 # Endpoints del módulo `accounting`
 
 - **Bloque:** Financiero y ERP (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
-- **Operaciones:** 68 (68 en el contrato, 0 sólo en el código)
+- **Operaciones:** 68 (63 en el contrato, 5 sólo en el código)
 - **Riesgo:** ALTO 5 · MEDIO 37 · BAJO 26
 - **Tablas distintas que tocan:** 62
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/accounting.md` (generado aparte por `yarn docs:endpoints:generate`)
@@ -75,11 +75,11 @@
 | 61 | DELETE | `/accounting/practitioner/simple/transactions/{id}` | Borrar una transacción debe/haber | ALTO | 4 | PRACTITIONER |
 | 62 | PUT | `/accounting/practitioner/simple/transactions/{id}` | Editar una transacción debe/haber | MEDIO | 5 | PRACTITIONER |
 | 63 | GET | `/accounting/trial-balance` | Balance de sumas y saldos | BAJO | 5 | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER |
-| 64 | GET | `/admin/accounting/report-templates` | Plantillas de presentación contable por tipo de usuario | BAJO | 1 | SUPERADMIN, SECURITY_ADMIN, PLATFORM_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER |
-| 65 | POST | `/admin/accounting/report-templates` | Crear una plantilla global sin modificar cuentas ni asientos | MEDIO | 1 | SUPERADMIN |
-| 66 | GET | `/admin/accounting/report-templates/{id}` | Leer una plantilla de presentación contable | BAJO | 1 | SUPERADMIN, SECURITY_ADMIN, PLATFORM_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER |
-| 67 | PUT | `/admin/accounting/report-templates/{id}` | Editar presentación con control de versión (409 si cambió) | MEDIO | 2 | SUPERADMIN |
-| 68 | POST | `/admin/accounting/report-templates/{id}/end` | Desactivar una plantilla sin borrarla (idempotente) | MEDIO | 2 | SUPERADMIN |
+| 64 | GET | `/admin/accounting/report-templates` | — | BAJO | 1 | SUPERADMIN, SECURITY_ADMIN, PLATFORM_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER |
+| 65 | POST | `/admin/accounting/report-templates` | — | MEDIO | 1 | SUPERADMIN |
+| 66 | GET | `/admin/accounting/report-templates/{id}` | — | BAJO | 1 | SUPERADMIN, SECURITY_ADMIN, PLATFORM_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER |
+| 67 | PUT | `/admin/accounting/report-templates/{id}` | — | MEDIO | 2 | SUPERADMIN |
+| 68 | POST | `/admin/accounting/report-templates/{id}/end` | — | MEDIO | 2 | SUPERADMIN |
 
 ---
 
@@ -118,7 +118,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `accounting.accounts` | LEE | LEE | DIRECTA | AccountingLedgerController.chartOfAccounts → LedgerReadService.chartOfAccounts → AccountsRepository.findByPractice | `src/modules/accounting/repositories/accounts.repository.ts:116` |
-| `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.chartOfAccounts → LedgerReadService.chartOfAccounts → LedgerReadService.verifyPracticeTenant | `src/modules/accounting/services/ledger-read.service.ts:183` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.chartOfAccounts → LedgerReadService.chartOfAccounts → LedgerReadService.verifyPracticeTenant | `src/modules/accounting/services/ledger-read.service.ts:190` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingLedgerController.chartOfAccounts → LedgerReadService.chartOfAccounts → LedgerReadService.assertPractitionerOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Parámetros
@@ -197,7 +197,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/accounting/controllers/accounting-ledger.controller.ts:173` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -276,7 +276,7 @@ El árbol de decisión completo está en [flujos](../flujos/accounting.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/fx14-cockpit-contable.int-spec.ts:110` |
-| INTEGRACION | `test/integration/hardening/mch-018.int-spec.ts:83` |
+| INTEGRACION | `test/integration/hardening/mch-018.int-spec.ts:90` |
 | CONTROLADOR | `src/modules/accounting/controllers/accounting-ledger.controller.spec.ts:52` |
 
 ### Flujos
@@ -375,7 +375,7 @@ El árbol de decisión completo está en [flujos](../flujos/accounting.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/fx14-cockpit-contable.int-spec.ts:397` |
+| INTEGRACION | `test/integration/fx14-cockpit-contable.int-spec.ts:408` |
 | CONTROLADOR | `src/modules/accounting/controllers/accounting-cockpit.controller.spec.ts:67` |
 
 ### Flujos
@@ -410,7 +410,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/accounting/controllers/accounting-accrual.controller.ts:30` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -516,7 +516,7 @@ El árbol de decisión completo está en [flujos](../flujos/accounting.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/fx14-cockpit-contable.int-spec.ts:234` |
+| INTEGRACION | `test/integration/fx14-cockpit-contable.int-spec.ts:242` |
 
 ### Flujos
 
@@ -550,7 +550,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/accounting/controllers/accounting-accrual.controller.ts:47` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -724,7 +724,7 @@ El árbol de decisión completo está en [flujos](../flujos/accounting.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/fx14-cockpit-contable.int-spec.ts:383` |
+| INTEGRACION | `test/integration/fx14-cockpit-contable.int-spec.ts:394` |
 | CONTROLADOR | `src/modules/accounting/controllers/accounting-cockpit.controller.spec.ts:58` |
 
 ### Flujos
@@ -759,7 +759,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/accounting/controllers/accounting-asset.controller.ts:30` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -865,7 +865,7 @@ El árbol de decisión completo está en [flujos](../flujos/accounting.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/fx14-cockpit-contable.int-spec.ts:216` |
+| INTEGRACION | `test/integration/fx14-cockpit-contable.int-spec.ts:223` |
 
 ### Flujos
 
@@ -909,7 +909,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `accounting.accounts` | LEE | LEE | DIRECTA | AccountingLedgerController.balanceSheet → LedgerReadService.balanceSheet → LedgerReadService.aggregatePostedByAccount → AccountsRepository.findByPractice | `src/modules/accounting/repositories/accounts.repository.ts:116` |
 | `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.balanceSheet → LedgerReadService.balanceSheet → LedgerReadService.aggregatePostedByAccount → JournalRepository.findTransactions | `src/modules/accounting/repositories/journal.repository.ts:284` |
 | `accounting.ledger_entries` | LEE | LEE | DIRECTA | AccountingLedgerController.balanceSheet → LedgerReadService.balanceSheet → LedgerReadService.aggregatePostedByAccount → JournalRepository.findEntriesByTransactions | `src/modules/accounting/repositories/journal.repository.ts:329` |
-| `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.balanceSheet → LedgerReadService.balanceSheet → LedgerReadService.verifyPracticeTenant | `src/modules/accounting/services/ledger-read.service.ts:183` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.balanceSheet → LedgerReadService.balanceSheet → LedgerReadService.verifyPracticeTenant | `src/modules/accounting/services/ledger-read.service.ts:190` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingLedgerController.balanceSheet → LedgerReadService.balanceSheet → LedgerReadService.assertPractitionerOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Parámetros
@@ -1010,7 +1010,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/accounting/controllers/accounting-subledger.controller.ts:47` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1158,11 +1158,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `accounting.cost_centers` | LEE | LEE | POR_SQL | AccountingSpaceController.listCostCenters → SpaceAccountingService.listCostCenters → SpaceAccountingService.costCenterRows | `src/modules/accounting/services/space-accounting.service.ts:295` |
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | AccountingSpaceController.listCostCenters → SpaceAccountingService.listCostCenters → InfrastructureAccessService.assertPracticeLevel → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
-| `directory.branch_memberships` | LEE | LEE | DIRECTA | AccountingSpaceController.listCostCenters → SpaceAccountingService.listCostCenters → InfrastructureAccessService.assertPracticeLevel → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:257` |
+| `directory.branch_memberships` | LEE | LEE | DIRECTA | AccountingSpaceController.listCostCenters → SpaceAccountingService.listCostCenters → InfrastructureAccessService.assertPracticeLevel → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | AccountingSpaceController.listCostCenters → SpaceAccountingService.listCostCenters → InfrastructureAccessService.assertPracticeLevel → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
 | `practice.care_spaces` | LEE | LEE | POR_SQL | AccountingSpaceController.listCostCenters → SpaceAccountingService.listCostCenters → InfrastructureAccessService.assertPracticeLevel → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
 | `practice.clinical_units` | LEE | LEE | POR_SQL | AccountingSpaceController.listCostCenters → SpaceAccountingService.listCostCenters → SpaceAccountingService.costCenterRows | `src/modules/accounting/services/space-accounting.service.ts:295` |
-| `practice.practices` | LEE | LEE | POR_SQL | AccountingSpaceController.listCostCenters → SpaceAccountingService.listCostCenters → InfrastructureAccessService.assertPracticeLevel | `src/modules/practice/services/infrastructure-access.service.ts:369` |
+| `practice.practices` | LEE | LEE | POR_SQL | AccountingSpaceController.listCostCenters → SpaceAccountingService.listCostCenters → InfrastructureAccessService.assertPracticeLevel | `src/modules/practice/services/infrastructure-access.service.ts:375` |
 | `terminology.catalog_concepts` | LEE | LEE | POR_SQL | AccountingSpaceController.listCostCenters → SpaceAccountingService.listCostCenters → SpaceAccountingService.costCenterRows | `src/modules/accounting/services/space-accounting.service.ts:295` |
 
 ### Parámetros
@@ -1232,7 +1232,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/accounting/controllers/accounting-space.controller.ts:88` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/accounting/controllers/accounting-space.controller.ts:88` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1243,7 +1243,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `accounting.cost_centers` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingSpaceController.linkUnit → SpaceAccountingService.linkUnit | `src/modules/accounting/services/space-accounting.service.ts:234` |
 | `accounting.cost_centers` | LEE | LEE | DIRECTA | AccountingSpaceController.linkUnit → SpaceAccountingService.linkUnit | `src/modules/accounting/services/space-accounting.service.ts:191` |
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | AccountingSpaceController.linkUnit → SpaceAccountingService.linkUnit → InfrastructureAccessService.assertPracticeLevel → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
-| `directory.branch_memberships` | LEE | LEE | DIRECTA | AccountingSpaceController.linkUnit → SpaceAccountingService.linkUnit → InfrastructureAccessService.assertPracticeLevel → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:257` |
+| `directory.branch_memberships` | LEE | LEE | DIRECTA | AccountingSpaceController.linkUnit → SpaceAccountingService.linkUnit → InfrastructureAccessService.assertPracticeLevel → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | AccountingSpaceController.linkUnit → SpaceAccountingService.linkUnit → InfrastructureAccessService.assertPracticeLevel → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | AccountingSpaceController.linkUnit → SpaceAccountingService.linkUnit → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
 | `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | AccountingSpaceController.linkUnit → SpaceAccountingService.linkUnit → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
@@ -1251,7 +1251,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `practice.care_spaces` | LEE | LEE | POR_SQL | AccountingSpaceController.linkUnit → SpaceAccountingService.linkUnit → InfrastructureAccessService.assertPracticeLevel → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
 | `practice.clinical_units` | LEE | LEE | POR_SQL | AccountingSpaceController.linkUnit → SpaceAccountingService.linkUnit | `src/modules/accounting/services/space-accounting.service.ts:212` |
 | `practice.practice_sites` | LEE | LEE | POR_SQL | AccountingSpaceController.linkUnit → SpaceAccountingService.linkUnit | `src/modules/accounting/services/space-accounting.service.ts:212` |
-| `practice.practices` | LEE | LEE | POR_SQL | AccountingSpaceController.linkUnit → SpaceAccountingService.linkUnit → InfrastructureAccessService.assertPracticeLevel | `src/modules/practice/services/infrastructure-access.service.ts:369` |
+| `practice.practices` | LEE | LEE | POR_SQL | AccountingSpaceController.linkUnit → SpaceAccountingService.linkUnit → InfrastructureAccessService.assertPracticeLevel | `src/modules/practice/services/infrastructure-access.service.ts:375` |
 | `terminology.catalog_concepts` | LEE | LEE | POR_SQL | AccountingSpaceController.linkUnit → SpaceAccountingService.linkUnit → SpaceAccountingService.costCenterRows | `src/modules/accounting/services/space-accounting.service.ts:295` |
 
 ### Eventos y trabajos
@@ -1345,7 +1345,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/accounting/controllers/accounting-asset.controller.ts:47` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1520,7 +1520,7 @@ El árbol de decisión completo está en [flujos](../flujos/accounting.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/fx14-cockpit-contable.int-spec.ts:339` |
+| INTEGRACION | `test/integration/fx14-cockpit-contable.int-spec.ts:350` |
 | CONTROLADOR | `src/modules/accounting/controllers/accounting-cockpit.controller.spec.ts:43` |
 
 ### Flujos
@@ -1555,7 +1555,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM | `src/modules/accounting/controllers/accounting-exchange-rate.controller.ts:25` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1563,7 +1563,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.exchange_rates` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingExchangeRateController.register → ExchangeRateService.registerRate | `src/modules/accounting/services/exchange-rate.service.ts:73` |
+| `accounting.exchange_rates` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingExchangeRateController.register → ExchangeRateService.registerRate | `src/modules/accounting/services/exchange-rate.service.ts:74` |
 | `accounting.exchange_rates` | ESCRIBE | CREA | DIRECTA | AccountingExchangeRateController.register → ExchangeRateService.registerRate → ExchangeRateRepository.create | `src/modules/accounting/repositories/exchange-rate.repository.ts:59` |
 | `accounting.exchange_rates` | LEE | LEE | DIRECTA | AccountingExchangeRateController.register → ExchangeRateService.registerRate → ExchangeRateRepository.findForPair | `src/modules/accounting/repositories/exchange-rate.repository.ts:16` |
 
@@ -1660,7 +1660,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/accounting/controllers/accounting-fiscal.controller.ts:59` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/accounting/controllers/accounting-fiscal.controller.ts:59` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1668,7 +1668,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.fiscal_periods` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingFiscalController.lockPeriod → FiscalService.lockPeriod | `src/modules/accounting/services/fiscal.service.ts:175` |
+| `accounting.fiscal_periods` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingFiscalController.lockPeriod → FiscalService.lockPeriod | `src/modules/accounting/services/fiscal.service.ts:185` |
 | `accounting.fiscal_periods` | LEE | LEE | DIRECTA | AccountingFiscalController.lockPeriod → FiscalService.lockPeriod → AccountingScopeService.periodInTenant → AccountingScopeService.periodAndYear → FiscalRepository.findPeriodById | `src/modules/accounting/repositories/fiscal.repository.ts:175` |
 | `accounting.fiscal_years` | LEE | LEE | DIRECTA | AccountingFiscalController.lockPeriod → FiscalService.lockPeriod → AccountingScopeService.periodInTenant → AccountingScopeService.periodAndYear → FiscalRepository.findYearById | `src/modules/accounting/repositories/fiscal.repository.ts:17` |
 | `practice.practices` | LEE | LEE | DIRECTA | AccountingFiscalController.lockPeriod → FiscalService.lockPeriod → AccountingScopeService.periodInTenant → AccountingScopeService.byPractice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
@@ -1815,7 +1815,7 @@ El árbol de decisión completo está en [flujos](../flujos/accounting.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/fx14-cockpit-contable.int-spec.ts:308` |
+| INTEGRACION | `test/integration/fx14-cockpit-contable.int-spec.ts:319` |
 | CONTROLADOR | `src/modules/accounting/controllers/accounting-cockpit.controller.spec.ts:27` |
 
 ### Flujos
@@ -1850,7 +1850,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER | `src/modules/accounting/controllers/accounting-fiscal.controller.ts:42` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1940,7 +1940,7 @@ El árbol de decisión completo está en [flujos](../flujos/accounting.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/fx14-cockpit-contable.int-spec.ts:138` |
+| INTEGRACION | `test/integration/fx14-cockpit-contable.int-spec.ts:139` |
 
 ### Flujos
 
@@ -1985,7 +1985,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `accounting.accounts` | LEE | LEE | DIRECTA | AccountingLedgerController.generalLedger → LedgerReadService.generalLedger → AccountsRepository.findById | `src/modules/accounting/repositories/accounts.repository.ts:73` |
 | `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.generalLedger → LedgerReadService.generalLedger → JournalRepository.findTransactions | `src/modules/accounting/repositories/journal.repository.ts:284` |
 | `accounting.ledger_entries` | LEE | LEE | DIRECTA | AccountingLedgerController.generalLedger → LedgerReadService.generalLedger → JournalRepository.findEntriesByTransactions | `src/modules/accounting/repositories/journal.repository.ts:329` |
-| `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.generalLedger → LedgerReadService.generalLedger → LedgerReadService.verifyPracticeTenant | `src/modules/accounting/services/ledger-read.service.ts:183` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.generalLedger → LedgerReadService.generalLedger → LedgerReadService.verifyPracticeTenant | `src/modules/accounting/services/ledger-read.service.ts:190` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingLedgerController.generalLedger → LedgerReadService.generalLedger → LedgerReadService.assertPractitionerOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Parámetros
@@ -2087,7 +2087,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `accounting.accounts` | LEE | LEE | DIRECTA | AccountingLedgerController.incomeStatement → LedgerReadService.incomeStatement → LedgerReadService.aggregatePostedByAccount → AccountsRepository.findByPractice | `src/modules/accounting/repositories/accounts.repository.ts:116` |
 | `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.incomeStatement → LedgerReadService.incomeStatement → LedgerReadService.aggregatePostedByAccount → JournalRepository.findTransactions | `src/modules/accounting/repositories/journal.repository.ts:284` |
 | `accounting.ledger_entries` | LEE | LEE | DIRECTA | AccountingLedgerController.incomeStatement → LedgerReadService.incomeStatement → LedgerReadService.aggregatePostedByAccount → JournalRepository.findEntriesByTransactions | `src/modules/accounting/repositories/journal.repository.ts:329` |
-| `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.incomeStatement → LedgerReadService.incomeStatement → LedgerReadService.verifyPracticeTenant | `src/modules/accounting/services/ledger-read.service.ts:183` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.incomeStatement → LedgerReadService.incomeStatement → LedgerReadService.verifyPracticeTenant | `src/modules/accounting/services/ledger-read.service.ts:190` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingLedgerController.incomeStatement → LedgerReadService.incomeStatement → LedgerReadService.assertPractitionerOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Parámetros
@@ -2188,11 +2188,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `accounting.infrastructure_items` | LEE | LEE | POR_SQL | AccountingSpaceController.listItems → SpaceAccountingService.listItems → SpaceAccountingService.itemRows | `src/modules/accounting/services/space-accounting.service.ts:264` |
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | AccountingSpaceController.listItems → SpaceAccountingService.listItems → InfrastructureAccessService.assertPracticeLevel → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
-| `directory.branch_memberships` | LEE | LEE | DIRECTA | AccountingSpaceController.listItems → SpaceAccountingService.listItems → InfrastructureAccessService.assertPracticeLevel → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:257` |
+| `directory.branch_memberships` | LEE | LEE | DIRECTA | AccountingSpaceController.listItems → SpaceAccountingService.listItems → InfrastructureAccessService.assertPracticeLevel → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | AccountingSpaceController.listItems → SpaceAccountingService.listItems → InfrastructureAccessService.assertPracticeLevel → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
 | `practice.care_spaces` | LEE | LEE | POR_SQL | AccountingSpaceController.listItems → SpaceAccountingService.listItems → SpaceAccountingService.itemRows | `src/modules/accounting/services/space-accounting.service.ts:264` |
 | `practice.clinical_units` | LEE | LEE | POR_SQL | AccountingSpaceController.listItems → SpaceAccountingService.listItems → InfrastructureAccessService.assertPracticeLevel → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
-| `practice.practices` | LEE | LEE | POR_SQL | AccountingSpaceController.listItems → SpaceAccountingService.listItems → InfrastructureAccessService.assertPracticeLevel | `src/modules/practice/services/infrastructure-access.service.ts:369` |
+| `practice.practices` | LEE | LEE | POR_SQL | AccountingSpaceController.listItems → SpaceAccountingService.listItems → InfrastructureAccessService.assertPracticeLevel | `src/modules/practice/services/infrastructure-access.service.ts:375` |
 | `terminology.catalog_concepts` | LEE | LEE | POR_SQL | AccountingSpaceController.listItems → SpaceAccountingService.listItems → SpaceAccountingService.itemRows | `src/modules/accounting/services/space-accounting.service.ts:264` |
 
 ### Parámetros
@@ -2263,7 +2263,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | CABECERA | If-Match (opcional) | `contrato (parameters)` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/accounting/controllers/accounting-space.controller.ts:54` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2274,7 +2274,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `accounting.infrastructure_items` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingSpaceController.locateItem → SpaceAccountingService.locateItem | `src/modules/accounting/services/space-accounting.service.ts:143` |
 | `accounting.infrastructure_items` | LEE | LEE | DIRECTA | AccountingSpaceController.locateItem → SpaceAccountingService.locateItem | `src/modules/accounting/services/space-accounting.service.ts:108` |
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | AccountingSpaceController.locateItem → SpaceAccountingService.locateItem → InfrastructureAccessService.assertPracticeLevel → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
-| `directory.branch_memberships` | LEE | LEE | DIRECTA | AccountingSpaceController.locateItem → SpaceAccountingService.locateItem → InfrastructureAccessService.assertPracticeLevel → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:257` |
+| `directory.branch_memberships` | LEE | LEE | DIRECTA | AccountingSpaceController.locateItem → SpaceAccountingService.locateItem → InfrastructureAccessService.assertPracticeLevel → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | AccountingSpaceController.locateItem → SpaceAccountingService.locateItem → InfrastructureAccessService.assertPracticeLevel → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | AccountingSpaceController.locateItem → SpaceAccountingService.locateItem → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
 | `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | AccountingSpaceController.locateItem → SpaceAccountingService.locateItem → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
@@ -2282,7 +2282,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `practice.care_spaces` | LEE | LEE | POR_SQL | AccountingSpaceController.locateItem → SpaceAccountingService.locateItem | `src/modules/accounting/services/space-accounting.service.ts:125` |
 | `practice.clinical_units` | LEE | LEE | POR_SQL | AccountingSpaceController.locateItem → SpaceAccountingService.locateItem → InfrastructureAccessService.assertPracticeLevel → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
 | `practice.practice_sites` | LEE | LEE | POR_SQL | AccountingSpaceController.locateItem → SpaceAccountingService.locateItem | `src/modules/accounting/services/space-accounting.service.ts:125` |
-| `practice.practices` | LEE | LEE | POR_SQL | AccountingSpaceController.locateItem → SpaceAccountingService.locateItem → InfrastructureAccessService.assertPracticeLevel | `src/modules/practice/services/infrastructure-access.service.ts:369` |
+| `practice.practices` | LEE | LEE | POR_SQL | AccountingSpaceController.locateItem → SpaceAccountingService.locateItem → InfrastructureAccessService.assertPracticeLevel | `src/modules/practice/services/infrastructure-access.service.ts:375` |
 | `terminology.catalog_concepts` | LEE | LEE | POR_SQL | AccountingSpaceController.locateItem → SpaceAccountingService.locateItem → SpaceAccountingService.itemRows | `src/modules/accounting/services/space-accounting.service.ts:264` |
 
 ### Eventos y trabajos
@@ -2385,7 +2385,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.listJournal → LedgerReadService.listJournal → JournalRepository.findTransactions | `src/modules/accounting/repositories/journal.repository.ts:284` |
-| `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.listJournal → LedgerReadService.listJournal → LedgerReadService.verifyPracticeTenant | `src/modules/accounting/services/ledger-read.service.ts:183` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.listJournal → LedgerReadService.listJournal → LedgerReadService.verifyPracticeTenant | `src/modules/accounting/services/ledger-read.service.ts:190` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingLedgerController.listJournal → LedgerReadService.listJournal → LedgerReadService.assertPractitionerOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Parámetros
@@ -2471,7 +2471,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/accounting/controllers/accounting-ledger.controller.ts:190` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2619,7 +2619,7 @@ El árbol de decisión completo está en [flujos](../flujos/accounting.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/fx14-cockpit-contable.int-spec.ts:182` |
+| INTEGRACION | `test/integration/fx14-cockpit-contable.int-spec.ts:187` |
 | CONTROLADOR | `src/modules/accounting/controllers/accounting-ledger.controller.spec.ts:59` |
 
 ### Flujos
@@ -2664,7 +2664,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `accounting.journal_entry_assignments` | LEE | LEE | DIRECTA | AccountingLedgerController.getJournalTransaction → LedgerReadService.getJournalTransaction → JournalRepository.assignmentsForEntries | `src/modules/accounting/repositories/journal.repository.ts:645` |
 | `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.getJournalTransaction → LedgerReadService.getJournalTransaction → JournalRepository.findTransactionById | `src/modules/accounting/repositories/journal.repository.ts:215` |
 | `accounting.ledger_entries` | LEE | LEE | DIRECTA | AccountingLedgerController.getJournalTransaction → LedgerReadService.getJournalTransaction → JournalRepository.findEntriesByTransaction | `src/modules/accounting/repositories/journal.repository.ts:304` |
-| `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.getJournalTransaction → LedgerReadService.getJournalTransaction → LedgerReadService.verifyPracticeTenant | `src/modules/accounting/services/ledger-read.service.ts:183` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.getJournalTransaction → LedgerReadService.getJournalTransaction → LedgerReadService.verifyPracticeTenant | `src/modules/accounting/services/ledger-read.service.ts:190` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingLedgerController.getJournalTransaction → LedgerReadService.getJournalTransaction → LedgerReadService.assertPractitionerOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Parámetros
@@ -2753,7 +2753,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SECURITY_ADMIN, ACCOUNTING_APPROVER | `src/modules/accounting/controllers/accounting-ledger.controller.ts:269` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/accounting/controllers/accounting-ledger.controller.ts:269` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2761,7 +2761,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.journal_transactions` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingLedgerController.approve → LedgerService.approve → LedgerService.transition | `src/modules/accounting/services/ledger.service.ts:889` |
+| `accounting.journal_transactions` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingLedgerController.approve → LedgerService.approve → LedgerService.transition | `src/modules/accounting/services/ledger.service.ts:896` |
 | `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.approve → LedgerService.approve → LedgerService.transition → AccountingScopeService.transaction → JournalRepository.findTransactionById | `src/modules/accounting/repositories/journal.repository.ts:215` |
 | `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.approve → LedgerService.approve → LedgerService.transition → AccountingScopeService.transaction → AccountingScopeService.byPractice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingLedgerController.approve → LedgerService.approve → LedgerService.transition → LedgerService.assertPractitionerOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
@@ -2865,7 +2865,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SECURITY_ADMIN, PRACTITIONER | `src/modules/accounting/controllers/accounting-ledger.controller.ts:233` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/accounting/controllers/accounting-ledger.controller.ts:233` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2873,7 +2873,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.journal_transactions` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingLedgerController.classify → LedgerService.classify | `src/modules/accounting/services/ledger.service.ts:400` |
+| `accounting.journal_transactions` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingLedgerController.classify → LedgerService.classify | `src/modules/accounting/services/ledger.service.ts:407` |
 | `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.classify → LedgerService.classify → AccountingScopeService.transaction → JournalRepository.findTransactionById | `src/modules/accounting/repositories/journal.repository.ts:215` |
 | `audit.audit_log` | ESCRIBE | CREA | DIRECTA | AccountingLedgerController.classify → LedgerService.classify → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
 | `audit.audit_log` | LEE | LEE | DIRECTA | AccountingLedgerController.classify → LedgerService.classify → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
@@ -2945,7 +2945,7 @@ El árbol de decisión completo está en [flujos](../flujos/accounting.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/hardening/mch-018.int-spec.ts:107` |
+| INTEGRACION | `test/integration/hardening/mch-018.int-spec.ts:114` |
 | CONTROLADOR | `src/modules/accounting/controllers/accounting-ledger.controller.spec.ts:71` |
 
 ### Flujos
@@ -3030,7 +3030,7 @@ El árbol de decisión completo está en [flujos](../flujos/accounting.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/fx14-cockpit-contable.int-spec.ts:361` |
+| INTEGRACION | `test/integration/fx14-cockpit-contable.int-spec.ts:372` |
 | CONTROLADOR | `src/modules/accounting/controllers/accounting-cockpit.controller.spec.ts:52` |
 
 ### Flujos
@@ -3066,7 +3066,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SECURITY_ADMIN, PRACTITIONER | `src/modules/accounting/controllers/accounting-ledger.controller.ts:346` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/accounting/controllers/accounting-ledger.controller.ts:346` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3170,7 +3170,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/accounting/controllers/accounting-ledger.controller.ts:290` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/accounting/controllers/accounting-ledger.controller.ts:290` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3180,7 +3180,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `accounting.fiscal_periods` | LEE | LEE | DIRECTA | AccountingLedgerController.post → LedgerService.post → AccountingScopeService.periodInPractice → AccountingScopeService.periodAndYear → FiscalRepository.findPeriodById | `src/modules/accounting/repositories/fiscal.repository.ts:175` |
 | `accounting.fiscal_years` | LEE | LEE | DIRECTA | AccountingLedgerController.post → LedgerService.post → AccountingScopeService.periodInPractice → AccountingScopeService.periodAndYear → FiscalRepository.findYearById | `src/modules/accounting/repositories/fiscal.repository.ts:17` |
-| `accounting.journal_transactions` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingLedgerController.post → LedgerService.post | `src/modules/accounting/services/ledger.service.ts:512` |
+| `accounting.journal_transactions` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingLedgerController.post → LedgerService.post | `src/modules/accounting/services/ledger.service.ts:519` |
 | `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.post → LedgerService.post → AccountingScopeService.transaction → JournalRepository.findTransactionById | `src/modules/accounting/repositories/journal.repository.ts:215` |
 | `accounting.ledger_entries` | LEE | LEE | DIRECTA | AccountingLedgerController.post → LedgerService.post → JournalRepository.ledgerEntriesForTransaction | `src/modules/accounting/repositories/journal.repository.ts:610` |
 | `audit.audit_log` | ESCRIBE | CREA | DIRECTA | AccountingLedgerController.post → LedgerService.post → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
@@ -3287,7 +3287,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/accounting/controllers/accounting-ledger.controller.ts:328` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/accounting/controllers/accounting-ledger.controller.ts:328` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3301,7 +3301,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `accounting.fiscal_years` | LEE | LEE | DIRECTA | AccountingLedgerController.reverse → LedgerService.reverseJournal → AccountingScopeService.periodInPractice → AccountingScopeService.periodAndYear → FiscalRepository.findYearById | `src/modules/accounting/repositories/fiscal.repository.ts:17` |
 | `accounting.journal_entry_assignments` | ESCRIBE | CREA | DIRECTA | AccountingLedgerController.reverse → LedgerService.reverseJournal → JournalRepository.createAssignment | `src/modules/accounting/repositories/journal.repository.ts:409` |
 | `accounting.journal_entry_assignments` | LEE | LEE | DIRECTA | AccountingLedgerController.reverse → LedgerService.reverseJournal → JournalRepository.assignmentForEntry | `src/modules/accounting/repositories/journal.repository.ts:628` |
-| `accounting.journal_transactions` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingLedgerController.reverse → LedgerService.reverseJournal | `src/modules/accounting/services/ledger.service.ts:656` |
+| `accounting.journal_transactions` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingLedgerController.reverse → LedgerService.reverseJournal | `src/modules/accounting/services/ledger.service.ts:663` |
 | `accounting.journal_transactions` | ESCRIBE | CREA | DIRECTA | AccountingLedgerController.reverse → LedgerService.reverseJournal → JournalRepository.createTransaction | `src/modules/accounting/repositories/journal.repository.ts:345` |
 | `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.reverse → LedgerService.reverseJournal → AccountingScopeService.transaction → JournalRepository.findTransactionById | `src/modules/accounting/repositories/journal.repository.ts:215` |
 | `accounting.ledger_entries` | ESCRIBE | CREA | DIRECTA | AccountingLedgerController.reverse → LedgerService.reverseJournal → JournalRepository.createLedgerEntry | `src/modules/accounting/repositories/journal.repository.ts:379` |
@@ -3376,7 +3376,7 @@ El árbol de decisión completo está en [flujos](../flujos/accounting.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/fx14-cockpit-contable.int-spec.ts:208` |
+| INTEGRACION | `test/integration/fx14-cockpit-contable.int-spec.ts:214` |
 | CONTROLADOR | `src/modules/accounting/controllers/accounting-ledger.controller.spec.ts:97` |
 
 ### Flujos
@@ -3412,7 +3412,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SECURITY_ADMIN, PRACTITIONER | `src/modules/accounting/controllers/accounting-ledger.controller.ts:251` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/accounting/controllers/accounting-ledger.controller.ts:251` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3420,7 +3420,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.journal_transactions` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingLedgerController.submitReview → LedgerService.submitForReview → LedgerService.transition | `src/modules/accounting/services/ledger.service.ts:889` |
+| `accounting.journal_transactions` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingLedgerController.submitReview → LedgerService.submitForReview → LedgerService.transition | `src/modules/accounting/services/ledger.service.ts:896` |
 | `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.submitReview → LedgerService.submitForReview → LedgerService.transition → AccountingScopeService.transaction → JournalRepository.findTransactionById | `src/modules/accounting/repositories/journal.repository.ts:215` |
 | `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.submitReview → LedgerService.submitForReview → LedgerService.transition → AccountingScopeService.transaction → AccountingScopeService.byPractice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingLedgerController.submitReview → LedgerService.submitForReview → LedgerService.transition → LedgerService.assertPractitionerOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
@@ -3489,7 +3489,7 @@ El árbol de decisión completo está en [flujos](../flujos/accounting.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/hardening/mch-018.int-spec.ts:160` |
+| INTEGRACION | `test/integration/hardening/mch-018.int-spec.ts:167` |
 | CONTROLADOR | `src/modules/accounting/controllers/accounting-ledger.controller.spec.ts:74` |
 
 ### Flujos
@@ -3524,7 +3524,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PRACTITIONER | `src/modules/accounting/controllers/accounting-ledger.controller.ts:212` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3670,7 +3670,7 @@ El árbol de decisión completo está en [flujos](../flujos/accounting.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/hardening/mch-018.int-spec.ts:38` |
+| INTEGRACION | `test/integration/hardening/mch-018.int-spec.ts:45` |
 | CONTROLADOR | `src/modules/accounting/controllers/accounting-ledger.controller.spec.ts:65` |
 
 ### Flujos
@@ -3706,7 +3706,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/accounting/controllers/accounting-liability.controller.ts:33` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/accounting/controllers/accounting-liability.controller.ts:33` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3848,7 +3848,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `accounting.accounts` | LEE | LEE | DIRECTA | AccountingCockpitController.openItems → AccountingReadService.openItems → AccountsRepository.findByPractice | `src/modules/accounting/repositories/accounts.repository.ts:116` |
 | `accounting.open_items` | LEE | LEE | DIRECTA | AccountingCockpitController.openItems → AccountingReadService.openItems → SubledgerRepository.findOpenItemsByReconciliationAccounts | `src/modules/accounting/repositories/subledger.repository.ts:186` |
 | `accounting.subledger_accounts` | LEE | LEE | DIRECTA | AccountingCockpitController.openItems → AccountingReadService.openItems → SubledgerRepository.findOpenItemsByReconciliationAccounts | `src/modules/accounting/repositories/subledger.repository.ts:179` |
-| `erp.business_partners` | LEE | LEE | DIRECTA | AccountingCockpitController.openItems → AccountingReadService.openItems | `src/modules/accounting/services/accounting-read.service.ts:333` |
+| `erp.business_partners` | LEE | LEE | DIRECTA | AccountingCockpitController.openItems → AccountingReadService.openItems | `src/modules/accounting/services/accounting-read.service.ts:340` |
 | `practice.practices` | LEE | LEE | DIRECTA | AccountingCockpitController.openItems → AccountingReadService.openItems → AccountingReadService.resolverPracticeTenant | `src/modules/accounting/services/accounting-read.service.ts:153` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingCockpitController.openItems → AccountingReadService.openItems → AccountingReadService.assertPractitionerOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
@@ -3909,7 +3909,7 @@ El árbol de decisión completo está en [flujos](../flujos/accounting.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/fx14-cockpit-contable.int-spec.ts:322` |
+| INTEGRACION | `test/integration/fx14-cockpit-contable.int-spec.ts:333` |
 | CONTROLADOR | `src/modules/accounting/controllers/accounting-cockpit.controller.spec.ts:37` |
 
 ### Flujos
@@ -3944,7 +3944,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/accounting/controllers/accounting-subledger.controller.ts:30` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4024,7 +4024,7 @@ El árbol de decisión completo está en [flujos](../flujos/accounting.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/fx14-cockpit-contable.int-spec.ts:287` |
+| INTEGRACION | `test/integration/fx14-cockpit-contable.int-spec.ts:297` |
 
 ### Flujos
 
@@ -4058,7 +4058,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/accounting/controllers/accounting-ledger.controller.ts:310` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4246,7 +4246,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER | `src/modules/accounting/controllers/accounting-practitioner.controller.ts:130` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4386,7 +4386,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: PRACTITIONER | `src/modules/accounting/controllers/accounting-practitioner.controller.ts:147` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/accounting/controllers/accounting-practitioner.controller.ts:147` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4571,7 +4571,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: PRACTITIONER | `src/modules/accounting/controllers/accounting-practitioner.controller.ts:179` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/accounting/controllers/accounting-practitioner.controller.ts:179` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4687,7 +4687,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER | `src/modules/accounting/controllers/accounting-practitioner.controller.ts:73` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4822,7 +4822,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER | `src/modules/accounting/controllers/accounting-practitioner.controller.ts:94` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -5044,7 +5044,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER | `src/modules/accounting/controllers/accounting-practitioner.controller.ts:208` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -5166,7 +5166,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: PRACTITIONER | `src/modules/accounting/controllers/accounting-practitioner.controller.ts:240` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/accounting/controllers/accounting-practitioner.controller.ts:240` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -5267,7 +5267,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: PRACTITIONER | `src/modules/accounting/controllers/accounting-practitioner.controller.ts:257` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/accounting/controllers/accounting-practitioner.controller.ts:257` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -5637,7 +5637,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER | `src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts:93` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -5823,7 +5823,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: PRACTITIONER | `src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts:113` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts:113` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -6018,7 +6018,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER | `src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts:172` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -6210,7 +6210,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: PRACTITIONER | `src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts:192` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts:192` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -6502,7 +6502,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER | `src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts:242` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -6694,7 +6694,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: PRACTITIONER | `src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts:262` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts:262` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -6822,7 +6822,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `accounting.accounts` | LEE | LEE | DIRECTA | AccountingLedgerController.trialBalance → LedgerReadService.trialBalance → AccountsRepository.findByPractice | `src/modules/accounting/repositories/accounts.repository.ts:116` |
 | `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.trialBalance → LedgerReadService.trialBalance → JournalRepository.findTransactions | `src/modules/accounting/repositories/journal.repository.ts:284` |
 | `accounting.ledger_entries` | LEE | LEE | DIRECTA | AccountingLedgerController.trialBalance → LedgerReadService.trialBalance → JournalRepository.findEntriesByTransactions | `src/modules/accounting/repositories/journal.repository.ts:329` |
-| `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.trialBalance → LedgerReadService.trialBalance → LedgerReadService.verifyPracticeTenant | `src/modules/accounting/services/ledger-read.service.ts:183` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.trialBalance → LedgerReadService.trialBalance → LedgerReadService.verifyPracticeTenant | `src/modules/accounting/services/ledger-read.service.ts:190` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingLedgerController.trialBalance → LedgerReadService.trialBalance → LedgerReadService.assertPractitionerOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Parámetros
@@ -6883,8 +6883,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 64. GET /admin/accounting/report-templates
 
-- **Origen:** CONTRATO
-- **Nombre:** Plantillas de presentación contable por tipo de usuario
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** —
 - **Bloque:** Financiero y ERP
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -6892,9 +6892,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Plantillas de presentación contable por tipo de usuario. Dominio: Financiero y ERP.
+Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -6919,9 +6919,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `userType` | query | No | `string` | — |
-| `after` | query | No | `string` | — |
-| `limit` | query | No | `number` | — |
+| `—` | query | sin dato | `ReportTemplateQueryDto` | — |
 
 ### Cuerpo
 
@@ -6954,8 +6952,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 65. POST /admin/accounting/report-templates
 
-- **Origen:** CONTRATO
-- **Nombre:** Crear una plantilla global sin modificar cuentas ni asientos
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** —
 - **Bloque:** Financiero y ERP
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -6963,13 +6961,13 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Crear una plantilla global sin modificar cuentas ni asientos. Dominio: Financiero y ERP.
+Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/accounting/report-templates` la atiende `ReportTemplatesController.create` (src/modules/accounting/report-templates/report-templates.controller.ts:80). Exige sesión con alguno de los roles SUPERADMIN. Valida el cuerpo como `CreateReportTemplateDto` (7 campos, 7 obligatorios). Delega en `ReportTemplatesService.create`. Crea filas en accounting.report_presentation_templates.
+`POST /admin/accounting/report-templates` la atiende `ReportTemplatesController.create` (src/modules/accounting/report-templates/report-templates.controller.ts:80). Exige sesión con alguno de los roles SUPERADMIN. Valida el cuerpo como `CreateReportTemplateDto` (2 campos, 2 obligatorios). Delega en `ReportTemplatesService.create`. Crea filas en accounting.report_presentation_templates.
 
 ### Requerimientos
 
@@ -6978,8 +6976,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SUPERADMIN | `src/modules/accounting/report-templates/report-templates.controller.ts:80` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -6988,31 +6984,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `accounting.report_presentation_templates (vista u objeto no catalogado)` | ESCRIBE | CREA | POR_SQL | ReportTemplatesController.create → ReportTemplatesService.create → ReportTemplatesRepository.create | `src/modules/accounting/report-templates/report-templates.repository.ts:87` |
 
-### Cuerpo — DTO `CreateReportTemplateDto` · `application/json`
+### Cuerpo — DTO `CreateReportTemplateDto`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `name` | `string` | Sí | longitud mínima 1; longitud máxima 160 | `@Transform(trim)` `@IsString()` `@MinLength(1)` `@MaxLength(160)` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:61` |
-| `reportKind` | `string` | Sí | valores: TRIAL_BALANCE, GENERAL_LEDGER, INCOME_STATEMENT | `@IsIn(Object.keys(REPORT_COLUMNS))` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:64` |
-| `columns` | `array<ReportTemplateColumnDto>` | Sí | mínimo 1 elemento(s); máximo 20 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ArrayMaxSize(20)` `@ValidateNested({ each: true })` `@Type(() => ReportTemplateColumnDto)` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:71` |
-| `columns[].key` | `string` | Sí | longitud máxima 64 | `@IsString()` `@MaxLength(64)` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:46` |
-| `columns[].label` | `string` | Sí | longitud mínima 1; longitud máxima 80 | `@Transform(trim)` `@IsString()` `@MinLength(1)` `@MaxLength(80)` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:52` |
-| `userType` | `string` | Sí | valores: PATIENT, PRACTITIONER, HEALTH_FACILITY, LABORATORY, PHARMACY, INSURER | `@IsIn(TEMPLATE_AUDIENCES)` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:77` |
-| `code` | `string` | Sí | patrón ^[A-Z][A-Z0-9_]{1,79}$; patrón runtime /^[A-Z][A-Z0-9_]{1,79}$/ | `@Matches(/^[A-Z][A-Z0-9_]{1,79}$/)` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:80` |
+| `userType` | `object` | Sí | — | `@IsIn(TEMPLATE_AUDIENCES)` | Tipo TypeScript no expandido: (typeof TEMPLATE_AUDIENCES)[number] | `src/modules/accounting/report-templates/report-templates.dto.ts:77` |
+| `code` | `string` | Sí | patrón runtime /^[A-Z][A-Z0-9_]{1,79}$/ | `@Matches(/^[A-Z][A-Z0-9_]{1,79}$/)` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:80` |
 
 **Payload mínimo** (sólo los obligatorios):
 
 ```json
 {
-  "name": "Nombre de ejemplo",
-  "reportKind": "TRIAL_BALANCE",
-  "columns": [
-    {
-      "key": "valor-ejemplo",
-      "label": "valor-ejemplo"
-    }
-  ],
-  "userType": "PATIENT",
+  "userType": {},
   "code": "CODIGO_EJEMPLO"
 }
 ```
@@ -7021,15 +7004,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ```json
 {
-  "name": "Nombre de ejemplo",
-  "reportKind": "TRIAL_BALANCE",
-  "columns": [
-    {
-      "key": "valor-ejemplo",
-      "label": "valor-ejemplo"
-    }
-  ],
-  "userType": "PATIENT",
+  "userType": {},
   "code": "CODIGO_EJEMPLO"
 }
 ```
@@ -7045,7 +7020,7 @@ _No se identificó un DTO de respuesta con campos._
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 201 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra); BadRequestException: {{ code: 'VALIDATION_FAILED', reason: AccountingErrorReason.…} |
+| 400 | `VALIDATION_FAILED` | BadRequestException: {{ code: 'VALIDATION_FAILED', reason: AccountingErrorReason.…} |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {{ code: 'FORBIDDEN', reason: AccountingErrorReason.REPORT_T…} |
 | 409 | `CONFLICT` | ConflictException: Ya existe ese código para el tipo de usuario |
@@ -7065,8 +7040,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 66. GET /admin/accounting/report-templates/{id}
 
-- **Origen:** CONTRATO
-- **Nombre:** Leer una plantilla de presentación contable
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** —
 - **Bloque:** Financiero y ERP
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -7074,9 +7049,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Leer una plantilla de presentación contable. Dominio: Financiero y ERP.
+Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -7137,8 +7112,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 67. PUT /admin/accounting/report-templates/{id}
 
-- **Origen:** CONTRATO
-- **Nombre:** Editar presentación con control de versión (409 si cambió)
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** —
 - **Bloque:** Financiero y ERP
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -7146,13 +7121,13 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Editar presentación con control de versión (409 si cambió). Dominio: Financiero y ERP.
+Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
-`PUT /admin/accounting/report-templates/{id}` la atiende `ReportTemplatesController.update` (src/modules/accounting/report-templates/report-templates.controller.ts:100). Exige sesión con alguno de los roles SUPERADMIN. Valida el cuerpo como `UpdateReportTemplateDto` (7 campos, 7 obligatorios). Delega en `ReportTemplatesService.update`. Actualiza accounting.report_presentation_templates. Lee accounting.report_presentation_templates.
+`PUT /admin/accounting/report-templates/{id}` la atiende `ReportTemplatesController.update` (src/modules/accounting/report-templates/report-templates.controller.ts:100). Exige sesión con alguno de los roles SUPERADMIN. Valida el cuerpo como `UpdateReportTemplateDto` (2 campos, 2 obligatorios). Delega en `ReportTemplatesService.update`. Actualiza accounting.report_presentation_templates. Lee accounting.report_presentation_templates.
 
 ### Requerimientos
 
@@ -7162,8 +7137,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SUPERADMIN | `src/modules/accounting/report-templates/report-templates.controller.ts:100` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/accounting/report-templates/report-templates.controller.ts:100` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -7179,15 +7152,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|
 | `id` | path | Sí | `string` | — |
 
-### Cuerpo — DTO `UpdateReportTemplateDto` · `application/json`
+### Cuerpo — DTO `UpdateReportTemplateDto`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `name` | `string` | Sí | longitud mínima 1; longitud máxima 160 | `@Transform(trim)` `@IsString()` `@MinLength(1)` `@MaxLength(160)` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:61` |
-| `reportKind` | `string` | Sí | valores: TRIAL_BALANCE, GENERAL_LEDGER, INCOME_STATEMENT | `@IsIn(Object.keys(REPORT_COLUMNS))` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:64` |
-| `columns` | `array<ReportTemplateColumnDto>` | Sí | mínimo 1 elemento(s); máximo 20 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ArrayMaxSize(20)` `@ValidateNested({ each: true })` `@Type(() => ReportTemplateColumnDto)` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:71` |
-| `columns[].key` | `string` | Sí | longitud máxima 64 | `@IsString()` `@MaxLength(64)` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:46` |
-| `columns[].label` | `string` | Sí | longitud mínima 1; longitud máxima 80 | `@Transform(trim)` `@IsString()` `@MinLength(1)` `@MaxLength(80)` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:52` |
 | `expectedRowVersion` | `number` | Sí | mínimo 1 | `@IsInt()` `@Min(1)` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:84` |
 | `isActive` | `boolean` | Sí | — | `@IsBoolean()` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:85` |
 
@@ -7195,14 +7163,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ```json
 {
-  "name": "Nombre de ejemplo",
-  "reportKind": "TRIAL_BALANCE",
-  "columns": [
-    {
-      "key": "valor-ejemplo",
-      "label": "valor-ejemplo"
-    }
-  ],
   "expectedRowVersion": 1,
   "isActive": true
 }
@@ -7212,14 +7172,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ```json
 {
-  "name": "Nombre de ejemplo",
-  "reportKind": "TRIAL_BALANCE",
-  "columns": [
-    {
-      "key": "valor-ejemplo",
-      "label": "valor-ejemplo"
-    }
-  ],
   "expectedRowVersion": 1,
   "isActive": true
 }
@@ -7236,7 +7188,7 @@ _No se identificó un DTO de respuesta con campos._
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra); BadRequestException: {{ code: 'VALIDATION_FAILED', reason: AccountingErrorReason.…} |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; BadRequestException: {{ code: 'VALIDATION_FAILED', reason: AccountingErrorReason.…} |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {{ code: 'FORBIDDEN', reason: AccountingErrorReason.REPORT_T…} |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: La plantilla no existe |
@@ -7257,8 +7209,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 68. POST /admin/accounting/report-templates/{id}/end
 
-- **Origen:** CONTRATO
-- **Nombre:** Desactivar una plantilla sin borrarla (idempotente)
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** —
 - **Bloque:** Financiero y ERP
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -7266,9 +7218,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Desactivar una plantilla sin borrarla (idempotente). Dominio: Financiero y ERP.
+Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -7282,8 +7234,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SUPERADMIN | `src/modules/accounting/report-templates/report-templates.controller.ts:121` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/accounting/report-templates/report-templates.controller.ts:121` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -7299,7 +7249,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|
 | `id` | path | Sí | `string` | — |
 
-### Cuerpo — DTO `EndReportTemplateDto` · `application/json`
+### Cuerpo — DTO `EndReportTemplateDto`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
@@ -7332,7 +7282,7 @@ _No se identificó un DTO de respuesta con campos._
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {{ code: 'FORBIDDEN', reason: AccountingErrorReason.REPORT_T…} |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: La plantilla no existe |

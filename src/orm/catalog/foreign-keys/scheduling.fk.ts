@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `scheduling`.
- * 138 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 143 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const schedulingForeignKeys: readonly ForeignKeyTuple[] = [
@@ -10,11 +10,14 @@ export const schedulingForeignKeys: readonly ForeignKeyTuple[] = [
   ['appointment_bookings', 'appointment_id', 'clinical', 'appointments', 'id'],
   ['appointment_bookings', 'bookable_slot_id', 'scheduling', 'bookable_slots', 'id'],
   ['appointment_bookings', 'booked_by_user_id', 'iam', 'users', 'id'],
+  ['appointment_bookings', 'booked_via_grant_id', 'delegated_access', 'support_scope_grants', 'id'],
   ['appointment_bookings', 'booking_channel_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['appointment_bookings', 'booking_policy_id', 'scheduling', 'booking_policies', 'id'],
+  ['appointment_bookings', 'care_space_id', 'practice', 'care_spaces', 'id'],
   ['appointment_bookings', 'created_by_user_id', 'iam', 'users', 'id'],
   ['appointment_bookings', 'follow_up_of_booking_id', 'scheduling', 'appointment_bookings', 'id'],
   ['appointment_bookings', 'form_instance_id', 'forms', 'form_instances', 'id'],
+  ['appointment_bookings', 'healthcare_service_id', 'practice', 'healthcare_services', 'id'],
   ['appointment_bookings', 'patient_profile_id', 'profiles', 'patient_profiles', 'profile_id'],
   ['appointment_bookings', 'practitioner_service_offering_id', 'scheduling', 'practitioner_service_offerings', 'id'],
   ['appointment_bookings', 'resource_id', 'scheduling', 'schedulable_resources', 'id'],
@@ -55,7 +58,9 @@ export const schedulingForeignKeys: readonly ForeignKeyTuple[] = [
   ['availability_slots', 'schedule_id', 'scheduling', 'practitioner_schedules', 'id'],
   ['availability_slots', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['availability_slots', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['bookable_slots', 'care_space_id', 'practice', 'care_spaces', 'id'],
   ['bookable_slots', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['bookable_slots', 'healthcare_service_id', 'practice', 'healthcare_services', 'id'],
   ['bookable_slots', 'practitioner_service_offering_id', 'scheduling', 'practitioner_service_offerings', 'id'],
   ['bookable_slots', 'resource_id', 'scheduling', 'schedulable_resources', 'id'],
   ['bookable_slots', 'schedule_template_id', 'scheduling', 'schedule_templates', 'id'],

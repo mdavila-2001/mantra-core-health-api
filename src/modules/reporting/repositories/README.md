@@ -52,7 +52,7 @@ lo que permite al almacén reaprovechar el objeto.
 Consultas por PK, FK, clave natural o hash, todas indexadas. La del tick filtra por `next_run_at`,
 que en el modelo lleva índice, y acota con `limit`. Sin N+1: nada recorre relaciones fila por fila.
 
-## Pruebas
+## Tests
 
 Se ejercitan desde los specs de servicio, donde van mockeados. La cobertura real del SKIP LOCKED, de
 los bloqueos y de las UNIQUE llega con las pruebas de integración.

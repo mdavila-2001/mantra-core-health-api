@@ -1,5 +1,10 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiProperty, ApiPropertyOptional, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiPropertyOptional,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsInt, IsOptional, Max, Min } from 'class-validator';
 import { NotAudited, Roles } from '../../../../common';
@@ -10,7 +15,11 @@ import {
 } from '../../application/services/telemetry-retention.service';
 
 export class RetentionPurgeDto {
-  @ApiPropertyOptional({ minimum: 1, maximum: RETENTION_MAX_BATCH, default: 1000 })
+  @ApiPropertyOptional({
+    minimum: 1,
+    maximum: RETENTION_MAX_BATCH,
+    default: 1000,
+  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
@@ -18,7 +27,11 @@ export class RetentionPurgeDto {
   @Max(RETENTION_MAX_BATCH)
   batchSize?: number;
 
-  @ApiPropertyOptional({ minimum: 1, maximum: RETENTION_MAX_BATCHES, default: 10 })
+  @ApiPropertyOptional({
+    minimum: 1,
+    maximum: RETENTION_MAX_BATCHES,
+    default: 10,
+  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
@@ -43,8 +56,14 @@ export class TelemetryRetentionController {
   @Post('purge')
   @Roles('SYSTEM')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Purga por retención del propósito: eventos de uso, propiedades y errores del cliente' })
+  @ApiOperation({
+    summary:
+      'Purga por retención del propósito: eventos de uso, propiedades y errores del cliente',
+  })
   purge(@Body() dto: RetentionPurgeDto) {
-    return this.retention.purge({ batchSize: dto.batchSize, maxBatches: dto.maxBatches });
+    return this.retention.purge({
+      batchSize: dto.batchSize,
+      maxBatches: dto.maxBatches,
+    });
   }
 }

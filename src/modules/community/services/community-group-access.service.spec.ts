@@ -9,6 +9,7 @@ import { ForbiddenException } from '@nestjs/common';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { CommunityGroupAccessService } from './community-group-access.service';
+import { CommunityVisibilityService } from './community-visibility.service';
 import { CONCEPTS, ResourceNotFoundException } from '../../../common';
 import { InsufficientRoleException } from '../../../common/errors/domain.exception';
 import { CommunityErrorReason } from '../community.error-reasons';
@@ -434,6 +435,92 @@ describe('CommunityGroupAccessService (P7)', () => {
       const access = await d.service.resolve({} as any, 'g1', actor);
 
       expect(access.canModerate).toBe(true);
+    });
+  });
+
+  /**
+   * Rol de plataforma acotado a un tenant: con la regla real de
+   * `CommunityVisibilityService.isPlatform`, un `SECURITY_ADMIN`/`SUPERADMIN`/
+   * `SYSTEM` concedido sólo en A no es plataforma sobre lo de B.
+   */
+  describe('rol de plataforma acotado a un tenant', () => {
+    const PLATFORM = ['SECURITY_ADMIN', 'SUPERADMIN', 'SYSTEM'];
+    const scopedTo = (role: string, tenantId: string) =>
+      ({
+        id: 'admin-a',
+        roles: [role],
+        scopedRoles: { [tenantId]: [role] },
+      }) as any;
+    const realIsPlatform = (a: any, t: any) =>
+      CommunityVisibilityService.prototype.isPlatform.call(undefined, a, t);
+
+    const secretOf = (tenantId: string) => ({
+      ...group(COMM.GROUP_VISIBILITY_SECRET),
+      tenantId,
+    });
+
+    it('acotado a A no modera ni lee un grupo secreto de B', async () => {
+      for (const role of PLATFORM) {
+        const d = build();
+        d.visibility.isPlatform.mockImplementation(realIsPlatform);
+        d.groupsRepo.findById.mockResolvedValue(secretOf('t-b'));
+        await expect(
+          d.service.resolve({} as any, 'g1', scopedTo(role, 't-a')),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      }
+    });
+
+    it('acotado a A no alcanza un foro de público autorizado de B', async () => {
+      const d = build();
+      d.visibility.isPlatform.mockImplementation(realIsPlatform);
+      d.audience.isEligible.mockResolvedValue(false);
+      d.groupsRepo.findById.mockResolvedValue({
+        ...group(AUDIENCE_IDS[0]),
+        tenantId: 't-b',
+      });
+      await expect(
+        d.service.resolve({} as any, 'g1', scopedTo('SECURITY_ADMIN', 't-a')),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('acotado a A sí modera el grupo secreto de A', async () => {
+      for (const role of PLATFORM) {
+        const d = build();
+        d.visibility.isPlatform.mockImplementation(realIsPlatform);
+        d.groupsRepo.findById.mockResolvedValue(secretOf('t-a'));
+        const access = await d.service.resolve(
+          {} as any,
+          'g1',
+          scopedTo(role, 't-a'),
+        );
+        expect(access.canRead).toBe(true);
+        expect(access.canAdminister).toBe(true);
+        expect(access.canModerate).toBe(true);
+      }
+    });
+
+    it('global modera los grupos secretos de A y de B', async () => {
+      for (const role of PLATFORM) {
+        for (const tenantId of ['t-a', 't-b']) {
+          const d = build();
+          d.visibility.isPlatform.mockImplementation(realIsPlatform);
+          d.groupsRepo.findById.mockResolvedValue(secretOf(tenantId));
+          const access = await d.service.resolve({} as any, 'g1', {
+            id: 'admin-g',
+            roles: [role],
+          } as any);
+          expect(access.canAdminister).toBe(true);
+        }
+      }
+    });
+
+    it('un grupo sin tenant sólo lo alcanza la plataforma global', async () => {
+      const d = build();
+      d.visibility.isPlatform.mockImplementation(realIsPlatform);
+      d.groupsRepo.findById.mockResolvedValue(secretOf(undefined as any));
+      await expect(
+        d.service.resolve({} as any, 'g1', scopedTo('SUPERADMIN', 't-a')),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
 });

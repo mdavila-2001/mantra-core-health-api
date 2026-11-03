@@ -235,4 +235,102 @@ describe('TenantAdministrationService', () => {
       );
     });
   });
+
+  describe('rol de plataforma acotado a un tenant (#1241)', () => {
+    // Un `SECURITY_ADMIN`/`SUPERADMIN` concedido sólo en el tenant A figura en
+    // `roles`, pero `scopedRoles` lo limita a A: fuera de A no es plataforma.
+    const scopedTo = (role: string, tenantId: string) => ({
+      id: 'admin-a',
+      roles: [role],
+      scopedRoles: { [tenantId]: [role] },
+    });
+    const PLATFORM = ['SECURITY_ADMIN', 'SUPERADMIN'];
+
+    it('acotado a A NO administra, ni lee, ni cambia dueños de B sin membresía', async () => {
+      const { service, tx } = build(null);
+
+      for (const role of PLATFORM) {
+        const actor = scopedTo(role, 'tenant-a');
+        await expect(
+          service.canAdminister(tx, 'tenant-b', actor),
+        ).resolves.toBe(false);
+        await expect(
+          service.assertCanAdminister(tx, 'tenant-b', actor),
+        ).rejects.toBeInstanceOf(ForbiddenException);
+        await expect(
+          service.assertCanRead(tx, 'tenant-b', actor),
+        ).rejects.toBeInstanceOf(ForbiddenException);
+        await expect(
+          service.assertCanChangeOwnership(tx, 'tenant-b', actor),
+        ).rejects.toBeInstanceOf(ForbiddenException);
+      }
+    });
+
+    it('acotado a A cae a la membresía en B: la decide el tenant B, no el rol', async () => {
+      // Sin el atajo, cuenta lo que el actor sea en B: STAFF lee pero no administra.
+      const { service, membershipsRepo, tx } = build({
+        tenantRoleConceptId: DIR.ROLE_STAFF,
+      });
+      const actor = scopedTo('SECURITY_ADMIN', 'tenant-a');
+
+      await expect(service.canAdminister(tx, 'tenant-b', actor)).resolves.toBe(
+        false,
+      );
+      await expect(
+        service.assertCanRead(tx, 'tenant-b', actor),
+      ).resolves.toBeUndefined();
+      expect(membershipsRepo.findActiveByUserTenant).toHaveBeenCalledWith(
+        tx,
+        'admin-a',
+        'tenant-b',
+        expect.anything(),
+      );
+    });
+
+    it('acotado a A sí administra, lee y cambia dueños de A sin consultar membresías', async () => {
+      const { service, membershipsRepo, tx } = build(null);
+
+      for (const role of PLATFORM) {
+        const actor = scopedTo(role, 'tenant-a');
+        await expect(
+          service.canAdminister(tx, 'tenant-a', actor),
+        ).resolves.toBe(true);
+        await expect(
+          service.assertCanAdminister(tx, 'tenant-a', actor),
+        ).resolves.toBeUndefined();
+        await expect(
+          service.assertCanRead(tx, 'tenant-a', actor),
+        ).resolves.toBeUndefined();
+        await expect(
+          service.assertCanChangeOwnership(tx, 'tenant-a', actor),
+        ).resolves.toBeUndefined();
+      }
+      expect(membershipsRepo.findActiveByUserTenant).not.toHaveBeenCalled();
+    });
+
+    it('global (sin ámbito) administra A y B, aunque tenga otros roles acotados', async () => {
+      const { service, membershipsRepo, tx } = build(null);
+
+      for (const role of PLATFORM) {
+        const actor = {
+          id: 'admin-global',
+          roles: [role, 'CLINICIAN'],
+          // Otro código acotado no vuelve acotado al de plataforma.
+          scopedRoles: { 'tenant-a': ['CLINICIAN'] },
+        };
+        for (const tenantId of ['tenant-a', 'tenant-b']) {
+          await expect(
+            service.assertCanAdminister(tx, tenantId, actor),
+          ).resolves.toBeUndefined();
+          await expect(
+            service.assertCanRead(tx, tenantId, actor),
+          ).resolves.toBeUndefined();
+          await expect(
+            service.assertCanChangeOwnership(tx, tenantId, actor),
+          ).resolves.toBeUndefined();
+        }
+      }
+      expect(membershipsRepo.findActiveByUserTenant).not.toHaveBeenCalled();
+    });
+  });
 });

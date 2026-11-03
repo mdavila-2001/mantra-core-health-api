@@ -59,7 +59,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/audit/controllers/audit.controller.ts:152` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -137,7 +137,7 @@ El árbol de decisión completo está en [flujos](../flujos/audit.md).
 - **Bloque:** Auditoría y Reporting
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AuditQueryController.dataAccess` — `src/modules/audit/controllers/audit-query.controller.ts:119`
+- **Implementación:** `AuditQueryController.dataAccess` — `src/modules/audit/controllers/audit-query.controller.ts:120`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -147,14 +147,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /audit/data-access` la atiende `AuditQueryController.dataAccess` (src/modules/audit/controllers/audit-query.controller.ts:119). Exige sesión con alguno de los roles AUDITOR, DPO, SECURITY_ADMIN. Delega en `AuditQueryService.dataAccess`. Lee audit.data_access_log.
+`GET /audit/data-access` la atiende `AuditQueryController.dataAccess` (src/modules/audit/controllers/audit-query.controller.ts:120). Exige sesión con alguno de los roles AUDITOR, DPO, SECURITY_ADMIN. Delega en `AuditQueryService.dataAccess`. Lee audit.data_access_log.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: AUDITOR, DPO, SECURITY_ADMIN | `src/modules/audit/controllers/audit-query.controller.ts:119` |
+| ROL | Alguno de: AUDITOR, DPO, SECURITY_ADMIN | `src/modules/audit/controllers/audit-query.controller.ts:120` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -233,7 +233,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/audit/controllers/audit.controller.ts:64` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -327,7 +327,7 @@ El árbol de decisión completo está en [flujos](../flujos/audit.md).
 - **Bloque:** Auditoría y Reporting
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AuditQueryController.dataAccessSummary` — `src/modules/audit/controllers/audit-query.controller.ts:102`
+- **Implementación:** `AuditQueryController.dataAccessSummary` — `src/modules/audit/controllers/audit-query.controller.ts:103`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -337,14 +337,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /audit/data-access/summary` la atiende `AuditQueryController.dataAccessSummary` (src/modules/audit/controllers/audit-query.controller.ts:102). Exige sesión con alguno de los roles ...AUDIT_SUMMARY_ROLES. Delega en `AuditOversightReadService.dataAccessSummary`. Lee audit.data_access_log, terminology.catalog_concepts.
+`GET /audit/data-access/summary` la atiende `AuditQueryController.dataAccessSummary` (src/modules/audit/controllers/audit-query.controller.ts:103). Exige sesión con alguno de los roles ...AUDIT_SUMMARY_ROLES. Delega en `AuditOversightReadService.dataAccessSummary`. Lee audit.data_access_log, terminology.catalog_concepts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: ...AUDIT_SUMMARY_ROLES | `src/modules/audit/controllers/audit-query.controller.ts:102` |
+| ROL | Alguno de: ...AUDIT_SUMMARY_ROLES | `src/modules/audit/controllers/audit-query.controller.ts:103` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -421,7 +421,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/audit/controllers/audit.controller.ts:83` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -627,7 +627,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/audit/controllers/audit.controller.ts:118` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -705,7 +705,7 @@ El árbol de decisión completo está en [flujos](../flujos/audit.md).
 - **Bloque:** Auditoría y Reporting
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AuditQueryController.log` — `src/modules/audit/controllers/audit-query.controller.ts:75`
+- **Implementación:** `AuditQueryController.log` — `src/modules/audit/controllers/audit-query.controller.ts:76`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -715,14 +715,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /audit/log` la atiende `AuditQueryController.log` (src/modules/audit/controllers/audit-query.controller.ts:75). Exige sesión con alguno de los roles AUDITOR, DPO, SECURITY_ADMIN. Delega en `AuditQueryService.log`. Lee audit.audit_log.
+`GET /audit/log` la atiende `AuditQueryController.log` (src/modules/audit/controllers/audit-query.controller.ts:76). Exige sesión con alguno de los roles AUDITOR, DPO, SECURITY_ADMIN. Delega en `AuditQueryService.log`. Lee audit.audit_log.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: AUDITOR, DPO, SECURITY_ADMIN | `src/modules/audit/controllers/audit-query.controller.ts:75` |
+| ROL | Alguno de: AUDITOR, DPO, SECURITY_ADMIN | `src/modules/audit/controllers/audit-query.controller.ts:76` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -785,7 +785,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Auditoría y Reporting
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AuditQueryController.filterCatalog` — `src/modules/audit/controllers/audit-query.controller.ts:89`
+- **Implementación:** `AuditQueryController.filterCatalog` — `src/modules/audit/controllers/audit-query.controller.ts:90`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -795,14 +795,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /audit/log/filter-catalog` la atiende `AuditQueryController.filterCatalog` (src/modules/audit/controllers/audit-query.controller.ts:89). Exige sesión con alguno de los roles AUDITOR, DPO, SECURITY_ADMIN. Delega en `AuditQueryService.filterCatalog`. No se determinaron tablas para esta operación.
+`GET /audit/log/filter-catalog` la atiende `AuditQueryController.filterCatalog` (src/modules/audit/controllers/audit-query.controller.ts:90). Exige sesión con alguno de los roles AUDITOR, DPO, SECURITY_ADMIN. Delega en `AuditQueryService.filterCatalog`. No se determinaron tablas para esta operación.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: AUDITOR, DPO, SECURITY_ADMIN | `src/modules/audit/controllers/audit-query.controller.ts:89` |
+| ROL | Alguno de: AUDITOR, DPO, SECURITY_ADMIN | `src/modules/audit/controllers/audit-query.controller.ts:90` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -957,7 +957,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/audit/controllers/audit.controller.ts:136` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1055,7 +1055,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/audit/controllers/audit.controller.ts:168` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1179,7 +1179,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/audit/controllers/compliance.controller.ts:25` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1285,7 +1285,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/audit/controllers/moderation.controller.ts:28` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1475,7 +1475,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/audit/controllers/privacy.controller.ts:70` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1653,7 +1653,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/audit/controllers/privacy.controller.ts:87` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/audit/controllers/privacy.controller.ts:87` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 

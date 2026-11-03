@@ -238,7 +238,9 @@ x-app-env: &app-env
   # Desafío MFA en el login para cuentas con factor verificado (TX-29). Apagado.
   AUTH_MFA_CHALLENGE_ENABLED: ${AUTH_MFA_CHALLENGE_ENABLED:-false}
   AUTH_REFRESH_COOKIE_SECURE: ${AUTH_REFRESH_COOKIE_SECURE:-true}
-  RLS_ENFORCE: ${RLS_ENFORCE:-false}
+  # Encendido por defecto (C-3). Con NODE_ENV=production cualquier otro valor
+  # aborta el arranque (SYSTEM_RLS_ENFORCE_DISABLED).
+  RLS_ENFORCE: ${RLS_ENFORCE:-true}
   # El bypass de verificación aborta el arranque si llega en `true` con
   # NODE_ENV=production; se deja escrito para que nadie lo herede de un `.env`.
   DEV_VERIFICATION_BYPASS: "false"
@@ -281,6 +283,11 @@ x-app-env: &app-env
   PHARMACY_ERP_BASE_URL: ${PHARMACY_ERP_BASE_URL:-}
   PHARMACY_ERP_API_KEY: ${PHARMACY_ERP_API_KEY:-}
   PHARMACY_ERP_TIMEOUT_MS: ${PHARMACY_ERP_TIMEOUT_MS:-5000}
+  # Sistema propio de cada farmacia (FAR-C9 · C9-3): la dirección la carga la
+  # farmacia y la llama la API. Solo se llaman los hosts de esta lista; VACÍA =
+  # no se llama a ninguno (fail-closed). En producción, solo https y nunca una
+  # IP interna. `PHARMACY_EXTERNAL_ALLOW_ANY_HOST` no se pone acá.
+  PHARMACY_EXTERNAL_ALLOWED_HOSTS: ${PHARMACY_EXTERNAL_ALLOWED_HOSTS:-}
 
   # --- Plazos HTTP --------------------------------------------------------
   # `keepAlive` por encima del idle timeout del proxy que va delante, o
@@ -731,6 +738,12 @@ services:
       # que hereda del ancla para que `buildOrmConfig` caiga a DB_USER (HZ-05).
       DB_APP_USER: ""
       DB_APP_PASSWORD: ""
+      # El vacío de arriba no alcanza en Coolify: lo trata como «sin valor» y lo
+      # rellena con la variable de la app (`mantra_app`). El propósito es lo que
+      # decide: `resolveRuntimeCredentials` usa el rol dueño con `migration`. Va
+      # en el entorno y no sólo en `seed-cli` porque la configuración del ORM se
+      # arma al importar `OrmModule`, antes de que corra su `main()`.
+      DB_ROLE_PURPOSE: "migration"
     deploy:
       resources: *api-resources
     depends_on:

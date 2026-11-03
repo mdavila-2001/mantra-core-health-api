@@ -24,7 +24,7 @@ import { ReportTemplatesController } from '../../src/modules/accounting/report-t
 import { ReportTemplatesRepository } from '../../src/modules/accounting/report-templates/report-templates.repository';
 import { ReportTemplatesService } from '../../src/modules/accounting/report-templates/report-templates.service';
 import {
-  isDisposableDatabaseName,
+  assertPermanentResidueTarget,
   resolveResetTarget,
 } from './disposable-database';
 
@@ -57,8 +57,7 @@ describe('Plantillas de presentación contable (HTTP + PostgreSQL)', () => {
 
   beforeAll(async () => {
     const target = resolveResetTarget(process.env);
-    if (!isDisposableDatabaseName(target.database))
-      throw new Error('La prueba exige una base descartable');
+    assertPermanentResidueTarget(target, process.env);
     orm = await MikroORM.init({
       host: target.host,
       port: target.port,

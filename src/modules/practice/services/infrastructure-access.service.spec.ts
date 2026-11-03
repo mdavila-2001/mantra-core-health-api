@@ -299,6 +299,51 @@ describe('roles globales sólo cuentan para su objetivo (revisión de seguridad)
   });
 });
 
+// Rol de plataforma acotado a un tenant (`scopedRoles`, MCH-001): sólo es
+// plataforma en las sedes de su tenant (#1241).
+describe('plataforma acotada a un tenant', () => {
+  const PLATFORM = ['SECURITY_ADMIN', 'PLATFORM_ADMIN', 'SUPERADMIN'];
+  const scopedTo = (role: string, tenantId: string) =>
+    ({
+      id: 'admin-a',
+      roles: [role],
+      scopedRoles: { [tenantId]: [role] },
+    }) as any;
+  const siteB = { ...site, id: 'site-b', tenantId: 'tenant-b' };
+
+  it('acotado al tenant de la sede: es plataforma; acotado a otro: no', async () => {
+    for (const role of PLATFORM) {
+      const { svc } = build();
+      const inSite = await svc.actorScope(
+        {} as any,
+        scopedTo(role, TENANT),
+        site as any,
+      );
+      expect(inSite.base).toContain('SUPERADMIN');
+      const elsewhere = await svc.actorScope(
+        {} as any,
+        scopedTo(role, TENANT),
+        siteB as any,
+      );
+      expect(elsewhere.base).not.toContain('SUPERADMIN');
+    }
+  });
+
+  it('global: es plataforma en cualquier sede', async () => {
+    for (const role of PLATFORM) {
+      const { svc } = build();
+      for (const target of [site, siteB]) {
+        const scope = await svc.actorScope(
+          {} as any,
+          { id: 'root', roles: [role] } as any,
+          target as any,
+        );
+        expect(scope.base).toContain('SUPERADMIN');
+      }
+    }
+  });
+});
+
 describe('alcance por unidad en colecciones (revisión de seguridad F3)', () => {
   it('asignación UNIT A: canOnUnit A sí, B no, null no; nivel sede no', async () => {
     const { svc } = build([

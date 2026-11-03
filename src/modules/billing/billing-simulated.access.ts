@@ -2,7 +2,8 @@
     Quién puede qué en `/billing/simulated/*` (decisión de negocio, 2026-10-11).
 
     - ADMINISTRACIÓN de la clínica (`SECURITY_ADMIN`, `BILLING`, `FINANCE`,
-      `CASHIER`, `PAYMENTS_ADMIN`; `SUPERADMIN` sin acotar): ve los cobros de los
+      `CASHIER`, `PAYMENTS_ADMIN`; `SUPERADMIN` global sin acotar, el acotado
+      en `scopedRoles` sólo en sus tenants): ve los cobros de los
       tenants de los que es miembro, aplica pagos reales, emite, anula,
       revierte, entrega por correo y ve la bandeja.
     - MÉDICO (`PRACTITIONER`, `CLINICIAN`, con perfil profesional): sólo los
@@ -15,7 +16,7 @@
       le emitieron.
     ========================================================================== */
 
-import type { AuthenticatedUser } from '../../common';
+import { roleAuthorizesInTenant, type AuthenticatedUser } from '../../common';
 
 export const ADMIN_ROLES: readonly string[] = [
   'SECURITY_ADMIN',
@@ -32,17 +33,27 @@ export const PRACTITIONER_ROLES: readonly string[] = [
 export type OperatingScope =
   | {
       kind: 'admin';
-      /** `null` = sin acotar (SUPERADMIN). */
+      /** `null` = sin acotar (SUPERADMIN global). */
       tenantIds: readonly string[] | null;
     }
   | { kind: 'practitioner'; practitionerProfileId: string };
 
 /** El alcance con el que se opera cobros y facturas; `null` = sin permiso. */
 export function operatingScope(user: AuthenticatedUser): OperatingScope | null {
-  if (user.roles.includes('SUPERADMIN'))
+  // Sin acotar sólo el `SUPERADMIN` global. Uno acotado en `scopedRoles`
+  // administra los tenants donde se le concedió, nada más (#1241).
+  if (roleAuthorizesInTenant(user, 'SUPERADMIN', undefined))
     return { kind: 'admin', tenantIds: null };
-  if (user.roles.some((r) => ADMIN_ROLES.includes(r))) {
-    return { kind: 'admin', tenantIds: user.tenantIds ?? [] };
+  const superadminTenants = Object.keys(user.scopedRoles ?? {}).filter((t) =>
+    roleAuthorizesInTenant(user, 'SUPERADMIN', t),
+  );
+  const isAdmin = user.roles.some((r) => ADMIN_ROLES.includes(r));
+  if (isAdmin || superadminTenants.length > 0) {
+    const memberTenants = isAdmin ? (user.tenantIds ?? []) : [];
+    return {
+      kind: 'admin',
+      tenantIds: [...new Set([...memberTenants, ...superadminTenants])],
+    };
   }
   if (
     user.practitionerProfileId !== undefined &&

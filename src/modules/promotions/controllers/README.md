@@ -50,7 +50,7 @@ marketing: es el estilo del proyecto y el enrutador de Nest 11 interpreta `:` co
 parámetro en cualquier posición del segmento, de modo que `coupons:batch` quedaría como el literal
 `coupons` seguido de un parámetro llamado `batch`.
 
-## Pruebas
+## Tests
 
 `promotions.controller.spec.ts` cubre ambos controladores con los servicios mockeados: delegación,
 argumentos (incluido el actor y los ids de ruta), la validación que va sin actor y propagación de

@@ -76,6 +76,11 @@ export class HttpExternalPharmacyCatalogAdapter implements ExternalPharmacyCatal
     });
   }
 
+  /** El sistema del servidor no tiene ruta de salud: responde si lista su catálogo. */
+  async checkHealth(): Promise<void> {
+    await this.listProducts();
+  }
+
   private async get(
     path: string,
     params?: Record<string, string>,

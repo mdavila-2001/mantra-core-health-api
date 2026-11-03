@@ -14,7 +14,7 @@ Dos, porque el módulo tiene dos vidas distintas:
 Comparten repositorio y el mapa de entornos (`ENVIRONMENT_CONCEPT`), pero ni una regla: mezclarlos
 pondría el camino caliente del login a cargar el mismo servicio que la administración.
 
-## Reglas de negocio
+## Business rules
 
 ### Configuración
 
@@ -107,7 +107,7 @@ perdería el intento, que es justo lo que hay que auditar.
 `operation: 'auth-providers.<área>.<acción>'`. `warn` en rotación de clave, rechazo de login y
 revocación de identidad. Nunca se loguean secretos, tokens ni claims.
 
-## Pruebas
+## Tests
 
 - `auth-providers-config.service.spec.ts` (40): borrador y activación, reemplazo de configuración,
   importación selectiva del JWKS, forma exigida por protocolo, gracia de la rotación, reemplazo en

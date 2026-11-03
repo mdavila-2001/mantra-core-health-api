@@ -7,6 +7,13 @@ import type { IndexTuple } from '../catalog.types';
  */
 export const auditIndexes3: readonly IndexTuple[] = [
   // [tabla, nombre, columnas, único, método]
+  ['integration_endpoints_history', 'ix_integration_endpoints_history_integration_endpoint_id', ['integration_endpoint_id'], false, 'btree'],
+  ['integration_endpoints_history', 'ix_integration_endpoints_history_operation_concept_id', ['operation_concept_id'], false, 'btree'],
+  ['integration_endpoints_history', 'ix_integration_endpoints_history_changed_by_user_id', ['changed_by_user_id'], false, 'btree'],
+  ['integration_endpoints_history', 'ix_integration_endpoints_history_change_reason_concept_id', ['change_reason_concept_id'], false, 'btree'],
+  ['integration_endpoints_history', 'brin_integration_endpoints_history_recorded_at', ['recorded_at'], false, 'brin'],
+  ['invoices_history', 'ix_invoices_history_invoice_id', ['invoice_id'], false, 'btree'],
+  ['invoices_history', 'ix_invoices_history_operation_concept_id', ['operation_concept_id'], false, 'btree'],
   ['invoices_history', 'ix_invoices_history_changed_by_user_id', ['changed_by_user_id'], false, 'btree'],
   ['invoices_history', 'ix_invoices_history_change_reason_concept_id', ['change_reason_concept_id'], false, 'btree'],
   ['invoices_history', 'brin_invoices_history_recorded_at', ['recorded_at'], false, 'brin'],
@@ -180,11 +187,4 @@ export const auditIndexes3: readonly IndexTuple[] = [
   ['pharmacovigilance_reports_history', 'ix_pharmacovigilance_reports_history_operation_concept_id', ['operation_concept_id'], false, 'btree'],
   ['pharmacovigilance_reports_history', 'ix_pharmacovigilance_reports_history_changed_by_user_id', ['changed_by_user_id'], false, 'btree'],
   ['pharmacovigilance_reports_history', 'ix_pharmacovigilance_reports_history_change_reason_concept_id', ['change_reason_concept_id'], false, 'btree'],
-  ['pharmacovigilance_reports_history', 'brin_pharmacovigilance_reports_history_recorded_at', ['recorded_at'], false, 'brin'],
-  ['pharmacy_inventory_access_log', 'ix_pharmacy_inventory_access_log_pharmacy_id', ['pharmacy_id'], false, 'btree'],
-  ['pharmacy_inventory_access_log', 'ix_pharmacy_inventory_access_log_actor_user_id', ['actor_user_id'], false, 'btree'],
-  ['pharmacy_inventory_access_log', 'ix_pharmacy_inventory_access_log_action_concept_id', ['action_concept_id'], false, 'btree'],
-  ['pharmacy_inventory_access_log', 'ix_pharmacy_inventory_access_log_target_type_concept_id', ['target_type_concept_id'], false, 'btree'],
-  ['pharmacy_inventory_access_log', 'ix_pharmacy_inventory_access_log_purpose_of_use_concept_id', ['purpose_of_use_concept_id'], false, 'btree'],
-  ['pharmacy_inventory_access_log', 'ix_pharmacy_inventory_access_log_outcome_concept_id', ['outcome_concept_id'], false, 'btree'],
 ];

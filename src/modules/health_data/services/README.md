@@ -29,7 +29,7 @@ transacción no quede repartida entre dos dueños:
 - `DataReleaseService` → `CanonicalResourcesRepository`, `PatientIdentityRepository` y
   `HealthProvenanceRepository`.
 
-## Reglas de negocio
+## Business rules
 
 ### Ingesta
 
@@ -129,7 +129,7 @@ de perfiles, de-identificación fallida y —siempre— exportación y `$everyth
 clínicos y deben quedar registrados aunque salgan bien. No se loguean payloads, valores observados ni
 resúmenes clínicos.
 
-## Pruebas
+## Tests
 
 - `health-ingestion.service.spec.ts` (20): lote no reabierto, dedupe del registro, conciliación al
   cerrar, creación frente a actualización de versión, payload idéntico sin versionar, hash estable

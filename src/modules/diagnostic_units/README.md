@@ -76,7 +76,7 @@ Entidades (`tableName`, 10 de 10 archivos `*.entity.ts`): `diagnostic_equipment`
 `diagnostic_study_offerings`, `diagnostic_study_components`,
 `diagnostic_price_schedules`, `diagnostic_study_prices`, `diagnostic_equipment`.
 
-## Reglas de negocio
+## Business rules
 
 - **Unicidad**: el modelo declara para la unidad **dos restricciones separadas** —
   `tenant_id` a solas (una unidad de diagnóstico por organización) y `code` a solas
@@ -100,7 +100,7 @@ Entidades (`tableName`, 10 de 10 archivos `*.entity.ts`): `diagnostic_equipment`
   mismo rol/sitio (`409`).
 - **Ofertas/estudios/precios/cronogramas** requieren unidad ACTIVA (`422`).
 
-## Permisos
+## Permissions
 
 Guard JWT global. Las lecturas del directorio aceptan cualquier sesión con tenant
 activo y nunca reciben `tenantId` del cliente; los comandos requieren rol

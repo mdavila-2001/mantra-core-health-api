@@ -86,7 +86,7 @@ account-link-requests ──> token (una sola vez) ──> complete ──> iden
 federated-identities/:id/unlink ──> identidad revocada + intento `unlinked`
 ```
 
-## Reglas de negocio
+## Business rules
 
 - **El proveedor nace en borrador** y sólo pasa a activo al configurar su protocolo. Un proveedor sin
   endpoints ni claves no puede autenticar a nadie, y dejarlo activo sería mentir sobre su estado.
@@ -125,7 +125,7 @@ frontera. Por eso el callback acepta un `userId` ya resuelto por IAM y, cuando n
 token de vinculación en lugar de inventar el usuario. El aprovisionamiento JIT de la identidad
 federada sí ocurre aquí, porque la identidad es nuestra.
 
-## Permisos
+## Permissions
 
 `IDENTITY_ADMIN` cubre el módulo entero y es el único que registra proveedores, configura protocolos,
 publica y rota claves, fija mapeos, vincula tenants, define reglas y desvincula. `AUTH_SERVICE`
@@ -134,7 +134,7 @@ publica y rota claves, fija mapeos, vincula tenants, define reglas y desvincula.
 Ninguna ruta es pública: el callback llega desde el servicio de autenticación, no desde el navegador
 del usuario.
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE` sobre el proveedor en toda reconfiguración, sobre la configuración del entorno que se
 reemplaza, sobre las claves activas al rotar (publicar la nueva y retirar las salientes deben ver el
@@ -148,7 +148,7 @@ identidad del sujeto en el callback y sobre la solicitud de vinculación que se 
 y revocación de identidad. No se loguean secretos, tokens ni claims: el `clientSecretRef` es una
 referencia al vault, nunca el secreto.
 
-## Pruebas
+## Tests
 
 `corepack yarn test src/modules/auth_providers --runInBand --silent` — 96 pruebas (84 de servicio + 12 de delegación del
 controlador).

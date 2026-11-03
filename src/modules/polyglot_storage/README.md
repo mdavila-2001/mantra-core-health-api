@@ -104,7 +104,7 @@ finops/storage-cost-snapshots ──> idempotente por ámbito y periodo
 ops/integrity/:datasetId/verify ──> hashes distintos + política ⇒ colocación QUARANTINED
 ```
 
-## Reglas de negocio
+## Business rules
 
 - **El backend nace `REGISTERED`, no `ACTIVE`**: declarar un motor no es lo mismo que haber
   comprobado que responde. Sus capacidades nacen sin verificar por la misma razón — lo que dice
@@ -141,7 +141,7 @@ ops/integrity/:datasetId/verify ──> hashes distintos + política ⇒ colocac
 - **Una proyección divergente se cuarentena** si la política lo ordena: seguir sirviendo algo que ya
   se sabe que no cuadra con la fuente canónica es devolver datos incorrectos sin avisar.
 
-## Permisos
+## Permissions
 
 `PLATFORM_ADMIN` cubre el módulo y es el único que registra backends y fuerza failovers.
 `GOVERNANCE_ADMIN` define datasets, colecciones, políticas y vínculos. `SECURITY_ADMIN` define
@@ -150,7 +150,7 @@ costes.
 
 Ninguna ruta es pública.
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE` sobre el dataset al publicar versión —el número sale de un máximo—, sobre la versión
 vigente que se supersede, sobre la colocación al vincularla o degradarla, sobre la región al
@@ -164,7 +164,7 @@ bloquee detrás de una colocación que alguien está tocando.
 los dos momentos en que el tráfico cambia de sitio— y ante proyección cuarentenada. No se loguean
 referencias de clave ni expresiones de filtro.
 
-## Pruebas
+## Tests
 
 `yarn test --testPathPatterns=modules/polyglot_storage` — 84 pruebas (69 de servicio + 15 de
 delegación de los tres controladores).

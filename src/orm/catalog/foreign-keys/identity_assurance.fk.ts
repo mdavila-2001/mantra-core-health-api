@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `identity_assurance`.
- * 69 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 70 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const identityAssuranceForeignKeys: readonly ForeignKeyTuple[] = [
@@ -68,6 +68,7 @@ export const identityAssuranceForeignKeys: readonly ForeignKeyTuple[] = [
   ['identity_verification_cases', 'requested_assurance_level_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['identity_verification_cases', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['identity_verification_cases', 'subject_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['identity_verification_cases', 'tenant_id', 'directory', 'tenants', 'id'],
   ['identity_verification_cases', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['identity_verification_policies', 'created_by_user_id', 'iam', 'users', 'id'],
   ['identity_verification_policies', 'required_authenticator_assurance_level_concept_id', 'terminology', 'catalog_concepts', 'id'],

@@ -95,4 +95,18 @@ describe('pharmacyErpEnvSchema', () => {
       }).error,
     ).toBeUndefined();
   });
+
+  it('no deja abrir la lista de hosts en producción (FAR-C9 · C9-3)', () => {
+    const { error } = pharmacyErpEnvSchema.validate({
+      NODE_ENV: 'production',
+      PHARMACY_EXTERNAL_ALLOW_ANY_HOST: 'true',
+    });
+    expect(error?.message).toMatch(/PHARMACY_EXTERNAL_ALLOW_ANY_HOST/);
+    expect(
+      pharmacyErpEnvSchema.validate({
+        NODE_ENV: 'development',
+        PHARMACY_EXTERNAL_ALLOW_ANY_HOST: 'true',
+      }).error,
+    ).toBeUndefined();
+  });
 });

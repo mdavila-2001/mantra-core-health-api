@@ -1,4 +1,4 @@
-import { Inject, Module, type OnModuleDestroy } from '@nestjs/common';
+import { Global, Inject, Module, type OnModuleDestroy } from '@nestjs/common';
 import { RedisRuntimeController } from './controllers';
 import { RedisRuntimeService } from './services';
 import {
@@ -17,6 +17,7 @@ import {
  * otros módulos (p. ej. verificación de contact points vía `verifyChallenge`)
  * puedan reutilizar el runtime sin abrir conexiones propias.
  */
+@Global()
 @Module({
   controllers: [RedisRuntimeController],
   providers: [redisClientProvider, RedisRuntimeService],

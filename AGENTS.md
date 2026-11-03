@@ -79,11 +79,33 @@ Esta plataforma maneja datos clínicos. Estas prohibiciones **no admiten excepci
   terminada. Un mock cubre una capa, no prueba la integración.
 - Un test en rojo **bloquea el cierre**. Se corrige, o se declara `BLOQUEADO` con evidencia externa.
 
-### 1.6 Ramas
+### 1.6 Ramas y Pull Requests Obligatorios (Orden de Pablo - 02/11/2026)
 
-- **Los cambios van por PR hacia `dev`.**
+- **Los cambios van SIEMPRE por PR hacia `dev`.**
+- **Obligatorio para toda sesión**: Al terminar el objetivo y pasar los gates, crear rama, hacer push y **ABRIR PULL REQUEST HACIA `dev`**. Nada puede quedar pendiente en local.
 - **Prohibido abrir PR hacia `test`.** Está dada de baja desde el 30/10/2026: no despliega nada y
   `test.alovidasalud.com` redirige a `dev`.
+
+### 1.7 Reforma estructural: arquitectura hexagonal, DTOs atómicos y código ≤ 300 líneas
+
+- **Regla durísima de código Lean:** Escribir única y exclusivamente las líneas de código necesarias.
+  Prohibido el boilerplate superfluo y la sobre-ingeniería.
+- **Tope estricto:** Ningún archivo de código nuevo (`.ts`, `.sql`, etc.) puede superar **300 líneas** salvo estricta
+  necesidad justificada (catálogos de semillas estáticos `*.catalog.ts`).
+- **Ratchet anti-crecimiento:** Los archivos heredados que superan 300 líneas quedan congelados en
+  `scripts/baselines/max-lines.json` y tienen **terminantemente prohibido crecer** (ratchet estricto).
+- **Arquitectura Hexagonal (Ports & Adapters):**
+  - Casos de uso aislados e independientes en `application/use-cases/` (≤ 150 líneas).
+  - Puertos de entrada y salida desacoplados en `domain/ports/`.
+  - Controladores y adaptadores de infraestructura delgados (≤ 150 líneas).
+  - DTOs atómicos: prohibidos los archivos macro-DTOs de miles de líneas; cada operación lleva su archivo
+    DTO específico en `dto/` (≤ 80 líneas).
+  - Al modificar o refactorizar un archivo existente de más de 300 líneas, es obligatorio descomponerlo
+    extrayendo casos de uso, servicios especializados, DTOs atómicos o helpers de dominio.
+- **Comentarios inline en inglés (English inline comments):** Todo comentario de código, JSDoc y notas inline
+  debe escribirse obligatoriamente en inglés para mantener coherencia técnica internacional.
+- **Orquestación con KMAN:** Se utiliza la skill y CLI de `kman` para orquestar agentes en carriles paralelos disjuntos.
+
 
 ---
 

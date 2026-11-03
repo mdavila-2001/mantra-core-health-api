@@ -472,5 +472,21 @@ describe('DiagnosticsImagingService', () => {
       expect(d.accountLinksRepo.findActiveByUser).not.toHaveBeenCalled();
       expect(d.repo.findStudiesByPatient).toHaveBeenCalled();
     });
+
+    it('SUPERADMIN acotado (a este tenant o a otro) no tiene comodín: sigue la regla de quien atiende (#1241)', async () => {
+      for (const tenantId of [T1, T2]) {
+        const d = build();
+        d.accountLinksRepo.findActiveByUser.mockResolvedValue(null);
+        await expectNotAvailable(
+          d.service.listStudiesByPatient(T1, PATIENT, {
+            id: 'su-scoped',
+            roles: ['SUPERADMIN'],
+            scopedRoles: { [tenantId]: ['SUPERADMIN'] },
+          } as any),
+          DiagnosticsErrorReason.DIAGNOSTICS_PATIENT_NOT_AVAILABLE,
+        );
+        expect(d.repo.findStudiesByPatient).not.toHaveBeenCalled();
+      }
+    });
   });
 });

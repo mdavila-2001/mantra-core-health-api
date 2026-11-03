@@ -4,7 +4,7 @@
 
 - **Bloque:** Integraciones y Contratos (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
 - **Operaciones:** 15 (15 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 2 · MEDIO 10 · BAJO 3
+- **Riesgo:** ALTO 1 · MEDIO 11 · BAJO 3
 - **Tablas distintas que tocan:** 10
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/integrations.md` (generado aparte por `yarn docs:endpoints:generate`)
 
@@ -14,7 +14,7 @@
 |---|---|---|---|---|---|---|
 | 1 | POST | `/integrations/connections/{id}:pause` | Pausar una conexión en fallo (circuit breaker) | MEDIO | 3 | SECURITY_ADMIN |
 | 2 | POST | `/integrations/connections/{id}/credentials:rotate` | Rotar/expirar la credencial de una conexión | MEDIO | 4 | SECURITY_ADMIN |
-| 3 | POST | `/integrations/messages:outbound` | Encolar un mensaje saliente (idempotente) | ALTO | 3 | sesión (sin roles) |
+| 3 | POST | `/integrations/messages:outbound` | Encolar un mensaje saliente (idempotente) | MEDIO | 3 | SYSTEM, SECURITY_ADMIN |
 | 4 | POST | `/integrations/messages/{id}:correlate` | Procesar callback/respuesta asíncrona del proveedor | MEDIO | 6 | SYSTEM, SECURITY_ADMIN |
 | 5 | POST | `/integrations/messages/{id}:dead-letter` | Enviar a dead-letter tras agotar reintentos | MEDIO | 4 | SYSTEM, SECURITY_ADMIN |
 | 6 | POST | `/integrations/messages/{id}:dispatch` | Despachar un mensaje y registrar su respuesta | MEDIO | 7 | SYSTEM, SECURITY_ADMIN |
@@ -137,7 +137,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/integrations/controllers/integrations-connections.controller.ts:44` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integrations/controllers/integrations-connections.controller.ts:44` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -222,9 +222,9 @@ El árbol de decisión completo está en [flujos](../flujos/integrations.md).
 - **Origen:** CONTRATO
 - **Nombre:** Encolar un mensaje saliente (idempotente)
 - **Bloque:** Integraciones y Contratos
-- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IntegrationsMessagesController.enqueueOutbound` — `src/modules/integrations/controllers/integrations-messages.controller.ts:53`
+- **Implementación:** `IntegrationsMessagesController.enqueueOutbound` — `src/modules/integrations/controllers/integrations-messages.controller.ts:58`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -234,16 +234,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /integrations/messages:outbound` la atiende `IntegrationsMessagesController.enqueueOutbound` (src/modules/integrations/controllers/integrations-messages.controller.ts:53). Exige sesión; el controlador no declara roles. Valida el cuerpo como `EnqueueOutboundDto` (8 campos, 3 obligatorios). Delega en `IntegrationsMessagingService.enqueueOutbound`. Crea filas en integrations.outbound_messages. Lee integrations.outbound_messages, integrations.provider_connections.
+`POST /integrations/messages:outbound` la atiende `IntegrationsMessagesController.enqueueOutbound` (src/modules/integrations/controllers/integrations-messages.controller.ts:58). Exige sesión con alguno de los roles SYSTEM, SECURITY_ADMIN. Valida el cuerpo como `EnqueueOutboundDto` (8 campos, 3 obligatorios). Delega en `IntegrationsMessagingService.enqueueOutbound`. Crea filas en integrations.outbound_messages. Lee integrations.outbound_messages, integrations.provider_connections.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/integrations/controllers/integrations-messages.controller.ts:53` |
+| ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/integrations/controllers/integrations-messages.controller.ts:58` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -322,7 +322,7 @@ El árbol de decisión completo está en [flujos](../flujos/integrations.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/integrations/controllers/integrations-messages.controller.spec.ts:43` |
+| CONTROLADOR | `src/modules/integrations/controllers/integrations-messages.controller.spec.ts:56` |
 
 ### Flujos
 
@@ -337,7 +337,7 @@ El árbol de decisión completo está en [flujos](../flujos/integrations.md).
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IntegrationsMessagesController.correlate` — `src/modules/integrations/controllers/integrations-messages.controller.ts:169`
+- **Implementación:** `IntegrationsMessagesController.correlate` — `src/modules/integrations/controllers/integrations-messages.controller.ts:175`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -347,16 +347,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /integrations/messages/{id}:correlate` la atiende `IntegrationsMessagesController.correlate` (src/modules/integrations/controllers/integrations-messages.controller.ts:169). Exige sesión con alguno de los roles SYSTEM, SECURITY_ADMIN. Delega en `IntegrationsMessagingService.correlate`. Crea filas en integrations.message_responses. Actualiza integrations.inbound_messages, integrations.outbound_messages. Lee integrations.inbound_messages, integrations.outbound_messages, integrations.provider_connections.
+`POST /integrations/messages/{id}:correlate` la atiende `IntegrationsMessagesController.correlate` (src/modules/integrations/controllers/integrations-messages.controller.ts:175). Exige sesión con alguno de los roles SYSTEM, SECURITY_ADMIN. Delega en `IntegrationsMessagingService.correlate`. Crea filas en integrations.message_responses. Actualiza integrations.inbound_messages, integrations.outbound_messages. Lee integrations.inbound_messages, integrations.outbound_messages, integrations.provider_connections.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/integrations/controllers/integrations-messages.controller.ts:169` |
+| ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/integrations/controllers/integrations-messages.controller.ts:175` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integrations/controllers/integrations-messages.controller.ts:169` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integrations/controllers/integrations-messages.controller.ts:175` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -406,7 +406,7 @@ El árbol de decisión completo está en [flujos](../flujos/integrations.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/integrations/controllers/integrations-messages.controller.spec.ts:68` |
+| CONTROLADOR | `src/modules/integrations/controllers/integrations-messages.controller.spec.ts:81` |
 
 ### Flujos
 
@@ -421,7 +421,7 @@ El árbol de decisión completo está en [flujos](../flujos/integrations.md).
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IntegrationsMessagesController.deadLetter` — `src/modules/integrations/controllers/integrations-messages.controller.ts:136`
+- **Implementación:** `IntegrationsMessagesController.deadLetter` — `src/modules/integrations/controllers/integrations-messages.controller.ts:142`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -431,16 +431,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /integrations/messages/{id}:dead-letter` la atiende `IntegrationsMessagesController.deadLetter` (src/modules/integrations/controllers/integrations-messages.controller.ts:136). Exige sesión con alguno de los roles SYSTEM, SECURITY_ADMIN. Delega en `IntegrationsMessagingService.deadLetter`. Crea filas en integrations.message_retries. Lee integrations.message_retries, integrations.outbound_messages, integrations.provider_connections.
+`POST /integrations/messages/{id}:dead-letter` la atiende `IntegrationsMessagesController.deadLetter` (src/modules/integrations/controllers/integrations-messages.controller.ts:142). Exige sesión con alguno de los roles SYSTEM, SECURITY_ADMIN. Delega en `IntegrationsMessagingService.deadLetter`. Crea filas en integrations.message_retries. Lee integrations.message_retries, integrations.outbound_messages, integrations.provider_connections.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/integrations/controllers/integrations-messages.controller.ts:136` |
+| ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/integrations/controllers/integrations-messages.controller.ts:142` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integrations/controllers/integrations-messages.controller.ts:136` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integrations/controllers/integrations-messages.controller.ts:142` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -487,7 +487,7 @@ El árbol de decisión completo está en [flujos](../flujos/integrations.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/integrations/controllers/integrations-messages.controller.spec.ts:62` |
+| CONTROLADOR | `src/modules/integrations/controllers/integrations-messages.controller.spec.ts:75` |
 
 ### Flujos
 
@@ -502,7 +502,7 @@ El árbol de decisión completo está en [flujos](../flujos/integrations.md).
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IntegrationsMessagesController.dispatch` — `src/modules/integrations/controllers/integrations-messages.controller.ts:84`
+- **Implementación:** `IntegrationsMessagesController.dispatch` — `src/modules/integrations/controllers/integrations-messages.controller.ts:90`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -512,17 +512,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /integrations/messages/{id}:dispatch` la atiende `IntegrationsMessagesController.dispatch` (src/modules/integrations/controllers/integrations-messages.controller.ts:84). Exige sesión con alguno de los roles SYSTEM, SECURITY_ADMIN. Valida el cuerpo como `DispatchMessageDto` (0 campos, 0 obligatorios). Delega en `IntegrationsMessagingService.dispatch`. Crea filas en integrations.message_responses. Actualiza integrations.outbound_messages. Lee integrations.external_providers, integrations.integration_endpoints, integrations.outbound_messages, integrations.provider_connections, integrations.provider_credentials.
+`POST /integrations/messages/{id}:dispatch` la atiende `IntegrationsMessagesController.dispatch` (src/modules/integrations/controllers/integrations-messages.controller.ts:90). Exige sesión con alguno de los roles SYSTEM, SECURITY_ADMIN. Valida el cuerpo como `DispatchMessageDto` (0 campos, 0 obligatorios). Delega en `IntegrationsMessagingService.dispatch`. Crea filas en integrations.message_responses. Actualiza integrations.outbound_messages. Lee integrations.external_providers, integrations.integration_endpoints, integrations.outbound_messages, integrations.provider_connections, integrations.provider_credentials.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/integrations/controllers/integrations-messages.controller.ts:84` |
+| ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/integrations/controllers/integrations-messages.controller.ts:90` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integrations/controllers/integrations-messages.controller.ts:84` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integrations/controllers/integrations-messages.controller.ts:90` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -580,7 +580,7 @@ El árbol de decisión completo está en [flujos](../flujos/integrations.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/integrations/controllers/integrations-messages.controller.spec.ts:50` |
+| CONTROLADOR | `src/modules/integrations/controllers/integrations-messages.controller.spec.ts:63` |
 
 ### Flujos
 
@@ -595,7 +595,7 @@ El árbol de decisión completo está en [flujos](../flujos/integrations.md).
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IntegrationsMessagesController.retry` — `src/modules/integrations/controllers/integrations-messages.controller.ts:119`
+- **Implementación:** `IntegrationsMessagesController.retry` — `src/modules/integrations/controllers/integrations-messages.controller.ts:125`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -605,16 +605,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /integrations/messages/{id}:retry` la atiende `IntegrationsMessagesController.retry` (src/modules/integrations/controllers/integrations-messages.controller.ts:119). Exige sesión con alguno de los roles SYSTEM, SECURITY_ADMIN. Delega en `IntegrationsMessagingService.retry`. Crea filas en integrations.message_retries. Lee integrations.message_retries, integrations.outbound_messages, integrations.provider_connections.
+`POST /integrations/messages/{id}:retry` la atiende `IntegrationsMessagesController.retry` (src/modules/integrations/controllers/integrations-messages.controller.ts:125). Exige sesión con alguno de los roles SYSTEM, SECURITY_ADMIN. Delega en `IntegrationsMessagingService.retry`. Crea filas en integrations.message_retries. Lee integrations.message_retries, integrations.outbound_messages, integrations.provider_connections.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/integrations/controllers/integrations-messages.controller.ts:119` |
+| ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/integrations/controllers/integrations-messages.controller.ts:125` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integrations/controllers/integrations-messages.controller.ts:119` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integrations/controllers/integrations-messages.controller.ts:125` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -662,7 +662,7 @@ El árbol de decisión completo está en [flujos](../flujos/integrations.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/integrations/controllers/integrations-messages.controller.spec.ts:56` |
+| CONTROLADOR | `src/modules/integrations/controllers/integrations-messages.controller.spec.ts:69` |
 
 ### Flujos
 
@@ -677,7 +677,7 @@ El árbol de decisión completo está en [flujos](../flujos/integrations.md).
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IntegrationsMessagesController.listPendingCorrelation` — `src/modules/integrations/controllers/integrations-messages.controller.ts:156`
+- **Implementación:** `IntegrationsMessagesController.listPendingCorrelation` — `src/modules/integrations/controllers/integrations-messages.controller.ts:162`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -687,14 +687,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /integrations/messages/pending-correlation` la atiende `IntegrationsMessagesController.listPendingCorrelation` (src/modules/integrations/controllers/integrations-messages.controller.ts:156). Exige sesión con alguno de los roles SYSTEM, SECURITY_ADMIN. Delega en `IntegrationsMessagingService.listReceivedForCorrelation`. Lee integrations.inbound_messages, integrations.provider_connections.
+`GET /integrations/messages/pending-correlation` la atiende `IntegrationsMessagesController.listPendingCorrelation` (src/modules/integrations/controllers/integrations-messages.controller.ts:162). Exige sesión con alguno de los roles SYSTEM, SECURITY_ADMIN. Delega en `IntegrationsMessagingService.listReceivedForCorrelation`. Lee integrations.inbound_messages, integrations.provider_connections.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/integrations/controllers/integrations-messages.controller.ts:156` |
+| ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/integrations/controllers/integrations-messages.controller.ts:162` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -731,7 +731,7 @@ El árbol de decisión completo está en [flujos](../flujos/integrations.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/integrations/controllers/integrations-messages.controller.spec.ts:101` |
+| CONTROLADOR | `src/modules/integrations/controllers/integrations-messages.controller.spec.ts:114` |
 
 ### Flujos
 
@@ -746,7 +746,7 @@ El árbol de decisión completo está en [flujos](../flujos/integrations.md).
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IntegrationsMessagesController.listPendingDispatch` — `src/modules/integrations/controllers/integrations-messages.controller.ts:73`
+- **Implementación:** `IntegrationsMessagesController.listPendingDispatch` — `src/modules/integrations/controllers/integrations-messages.controller.ts:79`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -756,14 +756,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /integrations/messages/pending-dispatch` la atiende `IntegrationsMessagesController.listPendingDispatch` (src/modules/integrations/controllers/integrations-messages.controller.ts:73). Exige sesión con alguno de los roles SYSTEM, SECURITY_ADMIN. Delega en `IntegrationsMessagingService.listQueuedForDispatch`. Lee integrations.outbound_messages, integrations.provider_connections.
+`GET /integrations/messages/pending-dispatch` la atiende `IntegrationsMessagesController.listPendingDispatch` (src/modules/integrations/controllers/integrations-messages.controller.ts:79). Exige sesión con alguno de los roles SYSTEM, SECURITY_ADMIN. Delega en `IntegrationsMessagingService.listQueuedForDispatch`. Lee integrations.outbound_messages, integrations.provider_connections.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/integrations/controllers/integrations-messages.controller.ts:73` |
+| ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/integrations/controllers/integrations-messages.controller.ts:79` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -800,7 +800,7 @@ El árbol de decisión completo está en [flujos](../flujos/integrations.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/integrations/controllers/integrations-messages.controller.spec.ts:74` |
+| CONTROLADOR | `src/modules/integrations/controllers/integrations-messages.controller.spec.ts:87` |
 
 ### Flujos
 
@@ -815,7 +815,7 @@ El árbol de decisión completo está en [flujos](../flujos/integrations.md).
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IntegrationsMessagesController.listPendingRetry` — `src/modules/integrations/controllers/integrations-messages.controller.ts:106`
+- **Implementación:** `IntegrationsMessagesController.listPendingRetry` — `src/modules/integrations/controllers/integrations-messages.controller.ts:112`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -825,14 +825,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /integrations/messages/pending-retry` la atiende `IntegrationsMessagesController.listPendingRetry` (src/modules/integrations/controllers/integrations-messages.controller.ts:106). Exige sesión con alguno de los roles SYSTEM, SECURITY_ADMIN. Delega en `IntegrationsMessagingService.listFailedForRetry`. Lee integrations.message_retries, integrations.outbound_messages, integrations.provider_connections.
+`GET /integrations/messages/pending-retry` la atiende `IntegrationsMessagesController.listPendingRetry` (src/modules/integrations/controllers/integrations-messages.controller.ts:112). Exige sesión con alguno de los roles SYSTEM, SECURITY_ADMIN. Delega en `IntegrationsMessagingService.listFailedForRetry`. Lee integrations.message_retries, integrations.outbound_messages, integrations.provider_connections.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/integrations/controllers/integrations-messages.controller.ts:106` |
+| ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/integrations/controllers/integrations-messages.controller.ts:112` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -872,7 +872,7 @@ El árbol de decisión completo está en [flujos](../flujos/integrations.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/integrations/controllers/integrations-messages.controller.spec.ts:92` |
+| CONTROLADOR | `src/modules/integrations/controllers/integrations-messages.controller.spec.ts:105` |
 
 ### Flujos
 
@@ -906,7 +906,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/integrations/controllers/integrations-providers.controller.ts:53` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1015,7 +1015,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/integrations/controllers/integrations-providers.controller.ts:70` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integrations/controllers/integrations-providers.controller.ts:70` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1074,7 +1074,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/integrations/dto/responses.dto.ts:33` |
 | `pharmacyId` | `string` | Sí | formato uuid | — | Identificador asociado a pharmacy. | sin fuente |
-| `connectionId` | `string` | Sí | formato uuid | — | Identificador asociado a connection. | sin fuente |
+| `connectionId` | `string` | Sí | formato uuid; admite null | — | Conexión registrada en integraciones; nulo mientras la farmacia no tiene configurado su sistema externo. | sin fuente |
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado | sin fuente |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | sin fuente |
 
@@ -1131,7 +1131,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/integrations/controllers/integrations-providers.controller.ts:90` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integrations/controllers/integrations-providers.controller.ts:90` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1270,7 +1270,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/integrations/controllers/integrations-providers.controller.ts:110` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integrations/controllers/integrations-providers.controller.ts:110` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1380,7 +1380,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/integrations/controllers/integrations-webhooks.controller.ts:23` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 

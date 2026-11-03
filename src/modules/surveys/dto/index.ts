@@ -35,3 +35,8 @@ export {
   AnswerDto,
   SurveyResponseDto,
 } from './responses.dto';
+export {
+  SurveyCatalogEntryDto,
+  type SurveyCatalogOrigin,
+  type SurveyCatalogScope,
+} from './survey-catalog.dto';

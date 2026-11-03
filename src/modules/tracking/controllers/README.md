@@ -50,7 +50,7 @@ Los casos de uso escriben tres rutas con dos puntos (`/eta:recompute`, `/{id}:ca
 `/sla:scan`). Aquí se usan segmentos normales por el mismo motivo que en el resto del proyecto: el
 enrutador de Nest 11 interpreta `:` como inicio de parámetro en cualquier posición del segmento.
 
-## Pruebas
+## Tests
 
 `tracking.controller.spec.ts` con el servicio mockeado: delegación, argumentos (incluido el actor y
 los ids de ruta), el webhook sin actor y propagación de errores.

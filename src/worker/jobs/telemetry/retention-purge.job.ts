@@ -34,7 +34,10 @@ export class RetentionPurgeJob {
   @Interval(RETENTION_PURGE_INTERVAL_MS)
   async tick(): Promise<void> {
     await runTick(this.logger, 'worker.telemetry.retention-purge', async () => {
-      const result = await this.api.post<PurgeResponse>('/telemetry/retention/purge', {});
+      const result = await this.api.post<PurgeResponse>(
+        '/telemetry/retention/purge',
+        {},
+      );
       if (result.totalEvents + result.totalClientErrors === 0) return;
       this.logger.info(
         {
@@ -42,7 +45,9 @@ export class RetentionPurgeJob {
           events: result.totalEvents,
           properties: result.totalProperties,
           clientErrors: result.totalClientErrors,
-          pending: result.purposes.filter((p) => p.more).map((p) => p.purposeCode),
+          pending: result.purposes
+            .filter((p) => p.more)
+            .map((p) => p.purposeCode),
         },
         'Telemetry retention purge removed expired rows',
       );

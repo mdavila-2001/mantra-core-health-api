@@ -23,6 +23,8 @@
     "proxy-addr@npm:^2.0.7": "2.0.8"
   },
   "scripts": {
+    "check:max-lines": "node scripts/check-max-lines.mjs",
+    "alovida:coverage:test": "node --test tools/alovida/coverage-report.test.mjs",
     "build": "node scripts/with-heap.mjs nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
@@ -85,8 +87,8 @@
     "test": "node --experimental-vm-modules node_modules/jest-cli/bin/jest.js",
     "test:watch": "node --experimental-vm-modules node_modules/jest-cli/bin/jest.js --watch",
     "test:cov": "node --experimental-vm-modules node_modules/jest-cli/bin/jest.js --coverage",
-    "test:integration": "cross-env ORM_SCHEMA_SYNC=off RATE_LIMIT_DISABLED=true node --experimental-vm-modules node_modules/jest-cli/bin/jest.js --config ./test/jest-integration.json",
-    "test:integration:cov": "cross-env ORM_SCHEMA_SYNC=off RATE_LIMIT_DISABLED=true node --experimental-vm-modules node_modules/jest-cli/bin/jest.js --config ./test/jest-integration.json --coverage",
+    "test:integration": "cross-env ORM_SCHEMA_SYNC=off RATE_LIMIT_DISABLED=true MIKRO_ORM_CLI_ALWAYS_ALLOW_TS=true node --experimental-vm-modules node_modules/jest-cli/bin/jest.js --config ./test/jest-integration.json",
+    "test:integration:cov": "cross-env ORM_SCHEMA_SYNC=off RATE_LIMIT_DISABLED=true MIKRO_ORM_CLI_ALWAYS_ALLOW_TS=true node --experimental-vm-modules node_modules/jest-cli/bin/jest.js --config ./test/jest-integration.json --coverage",
     "test:cov:merged": "node --experimental-vm-modules node_modules/jest-cli/bin/jest.js --coverage && yarn test:integration:cov && node tools/coverage/merge-coverage.mjs",
     "seed:dev": "node tools/alovida/seed-dev-data.mjs",
     "seed:vitrina": "node tools/alovida/seed-vitrina-publica.mjs",
@@ -104,6 +106,7 @@
     "test:terminology-import": "node --test \"tools/terminology-import/**/*.test.mjs\"",
     "orm": "mikro-orm",
     "docs:tsdoc": "node tools/documentation/generate-documentation.mjs",
+    "docs:tsdoc:test": "node --test tools/documentation/generate-documentation.test.mjs",
     "orm:catalog": "node tools/catalog/generate-catalog.mjs",
     "catalog:permission-drift": "node tools/catalog/permission-drift-gate.mjs",
     "ddl:sources": "python ../mantra-core-health-model/salud-db/check_ddl_sources.py",

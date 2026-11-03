@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `identity_assurance`.
- * 76 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 77 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const identityAssuranceIndexes: readonly IndexTuple[] = [
@@ -69,6 +69,7 @@ export const identityAssuranceIndexes: readonly IndexTuple[] = [
   ['identity_verification_attempts', 'ix_identity_verification_attempts_outcome_concept_id', ['outcome_concept_id'], false, 'btree'],
   ['identity_verification_attempts', 'uq_identity_verification_attempts_identity_verificatio_905f086b', ['identity_verification_case_id', 'attempt_number'], true, 'btree'],
   ['identity_verification_attempts', 'uq_identity_verification_attempts_idempotency', ['idempotency_key'], true, 'btree'],
+  ['identity_verification_cases', 'ix_identity_verification_cases_tenant_id', ['tenant_id'], false, 'btree'],
   ['identity_verification_cases', 'ix_identity_verification_cases_subject_type_concept_id', ['subject_type_concept_id'], false, 'btree'],
   ['identity_verification_cases', 'ix_identity_verification_cases_identity_verification_policy_id', ['identity_verification_policy_id'], false, 'btree'],
   ['identity_verification_cases', 'ix_identity_verification_cases_requested_assurance_lev_ebd923e4', ['requested_assurance_level_concept_id'], false, 'btree'],

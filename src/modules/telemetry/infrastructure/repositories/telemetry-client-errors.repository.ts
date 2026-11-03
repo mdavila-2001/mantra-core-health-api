@@ -50,11 +50,29 @@ export class TelemetryClientErrorsRepository {
     const params: unknown[] = [];
     for (const r of rows) {
       params.push(
-        randomUUID(), r.receivedAt, r.occurredAt, r.portalTypeConceptId, r.actorTenantId,
-        r.userId, r.sessionId, r.routeTemplate, r.fingerprint, r.errorClassConceptId,
-        r.errorType, r.sanitizedMessage, r.httpMethod, r.apiRouteTemplate, r.httpStatus,
-        r.apiErrorCode, r.requestId, r.supportCode, r.appVersion, r.buildId, r.screenSize,
-        r.isOnline, r.suppressedCount,
+        randomUUID(),
+        r.receivedAt,
+        r.occurredAt,
+        r.portalTypeConceptId,
+        r.actorTenantId,
+        r.userId,
+        r.sessionId,
+        r.routeTemplate,
+        r.fingerprint,
+        r.errorClassConceptId,
+        r.errorType,
+        r.sanitizedMessage,
+        r.httpMethod,
+        r.apiRouteTemplate,
+        r.httpStatus,
+        r.apiErrorCode,
+        r.requestId,
+        r.supportCode,
+        r.appVersion,
+        r.buildId,
+        r.screenSize,
+        r.isOnline,
+        r.suppressedCount,
       );
     }
     await this.em

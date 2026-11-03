@@ -84,7 +84,10 @@ export class CommunityGroupsReadService {
   ): Promise<GroupPageDto> {
     const em = this.em.fork();
     const afterKey = this.decodeCreatedAtCursor(options.cursor);
-    const hiddenVisibilityConceptIds = this.visibility.isPlatform(actor)
+    const hiddenVisibilityConceptIds = this.visibility.isPlatform(
+      actor,
+      tenantId,
+    )
       ? []
       : await this.audience.hiddenFrom(em, tenantId, actor);
 

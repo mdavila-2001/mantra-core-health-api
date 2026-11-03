@@ -6,6 +6,7 @@ import { InsufficientRoleException } from '../../../../common/errors/domain.exce
 import {
   ErrorCode,
   ResourceNotFoundException,
+  roleAuthorizesInTenant,
   type AuthenticatedUser,
 } from '../../../../common';
 import { resolveSecret } from '../../../../common/crypto/dev-secret';
@@ -148,14 +149,15 @@ export class PractitionerAdmissionDocumentsService {
   }
 
   private assertAllowedRole(actor: AuthenticatedUser): void {
-    const ok = actor.roles.some((r) =>
-      [
-        'ADMISSIONS_REVIEWER',
-        'ADMISSIONS_APPROVER',
-        'SECURITY_ADMIN',
-        'SUPERADMIN',
-      ].includes(r),
-    );
+    // La admisión es de plataforma (sin tenant): igual que `roleFor`, cada rol
+    // cuenta sólo si es global. Uno acotado a una organización no abre los
+    // documentos de cualquier admisión (#1241).
+    const ok = [
+      'ADMISSIONS_REVIEWER',
+      'ADMISSIONS_APPROVER',
+      'SECURITY_ADMIN',
+      'SUPERADMIN',
+    ].some((r) => roleAuthorizesInTenant(actor, r, undefined));
     if (!ok) {
       throw new InsufficientRoleException(
         'Su rol no alcanza para abrir documentos de admisiones',

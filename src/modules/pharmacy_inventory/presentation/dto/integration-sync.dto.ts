@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ExternalSystemSummaryDto } from './external-system.dto';
 
 /** Por qué un código externo no se tradujo. */
 export const UNMAPPED_REASONS = ['NO_MAPPING', 'AMBIGUOUS_MAPPING'] as const;
@@ -294,10 +295,18 @@ export class IntegrationConnectionDto {
   status!: 'ACTIVE' | 'INACTIVE';
 
   /**
-   * Si la API sabe dónde está el sistema externo.
+   * Si hay con quién sincronizar: el sistema propio de la farmacia o, si no
+   * tiene, el del servidor.
    */
   @ApiProperty()
   providerConfigured!: boolean;
+
+  /**
+   * El sistema propio de la farmacia (FAR-C9 · C9-3), sin la clave; `null` si
+   * la conexión usa el del servidor o trabaja en manual.
+   */
+  @ApiProperty({ type: ExternalSystemSummaryDto, nullable: true })
+  system!: ExternalSystemSummaryDto | null;
 
   /**
    * Alta de la conexión.

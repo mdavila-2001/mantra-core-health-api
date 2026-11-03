@@ -74,7 +74,7 @@ Contratos de entrada y salida. La validación vive en `class-validator`; la docu
 - **`EverythingBundleResponseDto.contentHash`** permite validar la frescura de una caché sin volver a
   pedir el Bundle entero.
 
-## Pruebas
+## Tests
 
 Sin suite propia: los DTOs se validan por el `ValidationPipe` global y se ejercitan desde las
 pruebas de servicio y de controlador.

@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `clinical` (parte 2/2).
- * 140 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 148 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const clinicalIndexes2: readonly IndexTuple[] = [
@@ -56,6 +56,14 @@ export const clinicalIndexes2: readonly IndexTuple[] = [
   ['observations', 'ix_observations_patient_profile_id_updated_at', ['custodian_tenant_id', 'patient_profile_id', 'updated_at desc'], false, 'btree'],
   ['observations', 'ix_observations_patient_code_effective', ['custodian_tenant_id', 'patient_profile_id', 'code_concept_id', 'effective_start_at desc'], false, 'btree'],
   ['observations', 'ix_observations_encounter_code', ['encounter_id', 'code_concept_id'], false, 'btree', 'encounter_id IS NOT NULL'],
+  ['patient_admission_footprints', 'ux_patient_admission_footprints_tenant_patient', ['tenant_id', 'patient_profile_id'], true, 'btree'],
+  ['patient_admission_footprints', 'ix_patient_admission_footprints_patient_profile_id', ['patient_profile_id'], false, 'btree'],
+  ['patient_admission_footprints', 'ix_patient_admission_footprints_encounter_id', ['encounter_id'], false, 'btree'],
+  ['patient_admission_footprints', 'ix_patient_admission_footprints_practice_site_id', ['practice_site_id'], false, 'btree'],
+  ['patient_admission_footprints', 'ix_patient_admission_footprints_admission_origin_concept_id', ['admission_origin_concept_id'], false, 'btree'],
+  ['patient_admission_footprints', 'ix_patient_admission_footprints_identity_verification_method_concept_id', ['identity_verification_method_concept_id'], false, 'btree'],
+  ['patient_admission_footprints', 'ix_patient_admission_footprints_referral_id', ['referral_id'], false, 'btree'],
+  ['patient_admission_footprints', 'ix_patient_admission_footprints_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
   ['placement_incidents', 'ix_placement_incidents_tenant_id', ['tenant_id'], false, 'btree'],
   ['placement_incidents', 'ix_placement_incidents_encounter_id', ['encounter_id'], false, 'btree'],
   ['placement_incidents', 'ix_placement_incidents_encounter_location_id', ['encounter_location_id'], false, 'btree'],

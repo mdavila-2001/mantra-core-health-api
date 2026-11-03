@@ -2,6 +2,7 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import {
   ResourceNotFoundException,
+  roleAuthorizesInTenant,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -59,6 +60,21 @@ import { checkIfMatchWhenPresent, codeOf, formOf } from './structure-input';
 
 /** Roles de plataforma: verificación SNIS y estado de habilitaciones. */
 const PLATFORM_ROLES = ['SECURITY_ADMIN', 'SUPERADMIN'];
+
+/**
+ * `true` si el actor tiene un rol de plataforma **global**.
+ *
+ * Verificar el SNIS o el estado de una habilitación es un acto de la
+ * plataforma sobre la organización, no de la organización sobre sí misma: un
+ * `SECURITY_ADMIN` concedido dentro del tenant (`scopedRoles`, MCH-001) se
+ * estaría verificando a sí mismo. Por eso sólo cuenta el rol sin ámbito
+ * (`roleAuthorizesInTenant` con tenant `undefined`), ni siquiera en su tenant (#1241).
+ */
+function isGlobalPlatform(actor: AuthenticatedUser): boolean {
+  return PLATFORM_ROLES.some((r) =>
+    roleAuthorizesInTenant(actor, r, undefined),
+  );
+}
 
 /**
  * Estado de `facility_licenses.verification_status_concept_id` ↔ LIC_*.
@@ -250,7 +266,7 @@ export class SiteEstablishmentService {
     actor: AuthenticatedUser,
     tenantId: string,
   ): Promise<SiteRegulatoryDto> {
-    if (!PLATFORM_ROLES.some((r) => (actor.roles ?? []).includes(r))) {
+    if (!isGlobalPlatform(actor)) {
       throw new ForbiddenException(
         'Sólo la plataforma verifica el código SNIS',
       );
@@ -456,9 +472,7 @@ export class SiteEstablishmentService {
       await this.access.assertCanAdministerOrganization(tx, tenantId, actor);
       checkIfMatchWhenPresent(ifMatch, license.rowVersion);
       this.assertNoNotes(dto.notes);
-      const platform = PLATFORM_ROLES.some((r) =>
-        (actor.roles ?? []).includes(r),
-      );
+      const platform = isGlobalPlatform(actor);
       const changes: string[] = [];
 
       if (dto.authorityName !== undefined) {

@@ -191,7 +191,7 @@ Cómo se sostiene acá:
 4. **404 en vez de 403** ante un recurso ajeno: confirmar que existe pero es de
    otro ya filtra que esa persona tuvo una atención.
 
-## Permisos
+## Permissions
 
 Guard JWT global. La autoría y la lectura de respuestas exigen `PRACTITIONER` o
 `CLINICIAN`; el autoservicio del paciente no exige rol —todas las cuentas de

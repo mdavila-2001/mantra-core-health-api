@@ -71,7 +71,7 @@ export class HealthcareServices {
   /**
    * Identificador asociado a service catalog.
    */
-  @Property({ fieldName: 'service_catalog_id', type: 'uuid', nullable: true }) // FK → billing.service_catalog (inferida)
+  @Property({ fieldName: 'service_catalog_id', type: 'uuid', nullable: true }) // FK → billing.service_catalog
   serviceCatalogId?: string;
 
   /**

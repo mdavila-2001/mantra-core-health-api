@@ -2,11 +2,26 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `insurance` (parte 2/2).
- * 48 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 63 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const insuranceIndexes2: readonly IndexTuple[] = [
   // [tabla, nombre, columnas, único, método]
+  ['insurance_terms_conditions', 'ix_insurance_terms_conditions_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['network_provider_memberships', 'ix_network_provider_memberships_provider_network_id', ['provider_network_id'], false, 'btree'],
+  ['network_provider_memberships', 'ix_network_provider_memberships_provider_type_concept_id', ['provider_type_concept_id'], false, 'btree'],
+  ['network_provider_memberships', 'ix_network_provider_memberships_practitioner_role_assignment_id', ['practitioner_role_assignment_id'], false, 'btree'],
+  ['network_provider_memberships', 'ix_network_provider_memberships_practice_id', ['practice_id'], false, 'btree'],
+  ['network_provider_memberships', 'ix_network_provider_memberships_hospital_id', ['hospital_id'], false, 'btree'],
+  ['network_provider_memberships', 'ix_network_provider_memberships_diagnostic_unit_id', ['diagnostic_unit_id'], false, 'btree'],
+  ['network_provider_memberships', 'ix_network_provider_memberships_pharmacy_id', ['pharmacy_id'], false, 'btree'],
+  ['network_provider_memberships', 'ix_network_provider_memberships_participation_level_concept_id', ['participation_level_concept_id'], false, 'btree'],
+  ['network_provider_memberships', 'ix_network_provider_memberships_verification_status_concept_id', ['verification_status_concept_id'], false, 'btree'],
+  ['network_provider_memberships', 'ix_network_provider_memberships_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['network_provider_memberships', 'ix_network_provider_memberships_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['network_provider_memberships', 'ix_network_provider_memberships_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['patient_coverages', 'ix_patient_coverages_patient_profile_id', ['patient_profile_id'], false, 'btree'],
+  ['patient_coverages', 'ix_patient_coverages_insurance_plan_id', ['insurance_plan_id'], false, 'btree'],
   ['patient_coverages', 'ix_patient_coverages_insurance_broker_id', ['insurance_broker_id'], false, 'btree'],
   ['patient_coverages', 'ix_patient_coverages_employer_group_id', ['employer_group_id'], false, 'btree'],
   ['patient_coverages', 'ix_patient_coverages_relationship_to_subscriber_concept_id', ['relationship_to_subscriber_concept_id'], false, 'btree'],

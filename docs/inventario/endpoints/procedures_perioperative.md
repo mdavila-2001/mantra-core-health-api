@@ -195,7 +195,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/procedures_perioperative/controllers/dental.controller.ts:90` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -476,7 +476,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | CABECERA | If-Match (opcional) | `contrato (parameters)` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop-or.controller.ts:305` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -485,7 +485,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | PeriopOrController.cancel → OrBlocksUseCases.close → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
-| `directory.branch_memberships` | LEE | LEE | DIRECTA | PeriopOrController.cancel → OrBlocksUseCases.close → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:257` |
+| `directory.branch_memberships` | LEE | LEE | DIRECTA | PeriopOrController.cancel → OrBlocksUseCases.close → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | PeriopOrController.cancel → OrBlocksUseCases.close → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
 | `practice.care_spaces` | LEE | LEE | DIRECTA | PeriopOrController.cancel → OrBlocksUseCases.close → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → CareSpacesRepository.findById | `src/modules/practice/repositories/care-spaces.repository.ts:85` |
 | `practice.clinical_units` | LEE | LEE | DIRECTA | PeriopOrController.cancel → OrBlocksUseCases.close → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:65` |
@@ -584,7 +584,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | CABECERA | If-Match (opcional) | `contrato (parameters)` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop-or.controller.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -593,7 +593,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | PeriopOrController.release → OrBlocksUseCases.close → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
-| `directory.branch_memberships` | LEE | LEE | DIRECTA | PeriopOrController.release → OrBlocksUseCases.close → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:257` |
+| `directory.branch_memberships` | LEE | LEE | DIRECTA | PeriopOrController.release → OrBlocksUseCases.close → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | PeriopOrController.release → OrBlocksUseCases.close → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
 | `practice.care_spaces` | LEE | LEE | DIRECTA | PeriopOrController.release → OrBlocksUseCases.close → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → CareSpacesRepository.findById | `src/modules/practice/repositories/care-spaces.repository.ts:85` |
 | `practice.clinical_units` | LEE | LEE | DIRECTA | PeriopOrController.release → OrBlocksUseCases.close → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:65` |
@@ -691,7 +691,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: PERIOP_NURSE, ANESTHESIOLOGIST, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:662` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: stayId | `src/modules/procedures_perioperative/controllers/periop.controller.ts:662` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -712,13 +712,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `assessedByProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2558` |
-| `aldreteScore` | `number` | No | mínimo 0; máximo 10 | `@IsOptional()` `@IsInt()` `@Min(0)` `@Max(10)` | Puntuación de Aldrete | `src/modules/procedures_perioperative/dto/periop.dto.ts:2572` |
-| `painScore` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Escala de dolor | `src/modules/procedures_perioperative/dto/periop.dto.ts:2580` |
-| `nauseaScore` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Escala de náusea | `src/modules/procedures_perioperative/dto/periop.dto.ts:2588` |
-| `airwayStatus` | `string` | No | valores: PATENT, SUPPORTED | `@IsOptional()` `@IsIn(['PATENT', 'SUPPORTED'])` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2596` |
-| `observationsJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Observaciones registradas | `src/modules/procedures_perioperative/dto/periop.dto.ts:2604` |
-| `criteriaJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Criterios de alta evaluados | `src/modules/procedures_perioperative/dto/periop.dto.ts:2612` |
+| `assessedByProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/postop/pacu.dto.ts:71` |
+| `aldreteScore` | `number` | No | mínimo 0; máximo 10 | `@IsOptional()` `@IsInt()` `@Min(0)` `@Max(10)` | Puntuación de Aldrete | `src/modules/procedures_perioperative/dto/postop/pacu.dto.ts:85` |
+| `painScore` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Escala de dolor | `src/modules/procedures_perioperative/dto/postop/pacu.dto.ts:93` |
+| `nauseaScore` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Escala de náusea | `src/modules/procedures_perioperative/dto/postop/pacu.dto.ts:101` |
+| `airwayStatus` | `string` | No | valores: PATENT, SUPPORTED | `@IsOptional()` `@IsIn(['PATENT', 'SUPPORTED'])` | — | `src/modules/procedures_perioperative/dto/postop/pacu.dto.ts:109` |
+| `observationsJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Observaciones registradas | `src/modules/procedures_perioperative/dto/postop/pacu.dto.ts:117` |
+| `criteriaJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Criterios de alta evaluados | `src/modules/procedures_perioperative/dto/postop/pacu.dto.ts:125` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -748,9 +748,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:2623` |
-| `pacuStayId` | `string` | Sí | formato uuid | — | Identificador asociado a pacu stay. | `src/modules/procedures_perioperative/dto/periop.dto.ts:2629` |
-| `meetsDischargeCriteria` | `boolean` | Sí | — | — | true si la valoración cumple el criterio de alta | `src/modules/procedures_perioperative/dto/periop.dto.ts:2637` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/postop/pacu.dto.ts:136` |
+| `pacuStayId` | `string` | Sí | formato uuid | — | Identificador asociado a pacu stay. | `src/modules/procedures_perioperative/dto/postop/pacu.dto.ts:142` |
+| `meetsDischargeCriteria` | `boolean` | Sí | — | — | true si la valoración cumple el criterio de alta | `src/modules/procedures_perioperative/dto/postop/pacu.dto.ts:150` |
 
 ### Respuestas posibles
 
@@ -804,7 +804,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: ANESTHESIOLOGIST, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:683` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: stayId | `src/modules/procedures_perioperative/controllers/periop.controller.ts:683` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -829,16 +829,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `destination` | `string` | Sí | valores: PACU, ICU, WARD, HOME | `@IsIn(DISPOSITIONS)` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2702` |
-| `dischargedByProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2710` |
-| `orders` | `array<PostoperativeOrderDto>` | No | — | `@IsOptional()` `@IsArray()` `@ValidateNested({ each: true })` `@Type(() => PostoperativeOrderDto)` | Órdenes postoperatorias | `src/modules/procedures_perioperative/dto/periop.dto.ts:2723` |
-| `orders[].serviceRequestId` | `string` | No | formato uuid | `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2649` |
-| `orders[].orderRole` | `string` | No | valores: LAB, IMAGING, CONSULT, MEDICATION | `@IsIn(['LAB', 'IMAGING', 'CONSULT', 'MEDICATION'])` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2656` |
-| `followups` | `array<PostoperativeFollowupDto>` | No | — | `@IsOptional()` `@IsArray()` `@ValidateNested({ each: true })` `@Type(() => PostoperativeFollowupDto)` | Seguimientos a agendar | `src/modules/procedures_perioperative/dto/periop.dto.ts:2736` |
-| `followups[].followupType` | `string` | No | valores: WOUND_CHECK, VISIT | `@IsIn(['WOUND_CHECK', 'VISIT'])` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2668` |
-| `followups[].appointmentId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2676` |
-| `followups[].dueAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2684` |
-| `followups[].instructionsText` | `string` | No | — | `@IsOptional()` `@IsString()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2692` |
+| `destination` | `string` | Sí | valores: PACU, ICU, WARD, HOME | `@IsIn(DISPOSITIONS)` | — | `src/modules/procedures_perioperative/dto/postop/pacu.dto.ts:215` |
+| `dischargedByProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/postop/pacu.dto.ts:223` |
+| `orders` | `array<PostoperativeOrderDto>` | No | — | `@IsOptional()` `@IsArray()` `@ValidateNested({ each: true })` `@Type(() => PostoperativeOrderDto)` | Órdenes postoperatorias | `src/modules/procedures_perioperative/dto/postop/pacu.dto.ts:236` |
+| `orders[].serviceRequestId` | `string` | No | formato uuid | `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/postop/pacu.dto.ts:162` |
+| `orders[].orderRole` | `string` | No | valores: LAB, IMAGING, CONSULT, MEDICATION | `@IsIn(['LAB', 'IMAGING', 'CONSULT', 'MEDICATION'])` | — | `src/modules/procedures_perioperative/dto/postop/pacu.dto.ts:169` |
+| `followups` | `array<PostoperativeFollowupDto>` | No | — | `@IsOptional()` `@IsArray()` `@ValidateNested({ each: true })` `@Type(() => PostoperativeFollowupDto)` | Seguimientos a agendar | `src/modules/procedures_perioperative/dto/postop/pacu.dto.ts:249` |
+| `followups[].followupType` | `string` | No | valores: WOUND_CHECK, VISIT | `@IsIn(['WOUND_CHECK', 'VISIT'])` | — | `src/modules/procedures_perioperative/dto/postop/pacu.dto.ts:181` |
+| `followups[].appointmentId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/postop/pacu.dto.ts:189` |
+| `followups[].dueAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | — | `src/modules/procedures_perioperative/dto/postop/pacu.dto.ts:197` |
+| `followups[].instructionsText` | `string` | No | — | `@IsOptional()` `@IsString()` | — | `src/modules/procedures_perioperative/dto/postop/pacu.dto.ts:205` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -877,10 +877,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:2747` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/periop.dto.ts:2753` |
-| `ordersCreated` | `number` | Sí | — | — | Órdenes postoperatorias creadas | `src/modules/procedures_perioperative/dto/periop.dto.ts:2759` |
-| `followupsCreated` | `number` | Sí | — | — | Seguimientos agendados | `src/modules/procedures_perioperative/dto/periop.dto.ts:2765` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/postop/pacu.dto.ts:260` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/postop/pacu.dto.ts:266` |
+| `ordersCreated` | `number` | Sí | — | — | Órdenes postoperatorias creadas | `src/modules/procedures_perioperative/dto/postop/pacu.dto.ts:272` |
+| `followupsCreated` | `number` | Sí | — | — | Seguimientos agendados | `src/modules/procedures_perioperative/dto/postop/pacu.dto.ts:278` |
 
 ### Respuestas posibles
 
@@ -967,31 +967,31 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<CaseSummaryDto>` | Sí | — | — | Valor de items mantenido por la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:819` |
-| `items[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:734` |
-| `items[].caseNumber` | `string` | Sí | — | — | Valor de case number mantenido por la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:740` |
-| `items[].patientProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a patient profile. | `src/modules/procedures_perioperative/dto/periop.dto.ts:746` |
-| `items[].primarySurgeonProfileId` | `string` | No | formato uuid | — | Identificador asociado a primary surgeon profile. | `src/modules/procedures_perioperative/dto/periop.dto.ts:752` |
-| `items[].operatingRoomId` | `string` | No | formato uuid | — | Identificador asociado a operating room. | `src/modules/procedures_perioperative/dto/periop.dto.ts:758` |
-| `items[].statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/periop.dto.ts:764` |
-| `items[].scheduledStartAt` | `string` | No | formato date-time | — | Valor de scheduled start at mantenido por la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:770` |
-| `items[].scheduledEndAt` | `string` | No | formato date-time | — | Valor de scheduled end at mantenido por la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:776` |
-| `items[].operatingRoom` | `CaseOperatingRoomDto` | No | — | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:779` |
-| `items[].operatingRoom.id` | `string` | No | formato uuid | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:675` |
-| `items[].operatingRoom.code` | `string` | No | — | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:676` |
-| `items[].operatingRoom.name` | `string` | No | — | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:677` |
-| `items[].block` | `CaseBlockRefDto` | No | — | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:782` |
-| `items[].block.id` | `string` | No | formato uuid | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:682` |
-| `items[].block.label` | `string` | No | — | — | Servicio (unidad) o cirujano dueño del bloque | `src/modules/procedures_perioperative/dto/periop.dto.ts:684` |
-| `items[].caseType` | `CaseConceptRefDto` | No | — | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:785` |
-| `items[].caseType.code` | `string` | No | — | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:689` |
-| `items[].caseType.display` | `string` | No | — | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:690` |
-| `items[].encounterId` | `string` | No | formato uuid; admite null | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:788` |
-| `items[].reservedStartAt` | `string` | No | formato date-time; admite null | — | Inicio reservado (programado − preparación) | `src/modules/procedures_perioperative/dto/periop.dto.ts:796` |
-| `items[].reservedEndAt` | `string` | No | formato date-time; admite null | — | Fin reservado (programado + limpieza) | `src/modules/procedures_perioperative/dto/periop.dto.ts:804` |
-| `items[].prepMinutes` | `number` | No | admite null | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:807` |
-| `items[].cleanupMinutes` | `number` | No | admite null | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:810` |
-| `total` | `number` | Sí | — | — | Casos que cumplen el filtro, sin paginar | `src/modules/procedures_perioperative/dto/periop.dto.ts:825` |
+| `items` | `array<CaseSummaryDto>` | Sí | — | — | Valor de items mantenido por la instancia. | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:237` |
+| `items[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:152` |
+| `items[].caseNumber` | `string` | Sí | — | — | Valor de case number mantenido por la instancia. | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:158` |
+| `items[].patientProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a patient profile. | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:164` |
+| `items[].primarySurgeonProfileId` | `string` | No | formato uuid | — | Identificador asociado a primary surgeon profile. | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:170` |
+| `items[].operatingRoomId` | `string` | No | formato uuid | — | Identificador asociado a operating room. | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:176` |
+| `items[].statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:182` |
+| `items[].scheduledStartAt` | `string` | No | formato date-time | — | Valor de scheduled start at mantenido por la instancia. | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:188` |
+| `items[].scheduledEndAt` | `string` | No | formato date-time | — | Valor de scheduled end at mantenido por la instancia. | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:194` |
+| `items[].operatingRoom` | `CaseOperatingRoomDto` | No | — | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:197` |
+| `items[].operatingRoom.id` | `string` | No | formato uuid | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:93` |
+| `items[].operatingRoom.code` | `string` | No | — | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:94` |
+| `items[].operatingRoom.name` | `string` | No | — | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:95` |
+| `items[].block` | `CaseBlockRefDto` | No | — | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:200` |
+| `items[].block.id` | `string` | No | formato uuid | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:100` |
+| `items[].block.label` | `string` | No | — | — | Servicio (unidad) o cirujano dueño del bloque | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:102` |
+| `items[].caseType` | `CaseConceptRefDto` | No | — | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:203` |
+| `items[].caseType.code` | `string` | No | — | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:107` |
+| `items[].caseType.display` | `string` | No | — | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:108` |
+| `items[].encounterId` | `string` | No | formato uuid; admite null | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:206` |
+| `items[].reservedStartAt` | `string` | No | formato date-time; admite null | — | Inicio reservado (programado − preparación) | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:214` |
+| `items[].reservedEndAt` | `string` | No | formato date-time; admite null | — | Fin reservado (programado + limpieza) | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:222` |
+| `items[].prepMinutes` | `number` | No | admite null | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:225` |
+| `items[].cleanupMinutes` | `number` | No | admite null | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:228` |
+| `total` | `number` | Sí | — | — | Casos que cumplen el filtro, sin paginar | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:243` |
 
 ### Respuestas posibles
 
@@ -1042,7 +1042,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:146` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1060,7 +1060,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | `procedures_perioperative.procedure_case_milestones` | ESCRIBE | CREA | DIRECTA | PeriopController.scheduleCase → PeriopCasesService.scheduleCase → PeriopCasesRepository.createMilestone | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:495` |
 | `procedures_perioperative.procedure_case_status_history` | ESCRIBE | CREA | DIRECTA | PeriopController.scheduleCase → PeriopCasesService.scheduleCase → PeriopCasesRepository.createStatusHistory | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:437` |
 | `procedures_perioperative.procedure_case_team_members` | ESCRIBE | CREA | DIRECTA | PeriopController.scheduleCase → PeriopCasesService.scheduleCase → PeriopCasesRepository.createTeamMember | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:628` |
-| `procedures_perioperative.procedure_cases` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.scheduleCase → PeriopCasesService.scheduleCase | `src/modules/procedures_perioperative/services/periop-cases.service.ts:333` |
+| `procedures_perioperative.procedure_cases` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.scheduleCase → PeriopCasesService.scheduleCase | `src/modules/procedures_perioperative/services/periop-cases.service.ts:334` |
 | `procedures_perioperative.procedure_cases` | ESCRIBE | CREA | DIRECTA | PeriopController.scheduleCase → PeriopCasesService.scheduleCase → PeriopCasesRepository.createCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:155` |
 | `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.scheduleCase → PeriopCasesService.scheduleCase → PeriopCasesService.nextCaseNumber → PeriopCasesRepository.countCases | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:385` |
 | `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | PeriopController.scheduleCase → PeriopCasesService.scheduleCase → OperatingRoomValidator.validate | `src/modules/procedures_perioperative/services/or/operating-room.validator.ts:107` |
@@ -1069,21 +1069,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `custodianTenantId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:49` |
-| `patientProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:56` |
-| `encounterId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:64` |
-| `serviceRequestId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Solicitud que origina el caso | `src/modules/procedures_perioperative/dto/periop.dto.ts:75` |
-| `primaryProcedureId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:83` |
-| `caseType` | `string` | Sí | valores: ELECTIVE, URGENT, EMERGENCY | `@IsIn(CASE_TYPES)` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:90` |
-| `priority` | `string` | Sí | valores: ROUTINE, URGENT, STAT | `@IsIn(CASE_PRIORITIES)` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:97` |
-| `surgicalSpecialtyConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:105` |
-| `requestedByProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:113` |
-| `primarySurgeonProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | Cirujano principal | `src/modules/procedures_perioperative/dto/periop.dto.ts:120` |
-| `practiceSiteId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:128` |
-| `operatingRoomId` | `string` | Sí | formato uuid | `@IsUUID()` | Quirófano que se reserva | `src/modules/procedures_perioperative/dto/periop.dto.ts:135` |
-| `scheduledStartAt` | `string` | Sí | formato date-time | `@IsISO8601()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:142` |
-| `scheduledEndAt` | `string` | Sí | formato date-time | `@IsISO8601()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:149` |
-| `urgencyReasonText` | `string` | No | — | `@IsOptional()` `@IsString()` | Justificación de la urgencia; obligatoria si el caso no es electivo | `src/modules/procedures_perioperative/dto/periop.dto.ts:160` |
+| `custodianTenantId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/cases/schedule-case.dto.ts:23` |
+| `patientProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/cases/schedule-case.dto.ts:30` |
+| `encounterId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/cases/schedule-case.dto.ts:38` |
+| `serviceRequestId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Solicitud que origina el caso | `src/modules/procedures_perioperative/dto/cases/schedule-case.dto.ts:49` |
+| `primaryProcedureId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/cases/schedule-case.dto.ts:57` |
+| `caseType` | `string` | Sí | valores: ELECTIVE, URGENT, EMERGENCY | `@IsIn(CASE_TYPES)` | — | `src/modules/procedures_perioperative/dto/cases/schedule-case.dto.ts:64` |
+| `priority` | `string` | Sí | valores: ROUTINE, URGENT, STAT | `@IsIn(CASE_PRIORITIES)` | — | `src/modules/procedures_perioperative/dto/cases/schedule-case.dto.ts:71` |
+| `surgicalSpecialtyConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/cases/schedule-case.dto.ts:79` |
+| `requestedByProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/cases/schedule-case.dto.ts:87` |
+| `primarySurgeonProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | Cirujano principal | `src/modules/procedures_perioperative/dto/cases/schedule-case.dto.ts:94` |
+| `practiceSiteId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/cases/schedule-case.dto.ts:102` |
+| `operatingRoomId` | `string` | Sí | formato uuid | `@IsUUID()` | Quirófano que se reserva | `src/modules/procedures_perioperative/dto/cases/schedule-case.dto.ts:109` |
+| `scheduledStartAt` | `string` | Sí | formato date-time | `@IsISO8601()` | — | `src/modules/procedures_perioperative/dto/cases/schedule-case.dto.ts:116` |
+| `scheduledEndAt` | `string` | Sí | formato date-time | `@IsISO8601()` | — | `src/modules/procedures_perioperative/dto/cases/schedule-case.dto.ts:123` |
+| `urgencyReasonText` | `string` | No | — | `@IsOptional()` `@IsString()` | Justificación de la urgencia; obligatoria si el caso no es electivo | `src/modules/procedures_perioperative/dto/cases/schedule-case.dto.ts:134` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1128,11 +1128,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:171` |
-| `caseNumber` | `string` | Sí | — | — | Número del caso | `src/modules/procedures_perioperative/dto/periop.dto.ts:177` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/periop.dto.ts:183` |
-| `operatingRoomId` | `string` | Sí | formato uuid | — | Quirófano reservado | `src/modules/procedures_perioperative/dto/periop.dto.ts:189` |
-| `milestoneId` | `string` | Sí | formato uuid | — | Hito de programación creado | `src/modules/procedures_perioperative/dto/periop.dto.ts:195` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/cases/schedule-case.dto.ts:145` |
+| `caseNumber` | `string` | Sí | — | — | Número del caso | `src/modules/procedures_perioperative/dto/cases/schedule-case.dto.ts:151` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/cases/schedule-case.dto.ts:157` |
+| `operatingRoomId` | `string` | Sí | formato uuid | — | Quirófano reservado | `src/modules/procedures_perioperative/dto/cases/schedule-case.dto.ts:163` |
+| `milestoneId` | `string` | Sí | formato uuid | — | Hito de programación creado | `src/modules/procedures_perioperative/dto/cases/schedule-case.dto.ts:169` |
 
 ### Respuestas posibles
 
@@ -1207,7 +1207,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | PeriopController.getCase → PeriopCasesService.getCaseDetail → CaseOrViewBuilder.detail → InfrastructureAccessService.actionsOn → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
-| `directory.branch_memberships` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → CaseOrViewBuilder.detail → InfrastructureAccessService.actionsOn → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:257` |
+| `directory.branch_memberships` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → CaseOrViewBuilder.detail → InfrastructureAccessService.actionsOn → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → CaseOrViewBuilder.detail → InfrastructureAccessService.actionsOn → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
 | `iam.user_global_roles` | LEE | LEE | POR_SQL | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `iam.users` | LEE | LEE | POR_SQL | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
@@ -1254,94 +1254,84 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `case` | `CaseSummaryDto` | Sí | — | — | Datos de cabecera del caso. | `src/modules/procedures_perioperative/dto/periop.dto.ts:868` |
-| `case.id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:734` |
-| `case.caseNumber` | `string` | Sí | — | — | Valor de case number mantenido por la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:740` |
-| `case.patientProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a patient profile. | `src/modules/procedures_perioperative/dto/periop.dto.ts:746` |
-| `case.primarySurgeonProfileId` | `string` | No | formato uuid | — | Identificador asociado a primary surgeon profile. | `src/modules/procedures_perioperative/dto/periop.dto.ts:752` |
-| `case.operatingRoomId` | `string` | No | formato uuid | — | Identificador asociado a operating room. | `src/modules/procedures_perioperative/dto/periop.dto.ts:758` |
-| `case.statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/periop.dto.ts:764` |
-| `case.scheduledStartAt` | `string` | No | formato date-time | — | Valor de scheduled start at mantenido por la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:770` |
-| `case.scheduledEndAt` | `string` | No | formato date-time | — | Valor de scheduled end at mantenido por la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:776` |
-| `case.operatingRoom` | `CaseOperatingRoomDto` | No | — | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:779` |
-| `case.operatingRoom.id` | `string` | No | formato uuid | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:675` |
-| `case.operatingRoom.code` | `string` | No | — | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:676` |
-| `case.operatingRoom.name` | `string` | No | — | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:677` |
-| `case.block` | `CaseBlockRefDto` | No | — | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:782` |
-| `case.block.id` | `string` | No | formato uuid | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:682` |
-| `case.block.label` | `string` | No | — | — | Servicio (unidad) o cirujano dueño del bloque | `src/modules/procedures_perioperative/dto/periop.dto.ts:684` |
-| `case.caseType` | `CaseConceptRefDto` | No | — | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:785` |
-| `case.caseType.code` | `string` | No | — | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:689` |
-| `case.caseType.display` | `string` | No | — | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:690` |
-| `case.encounterId` | `string` | No | formato uuid; admite null | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:788` |
-| `case.reservedStartAt` | `string` | No | formato date-time; admite null | — | Inicio reservado (programado − preparación) | `src/modules/procedures_perioperative/dto/periop.dto.ts:796` |
-| `case.reservedEndAt` | `string` | No | formato date-time; admite null | — | Fin reservado (programado + limpieza) | `src/modules/procedures_perioperative/dto/periop.dto.ts:804` |
-| `case.prepMinutes` | `number` | No | admite null | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:807` |
-| `case.cleanupMinutes` | `number` | No | admite null | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:810` |
-| `checklist` | `CaseChecklistDto` | Sí | — | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:871` |
-| `checklist.id` | `string` | Sí | formato uuid | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:701` |
-| `checklist.signIn` | `ChecklistPhaseDto` | Sí | — | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:702` |
-| `checklist.signIn.completedAt` | `string` | Sí | formato date-time; admite null | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:696` |
-| `checklist.timeOut` | `ChecklistPhaseDto` | Sí | — | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:703` |
-| `checklist.timeOut.completedAt` | `string` | Sí | formato date-time; admite null | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:696` |
-| `checklist.signOut` | `ChecklistPhaseDto` | Sí | — | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:704` |
-| `checklist.signOut.completedAt` | `string` | Sí | formato date-time; admite null | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:696` |
-| `roomEvents` | `array<CaseRoomEventDto>` | Sí | — | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:874` |
-| `roomEvents[].id` | `string` | Sí | formato uuid | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:709` |
-| `roomEvents[].eventCode` | `string` | Sí | — | — | PATIENT_IN_ROOM, ANESTHESIA_START, INCISION, CLOSURE, PATIENT_OUT_OF_ROOM, CLEANUP_START, CLEANUP_END, ROOM_READY | `src/modules/procedures_perioperative/dto/periop.dto.ts:714` |
-| `roomEvents[].occurredAt` | `string` | Sí | formato date-time; admite null | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:716` |
-| `roomEvents[].recordedByUserId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:718` |
-| `turnoverCleaning` | `CaseTurnoverCleaningDto` | Sí | — | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:877` |
-| `turnoverCleaning.id` | `string` | Sí | formato uuid | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:723` |
-| `turnoverCleaning.status` | `string` | Sí | admite null | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:724` |
-| `turnoverCleaning.rowVersion` | `number` | Sí | — | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:725` |
-| `turnoverCleaning.allowedTransitions` | `array<string>` | Sí | — | — | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:726` |
-| `diagnoses` | `array<object>` | Sí | — | — | Diagnósticos del caso con su papel y orden | `src/modules/procedures_perioperative/dto/periop.dto.ts:886` |
+| `case` | `CaseSummaryDto` | Sí | — | — | Datos de cabecera del caso. | `src/modules/procedures_perioperative/dto/cases/case-detail.dto.ts:23` |
+| `case.id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:152` |
+| `case.caseNumber` | `string` | Sí | — | — | Valor de case number mantenido por la instancia. | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:158` |
+| `case.patientProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a patient profile. | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:164` |
+| `case.primarySurgeonProfileId` | `string` | No | formato uuid | — | Identificador asociado a primary surgeon profile. | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:170` |
+| `case.operatingRoomId` | `string` | No | formato uuid | — | Identificador asociado a operating room. | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:176` |
+| `case.statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:182` |
+| `case.scheduledStartAt` | `string` | No | formato date-time | — | Valor de scheduled start at mantenido por la instancia. | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:188` |
+| `case.scheduledEndAt` | `string` | No | formato date-time | — | Valor de scheduled end at mantenido por la instancia. | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:194` |
+| `case.operatingRoom` | `CaseOperatingRoomDto` | No | — | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:197` |
+| `case.operatingRoom.id` | `string` | No | formato uuid | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:93` |
+| `case.operatingRoom.code` | `string` | No | — | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:94` |
+| `case.operatingRoom.name` | `string` | No | — | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:95` |
+| `case.block` | `CaseBlockRefDto` | No | — | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:200` |
+| `case.block.id` | `string` | No | formato uuid | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:100` |
+| `case.block.label` | `string` | No | — | — | Servicio (unidad) o cirujano dueño del bloque | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:102` |
+| `case.caseType` | `CaseConceptRefDto` | No | — | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:203` |
+| `case.caseType.code` | `string` | No | — | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:107` |
+| `case.caseType.display` | `string` | No | — | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:108` |
+| `case.encounterId` | `string` | No | formato uuid; admite null | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:206` |
+| `case.reservedStartAt` | `string` | No | formato date-time; admite null | — | Inicio reservado (programado − preparación) | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:214` |
+| `case.reservedEndAt` | `string` | No | formato date-time; admite null | — | Fin reservado (programado + limpieza) | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:222` |
+| `case.prepMinutes` | `number` | No | admite null | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:225` |
+| `case.cleanupMinutes` | `number` | No | admite null | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:228` |
+| `checklist` | `CaseChecklistDto` | Sí | — | — | — | `src/modules/procedures_perioperative/dto/cases/case-detail.dto.ts:26` |
+| `checklist.id` | `string` | Sí | formato uuid | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:119` |
+| `checklist.signIn` | `ChecklistPhaseDto` | Sí | — | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:120` |
+| `checklist.signIn.completedAt` | `string` | Sí | formato date-time; admite null | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:114` |
+| `checklist.timeOut` | `ChecklistPhaseDto` | Sí | — | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:121` |
+| `checklist.timeOut.completedAt` | `string` | Sí | formato date-time; admite null | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:114` |
+| `checklist.signOut` | `ChecklistPhaseDto` | Sí | — | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:122` |
+| `checklist.signOut.completedAt` | `string` | Sí | formato date-time; admite null | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:114` |
+| `roomEvents` | `array<CaseRoomEventDto>` | Sí | — | — | — | `src/modules/procedures_perioperative/dto/cases/case-detail.dto.ts:29` |
+| `roomEvents[].id` | `string` | Sí | formato uuid | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:127` |
+| `roomEvents[].eventCode` | `string` | Sí | — | — | PATIENT_IN_ROOM, ANESTHESIA_START, INCISION, CLOSURE, PATIENT_OUT_OF_ROOM, CLEANUP_START, CLEANUP_END, ROOM_READY | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:132` |
+| `roomEvents[].occurredAt` | `string` | Sí | formato date-time; admite null | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:134` |
+| `roomEvents[].recordedByUserId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:136` |
+| `turnoverCleaning` | `CaseTurnoverCleaningDto` | Sí | — | — | — | `src/modules/procedures_perioperative/dto/cases/case-detail.dto.ts:32` |
+| `turnoverCleaning.id` | `string` | Sí | formato uuid | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:141` |
+| `turnoverCleaning.status` | `string` | Sí | admite null | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:142` |
+| `turnoverCleaning.rowVersion` | `number` | Sí | — | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:143` |
+| `turnoverCleaning.allowedTransitions` | `array<string>` | Sí | — | — | — | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:144` |
+| `diagnoses` | `array<object>` | Sí | — | — | Diagnósticos del caso con su papel y orden | `src/modules/procedures_perioperative/dto/cases/case-detail.dto.ts:41` |
 | `diagnoses[].id` | `string` | Sí | — | — | Identificador del diagnóstico del caso. | sin fuente |
 | `diagnoses[].conditionId` | `string` | Sí | — | — | Condición clínica a la que apunta. | sin fuente |
 | `diagnoses[].diagnosisRoleConceptId` | `string` | Sí | — | — | Papel del diagnóstico (principal, secundario, postoperatorio). | sin fuente |
 | `diagnoses[].sequenceNumber` | `number` | Sí | — | — | Orden dentro del caso. | sin fuente |
-| `team` | `array<TeamMemberSummaryDto>` | Sí | — | — | Valor de team mantenido por la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:901` |
-| `team[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:834` |
-| `team[].practitionerProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a practitioner profile. | `src/modules/procedures_perioperative/dto/periop.dto.ts:840` |
-| `team[].teamRoleConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a team role concept. | `src/modules/procedures_perioperative/dto/periop.dto.ts:846` |
-| `team[].statusConceptId` | `string` | Sí | formato uuid | — | Asignado o aceptado | `src/modules/procedures_perioperative/dto/periop.dto.ts:852` |
-| `milestones` | `array<object>` | Sí | — | — | Hitos del caso | `src/modules/procedures_perioperative/dto/periop.dto.ts:907` |
+| `team` | `array<TeamMemberSummaryDto>` | Sí | — | — | Valor de team mantenido por la instancia. | `src/modules/procedures_perioperative/dto/cases/case-detail.dto.ts:56` |
+| `team[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:252` |
+| `team[].practitionerProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a practitioner profile. | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:258` |
+| `team[].teamRoleConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a team role concept. | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:264` |
+| `team[].statusConceptId` | `string` | Sí | formato uuid | — | Asignado o aceptado | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:270` |
+| `milestones` | `array<object>` | Sí | — | — | Hitos del caso | `src/modules/procedures_perioperative/dto/cases/case-detail.dto.ts:62` |
 | `milestones[].id` | `string` | Sí | — | — | Identificador del hito. | sin fuente |
 | `milestones[].milestoneTypeConceptId` | `string` | Sí | — | — | Tipo de hito. | sin fuente |
 | `milestones[].statusConceptId` | `string` | Sí | — | — | Estado del hito. | sin fuente |
 | `milestones[].plannedAt` | `string` | No | formato date-time | — | Momento planificado, si lo tiene. | sin fuente |
 | `milestones[].reachedAt` | `string` | No | formato date-time | — | Momento en que se alcanzó, si ya ocurrió. | sin fuente |
-| `preoperativeOrders` | `array<object>` | Sí | — | — | Órdenes preoperatorias | `src/modules/procedures_perioperative/dto/periop.dto.ts:924` |
+| `preoperativeOrders` | `array<object>` | Sí | — | — | Órdenes preoperatorias | `src/modules/procedures_perioperative/dto/cases/case-detail.dto.ts:79` |
 | `preoperativeOrders[].id` | `string` | Sí | — | — | Identificador de la orden. | sin fuente |
 | `preoperativeOrders[].serviceRequestId` | `string` | Sí | — | — | Orden clínica a la que apunta. | sin fuente |
 | `preoperativeOrders[].orderRoleConceptId` | `string` | Sí | — | — | Papel de la orden. | sin fuente |
 | `preoperativeOrders[].statusConceptId` | `string` | Sí | — | — | Estado: pendiente o verificada. | sin fuente |
-| `preoperativeAssessment` | `object` | No | admite null | — | Valoración preoperatoria, si ya se hizo | `src/modules/procedures_perioperative/dto/periop.dto.ts:941` |
+| `preoperativeAssessment` | `object` | No | admite null | — | Valoración preoperatoria, si ya se hizo | `src/modules/procedures_perioperative/dto/cases/case-detail.dto.ts:96` |
 | `preoperativeAssessment.id` | `string` | No | — | — | Identificador de la valoración. | sin fuente |
 | `preoperativeAssessment.fitnessStatusConceptId` | `string` | No | — | — | Aptitud del paciente para la intervención. | sin fuente |
 | `preoperativeAssessment.asaClassConceptId` | `string` | No | — | — | Clase ASA, si se registró. | sin fuente |
-| `anesthesiaPlan` | `object` | No | admite null | — | Plan anestésico, si ya se redactó | `src/modules/procedures_perioperative/dto/periop.dto.ts:954` |
+| `anesthesiaPlan` | `object` | No | admite null | — | Plan anestésico, si ya se redactó | `src/modules/procedures_perioperative/dto/cases/case-detail.dto.ts:109` |
 | `anesthesiaPlan.id` | `string` | No | — | — | Identificador del plan. | sin fuente |
 | `anesthesiaPlan.anesthesiaTypeConceptId` | `string` | No | — | — | Tipo de anestesia previsto. | sin fuente |
 | `anesthesiaPlan.statusConceptId` | `string` | No | — | — | Estado del plan: borrador o aprobado. | sin fuente |
-| `operativeReports` | `array<object>` | Sí | — | — | Versiones del informe operatorio, de la última a la primera | `src/modules/procedures_perioperative/dto/periop.dto.ts:970` |
+| `operativeReports` | `array<object>` | Sí | — | — | Versiones del informe operatorio, de la última a la primera | `src/modules/procedures_perioperative/dto/cases/case-detail.dto.ts:125` |
 | `operativeReports[].id` | `string` | Sí | — | — | Identificador del informe. | sin fuente |
 | `operativeReports[].reportVersion` | `number` | Sí | — | — | Número de versión. | sin fuente |
 | `operativeReports[].statusConceptId` | `string` | Sí | — | — | Estado: borrador o firmado. | sin fuente |
 | `operativeReports[].signedAt` | `string` | No | formato date-time | — | Cuándo se firmó, si ya ocurrió. | sin fuente |
-| `operativeSteps` | `array<OperativeStepItemDto>` | Sí | — | — | Pasos de la intervención, en orden | `src/modules/procedures_perioperative/dto/periop.dto.ts:993` |
-| `operativeSteps[].id` | `string` | Sí | formato uuid | — | Identificador del paso. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1841` |
-| `operativeSteps[].stepNumber` | `number` | Sí | — | — | Orden dentro de la intervención. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1845` |
-| `operativeSteps[].stepCodeConceptId` | `string` | Sí | formato uuid | — | Código del paso. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1849` |
-| `operativeSteps[].description` | `string` | Sí | — | — | Descripción escrita por quien lo registró. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1853` |
-| `operativeSteps[].performedByProfileId` | `string` | No | formato uuid | — | Profesional que lo ejecutó, si se registró. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1857` |
-| `operativeSteps[].bodySiteConceptId` | `string` | No | formato uuid | — | Sitio anatómico, si se registró. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1861` |
-| `operativeSteps[].lateralityConceptId` | `string` | No | formato uuid | — | Lateralidad, si aplica. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1865` |
-| `operativeSteps[].statusConceptId` | `string` | Sí | formato uuid | — | Estado del paso. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1869` |
-| `operativeSteps[].startedAt` | `string` | No | formato date-time | — | Cuándo empezó, si se cronometró. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1873` |
-| `operativeSteps[].endedAt` | `string` | No | formato date-time | — | Cuándo terminó, si se cronometró. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1877` |
-| `findings` | `array<object>` | Sí | — | — | Hallazgos registrados durante la intervención | `src/modules/procedures_perioperative/dto/periop.dto.ts:1000` |
+| `operativeSteps` | `array<object>` | Sí | — | — | Pasos de la intervención, en orden | `src/modules/procedures_perioperative/dto/cases/case-detail.dto.ts:143` |
+| `findings` | `array<object>` | Sí | — | — | Hallazgos registrados durante la intervención | `src/modules/procedures_perioperative/dto/cases/case-detail.dto.ts:150` |
 | `findings[].id` | `string` | Sí | — | — | Identificador del hallazgo. | sin fuente |
 | `findings[].operativeStepId` | `string` | No | — | — | Paso en el que se halló, si se ató a uno. | sin fuente |
 | `findings[].findingCodeConceptId` | `string` | Sí | — | — | Código del hallazgo. | sin fuente |
@@ -1351,7 +1341,7 @@ La operación no recibe cuerpo.
 | `findings[].severityConceptId` | `string` | No | — | — | Severidad, si se graduó. | sin fuente |
 | `findings[].recordedByProfileId` | `string` | No | — | — | Profesional que lo registró, si consta. | sin fuente |
 | `findings[].recordedAt` | `string` | Sí | formato date-time | — | Cuándo se registró. | sin fuente |
-| `implants` | `array<object>` | Sí | — | — | Implantes colocados, con sus identificadores | `src/modules/procedures_perioperative/dto/periop.dto.ts:1033` |
+| `implants` | `array<object>` | Sí | — | — | Implantes colocados, con sus identificadores | `src/modules/procedures_perioperative/dto/cases/case-detail.dto.ts:178` |
 | `implants[].id` | `string` | Sí | — | — | Identificador del implante en el caso. | sin fuente |
 | `implants[].procedureId` | `string` | Sí | — | — | Procedimiento clínico al que se imputa. | sin fuente |
 | `implants[].implantDeviceId` | `string` | Sí | — | — | Dispositivo implantado. | sin fuente |
@@ -1422,7 +1412,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:167` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:167` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1463,11 +1453,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `patientProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Paciente de la intervención. Sólo corregible con el caso en borrador y sin dependencias (CAN-INT-001). | `src/modules/procedures_perioperative/dto/periop.dto.ts:214` |
-| `priority` | `string` | No | valores: ROUTINE, URGENT, STAT | `@IsOptional()` `@IsIn(CASE_PRIORITIES)` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:222` |
-| `scheduledStartAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:230` |
-| `scheduledEndAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:238` |
-| `urgencyReasonText` | `string` | No | — | `@IsOptional()` `@IsString()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:246` |
+| `patientProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Paciente de la intervención. Sólo corregible con el caso en borrador y sin dependencias (CAN-INT-001). | `src/modules/procedures_perioperative/dto/cases/schedule-case.dto.ts:188` |
+| `priority` | `string` | No | valores: ROUTINE, URGENT, STAT | `@IsOptional()` `@IsIn(CASE_PRIORITIES)` | — | `src/modules/procedures_perioperative/dto/cases/schedule-case.dto.ts:196` |
+| `scheduledStartAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | — | `src/modules/procedures_perioperative/dto/cases/schedule-case.dto.ts:204` |
+| `scheduledEndAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | — | `src/modules/procedures_perioperative/dto/cases/schedule-case.dto.ts:212` |
+| `urgencyReasonText` | `string` | No | — | `@IsOptional()` `@IsString()` | — | `src/modules/procedures_perioperative/dto/cases/schedule-case.dto.ts:220` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1493,12 +1483,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:257` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/periop.dto.ts:263` |
-| `patientProfileId` | `string` | Sí | formato uuid | — | Paciente vigente del caso | `src/modules/procedures_perioperative/dto/periop.dto.ts:269` |
-| `patientChanged` | `boolean` | Sí | — | — | true si se corrigió el paciente del caso | `src/modules/procedures_perioperative/dto/periop.dto.ts:275` |
-| `reacceptanceRequired` | `boolean` | Sí | — | — | true si la modificación fue relevante y el equipo debe volver a aceptar | `src/modules/procedures_perioperative/dto/periop.dto.ts:284` |
-| `acceptancesInvalidated` | `number` | Sí | — | — | Aceptaciones que quedaron invalidadas por la modificación relevante | `src/modules/procedures_perioperative/dto/periop.dto.ts:293` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/cases/schedule-case.dto.ts:231` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/cases/schedule-case.dto.ts:237` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | Paciente vigente del caso | `src/modules/procedures_perioperative/dto/cases/schedule-case.dto.ts:243` |
+| `patientChanged` | `boolean` | Sí | — | — | true si se corrigió el paciente del caso | `src/modules/procedures_perioperative/dto/cases/schedule-case.dto.ts:249` |
+| `reacceptanceRequired` | `boolean` | Sí | — | — | true si la modificación fue relevante y el equipo debe volver a aceptar | `src/modules/procedures_perioperative/dto/cases/schedule-case.dto.ts:258` |
+| `acceptancesInvalidated` | `number` | Sí | — | — | Aceptaciones que quedaron invalidadas por la modificación relevante | `src/modules/procedures_perioperative/dto/cases/schedule-case.dto.ts:267` |
 
 ### Respuestas posibles
 
@@ -1554,7 +1544,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | ROL | Alguno de: ANESTHESIOLOGIST, PERIOP_NURSE, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:480` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:480` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1579,14 +1569,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `eventType` | `string` | Sí | valores: INDUCTION, INTUBATION, MEDICATION, VITALS, EMERGENCE, COMPLICATION | `@IsIn(ANESTHESIA_EVENT_TYPES)` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:1667` |
-| `occurredAt` | `string` | Sí | formato date-time | `@IsISO8601()` | Momento del evento | `src/modules/procedures_perioperative/dto/periop.dto.ts:1674` |
-| `severity` | `string` | No | valores: ROUTINE, MINOR, MAJOR, CRITICAL | `@IsOptional()` `@IsIn(CLINICAL_SEVERITIES)` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:1682` |
-| `medicationAdministrationId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:1690` |
-| `observationId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:1698` |
-| `deviceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:1706` |
-| `performedByProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:1714` |
-| `detailsJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Detalle del evento | `src/modules/procedures_perioperative/dto/periop.dto.ts:1722` |
+| `eventType` | `string` | Sí | valores: INDUCTION, INTUBATION, MEDICATION, VITALS, EMERGENCE, COMPLICATION | `@IsIn(ANESTHESIA_EVENT_TYPES)` | — | `src/modules/procedures_perioperative/dto/anesthesia/anesthesia-events.dto.ts:33` |
+| `occurredAt` | `string` | Sí | formato date-time | `@IsISO8601()` | Momento del evento | `src/modules/procedures_perioperative/dto/anesthesia/anesthesia-events.dto.ts:40` |
+| `severity` | `string` | No | valores: ROUTINE, MINOR, MAJOR, CRITICAL | `@IsOptional()` `@IsIn(CLINICAL_SEVERITIES)` | — | `src/modules/procedures_perioperative/dto/anesthesia/anesthesia-events.dto.ts:48` |
+| `medicationAdministrationId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/anesthesia/anesthesia-events.dto.ts:56` |
+| `observationId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/anesthesia/anesthesia-events.dto.ts:64` |
+| `deviceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/anesthesia/anesthesia-events.dto.ts:72` |
+| `performedByProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/anesthesia/anesthesia-events.dto.ts:80` |
+| `detailsJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Detalle del evento | `src/modules/procedures_perioperative/dto/anesthesia/anesthesia-events.dto.ts:88` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1618,9 +1608,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1733` |
-| `eventTypeConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a event type concept. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1739` |
-| `milestoneId` | `string` | No | formato uuid | — | Hito creado si el evento fue inducción o despertar | `src/modules/procedures_perioperative/dto/periop.dto.ts:1748` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/anesthesia/anesthesia-events.dto.ts:99` |
+| `eventTypeConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a event type concept. | `src/modules/procedures_perioperative/dto/anesthesia/anesthesia-events.dto.ts:105` |
+| `milestoneId` | `string` | No | formato uuid | — | Hito creado si el evento fue inducción o despertar | `src/modules/procedures_perioperative/dto/anesthesia/anesthesia-events.dto.ts:114` |
 
 ### Respuestas posibles
 
@@ -1674,7 +1664,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | ROL | Alguno de: ANESTHESIOLOGIST, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:440` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:440` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1696,13 +1686,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `anesthesiologistProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:1531` |
-| `anesthesiaType` | `string` | Sí | valores: GENERAL, REGIONAL, LOCAL, SEDATION | `@IsIn(ANESTHESIA_TYPES)` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:1538` |
-| `airwayPlan` | `string` | No | valores: ETT, LMA, MASK | `@IsOptional()` `@IsIn(AIRWAY_PLANS)` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:1546` |
-| `monitoringPlanJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Monitorización planificada | `src/modules/procedures_perioperative/dto/periop.dto.ts:1554` |
-| `medicationsPlanJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Medicación planificada | `src/modules/procedures_perioperative/dto/periop.dto.ts:1562` |
-| `postoperativeAnalgesiaPlanText` | `string` | No | — | `@IsOptional()` `@IsString()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:1570` |
-| `airwayAssessment` | `AirwayAssessmentDto` | Sí | — | `@ValidateNested()` `@Type(() => AirwayAssessmentDto)` | Valoración de vía aérea | `src/modules/procedures_perioperative/dto/periop.dto.ts:1581` |
+| `anesthesiologistProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/anesthesia/anesthesia-plan.dto.ts:98` |
+| `anesthesiaType` | `string` | Sí | valores: GENERAL, REGIONAL, LOCAL, SEDATION | `@IsIn(ANESTHESIA_TYPES)` | — | `src/modules/procedures_perioperative/dto/anesthesia/anesthesia-plan.dto.ts:105` |
+| `airwayPlan` | `string` | No | valores: ETT, LMA, MASK | `@IsOptional()` `@IsIn(AIRWAY_PLANS)` | — | `src/modules/procedures_perioperative/dto/anesthesia/anesthesia-plan.dto.ts:113` |
+| `monitoringPlanJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Monitorización planificada | `src/modules/procedures_perioperative/dto/anesthesia/anesthesia-plan.dto.ts:121` |
+| `medicationsPlanJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Medicación planificada | `src/modules/procedures_perioperative/dto/anesthesia/anesthesia-plan.dto.ts:129` |
+| `postoperativeAnalgesiaPlanText` | `string` | No | — | `@IsOptional()` `@IsString()` | — | `src/modules/procedures_perioperative/dto/anesthesia/anesthesia-plan.dto.ts:137` |
+| `airwayAssessment` | `AirwayAssessmentDto` | Sí | — | `@ValidateNested()` `@Type(() => AirwayAssessmentDto)` | Valoración de vía aérea | `src/modules/procedures_perioperative/dto/anesthesia/anesthesia-plan.dto.ts:148` |
 | `airwayAssessment.assessedByProfileId` | `string` | Sí | formato uuid | — | — | sin fuente |
 | `airwayAssessment.mallampati` | `string` | No | valores: I, II, III, IV | — | — | sin fuente |
 | `airwayAssessment.mouthOpeningMm` | `string` | No | — | — | Apertura bucal en milímetros | sin fuente |
@@ -1750,10 +1740,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1592` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1598` |
-| `airwayAssessmentId` | `string` | Sí | formato uuid | — | Identificador asociado a airway assessment. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1604` |
-| `difficultAirwayExpected` | `boolean` | Sí | — | — | true si se anticipa vía aérea difícil | `src/modules/procedures_perioperative/dto/periop.dto.ts:1610` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/anesthesia/anesthesia-plan.dto.ts:159` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/anesthesia/anesthesia-plan.dto.ts:165` |
+| `airwayAssessmentId` | `string` | Sí | formato uuid | — | Identificador asociado a airway assessment. | `src/modules/procedures_perioperative/dto/anesthesia/anesthesia-plan.dto.ts:171` |
+| `difficultAirwayExpected` | `boolean` | Sí | — | — | true si se anticipa vía aérea difícil | `src/modules/procedures_perioperative/dto/anesthesia/anesthesia-plan.dto.ts:177` |
 
 ### Respuestas posibles
 
@@ -1832,9 +1822,9 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1621` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1627` |
-| `anesthesiologistProfileId` | `string` | Sí | formato uuid | — | Anestesiólogo asignado al caso | `src/modules/procedures_perioperative/dto/periop.dto.ts:1636` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/anesthesia/anesthesia-plan.dto.ts:188` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/anesthesia/anesthesia-plan.dto.ts:194` |
+| `anesthesiologistProfileId` | `string` | Sí | formato uuid | — | Anestesiólogo asignado al caso | `src/modules/procedures_perioperative/dto/anesthesia/anesthesia-plan.dto.ts:203` |
 
 ### Respuestas posibles
 
@@ -1890,7 +1880,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | ROL | Alguno de: SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:704` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:704` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1912,11 +1902,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `cancellationReasonConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Motivo de la cancelación | `src/modules/procedures_perioperative/dto/periop.dto.ts:2783` |
-| `category` | `string` | Sí | valores: PATIENT, FACILITY, CLINICAL | `@IsIn(CANCELLATION_CATEGORIES)` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2790` |
-| `preventable` | `boolean` | Sí | — | `@IsBoolean()` | Si era evitable; es lo que mide la calidad del proceso | `src/modules/procedures_perioperative/dto/periop.dto.ts:2799` |
-| `explanationText` | `string` | No | — | `@IsOptional()` `@IsString()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2807` |
-| `rescheduleRequired` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2815` |
+| `cancellationReasonConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Motivo de la cancelación | `src/modules/procedures_perioperative/dto/postop/cancellation.dto.ts:23` |
+| `category` | `string` | Sí | valores: PATIENT, FACILITY, CLINICAL | `@IsIn(CANCELLATION_CATEGORIES)` | — | `src/modules/procedures_perioperative/dto/postop/cancellation.dto.ts:30` |
+| `preventable` | `boolean` | Sí | — | `@IsBoolean()` | Si era evitable; es lo que mide la calidad del proceso | `src/modules/procedures_perioperative/dto/postop/cancellation.dto.ts:39` |
+| `explanationText` | `string` | No | — | `@IsOptional()` `@IsString()` | — | `src/modules/procedures_perioperative/dto/postop/cancellation.dto.ts:47` |
+| `rescheduleRequired` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | — | `src/modules/procedures_perioperative/dto/postop/cancellation.dto.ts:55` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1946,10 +1936,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:2826` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/periop.dto.ts:2832` |
-| `cancellationId` | `string` | Sí | formato uuid | — | Registro de la cancelación | `src/modules/procedures_perioperative/dto/periop.dto.ts:2838` |
-| `operatingRoomReleased` | `boolean` | Sí | — | — | true si se liberó el quirófano reservado | `src/modules/procedures_perioperative/dto/periop.dto.ts:2844` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/postop/cancellation.dto.ts:66` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/postop/cancellation.dto.ts:72` |
+| `cancellationId` | `string` | Sí | formato uuid | — | Registro de la cancelación | `src/modules/procedures_perioperative/dto/postop/cancellation.dto.ts:78` |
+| `operatingRoomReleased` | `boolean` | Sí | — | — | true si se liberó el quirófano reservado | `src/modules/procedures_perioperative/dto/postop/cancellation.dto.ts:84` |
 
 ### Respuestas posibles
 
@@ -2004,7 +1994,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | ROL | Alguno de: PERIOP_ADMIN, BILLING | `src/modules/procedures_perioperative/controllers/periop.controller.ts:725` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:725` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2026,14 +2016,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<ChargeItemDto>` | Sí | mínimo 1 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ValidateNested({ each: true })` `@Type(() => ChargeItemDto)` | Cargos a generar, al menos uno | `src/modules/procedures_perioperative/dto/periop.dto.ts:2914` |
-| `items[].chargeType` | `string` | Sí | valores: PROCEDURE, IMPLANT, SUPPLY, OR_TIME | `@IsIn(CHARGE_TYPES)` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2864` |
-| `items[].billableItemId` | `string` | Sí | formato uuid | `@IsUUID()` | Concepto facturable del catálogo | `src/modules/procedures_perioperative/dto/periop.dto.ts:2874` |
-| `items[].quantity` | `string` | Sí | — | `@IsNumberString()` | Cantidad, como cadena decimal | `src/modules/procedures_perioperative/dto/periop.dto.ts:2881` |
-| `items[].unitPrice` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Precio unitario | `src/modules/procedures_perioperative/dto/periop.dto.ts:2889` |
-| `items[].currencyCode` | `string` | No | longitud máxima 3 | `@IsOptional()` `@IsString()` `@MaxLength(3)` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2898` |
-| `consolidateUtilization` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Consolidar además el uso real del quirófano | `src/modules/procedures_perioperative/dto/periop.dto.ts:2925` |
-| `turnoverSeconds` | `number` | No | mínimo 0 | `@IsOptional()` `@IsInt()` `@Min(0)` | Segundos de recambio hasta el siguiente caso | `src/modules/procedures_perioperative/dto/periop.dto.ts:2936` |
+| `items` | `array<ChargeItemDto>` | Sí | mínimo 1 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ValidateNested({ each: true })` `@Type(() => ChargeItemDto)` | Cargos a generar, al menos uno | `src/modules/procedures_perioperative/dto/postop/charges-utilization.dto.ts:90` |
+| `items[].chargeType` | `string` | Sí | valores: PROCEDURE, IMPLANT, SUPPLY, OR_TIME | `@IsIn(CHARGE_TYPES)` | — | `src/modules/procedures_perioperative/dto/postop/charges-utilization.dto.ts:40` |
+| `items[].billableItemId` | `string` | Sí | formato uuid | `@IsUUID()` | Concepto facturable del catálogo | `src/modules/procedures_perioperative/dto/postop/charges-utilization.dto.ts:50` |
+| `items[].quantity` | `string` | Sí | — | `@IsNumberString()` | Cantidad, como cadena decimal | `src/modules/procedures_perioperative/dto/postop/charges-utilization.dto.ts:57` |
+| `items[].unitPrice` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Precio unitario | `src/modules/procedures_perioperative/dto/postop/charges-utilization.dto.ts:65` |
+| `items[].currencyCode` | `string` | No | longitud máxima 3 | `@IsOptional()` `@IsString()` `@MaxLength(3)` | — | `src/modules/procedures_perioperative/dto/postop/charges-utilization.dto.ts:74` |
+| `consolidateUtilization` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Consolidar además el uso real del quirófano | `src/modules/procedures_perioperative/dto/postop/charges-utilization.dto.ts:101` |
+| `turnoverSeconds` | `number` | No | mínimo 0 | `@IsOptional()` `@IsInt()` `@Min(0)` | Segundos de recambio hasta el siguiente caso | `src/modules/procedures_perioperative/dto/postop/charges-utilization.dto.ts:112` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2073,11 +2063,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `procedureCaseId` | `string` | Sí | formato uuid | — | Identificador asociado a procedure case. | `src/modules/procedures_perioperative/dto/periop.dto.ts:2947` |
-| `charged` | `number` | Sí | — | — | Cargos generados | `src/modules/procedures_perioperative/dto/periop.dto.ts:2953` |
-| `totalAmount` | `string` | Sí | — | — | Importe total de los cargos | `src/modules/procedures_perioperative/dto/periop.dto.ts:2959` |
-| `actualDurationSeconds` | `number` | No | — | — | Duración real del caso, en segundos | `src/modules/procedures_perioperative/dto/periop.dto.ts:2965` |
-| `scheduleVarianceSeconds` | `number` | No | — | — | Desviación frente a lo programado, en segundos | `src/modules/procedures_perioperative/dto/periop.dto.ts:2973` |
+| `procedureCaseId` | `string` | Sí | formato uuid | — | Identificador asociado a procedure case. | `src/modules/procedures_perioperative/dto/postop/charges-utilization.dto.ts:123` |
+| `charged` | `number` | Sí | — | — | Cargos generados | `src/modules/procedures_perioperative/dto/postop/charges-utilization.dto.ts:129` |
+| `totalAmount` | `string` | Sí | — | — | Importe total de los cargos | `src/modules/procedures_perioperative/dto/postop/charges-utilization.dto.ts:135` |
+| `actualDurationSeconds` | `number` | No | — | — | Duración real del caso, en segundos | `src/modules/procedures_perioperative/dto/postop/charges-utilization.dto.ts:141` |
+| `scheduleVarianceSeconds` | `number` | No | — | — | Desviación frente a lo programado, en segundos | `src/modules/procedures_perioperative/dto/postop/charges-utilization.dto.ts:149` |
 
 ### Respuestas posibles
 
@@ -2152,7 +2142,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `periop.case.confirmation_blocked` | `src/modules/procedures_perioperative/services/periop-cases.service.ts:659` |
+| Evento de dominio | `periop.case.confirmation_blocked` | `src/modules/procedures_perioperative/services/periop-cases.service.ts:660` |
 
 ### Parámetros
 
@@ -2168,9 +2158,9 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:304` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Estado tras confirmar | `src/modules/procedures_perioperative/dto/periop.dto.ts:310` |
-| `teamVerified` | `number` | Sí | — | — | Miembros del equipo con credencial verificada al confirmar | `src/modules/procedures_perioperative/dto/periop.dto.ts:318` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/cases/schedule-case.dto.ts:278` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Estado tras confirmar | `src/modules/procedures_perioperative/dto/cases/schedule-case.dto.ts:284` |
+| `teamVerified` | `number` | Sí | — | — | Miembros del equipo con credencial verificada al confirmar | `src/modules/procedures_perioperative/dto/cases/schedule-case.dto.ts:292` |
 
 ### Respuestas posibles
 
@@ -2224,7 +2214,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | ROL | Alguno de: SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:211` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:211` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2254,11 +2244,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `diagnoses` | `array<CaseDiagnosisDto>` | Sí | mínimo 1 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ValidateNested({ each: true })` `@Type(() => CaseDiagnosisDto)` | Diagnósticos del caso, al menos uno | `src/modules/procedures_perioperative/dto/periop.dto.ts:394` |
-| `diagnoses[].conditionId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Condición ya registrada en la historia clínica | `src/modules/procedures_perioperative/dto/periop.dto.ts:344` |
-| `diagnoses[].conditionCodeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Código de la condición a registrar si aún no existe | `src/modules/procedures_perioperative/dto/periop.dto.ts:363` |
-| `diagnoses[].role` | `string` | Sí | valores: PRIMARY, SECONDARY, POSTOPERATIVE | `@IsIn(DIAGNOSIS_ROLES)` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:370` |
-| `diagnoses[].presentOnAdmission` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Presente al ingresar | `src/modules/procedures_perioperative/dto/periop.dto.ts:378` |
+| `diagnoses` | `array<CaseDiagnosisDto>` | Sí | mínimo 1 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ValidateNested({ each: true })` `@Type(() => CaseDiagnosisDto)` | Diagnósticos del caso, al menos uno | `src/modules/procedures_perioperative/dto/cases/case-team-diagnoses.dto.ts:93` |
+| `diagnoses[].conditionId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Condición ya registrada en la historia clínica | `src/modules/procedures_perioperative/dto/cases/case-team-diagnoses.dto.ts:43` |
+| `diagnoses[].conditionCodeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Código de la condición a registrar si aún no existe | `src/modules/procedures_perioperative/dto/cases/case-team-diagnoses.dto.ts:62` |
+| `diagnoses[].role` | `string` | Sí | valores: PRIMARY, SECONDARY, POSTOPERATIVE | `@IsIn(DIAGNOSIS_ROLES)` | — | `src/modules/procedures_perioperative/dto/cases/case-team-diagnoses.dto.ts:69` |
+| `diagnoses[].presentOnAdmission` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Presente al ingresar | `src/modules/procedures_perioperative/dto/cases/case-team-diagnoses.dto.ts:77` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2293,9 +2283,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `procedureCaseId` | `string` | Sí | formato uuid | — | Identificador asociado a procedure case. | `src/modules/procedures_perioperative/dto/periop.dto.ts:405` |
-| `diagnosisIds` | `array<string>` | Sí | formato uuid | — | Valor de diagnosis ids mantenido por la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:411` |
-| `skipped` | `number` | Sí | — | — | Diagnósticos que ya estaban registrados y se omitieron | `src/modules/procedures_perioperative/dto/periop.dto.ts:419` |
+| `procedureCaseId` | `string` | Sí | formato uuid | — | Identificador asociado a procedure case. | `src/modules/procedures_perioperative/dto/cases/case-team-diagnoses.dto.ts:104` |
+| `diagnosisIds` | `array<string>` | Sí | formato uuid | — | Valor de diagnosis ids mantenido por la instancia. | `src/modules/procedures_perioperative/dto/cases/case-team-diagnoses.dto.ts:110` |
+| `skipped` | `number` | Sí | — | — | Diagnósticos que ya estaban registrados y se omitieron | `src/modules/procedures_perioperative/dto/cases/case-team-diagnoses.dto.ts:118` |
 
 ### Respuestas posibles
 
@@ -2352,7 +2342,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:520` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:520` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2375,14 +2365,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `findingCodeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Código del hallazgo | `src/modules/procedures_perioperative/dto/periop.dto.ts:1887` |
-| `findingText` | `string` | Sí | — | `@IsString()` | Qué se encontró | `src/modules/procedures_perioperative/dto/periop.dto.ts:1894` |
-| `operativeStepId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Paso en el que se observó | `src/modules/procedures_perioperative/dto/periop.dto.ts:1905` |
-| `bodySiteConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:1913` |
-| `laterality` | `string` | No | valores: LEFT, RIGHT, BILATERAL | `@IsOptional()` `@IsIn(LATERALITIES)` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:1921` |
-| `severity` | `string` | No | valores: ROUTINE, MINOR, MAJOR, CRITICAL | `@IsOptional()` `@IsIn(CLINICAL_SEVERITIES)` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:1929` |
-| `observationId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:1937` |
-| `recordedByProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:1945` |
+| `findingCodeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Código del hallazgo | `src/modules/procedures_perioperative/dto/intraop/operative-steps-findings.dto.ts:141` |
+| `findingText` | `string` | Sí | — | `@IsString()` | Qué se encontró | `src/modules/procedures_perioperative/dto/intraop/operative-steps-findings.dto.ts:148` |
+| `operativeStepId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Paso en el que se observó | `src/modules/procedures_perioperative/dto/intraop/operative-steps-findings.dto.ts:159` |
+| `bodySiteConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/intraop/operative-steps-findings.dto.ts:167` |
+| `laterality` | `string` | No | valores: LEFT, RIGHT, BILATERAL | `@IsOptional()` `@IsIn(LATERALITIES)` | — | `src/modules/procedures_perioperative/dto/intraop/operative-steps-findings.dto.ts:175` |
+| `severity` | `string` | No | valores: ROUTINE, MINOR, MAJOR, CRITICAL | `@IsOptional()` `@IsIn(CLINICAL_SEVERITIES)` | — | `src/modules/procedures_perioperative/dto/intraop/operative-steps-findings.dto.ts:183` |
+| `observationId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/intraop/operative-steps-findings.dto.ts:191` |
+| `recordedByProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/intraop/operative-steps-findings.dto.ts:199` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2414,7 +2404,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1956` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/intraop/operative-steps-findings.dto.ts:210` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | sin fuente |
 
 ### Respuestas posibles
@@ -2470,7 +2460,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | ROL | Alguno de: SURGEON, PERIOP_NURSE, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:542` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:542` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2492,19 +2482,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `procedureId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2046` |
-| `implantDeviceId` | `string` | Sí | formato uuid | `@IsUUID()` | Dispositivo implantado | `src/modules/procedures_perioperative/dto/periop.dto.ts:2053` |
-| `implantRole` | `string` | Sí | valores: PRIMARY, ADJUNCT | `@IsIn(['PRIMARY', 'ADJUNCT'])` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2060` |
-| `bodySiteConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2068` |
-| `laterality` | `string` | No | valores: LEFT, RIGHT, BILATERAL | `@IsOptional()` `@IsIn(LATERALITIES)` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2076` |
-| `identifiers` | `array<ImplantIdentifierDto>` | Sí | mínimo 1 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ValidateNested({ each: true })` `@Type(() => ImplantIdentifierDto)` | Identificadores de trazabilidad, al menos uno | `src/modules/procedures_perioperative/dto/periop.dto.ts:2089` |
-| `identifiers[].identifierType` | `string` | Sí | valores: UDI_DI, UDI_PI, SERIAL | `@IsIn(IMPLANT_IDENTIFIER_TYPES)` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:1993` |
-| `identifiers[].identifierValue` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Valor del identificador | `src/modules/procedures_perioperative/dto/periop.dto.ts:2001` |
-| `identifiers[].issuingSystem` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Sistema emisor | `src/modules/procedures_perioperative/dto/periop.dto.ts:2010` |
-| `identifiers[].lotNumber` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2019` |
-| `identifiers[].serialNumber` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2028` |
-| `identifiers[].expirationDate` | `string` | No | formato date | `@IsOptional()` `@IsISO8601()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2036` |
-| `udiCarrier` | `string` | No | longitud máxima 300 | `@IsOptional()` `@IsString()` `@MaxLength(300)` | Portador UDI leído del envase | `src/modules/procedures_perioperative/dto/periop.dto.ts:2101` |
+| `procedureId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/intraop/implants.dto.ts:90` |
+| `implantDeviceId` | `string` | Sí | formato uuid | `@IsUUID()` | Dispositivo implantado | `src/modules/procedures_perioperative/dto/intraop/implants.dto.ts:97` |
+| `implantRole` | `string` | Sí | valores: PRIMARY, ADJUNCT | `@IsIn(['PRIMARY', 'ADJUNCT'])` | — | `src/modules/procedures_perioperative/dto/intraop/implants.dto.ts:104` |
+| `bodySiteConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/intraop/implants.dto.ts:112` |
+| `laterality` | `string` | No | valores: LEFT, RIGHT, BILATERAL | `@IsOptional()` `@IsIn(LATERALITIES)` | — | `src/modules/procedures_perioperative/dto/intraop/implants.dto.ts:120` |
+| `identifiers` | `array<ImplantIdentifierDto>` | Sí | mínimo 1 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ValidateNested({ each: true })` `@Type(() => ImplantIdentifierDto)` | Identificadores de trazabilidad, al menos uno | `src/modules/procedures_perioperative/dto/intraop/implants.dto.ts:133` |
+| `identifiers[].identifierType` | `string` | Sí | valores: UDI_DI, UDI_PI, SERIAL | `@IsIn(IMPLANT_IDENTIFIER_TYPES)` | — | `src/modules/procedures_perioperative/dto/intraop/implants.dto.ts:37` |
+| `identifiers[].identifierValue` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Valor del identificador | `src/modules/procedures_perioperative/dto/intraop/implants.dto.ts:45` |
+| `identifiers[].issuingSystem` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Sistema emisor | `src/modules/procedures_perioperative/dto/intraop/implants.dto.ts:54` |
+| `identifiers[].lotNumber` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/procedures_perioperative/dto/intraop/implants.dto.ts:63` |
+| `identifiers[].serialNumber` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/procedures_perioperative/dto/intraop/implants.dto.ts:72` |
+| `identifiers[].expirationDate` | `string` | No | formato date | `@IsOptional()` `@IsISO8601()` | — | `src/modules/procedures_perioperative/dto/intraop/implants.dto.ts:80` |
+| `udiCarrier` | `string` | No | longitud máxima 300 | `@IsOptional()` `@IsString()` `@MaxLength(300)` | Portador UDI leído del envase | `src/modules/procedures_perioperative/dto/intraop/implants.dto.ts:145` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2551,10 +2541,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:2112` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/periop.dto.ts:2118` |
-| `identifierIds` | `array<string>` | Sí | formato uuid | — | Valor de identifier ids mantenido por la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:2124` |
-| `deviceUseId` | `string` | Sí | formato uuid | — | Registro del dispositivo usado | `src/modules/procedures_perioperative/dto/periop.dto.ts:2133` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/intraop/implants.dto.ts:156` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/intraop/implants.dto.ts:162` |
+| `identifierIds` | `array<string>` | Sí | formato uuid | — | Valor de identifier ids mantenido por la instancia. | `src/modules/procedures_perioperative/dto/intraop/implants.dto.ts:168` |
+| `deviceUseId` | `string` | Sí | formato uuid | — | Registro del dispositivo usado | `src/modules/procedures_perioperative/dto/intraop/implants.dto.ts:177` |
 
 ### Respuestas posibles
 
@@ -2608,7 +2598,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | ROL | Alguno de: ANESTHESIOLOGIST, PERIOP_NURSE, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:563` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:563` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2629,10 +2619,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `medicationAdministrationId` | `string` | Sí | formato uuid | `@IsUUID()` | Administración registrada en farmacia | `src/modules/procedures_perioperative/dto/periop.dto.ts:2158` |
-| `useRole` | `string` | Sí | valores: ANESTHESIA, ANTIBIOTIC, ANALGESIA | `@IsIn(MEDICATION_USE_ROLES)` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2165` |
-| `procedureId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2173` |
-| `operativeStepId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Paso durante el que se administró | `src/modules/procedures_perioperative/dto/periop.dto.ts:2184` |
+| `medicationAdministrationId` | `string` | Sí | formato uuid | `@IsUUID()` | Administración registrada en farmacia | `src/modules/procedures_perioperative/dto/intraop/supplies-specimens.dto.ts:30` |
+| `useRole` | `string` | Sí | valores: ANESTHESIA, ANTIBIOTIC, ANALGESIA | `@IsIn(MEDICATION_USE_ROLES)` | — | `src/modules/procedures_perioperative/dto/intraop/supplies-specimens.dto.ts:37` |
+| `procedureId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/intraop/supplies-specimens.dto.ts:45` |
+| `operativeStepId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Paso durante el que se administró | `src/modules/procedures_perioperative/dto/intraop/supplies-specimens.dto.ts:56` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2660,8 +2650,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:2256` |
-| `procedureCaseId` | `string` | Sí | formato uuid | — | Identificador asociado a procedure case. | `src/modules/procedures_perioperative/dto/periop.dto.ts:2262` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/intraop/supplies-specimens.dto.ts:128` |
+| `procedureCaseId` | `string` | Sí | formato uuid | — | Identificador asociado a procedure case. | `src/modules/procedures_perioperative/dto/intraop/supplies-specimens.dto.ts:134` |
 
 ### Respuestas posibles
 
@@ -2715,7 +2705,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | ROL | Alguno de: SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:601` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:601` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2744,23 +2734,23 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `procedureId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Procedimiento ya registrado en la historia clínica | `src/modules/procedures_perioperative/dto/periop.dto.ts:2332` |
-| `procedureCodeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Código del procedimiento a registrar si aún no existe | `src/modules/procedures_perioperative/dto/periop.dto.ts:2348` |
-| `authorProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | Autor del reporte | `src/modules/procedures_perioperative/dto/periop.dto.ts:2355` |
-| `preoperativeDiagnosisText` | `string` | No | — | `@IsOptional()` `@IsString()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2363` |
-| `postoperativeDiagnosisText` | `string` | No | — | `@IsOptional()` `@IsString()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2371` |
-| `procedureDescription` | `string` | Sí | — | `@IsString()` | Descripción de lo realizado | `src/modules/procedures_perioperative/dto/periop.dto.ts:2378` |
-| `findingsText` | `string` | No | — | `@IsOptional()` `@IsString()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2386` |
-| `estimatedBloodLossMl` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Sangrado estimado en mililitros | `src/modules/procedures_perioperative/dto/periop.dto.ts:2394` |
-| `drainsText` | `string` | No | — | `@IsOptional()` `@IsString()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2402` |
-| `complicationsText` | `string` | No | — | `@IsOptional()` `@IsString()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2410` |
-| `disposition` | `string` | Sí | valores: PACU, ICU, WARD, HOME | `@IsIn(DISPOSITIONS)` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2417` |
-| `complications` | `array<ComplicationDto>` | No | — | `@IsOptional()` `@IsArray()` `@ValidateNested({ each: true })` `@Type(() => ComplicationDto)` | Complicaciones a registrar | `src/modules/procedures_perioperative/dto/periop.dto.ts:2430` |
-| `complications[].complicationCodeConceptId` | `string` | No | formato uuid | `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2286` |
-| `complications[].severity` | `string` | No | valores: ROUTINE, MINOR, MAJOR, CRITICAL | `@IsIn(CLINICAL_SEVERITIES)` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2293` |
-| `complications[].relatedness` | `string` | No | valores: PROCEDURE, ANESTHESIA, UNRELATED | `@IsIn(RELATEDNESS)` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2300` |
-| `complications[].conditionId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2308` |
-| `complications[].managementText` | `string` | No | — | `@IsOptional()` `@IsString()` | Cómo se manejó | `src/modules/procedures_perioperative/dto/periop.dto.ts:2316` |
+| `procedureId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Procedimiento ya registrado en la historia clínica | `src/modules/procedures_perioperative/dto/report/operative-report.dto.ts:79` |
+| `procedureCodeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Código del procedimiento a registrar si aún no existe | `src/modules/procedures_perioperative/dto/report/operative-report.dto.ts:90` |
+| `authorProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | Autor del reporte | `src/modules/procedures_perioperative/dto/report/operative-report.dto.ts:97` |
+| `preoperativeDiagnosisText` | `string` | No | — | `@IsOptional()` `@IsString()` | — | `src/modules/procedures_perioperative/dto/report/operative-report.dto.ts:105` |
+| `postoperativeDiagnosisText` | `string` | No | — | `@IsOptional()` `@IsString()` | — | `src/modules/procedures_perioperative/dto/report/operative-report.dto.ts:113` |
+| `procedureDescription` | `string` | Sí | — | `@IsString()` | Descripción de lo realizado | `src/modules/procedures_perioperative/dto/report/operative-report.dto.ts:120` |
+| `findingsText` | `string` | No | — | `@IsOptional()` `@IsString()` | — | `src/modules/procedures_perioperative/dto/report/operative-report.dto.ts:128` |
+| `estimatedBloodLossMl` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Sangrado estimado en mililitros | `src/modules/procedures_perioperative/dto/report/operative-report.dto.ts:136` |
+| `drainsText` | `string` | No | — | `@IsOptional()` `@IsString()` | — | `src/modules/procedures_perioperative/dto/report/operative-report.dto.ts:144` |
+| `complicationsText` | `string` | No | — | `@IsOptional()` `@IsString()` | — | `src/modules/procedures_perioperative/dto/report/operative-report.dto.ts:152` |
+| `disposition` | `string` | Sí | valores: PACU, ICU, WARD, HOME | `@IsIn(DISPOSITIONS)` | — | `src/modules/procedures_perioperative/dto/report/operative-report.dto.ts:159` |
+| `complications` | `array<ComplicationDto>` | No | — | `@IsOptional()` `@IsArray()` `@ValidateNested({ each: true })` `@Type(() => ComplicationDto)` | Complicaciones a registrar | `src/modules/procedures_perioperative/dto/report/operative-report.dto.ts:172` |
+| `complications[].complicationCodeConceptId` | `string` | No | formato uuid | `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/report/operative-report.dto.ts:35` |
+| `complications[].severity` | `string` | No | valores: ROUTINE, MINOR, MAJOR, CRITICAL | `@IsIn(CLINICAL_SEVERITIES)` | — | `src/modules/procedures_perioperative/dto/report/operative-report.dto.ts:42` |
+| `complications[].relatedness` | `string` | No | valores: PROCEDURE, ANESTHESIA, UNRELATED | `@IsIn(RELATEDNESS)` | — | `src/modules/procedures_perioperative/dto/report/operative-report.dto.ts:49` |
+| `complications[].conditionId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/report/operative-report.dto.ts:57` |
+| `complications[].managementText` | `string` | No | — | `@IsOptional()` `@IsString()` | Cómo se manejó | `src/modules/procedures_perioperative/dto/report/operative-report.dto.ts:65` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2805,10 +2795,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:2441` |
-| `reportVersion` | `number` | Sí | — | — | Versión del reporte | `src/modules/procedures_perioperative/dto/periop.dto.ts:2447` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/periop.dto.ts:2453` |
-| `complicationIds` | `array<string>` | Sí | formato uuid | — | Valor de complication ids mantenido por la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:2459` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/report/operative-report.dto.ts:183` |
+| `reportVersion` | `number` | Sí | — | — | Versión del reporte | `src/modules/procedures_perioperative/dto/report/operative-report.dto.ts:189` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/report/operative-report.dto.ts:195` |
+| `complicationIds` | `array<string>` | Sí | formato uuid | — | Valor de complication ids mantenido por la instancia. | `src/modules/procedures_perioperative/dto/report/operative-report.dto.ts:201` |
 
 ### Respuestas posibles
 
@@ -2863,7 +2853,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:622` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id, reportId | `src/modules/procedures_perioperative/controllers/periop.controller.ts:622` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2890,8 +2880,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `signatureId` | `string` | Sí | formato uuid | `@IsUUID()` | Firma electrónica aplicada | `src/modules/procedures_perioperative/dto/periop.dto.ts:2469` |
-| `fileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Documento firmado | `src/modules/procedures_perioperative/dto/periop.dto.ts:2477` |
+| `signatureId` | `string` | Sí | formato uuid | `@IsUUID()` | Firma electrónica aplicada | `src/modules/procedures_perioperative/dto/report/operative-report.dto.ts:211` |
+| `fileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Documento firmado | `src/modules/procedures_perioperative/dto/report/operative-report.dto.ts:219` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2916,9 +2906,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:2488` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/periop.dto.ts:2494` |
-| `caseStatusConceptId` | `string` | Sí | formato uuid | — | Estado en el que queda el caso | `src/modules/procedures_perioperative/dto/periop.dto.ts:2503` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/report/operative-report.dto.ts:230` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/report/operative-report.dto.ts:236` |
+| `caseStatusConceptId` | `string` | Sí | formato uuid | — | Estado en el que queda el caso | `src/modules/procedures_perioperative/dto/report/operative-report.dto.ts:245` |
 
 ### Respuestas posibles
 
@@ -2974,7 +2964,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | ROL | Alguno de: SURGEON, PERIOP_NURSE, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:502` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:502` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2995,12 +2985,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `stepCodeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Código del paso operatorio | `src/modules/procedures_perioperative/dto/periop.dto.ts:1762` |
-| `description` | `string` | Sí | — | `@IsString()` | Qué se hizo | `src/modules/procedures_perioperative/dto/periop.dto.ts:1769` |
-| `procedureId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:1777` |
-| `performedByProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:1785` |
-| `bodySiteConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Sitio anatómico intervenido | `src/modules/procedures_perioperative/dto/periop.dto.ts:1796` |
-| `laterality` | `string` | No | valores: LEFT, RIGHT, BILATERAL | `@IsOptional()` `@IsIn(LATERALITIES)` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:1804` |
+| `stepCodeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Código del paso operatorio | `src/modules/procedures_perioperative/dto/intraop/operative-steps-findings.dto.ts:21` |
+| `description` | `string` | Sí | — | `@IsString()` | Qué se hizo | `src/modules/procedures_perioperative/dto/intraop/operative-steps-findings.dto.ts:28` |
+| `procedureId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/intraop/operative-steps-findings.dto.ts:36` |
+| `performedByProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/intraop/operative-steps-findings.dto.ts:44` |
+| `bodySiteConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Sitio anatómico intervenido | `src/modules/procedures_perioperative/dto/intraop/operative-steps-findings.dto.ts:55` |
+| `laterality` | `string` | No | valores: LEFT, RIGHT, BILATERAL | `@IsOptional()` `@IsIn(LATERALITIES)` | — | `src/modules/procedures_perioperative/dto/intraop/operative-steps-findings.dto.ts:63` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -3030,9 +3020,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1815` |
-| `stepNumber` | `number` | Sí | — | — | Número del paso dentro del caso | `src/modules/procedures_perioperative/dto/periop.dto.ts:1821` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1827` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/intraop/operative-steps-findings.dto.ts:74` |
+| `stepNumber` | `number` | Sí | — | — | Número del paso dentro del caso | `src/modules/procedures_perioperative/dto/intraop/operative-steps-findings.dto.ts:80` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/intraop/operative-steps-findings.dto.ts:86` |
 
 ### Respuestas posibles
 
@@ -3086,7 +3076,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | ROL | Alguno de: PERIOP_NURSE, ANESTHESIOLOGIST, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:644` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:644` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3108,8 +3098,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `careSpaceId` | `string` | Sí | formato uuid | `@IsUUID()` | Espacio de recuperación | `src/modules/procedures_perioperative/dto/periop.dto.ts:2517` |
-| `admittedByProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2525` |
+| `careSpaceId` | `string` | Sí | formato uuid | `@IsUUID()` | Espacio de recuperación | `src/modules/procedures_perioperative/dto/postop/pacu.dto.ts:30` |
+| `admittedByProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/postop/pacu.dto.ts:38` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -3134,9 +3124,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:2536` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/periop.dto.ts:2542` |
-| `locationId` | `string` | Sí | formato uuid | — | Ubicación del caso creada | `src/modules/procedures_perioperative/dto/periop.dto.ts:2548` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/postop/pacu.dto.ts:49` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/postop/pacu.dto.ts:55` |
+| `locationId` | `string` | Sí | formato uuid | — | Ubicación del caso creada | `src/modules/procedures_perioperative/dto/postop/pacu.dto.ts:61` |
 
 ### Respuestas posibles
 
@@ -3191,7 +3181,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | ROL | Alguno de: ANESTHESIOLOGIST, SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:250` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:250` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3227,21 +3217,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `assessmentType` | `string` | Sí | valores: ANESTHESIA, SURGICAL | `@IsIn(['ANESTHESIA', 'SURGICAL'])` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:1079` |
-| `assessedByProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | Profesional que valora | `src/modules/procedures_perioperative/dto/periop.dto.ts:1086` |
-| `fitnessStatus` | `string` | Sí | valores: FIT, FIT_WITH_CAUTION, UNFIT | `@IsIn(FITNESS_STATUSES)` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:1093` |
-| `asaClass` | `string` | No | valores: I, II, III, IV, V | `@IsOptional()` `@IsIn(ASA_CLASSES)` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:1101` |
-| `allergiesReviewed` | `boolean` | Sí | — | `@IsBoolean()` | Se revisaron las alergias del paciente | `src/modules/procedures_perioperative/dto/periop.dto.ts:1108` |
-| `medicationsReviewed` | `boolean` | Sí | — | `@IsBoolean()` | Se revisó la medicación del paciente | `src/modules/procedures_perioperative/dto/periop.dto.ts:1115` |
-| `anticoagulationPlanText` | `string` | No | — | `@IsOptional()` `@IsString()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:1123` |
-| `fastingInstructionsText` | `string` | No | — | `@IsOptional()` `@IsString()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:1131` |
-| `assessmentJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Detalle estructurado de la valoración | `src/modules/procedures_perioperative/dto/periop.dto.ts:1139` |
-| `riskScores` | `array<RiskScoreDto>` | No | — | `@IsOptional()` `@IsArray()` `@ValidateNested({ each: true })` `@Type(() => RiskScoreDto)` | Puntuaciones de riesgo calculadas | `src/modules/procedures_perioperative/dto/periop.dto.ts:1152` |
-| `riskScores[].model` | `string` | No | valores: ASA, RCRI, APFEL | `@IsIn(RISK_MODELS)` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:560` |
-| `riskScores[].modelVersion` | `string` | No | longitud máxima 50 | `@IsString()` `@MaxLength(50)` | Versión del modelo aplicada | `src/modules/procedures_perioperative/dto/periop.dto.ts:568` |
-| `riskScores[].scoreValue` | `string` | No | — | `@IsNumberString()` | Puntuación obtenida | `src/modules/procedures_perioperative/dto/periop.dto.ts:575` |
-| `riskScores[].inputsJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Entradas con las que se calculó | `src/modules/procedures_perioperative/dto/periop.dto.ts:583` |
-| `riskScores[].interpretationText` | `string` | No | — | `@IsOptional()` `@IsString()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:591` |
+| `assessmentType` | `string` | Sí | valores: ANESTHESIA, SURGICAL | `@IsIn(['ANESTHESIA', 'SURGICAL'])` | — | `src/modules/procedures_perioperative/dto/preop/preop-assessment.dto.ts:82` |
+| `assessedByProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | Profesional que valora | `src/modules/procedures_perioperative/dto/preop/preop-assessment.dto.ts:89` |
+| `fitnessStatus` | `string` | Sí | valores: FIT, FIT_WITH_CAUTION, UNFIT | `@IsIn(FITNESS_STATUSES)` | — | `src/modules/procedures_perioperative/dto/preop/preop-assessment.dto.ts:96` |
+| `asaClass` | `string` | No | valores: I, II, III, IV, V | `@IsOptional()` `@IsIn(ASA_CLASSES)` | — | `src/modules/procedures_perioperative/dto/preop/preop-assessment.dto.ts:104` |
+| `allergiesReviewed` | `boolean` | Sí | — | `@IsBoolean()` | Se revisaron las alergias del paciente | `src/modules/procedures_perioperative/dto/preop/preop-assessment.dto.ts:111` |
+| `medicationsReviewed` | `boolean` | Sí | — | `@IsBoolean()` | Se revisó la medicación del paciente | `src/modules/procedures_perioperative/dto/preop/preop-assessment.dto.ts:118` |
+| `anticoagulationPlanText` | `string` | No | — | `@IsOptional()` `@IsString()` | — | `src/modules/procedures_perioperative/dto/preop/preop-assessment.dto.ts:126` |
+| `fastingInstructionsText` | `string` | No | — | `@IsOptional()` `@IsString()` | — | `src/modules/procedures_perioperative/dto/preop/preop-assessment.dto.ts:134` |
+| `assessmentJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Detalle estructurado de la valoración | `src/modules/procedures_perioperative/dto/preop/preop-assessment.dto.ts:142` |
+| `riskScores` | `array<RiskScoreDto>` | No | — | `@IsOptional()` `@IsArray()` `@ValidateNested({ each: true })` `@Type(() => RiskScoreDto)` | Puntuaciones de riesgo calculadas | `src/modules/procedures_perioperative/dto/preop/preop-assessment.dto.ts:155` |
+| `riskScores[].model` | `string` | No | valores: ASA, RCRI, APFEL | `@IsIn(RISK_MODELS)` | — | `src/modules/procedures_perioperative/dto/preop/preop-assessment.dto.ts:41` |
+| `riskScores[].modelVersion` | `string` | No | longitud máxima 50 | `@IsString()` `@MaxLength(50)` | Versión del modelo aplicada | `src/modules/procedures_perioperative/dto/preop/preop-assessment.dto.ts:49` |
+| `riskScores[].scoreValue` | `string` | No | — | `@IsNumberString()` | Puntuación obtenida | `src/modules/procedures_perioperative/dto/preop/preop-assessment.dto.ts:56` |
+| `riskScores[].inputsJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Entradas con las que se calculó | `src/modules/procedures_perioperative/dto/preop/preop-assessment.dto.ts:64` |
+| `riskScores[].interpretationText` | `string` | No | — | `@IsOptional()` `@IsString()` | — | `src/modules/procedures_perioperative/dto/preop/preop-assessment.dto.ts:72` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -3286,10 +3276,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1163` |
-| `fitnessStatusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a fitness status concept. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1169` |
-| `riskScoreIds` | `array<string>` | Sí | formato uuid | — | Valor de risk score ids mantenido por la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1175` |
-| `milestoneId` | `string` | No | formato uuid | — | Hito de aptitud preoperatoria, si el paciente quedó apto | `src/modules/procedures_perioperative/dto/periop.dto.ts:1184` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/preop/preop-assessment.dto.ts:166` |
+| `fitnessStatusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a fitness status concept. | `src/modules/procedures_perioperative/dto/preop/preop-assessment.dto.ts:172` |
+| `riskScoreIds` | `array<string>` | Sí | formato uuid | — | Valor de risk score ids mantenido por la instancia. | `src/modules/procedures_perioperative/dto/preop/preop-assessment.dto.ts:178` |
+| `milestoneId` | `string` | No | formato uuid | — | Hito de aptitud preoperatoria, si el paciente quedó apto | `src/modules/procedures_perioperative/dto/preop/preop-assessment.dto.ts:187` |
 
 ### Respuestas posibles
 
@@ -3344,7 +3334,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: ANESTHESIOLOGIST, SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:279` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:279` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3407,10 +3397,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `serviceRequestId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Orden clínica ya existente | `src/modules/procedures_perioperative/dto/periop.dto.ts:1214` |
-| `serviceRequestCodeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Código de la orden clínica a registrar si aún no existe | `src/modules/procedures_perioperative/dto/periop.dto.ts:1229` |
-| `orderRole` | `string` | Sí | valores: LAB, IMAGING, CONSULT, MEDICATION | `@IsIn(PREOP_ORDER_ROLES)` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:1236` |
-| `mandatory` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Si es obligatoria antes de la cirugía; una pendiente impide que el caso quede listo | `src/modules/procedures_perioperative/dto/periop.dto.ts:1248` |
+| `serviceRequestId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Orden clínica ya existente | `src/modules/procedures_perioperative/dto/preop/preop-orders.dto.ts:39` |
+| `serviceRequestCodeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Código de la orden clínica a registrar si aún no existe | `src/modules/procedures_perioperative/dto/preop/preop-orders.dto.ts:50` |
+| `orderRole` | `string` | Sí | valores: LAB, IMAGING, CONSULT, MEDICATION | `@IsIn(PREOP_ORDER_ROLES)` | — | `src/modules/procedures_perioperative/dto/preop/preop-orders.dto.ts:57` |
+| `mandatory` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Si es obligatoria antes de la cirugía; una pendiente impide que el caso quede listo | `src/modules/procedures_perioperative/dto/preop/preop-orders.dto.ts:69` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -3437,9 +3427,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1257` |
-| `serviceRequestId` | `string` | Sí | formato uuid | — | Identificador asociado a service request. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1263` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1269` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/preop/preop-orders.dto.ts:78` |
+| `serviceRequestId` | `string` | Sí | formato uuid | — | Identificador asociado a service request. | `src/modules/procedures_perioperative/dto/preop/preop-orders.dto.ts:84` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/preop/preop-orders.dto.ts:90` |
 
 ### Respuestas posibles
 
@@ -3492,7 +3482,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | ROL | Alguno de: ANESTHESIOLOGIST, PERIOP_NURSE, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:396` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:396` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3513,8 +3503,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `orderIds` | `array<string>` | Sí | formato uuid; mínimo 1 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@IsUUID(undefined, { each: true })` | Órdenes que se dan por verificadas | `src/modules/procedures_perioperative/dto/periop.dto.ts:1285` |
-| `verifiedByProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | Profesional que verifica | `src/modules/procedures_perioperative/dto/periop.dto.ts:1292` |
+| `orderIds` | `array<string>` | Sí | formato uuid; mínimo 1 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@IsUUID(undefined, { each: true })` | Órdenes que se dan por verificadas | `src/modules/procedures_perioperative/dto/preop/preop-orders.dto.ts:106` |
+| `verifiedByProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | Profesional que verifica | `src/modules/procedures_perioperative/dto/preop/preop-orders.dto.ts:113` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -3544,10 +3534,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `procedureCaseId` | `string` | Sí | formato uuid | — | Identificador asociado a procedure case. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1303` |
-| `verified` | `number` | Sí | — | — | Órdenes que pasaron a verificadas | `src/modules/procedures_perioperative/dto/periop.dto.ts:1309` |
-| `pendingMandatory` | `number` | Sí | — | — | Órdenes obligatorias que siguen pendientes | `src/modules/procedures_perioperative/dto/periop.dto.ts:1315` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Estado en el que queda el caso | `src/modules/procedures_perioperative/dto/periop.dto.ts:1324` |
+| `procedureCaseId` | `string` | Sí | formato uuid | — | Identificador asociado a procedure case. | `src/modules/procedures_perioperative/dto/preop/preop-orders.dto.ts:124` |
+| `verified` | `number` | Sí | — | — | Órdenes que pasaron a verificadas | `src/modules/procedures_perioperative/dto/preop/preop-orders.dto.ts:130` |
+| `pendingMandatory` | `number` | Sí | — | — | Órdenes obligatorias que siguen pendientes | `src/modules/procedures_perioperative/dto/preop/preop-orders.dto.ts:136` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Estado en el que queda el caso | `src/modules/procedures_perioperative/dto/preop/preop-orders.dto.ts:145` |
 
 ### Respuestas posibles
 
@@ -3602,7 +3592,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: PERIOP_ADMIN, PERIOP_NURSE, SURGEON, ANESTHESIOLOGIST | `src/modules/procedures_perioperative/controllers/periop-or.controller.ts:206` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop-or.controller.ts:206` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3872,7 +3862,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | ROL | Alguno de: PERIOP_NURSE, SURGEON, ANESTHESIOLOGIST, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:417` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id, checklistId | `src/modules/procedures_perioperative/controllers/periop.controller.ts:417` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3898,14 +3888,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `phase` | `string` | Sí | valores: SIGN_IN, TIME_OUT, SIGN_OUT | `@IsIn(CHECKLIST_PHASES)` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:1391` |
-| `respondedByProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | Profesional que responde | `src/modules/procedures_perioperative/dto/periop.dto.ts:1398` |
-| `responses` | `array<ChecklistResponseItemDto>` | Sí | mínimo 1 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ValidateNested({ each: true })` `@Type(() => ChecklistResponseItemDto)` | Respuestas de la fase | `src/modules/procedures_perioperative/dto/periop.dto.ts:1411` |
-| `responses[].itemId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:1348` |
-| `responses[].status` | `string` | Sí | valores: CONFIRMED, NOT_APPLICABLE, EXCEPTION | `@IsIn(RESPONSE_STATUSES)` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:1355` |
-| `responses[].responseBoolean` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:1363` |
-| `responses[].responseText` | `string` | No | — | `@IsOptional()` `@IsString()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:1371` |
-| `responses[].exceptionReason` | `string` | No | — | `@IsOptional()` `@IsString()` | Justificación; obligatoria cuando la respuesta es EXCEPTION | `src/modules/procedures_perioperative/dto/periop.dto.ts:1381` |
+| `phase` | `string` | Sí | valores: SIGN_IN, TIME_OUT, SIGN_OUT | `@IsIn(CHECKLIST_PHASES)` | — | `src/modules/procedures_perioperative/dto/safety/checklist.dto.ts:82` |
+| `respondedByProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | Profesional que responde | `src/modules/procedures_perioperative/dto/safety/checklist.dto.ts:89` |
+| `responses` | `array<ChecklistResponseItemDto>` | Sí | mínimo 1 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ValidateNested({ each: true })` `@Type(() => ChecklistResponseItemDto)` | Respuestas de la fase | `src/modules/procedures_perioperative/dto/safety/checklist.dto.ts:102` |
+| `responses[].itemId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/safety/checklist.dto.ts:39` |
+| `responses[].status` | `string` | Sí | valores: CONFIRMED, NOT_APPLICABLE, EXCEPTION | `@IsIn(RESPONSE_STATUSES)` | — | `src/modules/procedures_perioperative/dto/safety/checklist.dto.ts:46` |
+| `responses[].responseBoolean` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | — | `src/modules/procedures_perioperative/dto/safety/checklist.dto.ts:54` |
+| `responses[].responseText` | `string` | No | — | `@IsOptional()` `@IsString()` | — | `src/modules/procedures_perioperative/dto/safety/checklist.dto.ts:62` |
+| `responses[].exceptionReason` | `string` | No | — | `@IsOptional()` `@IsString()` | Justificación; obligatoria cuando la respuesta es EXCEPTION | `src/modules/procedures_perioperative/dto/safety/checklist.dto.ts:72` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -3946,11 +3936,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `checklistId` | `string` | Sí | formato uuid | — | Identificador asociado a checklist. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1422` |
-| `recorded` | `number` | Sí | — | — | Respuestas registradas en esta fase | `src/modules/procedures_perioperative/dto/periop.dto.ts:1428` |
-| `phaseCompleted` | `boolean` | Sí | — | — | true si la fase quedó completa | `src/modules/procedures_perioperative/dto/periop.dto.ts:1434` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1440` |
-| `milestoneId` | `string` | No | formato uuid | — | Hito de time-out, si la fase completada fue esa | `src/modules/procedures_perioperative/dto/periop.dto.ts:1449` |
+| `checklistId` | `string` | Sí | formato uuid | — | Identificador asociado a checklist. | `src/modules/procedures_perioperative/dto/safety/checklist.dto.ts:113` |
+| `recorded` | `number` | Sí | — | — | Respuestas registradas en esta fase | `src/modules/procedures_perioperative/dto/safety/checklist.dto.ts:119` |
+| `phaseCompleted` | `boolean` | Sí | — | — | true si la fase quedó completa | `src/modules/procedures_perioperative/dto/safety/checklist.dto.ts:125` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/safety/checklist.dto.ts:131` |
+| `milestoneId` | `string` | No | formato uuid | — | Hito de time-out, si la fase completada fue esa | `src/modules/procedures_perioperative/dto/safety/checklist.dto.ts:140` |
 
 ### Respuestas posibles
 
@@ -4006,7 +3996,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SURGEON, PERIOP_NURSE, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:583` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:583` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4027,13 +4017,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `procedureId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2194` |
-| `specimenId` | `string` | Sí | formato uuid | `@IsUUID()` | Muestra registrada en laboratorio | `src/modules/procedures_perioperative/dto/periop.dto.ts:2204` |
-| `specimenRole` | `string` | Sí | valores: BIOPSY, RESECTION, CULTURE | `@IsIn(SPECIMEN_ROLES)` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2211` |
-| `operativeStepId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2219` |
-| `bodySiteConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2227` |
-| `orientationText` | `string` | No | — | `@IsOptional()` `@IsString()` | Orientación de la pieza para el patólogo | `src/modules/procedures_perioperative/dto/periop.dto.ts:2237` |
-| `surgeonComment` | `string` | No | — | `@IsOptional()` `@IsString()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:2245` |
+| `procedureId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/intraop/supplies-specimens.dto.ts:66` |
+| `specimenId` | `string` | Sí | formato uuid | `@IsUUID()` | Muestra registrada en laboratorio | `src/modules/procedures_perioperative/dto/intraop/supplies-specimens.dto.ts:76` |
+| `specimenRole` | `string` | Sí | valores: BIOPSY, RESECTION, CULTURE | `@IsIn(SPECIMEN_ROLES)` | — | `src/modules/procedures_perioperative/dto/intraop/supplies-specimens.dto.ts:83` |
+| `operativeStepId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/intraop/supplies-specimens.dto.ts:91` |
+| `bodySiteConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/intraop/supplies-specimens.dto.ts:99` |
+| `orientationText` | `string` | No | — | `@IsOptional()` `@IsString()` | Orientación de la pieza para el patólogo | `src/modules/procedures_perioperative/dto/intraop/supplies-specimens.dto.ts:109` |
+| `surgeonComment` | `string` | No | — | `@IsOptional()` `@IsString()` | — | `src/modules/procedures_perioperative/dto/intraop/supplies-specimens.dto.ts:117` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -4065,8 +4055,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:2256` |
-| `procedureCaseId` | `string` | Sí | formato uuid | — | Identificador asociado a procedure case. | `src/modules/procedures_perioperative/dto/periop.dto.ts:2262` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/intraop/supplies-specimens.dto.ts:128` |
+| `procedureCaseId` | `string` | Sí | formato uuid | — | Identificador asociado a procedure case. | `src/modules/procedures_perioperative/dto/intraop/supplies-specimens.dto.ts:134` |
 
 ### Respuestas posibles
 
@@ -4143,10 +4133,10 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:834` |
-| `practitionerProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a practitioner profile. | `src/modules/procedures_perioperative/dto/periop.dto.ts:840` |
-| `teamRoleConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a team role concept. | `src/modules/procedures_perioperative/dto/periop.dto.ts:846` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Asignado o aceptado | `src/modules/procedures_perioperative/dto/periop.dto.ts:852` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:252` |
+| `practitionerProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a practitioner profile. | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:258` |
+| `teamRoleConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a team role concept. | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:264` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Asignado o aceptado | `src/modules/procedures_perioperative/dto/cases/query-case.dto.ts:270` |
 
 ### Respuestas posibles
 
@@ -4197,7 +4187,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:232` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:232` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4230,8 +4220,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `practitionerProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:444` |
-| `role` | `string` | Sí | valores: SURGEON, ASSISTANT, ANESTHESIOLOGIST, SCRUB_NURSE, CIRCULATING_NURSE | `@IsIn(TEAM_ROLES)` | — | `src/modules/procedures_perioperative/dto/periop.dto.ts:451` |
+| `practitionerProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/procedures_perioperative/dto/cases/case-team-diagnoses.dto.ts:143` |
+| `role` | `string` | Sí | valores: SURGEON, ASSISTANT, ANESTHESIOLOGIST, SCRUB_NURSE, CIRCULATING_NURSE | `@IsIn(TEAM_ROLES)` | — | `src/modules/procedures_perioperative/dto/cases/case-team-diagnoses.dto.ts:150` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -4257,10 +4247,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:514` |
-| `procedureCaseId` | `string` | Sí | formato uuid | — | Identificador asociado a procedure case. | `src/modules/procedures_perioperative/dto/periop.dto.ts:520` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/periop.dto.ts:526` |
-| `teamSize` | `number` | Sí | — | — | Miembros del equipo tras la asignación | `src/modules/procedures_perioperative/dto/periop.dto.ts:532` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/cases/case-team-diagnoses.dto.ts:213` |
+| `procedureCaseId` | `string` | Sí | formato uuid | — | Identificador asociado a procedure case. | `src/modules/procedures_perioperative/dto/cases/case-team-diagnoses.dto.ts:219` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/cases/case-team-diagnoses.dto.ts:225` |
+| `teamSize` | `number` | Sí | — | — | Miembros del equipo tras la asignación | `src/modules/procedures_perioperative/dto/cases/case-team-diagnoses.dto.ts:231` |
 
 ### Respuestas posibles
 
@@ -4339,10 +4329,10 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:514` |
-| `procedureCaseId` | `string` | Sí | formato uuid | — | Identificador asociado a procedure case. | `src/modules/procedures_perioperative/dto/periop.dto.ts:520` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/periop.dto.ts:526` |
-| `teamSize` | `number` | Sí | — | — | Miembros del equipo tras la asignación | `src/modules/procedures_perioperative/dto/periop.dto.ts:532` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/cases/case-team-diagnoses.dto.ts:213` |
+| `procedureCaseId` | `string` | Sí | formato uuid | — | Identificador asociado a procedure case. | `src/modules/procedures_perioperative/dto/cases/case-team-diagnoses.dto.ts:219` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/cases/case-team-diagnoses.dto.ts:225` |
+| `teamSize` | `number` | Sí | — | — | Miembros del equipo tras la asignación | `src/modules/procedures_perioperative/dto/cases/case-team-diagnoses.dto.ts:231` |
 
 ### Respuestas posibles
 
@@ -4395,7 +4385,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:367` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id, memberId | `src/modules/procedures_perioperative/controllers/periop.controller.ts:367` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4415,7 +4405,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `periop.case.team_participation_declined` | `src/modules/procedures_perioperative/services/periop-cases.service.ts:1536` |
+| Evento de dominio | `periop.case.team_participation_declined` | `src/modules/procedures_perioperative/services/periop-cases.service.ts:1549` |
 
 ### Parámetros
 
@@ -4428,8 +4418,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `response` | `string` | Sí | valores: DECLINE, REQUEST_CHANGE, UNAVAILABLE | `@IsIn(TEAM_PARTICIPATION_RESPONSES)` | Rechazo, solicitud de modificación o indisponibilidad informada | `src/modules/procedures_perioperative/dto/periop.dto.ts:486` |
-| `reasonText` | `string` | Sí | longitud mínima 1; longitud máxima 2000 | `@IsString()` `@MinLength(1)` `@MaxLength(2000)` | Motivo de la respuesta (obligatorio) | `src/modules/procedures_perioperative/dto/periop.dto.ts:503` |
+| `response` | `string` | Sí | valores: DECLINE, REQUEST_CHANGE, UNAVAILABLE | `@IsIn(TEAM_PARTICIPATION_RESPONSES)` | Rechazo, solicitud de modificación o indisponibilidad informada | `src/modules/procedures_perioperative/dto/cases/case-team-diagnoses.dto.ts:185` |
+| `reasonText` | `string` | Sí | longitud mínima 1; longitud máxima 2000 | `@IsString()` `@MinLength(1)` `@MaxLength(2000)` | Motivo de la respuesta (obligatorio) | `src/modules/procedures_perioperative/dto/cases/case-team-diagnoses.dto.ts:202` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -4455,10 +4445,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:514` |
-| `procedureCaseId` | `string` | Sí | formato uuid | — | Identificador asociado a procedure case. | `src/modules/procedures_perioperative/dto/periop.dto.ts:520` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/periop.dto.ts:526` |
-| `teamSize` | `number` | Sí | — | — | Miembros del equipo tras la asignación | `src/modules/procedures_perioperative/dto/periop.dto.ts:532` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/cases/case-team-diagnoses.dto.ts:213` |
+| `procedureCaseId` | `string` | Sí | formato uuid | — | Identificador asociado a procedure case. | `src/modules/procedures_perioperative/dto/cases/case-team-diagnoses.dto.ts:219` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/cases/case-team-diagnoses.dto.ts:225` |
+| `teamSize` | `number` | Sí | — | — | Miembros del equipo tras la asignación | `src/modules/procedures_perioperative/dto/cases/case-team-diagnoses.dto.ts:231` |
 
 ### Respuestas posibles
 
@@ -4521,7 +4511,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `clinical.encounter_locations` | LEE | LEE | POR_SQL | PeriopOrController.operatingRooms → OperatingRoomsReadUseCases.list → PracticeCareSpaceOpsAdapter.getOperationalState → CareSpaceOpsCore.snapshot → CareSpaceOpsCore.occupancy → CareSpaceOpsRepository.occupancy | `src/modules/practice/repositories/care-space-ops.repository.ts:178` |
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | PeriopOrController.operatingRooms → OperatingRoomsReadUseCases.list → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
-| `directory.branch_memberships` | LEE | LEE | DIRECTA | PeriopOrController.operatingRooms → OperatingRoomsReadUseCases.list → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:257` |
+| `directory.branch_memberships` | LEE | LEE | DIRECTA | PeriopOrController.operatingRooms → OperatingRoomsReadUseCases.list → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | PeriopOrController.operatingRooms → OperatingRoomsReadUseCases.list → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
 | `practice.care_spaces` | LEE | LEE | DIRECTA | PeriopOrController.operatingRooms → OperatingRoomsReadUseCases.list → PracticeCareSpaceOpsAdapter.getOperationalState → PracticeCareSpaceOpsAdapter.load → CareSpacesRepository.findById | `src/modules/practice/repositories/care-spaces.repository.ts:85` |
 | `practice.clinical_units` | LEE | LEE | DIRECTA | PeriopOrController.operatingRooms → OperatingRoomsReadUseCases.list → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:65` |
@@ -4606,7 +4596,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | PeriopOrController.listBlocks → OrBlocksUseCases.list → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
-| `directory.branch_memberships` | LEE | LEE | DIRECTA | PeriopOrController.listBlocks → OrBlocksUseCases.list → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:257` |
+| `directory.branch_memberships` | LEE | LEE | DIRECTA | PeriopOrController.listBlocks → OrBlocksUseCases.list → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | PeriopOrController.listBlocks → OrBlocksUseCases.list → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
 | `practice.care_spaces` | LEE | LEE | DIRECTA | PeriopOrController.listBlocks → OrBlocksUseCases.list → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → CareSpacesRepository.findById | `src/modules/practice/repositories/care-spaces.repository.ts:85` |
 | `practice.clinical_units` | LEE | LEE | DIRECTA | PeriopOrController.listBlocks → OrBlocksUseCases.list → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:65` |
@@ -4683,7 +4673,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/procedures_perioperative/controllers/periop-or.controller.ts:255` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/procedures_perioperative/controllers/periop-or.controller.ts:255` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4692,7 +4682,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | PeriopOrController.createBlocks → OrBlocksUseCases.create → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
-| `directory.branch_memberships` | LEE | LEE | DIRECTA | PeriopOrController.createBlocks → OrBlocksUseCases.create → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:257` |
+| `directory.branch_memberships` | LEE | LEE | DIRECTA | PeriopOrController.createBlocks → OrBlocksUseCases.create → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | PeriopOrController.createBlocks → OrBlocksUseCases.create → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
 | `practice.care_space_blocks` | LEE | LEE | DIRECTA | PeriopOrController.createBlocks → OrBlocksUseCases.create → PracticeCareSpaceOpsAdapter.assertBookable → CareSpaceOpsRepository.openBlocks | `src/modules/practice/repositories/care-space-ops.repository.ts:223` |
 | `practice.care_spaces` | LEE | LEE | DIRECTA | PeriopOrController.createBlocks → OrBlocksUseCases.create → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → CareSpacesRepository.findById | `src/modules/practice/repositories/care-spaces.repository.ts:85` |
@@ -4827,7 +4817,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | PeriopOrController.utilization → OperatingRoomsReadUseCases.utilization → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
-| `directory.branch_memberships` | LEE | LEE | DIRECTA | PeriopOrController.utilization → OperatingRoomsReadUseCases.utilization → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:257` |
+| `directory.branch_memberships` | LEE | LEE | DIRECTA | PeriopOrController.utilization → OperatingRoomsReadUseCases.utilization → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | PeriopOrController.utilization → OperatingRoomsReadUseCases.utilization → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
 | `practice.care_spaces` | LEE | LEE | DIRECTA | PeriopOrController.utilization → OperatingRoomsReadUseCases.utilization → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → CareSpacesRepository.findById | `src/modules/practice/repositories/care-spaces.repository.ts:85` |
 | `practice.clinical_units` | LEE | LEE | DIRECTA | PeriopOrController.utilization → OperatingRoomsReadUseCases.utilization → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:65` |

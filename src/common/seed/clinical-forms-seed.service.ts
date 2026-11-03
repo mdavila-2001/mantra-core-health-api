@@ -168,10 +168,22 @@ export class ClinicalFormsSeedService {
 
     const policy = await this.seedExtensionPolicy(em, now);
 
-    let templates = 0;
+    // La clave de origen: si la plantilla ya está, se saltea entera. No se
+    // comparan campos ni nombre a propósito — una plantilla que la organización
+    // editó tiene que sobrevivir al despliegue. Lo único que sí se reconcilia
+    // es una versión NUEVA del catálogo: ver `reconcileVersion`.
+    const missing: StandardFormDefinition[] = [];
     for (const form of STANDARD_FORMS) {
-      templates += await this.seedForm(em, form, ofModel, now);
+      const existing = await em.findOne(SpecialtyChartTemplates, {
+        id: templateIdOf(form),
+      });
+      if (existing) {
+        await this.reconcileVersion(em, form, existing, now);
+      } else {
+        missing.push(form);
+      }
     }
+    const templates = await this.seedForms(em, missing, ofModel, now);
 
     if (policy) {
       this.logger.info(
@@ -551,44 +563,58 @@ export class ClinicalFormsSeedService {
   }
 
   /**
-   * Siembra un formulario completo, o no hace nada si su plantilla ya existe.
+   * Siembra completos los formularios cuya plantilla todavía no existe.
    *
-   * @returns 1 si creó la plantilla, 0 si ya estaba.
+   * ## Por niveles, no por formulario
+   *
+   * Son cientos de formularios y miles de campos. Escribirlos de a uno —una
+   * consulta de existencia y un `flush` por campo y por asignación— costaba
+   * del orden de veinticinco mil idas y vueltas a la base, y cada `flush`
+   * además recorría un mapa de identidad que crecía con cada fila: en una base
+   * nueva el paso tardaba más de un cuarto de hora (api#1245). Acá cada nivel
+   * se resuelve con una consulta de existencia en bloque y un único `flush`,
+   * que MikroORM parte en `INSERT` multi-fila.
+   *
+   * El orden entre niveles sigue siendo el de siempre —secciones, plantillas,
+   * definiciones de campo, asignaciones— porque las FK del modelo son columnas
+   * `uuid` planas y no relaciones del ORM: MikroORM no infiere de ellas el
+   * orden de inserción, y la plantilla que entra antes que su sección rompe
+   * `fk_specialty_chart_templates_section_id`. Es el mismo motivo por el que
+   * `TerminologySeedService` flushea por niveles.
+   *
+   * ## Reanuda una corrida cortada
+   *
+   * Entre un nivel y el siguiente hay un `flush`, así que un proceso muerto en
+   * el medio deja, por ejemplo, secciones sin plantilla. La corrida siguiente
+   * no encuentra la plantilla y llega acá: cada nivel escribe sólo los ids
+   * deterministas que la base no tiene, y reusa los que ya están —volver a
+   * insertar la sección violaría `pk_dynamic_field_sections` y trabaría el
+   * arranque entero—.
+   *
+   * @param forms - Los formularios sin plantilla, en el orden del catálogo.
+   * @returns Cuántas plantillas creó.
    */
-  private async seedForm(
+  private async seedForms(
     em: EntityManager,
-    form: StandardFormDefinition,
+    forms: readonly StandardFormDefinition[],
     ofModel: ReadonlyMap<string, string>,
     now: Date,
   ): Promise<number> {
-    const templateId = deterministicId(`${ORIGIN}:template:${form.code}`);
+    if (forms.length === 0) return 0;
 
-    // La clave de origen: si la plantilla ya está, se saltea entera. No se
-    // comparan campos ni nombre a propósito — una plantilla que la organización
-    // editó tiene que sobrevivir al despliegue. Lo único que sí se reconcilia
-    // es una versión NUEVA del catálogo: ver `reconciliarVersion`.
-    const existing = await em.findOne(SpecialtyChartTemplates, {
-      id: templateId,
-    });
-    if (existing) {
-      await this.reconcileVersion(em, form, existing, now);
-      return 0;
-    }
-
-    const sectionId = deterministicId(`${ORIGIN}:section:${form.code}`);
-
-    // La sección y la plantilla se escriben en dos flush (ver abajo), así que
-    // una corrida cortada entre ambos —proceso muerto por timeout, caída de la
-    // base— deja la sección sin plantilla. La corrida siguiente no encuentra la
-    // plantilla y llega acá: si volviera a crear la sección con el mismo id
-    // determinista, la base la rechazaría con `pk_dynamic_field_sections` y el
-    // arranque entero quedaría trabado. Se reusa la que ya está y se completa
-    // lo que falta; campos y asignaciones ya se reanudan solos (`seedField`).
-    if (!(await em.findOne(DynamicFieldSections, { id: sectionId }))) {
+    // Secciones. Se flushean ANTES de crear las plantillas, no juntas: ver
+    // arriba por qué el ORM no las ordena solo.
+    const sectionIds = forms.map((form) => sectionIdOf(form));
+    const presentSections = await existingIds(sectionIds, (chunk) =>
+      em.find(DynamicFieldSections, { id: { $in: chunk } }),
+    );
+    let sectionsToWrite = 0;
+    for (const form of forms) {
+      if (presentSections.has(sectionIdOf(form))) continue;
       em.create(
         DynamicFieldSections,
         {
-          id: sectionId,
+          id: sectionIdOf(form),
           // Mismo formato que `ChartTemplatesService.createTemplate`, para que las
           // secciones del catálogo y las que arma un admin sean indistinguibles.
           code: `CHART_TPL-${form.code}`,
@@ -599,58 +625,120 @@ export class ClinicalFormsSeedService {
         },
         { partial: true },
       );
-      // La sección se flushea ANTES de crear la plantilla, no las dos juntas:
-      // `specialty_chart_templates.section_id` es una columna `uuid` plana con FK,
-      // no una relación del ORM, así que MikroORM no infiere que la sección va
-      // primero — ordena los inserts por tabla, y la plantilla entraba antes. La
-      // base rechazaba el lote con `fk_specialty_chart_templates_section_id`, el
-      // seed quedaba «omitido» en el arranque y el catálogo, vacío. Es el mismo
-      // motivo por el que `TerminologySeedService` flushea por niveles.
-      await em.flush();
+      sectionsToWrite++;
     }
+    if (sectionsToWrite > 0) await em.flush();
 
-    em.create(
-      SpecialtyChartTemplates,
-      {
-        id: templateId,
-        specialtyConceptId: this.specialtyConceptId(form.specialty, ofModel),
-        // Sin tenant: el catálogo es global y toda organización lo ve. Una
-        // adaptación propia se hace duplicando, que es lo que ofrece la pantalla.
-        tenantId: undefined,
-        code: form.code,
-        name: form.name,
-        sectionId,
-        version: form.version,
-        statusConceptId: CHART.TEMPLATE_ACTIVE,
-        createdAt: now,
-        updatedAt: now,
-      },
-      { partial: true },
-    );
+    for (const form of forms) {
+      em.create(
+        SpecialtyChartTemplates,
+        {
+          id: templateIdOf(form),
+          specialtyConceptId: this.specialtyConceptId(form.specialty, ofModel),
+          // Sin tenant: el catálogo es global y toda organización lo ve. Una
+          // adaptación propia se hace duplicando, que es lo que ofrece la pantalla.
+          tenantId: undefined,
+          code: form.code,
+          name: form.name,
+          sectionId: sectionIdOf(form),
+          version: form.version,
+          statusConceptId: CHART.TEMPLATE_ACTIVE,
+          createdAt: now,
+          updatedAt: now,
+        },
+        { partial: true },
+      );
+    }
     await em.flush();
 
     // El campo reservado va primero (ordinal -1) para que quede fuera del rango
     // de los campos reales aunque alguien liste sin filtrar.
-    await this.seedField(
-      em,
-      form,
-      {
-        code: CHART_TEMPLATE_PROVENANCE_FIELD_CODE,
-        name: `Procedencia de «${form.name}»`,
-        dataType: 'json',
-        required: false,
-      },
-      -1,
-      sectionId,
-      catalogRecord(form),
-      now,
-    );
-
-    for (const [ordinal, field] of form.fields.entries()) {
-      await this.seedField(em, form, field, ordinal, sectionId, undefined, now);
+    const fields: PlannedField[] = [];
+    for (const form of forms) {
+      fields.push({
+        form,
+        field: {
+          code: CHART_TEMPLATE_PROVENANCE_FIELD_CODE,
+          name: `Procedencia de «${form.name}»`,
+          dataType: 'json',
+          required: false,
+        },
+        ordinal: -1,
+        defaultValueJson: catalogRecord(form),
+      });
+      for (const [ordinal, field] of form.fields.entries()) {
+        fields.push({ form, field, ordinal, defaultValueJson: undefined });
+      }
     }
 
-    return 1;
+    // Definiciones de campo. Un id repetido dentro de la misma corrida se
+    // escribe una sola vez —el primero gana—, igual que cuando cada campo
+    // consultaba la base antes de crearse.
+    const presentFields = await existingIds(
+      fields.map(({ form, field }) => fieldIdOf(form, field.code)),
+      (chunk) => em.find(DynamicFieldDefinitions, { id: { $in: chunk } }),
+    );
+    let fieldsToWrite = 0;
+    for (const { form, field, defaultValueJson } of fields) {
+      const fieldId = fieldIdOf(form, field.code);
+      if (presentFields.has(fieldId)) continue;
+      presentFields.add(fieldId);
+      em.create(
+        DynamicFieldDefinitions,
+        {
+          id: fieldId,
+          // El código se prefija con el de la plantilla porque
+          // `forms.dynamic_field_definitions` es una tabla global: quince
+          // formularios con un `motivo_consulta` cada uno chocarían entre sí.
+          // El prefijo no se ve en ningún lado —lo que se dibuja es `name`—
+          // pero garantiza unicidad.
+          code: `${form.code}.${field.code}`,
+          name: field.name,
+          dataType: field.dataType,
+          defaultValueJson,
+          schemaVersion: 1,
+          stateConceptId: FORMS.FIELD_ACTIVE,
+          createdAt: now,
+          updatedAt: now,
+        },
+        { partial: true },
+      );
+      fieldsToWrite++;
+    }
+    if (fieldsToWrite > 0) await em.flush();
+
+    // Asignaciones a la sección de cada plantilla.
+    const presentAssignments = await existingIds(
+      fields.map(({ form, field }) => assignmentIdOf(form, field.code)),
+      (chunk) => em.find(FieldAssignments, { id: { $in: chunk } }),
+    );
+    let assignmentsToWrite = 0;
+    for (const { form, field, ordinal } of fields) {
+      const assignmentId = assignmentIdOf(form, field.code);
+      if (presentAssignments.has(assignmentId)) continue;
+      presentAssignments.add(assignmentId);
+      em.create(
+        FieldAssignments,
+        {
+          id: assignmentId,
+          fieldId: fieldIdOf(form, field.code),
+          targetResourceConceptId: CHART.TEMPLATE_FIELD_TARGET,
+          sectionId: sectionIdOf(form),
+          required: field.required ?? false,
+          ordinal,
+          visible: true,
+          editable: true,
+          stateConceptId: FORMS.ASSIGNMENT_ACTIVE,
+          createdAt: now,
+          updatedAt: now,
+        },
+        { partial: true },
+      );
+      assignmentsToWrite++;
+    }
+    if (assignmentsToWrite > 0) await em.flush();
+
+    return forms.length;
   }
 
   /**
@@ -822,6 +910,68 @@ export class ClinicalFormsSeedService {
 /** El id determinista de un campo del catálogo. */
 function fieldIdOf(form: StandardFormDefinition, code: string): string {
   return deterministicId(`${ORIGIN}:field:${form.code}.${code}`);
+}
+
+/** El id determinista de la plantilla de un formulario del catálogo. */
+function templateIdOf(form: StandardFormDefinition): string {
+  return deterministicId(`${ORIGIN}:template:${form.code}`);
+}
+
+/** El id determinista de la sección de un formulario del catálogo. */
+function sectionIdOf(form: StandardFormDefinition): string {
+  return deterministicId(`${ORIGIN}:section:${form.code}`);
+}
+
+/** El id determinista de la asignación de un campo a su sección. */
+function assignmentIdOf(form: StandardFormDefinition, code: string): string {
+  return deterministicId(`${ORIGIN}:assignment:${form.code}.${code}`);
+}
+
+/** Un campo a sembrar, con el formulario y la posición que le tocan. */
+interface PlannedField {
+  /** El formulario dueño del campo. */
+  form: StandardFormDefinition;
+  /** El campo, tal como lo declara el catálogo. */
+  field: {
+    /** Código del campo dentro del formulario. */
+    code: string;
+    /** Nombre legible del campo. */
+    name: string;
+    /** Tipo de dato técnico. */
+    dataType: string;
+    /** Si es obligatorio al completar. */
+    required?: boolean;
+  };
+  /** Posición dentro de la sección; -1 para la clave reservada. */
+  ordinal: number;
+  /** Lo que guarda `default_value_json`; sólo lo lleva la clave reservada. */
+  defaultValueJson: unknown;
+}
+
+/**
+ * Tamaño de cada consulta de existencia: mantiene la lista de parámetros del
+ * `IN (...)` muy lejos del límite de 65 535 de PostgreSQL.
+ */
+const EXISTENCE_CHUNK = 1000;
+
+/**
+ * Cuáles de estos ids ya están en la base, en una consulta por bloque en vez
+ * de una por fila.
+ *
+ * @param ids - Los ids a buscar; los repetidos se consultan una vez.
+ * @param lookup - Lee las filas de un bloque de ids (`id IN (...)`).
+ */
+async function existingIds(
+  ids: readonly string[],
+  lookup: (chunk: string[]) => Promise<readonly { id: string }[]>,
+): Promise<Set<string>> {
+  const unique = [...new Set(ids)];
+  const present = new Set<string>();
+  for (let from = 0; from < unique.length; from += EXISTENCE_CHUNK) {
+    const rows = await lookup(unique.slice(from, from + EXISTENCE_CHUNK));
+    for (const row of rows) present.add(row.id);
+  }
+  return present;
 }
 
 /**

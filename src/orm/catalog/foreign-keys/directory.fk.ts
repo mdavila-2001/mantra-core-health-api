@@ -2,11 +2,22 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `directory`.
- * 66 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 78 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const directoryForeignKeys: readonly ForeignKeyTuple[] = [
   // [tablaOrigen, columnaOrigen, schemaDestino, tablaDestino, columnaDestino]
+  ['affiliation_invitation_uses', 'affiliation_invitation_id', 'directory', 'affiliation_invitations', 'id'],
+  ['affiliation_invitation_uses', 'outcome_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['affiliation_invitation_uses', 'tenant_id', 'directory', 'tenants', 'id'],
+  ['affiliation_invitation_uses', 'used_by_user_id', 'iam', 'users', 'id'],
+  ['affiliation_invitations', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['affiliation_invitations', 'kind_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['affiliation_invitations', 'role_template_id', 'delegated_access', 'role_templates', 'id'],
+  ['affiliation_invitations', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['affiliation_invitations', 'target_person_id', 'profiles', 'persons', 'id'],
+  ['affiliation_invitations', 'tenant_id', 'directory', 'tenants', 'id'],
+  ['affiliation_invitations', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['branch_memberships', 'branch_id', 'directory', 'branches', 'id'],
   ['branch_memberships', 'created_by_user_id', 'iam', 'users', 'id'],
   ['branch_memberships', 'local_role_concept_id', 'terminology', 'catalog_concepts', 'id'],
@@ -49,6 +60,7 @@ export const directoryForeignKeys: readonly ForeignKeyTuple[] = [
   ['tenant_memberships', 'access_scope_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['tenant_memberships', 'created_by_user_id', 'iam', 'users', 'id'],
   ['tenant_memberships', 'invited_by_user_id', 'iam', 'users', 'id'],
+  ['tenant_memberships', 'origin_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['tenant_memberships', 'primary_branch_id', 'directory', 'branches', 'id'],
   ['tenant_memberships', 'responsible_user_id', 'iam', 'users', 'id'],
   ['tenant_memberships', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],

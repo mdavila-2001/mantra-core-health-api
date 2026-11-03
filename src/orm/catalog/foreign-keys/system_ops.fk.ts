@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `system_ops`.
- * 169 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 178 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const systemOpsForeignKeys: readonly ForeignKeyTuple[] = [
@@ -37,6 +37,13 @@ export const systemOpsForeignKeys: readonly ForeignKeyTuple[] = [
   ['breach_notifications', 'security_incident_id', 'system_ops', 'security_incidents', 'id'],
   ['breach_notifications', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['breach_notifications', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['bulk_import_batch_rows', 'batch_id', 'system_ops', 'bulk_import_batches', 'id'],
+  ['bulk_import_batch_rows', 'tenant_id', 'directory', 'tenants', 'id'],
+  ['bulk_import_batches', 'approval_request_id', 'delegated_access', 'four_eyes_requests', 'id'],
+  ['bulk_import_batches', 'confirmed_by_user_id', 'iam', 'users', 'id'],
+  ['bulk_import_batches', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['bulk_import_batches', 'tenant_id', 'directory', 'tenants', 'id'],
+  ['bulk_import_batches', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['cross_border_transfer_events', 'approved_by_user_id', 'iam', 'users', 'id'],
   ['cross_border_transfer_events', 'data_category_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['cross_border_transfer_events', 'destination_region_concept_id', 'terminology', 'catalog_concepts', 'id'],
@@ -86,6 +93,8 @@ export const systemOpsForeignKeys: readonly ForeignKeyTuple[] = [
   ['governance_change_log', 'action_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['governance_change_log', 'changed_by_user_id', 'iam', 'users', 'id'],
   ['governance_change_log', 'recorded_by_user_id', 'iam', 'users', 'id'],
+  ['governance_policy_revisions', 'decided_by_user_id', 'iam', 'users', 'id'],
+  ['governance_policy_revisions', 'submitted_by_user_id', 'iam', 'users', 'id'],
   ['key_rotation_events', 'encryption_key_id', 'system_ops', 'encryption_keys', 'id'],
   ['key_rotation_events', 'event_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['key_rotation_events', 'performed_by_user_id', 'iam', 'users', 'id'],

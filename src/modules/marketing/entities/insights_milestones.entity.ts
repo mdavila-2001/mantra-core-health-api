@@ -27,7 +27,7 @@ export class InsightsMilestones {
   /**
    * Identificador asociado a campaign.
    */
-  @Property({ fieldName: 'campaign_id', type: 'uuid', nullable: true }) // FK → marketing.insights_campaigns
+  @Property({ fieldName: 'campaign_id', type: 'uuid', nullable: true }) // FK → ads.campaigns (inferida)
   campaignId?: string;
 
   /**

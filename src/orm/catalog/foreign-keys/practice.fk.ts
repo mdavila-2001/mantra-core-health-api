@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `practice`.
- * 159 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 166 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const practiceForeignKeys: readonly ForeignKeyTuple[] = [
@@ -133,6 +133,12 @@ export const practiceForeignKeys: readonly ForeignKeyTuple[] = [
   ['practices', 'tenant_id', 'directory', 'tenants', 'id'],
   ['practices', 'type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['practices', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['practitioner_location_assignments', 'care_space_id', 'practice', 'care_spaces', 'id'],
+  ['practitioner_location_assignments', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['practitioner_location_assignments', 'practitioner_role_assignment_id', 'practice', 'practitioner_role_assignments', 'id'],
+  ['practitioner_location_assignments', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['practitioner_location_assignments', 'tenant_id', 'directory', 'tenants', 'id'],
+  ['practitioner_location_assignments', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['practitioner_role_assignments', 'clinical_unit_id', 'practice', 'clinical_units', 'id'],
   ['practitioner_role_assignments', 'created_by_user_id', 'iam', 'users', 'id'],
   ['practitioner_role_assignments', 'healthcare_service_id', 'practice', 'healthcare_services', 'id'],
@@ -145,6 +151,7 @@ export const practiceForeignKeys: readonly ForeignKeyTuple[] = [
   ['practitioner_role_assignments', 'supervisor_practitioner_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
   ['practitioner_role_assignments', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['practitioner_support_assignments', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['practitioner_support_assignments', 'initiated_by_party_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['practitioner_support_assignments', 'practitioner_role_assignment_id', 'practice', 'practitioner_role_assignments', 'id'],
   ['practitioner_support_assignments', 'scope_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['practitioner_support_assignments', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],

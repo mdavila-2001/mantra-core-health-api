@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `clinical` (parte 2/2).
- * 109 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 117 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const clinicalForeignKeys2: readonly ForeignKeyTuple[] = [
@@ -27,6 +27,14 @@ export const clinicalForeignKeys2: readonly ForeignKeyTuple[] = [
   ['observations', 'value_file_id', 'common', 'files', 'id'],
   ['observations', 'value_reference_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['observations', 'value_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['patient_admission_footprints', 'admission_origin_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['patient_admission_footprints', 'encounter_id', 'clinical', 'encounters', 'id'],
+  ['patient_admission_footprints', 'identity_verification_method_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['patient_admission_footprints', 'patient_profile_id', 'profiles', 'patient_profiles', 'profile_id'],
+  ['patient_admission_footprints', 'practice_site_id', 'practice', 'practice_sites', 'id'],
+  ['patient_admission_footprints', 'recorded_by_user_id', 'iam', 'users', 'id'],
+  ['patient_admission_footprints', 'referral_id', 'clinical_ext', 'referrals', 'id'],
+  ['patient_admission_footprints', 'tenant_id', 'directory', 'tenants', 'id'],
   ['placement_incidents', 'authorized_by_user_id', 'iam', 'users', 'id'],
   ['placement_incidents', 'care_space_id', 'practice', 'care_spaces', 'id'],
   ['placement_incidents', 'created_by_user_id', 'iam', 'users', 'id'],

@@ -8,3 +8,8 @@ export * from './diagnostic_unit_practitioner_assignments.entity';
 export * from './diagnostic_unit_sites.entity';
 export * from './diagnostic_unit_specialties.entity';
 export * from './diagnostic_units.entity';
+export * from './unit_medical_visitors.entity';
+export * from './unit_visit_ratings.entity';
+export * from './unit_visit_records.entity';
+export * from './unit_visit_request_events.entity';
+export * from './unit_visit_requests.entity';

@@ -70,10 +70,7 @@ export class AdminDataQualityController {
     purpose: 'DATA_GOVERNANCE',
   })
   @ApiOperation({ summary: 'Una incidencia de calidad de datos clínicos' })
-  @ApiResponse({
-    status: 200,
-    description: 'Incidencia de calidad de datos clínicos',
-  })
+  @ApiResponse({ status: 200, description: 'La incidencia' })
   @ApiResponse({ status: 404, description: 'No existe la incidencia' })
   issue(@Param() p: IdParamDto) {
     return this.service.getIssue(p.id);
@@ -94,7 +91,8 @@ export class AdminDataQualityController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Incidencia resuelta o acción ya aplicada',
+    description:
+      'La incidencia con su desenlace; `alreadyApplied` si ya estaba así',
   })
   @ApiResponse({
     status: 409,
@@ -119,6 +117,7 @@ export class AdminDataQualityController {
     summary:
       'Una regla de calidad con su expresión, sus incidencias por estado y sus últimas corridas',
   })
+  @ApiResponse({ status: 200, description: 'La regla' })
   @ApiResponse({ status: 404, description: 'No existe la regla' })
   @ApiResponse({
     status: 200,

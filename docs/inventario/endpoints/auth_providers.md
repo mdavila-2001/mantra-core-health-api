@@ -53,7 +53,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: IDENTITY_ADMIN, AUTH_SERVICE | `src/modules/auth_providers/controllers/auth-providers.controller.ts:261` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -157,7 +157,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: IDENTITY_ADMIN, AUTH_SERVICE | `src/modules/auth_providers/controllers/auth-providers.controller.ts:282` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -265,7 +265,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 | ROL | Alguno de: IDENTITY_ADMIN | `src/modules/auth_providers/controllers/auth-providers.controller.ts:299` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/auth_providers/controllers/auth-providers.controller.ts:299` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -367,7 +367,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: IDENTITY_ADMIN | `src/modules/auth_providers/controllers/auth-providers.controller.ts:70` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -480,7 +480,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 | ROL | Alguno de: IDENTITY_ADMIN | `src/modules/auth_providers/controllers/auth-providers.controller.ts:153` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/auth_providers/controllers/auth-providers.controller.ts:153` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -603,7 +603,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 | ROL | Alguno de: IDENTITY_ADMIN | `src/modules/auth_providers/controllers/auth-providers.controller.ts:91` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/auth_providers/controllers/auth-providers.controller.ts:91` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -753,7 +753,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 | ROL | Alguno de: IDENTITY_ADMIN | `src/modules/auth_providers/controllers/auth-providers.controller.ts:196` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/auth_providers/controllers/auth-providers.controller.ts:196` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -869,7 +869,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 | ROL | Alguno de: IDENTITY_ADMIN | `src/modules/auth_providers/controllers/auth-providers.controller.ts:113` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/auth_providers/controllers/auth-providers.controller.ts:113` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -985,7 +985,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 | ROL | Alguno de: IDENTITY_ADMIN | `src/modules/auth_providers/controllers/auth-providers.controller.ts:131` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/auth_providers/controllers/auth-providers.controller.ts:131` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1102,7 +1102,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: IDENTITY_ADMIN, AUTH_SERVICE | `src/modules/auth_providers/controllers/auth-providers.controller.ts:217` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1211,7 +1211,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: IDENTITY_ADMIN, AUTH_SERVICE | `src/modules/auth_providers/controllers/auth-providers.controller.ts:239` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1338,7 +1338,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: IDENTITY_ADMIN | `src/modules/auth_providers/controllers/auth-providers.controller.ts:175` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 

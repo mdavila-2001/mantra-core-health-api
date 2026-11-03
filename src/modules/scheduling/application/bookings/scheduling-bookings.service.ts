@@ -24,12 +24,9 @@ import {
   SetPaymentStateResponseDto,
   WorkerBatchResultDto,
 } from '../../presentation/dto';
-import { AcceptBookingUseCase } from './use-cases/accept-booking.use-case';
+import { BookingStateTransitionHandler } from './booking-state-transition.handler';
 import type { AppointmentBookings } from '../../entities';
 import type { AuthenticatedUser } from '../../../../common';
-import { CancelBookingUseCase } from './use-cases/cancel-booking.use-case';
-import { CheckInBookingUseCase } from './use-cases/check-in-booking.use-case';
-import { CompleteAppointmentUseCase } from './use-cases/complete-appointment.use-case';
 import { ConfirmBookingUseCase } from './use-cases/confirm-booking.use-case';
 import { CreateDirectAppointmentUseCase } from './use-cases/create-direct-appointment.use-case';
 import { DEFAULT_WORKER_BATCH } from '../../domain/booking/booking-defaults';
@@ -40,7 +37,6 @@ import { GetPaymentStateUseCase } from './use-cases/get-payment-state.use-case';
 import { Injectable } from '@nestjs/common';
 import { PlaceHoldUseCase } from './use-cases/place-hold.use-case';
 import { ProposeScheduleUseCase } from './use-cases/propose-schedule.use-case';
-import { RejectBookingUseCase } from './use-cases/reject-booking.use-case';
 import { RequestBookingInfoUseCase } from './use-cases/request-booking-info.use-case';
 import { RequestBookingUseCase } from './use-cases/request-booking.use-case';
 import { RescheduleBookingUseCase } from './use-cases/reschedule-booking.use-case';
@@ -76,16 +72,12 @@ export class SchedulingBookingsService {
     private readonly createDirectAppointmentUseCase: CreateDirectAppointmentUseCase,
     private readonly expireHoldsUseCase: ExpireHoldsUseCase,
     private readonly rescheduleBookingUseCase: RescheduleBookingUseCase,
-    private readonly cancelBookingUseCase: CancelBookingUseCase,
-    private readonly rejectBookingUseCase: RejectBookingUseCase,
+    private readonly bookingStateTransitionHandler: BookingStateTransitionHandler,
     private readonly setPaymentStateUseCase: SetPaymentStateUseCase,
     private readonly getPaymentStateUseCase: GetPaymentStateUseCase,
-    private readonly acceptBookingUseCase: AcceptBookingUseCase,
     private readonly requestBookingInfoUseCase: RequestBookingInfoUseCase,
     private readonly proposeScheduleUseCase: ProposeScheduleUseCase,
     private readonly startAppointmentUseCase: StartAppointmentUseCase,
-    private readonly completeAppointmentUseCase: CompleteAppointmentUseCase,
-    private readonly checkInBookingUseCase: CheckInBookingUseCase,
     private readonly searchBookingsUseCase: SearchBookingsUseCase,
     private readonly getBookingUseCase: GetBookingUseCase,
   ) {}
@@ -138,7 +130,7 @@ export class SchedulingBookingsService {
     dto: RejectBookingDto,
     actor: AuthenticatedUser,
   ): Promise<CancelBookingResponseDto> {
-    return this.rejectBookingUseCase.execute(bookingId, dto, actor);
+    return this.bookingStateTransitionHandler.reject(bookingId, dto, actor);
   }
 
   setPaymentState(
@@ -161,7 +153,7 @@ export class SchedulingBookingsService {
     dto: AcceptBookingDto,
     actor: AuthenticatedUser,
   ): Promise<BookingDecisionResponseDto> {
-    return this.acceptBookingUseCase.execute(bookingId, dto, actor);
+    return this.bookingStateTransitionHandler.accept(bookingId, dto, actor);
   }
 
   requestInfo(
@@ -184,21 +176,21 @@ export class SchedulingBookingsService {
     bookingId: string,
     actor: AuthenticatedUser,
   ): Promise<BookingDecisionResponseDto> {
-    return this.startAppointmentUseCase.execute(bookingId, actor);
+    return this.bookingStateTransitionHandler.start(bookingId, actor);
   }
 
   complete(
     bookingId: string,
     actor: AuthenticatedUser,
   ): Promise<BookingDecisionResponseDto> {
-    return this.completeAppointmentUseCase.execute(bookingId, actor);
+    return this.bookingStateTransitionHandler.complete(bookingId, actor);
   }
 
   checkIn(
     bookingId: string,
     actor: AuthenticatedUser,
   ): Promise<CheckInResponseDto> {
-    return this.checkInBookingUseCase.execute(bookingId, actor);
+    return this.bookingStateTransitionHandler.checkIn(bookingId, actor);
   }
 
   getBookingById(
@@ -213,12 +205,7 @@ export class SchedulingBookingsService {
     dto: CancelBookingDto,
     actor: AuthenticatedUser,
   ): Promise<CancelBookingResponseDto> {
-    return this.cancelBookingUseCase.execute(
-      bookingId,
-      dto,
-      actor,
-      'CANCELLED',
-    );
+    return this.bookingStateTransitionHandler.cancel(bookingId, dto, actor);
   }
 
   searchBookings(

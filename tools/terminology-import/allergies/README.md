@@ -54,7 +54,7 @@ uno. Reconstruir con `build-allergy-catalog.mjs` da el mismo SHA-256 del NDJSON
   internos de `src/common/seed/data/allergies/` con su código HL7 (según
   `fhir-allergy-enum-codes.json`). Sólo se cargan si la API ya los sembró.
 
-## Pruebas
+## Tests
 
 ```sh
 node --test "tools/terminology-import/allergies/test/*.test.mjs"

@@ -181,7 +181,11 @@ export class UserActivityEventsRepository {
 
 /** SQLSTATE 23505 (o la excepción tipada del ORM) en el índice de idempotencia anónima. */
 export function isUniqueViolation(error: unknown): boolean {
-  const e = error as { code?: string; name?: string; constraint?: string } | null;
+  const e = error as {
+    code?: string;
+    name?: string;
+    constraint?: string;
+  } | null;
   if (!e) return false;
   return e.code === '23505' || e.name === 'UniqueConstraintViolationException';
 }

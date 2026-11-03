@@ -109,6 +109,9 @@ export class ProcedureCaseTeamMembers {
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
 
+  /**
+   * Valor de accepted version number mantenido por la instancia.
+   */
   @Property({
     fieldName: 'accepted_version_number',
     columnType: 'int',

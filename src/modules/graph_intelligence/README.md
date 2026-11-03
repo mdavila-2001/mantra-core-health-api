@@ -114,7 +114,7 @@ MANTENIMIENTO
   projections/reconcile > actualiza, invalida rutas y CADUCA el riesgo
 ```
 
-## Reglas de negocio
+## Business rules
 
 - **Un evento con `source_version` anterior se descarta** y se devuelve `stale: true`. Los eventos
   llegan sin orden garantizado; aplicar uno viejo devolvería el nodo a un estado que ya no es el
@@ -171,7 +171,7 @@ MANTENIMIENTO
 del worker de analítica. Lo que aporta es el versionado de los resultados, la deduplicación, la
 caducidad y la purga completa.
 
-## Permisos
+## Permissions
 
 `GRAPH_PROJECTION_WORKER` y `SYSTEM` proyectan, avanzan corridas, expiran aristas y reconcilian.
 `DATA_GOVERNANCE_ADMIN` y `COMPLIANCE_OFFICER` definen alcances. `GRAPH_ANALYST` y `API_CONSUMER`
@@ -185,7 +185,7 @@ capacidades distintas, y quien puede escribirlo podría fabricar la relación qu
 
 Ninguna ruta es pública.
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE` sobre el nodo y la arista por su clave de origen —dos eventos del mismo agregado
 compiten—, sobre el alcance, la corrida, el hallazgo, el puntaje de riesgo y el job de borrado.
@@ -200,7 +200,7 @@ no bloquearse hasta que la primera termine.
 y reconciliación de un borrado. No se loguean etiquetas de nodo, identificadores ni explicaciones de
 riesgo.
 
-## Pruebas
+## Tests
 
 `corepack yarn test src/modules/graph_intelligence --runInBand --silent` — 4 suites y 87 pruebas
 aprobadas durante la revisión (28 proyección + 19 recorrido + 25 analítica + 15 de delegación).

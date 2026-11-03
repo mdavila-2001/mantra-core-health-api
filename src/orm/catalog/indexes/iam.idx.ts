@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `iam`.
- * 65 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 72 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const iamIndexes: readonly IndexTuple[] = [
@@ -52,6 +52,13 @@ export const iamIndexes: readonly IndexTuple[] = [
   ['security_events', 'ix_security_events_outcome_concept_id', ['outcome_concept_id'], false, 'btree'],
   ['security_events', 'ix_security_events_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
   ['security_events', 'brin_security_events_recorded_at', ['recorded_at'], false, 'brin'],
+  ['session_policies', 'ix_session_policies_tenant_id', ['tenant_id', 'status_concept_id'], false, 'btree'],
+  ['session_policies', 'ix_session_policies_scope_concept_id', ['scope_concept_id'], false, 'btree'],
+  ['session_policies', 'ix_session_policies_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['session_policies', 'uq_session_policies_active_tenant_scope', ['tenant_id', 'scope_concept_id'], true, 'btree', 'role_code IS NULL AND status_concept_id = \'38a1d301-f40d-5b17-a695-5e6d605f8b19\''],
+  ['session_policies', 'uq_session_policies_active_tenant_scope_role', ['tenant_id', 'scope_concept_id', 'role_code'], true, 'btree', 'role_code IS NOT NULL AND status_concept_id = \'38a1d301-f40d-5b17-a695-5e6d605f8b19\''],
+  ['session_policies', 'ix_session_policies_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['session_policies', 'ix_session_policies_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['sessions', 'uq_sessions_token_id', ['token_id'], true, 'btree'],
   ['sessions', 'ix_sessions_user_id', ['user_id'], false, 'btree'],
   ['sessions', 'ix_sessions_device_id', ['device_id'], false, 'btree'],

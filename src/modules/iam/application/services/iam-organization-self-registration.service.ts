@@ -50,6 +50,7 @@ import {
 } from '../../presentation/dto';
 import { IamOrganizationRepresentativesService } from './iam-organization-representatives.service';
 import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
+import { enterAuthBoundaryContext } from './auth-boundary-context';
 
 /** Nombre con el que nace la sede central de una farmacia (P50). */
 const PHARMACY_HEADQUARTERS_NAME = 'Casa central';
@@ -235,6 +236,7 @@ export class IamOrganizationSelfRegistrationService {
     );
 
     const created = await this.em.transactional(async (tx) => {
+      await enterAuthBoundaryContext(tx);
       // Las dos unicidades se comprueban ANTES de escribir nada: el código de
       // tenant y el correo del owner son ambos únicos, y descubrirlo por una
       // violación de constraint devolvería un 500 en vez de un 409 explicativo.

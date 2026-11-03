@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `diagnostic_units`.
- * 71 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 111 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const diagnosticUnitsForeignKeys: readonly ForeignKeyTuple[] = [
@@ -78,4 +78,44 @@ export const diagnosticUnitsForeignKeys: readonly ForeignKeyTuple[] = [
   ['diagnostic_units', 'tenant_id', 'directory', 'tenants', 'id'],
   ['diagnostic_units', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['diagnostic_units', 'verification_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['unit_medical_visitors', 'branch_id', 'directory', 'branches', 'id'],
+  ['unit_medical_visitors', 'contract_verification_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['unit_medical_visitors', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['unit_medical_visitors', 'credential_verification_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['unit_medical_visitors', 'diagnostic_unit_id', 'diagnostic_units', 'diagnostic_units', 'id'],
+  ['unit_medical_visitors', 'identity_verification_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['unit_medical_visitors', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['unit_medical_visitors', 'supervisor_user_id', 'iam', 'users', 'id'],
+  ['unit_medical_visitors', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['unit_medical_visitors', 'user_id', 'iam', 'users', 'id'],
+  ['unit_visit_ratings', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['unit_visit_ratings', 'doctor_user_id', 'iam', 'users', 'id'],
+  ['unit_visit_ratings', 'kind_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['unit_visit_ratings', 'unit_visit_record_id', 'diagnostic_units', 'unit_visit_records', 'id'],
+  ['unit_visit_ratings', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['unit_visit_records', 'confirmation_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['unit_visit_records', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['unit_visit_records', 'diagnostic_unit_id', 'diagnostic_units', 'diagnostic_units', 'id'],
+  ['unit_visit_records', 'doctor_attendance_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['unit_visit_records', 'doctor_user_id', 'iam', 'users', 'id'],
+  ['unit_visit_records', 'modality_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['unit_visit_records', 'unit_medical_visitor_id', 'diagnostic_units', 'unit_medical_visitors', 'id'],
+  ['unit_visit_records', 'unit_visit_request_id', 'diagnostic_units', 'unit_visit_requests', 'id'],
+  ['unit_visit_records', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['unit_visit_records', 'visitor_attendance_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['unit_visit_request_events', 'action_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['unit_visit_request_events', 'actor_user_id', 'iam', 'users', 'id'],
+  ['unit_visit_request_events', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['unit_visit_request_events', 'new_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['unit_visit_request_events', 'previous_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['unit_visit_request_events', 'unit_visit_request_id', 'diagnostic_units', 'unit_visit_requests', 'id'],
+  ['unit_visit_requests', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['unit_visit_requests', 'diagnostic_unit_id', 'diagnostic_units', 'diagnostic_units', 'id'],
+  ['unit_visit_requests', 'doctor_tenant_id', 'directory', 'tenants', 'id'],
+  ['unit_visit_requests', 'doctor_user_id', 'iam', 'users', 'id'],
+  ['unit_visit_requests', 'modality_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['unit_visit_requests', 'rescheduled_from_id', 'diagnostic_units', 'unit_visit_requests', 'id'],
+  ['unit_visit_requests', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['unit_visit_requests', 'unit_medical_visitor_id', 'diagnostic_units', 'unit_medical_visitors', 'id'],
+  ['unit_visit_requests', 'updated_by_user_id', 'iam', 'users', 'id'],
 ];

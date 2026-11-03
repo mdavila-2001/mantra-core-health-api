@@ -7,6 +7,11 @@ import type { ForeignKeyTuple } from '../catalog.types';
  */
 export const auditForeignKeys3: readonly ForeignKeyTuple[] = [
   // [tablaOrigen, columnaOrigen, schemaDestino, tablaDestino, columnaDestino]
+  ['opportunities_history', 'changed_by_user_id', 'iam', 'users', 'id'],
+  ['opportunities_history', 'operation_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['opportunities_history', 'opportunities_id', 'crm', 'opportunities', 'id'],
+  ['order_sets_history', 'change_reason_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['order_sets_history', 'changed_by_user_id', 'iam', 'users', 'id'],
   ['order_sets_history', 'operation_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['order_sets_history', 'order_set_id', 'clinical_ext', 'order_sets', 'id'],
   ['organization_affiliations_history', 'change_reason_concept_id', 'terminology', 'catalog_concepts', 'id'],
@@ -107,6 +112,10 @@ export const auditForeignKeys3: readonly ForeignKeyTuple[] = [
   ['practitioner_role_assignments_history', 'changed_by_user_id', 'iam', 'users', 'id'],
   ['practitioner_role_assignments_history', 'operation_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['practitioner_role_assignments_history', 'practitioner_role_assignment_id', 'practice', 'practitioner_role_assignments', 'id'],
+  ['procedure_cases_history', 'change_reason_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['procedure_cases_history', 'changed_by_user_id', 'iam', 'users', 'id'],
+  ['procedure_cases_history', 'operation_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['procedure_cases_history', 'procedure_case_id', 'procedures_perioperative', 'procedure_cases', 'id'],
   ['product_catalogs_history', 'change_reason_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['product_catalogs_history', 'changed_by_user_id', 'iam', 'users', 'id'],
   ['product_catalogs_history', 'operation_concept_id', 'terminology', 'catalog_concepts', 'id'],
@@ -178,13 +187,4 @@ export const auditForeignKeys3: readonly ForeignKeyTuple[] = [
   ['service_reviews_history', 'change_reason_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['service_reviews_history', 'changed_by_user_id', 'iam', 'users', 'id'],
   ['service_reviews_history', 'operation_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['service_reviews_history', 'service_review_id', 'community', 'service_reviews', 'id'],
-  ['shipments_history', 'change_reason_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['shipments_history', 'changed_by_user_id', 'iam', 'users', 'id'],
-  ['shipments_history', 'operation_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['shipments_history', 'shipment_id', 'tracking', 'shipments', 'id'],
-  ['social_posts_history', 'change_reason_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['social_posts_history', 'changed_by_user_id', 'iam', 'users', 'id'],
-  ['social_posts_history', 'operation_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['social_posts_history', 'social_post_id', 'community', 'social_posts', 'id'],
 ];

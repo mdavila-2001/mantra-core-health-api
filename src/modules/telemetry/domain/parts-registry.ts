@@ -33,7 +33,10 @@ export class PartsRegistry {
   }
 
   /** La parte de una plantilla, o `null` si no casa con ninguna (cubo «sin parte»). */
-  resolve(routeTemplate: string | null | undefined, portal = 'WEB'): PartRow | null {
+  resolve(
+    routeTemplate: string | null | undefined,
+    portal = 'WEB',
+  ): PartRow | null {
     if (!routeTemplate) return null;
     const candidates = this.byPattern.get(routeTemplate);
     if (!candidates?.length) return null;

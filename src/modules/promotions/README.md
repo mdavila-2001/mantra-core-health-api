@@ -89,7 +89,7 @@ promoción (draft) ── activar ──> active ── coupons/batch ──> cu
 referido (pending) ── qualify ──> qualified + puntos al referidor y al referido
 ```
 
-## Reglas de negocio
+## Business rules
 
 - **El ledger es la fuente de verdad** (REC 3.3): `points_balance` y `lifetime_points` son
   proyecciones. `recompute` las vuelve a derivar recorriendo el ledger completo.
@@ -115,14 +115,14 @@ referido (pending) ── qualify ──> qualified + puntos al referidor y al r
 - **No hay auto-referido**: calificar un referido cuyo referidor y referido son la misma persona se
   rechaza; sería una fuente de puntos gratis.
 
-## Permisos
+## Permissions
 
 `PROMOTIONS_ADMIN` en todo el módulo. `MARKETING_MANAGER` en programas, promociones y cupones.
 `MEMBER` para inscribirse, canjear sus puntos y generar su código de referido. `CASHIER` en
 validación, redención, checkout y reversa. `SYSTEM` en lo que ejecutan los workers: acumulación,
 recompute, barrido de expiración y calificación de referidos.
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE` sobre membresía (el saldo es un contador compartido), cupón (evita la sobre-redención
 entre cajas), promoción, redención y referido. `FOR UPDATE SKIP LOCKED` en el barrido de expiración,
@@ -132,7 +132,7 @@ que procesa por lotes y no debe esperar a otra pasada. `row_version` aporta bloq
 
 `operation: 'promotions.<área>.<acción>'`. No se loguean códigos de cupón generados ni saldos.
 
-## Pruebas
+## Tests
 
 `corepack yarn test src/modules/promotions --runInBand --silent` — 4 suites y 118 pruebas
 aprobadas durante la revisión.

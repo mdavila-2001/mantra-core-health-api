@@ -111,6 +111,35 @@ describe('InsuranceAnalyticsService.getLossRatioAnalytics (subtarea 3.1, v4.2.14
     expect(result.carrierId).toBe('carrier-a');
   });
 
+  // Rol de analítica acotado a otra organización (`scopedRoles`, MCH-001): no
+  // cuenta en la aseguradora activa; sí en la suya; el global, en ambas (#1241).
+  it('rol de analítica acotado a otra organización: 403; acotado a ésta o global: 200', async () => {
+    for (const role of ['INSURANCE_OPERATOR', 'SECURITY_ADMIN', 'SUPERADMIN']) {
+      const scopedTo = (tenantId: string) =>
+        ({
+          id: 'u-scoped',
+          roles: [role],
+          scopedRoles: { [tenantId]: [role] },
+        }) as any;
+      const { service, tenantAdministration } = build();
+      tenantAdministration.canAdminister.mockResolvedValue(false);
+
+      await expect(
+        runWithTenant(TENANT, () =>
+          service.getLossRatioAnalytics({}, scopedTo('tenant-otra')),
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      const own = await runWithTenant(TENANT, () =>
+        service.getLossRatioAnalytics({}, scopedTo(TENANT)),
+      );
+      expect(own.carrierId).toBe('carrier-a');
+      const global = await runWithTenant(TENANT, () =>
+        service.getLossRatioAnalytics({}, { id: 'g', roles: [role] } as any),
+      );
+      expect(global.carrierId).toBe('carrier-a');
+    }
+  });
+
   it('404 cuando planId no pertenece al carrier del tenant activo', async () => {
     const { service, catalogRepo } = build();
     catalogRepo.findPlanForCarrier.mockResolvedValue(null);

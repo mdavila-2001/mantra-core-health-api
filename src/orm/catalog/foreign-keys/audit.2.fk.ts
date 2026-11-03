@@ -7,6 +7,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
  */
 export const auditForeignKeys2: readonly ForeignKeyTuple[] = [
   // [tablaOrigen, columnaOrigen, schemaDestino, tablaDestino, columnaDestino]
+  ['custom_conversions_history', 'operation_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['data_access_log', 'action_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['data_access_log', 'legal_basis_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['data_access_log', 'patient_profile_id', 'profiles', 'patient_profiles', 'profile_id'],
@@ -111,6 +112,10 @@ export const auditForeignKeys2: readonly ForeignKeyTuple[] = [
   ['insurance_decision_access_log', 'outcome_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['insurance_decision_access_log', 'patient_profile_id', 'profiles', 'patient_profiles', 'profile_id'],
   ['insurance_decision_access_log', 'purpose_of_use_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['insurance_products_history', 'change_reason_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['insurance_products_history', 'changed_by_user_id', 'iam', 'users', 'id'],
+  ['insurance_products_history', 'insurance_product_id', 'insurance', 'insurance_products', 'id'],
+  ['insurance_products_history', 'operation_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['integration_endpoints_history', 'change_reason_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['integration_endpoints_history', 'changed_by_user_id', 'iam', 'users', 'id'],
   ['integration_endpoints_history', 'integration_endpoint_id', 'integrations', 'integration_endpoints', 'id'],
@@ -182,9 +187,4 @@ export const auditForeignKeys2: readonly ForeignKeyTuple[] = [
   ['operating_room_blocks_history', 'operation_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['operating_room_blocks_history', 'tenant_id', 'directory', 'tenants', 'id'],
   ['opportunities_history', 'change_reason_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['opportunities_history', 'changed_by_user_id', 'iam', 'users', 'id'],
-  ['opportunities_history', 'operation_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['opportunities_history', 'opportunities_id', 'crm', 'opportunities', 'id'],
-  ['order_sets_history', 'change_reason_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['order_sets_history', 'changed_by_user_id', 'iam', 'users', 'id'],
 ];

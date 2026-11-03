@@ -5,6 +5,7 @@ import {
   PreconditionFailedException,
   requireTenantId,
   ResourceNotFoundException,
+  roleAuthorizesInTenant,
   type AuthenticatedUser,
 } from '../../../../common';
 import {
@@ -106,8 +107,10 @@ export class InsuranceAnalyticsService {
       tenantId,
       actor,
     );
+    // El rol cuenta en la aseguradora activa: global en cualquiera; acotado en
+    // `scopedRoles`, sólo en la suya (#1241).
     const hasAnalyticsRole = ANALYTICS_ROLES.some((role) =>
-      actor.roles.includes(role),
+      roleAuthorizesInTenant(actor, role, tenantId),
     );
     if (!canAdminister && !hasAnalyticsRole) {
       throw new ForbiddenException(

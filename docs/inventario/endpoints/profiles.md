@@ -4,8 +4,8 @@
 
 - **Bloque:** Núcleo y Terminología (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
 - **Operaciones:** 85 (84 en el contrato, 1 sólo en el código)
-- **Riesgo:** ALTO 38 · MEDIO 13 · BAJO 34
-- **Tablas distintas que tocan:** 61
+- **Riesgo:** ALTO 29 · MEDIO 13 · BAJO 43
+- **Tablas distintas que tocan:** 60
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/profiles.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -66,8 +66,8 @@
 | 52 | PATCH | `/profiles/practitioners/{profileId}` | Corregir el perfil profesional de otro (titular o plataforma) | ALTO | 27 | sesión (sin roles) |
 | 53 | POST | `/profiles/practitioners/{profileId}/affiliations` | Registrar un consultorio de un profesional sin cuenta | MEDIO | 25 | SECURITY_ADMIN |
 | 54 | POST | `/profiles/practitioners/{profileId}/jurisdiction-authorizations` | Registrar/renovar autorización jurisdiccional (licencia) | ALTO | 5 | sesión (sin roles) |
-| 55 | DELETE | `/profiles/practitioners/{profileId}/photo` | Quitar la foto del perfil profesional | ALTO | 17 | sesión (sin roles) |
-| 56 | PUT | `/profiles/practitioners/{profileId}/photo` | Fijar la foto del perfil profesional | ALTO | 19 | sesión (sin roles) |
+| 55 | DELETE | `/profiles/practitioners/{profileId}/photo` | Quitar la foto del perfil profesional | BAJO | 16 | sesión (sin roles) |
+| 56 | PUT | `/profiles/practitioners/{profileId}/photo` | Fijar la foto del perfil profesional | BAJO | 16 | sesión (sin roles) |
 | 57 | POST | `/profiles/practitioners/{profileId}/specialties` | Agregar especialidad con credencial de soporte | ALTO | 9 | sesión (sin roles) |
 | 58 | GET | `/profiles/practitioners/{profileId}/summary` | Consultar el perfil profesional de un colega (ficha de la guía) | BAJO | 16 | sesión (sin roles) |
 | 59 | PATCH | `/profiles/practitioners/me` | Editar la presentación del propio perfil profesional | ALTO | 27 | sesión (sin roles) |
@@ -78,19 +78,19 @@
 | 64 | POST | `/profiles/practitioners/me/affiliations` | Registrar una afiliación institucional en el historial propio | ALTO | 25 | sesión (sin roles) |
 | 65 | DELETE | `/profiles/practitioners/me/affiliations/{affiliationId}` | Quitar una afiliación del historial laboral propio | ALTO | 4 | sesión (sin roles) |
 | 66 | PATCH | `/profiles/practitioners/me/affiliations/{affiliationId}` | Corregir una afiliación del historial laboral propio | ALTO | 4 | sesión (sin roles) |
-| 67 | POST | `/profiles/practitioners/me/credentials` | Agregar un título propio (diplomado, maestría, doctorado…) | ALTO | 5 | sesión (sin roles) |
-| 68 | DELETE | `/profiles/practitioners/me/credentials/{credentialId}` | Retirar un título propio pendiente | ALTO | 4 | sesión (sin roles) |
-| 69 | PATCH | `/profiles/practitioners/me/credentials/{credentialId}` | Editar un título propio pendiente de verificación | ALTO | 6 | sesión (sin roles) |
-| 70 | DELETE | `/profiles/practitioners/me/jurisdiction-authorizations/{licenseId}` | Retirar una matrícula propia pendiente de verificación | ALTO | 6 | sesión (sin roles) |
-| 71 | PATCH | `/profiles/practitioners/me/jurisdiction-authorizations/{licenseId}` | Corregir una matrícula propia pendiente de verificación | BAJO | 6 | sesión (sin roles) |
+| 67 | POST | `/profiles/practitioners/me/credentials` | Agregar un título propio (diplomado, maestría, doctorado…) | BAJO | 0 | sesión (sin roles) |
+| 68 | DELETE | `/profiles/practitioners/me/credentials/{credentialId}` | Retirar un título propio pendiente | BAJO | 0 | sesión (sin roles) |
+| 69 | PATCH | `/profiles/practitioners/me/credentials/{credentialId}` | Editar un título propio pendiente de verificación | BAJO | 0 | sesión (sin roles) |
+| 70 | DELETE | `/profiles/practitioners/me/jurisdiction-authorizations/{licenseId}` | Retirar una matrícula propia pendiente de verificación | BAJO | 0 | sesión (sin roles) |
+| 71 | PATCH | `/profiles/practitioners/me/jurisdiction-authorizations/{licenseId}` | Corregir una matrícula propia pendiente de verificación | BAJO | 0 | sesión (sin roles) |
 | 72 | GET | `/profiles/practitioners/me/linkable-organizations` | Buscar instituciones del padrón para declarar una afiliación | BAJO | 5 | sesión (sin roles) |
-| 73 | GET | `/profiles/practitioners/me/onboarding` | Qué le falta al profesional para completar su alta | BAJO | 7 | sesión (sin roles) |
+| 73 | GET | `/profiles/practitioners/me/onboarding` | Qué le falta al profesional para completar su alta | BAJO | 8 | sesión (sin roles) |
 | 74 | GET | `/profiles/practitioners/me/primary-patients` | Listar los pacientes que me eligieron como médico de cabecera | BAJO | 5 | sesión (sin roles) |
 | 75 | GET | `/profiles/practitioners/me/signature-assets` | Consultar las imágenes de firma y sello propias | BAJO | 2 | sesión (sin roles) |
 | 76 | PUT | `/profiles/practitioners/me/signature-assets` | Guardar o quitar las imágenes de firma y sello propias | ALTO | 5 | sesión (sin roles) |
-| 77 | DELETE | `/profiles/practitioners/me/specialties/{specialtyId}` | Retirar una especialidad propia pendiente de verificación | ALTO | 4 | sesión (sin roles) |
-| 78 | PATCH | `/profiles/practitioners/me/specialties/{specialtyId}` | Corregir una especialidad propia pendiente de verificación | ALTO | 7 | sesión (sin roles) |
-| 79 | PATCH | `/profiles/practitioners/me/specialties/{specialtyId}/primary` | Marcar una especialidad propia como la principal | ALTO | 4 | sesión (sin roles) |
+| 77 | DELETE | `/profiles/practitioners/me/specialties/{specialtyId}` | Retirar una especialidad propia pendiente de verificación | BAJO | 0 | sesión (sin roles) |
+| 78 | PATCH | `/profiles/practitioners/me/specialties/{specialtyId}` | Corregir una especialidad propia pendiente de verificación | BAJO | 0 | sesión (sin roles) |
+| 79 | PATCH | `/profiles/practitioners/me/specialties/{specialtyId}/primary` | Marcar una especialidad propia como la principal | BAJO | 0 | sesión (sin roles) |
 | 80 | GET | `/profiles/practitioners/me/summary` | Consultar el perfil profesional propio (trayectoria y actividad) | BAJO | 16 | sesión (sin roles) |
 | 81 | GET | `/profiles/practitioners/specialty-counts` | Contar profesionales visibles por especialidad | BAJO | 2 | sesión (sin roles) |
 | 82 | GET | `/tenants/{tenantId}/practitioner-requests` | Solicitudes de médicos que piden atender en la organización | BAJO | 5 | sesión (sin roles) |
@@ -555,7 +555,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: ADMISSIONS_REVIEWER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:167` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/admissions.controller.ts:167` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -596,7 +596,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.practitioner_admission_reviews` | ESCRIBE | CREA | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:123` |
 | `profiles.practitioner_admission_reviews` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.clearReview | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:253` |
 | `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionReviewsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:88` |
-| `profiles.practitioner_admissions` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.claim → PractitionerAdmissionsService.claim | `src/modules/profiles/application/services/practitioner-admissions.service.ts:264` |
+| `profiles.practitioner_admissions` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.claim → PractitionerAdmissionsService.claim | `src/modules/profiles/application/services/practitioner-admissions.service.ts:265` |
 | `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsService.loadLocked → PractitionerAdmissionsRepository.findByIdForUpdate | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:122` |
 | `profiles.practitioner_specialties` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:317` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsReadService.detailOf | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:514` |
@@ -842,7 +842,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: ADMISSIONS_APPROVER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:286` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/admissions.controller.ts:286` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -893,7 +893,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.practitioner_admission_reviews` | ESCRIBE | CREA | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:123` |
 | `profiles.practitioner_admission_reviews` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.clearReview | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:253` |
 | `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionReviewsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:88` |
-| `profiles.practitioner_admissions` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.decide → PractitionerAdmissionsService.decide | `src/modules/profiles/application/services/practitioner-admissions.service.ts:697` |
+| `profiles.practitioner_admissions` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.decide → PractitionerAdmissionsService.decide | `src/modules/profiles/application/services/practitioner-admissions.service.ts:698` |
 | `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsService.loadLocked → PractitionerAdmissionsRepository.findByIdForUpdate | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:122` |
 | `profiles.practitioner_specialties` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:317` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsReadService.detailOf | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:514` |
@@ -1327,7 +1327,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: ADMISSIONS_REVIEWER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:256` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id, itemId | `src/modules/profiles/presentation/controllers/admissions.controller.ts:256` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1349,7 +1349,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.persons` | LEE | LEE | DIRECTA | AdmissionsController.reviewItem → PractitionerAdmissionsService.reviewItem → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:229` |
 | `profiles.practitioner_admission_events` | ESCRIBE | CREA | DIRECTA | AdmissionsController.reviewItem → PractitionerAdmissionsService.reviewItem → PractitionerAdmissionsService.appendEvent → PractitionerAdmissionEventsRepository.append | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:395` |
 | `profiles.practitioner_admission_events` | LEE | LEE | DIRECTA | AdmissionsController.reviewItem → PractitionerAdmissionsService.reviewItem → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEventsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:403` |
-| `profiles.practitioner_admission_reviews` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.reviewItem → PractitionerAdmissionsService.reviewItem | `src/modules/profiles/application/services/practitioner-admissions.service.ts:553` |
+| `profiles.practitioner_admission_reviews` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.reviewItem → PractitionerAdmissionsService.reviewItem | `src/modules/profiles/application/services/practitioner-admissions.service.ts:554` |
 | `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | AdmissionsController.reviewItem → PractitionerAdmissionsService.reviewItem → PractitionerAdmissionReviewsRepository.findByIdForUpdate | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:111` |
 | `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | AdmissionsController.reviewItem → PractitionerAdmissionsService.reviewItem → PractitionerAdmissionsRepository.findById | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:114` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | AdmissionsController.reviewItem → PractitionerAdmissionsService.reviewItem → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:225` |
@@ -1615,7 +1615,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: ADMISSIONS_APPROVER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:213` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/admissions.controller.ts:213` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1643,7 +1643,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.practitioner_admission_reviews` | ESCRIBE | CREA | DIRECTA | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:123` |
 | `profiles.practitioner_admission_reviews` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.clearReview | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:253` |
 | `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionReviewsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:88` |
-| `profiles.practitioner_admissions` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.reassign → PractitionerAdmissionsService.reassign | `src/modules/profiles/application/services/practitioner-admissions.service.ts:357` |
+| `profiles.practitioner_admissions` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.reassign → PractitionerAdmissionsService.reassign | `src/modules/profiles/application/services/practitioner-admissions.service.ts:358` |
 | `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PractitionerAdmissionsService.loadLocked → PractitionerAdmissionsRepository.findByIdForUpdate | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:122` |
 | `profiles.practitioner_specialties` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:317` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PractitionerAdmissionsReadService.detailOf | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:514` |
@@ -1892,7 +1892,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: ADMISSIONS_APPROVER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:329` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/admissions.controller.ts:329` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1939,7 +1939,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.practitioner_admission_events` | ESCRIBE | CREA | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsService.appendEvent → PractitionerAdmissionEventsRepository.append | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:395` |
 | `profiles.practitioner_admission_events` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEventsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:403` |
 | `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionReviewsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:88` |
-| `profiles.practitioner_admissions` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate | `src/modules/profiles/application/services/practitioner-admissions.service.ts:846` |
+| `profiles.practitioner_admissions` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate | `src/modules/profiles/application/services/practitioner-admissions.service.ts:847` |
 | `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsService.loadLocked → PractitionerAdmissionsRepository.findByIdForUpdate | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:122` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsReadService.detailOf | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:514` |
 | `profiles.professional_credentials` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsReadService.detailOf | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:511` |
@@ -2190,7 +2190,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:190` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/admissions.controller.ts:190` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2213,7 +2213,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.practitioner_admission_events` | ESCRIBE | CREA | DIRECTA | AdmissionsController.release → PractitionerAdmissionsService.release → PractitionerAdmissionsService.appendEvent → PractitionerAdmissionEventsRepository.append | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:395` |
 | `profiles.practitioner_admission_events` | LEE | LEE | DIRECTA | AdmissionsController.release → PractitionerAdmissionsService.release → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEventsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:403` |
 | `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | AdmissionsController.release → PractitionerAdmissionsService.release → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionReviewsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:88` |
-| `profiles.practitioner_admissions` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.release → PractitionerAdmissionsService.release | `src/modules/profiles/application/services/practitioner-admissions.service.ts:302` |
+| `profiles.practitioner_admissions` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.release → PractitionerAdmissionsService.release | `src/modules/profiles/application/services/practitioner-admissions.service.ts:303` |
 | `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | AdmissionsController.release → PractitionerAdmissionsService.release → PractitionerAdmissionsService.loadLocked → PractitionerAdmissionsRepository.findByIdForUpdate | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:122` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | AdmissionsController.release → PractitionerAdmissionsService.release → PractitionerAdmissionsReadService.detailOf | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:514` |
 | `profiles.professional_credentials` | LEE | LEE | DIRECTA | AdmissionsController.release → PractitionerAdmissionsService.release → PractitionerAdmissionsReadService.detailOf | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:511` |
@@ -2457,7 +2457,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: ADMISSIONS_REVIEWER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:237` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/admissions.controller.ts:237` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2496,9 +2496,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.practitioner_admission_events` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEventsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:403` |
 | `profiles.practitioner_admission_reviews` | BORRA | BORRA | POR_TIPO | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.remove | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:140` |
 | `profiles.practitioner_admission_reviews` | ESCRIBE | CREA | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:123` |
-| `profiles.practitioner_admission_reviews` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsService.applyReview | `src/modules/profiles/application/services/practitioner-admissions.service.ts:1485` |
+| `profiles.practitioner_admission_reviews` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsService.applyReview | `src/modules/profiles/application/services/practitioner-admissions.service.ts:1493` |
 | `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionReviewsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:88` |
-| `profiles.practitioner_admissions` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo | `src/modules/profiles/application/services/practitioner-admissions.service.ts:430` |
+| `profiles.practitioner_admissions` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo | `src/modules/profiles/application/services/practitioner-admissions.service.ts:431` |
 | `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsService.loadLocked → PractitionerAdmissionsRepository.findByIdForUpdate | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:122` |
 | `profiles.practitioner_specialties` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:317` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsReadService.detailOf | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:514` |
@@ -2758,7 +2758,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: ADMISSIONS_APPROVER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:310` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/admissions.controller.ts:310` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2801,7 +2801,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.practitioner_admission_events` | ESCRIBE | CREA | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsService.appendEvent → PractitionerAdmissionEventsRepository.append | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:395` |
 | `profiles.practitioner_admission_events` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEventsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:403` |
 | `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionReviewsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:88` |
-| `profiles.practitioner_admissions` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.suspend → PractitionerAdmissionsService.suspend | `src/modules/profiles/application/services/practitioner-admissions.service.ts:779` |
+| `profiles.practitioner_admissions` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.suspend → PractitionerAdmissionsService.suspend | `src/modules/profiles/application/services/practitioner-admissions.service.ts:780` |
 | `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsService.loadLocked → PractitionerAdmissionsRepository.findByIdForUpdate | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:122` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsReadService.detailOf | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:514` |
 | `profiles.professional_credentials` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsReadService.detailOf | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:511` |
@@ -3142,7 +3142,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:107` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3269,7 +3269,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPractitionersController.listPendingCredentials` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:782`
+- **Implementación:** `ProfilesPractitionersController.listPendingCredentials` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:803`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3279,14 +3279,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /profiles/credentials` la atiende `ProfilesPractitionersController.listPendingCredentials` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:782). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `ProfilesPractitionersService.listPendingCredentials`. Lee profiles.professional_credentials.
+`GET /profiles/credentials` la atiende `ProfilesPractitionersController.listPendingCredentials` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:803). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `ProfilesPractitionersService.listPendingCredentials`. Lee profiles.professional_credentials.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:782` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:803` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3353,7 +3353,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** ALTO — Borra filas
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPractitionersController.verifyCredential` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:813`
+- **Implementación:** `ProfilesPractitionersController.verifyCredential` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:834`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3363,17 +3363,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /profiles/credentials/{credentialId}/verify` la atiende `ProfilesPractitionersController.verifyCredential` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:813). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `VerifyCredentialDto` (3 campos, 1 obligatorio). Delega en `ProfilesPractitionersService.verifyCredential`. Crea filas en profiles.practitioner_admission_events, profiles.practitioner_admission_reviews, profiles.practitioner_admissions. Actualiza profiles.jurisdiction_authorizations, profiles.practitioner_admission_reviews, profiles.practitioner_specialties, profiles.professional_credentials. Borra de profiles.practitioner_admission_reviews. Lee common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, practice.practice_sites, practice.practitioner_role_assignments, profiles.admission_requirements y 8 más.
+`POST /profiles/credentials/{credentialId}/verify` la atiende `ProfilesPractitionersController.verifyCredential` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:834). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `VerifyCredentialDto` (3 campos, 1 obligatorio). Delega en `ProfilesPractitionersService.verifyCredential`. Crea filas en profiles.practitioner_admission_events, profiles.practitioner_admission_reviews, profiles.practitioner_admissions. Actualiza profiles.jurisdiction_authorizations, profiles.practitioner_admission_reviews, profiles.practitioner_specialties, profiles.professional_credentials. Borra de profiles.practitioner_admission_reviews. Lee common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, practice.practice_sites, practice.practitioner_role_assignments, profiles.admission_requirements y 8 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:813` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:834` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: credentialId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:813` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: credentialId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:834` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3389,20 +3389,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `practice.practice_sites` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:159` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:154` |
 | `profiles.admission_requirements` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionChecklistService.requirementsOf → AdmissionRequirementsRepository.findActiveByType | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:152` |
-| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome | `src/modules/profiles/application/services/practitioner-admissions.service.ts:1209` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome | `src/modules/profiles/application/services/practitioner-admissions.service.ts:1210` |
 | `profiles.jurisdiction_authorizations` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:279` |
 | `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:223` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:229` |
 | `profiles.practitioner_admission_events` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.appendEvent → PractitionerAdmissionEventsRepository.append | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:395` |
 | `profiles.practitioner_admission_reviews` | BORRA | BORRA | POR_TIPO | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.remove | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:140` |
 | `profiles.practitioner_admission_reviews` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:123` |
-| `profiles.practitioner_admission_reviews` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.applyReview | `src/modules/profiles/application/services/practitioner-admissions.service.ts:1485` |
+| `profiles.practitioner_admission_reviews` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.applyReview | `src/modules/profiles/application/services/practitioner-admissions.service.ts:1493` |
 | `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionReviewsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:88` |
 | `profiles.practitioner_admissions` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionsRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:90` |
 | `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsRepository.findOpenByPractitionerForUpdate | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:148` |
 | `profiles.practitioner_specialties` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:317` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:225` |
-| `profiles.professional_credentials` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential | `src/modules/profiles/application/services/profiles-practitioners.service.ts:2309` |
+| `profiles.professional_credentials` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential | `src/modules/profiles/application/services/profiles-practitioners.service.ts:2249` |
 | `profiles.professional_credentials` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → ProfessionalCredentialsRepository.findByIdForUpdate | `src/modules/profiles/infrastructure/repositories/professional-credentials.repository.ts:104` |
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.conceptNames → AdmissionForeignReadsAdapter.conceptNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:42` |
 
@@ -3482,7 +3482,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPatientsController.searchPatients` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:309`
+- **Implementación:** `ProfilesPatientsController.searchPatients` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:317`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3492,14 +3492,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /profiles/patients` la atiende `ProfilesPatientsController.searchPatients` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:309). Exige sesión con alguno de los roles SECURITY_ADMIN, SUPERADMIN, CLINICIAN, PRACTITIONER. Delega en `ProfilesPatientsService.searchPatients`. Lee common.identifiers, profiles.patient_profiles, profiles.persons, terminology.value_set_members, terminology.value_set_versions, terminology.value_sets.
+`GET /profiles/patients` la atiende `ProfilesPatientsController.searchPatients` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:317). Exige sesión con alguno de los roles SECURITY_ADMIN, SUPERADMIN, CLINICIAN, PRACTITIONER. Delega en `ProfilesPatientsService.searchPatients`. Lee common.identifiers, profiles.patient_profiles, profiles.persons, terminology.value_set_members, terminology.value_set_versions, terminology.value_sets.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, SUPERADMIN, CLINICIAN, PRACTITIONER | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:309` |
+| ROL | Alguno de: SECURITY_ADMIN, SUPERADMIN, CLINICIAN, PRACTITIONER | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:317` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3575,7 +3575,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPatientsController.registerPatient` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:444`
+- **Implementación:** `ProfilesPatientsController.registerPatient` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:455`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3585,16 +3585,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /profiles/patients` la atiende `ProfilesPatientsController.registerPatient` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:444). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreatePatientDto` (6 campos, 1 obligatorio). Delega en `ProfilesPatientsService.registerPatient`. Crea filas en profiles.patient_profiles, profiles.person_profiles, profiles.persons. Lee profiles.patient_profiles.
+`POST /profiles/patients` la atiende `ProfilesPatientsController.registerPatient` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:455). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreatePatientDto` (6 campos, 1 obligatorio). Delega en `ProfilesPatientsService.registerPatient`. Crea filas en profiles.patient_profiles, profiles.person_profiles, profiles.persons. Lee profiles.patient_profiles.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:444` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:455` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3670,12 +3670,9 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 |---|---|
 | INTEGRACION | `test/integration/dental-procedures.int-spec.ts:43` |
 | INTEGRACION | `test/integration/frontend-read-flows.int-spec.ts:53` |
-| INTEGRACION | `test/integration/fx11-notas-de-evolucion-coleccion.int-spec.ts:107` |
-| INTEGRACION | `test/integration/fx15-documentos-del-expediente.int-spec.ts:108` |
-| INTEGRACION | `test/integration/identity-verification-cycle.int-spec.ts:48` |
 | INTEGRACION | `test/integration/infrastructure-admission-footprint.int-spec.ts:46` |
 | INTEGRACION | `test/integration/lab-booking-relevamiento.int-spec.ts:55` |
-| CONTROLADOR | `src/modules/profiles/presentation/controllers/profiles-patients.controller.spec.ts:73` |
+| CONTROLADOR | `src/modules/profiles/presentation/controllers/profiles-patients.controller.spec.ts:110` |
 
 ### Flujos
 
@@ -3690,7 +3687,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPatientsController.getPatient` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:425`
+- **Implementación:** `ProfilesPatientsController.getPatient` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:433`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3700,16 +3697,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /profiles/patients/{profileId}` la atiende `ProfilesPatientsController.getPatient` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:425). Exige sesión con alguno de los roles SECURITY_ADMIN, CLINICIAN, PRACTITIONER. Delega en `ClinicalPatientHistoryAccessPort.assertCanReadHistory`, `ProfilesPatientsService.getPatientById`. Lee profiles.patient_profiles, profiles.persons, profiles.related_persons.
+`GET /profiles/patients/{profileId}` la atiende `ProfilesPatientsController.getPatient` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:433). Exige sesión con alguno de los roles SECURITY_ADMIN, CLINICIAN, PRACTITIONER. Delega en `ClinicalPatientHistoryAccessPort.assertCanReadHistory`, `ProfilesPatientsService.getPatientById`. Lee profiles.patient_profiles, profiles.persons, profiles.related_persons.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, CLINICIAN, PRACTITIONER | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:425` |
+| ROL | Alguno de: SECURITY_ADMIN, CLINICIAN, PRACTITIONER | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:433` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:425` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:433` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -3780,7 +3777,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/frontend-read-flows.int-spec.ts:84` |
-| CONTROLADOR | `src/modules/profiles/presentation/controllers/profiles-patients.controller.spec.ts:58` |
+| CONTROLADOR | `src/modules/profiles/presentation/controllers/profiles-patients.controller.spec.ts:59` |
 
 ### Flujos
 
@@ -3795,7 +3792,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPatientsController.addIdentityLink` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:479`
+- **Implementación:** `ProfilesPatientsController.addIdentityLink` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:490`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3805,17 +3802,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /profiles/patients/{profileId}/identity-links` la atiende `ProfilesPatientsController.addIdentityLink` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:479). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `AddIdentityLinkDto` (6 campos, 3 obligatorios). Delega en `ProfilesPatientsService.addIdentityLink`. Crea filas en profiles.patient_identity_links. Actualiza profiles.patient_identity_links, profiles.patient_profiles. Lee profiles.patient_identity_links, profiles.patient_profiles.
+`POST /profiles/patients/{profileId}/identity-links` la atiende `ProfilesPatientsController.addIdentityLink` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:490). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `AddIdentityLinkDto` (6 campos, 3 obligatorios). Delega en `ProfilesPatientsService.addIdentityLink`. Crea filas en profiles.patient_identity_links. Actualiza profiles.patient_identity_links, profiles.patient_profiles. Lee profiles.patient_identity_links, profiles.patient_profiles.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:479` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:490` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:479` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:490` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3897,7 +3894,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/profiles/presentation/controllers/profiles-patients.controller.spec.ts:96` |
+| CONTROLADOR | `src/modules/profiles/presentation/controllers/profiles-patients.controller.spec.ts:133` |
 
 ### Flujos
 
@@ -3912,7 +3909,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPatientsController.grantPortalProxy` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:551`
+- **Implementación:** `ProfilesPatientsController.grantPortalProxy` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:563`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3922,17 +3919,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /profiles/patients/{profileId}/portal-proxies` la atiende `ProfilesPatientsController.grantPortalProxy` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:551). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `GrantPortalProxyDto` (6 campos, 3 obligatorios). Delega en `ProfilesPatientsService.grantPortalProxy`. Crea filas en profiles.patient_portal_proxies. Actualiza profiles.patient_portal_proxies. Lee profiles.patient_profiles, profiles.related_persons.
+`POST /profiles/patients/{profileId}/portal-proxies` la atiende `ProfilesPatientsController.grantPortalProxy` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:563). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `GrantPortalProxyDto` (6 campos, 3 obligatorios). Delega en `ProfilesPatientsService.grantPortalProxy`. Crea filas en profiles.patient_portal_proxies. Actualiza profiles.patient_portal_proxies. Lee profiles.patient_profiles, profiles.related_persons.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:551` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:563` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:551` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:563` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4015,7 +4012,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/profiles/presentation/controllers/profiles-patients.controller.spec.ts:139` |
+| CONTROLADOR | `src/modules/profiles/presentation/controllers/profiles-patients.controller.spec.ts:176` |
 
 ### Flujos
 
@@ -4030,7 +4027,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPatientsController.addRelatedPerson` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:532`
+- **Implementación:** `ProfilesPatientsController.addRelatedPerson` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:543`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -4040,17 +4037,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /profiles/patients/{profileId}/related-persons` la atiende `ProfilesPatientsController.addRelatedPerson` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:532). Exige sesión; el controlador no declara roles. Valida el cuerpo como `AddRelatedPersonDto` (6 campos, 0 obligatorios). Delega en `ProfilesPatientsService.addRelatedPerson`. Crea filas en profiles.persons, profiles.related_persons. Lee profiles.patient_profiles, profiles.person_account_links, profiles.persons, profiles.related_persons.
+`POST /profiles/patients/{profileId}/related-persons` la atiende `ProfilesPatientsController.addRelatedPerson` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:543). Exige sesión; el controlador no declara roles. Valida el cuerpo como `AddRelatedPersonDto` (6 campos, 0 obligatorios). Delega en `ProfilesPatientsService.addRelatedPerson`. Crea filas en profiles.persons, profiles.related_persons. Lee profiles.patient_profiles, profiles.person_account_links, profiles.persons, profiles.related_persons.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:532` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:543` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:532` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:543` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4132,7 +4129,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/frontend-read-flows.int-spec.ts:108` |
-| CONTROLADOR | `src/modules/profiles/presentation/controllers/profiles-patients.controller.spec.ts:124` |
+| CONTROLADOR | `src/modules/profiles/presentation/controllers/profiles-patients.controller.spec.ts:161` |
 
 ### Flujos
 
@@ -4147,7 +4144,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPatientsController.getOwnProfile` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:121`
+- **Implementación:** `ProfilesPatientsController.getOwnProfile` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:127`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -4157,14 +4154,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /profiles/patients/me` la atiende `ProfilesPatientsController.getOwnProfile` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:121). Exige sesión; el controlador no declara roles. Delega en `ProfilesPatientsService.getOwnProfile`. Lee common.addresses, common.contact_points, common.identifiers, insurance.insurance_carriers, insurance.insurance_plan_benefits, insurance.insurance_plans, insurance.insurance_products, insurance.patient_coverages y 6 más.
+`GET /profiles/patients/me` la atiende `ProfilesPatientsController.getOwnProfile` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:127). Exige sesión; el controlador no declara roles. Delega en `ProfilesPatientsService.getOwnProfile`. Lee common.addresses, common.contact_points, common.identifiers, insurance.insurance_carriers, insurance.insurance_plan_benefits, insurance.insurance_plans, insurance.insurance_products, insurance.patient_coverages y 6 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:121` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:127` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4297,8 +4294,8 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 |---|---|
 | INTEGRACION | `test/integration/patient-coverage-copays.int-spec.ts:351` |
 | INTEGRACION | `test/integration/patient-own-profile.int-spec.ts:75` |
-| INTEGRACION | `test/integration/quitar-punto-del-mapa.int-spec.ts:147` |
-| CONTROLADOR | `src/modules/profiles/presentation/controllers/profiles-patients.controller.spec.ts:161` |
+| INTEGRACION | `test/integration/quitar-punto-del-mapa.int-spec.ts:150` |
+| CONTROLADOR | `src/modules/profiles/presentation/controllers/profiles-patients.controller.spec.ts:198` |
 
 ### Flujos
 
@@ -4313,7 +4310,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPatientsController.updateOwnProfile` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:147`
+- **Implementación:** `ProfilesPatientsController.updateOwnProfile` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:153`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -4323,16 +4320,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /profiles/patients/me` la atiende `ProfilesPatientsController.updateOwnProfile` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:147). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateOwnPatientProfileDto` (29 campos, 0 obligatorios). Delega en `ProfilesPatientsService.updateOwnProfile`. Crea filas en common.contact_points, common.identifiers. Actualiza common.addresses, common.contact_points, profiles.persons, profiles.related_persons. Lee common.addresses, common.contact_points, common.identifiers, insurance.insurance_carriers, insurance.insurance_plan_benefits, insurance.insurance_plans, insurance.insurance_products, insurance.patient_coverages y 6 más.
+`PATCH /profiles/patients/me` la atiende `ProfilesPatientsController.updateOwnProfile` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:153). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateOwnPatientProfileDto` (29 campos, 0 obligatorios). Delega en `ProfilesPatientsService.updateOwnProfile`. Crea filas en common.contact_points, common.identifiers. Actualiza common.addresses, common.contact_points, profiles.persons, profiles.related_persons. Lee common.addresses, common.contact_points, common.identifiers, insurance.insurance_carriers, insurance.insurance_plan_benefits, insurance.insurance_plans, insurance.insurance_products, insurance.patient_coverages y 6 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:147` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:153` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4545,8 +4542,8 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/patient-own-profile.int-spec.ts:108` |
-| INTEGRACION | `test/integration/quitar-punto-del-mapa.int-spec.ts:103` |
-| CONTROLADOR | `src/modules/profiles/presentation/controllers/profiles-patients.controller.spec.ts:172` |
+| INTEGRACION | `test/integration/quitar-punto-del-mapa.int-spec.ts:106` |
+| CONTROLADOR | `src/modules/profiles/presentation/controllers/profiles-patients.controller.spec.ts:209` |
 
 ### Flujos
 
@@ -4561,7 +4558,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PatientAddressBookController.list` — `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:47`
+- **Implementación:** `PatientAddressBookController.list` — `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:51`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -4571,14 +4568,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /profiles/patients/me/addresses` la atiende `PatientAddressBookController.list` (src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:47). Exige sesión; el controlador no declara roles. Delega en `PatientAddressBookService.list`. Lee common.addresses, profiles.patient_profiles, profiles.person_account_links.
+`GET /profiles/patients/me/addresses` la atiende `PatientAddressBookController.list` (src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:51). Exige sesión; el controlador no declara roles. Delega en `PatientAddressBookService.list`. Lee common.addresses, profiles.patient_profiles, profiles.person_account_links.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:47` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:51` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4640,7 +4637,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PatientAddressBookController.create` — `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:57`
+- **Implementación:** `PatientAddressBookController.create` — `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:62`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -4650,16 +4647,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /profiles/patients/me/addresses` la atiende `PatientAddressBookController.create` (src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:57). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreatePatientAddressDto` (7 campos, 2 obligatorios). Delega en `PatientAddressBookService.create`. Lee common.addresses, profiles.patient_profiles, profiles.person_account_links.
+`POST /profiles/patients/me/addresses` la atiende `PatientAddressBookController.create` (src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:62). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreatePatientAddressDto` (7 campos, 2 obligatorios). Delega en `PatientAddressBookService.create`. Lee common.addresses, profiles.patient_profiles, profiles.person_account_links.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:57` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:62` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4755,7 +4752,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PatientAddressBookController.remove` — `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:86`
+- **Implementación:** `PatientAddressBookController.remove` — `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:93`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -4765,16 +4762,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`DELETE /profiles/patients/me/addresses/{id}` la atiende `PatientAddressBookController.remove` (src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:86). Exige sesión; el controlador no declara roles. Delega en `PatientAddressBookService.remove`. Actualiza common.addresses. Lee common.addresses, profiles.patient_profiles, profiles.person_account_links.
+`DELETE /profiles/patients/me/addresses/{id}` la atiende `PatientAddressBookController.remove` (src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:93). Exige sesión; el controlador no declara roles. Delega en `PatientAddressBookService.remove`. Actualiza common.addresses. Lee common.addresses, profiles.patient_profiles, profiles.person_account_links.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:86` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:93` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:86` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:93` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -4843,7 +4840,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PatientAddressBookController.update` — `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:68`
+- **Implementación:** `PatientAddressBookController.update` — `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:74`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -4853,17 +4850,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /profiles/patients/me/addresses/{id}` la atiende `PatientAddressBookController.update` (src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:68). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdatePatientAddressDto` (6 campos, 0 obligatorios). Delega en `PatientAddressBookService.update`. Actualiza common.addresses. Lee common.addresses, profiles.patient_profiles, profiles.person_account_links.
+`PATCH /profiles/patients/me/addresses/{id}` la atiende `PatientAddressBookController.update` (src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:74). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdatePatientAddressDto` (6 campos, 0 obligatorios). Delega en `PatientAddressBookService.update`. Actualiza common.addresses. Lee common.addresses, profiles.patient_profiles, profiles.person_account_links.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:68` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:74` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:68` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:74` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4962,7 +4959,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PatientAddressBookController.prefer` — `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:101`
+- **Implementación:** `PatientAddressBookController.prefer` — `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:109`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -4972,16 +4969,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PUT /profiles/patients/me/addresses/{id}/preferred` la atiende `PatientAddressBookController.prefer` (src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:101). Exige sesión; el controlador no declara roles. Delega en `PatientAddressBookService.prefer`. Lee common.addresses, profiles.patient_profiles, profiles.person_account_links.
+`PUT /profiles/patients/me/addresses/{id}/preferred` la atiende `PatientAddressBookController.prefer` (src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:109). Exige sesión; el controlador no declara roles. Delega en `PatientAddressBookService.prefer`. Lee common.addresses, profiles.patient_profiles, profiles.person_account_links.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:101` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:109` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:101` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:109` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -5147,7 +5144,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:73` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 10, ttl: 60_000 } }) | `src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:73` |
 
@@ -5258,7 +5255,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:159` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:159` |
-| CUERPO | application/json; máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json; máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -5516,7 +5513,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPatientsController.getOwnDependents` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:223`
+- **Implementación:** `ProfilesPatientsController.getOwnDependents` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:230`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -5526,14 +5523,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /profiles/patients/me/dependents` la atiende `ProfilesPatientsController.getOwnDependents` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:223). Exige sesión; el controlador no declara roles. Delega en `ProfilesPatientsService.getOwnDependents`. Lee common.identifiers, profiles.patient_portal_proxies, profiles.patient_profiles, profiles.persons, profiles.related_persons.
+`GET /profiles/patients/me/dependents` la atiende `ProfilesPatientsController.getOwnDependents` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:230). Exige sesión; el controlador no declara roles. Delega en `ProfilesPatientsService.getOwnDependents`. Lee common.identifiers, profiles.patient_portal_proxies, profiles.patient_profiles, profiles.persons, profiles.related_persons.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:223` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:230` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -5585,7 +5582,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 |---|---|
 | INTEGRACION | `test/integration/dependent-link-requests.int-spec.ts:123` |
 | INTEGRACION | `test/integration/fx16-dependientes-y-tutor-legal.int-spec.ts:161` |
-| CONTROLADOR | `src/modules/profiles/presentation/controllers/profiles-patients.controller.spec.ts:205` |
+| CONTROLADOR | `src/modules/profiles/presentation/controllers/profiles-patients.controller.spec.ts:242` |
 
 ### Flujos
 
@@ -5600,7 +5597,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPatientsController.registerOwnDependent` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:250`
+- **Implementación:** `ProfilesPatientsController.registerOwnDependent` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:257`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -5610,16 +5607,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /profiles/patients/me/dependents` la atiende `ProfilesPatientsController.registerOwnDependent` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:250). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateDependentDto` (9 campos, 4 obligatorios). Delega en `ProfilesPatientsService.registerOwnDependent`. Crea filas en common.identifiers, profiles.patient_portal_proxies, profiles.patient_profiles, profiles.person_profiles, profiles.persons, profiles.related_persons. Lee common.identifiers, profiles.patient_profiles, profiles.person_account_links, profiles.persons, terminology.value_set_members, terminology.value_set_versions, terminology.value_sets.
+`POST /profiles/patients/me/dependents` la atiende `ProfilesPatientsController.registerOwnDependent` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:257). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateDependentDto` (9 campos, 4 obligatorios). Delega en `ProfilesPatientsService.registerOwnDependent`. Crea filas en common.identifiers, profiles.patient_portal_proxies, profiles.patient_profiles, profiles.person_profiles, profiles.persons, profiles.related_persons. Lee common.identifiers, profiles.patient_profiles, profiles.person_account_links, profiles.persons, terminology.value_set_members, terminology.value_set_versions, terminology.value_sets.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:250` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:257` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -5721,7 +5718,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/fx16-dependientes-y-tutor-legal.int-spec.ts:172` |
-| CONTROLADOR | `src/modules/profiles/presentation/controllers/profiles-patients.controller.spec.ts:218` |
+| CONTROLADOR | `src/modules/profiles/presentation/controllers/profiles-patients.controller.spec.ts:255` |
 
 ### Flujos
 
@@ -5736,7 +5733,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPatientsController.removeOwnPhoto` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:201`
+- **Implementación:** `ProfilesPatientsController.removeOwnPhoto` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:207`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -5746,14 +5743,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`DELETE /profiles/patients/me/photo` la atiende `ProfilesPatientsController.removeOwnPhoto` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:201). Exige sesión; el controlador no declara roles. Delega en `ProfilesPatientsService.removeOwnPhoto`. Lee common.addresses, common.contact_points, common.identifiers, insurance.insurance_carriers, insurance.insurance_plan_benefits, insurance.insurance_plans, insurance.insurance_products, insurance.patient_coverages y 6 más.
+`DELETE /profiles/patients/me/photo` la atiende `ProfilesPatientsController.removeOwnPhoto` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:207). Exige sesión; el controlador no declara roles. Delega en `ProfilesPatientsService.removeOwnPhoto`. Lee common.addresses, common.contact_points, common.identifiers, insurance.insurance_carriers, insurance.insurance_plan_benefits, insurance.insurance_plans, insurance.insurance_products, insurance.patient_coverages y 6 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:201` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:207` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -5885,7 +5882,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/patient-own-profile.int-spec.ts:372` |
-| CONTROLADOR | `src/modules/profiles/presentation/controllers/profiles-patients.controller.spec.ts:195` |
+| CONTROLADOR | `src/modules/profiles/presentation/controllers/profiles-patients.controller.spec.ts:232` |
 
 ### Flujos
 
@@ -5900,7 +5897,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPatientsController.setOwnPhoto` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:179`
+- **Implementación:** `ProfilesPatientsController.setOwnPhoto` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:185`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -5910,16 +5907,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PUT /profiles/patients/me/photo` la atiende `ProfilesPatientsController.setOwnPhoto` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:179). Exige sesión; el controlador no declara roles. Valida el cuerpo como `SetOwnPatientPhotoDto` (1 campo, 1 obligatorio). Delega en `ProfilesPatientsService.setOwnPhoto`. Lee common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, insurance.insurance_carriers, insurance.insurance_plan_benefits, insurance.insurance_plans y 8 más.
+`PUT /profiles/patients/me/photo` la atiende `ProfilesPatientsController.setOwnPhoto` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:185). Exige sesión; el controlador no declara roles. Valida el cuerpo como `SetOwnPatientPhotoDto` (1 campo, 1 obligatorio). Delega en `ProfilesPatientsService.setOwnPhoto`. Lee common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, insurance.insurance_carriers, insurance.insurance_plan_benefits, insurance.insurance_plans y 8 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:179` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:185` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -6074,7 +6071,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/patient-own-profile.int-spec.ts:359` |
-| CONTROLADOR | `src/modules/profiles/presentation/controllers/profiles-patients.controller.spec.ts:185` |
+| CONTROLADOR | `src/modules/profiles/presentation/controllers/profiles-patients.controller.spec.ts:222` |
 
 ### Flujos
 
@@ -6089,7 +6086,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PrimaryPractitionerController.removeOwn` — `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:67`
+- **Implementación:** `PrimaryPractitionerController.removeOwn` — `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:70`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -6099,14 +6096,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`DELETE /profiles/patients/me/primary-practitioner` la atiende `PrimaryPractitionerController.removeOwn` (src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:67). Exige sesión; el controlador no declara roles. Delega en `PrimaryPractitionerService.removeOwn`. Actualiza profiles.patient_primary_practitioners. Lee profiles.health_practitioner_profiles, profiles.patient_primary_practitioners, profiles.patient_profiles, profiles.person_account_links.
+`DELETE /profiles/patients/me/primary-practitioner` la atiende `PrimaryPractitionerController.removeOwn` (src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:70). Exige sesión; el controlador no declara roles. Delega en `PrimaryPractitionerService.removeOwn`. Actualiza profiles.patient_primary_practitioners. Lee profiles.health_practitioner_profiles, profiles.patient_primary_practitioners, profiles.patient_profiles, profiles.person_account_links.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:67` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:70` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -6162,7 +6159,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PrimaryPractitionerController.getOwn` — `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:38`
+- **Implementación:** `PrimaryPractitionerController.getOwn` — `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:39`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -6172,14 +6169,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /profiles/patients/me/primary-practitioner` la atiende `PrimaryPractitionerController.getOwn` (src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:38). Exige sesión; el controlador no declara roles. Delega en `PrimaryPractitionerService.getOwn`. Lee profiles.health_practitioner_profiles, profiles.patient_primary_practitioners, profiles.patient_profiles, profiles.person_account_links.
+`GET /profiles/patients/me/primary-practitioner` la atiende `PrimaryPractitionerController.getOwn` (src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:39). Exige sesión; el controlador no declara roles. Delega en `PrimaryPractitionerService.getOwn`. Lee profiles.health_practitioner_profiles, profiles.patient_primary_practitioners, profiles.patient_profiles, profiles.person_account_links.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:38` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:39` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -6236,7 +6233,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PrimaryPractitionerController.setOwn` — `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:48`
+- **Implementación:** `PrimaryPractitionerController.setOwn` — `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:50`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -6246,16 +6243,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PUT /profiles/patients/me/primary-practitioner` la atiende `PrimaryPractitionerController.setOwn` (src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:48). Exige sesión; el controlador no declara roles. Valida el cuerpo como `SetPrimaryPractitionerDto` (1 campo, 1 obligatorio). Delega en `PrimaryPractitionerService.setOwn`. Crea filas en profiles.patient_primary_practitioners. Actualiza profiles.patient_primary_practitioners. Lee profiles.health_practitioner_profiles, profiles.patient_primary_practitioners, profiles.patient_profiles, profiles.person_account_links.
+`PUT /profiles/patients/me/primary-practitioner` la atiende `PrimaryPractitionerController.setOwn` (src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:50). Exige sesión; el controlador no declara roles. Valida el cuerpo como `SetPrimaryPractitionerDto` (1 campo, 1 obligatorio). Delega en `PrimaryPractitionerService.setOwn`. Crea filas en profiles.patient_primary_practitioners. Actualiza profiles.patient_primary_practitioners. Lee profiles.health_practitioner_profiles, profiles.patient_primary_practitioners, profiles.patient_profiles, profiles.person_account_links.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:48` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:50` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -6335,7 +6332,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPatientsController.getOwnSummary` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:98`
+- **Implementación:** `ProfilesPatientsController.getOwnSummary` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:103`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -6345,14 +6342,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /profiles/patients/me/summary` la atiende `ProfilesPatientsController.getOwnSummary` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:98). Exige sesión; el controlador no declara roles. Delega en `ProfilesPatientsService.getOwnSummary`. Lee profiles.patient_profiles, profiles.person_account_links, profiles.persons.
+`GET /profiles/patients/me/summary` la atiende `ProfilesPatientsController.getOwnSummary` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:103). Exige sesión; el controlador no declara roles. Delega en `ProfilesPatientsService.getOwnSummary`. Lee profiles.patient_profiles, profiles.person_account_links, profiles.persons.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:98` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:103` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -6397,7 +6394,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/identity-verification-self-service.int-spec.ts:85` |
+| INTEGRACION | `test/integration/identity-verification-self-service.int-spec.ts:100` |
 
 ### Flujos
 
@@ -6412,7 +6409,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPatientsController.mergePatients` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:497`
+- **Implementación:** `ProfilesPatientsController.mergePatients` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:508`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -6422,16 +6419,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /profiles/patients/merge` la atiende `ProfilesPatientsController.mergePatients` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:497). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `MergePatientsDto` (3 campos, 2 obligatorios). Delega en `ProfilesPatientsService.mergePatients`. Crea filas en profiles.patient_merge_events. Actualiza profiles.patient_identity_links, profiles.patient_portal_proxies, profiles.patient_profiles, profiles.persons, profiles.related_persons. Lee profiles.patient_profiles, profiles.persons.
+`POST /profiles/patients/merge` la atiende `ProfilesPatientsController.mergePatients` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:508). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `MergePatientsDto` (3 campos, 2 obligatorios). Delega en `ProfilesPatientsService.mergePatients`. Crea filas en profiles.patient_merge_events. Actualiza profiles.patient_identity_links, profiles.patient_portal_proxies, profiles.patient_profiles, profiles.persons, profiles.related_persons. Lee profiles.patient_profiles, profiles.persons.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:497` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:508` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -6507,7 +6504,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/profiles/presentation/controllers/profiles-patients.controller.spec.ts:107` |
+| CONTROLADOR | `src/modules/profiles/presentation/controllers/profiles-patients.controller.spec.ts:144` |
 
 ### Flujos
 
@@ -6522,7 +6519,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPatientsController.listMergeEvents` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:406`
+- **Implementación:** `ProfilesPatientsController.listMergeEvents` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:414`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -6532,14 +6529,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /profiles/patients/merge-events` la atiende `ProfilesPatientsController.listMergeEvents` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:406). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `ProfilesPatientsService.listMergeEvents`. Lee profiles.patient_merge_events.
+`GET /profiles/patients/merge-events` la atiende `ProfilesPatientsController.listMergeEvents` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:414). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `ProfilesPatientsService.listMergeEvents`. Lee profiles.patient_merge_events.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:406` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:414` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -6602,7 +6599,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPatientsController.reverseMerge` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:514`
+- **Implementación:** `ProfilesPatientsController.reverseMerge` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:525`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -6612,17 +6609,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /profiles/patients/merge/{eventId}/reverse` la atiende `ProfilesPatientsController.reverseMerge` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:514). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ReverseMergeDto` (1 campo, 0 obligatorios). Delega en `ProfilesPatientsService.reverseMerge`. Crea filas en profiles.patient_merge_events. Actualiza profiles.patient_profiles, profiles.persons. Lee profiles.patient_merge_events, profiles.patient_profiles, profiles.persons.
+`POST /profiles/patients/merge/{eventId}/reverse` la atiende `ProfilesPatientsController.reverseMerge` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:525). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ReverseMergeDto` (1 campo, 0 obligatorios). Delega en `ProfilesPatientsService.reverseMerge`. Crea filas en profiles.patient_merge_events. Actualiza profiles.patient_profiles, profiles.persons. Lee profiles.patient_merge_events, profiles.patient_profiles, profiles.persons.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:514` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:525` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: eventId | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:514` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: eventId | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:525` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -6695,7 +6692,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/profiles/presentation/controllers/profiles-patients.controller.spec.ts:113` |
+| CONTROLADOR | `src/modules/profiles/presentation/controllers/profiles-patients.controller.spec.ts:150` |
 
 ### Flujos
 
@@ -6710,7 +6707,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPatientsController.searchPatientsByBody` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:378`
+- **Implementación:** `ProfilesPatientsController.searchPatientsByBody` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:386`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -6720,16 +6717,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 
 ### Cómo se atiende (sistema)
 
-`POST /profiles/patients/search` la atiende `ProfilesPatientsController.searchPatientsByBody` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:378). Exige sesión con alguno de los roles SECURITY_ADMIN, SUPERADMIN, CLINICIAN, PRACTITIONER. Valida el cuerpo como `SearchPatientsQueryDto` (5 campos, 0 obligatorios). Lee common.identifiers, profiles.patient_profiles, profiles.persons, terminology.value_set_members, terminology.value_set_versions, terminology.value_sets.
+`POST /profiles/patients/search` la atiende `ProfilesPatientsController.searchPatientsByBody` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:386). Exige sesión con alguno de los roles SECURITY_ADMIN, SUPERADMIN, CLINICIAN, PRACTITIONER. Valida el cuerpo como `SearchPatientsQueryDto` (5 campos, 0 obligatorios). Lee common.identifiers, profiles.patient_profiles, profiles.persons, terminology.value_set_members, terminology.value_set_versions, terminology.value_sets.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, SUPERADMIN, CLINICIAN, PRACTITIONER | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:378` |
+| ROL | Alguno de: SECURITY_ADMIN, SUPERADMIN, CLINICIAN, PRACTITIONER | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:386` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -6807,7 +6804,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/profiles/presentation/controllers/profiles-patients.controller.spec.ts:254` |
+| CONTROLADOR | `src/modules/profiles/presentation/controllers/profiles-patients.controller.spec.ts:291` |
 
 ### Flujos
 
@@ -6822,7 +6819,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPatientsController.linkAccount` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:461`
+- **Implementación:** `ProfilesPatientsController.linkAccount` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:472`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -6832,17 +6829,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /profiles/persons/{personId}/account-links` la atiende `ProfilesPatientsController.linkAccount` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:461). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `LinkAccountDto` (2 campos, 1 obligatorio). Delega en `ProfilesPatientsService.linkAccount`. Crea filas en profiles.person_account_links. Actualiza profiles.person_account_links. Lee profiles.persons.
+`POST /profiles/persons/{personId}/account-links` la atiende `ProfilesPatientsController.linkAccount` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:472). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `LinkAccountDto` (2 campos, 1 obligatorio). Delega en `ProfilesPatientsService.linkAccount`. Crea filas en profiles.person_account_links. Actualiza profiles.person_account_links. Lee profiles.persons.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:461` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:472` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: personId | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:461` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: personId | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:472` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -6914,7 +6911,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/profiles/presentation/controllers/profiles-patients.controller.spec.ts:81` |
+| CONTROLADOR | `src/modules/profiles/presentation/controllers/profiles-patients.controller.spec.ts:118` |
 
 ### Flujos
 
@@ -6929,7 +6926,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPatientsController.decease` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:569`
+- **Implementación:** `ProfilesPatientsController.decease` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:581`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -6939,17 +6936,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /profiles/persons/{personId}/decease` la atiende `ProfilesPatientsController.decease` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:569). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `DeceasePersonDto` (2 campos, 0 obligatorios). Delega en `ProfilesPatientsService.decease`. Actualiza profiles.patient_portal_proxies, profiles.person_account_links, profiles.persons. Lee profiles.persons.
+`POST /profiles/persons/{personId}/decease` la atiende `ProfilesPatientsController.decease` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:581). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `DeceasePersonDto` (2 campos, 0 obligatorios). Delega en `ProfilesPatientsService.decease`. Actualiza profiles.patient_portal_proxies, profiles.person_account_links, profiles.persons. Lee profiles.persons.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:569` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:581` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: personId | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:569` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: personId | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:581` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -7021,7 +7018,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/profiles/presentation/controllers/profiles-patients.controller.spec.ts:149` |
+| CONTROLADOR | `src/modules/profiles/presentation/controllers/profiles-patients.controller.spec.ts:186` |
 
 ### Flujos
 
@@ -7036,7 +7033,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPractitionersController.listPractitioners` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:148`
+- **Implementación:** `ProfilesPractitionersController.listPractitioners` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:153`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -7046,14 +7043,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /profiles/practitioners` la atiende `ProfilesPractitionersController.listPractitioners` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:148). Exige sesión; el controlador no declara roles. Delega en `ProfilesPractitionersService.listPractitioners`. Lee chart.clinical_note_headers, chart.document_records, clinical.encounters, clinical.medication_requests, community.public_profiles, community.service_reviews, profiles.health_practitioner_profiles, profiles.person_account_links y 4 más.
+`GET /profiles/practitioners` la atiende `ProfilesPractitionersController.listPractitioners` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:153). Exige sesión; el controlador no declara roles. Delega en `ProfilesPractitionersService.listPractitioners`. Lee chart.clinical_note_headers, chart.document_records, clinical.encounters, clinical.medication_requests, community.public_profiles, community.service_reviews, profiles.health_practitioner_profiles, profiles.person_account_links y 4 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:148` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:153` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -7061,14 +7058,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `chart.clinical_note_headers` | LEE | LEE | POR_SQL | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerContextAdapter.directoryStats | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:81` |
-| `chart.document_records` | LEE | LEE | POR_SQL | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerContextAdapter.directoryStats | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:81` |
-| `clinical.encounters` | LEE | LEE | POR_SQL | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerContextAdapter.directoryStats | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:81` |
-| `clinical.medication_requests` | LEE | LEE | POR_SQL | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerContextAdapter.directoryStats | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:81` |
-| `community.public_profiles` | LEE | LEE | POR_SQL | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerContextAdapter.directoryStats | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:97` |
-| `community.service_reviews` | LEE | LEE | POR_SQL | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerContextAdapter.directoryStats | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:97` |
+| `chart.clinical_note_headers` | LEE | LEE | POR_SQL | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerContextAdapter.directoryStats | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:89` |
+| `chart.document_records` | LEE | LEE | POR_SQL | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerContextAdapter.directoryStats | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:89` |
+| `clinical.encounters` | LEE | LEE | POR_SQL | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerContextAdapter.directoryStats | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:89` |
+| `clinical.medication_requests` | LEE | LEE | POR_SQL | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerContextAdapter.directoryStats | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:89` |
+| `community.public_profiles` | LEE | LEE | POR_SQL | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerContextAdapter.directoryStats | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:105` |
+| `community.service_reviews` | LEE | LEE | POR_SQL | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerContextAdapter.directoryStats | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:105` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → HealthPractitionerProfilesRepository.findVisibleProfileIds | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:144` |
-| `profiles.person_account_links` | LEE | LEE | POR_SQL | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerContextAdapter.directoryStats | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:81` |
+| `profiles.person_account_links` | LEE | LEE | POR_SQL | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerContextAdapter.directoryStats | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:89` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PersonsRepository.findByIds | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:113` |
 | `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerAdmissionsReadService.verificationOf → PractitionerAdmissionsRepository.findCurrentByPractitioners | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:166` |
 | `profiles.practitioner_affiliations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerAffiliationsRepository.findByPractitioners | `src/modules/profiles/infrastructure/repositories/practitioner-affiliations.repository.ts:100` |
@@ -7135,7 +7132,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/verification-bypass.int-spec.ts:48` |
+| INTEGRACION | `test/integration/verification-bypass.int-spec.ts:52` |
 
 ### Flujos
 
@@ -7150,7 +7147,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** ALTO — Borra filas
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPractitionersController.onboardPractitioner` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:353`
+- **Implementación:** `ProfilesPractitionersController.onboardPractitioner` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:360`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -7160,16 +7157,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /profiles/practitioners` la atiende `ProfilesPractitionersController.onboardPractitioner` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:353). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreatePractitionerDto` (17 campos, 1 obligatorio). Delega en `ProfilesPractitionersService.onboardPractitioner`. Crea filas en profiles.health_practitioner_profiles, profiles.jurisdiction_authorizations, profiles.person_profiles, profiles.persons, profiles.practitioner_admission_events, profiles.practitioner_admission_reviews, profiles.practitioner_admissions, profiles.practitioner_languages y 2 más. Actualiza profiles.jurisdiction_authorizations, profiles.practitioner_admission_reviews, profiles.practitioner_specialties, profiles.professional_credentials. Borra de profiles.practitioner_admission_reviews. Lee common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, practice.practice_sites, practice.practitioner_role_assignments, profiles.admission_requirements y 12 más.
+`POST /profiles/practitioners` la atiende `ProfilesPractitionersController.onboardPractitioner` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:360). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreatePractitionerDto` (17 campos, 1 obligatorio). Delega en `ProfilesPractitionersService.onboardPractitioner`. Crea filas en profiles.health_practitioner_profiles, profiles.jurisdiction_authorizations, profiles.person_profiles, profiles.persons, profiles.practitioner_admission_events, profiles.practitioner_admission_reviews, profiles.practitioner_admissions, profiles.practitioner_languages y 2 más. Actualiza profiles.jurisdiction_authorizations, profiles.practitioner_admission_reviews, profiles.practitioner_specialties, profiles.professional_credentials. Borra de profiles.practitioner_admission_reviews. Lee common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, practice.practice_sites, practice.practitioner_role_assignments, profiles.admission_requirements y 12 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:353` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:360` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -7320,7 +7317,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** ALTO — Borra filas; Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPractitionersController.updatePractitionerProfile` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:264`
+- **Implementación:** `ProfilesPractitionersController.updatePractitionerProfile` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:269`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -7330,17 +7327,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /profiles/practitioners/{profileId}` la atiende `ProfilesPractitionersController.updatePractitionerProfile` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:264). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateOwnPractitionerProfileDto` (37 campos, 0 obligatorios). Delega en `ProfilesPractitionersService.updatePractitionerProfile`. Crea filas en common.contact_points, common.identifiers, profiles.practitioner_languages. Actualiza common.contact_points, profiles.health_practitioner_profiles, profiles.persons, profiles.practitioner_languages. Borra de profiles.practitioner_languages. Lee chart.clinical_note_headers, chart.document_records, clinical.encounters, clinical.medication_requests, common.addresses, common.contact_points, common.identifiers, profiles.health_practitioner_profiles y 11 más.
+`PATCH /profiles/practitioners/{profileId}` la atiende `ProfilesPractitionersController.updatePractitionerProfile` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:269). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateOwnPractitionerProfileDto` (37 campos, 0 obligatorios). Delega en `ProfilesPractitionersService.updatePractitionerProfile`. Crea filas en common.contact_points, common.identifiers, profiles.practitioner_languages. Actualiza common.contact_points, profiles.health_practitioner_profiles, profiles.persons, profiles.practitioner_languages. Borra de profiles.practitioner_languages. Lee chart.clinical_note_headers, chart.document_records, clinical.encounters, clinical.medication_requests, common.addresses, common.contact_points, common.identifiers, profiles.health_practitioner_profiles y 11 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:264` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:269` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:264` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:269` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -7348,26 +7345,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:47` |
-| `chart.document_records` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:48` |
-| `clinical.encounters` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:45` |
-| `clinical.medication_requests` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:46` |
+| `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:55` |
+| `chart.document_records` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:56` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:53` |
+| `clinical.medication_requests` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:54` |
 | `common.addresses` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentAddress → AddressesRepository.findCurrentByOwnerAndUse | `src/modules/common/repositories/addresses.repository.ts:95` |
 | `common.contact_points` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceContact → PersonRecordsAdapter.closeContact → ContactPointsRepository.closeCurrent | `src/modules/common/repositories/contact-points.repository.ts:192` |
 | `common.contact_points` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceContact → PersonRecordsAdapter.createContact → ContactPointsRepository.create | `src/modules/common/repositories/contact-points.repository.ts:198` |
 | `common.contact_points` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → PersonRecordsAdapter.findAllCurrentContacts → ContactPointsRepository.findAllCurrentByOwner | `src/modules/common/repositories/contact-points.repository.ts:71` |
 | `common.identifiers` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.fixNationalId → PersonRecordsAdapter.createIdentifier → IdentifiersRepository.create | `src/modules/common/repositories/identifiers.repository.ts:131` |
 | `common.identifiers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.fixNationalId → PersonRecordsAdapter.findCurrentIdentifiers | `src/modules/profiles/infrastructure/adapters/person-records.adapter.ts:129` |
-| `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1377` |
+| `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1394` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfileOwnershipService.assertOwnsPractitionerProfile → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → JurisdictionAuthorizationsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:107` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
-| `profiles.persons` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1404` |
+| `profiles.persons` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1421` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
 | `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → PractitionerAdmissionsReadService.verificationOf → PractitionerAdmissionsRepository.findCurrentByPractitioners | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:166` |
 | `profiles.practitioner_affiliations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → PractitionerAffiliationsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-affiliations.repository.ts:69` |
 | `profiles.practitioner_languages` | BORRA | BORRA | POR_TIPO | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceLanguages → PractitionerLanguagesRepository.remove | `src/modules/profiles/infrastructure/repositories/practitioner-languages.repository.ts:84` |
-| `profiles.practitioner_languages` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceLanguages | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1593` |
+| `profiles.practitioner_languages` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceLanguages | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1610` |
 | `profiles.practitioner_languages` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceLanguages → PractitionerLanguagesRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-languages.repository.ts:62` |
 | `profiles.practitioner_languages` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → PractitionerLanguagesRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-languages.repository.ts:55` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → PractitionerSpecialtiesRepository.findAllByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:143` |
@@ -7632,7 +7629,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPractitionersController.addAffiliationFor` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:624`
+- **Implementación:** `ProfilesPractitionersController.addAffiliationFor` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:639`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -7642,17 +7639,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /profiles/practitioners/{profileId}/affiliations` la atiende `ProfilesPractitionersController.addAffiliationFor` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:624). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ProfilesCreateAffiliationDto` (7 campos, 2 obligatorios). Delega en `ProfilesPractitionersService.addAffiliationFor`. Crea filas en messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.practitioner_affiliations. Actualiza iam.devices, messaging.notification_requests. Lee directory.tenant_memberships, iam.devices, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries, messaging.notification_requests, messaging.provider_channel_configs y 11 más.
+`POST /profiles/practitioners/{profileId}/affiliations` la atiende `ProfilesPractitionersController.addAffiliationFor` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:639). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ProfilesCreateAffiliationDto` (7 campos, 2 obligatorios). Delega en `ProfilesPractitionersService.addAffiliationFor`. Crea filas en messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.practitioner_affiliations. Actualiza iam.devices, messaging.notification_requests. Lee directory.tenant_memberships, iam.devices, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries, messaging.notification_requests, messaging.provider_channel_configs y 11 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:624` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:639` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:624` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:639` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -7780,7 +7777,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPractitionersController.addJurisdictionAuthorization` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:372`
+- **Implementación:** `ProfilesPractitionersController.addJurisdictionAuthorization` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:379`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -7790,17 +7787,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /profiles/practitioners/{profileId}/jurisdiction-authorizations` la atiende `ProfilesPractitionersController.addJurisdictionAuthorization` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:372). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateJurisdictionAuthorizationDto` (7 campos, 1 obligatorio). Delega en `ProfilesPractitionersService.addJurisdictionAuthorization`. Crea filas en profiles.jurisdiction_authorizations. Lee common.file_versions, common.files, profiles.health_practitioner_profiles, profiles.person_account_links.
+`POST /profiles/practitioners/{profileId}/jurisdiction-authorizations` la atiende `ProfilesPractitionersController.addJurisdictionAuthorization` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:379). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateJurisdictionAuthorizationDto` (7 campos, 1 obligatorio). Delega en `ProfilesPractitionersService.addJurisdictionAuthorization`. Crea filas en profiles.jurisdiction_authorizations. Lee common.file_versions, common.files, profiles.health_practitioner_profiles, profiles.person_account_links.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:372` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:379` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:372` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:379` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -7898,9 +7895,9 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Origen:** CONTRATO
 - **Nombre:** Quitar la foto del perfil profesional
 - **Bloque:** Núcleo y Terminología
-- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPractitionersController.removePractitionerPhoto` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:338`
+- **Implementación:** `ProfilesPractitionersController.removePractitionerPhoto` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:344`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -7910,31 +7907,30 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 
 ### Cómo se atiende (sistema)
 
-`DELETE /profiles/practitioners/{profileId}/photo` la atiende `ProfilesPractitionersController.removePractitionerPhoto` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:338). Exige sesión; el controlador no declara roles. Delega en `ProfilesPractitionersService.removePractitionerPhoto`. Actualiza profiles.health_practitioner_profiles. Lee chart.clinical_note_headers, chart.document_records, clinical.encounters, clinical.medication_requests, common.addresses, common.contact_points, common.identifiers, profiles.health_practitioner_profiles y 8 más.
+`DELETE /profiles/practitioners/{profileId}/photo` la atiende `ProfilesPractitionersController.removePractitionerPhoto` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:344). Exige sesión; el controlador no declara roles. Delega en `ProfilesPractitionersService.removePractitionerPhoto`. Lee chart.clinical_note_headers, chart.document_records, clinical.encounters, clinical.medication_requests, common.addresses, common.contact_points, common.identifiers, profiles.health_practitioner_profiles y 8 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:338` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:344` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:338` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:344` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:47` |
-| `chart.document_records` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:48` |
-| `clinical.encounters` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:45` |
-| `clinical.medication_requests` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:46` |
+| `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:55` |
+| `chart.document_records` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:56` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:53` |
+| `clinical.medication_requests` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:54` |
 | `common.addresses` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentAddress → AddressesRepository.findCurrentByOwnerAndUse | `src/modules/common/repositories/addresses.repository.ts:95` |
 | `common.contact_points` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → PersonRecordsAdapter.findAllCurrentContacts → ContactPointsRepository.findAllCurrentByOwner | `src/modules/common/repositories/contact-points.repository.ts:71` |
 | `common.identifiers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentIdentifiers | `src/modules/profiles/infrastructure/adapters/person-records.adapter.ts:129` |
-| `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1902` |
-| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → JurisdictionAuthorizationsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:107` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
@@ -8080,8 +8076,8 @@ La operación no recibe cuerpo.
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo el titular del perfil profesional o la plataforma pueden modificarlo |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Profesional no encontrado; ResourceNotFoundException: Perfil profesional no encontrado |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Perfil profesional no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/profiles.md).
@@ -8103,9 +8099,9 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Origen:** CONTRATO
 - **Nombre:** Fijar la foto del perfil profesional
 - **Bloque:** Núcleo y Terminología
-- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPractitionersController.setPractitionerPhoto` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:308`
+- **Implementación:** `ProfilesPractitionersController.setPractitionerPhoto` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:313`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -8115,17 +8111,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 
 ### Cómo se atiende (sistema)
 
-`PUT /profiles/practitioners/{profileId}/photo` la atiende `ProfilesPractitionersController.setPractitionerPhoto` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:308). Exige sesión; el controlador no declara roles. Valida el cuerpo como `SetPractitionerPhotoDto` (1 campo, 1 obligatorio). Delega en `ProfilesPractitionersService.setPractitionerPhoto`. Actualiza profiles.health_practitioner_profiles. Lee chart.clinical_note_headers, chart.document_records, clinical.encounters, clinical.medication_requests, common.addresses, common.contact_points, common.file_versions, common.files y 10 más.
+`PUT /profiles/practitioners/{profileId}/photo` la atiende `ProfilesPractitionersController.setPractitionerPhoto` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:313). Exige sesión; el controlador no declara roles. Valida el cuerpo como `SetPractitionerPhotoDto` (1 campo, 1 obligatorio). Delega en `ProfilesPractitionersService.setPractitionerPhoto`. Lee chart.clinical_note_headers, chart.document_records, clinical.encounters, clinical.medication_requests, common.addresses, common.contact_points, common.identifiers, profiles.health_practitioner_profiles y 8 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:308` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:313` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:308` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:313` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -8133,17 +8129,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:47` |
-| `chart.document_records` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:48` |
-| `clinical.encounters` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:45` |
-| `clinical.medication_requests` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:46` |
+| `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:55` |
+| `chart.document_records` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:56` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:53` |
+| `clinical.medication_requests` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:54` |
 | `common.addresses` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentAddress → AddressesRepository.findCurrentByOwnerAndUse | `src/modules/common/repositories/addresses.repository.ts:95` |
 | `common.contact_points` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → PersonRecordsAdapter.findAllCurrentContacts → ContactPointsRepository.findAllCurrentByOwner | `src/modules/common/repositories/contact-points.repository.ts:71` |
-| `common.file_versions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → AttachableFilesAdapter.assertUsableBy → AttachableFileService.assertUsableBy → AttachableFileService.assertVersionUsable → FileVersionsRepository.findById | `src/modules/common/repositories/file-versions.repository.ts:75` |
-| `common.files` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → AttachableFilesAdapter.assertUsableBy → AttachableFileService.assertUsableBy → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
 | `common.identifiers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentIdentifiers | `src/modules/profiles/infrastructure/adapters/person-records.adapter.ts:129` |
-| `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1854` |
-| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → JurisdictionAuthorizationsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:107` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
@@ -8309,9 +8302,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo el titular del perfil profesional o la plataforma pueden modificarlo; ForbiddenException: {labels.subject} no le pertenece |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Profesional no encontrado; ResourceNotFoundException: {labels.notFound}; ResourceNotFoundException: Perfil profesional no encontrado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: {labels.subject} resultó infectado; PreconditionFailedException: {labels.subject} no es de un formato admitido para este uso |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Perfil profesional no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/profiles.md).
@@ -8335,7 +8327,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPractitionersController.addSpecialty` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:646`
+- **Implementación:** `ProfilesPractitionersController.addSpecialty` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:661`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -8345,17 +8337,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /profiles/practitioners/{profileId}/specialties` la atiende `ProfilesPractitionersController.addSpecialty` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:646). Exige sesión; el controlador no declara roles. Valida el cuerpo como `AddSpecialtyDto` (5 campos, 0 obligatorios). Delega en `ProfilesPractitionersService.addSpecialty`. Crea filas en profiles.practitioner_specialties. Actualiza profiles.practitioner_specialties. Lee profiles.health_practitioner_profiles, profiles.person_account_links, profiles.practitioner_specialties, profiles.professional_credentials, terminology.value_set_members, terminology.value_set_versions, terminology.value_sets.
+`POST /profiles/practitioners/{profileId}/specialties` la atiende `ProfilesPractitionersController.addSpecialty` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:661). Exige sesión; el controlador no declara roles. Valida el cuerpo como `AddSpecialtyDto` (5 campos, 0 obligatorios). Delega en `ProfilesPractitionersService.addSpecialty`. Crea filas en profiles.practitioner_specialties. Actualiza profiles.practitioner_specialties. Lee profiles.health_practitioner_profiles, profiles.person_account_links, profiles.practitioner_specialties, profiles.professional_credentials, terminology.value_set_members, terminology.value_set_versions, terminology.value_sets.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:646` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:661` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:646` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:661` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -8453,7 +8445,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPractitionersController.getPractitionerSummary` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:214`
+- **Implementación:** `ProfilesPractitionersController.getPractitionerSummary` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:219`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -8463,26 +8455,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /profiles/practitioners/{profileId}/summary` la atiende `ProfilesPractitionersController.getPractitionerSummary` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:214). Exige sesión; el controlador no declara roles. Delega en `ProfilesPractitionersService.getPractitionerSummary`. Lee chart.clinical_note_headers, chart.document_records, clinical.encounters, clinical.medication_requests, common.addresses, common.contact_points, common.identifiers, profiles.health_practitioner_profiles y 8 más.
+`GET /profiles/practitioners/{profileId}/summary` la atiende `ProfilesPractitionersController.getPractitionerSummary` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:219). Exige sesión; el controlador no declara roles. Delega en `ProfilesPractitionersService.getPractitionerSummary`. Lee chart.clinical_note_headers, chart.document_records, clinical.encounters, clinical.medication_requests, common.addresses, common.contact_points, common.identifiers, profiles.health_practitioner_profiles y 8 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:214` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:219` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:214` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:219` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:47` |
-| `chart.document_records` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:48` |
-| `clinical.encounters` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:45` |
-| `clinical.medication_requests` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:46` |
+| `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:55` |
+| `chart.document_records` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:56` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:53` |
+| `clinical.medication_requests` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:54` |
 | `common.addresses` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentAddress → AddressesRepository.findCurrentByOwnerAndUse | `src/modules/common/repositories/addresses.repository.ts:95` |
 | `common.contact_points` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → PersonRecordsAdapter.findAllCurrentContacts → ContactPointsRepository.findAllCurrentByOwner | `src/modules/common/repositories/contact-points.repository.ts:71` |
 | `common.identifiers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentIdentifiers | `src/modules/profiles/infrastructure/adapters/person-records.adapter.ts:129` |
@@ -8659,7 +8651,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** ALTO — Borra filas; Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPractitionersController.updateOwnPractitionerProfile` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:237`
+- **Implementación:** `ProfilesPractitionersController.updateOwnPractitionerProfile` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:242`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -8669,16 +8661,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /profiles/practitioners/me` la atiende `ProfilesPractitionersController.updateOwnPractitionerProfile` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:237). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateOwnPractitionerProfileDto` (37 campos, 0 obligatorios). Delega en `ProfilesPractitionersService.updateOwnPractitionerProfile`. Crea filas en common.contact_points, common.identifiers, profiles.practitioner_languages. Actualiza common.contact_points, profiles.health_practitioner_profiles, profiles.persons, profiles.practitioner_languages. Borra de profiles.practitioner_languages. Lee chart.clinical_note_headers, chart.document_records, clinical.encounters, clinical.medication_requests, common.addresses, common.contact_points, common.identifiers, profiles.health_practitioner_profiles y 11 más.
+`PATCH /profiles/practitioners/me` la atiende `ProfilesPractitionersController.updateOwnPractitionerProfile` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:242). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateOwnPractitionerProfileDto` (37 campos, 0 obligatorios). Delega en `ProfilesPractitionersService.updateOwnPractitionerProfile`. Crea filas en common.contact_points, common.identifiers, profiles.practitioner_languages. Actualiza common.contact_points, profiles.health_practitioner_profiles, profiles.persons, profiles.practitioner_languages. Borra de profiles.practitioner_languages. Lee chart.clinical_note_headers, chart.document_records, clinical.encounters, clinical.medication_requests, common.addresses, common.contact_points, common.identifiers, profiles.health_practitioner_profiles y 11 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:237` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:242` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -8686,26 +8678,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:47` |
-| `chart.document_records` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:48` |
-| `clinical.encounters` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:45` |
-| `clinical.medication_requests` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:46` |
+| `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:55` |
+| `chart.document_records` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:56` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:53` |
+| `clinical.medication_requests` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:54` |
 | `common.addresses` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentAddress → AddressesRepository.findCurrentByOwnerAndUse | `src/modules/common/repositories/addresses.repository.ts:95` |
 | `common.contact_points` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceContact → PersonRecordsAdapter.closeContact → ContactPointsRepository.closeCurrent | `src/modules/common/repositories/contact-points.repository.ts:192` |
 | `common.contact_points` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceContact → PersonRecordsAdapter.createContact → ContactPointsRepository.create | `src/modules/common/repositories/contact-points.repository.ts:198` |
 | `common.contact_points` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceContact → PersonRecordsAdapter.findCurrentContact → ContactPointsRepository.findCurrentByOwnerAndSystem | `src/modules/common/repositories/contact-points.repository.ts:126` |
 | `common.identifiers` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.fixNationalId → PersonRecordsAdapter.createIdentifier → IdentifiersRepository.create | `src/modules/common/repositories/identifiers.repository.ts:131` |
 | `common.identifiers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.fixNationalId → PersonRecordsAdapter.findCurrentIdentifiers | `src/modules/profiles/infrastructure/adapters/person-records.adapter.ts:129` |
-| `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1377` |
+| `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1394` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → JurisdictionAuthorizationsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:107` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `profiles.persons` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1404` |
+| `profiles.persons` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1421` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
 | `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → PractitionerAdmissionsReadService.verificationOf → PractitionerAdmissionsRepository.findCurrentByPractitioners | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:166` |
 | `profiles.practitioner_affiliations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → PractitionerAffiliationsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-affiliations.repository.ts:69` |
 | `profiles.practitioner_languages` | BORRA | BORRA | POR_TIPO | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceLanguages → PractitionerLanguagesRepository.remove | `src/modules/profiles/infrastructure/repositories/practitioner-languages.repository.ts:84` |
-| `profiles.practitioner_languages` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceLanguages | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1593` |
+| `profiles.practitioner_languages` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceLanguages | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1610` |
 | `profiles.practitioner_languages` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceLanguages → PractitionerLanguagesRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-languages.repository.ts:62` |
 | `profiles.practitioner_languages` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceLanguages → PractitionerLanguagesRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-languages.repository.ts:55` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → PractitionerSpecialtiesRepository.findAllByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:143` |
@@ -8965,7 +8957,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `OwnAdmissionController.get` — `src/modules/profiles/presentation/controllers/own-admission.controller.ts:45`
+- **Implementación:** `OwnAdmissionController.get` — `src/modules/profiles/presentation/controllers/own-admission.controller.ts:46`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -8975,14 +8967,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /profiles/practitioners/me/admission` la atiende `OwnAdmissionController.get` (src/modules/profiles/presentation/controllers/own-admission.controller.ts:45). Exige sesión; el controlador no declara roles. Delega en `PractitionerAdmissionsReadService.own`. Lee common.addresses, common.file_versions, common.files, common.identifiers, practice.practice_sites, practice.practitioner_role_assignments, profiles.admission_requirements, profiles.health_practitioner_profiles y 8 más.
+`GET /profiles/practitioners/me/admission` la atiende `OwnAdmissionController.get` (src/modules/profiles/presentation/controllers/own-admission.controller.ts:46). Exige sesión; el controlador no declara roles. Delega en `PractitionerAdmissionsReadService.own`. Lee common.addresses, common.file_versions, common.files, common.identifiers, practice.practice_sites, practice.practitioner_role_assignments, profiles.admission_requirements, profiles.health_practitioner_profiles y 8 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/own-admission.controller.ts:45` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/own-admission.controller.ts:46` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -9070,7 +9062,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** ALTO — Borra filas; Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `OwnAdmissionController.resubmit` — `src/modules/profiles/presentation/controllers/own-admission.controller.ts:56`
+- **Implementación:** `OwnAdmissionController.resubmit` — `src/modules/profiles/presentation/controllers/own-admission.controller.ts:58`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -9080,16 +9072,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /profiles/practitioners/me/admission/resubmit` la atiende `OwnAdmissionController.resubmit` (src/modules/profiles/presentation/controllers/own-admission.controller.ts:56). Exige sesión; el controlador no declara roles. Valida el cuerpo como `ResubmitAdmissionDto` (2 campos, 2 obligatorios). Delega en `PractitionerAdmissionsService.resubmit`. Crea filas en messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.practitioner_admission_events, profiles.practitioner_admission_reviews. Actualiza iam.devices, messaging.notification_requests, profiles.jurisdiction_authorizations, profiles.practitioner_admission_reviews, profiles.practitioner_admissions, profiles.practitioner_specialties, profiles.professional_credentials. Borra de profiles.practitioner_admission_reviews. Lee common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, iam.devices, messaging.message_channels, messaging.message_templates y 17 más.
+`POST /profiles/practitioners/me/admission/resubmit` la atiende `OwnAdmissionController.resubmit` (src/modules/profiles/presentation/controllers/own-admission.controller.ts:58). Exige sesión; el controlador no declara roles. Valida el cuerpo como `ResubmitAdmissionDto` (2 campos, 2 obligatorios). Delega en `PractitionerAdmissionsService.resubmit`. Crea filas en messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.practitioner_admission_events, profiles.practitioner_admission_reviews. Actualiza iam.devices, messaging.notification_requests, profiles.jurisdiction_authorizations, profiles.practitioner_admission_reviews, profiles.practitioner_admissions, profiles.practitioner_specialties, profiles.professional_credentials. Borra de profiles.practitioner_admission_reviews. Lee common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, iam.devices, messaging.message_channels, messaging.message_templates y 17 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/own-admission.controller.ts:56` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/own-admission.controller.ts:58` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -9128,7 +9120,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.practitioner_admission_reviews` | ESCRIBE | CREA | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:123` |
 | `profiles.practitioner_admission_reviews` | ESCRIBE | ACTUALIZA | POR_TIPO | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.clearReview | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:253` |
 | `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionReviewsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:88` |
-| `profiles.practitioner_admissions` | ESCRIBE | ACTUALIZA | POR_TIPO | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit | `src/modules/profiles/application/services/practitioner-admissions.service.ts:1049` |
+| `profiles.practitioner_admissions` | ESCRIBE | ACTUALIZA | POR_TIPO | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit | `src/modules/profiles/application/services/practitioner-admissions.service.ts:1050` |
 | `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionsService.ownLocked → PractitionerAdmissionsReadService.currentOf → PractitionerAdmissionsRepository.findCurrentByPractitioners | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:166` |
 | `profiles.practitioner_specialties` | ESCRIBE | ACTUALIZA | POR_TIPO | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:317` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionEvidenceService.buildSnapshot | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:379` |
@@ -9225,7 +9217,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `OwnAdmissionController.withdraw` — `src/modules/profiles/presentation/controllers/own-admission.controller.ts:78`
+- **Implementación:** `OwnAdmissionController.withdraw` — `src/modules/profiles/presentation/controllers/own-admission.controller.ts:81`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -9235,14 +9227,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /profiles/practitioners/me/admission/withdraw` la atiende `OwnAdmissionController.withdraw` (src/modules/profiles/presentation/controllers/own-admission.controller.ts:78). Exige sesión; el controlador no declara roles. Delega en `PractitionerAdmissionsService.withdraw`. Crea filas en messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.practitioner_admission_events. Actualiza iam.devices, messaging.notification_requests, profiles.practitioner_admissions. Lee common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, iam.devices, messaging.message_channels, messaging.message_templates y 17 más.
+`POST /profiles/practitioners/me/admission/withdraw` la atiende `OwnAdmissionController.withdraw` (src/modules/profiles/presentation/controllers/own-admission.controller.ts:81). Exige sesión; el controlador no declara roles. Delega en `PractitionerAdmissionsService.withdraw`. Crea filas en messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.practitioner_admission_events. Actualiza iam.devices, messaging.notification_requests, profiles.practitioner_admissions. Lee common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, iam.devices, messaging.message_channels, messaging.message_templates y 17 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/own-admission.controller.ts:78` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/own-admission.controller.ts:81` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -9277,7 +9269,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.persons` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:229` |
 | `profiles.practitioner_admission_events` | ESCRIBE | CREA | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.appendEvent → PractitionerAdmissionEventsRepository.append | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:395` |
 | `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionReviewsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:88` |
-| `profiles.practitioner_admissions` | ESCRIBE | ACTUALIZA | POR_TIPO | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw | `src/modules/profiles/application/services/practitioner-admissions.service.ts:1092` |
+| `profiles.practitioner_admissions` | ESCRIBE | ACTUALIZA | POR_TIPO | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw | `src/modules/profiles/application/services/practitioner-admissions.service.ts:1093` |
 | `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.ownLocked → PractitionerAdmissionsReadService.currentOf → PractitionerAdmissionsRepository.findCurrentByPractitioners | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:166` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:225` |
 | `profiles.professional_credentials` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:224` |
@@ -9348,7 +9340,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPractitionersController.listOwnAffiliations` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:446`
+- **Implementación:** `ProfilesPractitionersController.listOwnAffiliations` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:454`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -9358,14 +9350,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /profiles/practitioners/me/affiliations` la atiende `ProfilesPractitionersController.listOwnAffiliations` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:446). Exige sesión; el controlador no declara roles. Delega en `ProfilesPractitionersService.listOwnAffiliations`. Lee profiles.health_practitioner_profiles, profiles.person_account_links, profiles.practitioner_affiliations.
+`GET /profiles/practitioners/me/affiliations` la atiende `ProfilesPractitionersController.listOwnAffiliations` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:454). Exige sesión; el controlador no declara roles. Delega en `ProfilesPractitionersService.listOwnAffiliations`. Lee profiles.health_practitioner_profiles, profiles.person_account_links, profiles.practitioner_affiliations.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:446` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:454` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -9430,7 +9422,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPractitionersController.addOwnAffiliation` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:457`
+- **Implementación:** `ProfilesPractitionersController.addOwnAffiliation` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:466`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -9440,16 +9432,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /profiles/practitioners/me/affiliations` la atiende `ProfilesPractitionersController.addOwnAffiliation` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:457). Exige sesión; el controlador no declara roles. Valida el cuerpo como `ProfilesCreateAffiliationDto` (7 campos, 2 obligatorios). Delega en `ProfilesPractitionersService.addOwnAffiliation`. Crea filas en messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.practitioner_affiliations. Actualiza iam.devices, messaging.notification_requests. Lee directory.tenant_memberships, iam.devices, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries, messaging.notification_requests, messaging.provider_channel_configs y 11 más.
+`POST /profiles/practitioners/me/affiliations` la atiende `ProfilesPractitionersController.addOwnAffiliation` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:466). Exige sesión; el controlador no declara roles. Valida el cuerpo como `ProfilesCreateAffiliationDto` (7 campos, 2 obligatorios). Delega en `ProfilesPractitionersService.addOwnAffiliation`. Crea filas en messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.practitioner_affiliations. Actualiza iam.devices, messaging.notification_requests. Lee directory.tenant_memberships, iam.devices, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries, messaging.notification_requests, messaging.provider_channel_configs y 11 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:457` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:466` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -9573,7 +9565,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** ALTO — Borra filas; Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPractitionersController.removeOwnAffiliation` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:508`
+- **Implementación:** `ProfilesPractitionersController.removeOwnAffiliation` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:519`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -9583,16 +9575,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`DELETE /profiles/practitioners/me/affiliations/{affiliationId}` la atiende `ProfilesPractitionersController.removeOwnAffiliation` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:508). Exige sesión; el controlador no declara roles. Delega en `ProfilesPractitionersService.removeOwnAffiliation`. Borra de profiles.practitioner_affiliations. Lee profiles.health_practitioner_profiles, profiles.person_account_links, profiles.practitioner_affiliations.
+`DELETE /profiles/practitioners/me/affiliations/{affiliationId}` la atiende `ProfilesPractitionersController.removeOwnAffiliation` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:519). Exige sesión; el controlador no declara roles. Delega en `ProfilesPractitionersService.removeOwnAffiliation`. Borra de profiles.practitioner_affiliations. Lee profiles.health_practitioner_profiles, profiles.person_account_links, profiles.practitioner_affiliations.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:508` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:519` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: affiliationId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:508` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: affiliationId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:519` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -9648,7 +9640,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPractitionersController.updateOwnAffiliation` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:482`
+- **Implementación:** `ProfilesPractitionersController.updateOwnAffiliation` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:492`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -9658,17 +9650,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /profiles/practitioners/me/affiliations/{affiliationId}` la atiende `ProfilesPractitionersController.updateOwnAffiliation` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:482). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateAffiliationDto` (5 campos, 0 obligatorios). Delega en `ProfilesPractitionersService.updateOwnAffiliation`. Actualiza profiles.practitioner_affiliations. Lee profiles.health_practitioner_profiles, profiles.person_account_links, profiles.practitioner_affiliations.
+`PATCH /profiles/practitioners/me/affiliations/{affiliationId}` la atiende `ProfilesPractitionersController.updateOwnAffiliation` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:492). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateAffiliationDto` (5 campos, 0 obligatorios). Delega en `ProfilesPractitionersService.updateOwnAffiliation`. Actualiza profiles.practitioner_affiliations. Lee profiles.health_practitioner_profiles, profiles.person_account_links, profiles.practitioner_affiliations.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:482` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:492` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: affiliationId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:482` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: affiliationId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:492` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -9678,7 +9670,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnAffiliation → ProfilesPractitionersService.updateOwnAffiliation → ProfilesPractitionersService.ownOrNothing → ProfileOwnershipService.requireOwnPractitionerProfileId → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnAffiliation → ProfilesPractitionersService.updateOwnAffiliation → ProfilesPractitionersService.ownOrNothing → ProfileOwnershipService.requireOwnPractitionerProfileId → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `profiles.practitioner_affiliations` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnAffiliation → ProfilesPractitionersService.updateOwnAffiliation | `src/modules/profiles/application/services/profiles-practitioners.service.ts:3207` |
+| `profiles.practitioner_affiliations` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnAffiliation → ProfilesPractitionersService.updateOwnAffiliation | `src/modules/profiles/application/services/profiles-practitioners.service.ts:2861` |
 | `profiles.practitioner_affiliations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnAffiliation → ProfilesPractitionersService.updateOwnAffiliation → PractitionerAffiliationsRepository.findSame | `src/modules/profiles/infrastructure/repositories/practitioner-affiliations.repository.ts:254` |
 
 ### Parámetros
@@ -9766,9 +9758,9 @@ _Ninguna prueba existente menciona esta operación._
 - **Origen:** CONTRATO
 - **Nombre:** Agregar un título propio (diplomado, maestría, doctorado…)
 - **Bloque:** Núcleo y Terminología
-- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPractitionersController.addOwnCredential` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:535`
+- **Implementación:** `ProfilesPractitionersController.addOwnCredential` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:547`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -9778,28 +9770,22 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /profiles/practitioners/me/credentials` la atiende `ProfilesPractitionersController.addOwnCredential` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:535). Exige sesión; el controlador no declara roles. Valida el cuerpo como `AddOwnCredentialDto` (9 campos, 2 obligatorios). Delega en `ProfilesPractitionersService.addOwnCredential`. Crea filas en profiles.professional_credentials. Lee common.file_versions, common.files, profiles.health_practitioner_profiles, profiles.person_account_links.
+`POST /profiles/practitioners/me/credentials` la atiende `ProfilesPractitionersController.addOwnCredential` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:547). Exige sesión; el controlador no declara roles. Valida el cuerpo como `AddOwnCredentialDto` (9 campos, 2 obligatorios). Delega en `ProfilesPractitionersService.addOwnCredential`. No se determinaron tablas para esta operación.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:535` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:547` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
-| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
-|---|---|---|---|---|---|
-| `common.file_versions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnCredential → ProfilesPractitionersService.addOwnCredential → AttachableFilesAdapter.assertUsableBy → AttachableFileService.assertUsableBy → AttachableFileService.assertVersionUsable → FileVersionsRepository.findById | `src/modules/common/repositories/file-versions.repository.ts:75` |
-| `common.files` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnCredential → ProfilesPractitionersService.addOwnCredential → AttachableFilesAdapter.assertUsableBy → AttachableFileService.assertUsableBy → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
-| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnCredential → ProfilesPractitionersService.addOwnCredential → ProfileOwnershipService.requireOwnPractitionerProfileId → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
-| `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnCredential → ProfilesPractitionersService.addOwnCredential → ProfileOwnershipService.requireOwnPractitionerProfileId → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `profiles.professional_credentials` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.addOwnCredential → ProfilesPractitionersService.addOwnCredential → ProfessionalCredentialsRepository.create | `src/modules/profiles/infrastructure/repositories/professional-credentials.repository.ts:122` |
+No se determinaron tablas para esta operación (**SIN_DETERMINAR**).
 
 ### Cuerpo — DTO `AddOwnCredentialDto` · `application/json`
 
@@ -9866,9 +9852,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cuenta no tiene un perfil profesional asociado; ForbiddenException: {labels.subject} no le pertenece |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: {labels.notFound} |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Ese concepto no es un tipo de credencial profesional; PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: {labels.subject} resultó infectado; PreconditionFailedException: {labels.subject} no es de un formato admitido para este uso |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/profiles.md).
@@ -9890,9 +9874,9 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Origen:** CONTRATO
 - **Nombre:** Retirar un título propio pendiente
 - **Bloque:** Núcleo y Terminología
-- **Riesgo:** ALTO — Borra filas; Escribe y el controlador no declara roles
+- **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPractitionersController.removeOwnCredential` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:595`
+- **Implementación:** `ProfilesPractitionersController.removeOwnCredential` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:609`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -9902,26 +9886,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`DELETE /profiles/practitioners/me/credentials/{credentialId}` la atiende `ProfilesPractitionersController.removeOwnCredential` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:595). Exige sesión; el controlador no declara roles. Delega en `ProfilesPractitionersService.removeOwnCredential`. Borra de profiles.professional_credentials. Lee profiles.health_practitioner_profiles, profiles.person_account_links, profiles.professional_credentials.
+`DELETE /profiles/practitioners/me/credentials/{credentialId}` la atiende `ProfilesPractitionersController.removeOwnCredential` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:609). Exige sesión; el controlador no declara roles. Delega en `ProfilesPractitionersService.removeOwnCredential`. No se determinaron tablas para esta operación.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:595` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:609` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: credentialId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:595` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: credentialId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:609` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
-| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
-|---|---|---|---|---|---|
-| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removeOwnCredential → ProfilesPractitionersService.removeOwnCredential → ProfileOwnershipService.requireOwnPractitionerProfileId → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
-| `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removeOwnCredential → ProfilesPractitionersService.removeOwnCredential → ProfileOwnershipService.requireOwnPractitionerProfileId → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `profiles.professional_credentials` | BORRA | BORRA | POR_TIPO | ProfilesPractitionersController.removeOwnCredential → ProfilesPractitionersService.removeOwnCredential → ProfessionalCredentialsRepository.remove | `src/modules/profiles/infrastructure/repositories/professional-credentials.repository.ts:193` |
-| `profiles.professional_credentials` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removeOwnCredential → ProfilesPractitionersService.removeOwnCredential → ProfessionalCredentialsRepository.findByIdForUpdate | `src/modules/profiles/infrastructure/repositories/professional-credentials.repository.ts:104` |
+No se determinaron tablas para esta operación (**SIN_DETERMINAR**).
 
 ### Parámetros
 
@@ -9944,9 +9923,7 @@ _No se identificó un DTO de respuesta con campos._
 | 204 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cuenta no tiene un perfil profesional asociado |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Título no encontrado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Ese título ya fue verificado o rechazado; no se puede retirar |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/profiles.md).
@@ -9966,9 +9943,9 @@ _Ninguna prueba existente menciona esta operación._
 - **Origen:** CONTRATO
 - **Nombre:** Editar un título propio pendiente de verificación
 - **Bloque:** Núcleo y Terminología
-- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPractitionersController.updateOwnCredential` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:558`
+- **Implementación:** `ProfilesPractitionersController.updateOwnCredential` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:571`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -9978,30 +9955,23 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /profiles/practitioners/me/credentials/{credentialId}` la atiende `ProfilesPractitionersController.updateOwnCredential` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:558). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateOwnCredentialDto` (9 campos, 0 obligatorios). Delega en `ProfilesPractitionersService.updateOwnCredential`. Actualiza profiles.professional_credentials. Lee common.file_versions, common.files, profiles.health_practitioner_profiles, profiles.person_account_links, profiles.professional_credentials.
+`PATCH /profiles/practitioners/me/credentials/{credentialId}` la atiende `ProfilesPractitionersController.updateOwnCredential` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:571). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateOwnCredentialDto` (9 campos, 0 obligatorios). Delega en `ProfilesPractitionersService.updateOwnCredential`. No se determinaron tablas para esta operación.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:558` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:571` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: credentialId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:558` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: credentialId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:571` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
-| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
-|---|---|---|---|---|---|
-| `common.file_versions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnCredential → ProfilesPractitionersService.updateOwnCredential → AttachableFilesAdapter.assertUsableBy → AttachableFileService.assertUsableBy → AttachableFileService.assertVersionUsable → FileVersionsRepository.findById | `src/modules/common/repositories/file-versions.repository.ts:75` |
-| `common.files` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnCredential → ProfilesPractitionersService.updateOwnCredential → AttachableFilesAdapter.assertUsableBy → AttachableFileService.assertUsableBy → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
-| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnCredential → ProfilesPractitionersService.updateOwnCredential → ProfileOwnershipService.requireOwnPractitionerProfileId → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
-| `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnCredential → ProfilesPractitionersService.updateOwnCredential → ProfileOwnershipService.requireOwnPractitionerProfileId → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `profiles.professional_credentials` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnCredential → ProfilesPractitionersService.updateOwnCredential | `src/modules/profiles/application/services/profiles-practitioners.service.ts:3491` |
-| `profiles.professional_credentials` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnCredential → ProfilesPractitionersService.updateOwnCredential → ProfessionalCredentialsRepository.findByIdForUpdate | `src/modules/profiles/infrastructure/repositories/professional-credentials.repository.ts:104` |
+No se determinaron tablas para esta operación (**SIN_DETERMINAR**).
 
 ### Parámetros
 
@@ -10058,9 +10028,7 @@ _No se identificó un DTO de respuesta con campos._
 | 204 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cuenta no tiene un perfil profesional asociado; ForbiddenException: {labels.subject} no le pertenece |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Título no encontrado; ResourceNotFoundException: {labels.notFound} |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Ese concepto no es un tipo de credencial profesional; PreconditionFailedException: Ese título ya fue verificado o rechazado; no se puede editar; PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: {labels.subject} resultó infectado; PreconditionFailedException: {labels.subject} no es de un formato admitido para este uso |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/profiles.md).
@@ -10082,9 +10050,9 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Origen:** CONTRATO
 - **Nombre:** Retirar una matrícula propia pendiente de verificación
 - **Bloque:** Núcleo y Terminología
-- **Riesgo:** ALTO — Borra filas; Escribe y el controlador no declara roles
+- **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPractitionersController.removeOwnLicense` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:761`
+- **Implementación:** `ProfilesPractitionersController.removeOwnLicense` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:781`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -10094,28 +10062,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}` la atiende `ProfilesPractitionersController.removeOwnLicense` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:761). Exige sesión; el controlador no declara roles. Delega en `ProfilesPractitionersService.removeOwnLicense`. Borra de profiles.jurisdiction_authorizations. Lee audit.jurisdiction_authorizations_history, identity_assurance.identity_verification_cases, profiles.health_practitioner_profiles, profiles.jurisdiction_authorizations, profiles.person_account_links.
+`DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}` la atiende `ProfilesPractitionersController.removeOwnLicense` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:781). Exige sesión; el controlador no declara roles. Delega en `ProfilesPractitionersService.removeOwnLicense`. No se determinaron tablas para esta operación.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:761` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:781` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: licenseId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:761` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: licenseId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:781` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
-| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
-|---|---|---|---|---|---|
-| `audit.jurisdiction_authorizations_history` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removeOwnLicense → ProfilesPractitionersService.removeOwnLicense → PractitionerContextAdapter.hasAuthorizationHistory | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:157` |
-| `identity_assurance.identity_verification_cases` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removeOwnLicense → ProfilesPractitionersService.removeOwnLicense → ProfilesPractitionersService.lockOwnEditableLicense → PractitionerContextAdapter.hasOpenIdentityCase | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:165` |
-| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removeOwnLicense → ProfilesPractitionersService.removeOwnLicense → ProfilesPractitionersService.lockOwnEditableLicense → ProfileOwnershipService.requireOwnPractitionerProfileId → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
-| `profiles.jurisdiction_authorizations` | BORRA | BORRA | POR_TIPO | ProfilesPractitionersController.removeOwnLicense → ProfilesPractitionersService.removeOwnLicense → JurisdictionAuthorizationsRepository.remove | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:89` |
-| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removeOwnLicense → ProfilesPractitionersService.removeOwnLicense → ProfilesPractitionersService.lockOwnEditableLicense → JurisdictionAuthorizationsRepository.findByIdForUpdate | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:80` |
-| `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removeOwnLicense → ProfilesPractitionersService.removeOwnLicense → ProfilesPractitionersService.lockOwnEditableLicense → ProfileOwnershipService.requireOwnPractitionerProfileId → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+No se determinaron tablas para esta operación (**SIN_DETERMINAR**).
 
 ### Parámetros
 
@@ -10138,9 +10099,7 @@ _No se identificó un DTO de respuesta con campos._
 | 204 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cuenta no tiene un perfil profesional asociado |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Matrícula no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Esa matrícula ya no está pendiente; no se puede {verb}; PreconditionFailedException: Esa matrícula tiene una verificación en curso; no se puede {verb}; PreconditionFailedException: Esa matrícula ya tiene historial de auditoría; no se puede borrar |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/profiles.md).
@@ -10160,9 +10119,9 @@ _Ninguna prueba existente menciona esta operación._
 - **Origen:** CONTRATO
 - **Nombre:** Corregir una matrícula propia pendiente de verificación
 - **Bloque:** Núcleo y Terminología
-- **Riesgo:** BAJO — Sólo lee
+- **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPractitionersController.updateOwnLicense` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:739`
+- **Implementación:** `ProfilesPractitionersController.updateOwnLicense` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:758`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -10172,30 +10131,23 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}` la atiende `ProfilesPractitionersController.updateOwnLicense` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:739). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateOwnLicenseDto` (4 campos, 0 obligatorios). Delega en `ProfilesPractitionersService.updateOwnLicense`. Lee common.file_versions, common.files, identity_assurance.identity_verification_cases, profiles.health_practitioner_profiles, profiles.jurisdiction_authorizations, profiles.person_account_links.
+`PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}` la atiende `ProfilesPractitionersController.updateOwnLicense` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:758). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateOwnLicenseDto` (4 campos, 0 obligatorios). Delega en `ProfilesPractitionersService.updateOwnLicense`. No se determinaron tablas para esta operación.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:739` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:758` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: licenseId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:739` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: licenseId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:758` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
-| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
-|---|---|---|---|---|---|
-| `common.file_versions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnLicense → ProfilesPractitionersService.updateOwnLicense → AttachableFilesAdapter.assertUsableBy → AttachableFileService.assertUsableBy → AttachableFileService.assertVersionUsable → FileVersionsRepository.findById | `src/modules/common/repositories/file-versions.repository.ts:75` |
-| `common.files` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnLicense → ProfilesPractitionersService.updateOwnLicense → AttachableFilesAdapter.assertUsableBy → AttachableFileService.assertUsableBy → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
-| `identity_assurance.identity_verification_cases` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnLicense → ProfilesPractitionersService.updateOwnLicense → ProfilesPractitionersService.lockOwnEditableLicense → PractitionerContextAdapter.hasOpenIdentityCase | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:165` |
-| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnLicense → ProfilesPractitionersService.updateOwnLicense → ProfilesPractitionersService.lockOwnEditableLicense → ProfileOwnershipService.requireOwnPractitionerProfileId → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
-| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnLicense → ProfilesPractitionersService.updateOwnLicense → ProfilesPractitionersService.lockOwnEditableLicense → JurisdictionAuthorizationsRepository.findByIdForUpdate | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:80` |
-| `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnLicense → ProfilesPractitionersService.updateOwnLicense → ProfilesPractitionersService.lockOwnEditableLicense → ProfileOwnershipService.requireOwnPractitionerProfileId → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+No se determinaron tablas para esta operación (**SIN_DETERMINAR**).
 
 ### Parámetros
 
@@ -10242,9 +10194,7 @@ _No se identificó un DTO de respuesta con campos._
 | 204 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cuenta no tiene un perfil profesional asociado; ForbiddenException: {labels.subject} no le pertenece |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Matrícula no encontrada; ResourceNotFoundException: {labels.notFound} |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Esa matrícula ya no está pendiente; no se puede {verb}; PreconditionFailedException: Esa matrícula tiene una verificación en curso; no se puede {verb}; PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: {labels.subject} resultó infectado; PreconditionFailedException: {labels.subject} no es de un formato admitido para este uso |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/profiles.md).
@@ -10266,7 +10216,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPractitionersController.searchLinkableOrganizations` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:414`
+- **Implementación:** `ProfilesPractitionersController.searchLinkableOrganizations` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:422`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -10276,14 +10226,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /profiles/practitioners/me/linkable-organizations` la atiende `ProfilesPractitionersController.searchLinkableOrganizations` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:414). Exige sesión; el controlador no declara roles. Delega en `LinkableOrganizationsService.search`. Lee terminology.catalog_concepts, terminology.concept_properties, terminology.value_set_members, terminology.value_set_versions, terminology.value_sets.
+`GET /profiles/practitioners/me/linkable-organizations` la atiende `ProfilesPractitionersController.searchLinkableOrganizations` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:422). Exige sesión; el controlador no declara roles. Delega en `LinkableOrganizationsService.search`. Lee terminology.catalog_concepts, terminology.concept_properties, terminology.value_set_members, terminology.value_set_versions, terminology.value_sets.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:414` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:422` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -10351,7 +10301,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPractitionersController.getOwnOnboarding` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:121`
+- **Implementación:** `ProfilesPractitionersController.getOwnOnboarding` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:126`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -10361,14 +10311,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /profiles/practitioners/me/onboarding` la atiende `ProfilesPractitionersController.getOwnOnboarding` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:121). Exige sesión; el controlador no declara roles. Delega en `ProfilesPractitionersService.getOwnOnboarding`. Lee profiles.health_practitioner_profiles, profiles.jurisdiction_authorizations, profiles.person_account_links, profiles.practitioner_affiliations, profiles.practitioner_specialties, scheduling.bookable_slots, scheduling.schedulable_resources.
+`GET /profiles/practitioners/me/onboarding` la atiende `ProfilesPractitionersController.getOwnOnboarding` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:126). Exige sesión; el controlador no declara roles. Delega en `ProfilesPractitionersService.getOwnOnboarding`. Lee profiles.health_practitioner_profiles, profiles.jurisdiction_authorizations, profiles.person_account_links, profiles.practitioner_affiliations, profiles.practitioner_specialties, scheduling.bookable_slots, scheduling.schedulable_resources, scheduling.schedule_templates.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:121` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:126` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -10381,8 +10331,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnOnboarding → ProfilesPractitionersService.getOwnOnboarding → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `profiles.practitioner_affiliations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnOnboarding → ProfilesPractitionersService.getOwnOnboarding → PractitionerAffiliationsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-affiliations.repository.ts:69` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnOnboarding → ProfilesPractitionersService.getOwnOnboarding → PractitionerSpecialtiesRepository.findAllByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:143` |
-| `scheduling.bookable_slots` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnOnboarding → ProfilesPractitionersService.getOwnOnboarding → PractitionerContextAdapter.onboardingContext | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:32` |
-| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnOnboarding → ProfilesPractitionersService.getOwnOnboarding → PractitionerContextAdapter.onboardingContext | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:28` |
+| `scheduling.bookable_slots` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnOnboarding → ProfilesPractitionersService.getOwnOnboarding → PractitionerContextAdapter.onboardingContext | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:35` |
+| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnOnboarding → ProfilesPractitionersService.getOwnOnboarding → PractitionerContextAdapter.onboardingContext | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:29` |
+| `scheduling.schedule_templates` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnOnboarding → ProfilesPractitionersService.getOwnOnboarding → PractitionerContextAdapter.onboardingContext | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:38` |
 
 ### Cuerpo
 
@@ -10431,7 +10382,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PrimaryPractitionerController.listOwnPatients` — `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:80`
+- **Implementación:** `PrimaryPractitionerController.listOwnPatients` — `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:84`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -10441,14 +10392,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /profiles/practitioners/me/primary-patients` la atiende `PrimaryPractitionerController.listOwnPatients` (src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:80). Exige sesión; el controlador no declara roles. Delega en `PrimaryPractitionerService.listOwnPatients`. Lee profiles.health_practitioner_profiles, profiles.patient_primary_practitioners, profiles.patient_profiles, profiles.person_account_links, profiles.persons.
+`GET /profiles/practitioners/me/primary-patients` la atiende `PrimaryPractitionerController.listOwnPatients` (src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:84). Exige sesión; el controlador no declara roles. Delega en `PrimaryPractitionerService.listOwnPatients`. Lee profiles.health_practitioner_profiles, profiles.patient_primary_practitioners, profiles.patient_profiles, profiles.person_account_links, profiles.persons.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:80` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:84` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -10515,7 +10466,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PractitionerSignatureAssetsController.getOwn` — `src/modules/profiles/presentation/controllers/practitioner-signature-assets.controller.ts:25`
+- **Implementación:** `PractitionerSignatureAssetsController.getOwn` — `src/modules/profiles/presentation/controllers/practitioner-signature-assets.controller.ts:31`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -10525,14 +10476,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /profiles/practitioners/me/signature-assets` la atiende `PractitionerSignatureAssetsController.getOwn` (src/modules/profiles/presentation/controllers/practitioner-signature-assets.controller.ts:25). Exige sesión; el controlador no declara roles. Delega en `PractitionerSignatureAssetsService.getOwn`. Lee profiles.health_practitioner_profiles, profiles.person_account_links.
+`GET /profiles/practitioners/me/signature-assets` la atiende `PractitionerSignatureAssetsController.getOwn` (src/modules/profiles/presentation/controllers/practitioner-signature-assets.controller.ts:31). Exige sesión; el controlador no declara roles. Delega en `PractitionerSignatureAssetsService.getOwn`. Lee profiles.health_practitioner_profiles, profiles.person_account_links.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/practitioner-signature-assets.controller.ts:25` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/practitioner-signature-assets.controller.ts:31` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -10586,7 +10537,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PractitionerSignatureAssetsController.setOwn` — `src/modules/profiles/presentation/controllers/practitioner-signature-assets.controller.ts:34`
+- **Implementación:** `PractitionerSignatureAssetsController.setOwn` — `src/modules/profiles/presentation/controllers/practitioner-signature-assets.controller.ts:41`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -10596,16 +10547,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PUT /profiles/practitioners/me/signature-assets` la atiende `PractitionerSignatureAssetsController.setOwn` (src/modules/profiles/presentation/controllers/practitioner-signature-assets.controller.ts:34). Exige sesión; el controlador no declara roles. Valida el cuerpo como `SetPractitionerSignatureAssetsDto` (2 campos, 0 obligatorios). Delega en `PractitionerSignatureAssetsService.setOwn`. Actualiza profiles.health_practitioner_profiles. Lee common.file_versions, common.files, profiles.health_practitioner_profiles, profiles.person_account_links.
+`PUT /profiles/practitioners/me/signature-assets` la atiende `PractitionerSignatureAssetsController.setOwn` (src/modules/profiles/presentation/controllers/practitioner-signature-assets.controller.ts:41). Exige sesión; el controlador no declara roles. Valida el cuerpo como `SetPractitionerSignatureAssetsDto` (2 campos, 0 obligatorios). Delega en `PractitionerSignatureAssetsService.setOwn`. Actualiza profiles.health_practitioner_profiles. Lee common.file_versions, common.files, profiles.health_practitioner_profiles, profiles.person_account_links.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/practitioner-signature-assets.controller.ts:34` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/practitioner-signature-assets.controller.ts:41` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -10681,9 +10632,9 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Origen:** CONTRATO
 - **Nombre:** Retirar una especialidad propia pendiente de verificación
 - **Bloque:** Núcleo y Terminología
-- **Riesgo:** ALTO — Borra filas; Escribe y el controlador no declara roles
+- **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPractitionersController.removeOwnSpecialty` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:718`
+- **Implementación:** `ProfilesPractitionersController.removeOwnSpecialty` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:736`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -10693,26 +10644,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`DELETE /profiles/practitioners/me/specialties/{specialtyId}` la atiende `ProfilesPractitionersController.removeOwnSpecialty` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:718). Exige sesión; el controlador no declara roles. Delega en `ProfilesPractitionersService.removeOwnSpecialty`. Borra de profiles.practitioner_specialties. Lee profiles.health_practitioner_profiles, profiles.person_account_links, profiles.practitioner_specialties.
+`DELETE /profiles/practitioners/me/specialties/{specialtyId}` la atiende `ProfilesPractitionersController.removeOwnSpecialty` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:736). Exige sesión; el controlador no declara roles. Delega en `ProfilesPractitionersService.removeOwnSpecialty`. No se determinaron tablas para esta operación.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:718` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:736` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: specialtyId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:718` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: specialtyId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:736` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
-| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
-|---|---|---|---|---|---|
-| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removeOwnSpecialty → ProfilesPractitionersService.removeOwnSpecialty → ProfileOwnershipService.requireOwnPractitionerProfileId → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
-| `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removeOwnSpecialty → ProfilesPractitionersService.removeOwnSpecialty → ProfileOwnershipService.requireOwnPractitionerProfileId → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `profiles.practitioner_specialties` | BORRA | BORRA | POR_TIPO | ProfilesPractitionersController.removeOwnSpecialty → ProfilesPractitionersService.removeOwnSpecialty → PractitionerSpecialtiesRepository.remove | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:110` |
-| `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removeOwnSpecialty → ProfilesPractitionersService.removeOwnSpecialty → PractitionerSpecialtiesRepository.findByIdForUpdate | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:101` |
+No se determinaron tablas para esta operación (**SIN_DETERMINAR**).
 
 ### Parámetros
 
@@ -10735,9 +10681,7 @@ _No se identificó un DTO de respuesta con campos._
 | 204 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cuenta no tiene un perfil profesional asociado |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Especialidad no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Esa especialidad ya no está pendiente de verificación; no se puede {verb} |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/profiles.md).
@@ -10757,9 +10701,9 @@ _Ninguna prueba existente menciona esta operación._
 - **Origen:** CONTRATO
 - **Nombre:** Corregir una especialidad propia pendiente de verificación
 - **Bloque:** Núcleo y Terminología
-- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPractitionersController.updateOwnSpecialty` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:692`
+- **Implementación:** `ProfilesPractitionersController.updateOwnSpecialty` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:709`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -10769,31 +10713,23 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /profiles/practitioners/me/specialties/{specialtyId}` la atiende `ProfilesPractitionersController.updateOwnSpecialty` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:692). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateOwnSpecialtyDto` (2 campos, 0 obligatorios). Delega en `ProfilesPractitionersService.updateOwnSpecialty`. Actualiza profiles.practitioner_specialties. Lee profiles.health_practitioner_profiles, profiles.person_account_links, profiles.practitioner_specialties, terminology.value_set_members, terminology.value_set_versions, terminology.value_sets.
+`PATCH /profiles/practitioners/me/specialties/{specialtyId}` la atiende `ProfilesPractitionersController.updateOwnSpecialty` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:709). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateOwnSpecialtyDto` (2 campos, 0 obligatorios). Delega en `ProfilesPractitionersService.updateOwnSpecialty`. No se determinaron tablas para esta operación.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:692` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:709` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: specialtyId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:692` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: specialtyId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:709` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
-| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
-|---|---|---|---|---|---|
-| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnSpecialty → ProfilesPractitionersService.updateOwnSpecialty → ProfileOwnershipService.requireOwnPractitionerProfileId → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
-| `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnSpecialty → ProfilesPractitionersService.updateOwnSpecialty → ProfileOwnershipService.requireOwnPractitionerProfileId → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `profiles.practitioner_specialties` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnSpecialty → ProfilesPractitionersService.updateOwnSpecialty | `src/modules/profiles/application/services/profiles-practitioners.service.ts:2670` |
-| `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnSpecialty → ProfilesPractitionersService.updateOwnSpecialty → PractitionerSpecialtiesRepository.findByIdForUpdate | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:101` |
-| `terminology.value_set_members` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnSpecialty → ProfilesPractitionersService.updateOwnSpecialty → MedicalSpecialtyCatalogService.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:438` |
-| `terminology.value_set_versions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnSpecialty → ProfilesPractitionersService.updateOwnSpecialty → MedicalSpecialtyCatalogService.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:612` |
-| `terminology.value_sets` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnSpecialty → ProfilesPractitionersService.updateOwnSpecialty → MedicalSpecialtyCatalogService.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.listMemberIds → ProfilesTerminologyAdapter.findByInternalCode → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:121` |
+No se determinaron tablas para esta operación (**SIN_DETERMINAR**).
 
 ### Parámetros
 
@@ -10836,10 +10772,7 @@ _No se identificó un DTO de respuesta con campos._
 | 204 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cuenta no tiene un perfil profesional asociado |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Especialidad no encontrada |
-| 409 | `CONFLICT` | ConflictException: El profesional ya tiene esa especialidad activa |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Esa especialidad ya no está pendiente de verificación; no se puede {verb}; PreconditionFailedException: El catálogo de especialidades médicas no está disponible; PreconditionFailedException: La especialidad no pertenece al catálogo de especialidades médicas |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/profiles.md).
@@ -10859,9 +10792,9 @@ _Ninguna prueba existente menciona esta operación._
 - **Origen:** CONTRATO
 - **Nombre:** Marcar una especialidad propia como la principal
 - **Bloque:** Núcleo y Terminología
-- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPractitionersController.setOwnPrimarySpecialty` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:668`
+- **Implementación:** `ProfilesPractitionersController.setOwnPrimarySpecialty` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:684`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -10871,26 +10804,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary` la atiende `ProfilesPractitionersController.setOwnPrimarySpecialty` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:668). Exige sesión; el controlador no declara roles. Delega en `ProfilesPractitionersService.setOwnPrimarySpecialty`. Actualiza profiles.practitioner_specialties. Lee profiles.health_practitioner_profiles, profiles.person_account_links, profiles.practitioner_specialties.
+`PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary` la atiende `ProfilesPractitionersController.setOwnPrimarySpecialty` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:684). Exige sesión; el controlador no declara roles. Delega en `ProfilesPractitionersService.setOwnPrimarySpecialty`. No se determinaron tablas para esta operación.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:668` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:684` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: specialtyId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:668` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: specialtyId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:684` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
-| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
-|---|---|---|---|---|---|
-| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setOwnPrimarySpecialty → ProfilesPractitionersService.setOwnPrimarySpecialty → ProfileOwnershipService.requireOwnPractitionerProfileId → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
-| `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setOwnPrimarySpecialty → ProfilesPractitionersService.setOwnPrimarySpecialty → ProfileOwnershipService.requireOwnPractitionerProfileId → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `profiles.practitioner_specialties` | ESCRIBE | ACTUALIZA | DIRECTA | ProfilesPractitionersController.setOwnPrimarySpecialty → ProfilesPractitionersService.setOwnPrimarySpecialty → PractitionerSpecialtiesRepository.demotePrimary | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:228` |
-| `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setOwnPrimarySpecialty → ProfilesPractitionersService.setOwnPrimarySpecialty → PractitionerSpecialtiesRepository.findById | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:93` |
+No se determinaron tablas para esta operación (**SIN_DETERMINAR**).
 
 ### Parámetros
 
@@ -10919,9 +10847,7 @@ La operación no recibe cuerpo.
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cuenta no tiene un perfil profesional asociado |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Especialidad no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una especialidad que ya no ejerce no puede ser la principal |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/profiles.md).
@@ -10945,7 +10871,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPractitionersController.getOwnPractitionerProfile` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:97`
+- **Implementación:** `ProfilesPractitionersController.getOwnPractitionerProfile` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:102`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -10955,14 +10881,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /profiles/practitioners/me/summary` la atiende `ProfilesPractitionersController.getOwnPractitionerProfile` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:97). Exige sesión; el controlador no declara roles. Delega en `ProfilesPractitionersService.getOwnPractitionerProfile`. Lee chart.clinical_note_headers, chart.document_records, clinical.encounters, clinical.medication_requests, common.addresses, common.contact_points, common.identifiers, profiles.health_practitioner_profiles y 8 más.
+`GET /profiles/practitioners/me/summary` la atiende `ProfilesPractitionersController.getOwnPractitionerProfile` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:102). Exige sesión; el controlador no declara roles. Delega en `ProfilesPractitionersService.getOwnPractitionerProfile`. Lee chart.clinical_note_headers, chart.document_records, clinical.encounters, clinical.medication_requests, common.addresses, common.contact_points, common.identifiers, profiles.health_practitioner_profiles y 8 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:97` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:102` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -10970,10 +10896,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:47` |
-| `chart.document_records` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:48` |
-| `clinical.encounters` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:45` |
-| `clinical.medication_requests` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:46` |
+| `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:55` |
+| `chart.document_records` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:56` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:53` |
+| `clinical.medication_requests` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:54` |
 | `common.addresses` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentAddress → AddressesRepository.findCurrentByOwnerAndUse | `src/modules/common/repositories/addresses.repository.ts:95` |
 | `common.contact_points` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → PersonRecordsAdapter.findAllCurrentContacts → ContactPointsRepository.findAllCurrentByOwner | `src/modules/common/repositories/contact-points.repository.ts:71` |
 | `common.identifiers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentIdentifiers | `src/modules/profiles/infrastructure/adapters/person-records.adapter.ts:129` |
@@ -11146,7 +11072,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ProfilesPractitionersController.countPractitionersBySpecialty` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:195`
+- **Implementación:** `ProfilesPractitionersController.countPractitionersBySpecialty` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:200`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -11156,14 +11082,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /profiles/practitioners/specialty-counts` la atiende `ProfilesPractitionersController.countPractitionersBySpecialty` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:195). Exige sesión; el controlador no declara roles. Delega en `ProfilesPractitionersService.countPractitionersBySpecialty`. Lee profiles.health_practitioner_profiles, profiles.practitioner_specialties.
+`GET /profiles/practitioners/specialty-counts` la atiende `ProfilesPractitionersController.countPractitionersBySpecialty` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:200). Exige sesión; el controlador no declara roles. Delega en `ProfilesPractitionersService.countPractitionersBySpecialty`. Lee profiles.health_practitioner_profiles, profiles.practitioner_specialties.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:195` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:200` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -11419,7 +11345,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:90` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: tenantId, affiliationId | `src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:90` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -11531,7 +11457,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:118` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: tenantId, affiliationId | `src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:118` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 

@@ -59,6 +59,7 @@ export const auditForeignKeys1: readonly ForeignKeyTuple[] = [
   ['audit_log', 'device_id', 'iam', 'devices', 'id'],
   ['audit_log', 'outcome_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['audit_log', 'recorded_by_user_id', 'iam', 'users', 'id'],
+  ['audit_log', 'session_id', 'iam', 'sessions', 'id'],
   ['audit_log', 'tenant_id', 'directory', 'tenants', 'id'],
   ['audit_log', 'user_id', 'iam', 'users', 'id'],
   ['automated_rules_history', 'automated_rules_id', 'ads', 'automated_rules', 'id'],
@@ -186,5 +187,4 @@ export const auditForeignKeys1: readonly ForeignKeyTuple[] = [
   ['custom_conversions_history', 'change_reason_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['custom_conversions_history', 'changed_by_user_id', 'iam', 'users', 'id'],
   ['custom_conversions_history', 'custom_conversions_id', 'ads', 'custom_conversions', 'id'],
-  ['custom_conversions_history', 'operation_concept_id', 'terminology', 'catalog_concepts', 'id'],
 ];

@@ -18,13 +18,15 @@ export function integrationNotConfigured(): PreconditionFailedException {
 }
 
 /** 502: el sistema de la farmacia externa no respondió o no se le entendió. */
-export function integrationUnavailable(): DomainException {
+export function integrationUnavailable(
+  errorReason?: 'AUTH_REJECTED' | 'UNREACHABLE',
+): DomainException {
   const reason = PharmacyInventoryErrorReason.PHARMACY_INTEGRATION_UNAVAILABLE;
   return new DomainException(
     HttpStatus.BAD_GATEWAY,
     ErrorCode.DEPENDENCY_UNAVAILABLE,
     'No pudimos hablar con el sistema de la farmacia',
-    { reason },
+    { reason, ...(errorReason ? { errorReason } : {}) },
     reason,
   );
 }
@@ -35,6 +37,17 @@ export function integrationConnectionInactive(): PreconditionFailedException {
     PharmacyInventoryErrorReason.PHARMACY_INTEGRATION_CONNECTION_INACTIVE;
   return new PreconditionFailedException(
     'La conexión no está activa o no permite consultar stock',
+    { reason },
+    reason,
+  );
+}
+
+/** 422: el sistema de la farmacia está en una dirección que la plataforma no llama. */
+export function integrationHostNotAllowed(): PreconditionFailedException {
+  const reason =
+    PharmacyInventoryErrorReason.PHARMACY_INTEGRATION_HOST_NOT_ALLOWED;
+  return new PreconditionFailedException(
+    'La dirección del sistema de la farmacia no está permitida',
     { reason },
     reason,
   );

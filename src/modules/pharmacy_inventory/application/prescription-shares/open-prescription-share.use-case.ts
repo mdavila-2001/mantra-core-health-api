@@ -103,7 +103,7 @@ export class OpenPrescriptionShareUseCase {
     context: PrescriptionShareOpenContext = {},
   ): Promise<PharmacyPrescriptionShareDto> {
     const tenantId = requireTenantId();
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
 
     // Antes de abrir: sin farmacia verificada no queda un uso registrado.
     const pharmacies = await this.directory.findVisibleByTenant(em, tenantId);

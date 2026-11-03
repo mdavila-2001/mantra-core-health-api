@@ -6,6 +6,7 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
   getCurrentTenantId,
+  roleAuthorizesInTenant,
   type AuthenticatedUser,
 } from '../../../common';
 import { ServiceCatalogRepository } from '../../billing/repositories';
@@ -311,10 +312,13 @@ export class QuotationsService {
       const tenantPractice =
         await this.practiceTenantLookup.findTenantOfPractice(practiceId);
       // Sin tenant en contexto son los carriles internos, que no pasan por la
-      // cabecera: lo único que se exige es que la práctica exista.
+      // cabecera: se exige que la práctica exista. En los dos casos el rol se
+      // mide en el tenant de la práctica (#1241): el acotado en `scopedRoles`
+      // a otra organización no la alcanza por tener membresía en la suya.
       if (
         tenantPractice !== null &&
-        (tenantId === undefined || tenantPractice === tenantId)
+        (tenantId === undefined || tenantPractice === tenantId) &&
+        roleAuthorizesInTenant(actor, 'SECURITY_ADMIN', tenantPractice)
       ) {
         return true;
       }
@@ -344,7 +348,12 @@ export class QuotationsService {
     let administrativeScope = false;
     if (actor.roles.includes('SECURITY_ADMIN')) {
       const tenantId = getCurrentTenantId();
-      if (tenantId !== undefined) {
+      // Las prácticas que suma son las de `tenantId`: el rol se mide ahí
+      // (#1241), así que el acotado a otra organización no suma ninguna.
+      if (
+        tenantId !== undefined &&
+        roleAuthorizesInTenant(actor, 'SECURITY_ADMIN', tenantId)
+      ) {
         administrativeScope = true;
         const ofTenant =
           await this.practiceTenantLookup.findActivePracticeIdsForTenant(
