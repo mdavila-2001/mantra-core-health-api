@@ -57,6 +57,8 @@ export enum AuthzErrorReason {
 
   /** Ya existe una relación asistencial activa para ese (paciente, practicante). */
   CARE_RELATIONSHIP_ALREADY_ACTIVE = 'CARE_RELATIONSHIP_ALREADY_ACTIVE',
+  /** Ya hay una solicitud de relación asistencial pendiente de respuesta para ese (paciente, practicante). */
+  CARE_RELATIONSHIP_REQUEST_ALREADY_PENDING = 'CARE_RELATIONSHIP_REQUEST_ALREADY_PENDING',
   /** No se encontró la relación asistencial a revocar. */
   CARE_RELATIONSHIP_NOT_FOUND = 'CARE_RELATIONSHIP_NOT_FOUND',
   /** La relación asistencial a revocar no está en estado activo. */
