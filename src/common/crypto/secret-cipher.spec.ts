@@ -1,5 +1,9 @@
 import { createCipheriv, randomBytes, scryptSync } from 'node:crypto';
-import { decryptSecret, encryptSecret } from './secret-cipher';
+import {
+  decryptSecret,
+  encryptSecret,
+  isSecretCipherConfigured,
+} from './secret-cipher';
 import { SecretCipherError } from '../errors/secret-cipher.error';
 
 /**
@@ -136,6 +140,36 @@ describe('secret-cipher', () => {
       process.env.NODE_ENV = 'production';
       expect(() => decryptSecret(enc)).toThrow(/MFA_ENCRYPTION_KEY/);
       expect(() => decryptSecret(enc)).not.toThrow(SecretCipherError);
+    });
+  });
+
+  describe('isSecretCipherConfigured (H-05)', () => {
+    it.each([
+      [{}],
+      [{ MFA_ENCRYPTION_KEY: '' }],
+      [{ MFA_ENCRYPTION_KEY: '   ' }],
+      [{ NODE_ENV: 'production' }],
+      [
+        {
+          NODE_ENV: 'production',
+          MFA_ENCRYPTION_KEY: 'dev-only-insecure-mfa-key-change-me',
+        },
+      ],
+    ])('is false without a real key: %j', (env) => {
+      expect(isSecretCipherConfigured(env as NodeJS.ProcessEnv)).toBe(false);
+    });
+
+    it.each([
+      [{ MFA_ENCRYPTION_KEY: clave }],
+      [{ NODE_ENV: 'production', MFA_ENCRYPTION_KEY: clave }],
+      [
+        {
+          NODE_ENV: 'development',
+          MFA_ENCRYPTION_KEY: 'dev-only-mfa-key-change-me',
+        },
+      ],
+    ])('is true with a key: %j', (env) => {
+      expect(isSecretCipherConfigured(env as NodeJS.ProcessEnv)).toBe(true);
     });
   });
 });

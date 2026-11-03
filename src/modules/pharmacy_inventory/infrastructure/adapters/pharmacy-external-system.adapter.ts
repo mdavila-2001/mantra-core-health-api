@@ -6,7 +6,12 @@ import type { ExternalSystemCheckToken } from '../../application/ports/external-
 import { INTEG } from '../../../integrations/integrations.concepts';
 import { Inject, Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { decryptSecret, encryptSecret, touch } from '../../../../common';
+import {
+  decryptSecret,
+  encryptSecret,
+  isSecretCipherConfigured,
+  touch,
+} from '../../../../common';
 import {
   EXTERNAL_PHARMACY_CATALOG_PORT,
   type ExternalPharmacyCatalogPort,
@@ -46,6 +51,10 @@ export class PharmacyExternalSystemAdapter implements ExternalPharmacySystemPort
 
   serverConfigured(): boolean {
     return this.server.isConfigured();
+  }
+
+  canStoreCredentials(): boolean {
+    return isSecretCipherConfigured();
   }
 
   async resolve(
@@ -198,6 +207,11 @@ export class PharmacyExternalSystemAdapter implements ExternalPharmacySystemPort
       actorUserId: string;
     },
   ): Promise<string> {
+    // Segunda línea de defensa (la primera está en el caso de uso): sin clave de
+    // cifrado real no se escribe ni la conexión, y la clave jamás va en claro.
+    if (!isSecretCipherConfigured()) {
+      throw new Error('MFA_ENCRYPTION_KEY is not configured');
+    }
     const configJson = {
       ...externalSystemConfigJson(data.config),
       configuredAt: new Date().toISOString(),

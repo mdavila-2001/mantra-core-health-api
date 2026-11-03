@@ -93,6 +93,18 @@ export enum PharmacyInventoryErrorReason {
   PHARMACY_INTEGRATION_HOST_NOT_ALLOWED = 'PHARMACY_INTEGRATION_HOST_NOT_ALLOWED',
   /** La dirección no es una URL http(s) válida (sin usuario, sin consulta). */
   PHARMACY_INTEGRATION_URL_INVALID = 'PHARMACY_INTEGRATION_URL_INVALID',
+  /**
+   * H-05: el servidor no tiene `MFA_ENCRYPTION_KEY` (o es la de desarrollo en
+   * producción): no se prueba ni se guarda la clave del sistema de la farmacia,
+   * porque no hay con qué cifrarla. Nunca se guarda en claro.
+   */
+  PHARMACY_INTEGRATION_ENCRYPTION_NOT_CONFIGURED = 'PHARMACY_INTEGRATION_ENCRYPTION_NOT_CONFIGURED',
+  /**
+   * H-05: a las sedes de la conexión les aplica también otra conexión activa
+   * que consulta stock. No se sincroniza ninguna de las dos hasta que quede una
+   * sola: elegir una en silencio pisaría el stock de la otra.
+   */
+  PHARMACY_INTEGRATION_CONNECTION_AMBIGUOUS = 'PHARMACY_INTEGRATION_CONNECTION_AMBIGUOUS',
   /** F5c: el espacio o la unidad no son de la sede de práctica de la sede de farmacia. */
   STOCK_POINT_SITE_MISMATCH = 'STOCK_POINT_SITE_MISMATCH',
   /** F5c: la función del espacio no tiene perfil `stockPoint` o el espacio no está activo. */

@@ -66,6 +66,13 @@ export interface ExternalPharmacySystemPort {
   serverConfigured(): boolean;
 
   /**
+   * Si el servidor puede cifrar la clave del sistema de una farmacia
+   * (`MFA_ENCRYPTION_KEY`). Si no, no se prueba ni se guarda nada: la clave
+   * nunca se guarda en claro (H-05).
+   */
+  canStoreCredentials(): boolean;
+
+  /**
    * El sistema con que se habla para una conexión de farmacia: el suyo si
    * tiene `connectionId`, si no el del servidor.
    */

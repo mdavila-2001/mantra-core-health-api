@@ -25,6 +25,7 @@ import {
   type ExternalSystemConfig,
 } from '../../domain/sync/external-system';
 import {
+  integrationEncryptionNotConfigured,
   integrationHostNotAllowed,
   integrationUnavailable,
 } from './integration-errors';
@@ -33,7 +34,8 @@ import type { ConnectionRef } from './sync-external-pharmacy-catalog.use-case';
 /**
  * Configura, prueba y quita el sistema propio de una conexión de farmacia
  * (FAR-C9 · C9-3). Guardar prueba antes el sistema: si no responde con esa
- * clave, no se escribe nada.
+ * clave, no se escribe nada. Sin `MFA_ENCRYPTION_KEY` falla en cerrado (503
+ * `PHARMACY_INTEGRATION_ENCRYPTION_NOT_CONFIGURED`) antes de llamar a nadie.
  */
 @Injectable()
 export class ConfigureExternalSystemUseCase {
@@ -52,6 +54,11 @@ export class ConfigureExternalSystemUseCase {
     dto: ConfigureExternalSystemDto,
     actor: AuthenticatedUser,
   ): Promise<ExternalSystemResponseDto> {
+    // Sin con qué cifrar no se prueba ni se guarda: la clave llegó en claro y no
+    // puede quedar en ningún lado, ni siquiera en un intento (H-05).
+    if (!this.systems.canStoreCredentials()) {
+      throw integrationEncryptionNotConfigured();
+    }
     const config: ExternalSystemConfig = {
       format: dto.format,
       baseUrl: normalizeBaseUrl(dto.baseUrl),

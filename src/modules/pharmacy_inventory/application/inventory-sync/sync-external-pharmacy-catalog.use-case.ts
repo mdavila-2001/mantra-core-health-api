@@ -16,6 +16,7 @@ import {
   type ExternalProduct,
   type ExternalStockLine,
 } from '../../domain/sync/external-catalog';
+import { conflictingStockConnections } from '../../domain/sync/connection-coverage';
 import {
   mappedCodesNotSent,
   translateExternalStock,
@@ -45,6 +46,7 @@ import {
 import { SiteStockWriter } from '../site-availability/site-stock-writer';
 import { CreateInventorySyncBatchUseCase } from './create-inventory-sync-batch.use-case';
 import {
+  integrationConnectionAmbiguous,
   integrationConnectionInactive,
   integrationHostNotAllowed,
   integrationNotConfigured,
@@ -95,6 +97,9 @@ interface SiteOutcome {
  * (`reconcile-inventory-sync-batch.use-case.ts`). Por eso, en orden:
  *
  * 1. Lee la conexión, sus sedes y sus vínculos dentro del ámbito del actor.
+ *    Si a esas sedes les aplica otra conexión activa que también consulta
+ *    stock, 409 `PHARMACY_INTEGRATION_CONNECTION_AMBIGUOUS` y no se hace nada
+ *    (H-05).
  * 2. Llama al sistema externo **fuera** de toda transacción; si no responde,
  *    502 y no queda lote.
  * 3. Traduce: lo que no tiene un vínculo único va al lote sin producto y se
@@ -263,6 +268,24 @@ export class SyncExternalPharmacyCatalogUseCase {
         pharmacy.pharmacyId,
         connection.pharmacySiteId ?? undefined,
       );
+      // H-05: si otra conexión activa también escribe stock en estas sedes, no
+      // se elige una en silencio: se pide dejar una sola.
+      const conflicting = conflictingStockConnections(
+        connection,
+        sites.map((site) => site.id),
+        (await this.reads.findConnections(tx, pharmacy.pharmacyId)).map(
+          (other) => ({
+            id: other.id,
+            pharmacySiteId: other.pharmacySiteId ?? null,
+            writesStock:
+              other.statusConceptId === PHARM.CONNECTION_ACTIVE &&
+              other.supportsStockQuery === true,
+          }),
+        ),
+      );
+      if (conflicting.length > 0) {
+        throw integrationConnectionAmbiguous(conflicting);
+      }
       const mappings = (await this.reads.findMappings(tx, connection.id)).map(
         (mapping) => ({
           externalProductCode: mapping.externalProductCode,

@@ -52,3 +52,38 @@ export function integrationHostNotAllowed(): PreconditionFailedException {
     reason,
   );
 }
+
+/**
+ * 503: el servidor no tiene con qué cifrar la clave del sistema de la farmacia
+ * (`MFA_ENCRYPTION_KEY`). Es del despliegue, no de quien guarda: reintentar no
+ * sirve hasta que se configure.
+ */
+export function integrationEncryptionNotConfigured(): DomainException {
+  const reason =
+    PharmacyInventoryErrorReason.PHARMACY_INTEGRATION_ENCRYPTION_NOT_CONFIGURED;
+  return new DomainException(
+    HttpStatus.SERVICE_UNAVAILABLE,
+    ErrorCode.DEPENDENCY_UNAVAILABLE,
+    'El servidor no puede guardar la clave del sistema de la farmacia: falta configurar el cifrado',
+    { reason },
+    reason,
+  );
+}
+
+/**
+ * 409: a las sedes de la conexión les aplica otra conexión activa que también
+ * consulta stock. Se informa cuáles para que la farmacia deje una.
+ */
+export function integrationConnectionAmbiguous(
+  conflictingConnectionIds: readonly string[],
+): DomainException {
+  const reason =
+    PharmacyInventoryErrorReason.PHARMACY_INTEGRATION_CONNECTION_AMBIGUOUS;
+  return new DomainException(
+    HttpStatus.CONFLICT,
+    ErrorCode.CONFLICT,
+    'A las sedes de esta conexión les aplica más de una conexión de stock; deje una sola activa',
+    { reason, conflictingConnectionIds: [...conflictingConnectionIds] },
+    reason,
+  );
+}

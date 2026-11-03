@@ -47,6 +47,8 @@ function build(
     marked?: string[];
     /** Códigos que el sistema externo manda por sede (todos, si falta). */
     sentCodes?: string[];
+    /** Otras conexiones de la misma farmacia (H-05). */
+    otherConnections?: Record<string, unknown>[];
   } = {},
 ) {
   // Una transacción distinta por llamada, para ver qué corre en cuál.
@@ -63,6 +65,12 @@ function build(
     findConnection: jest.fn(async () =>
       options.connection === undefined ? connection() : options.connection,
     ),
+    findConnections: jest.fn(async () => [
+      options.connection === undefined || options.connection === null
+        ? connection()
+        : options.connection,
+      ...(options.otherConnections ?? []),
+    ]),
     findActiveSites: jest.fn(
       async (_tx: unknown, _p: string, siteId?: string) =>
         siteId ? SITES.filter((s) => s.id === siteId) : SITES,
@@ -199,6 +207,50 @@ describe('SyncExternalPharmacyCatalogUseCase', () => {
       );
     },
   );
+
+  describe('H-05 · una sola conexión de stock por sede', () => {
+    it('another active stock connection covering the same sites → 409, nothing is called or written', async () => {
+      const d = build({
+        otherConnections: [
+          connection({ id: 'conn-2', pharmacySiteId: 'site-2' }),
+        ],
+      });
+      let thrown: any;
+      try {
+        await d.useCase.execute(REF, ACTOR);
+      } catch (error) {
+        thrown = error;
+      }
+      expect(thrown?.reason).toBe(
+        PharmacyInventoryErrorReason.PHARMACY_INTEGRATION_CONNECTION_AMBIGUOUS,
+      );
+      expect(thrown.getStatus()).toBe(409);
+      expect(JSON.stringify(thrown.getResponse())).toContain('conn-2');
+      expect(d.external.listProducts).not.toHaveBeenCalled();
+      expect(d.createBatch.execute).not.toHaveBeenCalled();
+      expect(d.writer.write).not.toHaveBeenCalled();
+    });
+
+    it('a connection tied to another site does not conflict', async () => {
+      const d = build({
+        connection: connection({ pharmacySiteId: 'site-1' }),
+        otherConnections: [
+          connection({ id: 'conn-2', pharmacySiteId: 'site-2' }),
+        ],
+      });
+      await expect(d.useCase.execute(REF, ACTOR)).resolves.toBeDefined();
+    });
+
+    it('an inactive or no-stock-query connection does not conflict', async () => {
+      const d = build({
+        otherConnections: [
+          connection({ id: 'conn-2', statusConceptId: 'other' }),
+          connection({ id: 'conn-3', supportsStockQuery: false }),
+        ],
+      });
+      await expect(d.useCase.execute(REF, ACTOR)).resolves.toBeDefined();
+    });
+  });
 
   it('not configured → 422 without batch', async () => {
     const d = build({ configured: false });
