@@ -80,6 +80,11 @@ export class PharmacyIntegrationSyncController {
   }
 
   /** Prueba el sistema que usa hoy la conexión. */
+  @Audited({
+    action: 'PHARMACY_EXTERNAL_SYSTEM_PROBED',
+    entity: 'pharmacy_integration_connection',
+    entityId: 'param:connectionId',
+  })
   @Post(
     ':pharmacyId/integration-connections/:connectionId/external-system/test',
   )
