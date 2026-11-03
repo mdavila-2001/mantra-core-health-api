@@ -1,4 +1,9 @@
-import { hasPrivilegedTenantRole } from './tenant-resolution';
+import type { Request } from 'express';
+import {
+  hasPrivilegedTenantRole,
+  resolveOrdinaryTenantId,
+  resolveRequestTenantId,
+} from './tenant-resolution';
 import type { AuthenticatedUser } from '../auth/authenticated-user.interface';
 
 const user = (over: Partial<AuthenticatedUser>): AuthenticatedUser => ({
@@ -41,5 +46,53 @@ describe('hasPrivilegedTenantRole', () => {
         }),
       ),
     ).toBe(true);
+  });
+});
+
+describe('resolveOrdinaryTenantId · el paciente y la organización que declara', () => {
+  const declaring = (tenantId: string): Request =>
+    ({ headers: { 'x-tenant-id': tenantId } }) as unknown as Request;
+  const patient = user({ roles: ['PATIENT'], tenantIds: ['tenant-default'] });
+
+  it('sin la marca de la ruta, una organización ajena sigue siendo 403', () => {
+    expect(() =>
+      resolveOrdinaryTenantId(declaring('tenant-otra'), patient),
+    ).toThrow('El actor no pertenece al tenant indicado en X-Tenant-Id');
+  });
+
+  it('con la marca, un paciente agenda en una organización de la que no es miembro', () => {
+    expect(
+      resolveOrdinaryTenantId(declaring('tenant-otra'), patient, {
+        patientAnyTenant: true,
+      }),
+    ).toBe('tenant-otra');
+  });
+
+  it('con la marca, lo mismo vale para el camino general de resolución', () => {
+    expect(
+      resolveRequestTenantId(declaring('tenant-otra'), patient, {
+        patientAnyTenant: true,
+      }),
+    ).toBe('tenant-otra');
+  });
+
+  it('con la marca, quien no es paciente sigue necesitando membresía', () => {
+    const staff = user({
+      roles: ['PRACTITIONER'],
+      tenantIds: ['tenant-default'],
+    });
+    expect(() =>
+      resolveOrdinaryTenantId(declaring('tenant-otra'), staff, {
+        patientAnyTenant: true,
+      }),
+    ).toThrow('El actor no pertenece al tenant indicado en X-Tenant-Id');
+  });
+
+  it('con la marca, sin cabecera se resuelve como siempre (su única membresía)', () => {
+    expect(
+      resolveOrdinaryTenantId({ headers: {} } as unknown as Request, patient, {
+        patientAnyTenant: true,
+      }),
+    ).toBe('tenant-default');
   });
 });

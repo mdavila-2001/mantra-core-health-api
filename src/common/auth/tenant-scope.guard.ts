@@ -11,6 +11,7 @@ import {
   PLATFORM_SCOPE_OPTIONAL_KEY,
   isPlatformScopeRequest,
 } from '../tenant/platform-scope';
+import { PATIENT_ANY_TENANT_KEY } from '../tenant/patient-any-tenant.decorator';
 import { resolveRequestTenantId } from '../tenant/tenant-resolution';
 import type { AuthenticatedRequest } from './authenticated-user.interface';
 
@@ -78,7 +79,13 @@ export class TenantScopeGuard implements CanActivate {
     if (isPlatformScopeRequest(platformScope, request, user, routeRoles))
       return true;
 
-    request.resolvedTenantId = resolveRequestTenantId(request, user);
+    const patientAnyTenant = this.reflector.getAllAndOverride<boolean>(
+      PATIENT_ANY_TENANT_KEY,
+      [context.getHandler(), context.getClass()],
+    );
+    request.resolvedTenantId = resolveRequestTenantId(request, user, {
+      patientAnyTenant: patientAnyTenant === true,
+    });
     return true;
   }
 }

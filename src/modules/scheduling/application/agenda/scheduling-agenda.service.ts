@@ -18,6 +18,7 @@ import {
 import type { BookableSlots, SchedulableResources } from '../../entities';
 import {
   AGENDA_MAX_LIMIT,
+  BookableOrganizationsResponseDto,
   ListResourcesQueryDto,
   ListResourcesResponseDto,
   ListSlotsQueryDto,
@@ -74,6 +75,71 @@ export class SchedulingAgendaService {
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(SchedulingAgendaService.name);
+  }
+
+  /**
+   * Las organizaciones con las que un paciente puede pedir cita **hoy**: las
+   * que tienen algún profesional o laboratorio con un cupo abierto por delante.
+   *
+   * ## Por qué cruza organizaciones
+   *
+   * El paciente no es de una organización: pide cita con la que tiene a su
+   * profesional. Sin esta lectura, «Mis citas» sólo podía mostrar la agenda de
+   * la organización por defecto de la cuenta, y el resto era inalcanzable. La
+   * lista sólo trae lo que hace falta para elegir —identificador, nombre y
+   * cuántos hay— y nada de la organización que no sea público para quien va a
+   * reservar; los profesionales y sus cupos se piden después, uno a uno, con
+   * `X-Tenant-Id` (`@PatientAnyTenant`).
+   *
+   * Corre en contexto de sistema porque RLS acota toda lectura al tenant de la
+   * cuenta, que es justo lo que esta pregunta tiene que saltarse.
+   */
+  async listBookableOrganizations(): Promise<BookableOrganizationsResponseDto> {
+    const rows = await this.em.transactional(async (tx) => {
+      await tx.execute("select set_config('app.system_context', 'true', true)");
+      return tx.execute<
+        {
+          tenant_id: string;
+          name: string;
+          practitioner_count: string;
+          room_count: string;
+        }[]
+      >(
+        `SELECT t.id AS tenant_id,
+                coalesce(nullif(t.trade_name, ''), t.legal_name) AS name,
+                count(DISTINCT r.id) FILTER (WHERE r.resource_type_concept_id = ?) AS practitioner_count,
+                count(DISTINCT r.id) FILTER (WHERE r.resource_type_concept_id = ?) AS room_count
+           FROM directory.tenants t
+           JOIN scheduling.schedulable_resources r
+             ON r.tenant_id = t.id AND r.state_concept_id = ?
+           JOIN scheduling.bookable_slots s
+             ON s.resource_id = r.id
+            AND s.status_concept_id = ?
+            AND s.remaining_capacity > 0
+            AND s.start_at > now()
+          WHERE t.status_concept_id = ?
+            AND r.resource_type_concept_id IN (?, ?)
+          GROUP BY t.id, name
+          ORDER BY name`,
+        [
+          CONCEPTS.RESOURCE_PRACTITIONER,
+          CONCEPTS.RESOURCE_ROOM,
+          CONCEPTS.STATE_ACTIVE,
+          CONCEPTS.SLOT_OPEN,
+          CONCEPTS.TENANT_ACTIVE,
+          CONCEPTS.RESOURCE_PRACTITIONER,
+          CONCEPTS.RESOURCE_ROOM,
+        ],
+      );
+    });
+
+    const items = rows.map((row) => ({
+      tenantId: row.tenant_id,
+      name: row.name,
+      practitionerCount: Number(row.practitioner_count),
+      roomCount: Number(row.room_count),
+    }));
+    return { items, count: items.length };
   }
 
   /** Recursos agendables del tenant. */
