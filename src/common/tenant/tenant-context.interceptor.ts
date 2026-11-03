@@ -200,6 +200,15 @@ export class TenantContextInterceptor implements NestInterceptor {
                 "select set_config('app.current_tenant_id', ?, true)",
                 [tenantId],
               );
+              // H-01: el paciente espectador del mercado lee las farmacias
+              // PUBLICADAS de otras organizaciones (política de sólo lectura
+              // `pharmacies_marketplace_read`). Se declara sólo para él, nunca
+              // desde el cliente, y dentro de la transacción del request.
+              if (marketplaceViewer) {
+                await this.em.execute(
+                  "select set_config('app.marketplace_viewer', 'true', true)",
+                );
+              }
               return lastValueFrom(next.handle());
             }),
           ),

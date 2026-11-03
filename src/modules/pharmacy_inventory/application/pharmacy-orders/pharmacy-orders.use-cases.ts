@@ -452,14 +452,19 @@ export class PharmacyOrdersUseCases {
         await this.ordersRepo.findLinesByReservationIds(tx, [reservation.id]),
       );
 
+      // H-01: el outbox está bajo RLS y se escribe con el tenant de la sesión.
+      // Si la farmacia es de otra organización que el paciente, el evento se
+      // registra en la del paciente (quien lo origina) y lleva el tenant de la
+      // farmacia en el payload; la mensajería no se abre a otras organizaciones.
       await this.outbox.publish(tx, {
-        tenantId: pharmacy.tenantId,
+        tenantId: getCurrentTenantId() ?? pharmacy.tenantId,
         eventType: 'PharmacyOrderSubmitted',
         aggregateType: 'pharmacy_inventory.inventory_reservations',
         aggregateId: reservation.id,
         payloadJson: {
           orderId: reservation.id,
           pharmacyId: pharmacy.id,
+          pharmacyTenantId: pharmacy.tenantId,
           pharmacySiteId: site.id,
           statusCode: 'PINV_ORDER_ENVIADO',
           lineCount: dto.lines.length,
