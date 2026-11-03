@@ -25,6 +25,7 @@ import {
   SelfRequestRoleAssignmentDto,
   RoleAssignmentTransitionDto,
   MyRoleAssignmentResponseDto,
+  JoinablePracticeResponseDto,
   ListPracticeRoleAssignmentsResponseDto,
 } from '../dto';
 
@@ -316,6 +317,64 @@ export class PracticeWorkforceService {
         avatarUrl: avatarsByPracticeId.get(a.practiceId) ?? null,
       };
     });
+  }
+
+  /**
+   * Las organizaciones a las que el profesional puede pedir vincularse.
+   *
+   * ## Por qué no es `GET /practices`
+   *
+   * Esa lectura se acota al tenant de la sesión: devuelve «las prácticas de mi
+   * organización activa». Quien quiere unirse a una organización **nueva** no
+   * pertenece a su tenant todavía, así que el selector de «Pedir una
+   * vinculación» salía siempre vacío. El autoservicio de
+   * {@link selfRequestAffiliation} ya cruza tenants a propósito (el profesional
+   * pide, la organización decide); la lista para elegir tiene que cruzarlos
+   * igual.
+   *
+   * Sólo devuelve id, nombre y tipo, y deja fuera:
+   * - los consultorios propios (`OFFICE`): son personales, no una organización
+   *   a la que uno se postule;
+   * - las organizaciones donde ya hay una vinculación viva (pendiente, activa o
+   *   suspendida), para no ofrecer una solicitud duplicada. Rechazadas y
+   *   finalizadas sí se ofrecen: volver a pedir es legítimo.
+   */
+  async listJoinablePractices(
+    actor: AuthenticatedUser,
+  ): Promise<JoinablePracticeResponseDto[]> {
+    if (!actor.practitionerProfileId) {
+      throw new PreconditionFailedException(
+        'La cuenta no tiene un perfil profesional asociado',
+        { actorId: actor.id },
+      );
+    }
+    const em = this.em.fork();
+    const [practices, assignments] = await Promise.all([
+      this.practicesRepo.findActive(em, PRAC.PRACTICE_ACTIVE),
+      this.rolesRepo.findByPractitioner(em, actor.practitionerProfileId),
+    ]);
+    const liveStatuses: string[] = [
+      PRAC.ROLE_ASSIGNMENT_PENDING,
+      PRAC.ROLE_ASSIGNMENT_ACTIVE,
+      PRAC.ROLE_ASSIGNMENT_SUSPENDED,
+    ];
+    const alreadyLinked = new Set(
+      assignments
+        .filter((a) => liveStatuses.includes(a.statusConceptId))
+        .map((a) => a.practiceId),
+    );
+    return practices
+      .filter(
+        (p) =>
+          p.typeConceptId !== PRAC.PRACTICE_TYPE_OFFICE &&
+          !alreadyLinked.has(p.id),
+      )
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((p) => ({
+        id: p.id,
+        name: p.name,
+        practiceType: p.typeConceptId,
+      }));
   }
 
   /**

@@ -29,6 +29,7 @@ import {
   PractitionerSiteDto,
   PractitionerSitesResponseDto,
   MyRoleAssignmentResponseDto,
+  JoinablePracticeResponseDto,
 } from '../dto';
 
 /**
@@ -78,6 +79,25 @@ export class PractitionerSitesController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<MyRoleAssignmentResponseDto[]> {
     return this.workforceService.listMyAssignments(actor);
+  }
+
+  /**
+   * Las organizaciones a las que se puede pedir vincularse: el selector de
+   * «Pedir una vinculación». Cruza tenants a propósito (ver
+   * `PracticeWorkforceService.listJoinablePractices`); por eso no usa
+   * `GET /practices`, que sólo ve la organización activa de la sesión.
+   */
+  @Get('me/joinable-practices')
+  @Roles('PRACTITIONER')
+  @ApiOperation({
+    summary: 'Organizaciones a las que puedo pedir vincularme',
+    description:
+      'Organizaciones activas de cualquier tenant, sin consultorios propios ni aquellas donde ya hay una vinculación pendiente, activa o suspendida.',
+  })
+  listJoinablePractices(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<JoinablePracticeResponseDto[]> {
+    return this.workforceService.listJoinablePractices(actor);
   }
 
   /** UC-14-15. */

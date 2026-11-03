@@ -98,3 +98,18 @@ export class MyRoleAssignmentResponseDto {
    */
   @ApiPropertyOptional({ nullable: true }) avatarUrl!: string | null;
 }
+
+/**
+ * Organización a la que el profesional puede pedir vincularse
+ * (`GET /practitioners/me/joinable-practices`). Sólo identificación: ni el
+ * tenant ni la configuración salen de su organización.
+ */
+export class JoinablePracticeResponseDto {
+  /** Organización (`practice.practices`). */
+  @ApiProperty({ format: 'uuid' }) id!: string;
+  /** Nombre legible de la organización. */
+  @ApiProperty() name!: string;
+  /** Tipo de organización (concepto). */
+  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  practiceType!: string | null;
+}
