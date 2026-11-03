@@ -601,7 +601,7 @@ export class SurveysTemplatesService {
    * que es la que se reparte. El servicio lleva su nombre del catálogo, para que
    * el cliente no tenga que resolver el identificador.
    */
-  private async listAssignments(
+  async listAssignments(
     templateId: string,
   ): Promise<TemplateAssignmentDto[]> {
     const versions = await this.templatesRepo.listVersions(this.em, templateId);
