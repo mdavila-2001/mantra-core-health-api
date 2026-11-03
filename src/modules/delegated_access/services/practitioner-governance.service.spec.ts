@@ -199,11 +199,45 @@ describe('PractitionerGovernanceService', () => {
       );
     });
 
-    it('un vínculo de lugar de la misma persona no la deja fuera', async () => {
+    it('una persona con un vínculo de lugar en la misma organización atiende a otros doctores: no entra', async () => {
       links.findLinks.mockImplementation(async (_em: unknown, f: any) =>
         f.supportUserId
           ? [ANA, { ...ANA, kind: 'LOCATION', practitionerProfileId: null }]
           : [ANA],
+      );
+      await service.pendingApprovals(DOCTOR, {});
+      expect(repo.findPendingForDoctor).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ team: [] }),
+      );
+    });
+
+    it('un vínculo de la persona en OTRA organización no la excluye de esta', async () => {
+      links.findLinks.mockImplementation(async (_em: unknown, f: any) =>
+        f.supportUserId
+          ? [
+              ANA,
+              {
+                ...ANA,
+                tenantId: 't-2',
+                kind: 'LOCATION',
+                practitionerProfileId: null,
+              },
+              { ...ANA, tenantId: 't-3', practitionerProfileId: 'pp-otro' },
+            ]
+          : [ANA],
+      );
+      await service.pendingApprovals(DOCTOR, {});
+      expect(repo.findPendingForDoctor).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ team: [KEY_ANA] }),
+      );
+    });
+
+    it('dos vínculos propios de la misma persona en la misma organización no la vuelven compartida y salen una vez', async () => {
+      const otro = { ...ANA, id: 'v-2' };
+      links.findLinks.mockImplementation(async (_em: unknown, f: any) =>
+        f.supportUserId ? [ANA, otro] : [ANA, otro],
       );
       await service.pendingApprovals(DOCTOR, {});
       expect(repo.findPendingForDoctor).toHaveBeenCalledWith(

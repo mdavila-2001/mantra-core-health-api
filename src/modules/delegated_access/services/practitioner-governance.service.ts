@@ -164,9 +164,13 @@ export class PractitionerGovernanceService {
    *
    * Las aprobaciones y alertas hablan de una **persona**, no de una agenda: si
    * la misma persona apoya a dos doctores, no se puede decir de cuál es lo que
-   * pasó, y mostrarlo a ambos filtraría la actividad de uno al otro. Por eso
-   * solo entran las personas sin vínculo activo con **otro** doctor (falla
-   * cerrado: una persona compartida no aparece, en vez de aparecer de más).
+   * pasó, y mostrarlo a ambos filtraría la actividad de uno al otro. Por eso,
+   * en cada organización, solo entran las personas cuyos **únicos** vínculos
+   * activos allí son con este doctor: otro doctor, o un vínculo de lugar
+   * (hospital, sede, servicio: la persona atiende a todos los de ese lugar),
+   * la vuelven compartida. Falla cerrado: una persona compartida no aparece,
+   * en vez de aparecer de más. Se mira por organización porque las aprobaciones
+   * y alertas son de una organización.
    */
   private async teamOf(actor: AuthenticatedUser): Promise<Team> {
     if (!actor.practitionerProfileId) return { keys: [], names: new Map() };
@@ -174,22 +178,30 @@ export class PractitionerGovernanceService {
       practitionerProfileId: actor.practitionerProfileId,
       statuses: ['ACTIVE'],
     });
-    const shared = new Set<string>();
+    const sharedHere = new Set<string>();
     for (const userId of new Set(mine.map((r) => r.supportUserId))) {
       const all = await this.links.findLinks(this.em.fork(), {
         supportUserId: userId,
         statuses: ['ACTIVE'],
       });
-      const ofAnotherDoctor = all.some(
-        (r) =>
-          r.kind === 'PRACTITIONER' &&
-          r.practitionerProfileId !== actor.practitionerProfileId,
-      );
-      if (ofAnotherDoctor) shared.add(userId);
+      for (const link of all) {
+        const isMine =
+          link.kind === 'PRACTITIONER' &&
+          link.practitionerProfileId === actor.practitionerProfileId;
+        if (!isMine) sharedHere.add(`${userId}|${link.tenantId}`);
+      }
     }
-    const own = mine.filter((r) => !shared.has(r.supportUserId));
+    const own = mine.filter(
+      (r) => !sharedHere.has(`${r.supportUserId}|${r.tenantId}`),
+    );
+    const keys = new Map(
+      own.map((r) => [
+        `${r.supportUserId}|${r.tenantId}`,
+        { userId: r.supportUserId, tenantId: r.tenantId },
+      ]),
+    );
     return {
-      keys: own.map((r) => ({ userId: r.supportUserId, tenantId: r.tenantId })),
+      keys: [...keys.values()],
       names: new Map(
         own.map((r) => [r.supportUserId, r.supportName ?? SOMEONE]),
       ),
