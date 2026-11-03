@@ -153,6 +153,8 @@ export class AuthzCareRelationshipsService {
       if (active) {
         throw new ConflictException(
           'Ya existe una relación asistencial activa con ese paciente',
+          undefined,
+          AuthzErrorReason.CARE_RELATIONSHIP_ALREADY_ACTIVE,
         );
       }
       const pending = await this.careRepo.findPendingInTenant(
@@ -164,6 +166,8 @@ export class AuthzCareRelationshipsService {
       if (pending) {
         throw new ConflictException(
           'Ya hay una solicitud pendiente de respuesta para ese paciente',
+          undefined,
+          AuthzErrorReason.CARE_RELATIONSHIP_REQUEST_ALREADY_PENDING,
         );
       }
 
