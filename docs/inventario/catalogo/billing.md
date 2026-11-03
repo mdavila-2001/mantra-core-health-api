@@ -2,7 +2,7 @@
 
 # Catálogo del schema `billing`
 
-- **Tablas:** 26 · **Columnas:** 397 (98 con descripción: 24.7 %) · **Índices:** 204
+- **Tablas:** 26 · **Columnas:** 397 (103 con descripción: 25.9 %) · **Índices:** 204
 - **Dominio:** Financiero y ERP
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -29,7 +29,7 @@
 | [quotations](#quotations) | Representa cotizaciones de prestaciones ligadas a una práctica y a una persona paciente, para informar y acordar costos antes de la atención. | 20 | 9 | 3 | COINCIDE |
 | [receivable_payment_allocations](#receivable_payment_allocations) | Asocia pagos recibidos con saldos y facturas por cobrar para explicar cómo se cancelaron obligaciones. | 11 | 7 | 12 | COINCIDE |
 | [reimbursements](#reimbursements) | Conserva reembolsos vinculados a pacientes, prestadores o transacciones de servicios de salud. | 11 | 5 | 2 | COINCIDE |
-| [service_catalog](#service_catalog) | Define prestaciones médicas y servicios facturables para mantener un catálogo común entre atención y cobro. | 18 | 9 | 66 | COINCIDE |
+| [service_catalog](#service_catalog) | Define prestaciones médicas y servicios facturables para mantener un catálogo común entre atención y cobro. | 18 | 9 | 67 | COINCIDE |
 | [siat_simulated_invoices](#siat_simulated_invoices) | sin propósito | 26 | 4 | 15 | COINCIDE |
 | [siat_simulated_outbox](#siat_simulated_outbox) | sin propósito | 8 | 1 | 2 | COINCIDE |
 | [space_tariffs](#space_tariffs) | Define la tarifa vigente por uso de un espacio o categoría de cama (día-cama, quirófano por tiempo) por práctica, sin vigencias solapadas, para valorizar los cargos devengados. | 19 | 11 | 6 | COINCIDE |
@@ -1959,7 +1959,7 @@ Define prestaciones médicas y servicios facturables para mantener un catálogo 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_17_billing.puml: service_catalog`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_17_billing.puml` · **DDL:** `SQL/17_billing/02_tables.sql`
 - **Entidad del ORM:** `ServiceCatalog` — `src/modules/billing/entities/service_catalog.entity.ts`
-- **Resumen:** 18 columnas · 9 índices · 8 FK salientes · 9 entrantes · 66 operaciones
+- **Resumen:** 18 columnas · 9 índices · 8 FK salientes · 9 entrantes · 67 operaciones
 
 #### Columnas
 
@@ -1978,11 +1978,11 @@ Define prestaciones médicas y servicios facturables para mantener un catálogo 
 | 11 | `tax_code_id` | `uuid` | Clave foránea → billing.tax_codes.id; Opcional | _sin dato_ | coincide |
 | 12 | `income_account_id` | `uuid` | Clave foránea → accounting.accounts.id; Opcional | _sin dato_ | coincide |
 | 13 | `is_active` | `boolean` | Obligatoria | _sin dato_ | coincide |
-| 14 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/billing/entities/service_catalog.entity.ts:91`)_ | coincide |
-| 15 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/billing/entities/service_catalog.entity.ts:97`)_ | coincide |
+| 14 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/billing/entities/service_catalog.entity.ts:94`)_ | coincide |
+| 15 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/billing/entities/service_catalog.entity.ts:100`)_ | coincide |
 | 16 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 17 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 18 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/billing/entities/service_catalog.entity.ts:115`)_ | coincide |
+| 18 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/billing/entities/service_catalog.entity.ts:118`)_ | coincide |
 
 #### Relaciones
 
@@ -2093,6 +2093,7 @@ Define prestaciones médicas y servicios facturables para mantener un catálogo 
 | POST /scheduling/service-offerings/{id}/holds | LEE | DIRECTA |
 | GET /scheduling/slots | LEE | DIRECTA |
 | POST /surveys/assignments | LEE | DIRECTA |
+| GET /surveys/catalog | LEE | DIRECTA |
 | GET /surveys/me/invitations | LEE | POR_SQL |
 | GET /surveys/me/invitations/{id} | LEE | POR_SQL |
 | GET /surveys/templates/{id} | LEE | DIRECTA |
@@ -2126,7 +2127,7 @@ _Sin propósito registrado._
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/billing/entities/siat_simulated_invoices.entity.ts:12`)_ | coincide |
 | 2 | `invoice_id` | `uuid` | Clave foránea → billing.invoices.id; Obligatoria | _sin dato_ | coincide |
 | 3 | `encounter_id` | `uuid` | Opcional | _sin dato_ | coincide |
 | 4 | `practice_id` | `uuid` | Clave foránea → practice.practices.id; Obligatoria | _sin dato_ | coincide |
@@ -2147,11 +2148,11 @@ _Sin propósito registrado._
 | 19 | `events` | `jsonb` | Obligatoria | _sin dato_ | coincide |
 | 20 | `simulated` | `boolean = true` | Obligatoria | _sin dato_ | coincide |
 | 21 | `siat_mode` | `varchar(12) = 'simulated'` | Obligatoria | _sin dato_ | coincide |
-| 22 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 23 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 22 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/billing/entities/siat_simulated_invoices.entity.ts:142`)_ | coincide |
+| 23 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/billing/entities/siat_simulated_invoices.entity.ts:148`)_ | coincide |
 | 24 | `created_by_user_id` | `uuid` | Opcional | _sin dato_ | coincide |
 | 25 | `updated_by_user_id` | `uuid` | Opcional | _sin dato_ | coincide |
-| 26 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+| 26 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/billing/entities/siat_simulated_invoices.entity.ts:166`)_ | coincide |
 
 #### Relaciones
 
@@ -2228,7 +2229,7 @@ _Sin propósito registrado._
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/billing/entities/siat_simulated_outbox.entity.ts:12`)_ | coincide |
 | 2 | `siat_invoice_id` | `uuid` | Clave foránea → billing.siat_simulated_invoices.id; Obligatoria | _sin dato_ | coincide |
 | 3 | `to_email` | `varchar(320)` | Obligatoria | _sin dato_ | coincide |
 | 4 | `attachments` | `jsonb` | Obligatoria | _sin dato_ | coincide |

@@ -2,7 +2,7 @@
 
 # Catálogo del schema `observability`
 
-- **Tablas:** 12 · **Columnas:** 195 (0 con descripción: 0.0 %) · **Índices:** 39
+- **Tablas:** 12 · **Columnas:** 195 (28 con descripción: 14.4 %) · **Índices:** 39
 - **Dominio:** sin dato
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -91,13 +91,13 @@ _Sin propósito registrado._
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/observability/entities/alert_evaluations.entity.ts:12`)_ | coincide |
 | 2 | `time` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
 | 3 | `alert_rule_id` | `uuid` | Clave foránea → observability.alert_rules.id; Obligatoria | _sin dato_ | coincide |
 | 4 | `observed_value` | `double precision` | Obligatoria | _sin dato_ | coincide |
 | 5 | `fired` | `boolean` | Obligatoria | _sin dato_ | coincide |
 | 6 | `health_incident_id` | `uuid` | Clave foránea → platform_ops.health_incidents.id; Opcional | _sin dato_ | coincide |
-| 7 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 7 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/observability/entities/alert_evaluations.entity.ts:48`)_ | coincide |
 
 #### Relaciones
 
@@ -147,7 +147,7 @@ _Sin propósito registrado._
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/observability/entities/alert_rules.entity.ts:12`)_ | coincide |
 | 2 | `code` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 3 | `metric` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 4 | `comparator` | `varchar` | Obligatoria | _sin dato_ | coincide |
@@ -157,11 +157,11 @@ _Sin propósito registrado._
 | 8 | `enabled` | `boolean` | Obligatoria | _sin dato_ | coincide |
 | 9 | `module_code` | `varchar` | Opcional | _sin dato_ | coincide |
 | 10 | `route_template` | `varchar` | Opcional | _sin dato_ | coincide |
-| 11 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 12 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 11 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/observability/entities/alert_rules.entity.ts:76`)_ | coincide |
+| 12 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/observability/entities/alert_rules.entity.ts:82`)_ | coincide |
 | 13 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 14 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 15 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+| 15 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/observability/entities/alert_rules.entity.ts:100`)_ | coincide |
 
 #### Relaciones
 
@@ -228,7 +228,7 @@ _Sin propósito registrado._
 | 5 | `status` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 6 | `latency_ms` | `integer` | Opcional | _sin dato_ | coincide |
 | 7 | `error_type` | `varchar` | Opcional | _sin dato_ | coincide |
-| 8 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 8 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/observability/entities/dependency_probe_runs.entity.ts:53`)_ | coincide |
 
 #### Relaciones
 
@@ -283,7 +283,7 @@ _Sin propósito registrado._
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/observability/entities/error_events.entity.ts:12`)_ | coincide |
 | 2 | `occurred_at` | `timestamptz` | Clave primaria; Obligatoria | _sin dato_ | coincide |
 | 3 | `error_group_id` | `uuid` | Clave foránea → observability.error_groups.id; Obligatoria | _sin dato_ | coincide |
 | 4 | `request_id` | `varchar` | Opcional | _sin dato_ | coincide |
@@ -309,7 +309,7 @@ _Sin propósito registrado._
 | 24 | `message_redacted` | `text` | Opcional | _sin dato_ | coincide |
 | 25 | `frames_json` | `jsonb` | Opcional | _sin dato_ | coincide |
 | 26 | `client_kind` | `varchar` | Opcional | _sin dato_ | coincide |
-| 27 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 27 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/observability/entities/error_events.entity.ts:210`)_ | coincide |
 
 #### Relaciones
 
@@ -373,7 +373,7 @@ _Sin propósito registrado._
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/observability/entities/error_groups.entity.ts:12`)_ | coincide |
 | 2 | `fingerprint` | `varchar(64)` | Obligatoria | _sin dato_ | coincide |
 | 3 | `source` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 4 | `http_status` | `integer` | Opcional | _sin dato_ | coincide |
@@ -399,11 +399,11 @@ _Sin propósito registrado._
 | 24 | `resolution_note` | `text` | Opcional | _sin dato_ | coincide |
 | 25 | `regressed_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
 | 26 | `last_request_id` | `varchar` | Opcional | _sin dato_ | coincide |
-| 27 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 28 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 27 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/observability/entities/error_groups.entity.ts:209`)_ | coincide |
+| 28 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/observability/entities/error_groups.entity.ts:215`)_ | coincide |
 | 29 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 30 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 31 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+| 31 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/observability/entities/error_groups.entity.ts:233`)_ | coincide |
 
 #### Relaciones
 
@@ -499,7 +499,7 @@ _Sin propósito registrado._
 | 20 | `le2000` | `integer` | Obligatoria | _sin dato_ | coincide |
 | 21 | `le5000` | `integer` | Obligatoria | _sin dato_ | coincide |
 | 22 | `le10000` | `integer` | Obligatoria | _sin dato_ | coincide |
-| 23 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 23 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/observability/entities/http_request_minute_series.entity.ts:147`)_ | coincide |
 
 #### Índices
 
@@ -547,7 +547,7 @@ _Sin propósito registrado._
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/observability/entities/instances.entity.ts:12`)_ | coincide |
 | 2 | `kind` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 3 | `name` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 4 | `build_commit` | `varchar` | Opcional | _sin dato_ | coincide |
@@ -558,9 +558,9 @@ _Sin propósito registrado._
 | 9 | `status` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 10 | `last_snapshot_json` | `jsonb` | Opcional | _sin dato_ | coincide |
 | 11 | `expected` | `boolean` | Opcional | _sin dato_ | coincide |
-| 12 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 13 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 14 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+| 12 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/observability/entities/instances.entity.ts:95`)_ | coincide |
+| 13 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/observability/entities/instances.entity.ts:101`)_ | coincide |
+| 14 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/observability/entities/instances.entity.ts:107`)_ | coincide |
 
 #### Relaciones
 
@@ -632,9 +632,9 @@ _Sin propósito registrado._
 | 3 | `last_run_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
 | 4 | `last_duration_ms` | `integer` | Opcional | _sin dato_ | coincide |
 | 5 | `last_error` | `varchar` | Opcional | _sin dato_ | coincide |
-| 6 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 7 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 8 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+| 6 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/observability/entities/rollup_watermarks.entity.ts:49`)_ | coincide |
+| 7 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/observability/entities/rollup_watermarks.entity.ts:55`)_ | coincide |
+| 8 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/observability/entities/rollup_watermarks.entity.ts:61`)_ | coincide |
 
 #### Operaciones que la tocan
 
@@ -669,7 +669,7 @@ _Sin propósito registrado._
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/observability/entities/slow_request_samples.entity.ts:12`)_ | coincide |
 | 2 | `time` | `timestamptz` | Clave primaria; Obligatoria | _sin dato_ | coincide |
 | 3 | `request_id` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 4 | `trace_id` | `varchar(32)` | Opcional | _sin dato_ | coincide |
@@ -684,7 +684,7 @@ _Sin propósito registrado._
 | 13 | `sql_total_ms` | `double precision` | Opcional | _sin dato_ | coincide |
 | 14 | `sql_top_json` | `jsonb` | Opcional | _sin dato_ | coincide |
 | 15 | `sampled_because` | `varchar` | Obligatoria | _sin dato_ | coincide |
-| 16 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 16 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/observability/entities/slow_request_samples.entity.ts:119`)_ | coincide |
 
 #### Índices
 
@@ -760,7 +760,7 @@ _Sin propósito registrado._
 | 21 | `le1000` | `integer` | Obligatoria | _sin dato_ | coincide |
 | 22 | `le5000` | `integer` | Obligatoria | _sin dato_ | coincide |
 | 23 | `inf` | `integer` | Obligatoria | _sin dato_ | coincide |
-| 24 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 24 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/observability/entities/sql_statement_minute_series.entity.ts:149`)_ | coincide |
 
 #### Índices
 
@@ -815,9 +815,9 @@ _Sin propósito registrado._
 | 5 | `first_seen_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
 | 6 | `last_seen_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
 | 7 | `is_slow_ever` | `boolean` | Obligatoria | _sin dato_ | coincide |
-| 8 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 9 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 10 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+| 8 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/observability/entities/sql_statements.entity.ts:57`)_ | coincide |
+| 9 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/observability/entities/sql_statements.entity.ts:63`)_ | coincide |
+| 10 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/observability/entities/sql_statements.entity.ts:69`)_ | coincide |
 
 #### Índices
 
@@ -873,7 +873,7 @@ _Sin propósito registrado._
 | 9 | `sum_ms` | `double precision` | Obligatoria | _sin dato_ | coincide |
 | 10 | `max_ms` | `double precision` | Obligatoria | _sin dato_ | coincide |
 | 11 | `consecutive_failures_max` | `integer` | Obligatoria | _sin dato_ | coincide |
-| 12 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 12 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/observability/entities/worker_tick_minute_series.entity.ts:77`)_ | coincide |
 
 #### Índices
 

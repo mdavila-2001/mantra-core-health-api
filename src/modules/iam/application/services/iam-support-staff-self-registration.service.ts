@@ -45,6 +45,7 @@ import {
 } from '../ports/profile-registration.port';
 import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
 import { enterAuthBoundaryContext } from './auth-boundary-context';
+import { verificationEmail } from '../emails/access-email.templates';
 
 /** Vida útil del token de verificación de correo (24 h), igual que el paciente. */
 const EMAIL_VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000;
@@ -313,10 +314,7 @@ export class IamSupportStaffSelfRegistrationService {
       await this.emailNotice.enqueueEmail({
         recipientUserId: userId,
         recipientAddress: email,
-        subject: 'Verifique su correo',
-        bodyText:
-          'Para verificar su correo, use este código: ' +
-          `${token}\n\nSi no creó esta cuenta, ignore este mensaje.`,
+        ...verificationEmail({ token, variant: 'account' }),
       });
       return true;
     } catch (error) {

@@ -1126,6 +1126,7 @@ Registra un lote de errores del cliente (saneados en el servidor)
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Redis no está disponible para validar sesiones |
 
 ```mermaid
 flowchart TD
@@ -1144,22 +1145,30 @@ flowchart TD
   n6 --> n7
   n8(["↩ (relanza el error capturado)"]):::error
   n7 -->|"sí"| n8
-  n9[("LEE iam.sessions · LEE iam.users")]:::efecto
+  n9{"!this.redis"}:::decision
   n7 -->|"no"| n9
-  n10{"rows.length === 0"}:::decision
-  n9 --> n10
-  n11(["↩ (relanza el error capturado)"]):::error
-  n10 -->|"sí"| n11
-  n12["Llama a TelemetryClientErrorsRepository.sessionIdOf"]:::llamada
-  n10 -->|"no"| n12
-  n13[("LEE iam.sessions")]:::efecto
-  n12 --> n13
-  n14["Llama a TelemetryClientErrorsRepository.insertMany"]:::llamada
+  n10(["500 INTERNAL Redis no está disponible para validar sesiones"]):::error
+  n9 -->|"sí"| n10
+  n11{"await this.redis.get(`${this.revocationKeyPrefix}${payload.sid}`)"}:::decision
+  n9 -->|"no"| n11
+  n12(["↩ (relanza el error capturado)"]):::error
+  n11 -->|"sí"| n12
+  n13[("LEE iam.sessions · LEE iam.users")]:::efecto
+  n11 -->|"no"| n13
+  n14{"rows.length === 0"}:::decision
   n13 --> n14
-  n15[("CREA telemetry.client_error_events")]:::efecto
-  n14 --> n15
-  n16(("201 Responde con éxito")):::ok
-  n15 --> n16
+  n15(["↩ (relanza el error capturado)"]):::error
+  n14 -->|"sí"| n15
+  n16["Llama a TelemetryClientErrorsRepository.sessionIdOf"]:::llamada
+  n14 -->|"no"| n16
+  n17[("LEE iam.sessions")]:::efecto
+  n16 --> n17
+  n18["Llama a TelemetryClientErrorsRepository.insertMany"]:::llamada
+  n17 --> n18
+  n19[("CREA telemetry.client_error_events")]:::efecto
+  n18 --> n19
+  n20(("201 Responde con éxito")):::ok
+  n19 --> n20
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

@@ -26,6 +26,7 @@ import {
   PreconditionFailedException,
   Roles,
   type AuthenticatedUser,
+  PatientAnyTenant,
 } from '../../../../common';
 import { SchedulingErrorReason } from '../../scheduling.error-reasons';
 import {
@@ -119,6 +120,7 @@ export class SchedulingController {
    * @returns Slots de la ventana, ordenados cronológicamente.
    */
   @Get('resources/:id/slots')
+  @PatientAnyTenant()
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER', 'PATIENT')
   @ApiOperation({
     summary: 'UC-41-14: agenda publicada del recurso en una ventana',
@@ -403,6 +405,7 @@ export class SchedulingController {
   // `PATIENT` entra acotado por el servicio: sólo lee los bloqueos de un médico
   // con el que TIENE cita, y sólo ve el motivo catalogado — nunca el texto
   // libre que el profesional escribe al elegir «Otro».
+  @PatientAnyTenant()
   @Roles('SCHEDULING_ADMIN', 'PRACTITIONER', 'PATIENT')
   @ApiOperation({
     summary: 'Listar las excepciones de disponibilidad de un recurso',
@@ -694,6 +697,7 @@ export class SchedulingController {
     entityId: 'result.id',
   })
   @Post('slots/:id/holds')
+  @PatientAnyTenant()
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PATIENT')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -716,6 +720,7 @@ export class SchedulingController {
     entityId: 'result.id',
   })
   @Post('holds/:holdToken/confirm')
+  @PatientAnyTenant()
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PATIENT')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -745,6 +750,7 @@ export class SchedulingController {
     entityId: 'result.id',
   })
   @Post('holds/:holdToken/request')
+  @PatientAnyTenant()
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PATIENT')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -767,6 +773,7 @@ export class SchedulingController {
     entityId: 'result.id',
   })
   @Post('waitlist')
+  @PatientAnyTenant()
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PATIENT')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Inscribir a un paciente en la lista de espera' })
@@ -784,6 +791,7 @@ export class SchedulingController {
    * que «estás en espera» sólo podía ser una suposición del cliente.
    */
   @Get('waitlist')
+  @PatientAnyTenant()
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER', 'PATIENT')
   @ApiOperation({
     summary: 'Listar las entradas de lista de espera de un paciente',

@@ -2,7 +2,7 @@
 
 # Catálogo del schema `data_catalog`
 
-- **Tablas:** 25 · **Columnas:** 378 (0 con descripción: 0.0 %) · **Índices:** 69
+- **Tablas:** 25 · **Columnas:** 378 (79 con descripción: 20.9 %) · **Índices:** 69
 - **Dominio:** sin dato
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -10,18 +10,18 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [catalog_annotation_revisions](#catalog_annotation_revisions) | Conserva versiones de las anotaciones del catálogo de datos de salud, de modo que puedan revisarse los cambios en definiciones y contexto de los activos catalogados. | 10 | 1 | 8 | COINCIDE |
-| [catalog_annotations](#catalog_annotations) | Documenta definiciones y contexto funcional asociados a objetos o columnas del catálogo de datos de salud para mejorar su interpretación y gobernanza. | 34 | 3 | 33 | COINCIDE |
-| [catalog_certifications](#catalog_certifications) | sin propósito | 19 | 6 | 0 | SIN_ENTIDAD |
-| [catalog_change_acknowledgements](#catalog_change_acknowledgements) | sin propósito | 5 | 2 | 0 | SIN_ENTIDAD |
+| [catalog_annotation_revisions](#catalog_annotation_revisions) | Conserva versiones de las anotaciones del catálogo de datos de salud, de modo que puedan revisarse los cambios en definiciones y contexto de los activos catalogados. | 10 | 1 | 7 | COINCIDE |
+| [catalog_annotations](#catalog_annotations) | Documenta definiciones y contexto funcional asociados a objetos o columnas del catálogo de datos de salud para mejorar su interpretación y gobernanza. | 34 | 3 | 31 | COINCIDE |
+| [catalog_certifications](#catalog_certifications) | sin propósito | 19 | 6 | 0 | COINCIDE |
+| [catalog_change_acknowledgements](#catalog_change_acknowledgements) | sin propósito | 5 | 2 | 0 | COINCIDE |
 | [catalog_change_events](#catalog_change_events) | Registra cambios detectados en objetos y columnas entre escaneos del catálogo, lo que permite seguir la evolución de los activos de datos de salud. | 8 | 2 | 6 | COINCIDE |
 | [catalog_columns](#catalog_columns) | Describe las columnas encontradas en los objetos de datos de salud durante un escaneo, con metadatos para su búsqueda, interpretación y gobernanza. | 24 | 1 | 21 | COINCIDE |
 | [catalog_evidence_items](#catalog_evidence_items) | Asocia evidencia a objetos y columnas del catálogo para respaldar la revisión de su significado, procedencia y uso en datos de salud. | 9 | 2 | 6 | COINCIDE |
-| [catalog_glossary_term_links](#catalog_glossary_term_links) | sin propósito | 7 | 3 | 0 | SIN_ENTIDAD |
-| [catalog_glossary_term_revisions](#catalog_glossary_term_revisions) | sin propósito | 8 | 1 | 0 | SIN_ENTIDAD |
-| [catalog_glossary_terms](#catalog_glossary_terms) | sin propósito | 16 | 3 | 0 | SIN_ENTIDAD |
-| [catalog_lineage_edges](#catalog_lineage_edges) | sin propósito | 19 | 4 | 0 | SIN_ENTIDAD |
-| [catalog_objects](#catalog_objects) | Identifica objetos de datos relevados por el catálogo y el escaneo que los observó, facilitando localizar y gobernar los activos que sostienen la plataforma de salud. | 23 | 3 | 28 | DIVERGE |
+| [catalog_glossary_term_links](#catalog_glossary_term_links) | sin propósito | 7 | 3 | 0 | COINCIDE |
+| [catalog_glossary_term_revisions](#catalog_glossary_term_revisions) | sin propósito | 8 | 1 | 0 | COINCIDE |
+| [catalog_glossary_terms](#catalog_glossary_terms) | sin propósito | 16 | 3 | 0 | COINCIDE |
+| [catalog_lineage_edges](#catalog_lineage_edges) | sin propósito | 19 | 4 | 0 | COINCIDE |
+| [catalog_objects](#catalog_objects) | Identifica objetos de datos relevados por el catálogo y el escaneo que los observó, facilitando localizar y gobernar los activos que sostienen la plataforma de salud. | 23 | 3 | 28 | COINCIDE |
 | [catalog_operation_impacts](#catalog_operation_impacts) | sin propósito | 14 | 3 | 2 | COINCIDE |
 | [catalog_operations](#catalog_operations) | sin propósito | 21 | 1 | 5 | COINCIDE |
 | [catalog_process_step_operations](#catalog_process_step_operations) | sin propósito | 9 | 3 | 3 | COINCIDE |
@@ -29,12 +29,12 @@
 | [catalog_processes](#catalog_processes) | sin propósito | 12 | 1 | 3 | COINCIDE |
 | [catalog_review_decisions](#catalog_review_decisions) | Mantiene decisiones de revisión sobre anotaciones del catálogo, dejando trazabilidad de la validación de definiciones de activos de datos de salud. | 7 | 1 | 2 | COINCIDE |
 | [catalog_scan_runs](#catalog_scan_runs) | Registra cada ejecución de relevamiento del catálogo para identificar cuándo se descubrieron objetos y columnas de datos de salud y comparar cambios entre escaneos. | 34 | 3 | 22 | COINCIDE |
-| [catalog_stewardships](#catalog_stewardships) | sin propósito | 14 | 4 | 0 | SIN_ENTIDAD |
-| [quality_issue_events](#quality_issue_events) | sin propósito | 7 | 2 | 0 | SIN_ENTIDAD |
-| [quality_issues](#quality_issues) | sin propósito | 22 | 7 | 0 | SIN_ENTIDAD |
-| [quality_rule_runs](#quality_rule_runs) | sin propósito | 18 | 4 | 0 | SIN_ENTIDAD |
-| [quality_rules](#quality_rules) | sin propósito | 20 | 5 | 0 | SIN_ENTIDAD |
-| [quality_score_snapshots](#quality_score_snapshots) | sin propósito | 8 | 3 | 0 | SIN_ENTIDAD |
+| [catalog_stewardships](#catalog_stewardships) | sin propósito | 14 | 4 | 0 | COINCIDE |
+| [quality_issue_events](#quality_issue_events) | sin propósito | 7 | 2 | 0 | COINCIDE |
+| [quality_issues](#quality_issues) | sin propósito | 22 | 7 | 0 | COINCIDE |
+| [quality_rule_runs](#quality_rule_runs) | sin propósito | 18 | 4 | 0 | COINCIDE |
+| [quality_rules](#quality_rules) | sin propósito | 20 | 5 | 0 | COINCIDE |
+| [quality_score_snapshots](#quality_score_snapshots) | sin propósito | 8 | 3 | 0 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -257,13 +257,13 @@ Conserva versiones de las anotaciones del catálogo de datos de salud, de modo q
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_67_data_catalog.puml:188: entity catalog_annotation_revisions <<LOG>> {`
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` · **DDL:** `SQL/67_data_catalog/02_tables.sql`
 - **Entidad del ORM:** `CatalogAnnotationRevisions` — `src/modules/data_catalog/entities/catalog_annotation_revisions.entity.ts`
-- **Resumen:** 10 columnas · 1 índices · 2 FK salientes · 0 entrantes · 8 operaciones
+- **Resumen:** 10 columnas · 1 índices · 2 FK salientes · 0 entrantes · 7 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_annotation_revisions.entity.ts:12`)_ | coincide |
 | 2 | `annotation_id` | `uuid` | Clave foránea → data_catalog.catalog_annotations.id; Obligatoria | _sin dato_ | coincide |
 | 3 | `revision_no` | `integer` | Obligatoria | _sin dato_ | coincide |
 | 4 | `content_json` | `jsonb` | Obligatoria | _sin dato_ | coincide |
@@ -272,7 +272,7 @@ Conserva versiones de las anotaciones del catálogo de datos de salud, de modo q
 | 7 | `submitted_status` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 8 | `change_reason` | `text` | Opcional | _sin dato_ | coincide |
 | 9 | `author_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 10 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 10 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_annotation_revisions.entity.ts:66`)_ | coincide |
 
 #### Relaciones
 
@@ -304,7 +304,6 @@ Conserva versiones de las anotaciones del catálogo de datos de salud, de modo q
 | GET /admin/catalog/objects/{id}/history | LEE | POR_SQL |
 | POST /admin/catalog/scans | CREA | POR_SQL |
 | GET /admin/governance/review-queue | LEE | POR_SQL |
-| POST /internal/catalog/scans/run-next | CREA | POR_SQL |
 
 #### Gobierno
 
@@ -329,13 +328,13 @@ Documenta definiciones y contexto funcional asociados a objetos o columnas del c
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_67_data_catalog.puml:143: entity catalog_annotations {`
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` · **DDL:** `SQL/67_data_catalog/02_tables.sql`
 - **Entidad del ORM:** `CatalogAnnotations` — `src/modules/data_catalog/entities/catalog_annotations.entity.ts`
-- **Resumen:** 34 columnas · 3 índices · 5 FK salientes · 2 entrantes · 33 operaciones
+- **Resumen:** 34 columnas · 3 índices · 5 FK salientes · 2 entrantes · 31 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_annotations.entity.ts:12`)_ | coincide |
 | 2 | `target_kind` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 3 | `object_id` | `uuid` | Clave foránea → data_catalog.catalog_objects.id; Obligatoria | _sin dato_ | coincide |
 | 4 | `column_id` | `uuid` | Clave foránea → data_catalog.catalog_columns.id; Opcional | _sin dato_ | coincide |
@@ -364,11 +363,11 @@ Documenta definiciones y contexto funcional asociados a objetos o columnas del c
 | 27 | `approved_revision_no` | `integer` | Opcional | _sin dato_ | coincide |
 | 28 | `approved_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 29 | `approved_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
-| 30 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 31 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 30 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_annotations.entity.ts:235`)_ | coincide |
+| 31 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_annotations.entity.ts:241`)_ | coincide |
 | 32 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 33 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 34 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+| 34 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/data_catalog/entities/catalog_annotations.entity.ts:259`)_ | coincide |
 
 #### Relaciones
 
@@ -430,8 +429,6 @@ Documenta definiciones y contexto funcional asociados a objetos o columnas del c
 | GET /admin/catalog/schemas | LEE | POR_SQL |
 | GET /admin/governance/review-queue | LEE | POR_SQL |
 | POST /internal/catalog/fit/run | LEE | POR_SQL |
-| POST /internal/catalog/scans/run-next | CREA | POR_SQL |
-| POST /internal/catalog/scans/run-next | ACTUALIZA | POR_SQL |
 | POST /internal/catalog/scans/run-next | LEE | POR_SQL |
 | GET /admin/ops/readiness | LEE | POR_SQL |
 
@@ -457,32 +454,32 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` · **DDL:** `SQL/67_data_catalog/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `CatalogCertifications` — `src/modules/data_catalog/entities/catalog_certifications.entity.ts`
 - **Resumen:** 19 columnas · 6 índices · 6 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `target_kind` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `object_id` | `uuid` | Clave foránea → data_catalog.catalog_objects.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `read_model_definition_id` | `uuid` | Clave foránea → read_models.read_model_definitions.id; Parte de la restricción única ux_data_catalog_certifications_live; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `report_definition_id` | `uuid` | Clave foránea → reporting.report_definitions.id; Parte de la restricción única ux_data_catalog_certifications_live; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `kpi_code` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `status` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `basis_json` | `jsonb` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `requested_by_user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `requested_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `certified_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `certified_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `expires_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `revoked_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `revoked_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 16 | `reason` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 17 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 18 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 19 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_certifications.entity.ts:12`)_ | coincide |
+| 2 | `target_kind` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 3 | `object_id` | `uuid` | Clave foránea → data_catalog.catalog_objects.id; Opcional | _sin dato_ | coincide |
+| 4 | `read_model_definition_id` | `uuid` | Clave foránea → read_models.read_model_definitions.id; Parte de la restricción única ux_data_catalog_certifications_live; Opcional | _sin dato_ | coincide |
+| 5 | `report_definition_id` | `uuid` | Clave foránea → reporting.report_definitions.id; Parte de la restricción única ux_data_catalog_certifications_live; Opcional | _sin dato_ | coincide |
+| 6 | `kpi_code` | `varchar` | Opcional | _sin dato_ | coincide |
+| 7 | `status` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 8 | `basis_json` | `jsonb` | Obligatoria | _sin dato_ | coincide |
+| 9 | `requested_by_user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | coincide |
+| 10 | `requested_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 11 | `certified_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 12 | `certified_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 13 | `expires_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 14 | `revoked_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 15 | `revoked_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 16 | `reason` | `text` | Opcional | _sin dato_ | coincide |
+| 17 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_certifications.entity.ts:124`)_ | coincide |
+| 18 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_certifications.entity.ts:130`)_ | coincide |
+| 19 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/data_catalog/entities/catalog_certifications.entity.ts:136`)_ | coincide |
 
 #### Relaciones
 
@@ -540,18 +537,18 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` · **DDL:** `SQL/67_data_catalog/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `CatalogChangeAcknowledgements` — `src/modules/data_catalog/entities/catalog_change_acknowledgements.entity.ts`
 - **Resumen:** 5 columnas · 2 índices · 2 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `change_event_id` | `uuid` | Clave foránea → data_catalog.catalog_change_events.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `reason` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_change_acknowledgements.entity.ts:15`)_ | coincide |
+| 2 | `change_event_id` | `uuid` | Clave foránea → data_catalog.catalog_change_events.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `reason` | `text` | Opcional | _sin dato_ | coincide |
+| 5 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_change_acknowledgements.entity.ts:39`)_ | coincide |
 
 #### Relaciones
 
@@ -606,14 +603,14 @@ Registra cambios detectados en objetos y columnas entre escaneos del catálogo, 
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_change_events.entity.ts:12`)_ | coincide |
 | 2 | `scan_run_id` | `uuid` | Clave foránea → data_catalog.catalog_scan_runs.id; Obligatoria | _sin dato_ | coincide |
 | 3 | `object_id` | `uuid` | Clave foránea → data_catalog.catalog_objects.id; Obligatoria | _sin dato_ | coincide |
 | 4 | `column_id` | `uuid` | Clave foránea → data_catalog.catalog_columns.id; Opcional | _sin dato_ | coincide |
 | 5 | `change_kind` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 6 | `before_json` | `jsonb` | Opcional | _sin dato_ | coincide |
 | 7 | `after_json` | `jsonb` | Opcional | _sin dato_ | coincide |
-| 8 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 8 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_change_events.entity.ts:64`)_ | coincide |
 
 #### Relaciones
 
@@ -671,7 +668,7 @@ Describe las columnas encontradas en los objetos de datos de salud durante un es
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_columns.entity.ts:12`)_ | coincide |
 | 2 | `object_id` | `uuid` | Clave foránea → data_catalog.catalog_objects.id; Obligatoria | _sin dato_ | coincide |
 | 3 | `column_name` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 4 | `ordinal` | `integer` | Obligatoria | _sin dato_ | coincide |
@@ -690,11 +687,11 @@ Describe las columnas encontradas en los objetos de datos de salud durante un es
 | 17 | `last_seen_scan_id` | `uuid` | Clave foránea → data_catalog.catalog_scan_runs.id; Obligatoria | _sin dato_ | coincide |
 | 18 | `last_seen_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
 | 19 | `not_observed_since` | `timestamptz` | Opcional | _sin dato_ | coincide |
-| 20 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 21 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 20 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_columns.entity.ts:139`)_ | coincide |
+| 21 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_columns.entity.ts:145`)_ | coincide |
 | 22 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 23 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 24 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+| 24 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/data_catalog/entities/catalog_columns.entity.ts:163`)_ | coincide |
 
 #### Relaciones
 
@@ -780,7 +777,7 @@ Asocia evidencia a objetos y columnas del catálogo para respaldar la revisión 
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_evidence_items.entity.ts:12`)_ | coincide |
 | 2 | `object_id` | `uuid` | Clave foránea → data_catalog.catalog_objects.id; Obligatoria | _sin dato_ | coincide |
 | 3 | `column_id` | `uuid` | Clave foránea → data_catalog.catalog_columns.id; Opcional | _sin dato_ | coincide |
 | 4 | `kind` | `varchar` | Obligatoria | _sin dato_ | coincide |
@@ -788,7 +785,7 @@ Asocia evidencia a objetos y columnas del catálogo para respaldar la revisión 
 | 6 | `excerpt` | `text` | Opcional | _sin dato_ | coincide |
 | 7 | `source_revision` | `varchar` | Opcional | _sin dato_ | coincide |
 | 8 | `added_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 9 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 9 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_evidence_items.entity.ts:64`)_ | coincide |
 
 #### Relaciones
 
@@ -838,20 +835,20 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` · **DDL:** `SQL/67_data_catalog/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `CatalogGlossaryTermLinks` — `src/modules/data_catalog/entities/catalog_glossary_term_links.entity.ts`
 - **Resumen:** 7 columnas · 3 índices · 4 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `term_id` | `uuid` | Clave foránea → data_catalog.catalog_glossary_terms.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `object_id` | `uuid` | Clave foránea → data_catalog.catalog_objects.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `column_id` | `uuid` | Clave foránea → data_catalog.catalog_columns.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `link_kind` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_glossary_term_links.entity.ts:12`)_ | coincide |
+| 2 | `term_id` | `uuid` | Clave foránea → data_catalog.catalog_glossary_terms.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `object_id` | `uuid` | Clave foránea → data_catalog.catalog_objects.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `column_id` | `uuid` | Clave foránea → data_catalog.catalog_columns.id; Opcional | _sin dato_ | coincide |
+| 5 | `link_kind` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 6 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_glossary_term_links.entity.ts:42`)_ | coincide |
+| 7 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 
 #### Relaciones
 
@@ -902,21 +899,21 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` · **DDL:** `SQL/67_data_catalog/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `CatalogGlossaryTermRevisions` — `src/modules/data_catalog/entities/catalog_glossary_term_revisions.entity.ts`
 - **Resumen:** 8 columnas · 1 índices · 2 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `term_id` | `uuid` | Clave foránea → data_catalog.catalog_glossary_terms.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `revision_no` | `integer` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `content_json` | `jsonb` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `content_hash` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `change_reason` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `author_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_glossary_term_revisions.entity.ts:15`)_ | coincide |
+| 2 | `term_id` | `uuid` | Clave foránea → data_catalog.catalog_glossary_terms.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `revision_no` | `integer` | Obligatoria | _sin dato_ | coincide |
+| 4 | `content_json` | `jsonb` | Obligatoria | _sin dato_ | coincide |
+| 5 | `content_hash` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 6 | `change_reason` | `text` | Opcional | _sin dato_ | coincide |
+| 7 | `author_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 8 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_glossary_term_revisions.entity.ts:57`)_ | coincide |
 
 #### Relaciones
 
@@ -963,29 +960,29 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` · **DDL:** `SQL/67_data_catalog/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `CatalogGlossaryTerms` — `src/modules/data_catalog/entities/catalog_glossary_terms.entity.ts`
 - **Resumen:** 16 columnas · 3 índices · 4 FK salientes · 2 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `term_code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `name` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `definition` | `text` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `domain_id` | `uuid` | Clave foránea → system_ops.data_domains.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `synonyms` | `jsonb` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `status` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `current_revision_no` | `integer` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `approved_revision_no` | `integer` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `approved_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `approved_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 16 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_glossary_terms.entity.ts:12`)_ | coincide |
+| 2 | `term_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 3 | `name` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 4 | `definition` | `text` | Obligatoria | _sin dato_ | coincide |
+| 5 | `domain_id` | `uuid` | Clave foránea → system_ops.data_domains.id; Opcional | _sin dato_ | coincide |
+| 6 | `synonyms` | `jsonb` | Opcional | _sin dato_ | coincide |
+| 7 | `status` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 8 | `current_revision_no` | `integer` | Obligatoria | _sin dato_ | coincide |
+| 9 | `approved_revision_no` | `integer` | Opcional | _sin dato_ | coincide |
+| 10 | `approved_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 11 | `approved_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 12 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_glossary_terms.entity.ts:86`)_ | coincide |
+| 13 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_glossary_terms.entity.ts:92`)_ | coincide |
+| 14 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 15 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 16 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/data_catalog/entities/catalog_glossary_terms.entity.ts:110`)_ | coincide |
 
 #### Relaciones
 
@@ -1038,32 +1035,32 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` · **DDL:** `SQL/67_data_catalog/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `CatalogLineageEdges` — `src/modules/data_catalog/entities/catalog_lineage_edges.entity.ts`
 - **Resumen:** 19 columnas · 4 índices · 3 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `source_kind` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `source_ref` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `target_kind` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `target_ref` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `edge_kind` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `origin` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `confidence` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `is_official` | `boolean = false` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `approved_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `approved_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `observation_status` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `first_seen_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `last_seen_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 16 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 17 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 18 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 19 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_lineage_edges.entity.ts:12`)_ | coincide |
+| 2 | `source_kind` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 3 | `source_ref` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 4 | `target_kind` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 5 | `target_ref` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 6 | `edge_kind` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 7 | `origin` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 8 | `confidence` | `varchar` | Opcional | _sin dato_ | coincide |
+| 9 | `is_official` | `boolean = false` | Obligatoria | _sin dato_ | coincide |
+| 10 | `approved_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 11 | `approved_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 12 | `observation_status` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 13 | `first_seen_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 14 | `last_seen_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 15 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_lineage_edges.entity.ts:100`)_ | coincide |
+| 16 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_lineage_edges.entity.ts:106`)_ | coincide |
+| 17 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 18 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 19 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/data_catalog/entities/catalog_lineage_edges.entity.ts:124`)_ | coincide |
 
 #### Relaciones
 
@@ -1121,7 +1118,7 @@ Identifica objetos de datos relevados por el catálogo y el escaneo que los obse
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_objects.entity.ts:12`)_ | coincide |
 | 2 | `source_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 3 | `schema_name` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 4 | `object_name` | `varchar` | Obligatoria | _sin dato_ | coincide |
@@ -1138,12 +1135,12 @@ Identifica objetos de datos relevados por el catálogo y el escaneo que los obse
 | 15 | `last_seen_scan_id` | `uuid` | Clave foránea → data_catalog.catalog_scan_runs.id; Obligatoria | _sin dato_ | coincide |
 | 16 | `last_seen_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
 | 17 | `not_observed_since` | `timestamptz` | Opcional | _sin dato_ | coincide |
-| 18 | `domain_id` | `uuid` | Clave foránea → system_ops.data_domains.id; Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 19 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 20 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 18 | `domain_id` | `uuid` | Clave foránea → system_ops.data_domains.id; Opcional | _sin dato_ | coincide |
+| 19 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_objects.entity.ts:133`)_ | coincide |
+| 20 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_objects.entity.ts:139`)_ | coincide |
 | 21 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 22 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 23 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+| 23 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/data_catalog/entities/catalog_objects.entity.ts:157`)_ | coincide |
 
 #### Relaciones
 
@@ -1242,7 +1239,7 @@ _Sin propósito registrado._
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_operation_impacts.entity.ts:12`)_ | coincide |
 | 2 | `operation_id` | `uuid` | Clave foránea → data_catalog.catalog_operations.id; Obligatoria | _sin dato_ | coincide |
 | 3 | `object_id` | `uuid` | Clave foránea → data_catalog.catalog_objects.id; Obligatoria | _sin dato_ | coincide |
 | 4 | `column_id` | `uuid` | Clave foránea → data_catalog.catalog_columns.id; Opcional | _sin dato_ | coincide |
@@ -1251,11 +1248,11 @@ _Sin propósito registrado._
 | 7 | `confidence` | `varchar` | Opcional | _sin dato_ | coincide |
 | 8 | `call_path` | `jsonb` | Opcional | _sin dato_ | coincide |
 | 9 | `source_ref` | `varchar` | Opcional | _sin dato_ | coincide |
-| 10 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 11 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 10 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_operation_impacts.entity.ts:75`)_ | coincide |
+| 11 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_operation_impacts.entity.ts:81`)_ | coincide |
 | 12 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 13 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 14 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+| 14 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/data_catalog/entities/catalog_operation_impacts.entity.ts:99`)_ | coincide |
 
 #### Relaciones
 
@@ -1311,7 +1308,7 @@ _Sin propósito registrado._
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_operations.entity.ts:12`)_ | coincide |
 | 2 | `source_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 3 | `operation_key` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 4 | `http_method` | `varchar` | Obligatoria | _sin dato_ | coincide |
@@ -1327,11 +1324,11 @@ _Sin propósito registrado._
 | 14 | `technical_hash` | `varchar` | Opcional | _sin dato_ | coincide |
 | 15 | `first_seen_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
 | 16 | `last_seen_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 17 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 18 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 17 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_operations.entity.ts:125`)_ | coincide |
+| 18 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_operations.entity.ts:131`)_ | coincide |
 | 19 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 20 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 21 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+| 21 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/data_catalog/entities/catalog_operations.entity.ts:149`)_ | coincide |
 
 #### Relaciones
 
@@ -1393,15 +1390,15 @@ _Sin propósito registrado._
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_process_step_operations.entity.ts:15`)_ | coincide |
 | 2 | `step_id` | `uuid` | Clave foránea → data_catalog.catalog_process_steps.id; Obligatoria | _sin dato_ | coincide |
 | 3 | `operation_id` | `uuid` | Clave foránea → data_catalog.catalog_operations.id; Obligatoria | _sin dato_ | coincide |
 | 4 | `ordinal` | `integer` | Obligatoria | _sin dato_ | coincide |
-| 5 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 6 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 5 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_process_step_operations.entity.ts:39`)_ | coincide |
+| 6 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_process_step_operations.entity.ts:45`)_ | coincide |
 | 7 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 8 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 9 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+| 9 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/data_catalog/entities/catalog_process_step_operations.entity.ts:63`)_ | coincide |
 
 #### Relaciones
 
@@ -1463,16 +1460,16 @@ _Sin propósito registrado._
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_process_steps.entity.ts:12`)_ | coincide |
 | 2 | `process_id` | `uuid` | Clave foránea → data_catalog.catalog_processes.id; Obligatoria | _sin dato_ | coincide |
 | 3 | `ordinal` | `integer` | Obligatoria | _sin dato_ | coincide |
 | 4 | `step_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 5 | `name` | `varchar` | Obligatoria | _sin dato_ | coincide |
-| 6 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 7 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 6 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_process_steps.entity.ts:42`)_ | coincide |
+| 7 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_process_steps.entity.ts:48`)_ | coincide |
 | 8 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 9 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 10 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+| 10 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/data_catalog/entities/catalog_process_steps.entity.ts:66`)_ | coincide |
 
 #### Relaciones
 
@@ -1532,18 +1529,18 @@ _Sin propósito registrado._
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_processes.entity.ts:12`)_ | coincide |
 | 2 | `process_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 3 | `kind` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 4 | `name` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 5 | `module_code` | `varchar` | Opcional | _sin dato_ | coincide |
 | 6 | `purpose` | `text` | Opcional | _sin dato_ | coincide |
 | 7 | `source_ref` | `text` | Opcional | _sin dato_ | coincide |
-| 8 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 9 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 8 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_processes.entity.ts:54`)_ | coincide |
+| 9 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_processes.entity.ts:60`)_ | coincide |
 | 10 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 11 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 12 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+| 12 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/data_catalog/entities/catalog_processes.entity.ts:78`)_ | coincide |
 
 #### Relaciones
 
@@ -1602,7 +1599,7 @@ Mantiene decisiones de revisión sobre anotaciones del catálogo, dejando trazab
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_review_decisions.entity.ts:12`)_ | coincide |
 | 2 | `annotation_id` | `uuid` | Clave foránea → data_catalog.catalog_annotations.id; Obligatoria | _sin dato_ | coincide |
 | 3 | `revision_no` | `integer` | Obligatoria | _sin dato_ | coincide |
 | 4 | `decision` | `varchar` | Obligatoria | _sin dato_ | coincide |
@@ -1659,7 +1656,7 @@ Registra cada ejecución de relevamiento del catálogo para identificar cuándo 
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_scan_runs.entity.ts:12`)_ | coincide |
 | 2 | `source_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 3 | `mode` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 4 | `status` | `varchar` | Obligatoria | _sin dato_ | coincide |
@@ -1688,11 +1685,11 @@ Registra cada ejecución de relevamiento del catálogo para identificar cuándo 
 | 27 | `snapshot_hash` | `varchar` | Opcional | _sin dato_ | coincide |
 | 28 | `error_code` | `varchar` | Opcional | _sin dato_ | coincide |
 | 29 | `error_message` | `text` | Opcional | _sin dato_ | coincide |
-| 30 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 31 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 30 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_scan_runs.entity.ts:239`)_ | coincide |
+| 31 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_scan_runs.entity.ts:245`)_ | coincide |
 | 32 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 33 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 34 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+| 34 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/data_catalog/entities/catalog_scan_runs.entity.ts:263`)_ | coincide |
 
 #### Relaciones
 
@@ -1771,27 +1768,27 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` · **DDL:** `SQL/67_data_catalog/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `CatalogStewardships` — `src/modules/data_catalog/entities/catalog_stewardships.entity.ts`
 - **Resumen:** 14 columnas · 4 índices · 5 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `scope_kind` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `domain_id` | `uuid` | Clave foránea → system_ops.data_domains.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `object_id` | `uuid` | Clave foránea → data_catalog.catalog_objects.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `role_kind` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `team_code` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `valid_from` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `valid_to` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_stewardships.entity.ts:12`)_ | coincide |
+| 2 | `scope_kind` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 3 | `domain_id` | `uuid` | Clave foránea → system_ops.data_domains.id; Opcional | _sin dato_ | coincide |
+| 4 | `object_id` | `uuid` | Clave foránea → data_catalog.catalog_objects.id; Opcional | _sin dato_ | coincide |
+| 5 | `role_kind` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 6 | `user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 7 | `team_code` | `varchar` | Opcional | _sin dato_ | coincide |
+| 8 | `valid_from` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 9 | `valid_to` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 10 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_stewardships.entity.ts:70`)_ | coincide |
+| 11 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/catalog_stewardships.entity.ts:76`)_ | coincide |
+| 12 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 13 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 14 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/data_catalog/entities/catalog_stewardships.entity.ts:94`)_ | coincide |
 
 #### Relaciones
 
@@ -1847,20 +1844,20 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` · **DDL:** `SQL/67_data_catalog/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `QualityIssueEvents` — `src/modules/data_catalog/entities/quality_issue_events.entity.ts`
 - **Resumen:** 7 columnas · 2 índices · 3 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `issue_id` | `uuid` | Clave foránea → data_catalog.quality_issues.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `event_kind` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `run_id` | `uuid` | Clave foránea → data_catalog.quality_rule_runs.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `actor_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `reason` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/quality_issue_events.entity.ts:12`)_ | coincide |
+| 2 | `issue_id` | `uuid` | Clave foránea → data_catalog.quality_issues.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `event_kind` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 4 | `run_id` | `uuid` | Clave foránea → data_catalog.quality_rule_runs.id; Opcional | _sin dato_ | coincide |
+| 5 | `actor_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 6 | `reason` | `text` | Opcional | _sin dato_ | coincide |
+| 7 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/quality_issue_events.entity.ts:48`)_ | coincide |
 
 #### Relaciones
 
@@ -1903,35 +1900,35 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` · **DDL:** `SQL/67_data_catalog/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `QualityIssues` — `src/modules/data_catalog/entities/quality_issues.entity.ts`
 - **Resumen:** 22 columnas · 7 índices · 7 FK salientes · 1 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `rule_id` | `uuid` | Clave foránea → data_catalog.quality_rules.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `object_id` | `uuid` | Clave foránea → data_catalog.catalog_objects.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `column_id` | `uuid` | Clave foránea → data_catalog.catalog_columns.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `fingerprint` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `severity` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `status` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `first_seen_run_id` | `uuid` | Clave foránea → data_catalog.quality_rule_runs.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `last_seen_run_id` | `uuid` | Clave foránea → data_catalog.quality_rule_runs.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `occurrences` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `failed_rows_last` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `failed_pct_last` | `numeric(7,4)` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `acknowledged_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `acknowledged_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `resolved_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 16 | `resolved_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 17 | `resolution_kind` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 18 | `ignored_until` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 19 | `reason` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 20 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 21 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 22 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/quality_issues.entity.ts:12`)_ | coincide |
+| 2 | `rule_id` | `uuid` | Clave foránea → data_catalog.quality_rules.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `object_id` | `uuid` | Clave foránea → data_catalog.catalog_objects.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `column_id` | `uuid` | Clave foránea → data_catalog.catalog_columns.id; Opcional | _sin dato_ | coincide |
+| 5 | `fingerprint` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 6 | `severity` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 7 | `status` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 8 | `first_seen_run_id` | `uuid` | Clave foránea → data_catalog.quality_rule_runs.id; Obligatoria | _sin dato_ | coincide |
+| 9 | `last_seen_run_id` | `uuid` | Clave foránea → data_catalog.quality_rule_runs.id; Obligatoria | _sin dato_ | coincide |
+| 10 | `occurrences` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+| 11 | `failed_rows_last` | `bigint` | Opcional | _sin dato_ | coincide |
+| 12 | `failed_pct_last` | `numeric(7,4)` | Opcional | _sin dato_ | coincide |
+| 13 | `acknowledged_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 14 | `acknowledged_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 15 | `resolved_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 16 | `resolved_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 17 | `resolution_kind` | `varchar` | Opcional | _sin dato_ | coincide |
+| 18 | `ignored_until` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 19 | `reason` | `text` | Opcional | _sin dato_ | coincide |
+| 20 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/quality_issues.entity.ts:150`)_ | coincide |
+| 21 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/quality_issues.entity.ts:156`)_ | coincide |
+| 22 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/data_catalog/entities/quality_issues.entity.ts:162`)_ | coincide |
 
 #### Relaciones
 
@@ -1990,31 +1987,31 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` · **DDL:** `SQL/67_data_catalog/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `QualityRuleRuns` — `src/modules/data_catalog/entities/quality_rule_runs.entity.ts`
 - **Resumen:** 18 columnas · 4 índices · 2 FK salientes · 3 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `rule_id` | `uuid` | Clave foránea → data_catalog.quality_rules.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `trigger` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `status` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `idempotency_key` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `requested_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `lease_owner` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `lease_expires_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `started_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `finished_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `evaluated_rows` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `failed_rows` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `failed_pct` | `numeric(7,4)` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `passed` | `boolean` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `sample_ids_json` | `jsonb` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 16 | `error_code` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 17 | `error_message` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 18 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/quality_rule_runs.entity.ts:12`)_ | coincide |
+| 2 | `rule_id` | `uuid` | Clave foránea → data_catalog.quality_rules.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `trigger` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 4 | `status` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 5 | `idempotency_key` | `varchar` | Opcional | _sin dato_ | coincide |
+| 6 | `requested_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 7 | `lease_owner` | `varchar` | Opcional | _sin dato_ | coincide |
+| 8 | `lease_expires_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 9 | `started_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 10 | `finished_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 11 | `evaluated_rows` | `bigint` | Opcional | _sin dato_ | coincide |
+| 12 | `failed_rows` | `bigint` | Opcional | _sin dato_ | coincide |
+| 13 | `failed_pct` | `numeric(7,4)` | Opcional | _sin dato_ | coincide |
+| 14 | `passed` | `boolean` | Opcional | _sin dato_ | coincide |
+| 15 | `sample_ids_json` | `jsonb` | Opcional | _sin dato_ | coincide |
+| 16 | `error_code` | `varchar` | Opcional | _sin dato_ | coincide |
+| 17 | `error_message` | `text` | Opcional | _sin dato_ | coincide |
+| 18 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/quality_rule_runs.entity.ts:139`)_ | coincide |
 
 #### Relaciones
 
@@ -2068,33 +2065,33 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` · **DDL:** `SQL/67_data_catalog/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `QualityRules` — `src/modules/data_catalog/entities/quality_rules.entity.ts`
 - **Resumen:** 20 columnas · 5 índices · 5 FK salientes · 2 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `rule_code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `name` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `description` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `object_id` | `uuid` | Clave foránea → data_catalog.catalog_objects.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `column_id` | `uuid` | Clave foránea → data_catalog.catalog_columns.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `rule_kind` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `params_json` | `jsonb` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `severity` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `threshold_pct` | `numeric(5,2)` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `schedule_minutes` | `integer` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `sample_limit` | `integer = 20` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `enabled` | `boolean = true` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `owner_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 16 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 17 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 18 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 19 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 20 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/quality_rules.entity.ts:12`)_ | coincide |
+| 2 | `rule_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 3 | `name` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 4 | `description` | `text` | Opcional | _sin dato_ | coincide |
+| 5 | `object_id` | `uuid` | Clave foránea → data_catalog.catalog_objects.id; Obligatoria | _sin dato_ | coincide |
+| 6 | `column_id` | `uuid` | Clave foránea → data_catalog.catalog_columns.id; Opcional | _sin dato_ | coincide |
+| 7 | `rule_kind` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 8 | `params_json` | `jsonb` | Obligatoria | _sin dato_ | coincide |
+| 9 | `severity` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 10 | `threshold_pct` | `numeric(5,2)` | Obligatoria | _sin dato_ | coincide |
+| 11 | `schedule_minutes` | `integer` | Opcional | _sin dato_ | coincide |
+| 12 | `sample_limit` | `integer = 20` | Obligatoria | _sin dato_ | coincide |
+| 13 | `enabled` | `boolean = true` | Obligatoria | _sin dato_ | coincide |
+| 14 | `owner_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 15 | `version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+| 16 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/quality_rules.entity.ts:106`)_ | coincide |
+| 17 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/quality_rules.entity.ts:112`)_ | coincide |
+| 18 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 19 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 20 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/data_catalog/entities/quality_rules.entity.ts:130`)_ | coincide |
 
 #### Relaciones
 
@@ -2151,21 +2148,21 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` · **DDL:** `SQL/67_data_catalog/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `QualityScoreSnapshots` — `src/modules/data_catalog/entities/quality_score_snapshots.entity.ts`
 - **Resumen:** 8 columnas · 3 índices · 2 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `scope_kind` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `object_id` | `uuid` | Clave foránea → data_catalog.catalog_objects.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `domain_id` | `uuid` | Clave foránea → system_ops.data_domains.id; Parte de la restricción única ux_data_catalog_quality_score_snapshots_scope_asof; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `as_of` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `score` | `numeric(5,2)` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `components_json` | `jsonb` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/quality_score_snapshots.entity.ts:12`)_ | coincide |
+| 2 | `scope_kind` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 3 | `object_id` | `uuid` | Clave foránea → data_catalog.catalog_objects.id; Opcional | _sin dato_ | coincide |
+| 4 | `domain_id` | `uuid` | Clave foránea → system_ops.data_domains.id; Parte de la restricción única ux_data_catalog_quality_score_snapshots_scope_asof; Opcional | _sin dato_ | coincide |
+| 5 | `as_of` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 6 | `score` | `numeric(5,2)` | Obligatoria | _sin dato_ | coincide |
+| 7 | `components_json` | `jsonb` | Obligatoria | _sin dato_ | coincide |
+| 8 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/data_catalog/entities/quality_score_snapshots.entity.ts:54`)_ | coincide |
 
 #### Relaciones
 

@@ -22,7 +22,7 @@
 | [analytics_governance_log](#analytics_governance_log) | Registra cambios de gobierno analítico para conservar trazabilidad de decisiones que afectan el uso secundario de datos de salud. | 9 | 5 | 4 | COINCIDE |
 | [appointment_bookings_history](#appointment_bookings_history) | Preserva versiones o estados históricos de appointment bookings para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 6 | 50 | COINCIDE |
 | [assets_history](#assets_history) | Preserva versiones o estados históricos de assets para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
-| [audit_log](#audit_log) | Conserva eventos de auditoría de acciones del sistema para reconstruir quién realizó operaciones y cuándo. | 17 | 10 | 216 | DIVERGE |
+| [audit_log](#audit_log) | Conserva eventos de auditoría de acciones del sistema para reconstruir quién realizó operaciones y cuándo. | 17 | 10 | 216 | COINCIDE |
 | [automated_rules_history](#automated_rules_history) | Preserva versiones o estados históricos de automated rules para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [bills_history](#bills_history) | Preserva versiones o estados históricos de bills para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [booking_policies_history](#booking_policies_history) | Preserva versiones o estados históricos de booking policies para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
@@ -75,12 +75,12 @@
 | [informational_materials_history](#informational_materials_history) | Conserva revisiones de materiales informativos de productos farmacéuticos, con número de revisión y operación auditada, para reconstruir cambios en contenido entregado a profesionales de salud. | 10 | 5 | 0 | COINCIDE |
 | [insurance_claims_history](#insurance_claims_history) | Preserva versiones o estados históricos de insurance claims para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [insurance_decision_access_log](#insurance_decision_access_log) | Traza accesos a decisiones de cobertura y adjudicación para apoyar revisión y rendición de cuentas. | 10 | 10 | 1 | COINCIDE |
-| [insurance_products_history](#insurance_products_history) | sin propósito | 10 | 5 | 0 | SIN_ENTIDAD |
+| [insurance_products_history](#insurance_products_history) | sin propósito | 10 | 5 | 0 | COINCIDE |
 | [integration_endpoints_history](#integration_endpoints_history) | Preserva versiones o estados históricos de integration endpoints para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [invoices_history](#invoices_history) | Preserva versiones o estados históricos de invoices para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [journal_transactions_history](#journal_transactions_history) | Preserva versiones o estados históricos de journal transactions para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [journeys_history](#journeys_history) | Preserva versiones o estados históricos de journeys para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
-| [jurisdiction_authorizations_history](#jurisdiction_authorizations_history) | Preserva versiones o estados históricos de jurisdiction authorizations para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 6 | 1 | COINCIDE |
+| [jurisdiction_authorizations_history](#jurisdiction_authorizations_history) | Preserva versiones o estados históricos de jurisdiction authorizations para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 6 | 0 | COINCIDE |
 | [liabilities_history](#liabilities_history) | Preserva versiones o estados históricos de liabilities para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [loyalty_memberships_history](#loyalty_memberships_history) | Preserva versiones o estados históricos de loyalty memberships para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 6 | 0 | COINCIDE |
 | [loyalty_programs_history](#loyalty_programs_history) | Preserva versiones o estados históricos de loyalty programs para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
@@ -118,7 +118,7 @@
 | [practice_sites_history](#practice_sites_history) | Preserva versiones o estados históricos de practice sites para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 11 | 6 | 0 | COINCIDE |
 | [practices_history](#practices_history) | Preserva versiones o estados históricos de practices para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [practitioner_role_assignments_history](#practitioner_role_assignments_history) | Preserva versiones o estados históricos de practitioner role assignments para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 6 | 0 | COINCIDE |
-| [procedure_cases_history](#procedure_cases_history) | sin propósito | 10 | 5 | 0 | SIN_ENTIDAD |
+| [procedure_cases_history](#procedure_cases_history) | sin propósito | 10 | 5 | 0 | COINCIDE |
 | [product_catalogs_history](#product_catalogs_history) | Preserva versiones o estados históricos de product catalogs para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [product_sets_history](#product_sets_history) | Preserva versiones o estados históricos de product sets para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [professional_credentials_history](#professional_credentials_history) | Preserva versiones o estados históricos de professional credentials para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
@@ -996,9 +996,9 @@ Conserva eventos de auditoría de acciones del sistema para reconstruir quién r
 | 8 | `outcome_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
 | 9 | `ip` | `inet` | Opcional | _sin dato_ | coincide |
 | 10 | `device_id` | `uuid` | Clave foránea → iam.devices.id; Opcional | _sin dato_ | coincide |
-| 11 | `session_id` | `uuid` | Clave foránea → iam.sessions.id; Opcional | + v4.2.49 (CAN-AUDIT-001 / C-19): los tres campos de la auditoria canonica que faltaban. session_id ata la fila a la sesion (iam.sessions) que actuo; correlation_id ata las lecturas y escrituras de una misma operacion (p. ej. el conjunto que habilito una sesion de emergencia, authz.break_glass_sessions); actor_role_snapshot CONGELA el rol con el que actuo el usuario: la auditoria posterior lee el rol que autorizo el acto, no el actual. Los tres nullable: las filas anteriores no los tienen y la tabla es WORM (no se pueden completar). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_10_audit.puml:31`)_ | **AUSENTE_EN_ORM** |
-| 12 | `correlation_id` | `uuid` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 13 | `actor_role_snapshot` | `varchar` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 11 | `session_id` | `uuid` | Clave foránea → iam.sessions.id; Opcional | + v4.2.49 (CAN-AUDIT-001 / C-19): los tres campos de la auditoria canonica que faltaban. session_id ata la fila a la sesion (iam.sessions) que actuo; correlation_id ata las lecturas y escrituras de una misma operacion (p. ej. el conjunto que habilito una sesion de emergencia, authz.break_glass_sessions); actor_role_snapshot CONGELA el rol con el que actuo el usuario: la auditoria posterior lee el rol que autorizo el acto, no el actual. Los tres nullable: las filas anteriores no los tienen y la tabla es WORM (no se pueden completar). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_10_audit.puml:31`)_ | coincide |
+| 12 | `correlation_id` | `uuid` | Opcional | _sin dato_ | coincide |
+| 13 | `actor_role_snapshot` | `varchar` | Opcional | _sin dato_ | coincide |
 | 14 | `previous_hash` | `varchar` | Opcional | _sin dato_ | coincide |
 | 15 | `record_hash` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 16 | `recorded_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
@@ -4661,23 +4661,23 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Auditoría y Reporting · **Diagrama:** `Mantra Core Health Context/modules/diagram_10_audit.puml` · **DDL:** `SQL/10_audit/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `InsuranceProductsHistory` — `src/modules/audit/entities/insurance_products_history.entity.ts`
 - **Resumen:** 10 columnas · 5 índices · 4 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `history_id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `insurance_product_id` | `uuid` | Clave foránea → insurance.insurance_products.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `revision_no` | `integer` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `operation_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `valid_from` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `valid_to` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `data_snapshot` | `jsonb` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `changed_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `change_reason_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `recorded_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `history_id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 2 | `insurance_product_id` | `uuid` | Clave foránea → insurance.insurance_products.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `revision_no` | `integer` | Obligatoria | _sin dato_ | coincide |
+| 4 | `operation_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `valid_from` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 6 | `valid_to` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 7 | `data_snapshot` | `jsonb` | Obligatoria | _sin dato_ | coincide |
+| 8 | `changed_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 9 | `change_reason_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 10 | `recorded_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
 
 #### Relaciones
 
@@ -4706,7 +4706,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | no declarado | — |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:93` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -4977,7 +4977,7 @@ Preserva versiones o estados históricos de jurisdiction authorizations para rec
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_10_audit.puml: jurisdiction_authorizations_history`
 - **Dominio:** Auditoría y Reporting · **Diagrama:** `Mantra Core Health Context/modules/diagram_10_audit.puml` · **DDL:** `SQL/10_audit/02_tables.sql`
 - **Entidad del ORM:** `JurisdictionAuthorizationsHistory` — `src/modules/audit/entities/jurisdiction_authorizations_history.entity.ts`
-- **Resumen:** 10 columnas · 6 índices · 4 FK salientes · 0 entrantes · 1 operaciones
+- **Resumen:** 10 columnas · 6 índices · 4 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
@@ -5016,9 +5016,7 @@ Preserva versiones o estados históricos de jurisdiction authorizations para rec
 
 #### Operaciones que la tocan
 
-| Operación | Efecto | Confianza |
-|---|---|---|
-| DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId} | LEE | DIRECTA |
+_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
 
 #### Gobierno
 
@@ -7430,23 +7428,23 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Auditoría y Reporting · **Diagrama:** `Mantra Core Health Context/modules/diagram_10_audit.puml` · **DDL:** `SQL/10_audit/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `ProcedureCasesHistory` — `src/modules/audit/entities/procedure_cases_history.entity.ts`
 - **Resumen:** 10 columnas · 5 índices · 4 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `history_id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `procedure_case_id` | `uuid` | Clave foránea → procedures_perioperative.procedure_cases.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `revision_no` | `integer` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `operation_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `valid_from` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `valid_to` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `data_snapshot` | `jsonb` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `changed_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `change_reason_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `recorded_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `history_id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 2 | `procedure_case_id` | `uuid` | Clave foránea → procedures_perioperative.procedure_cases.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `revision_no` | `integer` | Obligatoria | _sin dato_ | coincide |
+| 4 | `operation_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `valid_from` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 6 | `valid_to` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 7 | `data_snapshot` | `jsonb` | Obligatoria | _sin dato_ | coincide |
+| 8 | `changed_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 9 | `change_reason_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 10 | `recorded_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
 
 #### Relaciones
 
@@ -7475,7 +7473,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | no declarado | — |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:93` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |

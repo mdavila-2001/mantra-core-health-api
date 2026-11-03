@@ -2,7 +2,7 @@
 
 # Catálogo del schema `telemetry`
 
-- **Tablas:** 15 · **Columnas:** 195 (32 con descripción: 16.4 %) · **Índices:** 95
+- **Tablas:** 15 · **Columnas:** 195 (33 con descripción: 16.9 %) · **Índices:** 95
 - **Dominio:** Operaciones de Plataforma
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -445,7 +445,7 @@ _Sin propósito registrado._
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/telemetry/entities/client_error_events.entity.ts:12`)_ | coincide |
 | 2 | `received_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
 | 3 | `occurred_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
 | 4 | `portal_type_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |

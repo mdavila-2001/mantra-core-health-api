@@ -39,7 +39,7 @@
 | 25 | GET | `/insurance-claims` | Listar las solicitudes de seguro presentadas (cursor) | BAJO | 11 | BILLING_OPERATOR, SECURITY_ADMIN |
 | 26 | POST | `/insurance-claims` | Enviar reclamo con líneas (837) | MEDIO | 22 | BILLING, FINANCE |
 | 27 | GET | `/insurance-claims/{id}` | Consultar una solicitud de seguro con sus ítems y su dictamen | BAJO | 20 | BILLING_OPERATOR, SECURITY_ADMIN |
-| 28 | POST | `/insurance-claims/{id}/adjudications` | Adjudicar reclamo por línea (835) | MEDIO | 19 | BILLING, FINANCE |
+| 28 | POST | `/insurance-claims/{id}/adjudications` | Adjudicar reclamo por línea (835) | MEDIO | 18 | BILLING, FINANCE |
 | 29 | POST | `/insurance-claims/{id}/disputes` | Abrir disputa sobre adjudicación | MEDIO | 10 | BILLING, FINANCE, BILLING_OPERATOR, SECURITY_ADMIN, PATIENT |
 | 30 | POST | `/insurance-claims/{id}/eob` | Publicar Explicación de Beneficios (EOB) | MEDIO | 21 | BILLING, FINANCE |
 | 31 | POST | `/insurance-claims/{id}/patient-invoice` | Facturar al paciente su parte de un servicio reclamado | MEDIO | 25 | BILLING, FINANCE |
@@ -3205,7 +3205,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /insurance-claims/{id}/adjudications` la atiende `ClaimsController.adjudicate` (src/modules/insurance/presentation/controllers/claims.controller.ts:150). Exige sesión con alguno de los roles BILLING, FINANCE. Valida el cuerpo como `CreateAdjudicationDto` (14 campos, 4 obligatorios). Delega en `ClaimsService.adjudicate`. Crea filas en insurance.claim_adjudication_versions, insurance.claim_line_adjudications. Lee clinical.service_requests, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_units, directory.tenant_memberships, insurance.claim_adjudication_versions, insurance.insurance_carriers, insurance.insurance_claim_lines, insurance.insurance_claims y 9 más.
+`POST /insurance-claims/{id}/adjudications` la atiende `ClaimsController.adjudicate` (src/modules/insurance/presentation/controllers/claims.controller.ts:150). Exige sesión con alguno de los roles BILLING, FINANCE. Valida el cuerpo como `CreateAdjudicationDto` (14 campos, 4 obligatorios). Delega en `ClaimsService.adjudicate`. Crea filas en insurance.claim_adjudication_versions, insurance.claim_line_adjudications. Lee clinical.service_requests, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_units, insurance.claim_adjudication_versions, insurance.insurance_carriers, insurance.insurance_claim_lines, insurance.insurance_claims, insurance.insurance_plans y 8 más.
 
 ### Requerimientos
 
@@ -3226,7 +3226,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinical.service_requests` | LEE | LEE | DIRECTA | ClaimsController.adjudicate → ClaimsService.adjudicate → ClaimsService.claimForMutation → LinkedClaimOrderService.lockAndResolve → LinkedOrderDataRepository.lockServiceRequest | `src/modules/insurance/infrastructure/repositories/linked-order-data.repository.ts:73` |
 | `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | ClaimsController.adjudicate → ClaimsService.adjudicate → ClaimsService.claimForMutation → LinkedClaimOrderService.lockAndResolve → LinkedClaimOrderService.loadSnapshot → LinkedClaimOrderService.resolveBatch → LinkedOrderDataRepository.findOfferings | `src/modules/insurance/infrastructure/repositories/linked-order-data.repository.ts:132` |
 | `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | ClaimsController.adjudicate → ClaimsService.adjudicate → ClaimsService.claimForMutation → LinkedClaimOrderService.lockAndResolve → LinkedClaimOrderService.loadSnapshot → LinkedClaimOrderService.resolveBatch → LinkedOrderDataRepository.findDiagnosticUnits | `src/modules/insurance/infrastructure/repositories/linked-order-data.repository.ts:139` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClaimsController.adjudicate → ClaimsService.adjudicate → ClaimsService.claimForMutation → LinkedClaimAccessService.assertInsurer → LinkedClaimAccessService.assertAdministrator → DirectoryTenantAdministrationAdapter.assertCanAdminister → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
 | `insurance.claim_adjudication_versions` | ESCRIBE | CREA | DIRECTA | ClaimsController.adjudicate → ClaimsService.adjudicate → ClaimRepository.createVersion | `src/modules/insurance/infrastructure/repositories/claim.repository.ts:152` |
 | `insurance.claim_adjudication_versions` | LEE | LEE | DIRECTA | ClaimsController.adjudicate → ClaimsService.adjudicate → ClaimRepository.latestVersion | `src/modules/insurance/infrastructure/repositories/claim.repository.ts:135` |
 | `insurance.claim_line_adjudications` | ESCRIBE | CREA | DIRECTA | ClaimsController.adjudicate → ClaimsService.adjudicate → ClaimRepository.createLineAdjudication | `src/modules/insurance/infrastructure/repositories/claim.repository.ts:173` |
@@ -3686,8 +3685,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `claimLineId` | `string` | Sí | formato uuid | — | — | `src/modules/insurance/presentation/dto/claim-patient-invoice.dto.ts:70` |
 | `chargeKind` | `string` | Sí | valores: INSURED_SHARE, PRIVATE_FULL | — | — | `src/modules/insurance/presentation/dto/claim-patient-invoice.dto.ts:73` |
 | `billedAmount` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/claim-patient-invoice.dto.ts:76` |
-| `coveragePercent` | `object` | No | admite null | — | — | `src/modules/insurance/presentation/dto/claim-patient-invoice.dto.ts:79` |
-| `copayAmount` | `object` | No | admite null | — | — | `src/modules/insurance/presentation/dto/claim-patient-invoice.dto.ts:82` |
+| `coveragePercent` | `string` | No | admite null | — | — | `src/modules/insurance/presentation/dto/claim-patient-invoice.dto.ts:79` |
+| `copayAmount` | `string` | No | admite null | — | — | `src/modules/insurance/presentation/dto/claim-patient-invoice.dto.ts:82` |
 | `patientAmount` | `string` | Sí | — | — | Lo que paga el paciente | `src/modules/insurance/presentation/dto/claim-patient-invoice.dto.ts:85` |
 | `insurerAmount` | `string` | Sí | — | — | Lo que paga la aseguradora | `src/modules/insurance/presentation/dto/claim-patient-invoice.dto.ts:88` |
 | `currencyConceptId` | `object` | No | formato uuid; admite null | — | — | `src/modules/insurance/presentation/dto/claim-patient-invoice.dto.ts:91` |
@@ -3938,21 +3937,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|---|
 | `canSubmit` | `boolean` | Sí | — | — | Todas las líneas se podrían enviar hoy. Si es `false`, el botón «Enviar a la aseguradora» debe quedar deshabilitado y explicar el motivo. | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:131` |
 | `currencyConceptId` | `object` | No | formato uuid; admite null | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:134` |
-| `totalBilledAmount` | `object` | No | admite null | — | `null` si algún monto no es un decimal válido. | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:142` |
-| `totalPatientAmount` | `object` | No | admite null | — | `null` mientras alguna línea no tenga reparto calculable. | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:150` |
-| `totalInsurerAmount` | `object` | No | admite null | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:153` |
+| `totalBilledAmount` | `string` | No | admite null | — | `null` si algún monto no es un decimal válido. | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:142` |
+| `totalPatientAmount` | `string` | No | admite null | — | `null` mientras alguna línea no tenga reparto calculable. | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:150` |
+| `totalInsurerAmount` | `string` | No | admite null | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:153` |
 | `lines` | `array<ClaimQuoteLineResultDto>` | Sí | — | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:156` |
 | `lines[].lineSequence` | `number` | Sí | — | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:69` |
 | `lines[].serviceConceptId` | `object` | No | formato uuid; admite null | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:72` |
 | `lines[].billedAmount` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:75` |
 | `lines[].covered` | `boolean` | Sí | — | — | El plan cubre el servicio y el reparto se pudo calcular. No implica que el cobro se pueda enviar: mire `reason`. | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:81` |
-| `lines[].coveragePercent` | `object` | No | admite null | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:84` |
-| `lines[].copayAmount` | `object` | No | admite null | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:87` |
-| `lines[].deductibleAmount` | `object` | No | admite null | — | Informativo: el deducible todavía no se aplica al reparto (decisión del propietario). | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:96` |
+| `lines[].coveragePercent` | `string` | No | admite null | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:84` |
+| `lines[].copayAmount` | `string` | No | admite null | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:87` |
+| `lines[].deductibleAmount` | `string` | No | admite null | — | Informativo: el deducible todavía no se aplica al reparto (decisión del propietario). | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:96` |
 | `lines[].requiresPriorAuthorization` | `boolean` | Sí | — | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:99` |
 | `lines[].priorAuthorizationStatus` | `string` | No | valores: NOT_REQUIRED, APPROVED, MISSING, PENDING, DENIED, EXPIRED, MISMATCH, AMOUNT_EXCEEDED; admite null | — | `null` si el servicio no tiene beneficio vigente. | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:106` |
-| `lines[].patientAmount` | `object` | No | admite null | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:109` |
-| `lines[].insurerAmount` | `object` | No | admite null | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:112` |
+| `lines[].patientAmount` | `string` | No | admite null | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:109` |
+| `lines[].insurerAmount` | `string` | No | admite null | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:112` |
 | `lines[].reason` | `object` | No | admite null | — | Motivo tipificado por el que esta línea no se podría cobrar (por ejemplo `PRIOR_AUTHORIZATION_REQUIRED`). | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:119` |
 | `lines[].message` | `object` | No | admite null | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:122` |
 

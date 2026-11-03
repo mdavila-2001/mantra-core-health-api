@@ -44,8 +44,8 @@ _Fuente: `src/modules/forms/README.md:3`_
 | `ctrl:FormsDefinitionSetsController` | Operaciones de FormsDefinitionSetsController que el README no asigna a un caso de uso | GET /forms/definition-sets | CLINICIAN · PRACTITIONER · SECURITY_ADMIN | BAJO | 1 |
 |  |  | GET /forms/definition-sets/{id} | CLINICIAN · PRACTITIONER · SECURITY_ADMIN | BAJO | 8 |
 | `ctrl:FormsFieldsController` | Operaciones de FormsFieldsController que el README no asigna a un caso de uso | PATCH /forms/field-definitions/{id} | CLINICIAN · PRACTITIONER · SECURITY_ADMIN | MEDIO | 4 |
-| `ctrl:FormsInstancesController` | Operaciones de FormsInstancesController que el README no asigna a un caso de uso | GET /forms/instances | CLINICIAN · PRACTITIONER | BAJO | 20 |
-|  |  | GET /forms/instances/{id} | CLINICIAN · PRACTITIONER | BAJO | 23 |
+| `ctrl:FormsInstancesController` | Operaciones de FormsInstancesController que el README no asigna a un caso de uso | GET /forms/instances | CLINICIAN · PRACTITIONER | BAJO | 22 |
+|  |  | GET /forms/instances/{id} | CLINICIAN · PRACTITIONER | BAJO | 25 |
 | `ctrl:FormsMeController` | Operaciones de FormsMeController que el README no asigna a un caso de uso | GET /forms/me/instances | Cualquier sesión válida | BAJO | 2 |
 |  |  | GET /forms/me/instances/{id} | Cualquier sesión válida | BAJO | 5 |
 
@@ -239,8 +239,8 @@ flowchart LR
   subgraph s0["ctrl:FormsFieldsController · Operaciones de FormsFieldsController que el README…"]
     o1["PATCH /forms/field-definitions/{id}"]:::op
   end
-  t14[("+14 tablas más")]
-  t16[("+17 tablas más")]
+  t14[("+16 tablas más")]
+  t16[("+19 tablas más")]
   subgraph s1["ctrl:FormsInstancesController · Operaciones de FormsInstancesController que el…"]
     o6["GET /forms/instances"]:::op
     o15["GET /forms/instances/{id}"]:::op

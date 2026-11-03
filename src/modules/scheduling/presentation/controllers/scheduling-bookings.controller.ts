@@ -28,6 +28,7 @@ import {
   ParseOptionalDatePipe,
   Roles,
   type AuthenticatedUser,
+  PatientAnyTenant,
 } from '../../../../common';
 import {
   SchedulingBookingsService,
@@ -97,6 +98,7 @@ export class SchedulingBookingsController {
    * @returns Citas que casan con los filtros.
    */
   @Get()
+  @PatientAnyTenant()
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER', 'PATIENT')
   @ApiOperation({
     summary: 'UC-41-15: lista citas por paciente, recurso y/o ventana',
@@ -140,6 +142,7 @@ export class SchedulingBookingsController {
    * @returns La cita con su instante resuelto desde el slot.
    */
   @Get(':id')
+  @PatientAnyTenant()
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER', 'PATIENT')
   @ApiOperation({ summary: 'UC-41-15: consulta una cita' })
   getBooking(
@@ -319,6 +322,7 @@ export class SchedulingBookingsController {
     entityId: 'param:id',
   })
   @Post(':id/payment-receipts')
+  @PatientAnyTenant()
   @Roles('PATIENT')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -336,6 +340,7 @@ export class SchedulingBookingsController {
 
   /** Los comprobantes de la cita, del más reciente al más viejo. */
   @Get(':id/payment-receipts')
+  @PatientAnyTenant()
   @Roles('PATIENT', 'PRACTITIONER', 'SCHEDULING_ADMIN', 'SCHEDULING_AGENT')
   @ApiOperation({
     summary: 'Listar los comprobantes de pago de una cita',
@@ -357,6 +362,7 @@ export class SchedulingBookingsController {
    * lo da a quien lo subió, y quien tiene que mirarlo es el médico.
    */
   @Get(':id/payment-receipts/:receiptId/content')
+  @PatientAnyTenant()
   @Roles('PATIENT', 'PRACTITIONER', 'SCHEDULING_ADMIN', 'SCHEDULING_AGENT')
   @Header('Cache-Control', 'private, no-store')
   // Un comprobante se mira, no se ejecuta: aunque el archivo trajera algo
@@ -491,6 +497,7 @@ export class SchedulingBookingsController {
   // `PRACTITIONER` desde la corrección #14: mover un turno es un acto del
   // profesional tanto como del mostrador, y ahora exige motivo en las dos
   // direcciones.
+  @PatientAnyTenant()
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER', 'PATIENT')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Reprogramar la cita a otro slot' })
@@ -509,6 +516,7 @@ export class SchedulingBookingsController {
     entityId: 'param:id',
   })
   @Post(':id/cancel')
+  @PatientAnyTenant()
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER', 'PATIENT')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({

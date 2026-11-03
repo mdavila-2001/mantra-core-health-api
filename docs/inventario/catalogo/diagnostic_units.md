@@ -2,7 +2,7 @@
 
 # Catálogo del schema `diagnostic_units`
 
-- **Tablas:** 15 · **Columnas:** 254 (36 con descripción: 14.2 %) · **Índices:** 120
+- **Tablas:** 15 · **Columnas:** 254 (54 con descripción: 21.3 %) · **Índices:** 120
 - **Dominio:** Clínico y Diagnóstico
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -20,11 +20,11 @@
 | [diagnostic_unit_sites](#diagnostic_unit_sites) | Identifica sedes físicas de unidades diagnósticas para localizar dónde se reciben pacientes o se procesan estudios. | 13 | 6 | 25 | COINCIDE |
 | [diagnostic_unit_specialties](#diagnostic_unit_specialties) | Asocia especialidades con unidades diagnósticas para describir las áreas clínicas que pueden atender. | 12 | 5 | 6 | COINCIDE |
 | [diagnostic_units](#diagnostic_units) | Representa laboratorios, centros de imagen u otras unidades que realizan servicios diagnósticos para prestadores de salud. | 19 | 13 | 54 | COINCIDE |
-| [unit_medical_visitors](#unit_medical_visitors) | sin propósito | 26 | 10 | 0 | SIN_ENTIDAD |
-| [unit_visit_ratings](#unit_visit_ratings) | sin propósito | 16 | 5 | 0 | SIN_ENTIDAD |
-| [unit_visit_records](#unit_visit_records) | sin propósito | 22 | 10 | 0 | SIN_ENTIDAD |
-| [unit_visit_request_events](#unit_visit_request_events) | sin propósito | 11 | 6 | 0 | SIN_ENTIDAD |
-| [unit_visit_requests](#unit_visit_requests) | sin propósito | 23 | 9 | 0 | SIN_ENTIDAD |
+| [unit_medical_visitors](#unit_medical_visitors) | sin propósito | 26 | 10 | 0 | COINCIDE |
+| [unit_visit_ratings](#unit_visit_ratings) | sin propósito | 16 | 5 | 0 | COINCIDE |
+| [unit_visit_records](#unit_visit_records) | sin propósito | 22 | 10 | 0 | COINCIDE |
+| [unit_visit_request_events](#unit_visit_request_events) | sin propósito | 11 | 6 | 0 | COINCIDE |
+| [unit_visit_requests](#unit_visit_requests) | sin propósito | 23 | 9 | 0 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -1164,39 +1164,39 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml` · **DDL:** `SQL/23_diagnostic_units/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `UnitMedicalVisitors` — `src/modules/diagnostic_units/entities/unit_medical_visitors.entity.ts`
 - **Resumen:** 26 columnas · 10 índices · 10 FK salientes · 2 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `diagnostic_unit_id` | `uuid` | Clave foránea → diagnostic_units.diagnostic_units.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `full_name` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `photo_url` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `internal_code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `position` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `supervisor_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `branch_id` | `uuid` | Clave foránea → directory.branches.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `region` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `commercial_area` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `assigned_zone` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `started_on` | `date` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `ended_on` | `date` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `identity_verification_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 16 | `contract_verification_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 17 | `credential_verification_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 18 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 19 | `publicly_listed` | `boolean = true` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 20 | `unlinked_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 21 | `unlink_reason` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 22 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 23 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 24 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 25 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 26 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/diagnostic_units/entities/unit_medical_visitors.entity.ts:12`)_ | coincide |
+| 2 | `diagnostic_unit_id` | `uuid` | Clave foránea → diagnostic_units.diagnostic_units.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `full_name` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 5 | `photo_url` | `varchar` | Opcional | _sin dato_ | coincide |
+| 6 | `internal_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 7 | `position` | `varchar` | Opcional | _sin dato_ | coincide |
+| 8 | `supervisor_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 9 | `branch_id` | `uuid` | Clave foránea → directory.branches.id; Opcional | _sin dato_ | coincide |
+| 10 | `region` | `varchar` | Opcional | _sin dato_ | coincide |
+| 11 | `commercial_area` | `varchar` | Opcional | _sin dato_ | coincide |
+| 12 | `assigned_zone` | `varchar` | Opcional | _sin dato_ | coincide |
+| 13 | `started_on` | `date` | Obligatoria | _sin dato_ | coincide |
+| 14 | `ended_on` | `date` | Opcional | _sin dato_ | coincide |
+| 15 | `identity_verification_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 16 | `contract_verification_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 17 | `credential_verification_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 18 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 19 | `publicly_listed` | `boolean = true` | Obligatoria | _sin dato_ | coincide |
+| 20 | `unlinked_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 21 | `unlink_reason` | `text` | Opcional | _sin dato_ | coincide |
+| 22 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/diagnostic_units/entities/unit_medical_visitors.entity.ts:150`)_ | coincide |
+| 23 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/diagnostic_units/entities/unit_medical_visitors.entity.ts:156`)_ | coincide |
+| 24 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 25 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 26 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/diagnostic_units/entities/unit_medical_visitors.entity.ts:174`)_ | coincide |
 
 #### Relaciones
 
@@ -1262,29 +1262,29 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml` · **DDL:** `SQL/23_diagnostic_units/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `UnitVisitRatings` — `src/modules/diagnostic_units/entities/unit_visit_ratings.entity.ts`
 - **Resumen:** 16 columnas · 5 índices · 5 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `unit_visit_record_id` | `uuid` | Clave foránea → diagnostic_units.unit_visit_records.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `doctor_user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `kind_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `punctuality` | `integer` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `information_quality` | `integer` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `clarity` | `integer` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `relevance` | `integer` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `professional_conduct` | `integer` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `overall_satisfaction` | `integer` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `comment` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 16 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/diagnostic_units/entities/unit_visit_ratings.entity.ts:12`)_ | coincide |
+| 2 | `unit_visit_record_id` | `uuid` | Clave foránea → diagnostic_units.unit_visit_records.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `doctor_user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `kind_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `punctuality` | `integer` | Opcional | _sin dato_ | coincide |
+| 6 | `information_quality` | `integer` | Opcional | _sin dato_ | coincide |
+| 7 | `clarity` | `integer` | Opcional | _sin dato_ | coincide |
+| 8 | `relevance` | `integer` | Opcional | _sin dato_ | coincide |
+| 9 | `professional_conduct` | `integer` | Opcional | _sin dato_ | coincide |
+| 10 | `overall_satisfaction` | `integer` | Opcional | _sin dato_ | coincide |
+| 11 | `comment` | `text` | Opcional | _sin dato_ | coincide |
+| 12 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/diagnostic_units/entities/unit_visit_ratings.entity.ts:90`)_ | coincide |
+| 13 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/diagnostic_units/entities/unit_visit_ratings.entity.ts:96`)_ | coincide |
+| 14 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 15 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 16 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/diagnostic_units/entities/unit_visit_ratings.entity.ts:114`)_ | coincide |
 
 #### Relaciones
 
@@ -1332,35 +1332,35 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml` · **DDL:** `SQL/23_diagnostic_units/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `UnitVisitRecords` — `src/modules/diagnostic_units/entities/unit_visit_records.entity.ts`
 - **Resumen:** 22 columnas · 10 índices · 10 FK salientes · 1 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `unit_visit_request_id` | `uuid` | Clave foránea → diagnostic_units.unit_visit_requests.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `doctor_user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `unit_medical_visitor_id` | `uuid` | Clave foránea → diagnostic_units.unit_medical_visitors.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `diagnostic_unit_id` | `uuid` | Clave foránea → diagnostic_units.diagnostic_units.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `occurred_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `location` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `modality_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `topics_discussed` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `questions` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `commitments` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `next_action` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `observations` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `visitor_attendance_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `doctor_attendance_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 16 | `confirmation_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 17 | `confirmed_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 18 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 19 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 20 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 21 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 22 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/diagnostic_units/entities/unit_visit_records.entity.ts:12`)_ | coincide |
+| 2 | `unit_visit_request_id` | `uuid` | Clave foránea → diagnostic_units.unit_visit_requests.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `doctor_user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `unit_medical_visitor_id` | `uuid` | Clave foránea → diagnostic_units.unit_medical_visitors.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `diagnostic_unit_id` | `uuid` | Clave foránea → diagnostic_units.diagnostic_units.id; Obligatoria | _sin dato_ | coincide |
+| 6 | `occurred_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 7 | `location` | `varchar` | Opcional | _sin dato_ | coincide |
+| 8 | `modality_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 9 | `topics_discussed` | `text` | Opcional | _sin dato_ | coincide |
+| 10 | `questions` | `text` | Opcional | _sin dato_ | coincide |
+| 11 | `commitments` | `text` | Opcional | _sin dato_ | coincide |
+| 12 | `next_action` | `text` | Opcional | _sin dato_ | coincide |
+| 13 | `observations` | `text` | Opcional | _sin dato_ | coincide |
+| 14 | `visitor_attendance_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 15 | `doctor_attendance_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 16 | `confirmation_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 17 | `confirmed_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 18 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/diagnostic_units/entities/unit_visit_records.entity.ts:122`)_ | coincide |
+| 19 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/diagnostic_units/entities/unit_visit_records.entity.ts:128`)_ | coincide |
+| 20 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 21 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 22 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/diagnostic_units/entities/unit_visit_records.entity.ts:146`)_ | coincide |
 
 #### Relaciones
 
@@ -1425,24 +1425,24 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml` · **DDL:** `SQL/23_diagnostic_units/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `UnitVisitRequestEvents` — `src/modules/diagnostic_units/entities/unit_visit_request_events.entity.ts`
 - **Resumen:** 11 columnas · 6 índices · 6 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `unit_visit_request_id` | `uuid` | Clave foránea → diagnostic_units.unit_visit_requests.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `action_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `previous_status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `new_status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `proposed_start_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `note` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `actor_user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `occurred_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/diagnostic_units/entities/unit_visit_request_events.entity.ts:12`)_ | coincide |
+| 2 | `unit_visit_request_id` | `uuid` | Clave foránea → diagnostic_units.unit_visit_requests.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `action_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `previous_status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `new_status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 6 | `proposed_start_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 7 | `note` | `text` | Opcional | _sin dato_ | coincide |
+| 8 | `actor_user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | coincide |
+| 9 | `occurred_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 10 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/diagnostic_units/entities/unit_visit_request_events.entity.ts:70`)_ | coincide |
+| 11 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 
 #### Relaciones
 
@@ -1492,36 +1492,36 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml` · **DDL:** `SQL/23_diagnostic_units/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `UnitVisitRequests` — `src/modules/diagnostic_units/entities/unit_visit_requests.entity.ts`
 - **Resumen:** 23 columnas · 9 índices · 9 FK salientes · 3 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `unit_medical_visitor_id` | `uuid` | Clave foránea → diagnostic_units.unit_medical_visitors.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `diagnostic_unit_id` | `uuid` | Clave foránea → diagnostic_units.diagnostic_units.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `doctor_user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `doctor_tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `reason` | `text` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `requested_start_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `duration_minutes` | `integer` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `time_zone` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `modality_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `location` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `attachments` | `jsonb` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `observations` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `proposed_start_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 16 | `confirmed_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 17 | `closed_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 18 | `rescheduled_from_id` | `uuid` | Clave foránea → diagnostic_units.unit_visit_requests.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 19 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 20 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 21 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 22 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 23 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/diagnostic_units/entities/unit_visit_requests.entity.ts:12`)_ | coincide |
+| 2 | `unit_medical_visitor_id` | `uuid` | Clave foránea → diagnostic_units.unit_medical_visitors.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `diagnostic_unit_id` | `uuid` | Clave foránea → diagnostic_units.diagnostic_units.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `doctor_user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `doctor_tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Opcional | _sin dato_ | coincide |
+| 6 | `reason` | `text` | Obligatoria | _sin dato_ | coincide |
+| 7 | `requested_start_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 8 | `duration_minutes` | `integer` | Obligatoria | _sin dato_ | coincide |
+| 9 | `time_zone` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 10 | `modality_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 11 | `location` | `varchar` | Opcional | _sin dato_ | coincide |
+| 12 | `attachments` | `jsonb` | Opcional | _sin dato_ | coincide |
+| 13 | `observations` | `text` | Opcional | _sin dato_ | coincide |
+| 14 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 15 | `proposed_start_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 16 | `confirmed_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 17 | `closed_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 18 | `rescheduled_from_id` | `uuid` | Clave foránea → diagnostic_units.unit_visit_requests.id; Opcional | _sin dato_ | coincide |
+| 19 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/diagnostic_units/entities/unit_visit_requests.entity.ts:132`)_ | coincide |
+| 20 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/diagnostic_units/entities/unit_visit_requests.entity.ts:138`)_ | coincide |
+| 21 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 22 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 23 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/diagnostic_units/entities/unit_visit_requests.entity.ts:156`)_ | coincide |
 
 #### Relaciones
 

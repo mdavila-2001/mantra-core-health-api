@@ -2,7 +2,7 @@
 
 # Catálogo del schema `terminology`
 
-- **Tablas:** 16 · **Columnas:** 214 (57 con descripción: 26.6 %) · **Índices:** 103
+- **Tablas:** 16 · **Columnas:** 214 (61 con descripción: 28.5 %) · **Índices:** 103
 - **Dominio:** Núcleo y Terminología
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -10,7 +10,7 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [catalog_concepts](#catalog_concepts) | Almacena conceptos normalizados de catálogos sanitarios que se referencian desde los registros clínicos y administrativos. | 16 | 8 | 228 | COINCIDE |
+| [catalog_concepts](#catalog_concepts) | Almacena conceptos normalizados de catálogos sanitarios que se referencian desde los registros clínicos y administrativos. | 16 | 8 | 229 | COINCIDE |
 | [catalog_import_batches](#catalog_import_batches) | Agrupa importaciones de terminología para trazar la carga de fuentes externas y sus resultados. | 13 | 6 | 3 | COINCIDE |
 | [code_system_versions](#code_system_versions) | Registra versiones de sistemas de códigos para preservar el contexto temporal de conceptos clínicos. | 14 | 6 | 19 | COINCIDE |
 | [code_systems](#code_systems) | Define sistemas de codificación sanitaria que permiten interpretar identificadores clínicos de forma interoperable. | 15 | 8 | 16 | COINCIDE |
@@ -220,7 +220,7 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: catalog_concepts`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `CatalogConcepts` — `src/modules/terminology/entities/catalog_concepts.entity.ts`
-- **Resumen:** 16 columnas · 8 índices · 5 FK salientes · 2745 entrantes · 228 operaciones
+- **Resumen:** 16 columnas · 8 índices · 5 FK salientes · 2745 entrantes · 229 operaciones
 
 #### Columnas
 
@@ -3064,6 +3064,8 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | POST /admin/content-packs/{code}/apply | ACTUALIZA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
 | GET /admin/governance/jobs | LEE | POR_SQL |
+| GET /approvals/pending | LEE | POR_SQL |
+| GET /me/practitioner/governance-panel | LEE | POR_SQL |
 | GET /me/support-agenda | LEE | POR_SQL |
 | GET /diagnostic-equipment/{id} | LEE | POR_SQL |
 | GET /diagnostic-units | LEE | DIRECTA |
@@ -3088,7 +3090,6 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | POST /iam/auth/register-practitioner | LEE | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /identity/checks/{id}/results | LEE | DIRECTA |
-| POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
 | POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
 | POST /internal/identity/evidence/lifecycle-scan | LEE | DIRECTA |
 | POST /internal/identity/evidence/storage-purge-review | LEE | DIRECTA |
@@ -3828,7 +3829,7 @@ _Sin propósito registrado._
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/terminology/entities/concept_relationship_evidence.entity.ts:12`)_ | coincide |
 | 2 | `concept_relationship_id` | `uuid` | Clave foránea → terminology.concept_relationships.id; Obligatoria | _sin dato_ | coincide |
 | 3 | `terminology_source_id` | `uuid` | Clave foránea → terminology.terminology_sources.id; Obligatoria | _sin dato_ | coincide |
 | 4 | `code_system_version_id` | `uuid` | Clave foránea → terminology.code_system_versions.id; Obligatoria | _sin dato_ | coincide |
@@ -3848,9 +3849,9 @@ _Sin propósito registrado._
 | 18 | `line_of_therapy_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
 | 19 | `valid_from` | `date` | Obligatoria | _sin dato_ | coincide |
 | 20 | `valid_to` | `date` | Opcional | _sin dato_ | coincide |
-| 21 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 22 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 23 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+| 21 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/terminology/entities/concept_relationship_evidence.entity.ts:160`)_ | coincide |
+| 22 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/terminology/entities/concept_relationship_evidence.entity.ts:166`)_ | coincide |
+| 23 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/terminology/entities/concept_relationship_evidence.entity.ts:172`)_ | coincide |
 
 #### Relaciones
 
@@ -3931,11 +3932,11 @@ Expresa relaciones semánticas entre conceptos para navegación, mapeo y razonam
 | 7 | `evidence_count` | `integer` | Opcional | _sin dato_ | coincide |
 | 8 | `best_evidence_tier_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
 | 9 | `frequency_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
-| 10 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/terminology/entities/concept_relationships.entity.ts:62`)_ | coincide |
-| 11 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/terminology/entities/concept_relationships.entity.ts:68`)_ | coincide |
+| 10 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/terminology/entities/concept_relationships.entity.ts:74`)_ | coincide |
+| 11 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/terminology/entities/concept_relationships.entity.ts:80`)_ | coincide |
 | 12 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 13 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 14 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/terminology/entities/concept_relationships.entity.ts:86`)_ | coincide |
+| 14 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/terminology/entities/concept_relationships.entity.ts:98`)_ | coincide |
 
 #### Relaciones
 
@@ -4298,6 +4299,8 @@ Asocia conceptos concretos a versiones de un conjunto de valores para delimitar 
 | POST /admin/content-packs/{code}/apply | BORRA | POR_TIPO |
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
+| POST /me/practitioner/support-staff | LEE | DIRECTA |
+| POST /org/support-staff | LEE | DIRECTA |
 | POST /admin/tenants/{tenantId}/verification | LEE | DIRECTA |
 | POST /tenants/{tenantId}/affiliation-documents | LEE | DIRECTA |
 | GET /tenants/{tenantId}/laboratory-readiness | LEE | DIRECTA |
@@ -4309,7 +4312,6 @@ Asocia conceptos concretos a versiones de un conjunto de valores para delimitar 
 | POST /iam/auth/register-support-staff | LEE | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /identity/checks/{id}/results | LEE | DIRECTA |
-| POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
 | POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
 | GET /pharmacy/pharmacies/{id}/contacts | LEE | DIRECTA |
 | POST /practices/{practiceId}/healthcare-services | LEE | DIRECTA |
@@ -4324,7 +4326,6 @@ Asocia conceptos concretos a versiones de un conjunto de valores para delimitar 
 | PATCH /profiles/practitioners/me | LEE | DIRECTA |
 | POST /profiles/practitioners/me/affiliations | LEE | DIRECTA |
 | GET /profiles/practitioners/me/linkable-organizations | LEE | DIRECTA |
-| PATCH /profiles/practitioners/me/specialties/{specialtyId} | LEE | DIRECTA |
 | GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions | LEE | DIRECTA |
 | GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | LEE | DIRECTA |
 | GET /clinical/study-catalog | LEE | POR_SQL |
@@ -4503,6 +4504,8 @@ Preserva versiones de conjuntos de valores para reproducir qué opciones estaban
 | GET /public/search/practitioners | LEE | DIRECTA |
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
+| POST /me/practitioner/support-staff | LEE | DIRECTA |
+| POST /org/support-staff | LEE | DIRECTA |
 | POST /admin/tenants/{tenantId}/verification | LEE | DIRECTA |
 | POST /tenants/{tenantId}/affiliation-documents | LEE | DIRECTA |
 | GET /tenants/{tenantId}/laboratory-readiness | LEE | DIRECTA |
@@ -4514,7 +4517,6 @@ Preserva versiones de conjuntos de valores para reproducir qué opciones estaban
 | POST /iam/auth/register-support-staff | LEE | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /identity/checks/{id}/results | LEE | DIRECTA |
-| POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
 | POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
 | GET /pharmacy/pharmacies/{id}/contacts | LEE | DIRECTA |
 | POST /procedure-cases/{id}/preoperative-orders | LEE | POR_SQL |
@@ -4528,7 +4530,6 @@ Preserva versiones de conjuntos de valores para reproducir qué opciones estaban
 | PATCH /profiles/practitioners/me | LEE | DIRECTA |
 | POST /profiles/practitioners/me/affiliations | LEE | DIRECTA |
 | GET /profiles/practitioners/me/linkable-organizations | LEE | DIRECTA |
-| PATCH /profiles/practitioners/me/specialties/{specialtyId} | LEE | DIRECTA |
 | GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions | LEE | DIRECTA |
 | GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | LEE | DIRECTA |
 | GET /clinical/study-catalog | LEE | POR_SQL |
@@ -4655,6 +4656,8 @@ Define conjuntos de conceptos permitidos que pueden utilizar formularios y proce
 | GET /public/search/practitioners | LEE | DIRECTA |
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
+| POST /me/practitioner/support-staff | LEE | DIRECTA |
+| POST /org/support-staff | LEE | DIRECTA |
 | POST /admin/tenants/{tenantId}/verification | LEE | DIRECTA |
 | POST /tenants/{tenantId}/affiliation-documents | LEE | DIRECTA |
 | GET /tenants/{tenantId}/laboratory-readiness | LEE | DIRECTA |
@@ -4666,7 +4669,6 @@ Define conjuntos de conceptos permitidos que pueden utilizar formularios y proce
 | POST /iam/auth/register-support-staff | LEE | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /identity/checks/{id}/results | LEE | DIRECTA |
-| POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
 | POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
 | GET /pharmacy/pharmacies/{id}/contacts | LEE | DIRECTA |
 | POST /procedure-cases/{id}/preoperative-orders | LEE | POR_SQL |
@@ -4680,7 +4682,6 @@ Define conjuntos de conceptos permitidos que pueden utilizar formularios y proce
 | PATCH /profiles/practitioners/me | LEE | DIRECTA |
 | POST /profiles/practitioners/me/affiliations | LEE | DIRECTA |
 | GET /profiles/practitioners/me/linkable-organizations | LEE | DIRECTA |
-| PATCH /profiles/practitioners/me/specialties/{specialtyId} | LEE | DIRECTA |
 | GET /clinical/study-catalog | LEE | POR_SQL |
 | GET /clinical/study-catalog/{conceptId} | LEE | POR_SQL |
 | POST /admin/catalogs/glossary | LEE | DIRECTA |

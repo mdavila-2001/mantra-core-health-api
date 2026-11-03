@@ -19,7 +19,7 @@
 | [identity_fraud_signals](#identity_fraud_signals) | Documenta señales de posible fraude de identidad para apoyar revisión de riesgo y protección de cuentas. | 11 | 6 | 4 | COINCIDE |
 | [identity_manual_review_cases](#identity_manual_review_cases) | Encola casos que requieren revisión humana cuando la verificación automática no resuelve la identidad con suficiente certeza. | 14 | 7 | 5 | COINCIDE |
 | [identity_verification_attempts](#identity_verification_attempts) | Registra intentos de verificación para conservar métodos, tiempos y resultados parciales del proceso. | 13 | 7 | 13 | COINCIDE |
-| [identity_verification_cases](#identity_verification_cases) | Agrupa procesos de verificación de identidad para seguir su estado, sujeto y resultado. | 17 | 7 | 39 | DIVERGE |
+| [identity_verification_cases](#identity_verification_cases) | Agrupa procesos de verificación de identidad para seguir su estado, sujeto y resultado. | 17 | 7 | 37 | COINCIDE |
 | [identity_verification_policies](#identity_verification_policies) | Define políticas que determinan requisitos y métodos de verificación de identidad para personas usuarias o pacientes. | 15 | 8 | 2 | COINCIDE |
 
 ## Diagrama entidad-relación
@@ -896,14 +896,14 @@ Agrupa procesos de verificación de identidad para seguir su estado, sujeto y re
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_27_identity_assurance.puml: identity_verification_cases`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_27_identity_assurance.puml` · **DDL:** `SQL/27_identity_assurance/02_tables.sql`
 - **Entidad del ORM:** `IdentityVerificationCases` — `src/modules/identity_assurance/entities/identity_verification_cases.entity.ts`
-- **Resumen:** 17 columnas · 7 índices · 7 FK salientes · 7 entrantes · 39 operaciones
+- **Resumen:** 17 columnas · 7 índices · 7 FK salientes · 7 entrantes · 37 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
 | 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/identity_assurance/entities/identity_verification_cases.entity.ts:15`)_ | coincide |
-| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Opcional | _sin dato_ | coincide |
 | 3 | `subject_type_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
 | 4 | `subject_entity_id` | `uuid` | Obligatoria | _sin dato_ | coincide |
 | 5 | `identity_verification_policy_id` | `uuid` | Clave foránea → identity_assurance.identity_verification_policies.id; Obligatoria | _sin dato_ | coincide |
@@ -914,11 +914,11 @@ Agrupa procesos de verificación de identidad para seguir su estado, sujeto y re
 | 10 | `completed_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
 | 11 | `expires_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
 | 12 | `correlation_id` | `uuid` | Opcional | _sin dato_ | coincide |
-| 13 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/identity_assurance/entities/identity_verification_cases.entity.ts:97`)_ | coincide |
-| 14 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/identity_assurance/entities/identity_verification_cases.entity.ts:103`)_ | coincide |
+| 13 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/identity_assurance/entities/identity_verification_cases.entity.ts:103`)_ | coincide |
+| 14 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/identity_assurance/entities/identity_verification_cases.entity.ts:109`)_ | coincide |
 | 15 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 16 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 17 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/identity_assurance/entities/identity_verification_cases.entity.ts:121`)_ | coincide |
+| 17 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/identity_assurance/entities/identity_verification_cases.entity.ts:127`)_ | coincide |
 
 #### Relaciones
 
@@ -991,8 +991,6 @@ Agrupa procesos de verificación de identidad para seguir su estado, sujeto y re
 | GET /internal/identity/checks/dispatchable | LEE | DIRECTA |
 | POST /internal/identity/evidence/lifecycle-scan | LEE | DIRECTA |
 | POST /internal/identity/evidence/storage-purge-review | LEE | DIRECTA |
-| DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId} | LEE | DIRECTA |
-| PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId} | LEE | DIRECTA |
 | POST /internal/governance/retention-executions/run | LEE | DIRECTA |
 
 #### Gobierno

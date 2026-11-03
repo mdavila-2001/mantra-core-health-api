@@ -30,7 +30,7 @@ _Fuente: `src/modules/consent/README.md:3`_
 | `UC-07-05` | Revocar autorización HIPAA | POST /consent/hipaa-authorizations/{id}/revoke | SECURITY_ADMIN | MEDIO | 2 |
 | `UC-07-06` | Establecer/versionar base legal (supersede la anterior) | POST /consent/processing-legal-bases | SECURITY_ADMIN | MEDIO | 3 |
 | `UC-07-07` | Aplicar restricción de privacidad que afecta RLS clínico | POST /consent/privacy-restrictions | SECURITY_ADMIN | MEDIO | 3 |
-| `UC-07-08` | Capturar consentimiento informado de tratamiento | POST /consent/treatment-informed-consents | SECURITY_ADMIN · CLINICIAN · PRACTITIONER | MEDIO | 21 |
+| `UC-07-08` | Capturar consentimiento informado de tratamiento | POST /consent/treatment-informed-consents | SECURITY_ADMIN · CLINICIAN · PRACTITIONER | MEDIO | 23 |
 | `UC-07-09` | Actualizar provisiones granulares (soft-close + insert) | PATCH /consent/consents/{id}/provisions | SECURITY_ADMIN | MEDIO | 5 |
 | `UC-07-10` | Registrar evidencia inmutable (append-only) | POST /consent/consent-evidence | SECURITY_ADMIN | MEDIO | 1 |
 | `UC-07-11` | Barrido de expiraciones (worker) | POST /consent/internal/expiration-sweep | SYSTEM · SECURITY_ADMIN | MEDIO | 7 |
@@ -40,16 +40,16 @@ _Fuente: `src/modules/consent/README.md:3`_
 |  |  | GET /consent/me/hipaa-authorizations | PATIENT | BAJO | 4 |
 |  |  | GET /consent/me/objections | PATIENT | BAJO | 4 |
 |  |  | GET /consent/me/treatment-informed-consents | PATIENT | BAJO | 3 |
-| `ctrl:EncounterInformedConsentsController` | Operaciones de EncounterInformedConsentsController que el README no asigna a un caso de uso | GET /consent/encounters/{encounterId}/informed-consent | CLINICIAN · PRACTITIONER | BAJO | 20 |
-|  |  | POST /consent/encounters/{encounterId}/informed-consent | CLINICIAN · PRACTITIONER | MEDIO | 21 |
+| `ctrl:EncounterInformedConsentsController` | Operaciones de EncounterInformedConsentsController que el README no asigna a un caso de uso | GET /consent/encounters/{encounterId}/informed-consent | CLINICIAN · PRACTITIONER | BAJO | 22 |
+|  |  | POST /consent/encounters/{encounterId}/informed-consent | CLINICIAN · PRACTITIONER | MEDIO | 23 |
 | `ctrl:PractitionerAccessRequestsController` | Operaciones de PractitionerAccessRequestsController que el README no asigna a un caso de uso | POST /consent/practitioner-access-requests | PRACTITIONER · CLINICIAN | MEDIO | 21 |
 |  |  | POST /consent/practitioner-access-requests/{id}/decision | PATIENT | MEDIO | 25 |
 |  |  | GET /consent/practitioner-access-requests/mine | PATIENT | BAJO | 4 |
-| `ctrl:TreatmentInformedConsentsController` | Operaciones de TreatmentInformedConsentsController que el README no asigna a un caso de uso | GET /consent/treatment-informed-consents | CLINICIAN · PRACTITIONER | BAJO | 20 |
-|  |  | GET /consent/treatment-informed-consents/{id} | CLINICIAN · PRACTITIONER | BAJO | 20 |
-|  |  | POST /consent/treatment-informed-consents/{id}/evidence | CLINICIAN · PRACTITIONER | MEDIO | 18 |
-|  |  | PATCH /consent/treatment-informed-consents/{id}/post-emergency-information | CLINICIAN · PRACTITIONER | MEDIO | 19 |
-|  |  | PATCH /consent/treatment-informed-consents/{id}/withdraw | CLINICIAN · PRACTITIONER | MEDIO | 22 |
+| `ctrl:TreatmentInformedConsentsController` | Operaciones de TreatmentInformedConsentsController que el README no asigna a un caso de uso | GET /consent/treatment-informed-consents | CLINICIAN · PRACTITIONER | BAJO | 22 |
+|  |  | GET /consent/treatment-informed-consents/{id} | CLINICIAN · PRACTITIONER | BAJO | 22 |
+|  |  | POST /consent/treatment-informed-consents/{id}/evidence | CLINICIAN · PRACTITIONER | MEDIO | 20 |
+|  |  | PATCH /consent/treatment-informed-consents/{id}/post-emergency-information | CLINICIAN · PRACTITIONER | MEDIO | 21 |
+|  |  | PATCH /consent/treatment-informed-consents/{id}/withdraw | CLINICIAN · PRACTITIONER | MEDIO | 24 |
 
 ### Diagrama 1 de 2 — etapas `UC-07-01`, `UC-07-02`, `UC-07-03`…
 
@@ -102,7 +102,7 @@ flowchart LR
   subgraph s6["UC-07-07 · Aplicar restricción de privacidad que afecta RLS clínico"]
     o21["POST /consent/privacy-restrictions"]:::op
   end
-  t29[("+15 tablas más")]
+  t29[("+17 tablas más")]
   subgraph s7["UC-07-08 · Capturar consentimiento informado de tratamiento"]
     o22["POST /consent/treatment-informed-consents"]:::op
   end
@@ -127,8 +127,8 @@ flowchart LR
     o43["GET /consent/me/objections"]:::op
     o44["GET /consent/me/treatment-informed-consents"]:::op
   end
-  t48[("+14 tablas más")]
-  t50[("+15 tablas más")]
+  t48[("+16 tablas más")]
+  t50[("+17 tablas más")]
   subgraph s13["ctrl:EncounterInformedConsentsController · Operaciones de EncounterInformedCons…"]
     o46["GET /consent/encounters/{encounterId}/informed-consent"]:::op
     o49["POST /consent/encounters/{encounterId}/informed-consent"]:::op
@@ -276,11 +276,11 @@ flowchart LR
     o8["POST /consent/practitioner-access-requests/{id}/decision"]:::op
     o12["GET /consent/practitioner-access-requests/mine"]:::op
   end
-  t22[("+14 tablas más")]
-  t24[("+14 tablas más")]
-  t26[("+12 tablas más")]
-  t28[("+13 tablas más")]
-  t30[("+16 tablas más")]
+  t22[("+16 tablas más")]
+  t24[("+16 tablas más")]
+  t26[("+14 tablas más")]
+  t28[("+15 tablas más")]
+  t30[("+18 tablas más")]
   subgraph s1["ctrl:TreatmentInformedConsentsController · Operaciones de TreatmentInformedCons…"]
     o15["GET /consent/treatment-informed-consents"]:::op
     o23["GET /consent/treatment-informed-consents/{id}"]:::op

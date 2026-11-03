@@ -2498,11 +2498,11 @@ Gestiona solicitudes de representantes a profesionales de salud, vinculando labo
 | 16 | `confirmed_at` | `timestamptz` | Opcional | Momento de la confirmación. _(JSDOC_ENTIDAD, `src/modules/pharma_lab/entities/visit_requests.entity.ts:114`)_ | coincide |
 | 17 | `closed_at` | `timestamptz` | Opcional | Momento de la cancelación o el rechazo. _(JSDOC_ENTIDAD, `src/modules/pharma_lab/entities/visit_requests.entity.ts:124`)_ | coincide |
 | 18 | `rescheduled_from_id` | `uuid` | Clave foránea → pharma_lab.visit_requests.id; Opcional | Solicitud de la que ésta es reprogramación, si la hay. _(JSDOC_ENTIDAD, `src/modules/pharma_lab/entities/visit_requests.entity.ts:134`)_ | coincide |
-| 19 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/pharma_lab/entities/visit_requests.entity.ts:144`)_ | coincide |
-| 20 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/pharma_lab/entities/visit_requests.entity.ts:150`)_ | coincide |
+| 19 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/pharma_lab/entities/visit_requests.entity.ts:140`)_ | coincide |
+| 20 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/pharma_lab/entities/visit_requests.entity.ts:146`)_ | coincide |
 | 21 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 22 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 23 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/pharma_lab/entities/visit_requests.entity.ts:168`)_ | coincide |
+| 23 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/pharma_lab/entities/visit_requests.entity.ts:164`)_ | coincide |
 
 #### Relaciones
 

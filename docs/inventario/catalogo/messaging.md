@@ -21,17 +21,17 @@
 | [domain_events](#domain_events) | Conserva eventos de dominio que comunican cambios relevantes entre módulos del sistema médico. | 13 | 5 | 128 | COINCIDE |
 | [event_deliveries](#event_deliveries) | Registra entregas de eventos a suscriptores para conocer estado, reintentos y resultado de publicación. | 9 | 6 | 4 | COINCIDE |
 | [event_subscriptions](#event_subscriptions) | Define suscripciones de consumidores a eventos de dominio para dirigir actualizaciones a módulos interesados. | 15 | 6 | 1 | COINCIDE |
-| [in_app_notifications](#in_app_notifications) | Registra notificaciones visibles dentro de la aplicación para comunicar eventos a pacientes y profesionales. | 31 | 8 | 84 | COINCIDE |
-| [message_channels](#message_channels) | Cataloga canales de comunicación disponibles para enviar mensajes transaccionales y asistenciales. | 11 | 5 | 75 | COINCIDE |
+| [in_app_notifications](#in_app_notifications) | Registra notificaciones visibles dentro de la aplicación para comunicar eventos a pacientes y profesionales. | 31 | 8 | 83 | COINCIDE |
+| [message_channels](#message_channels) | Cataloga canales de comunicación disponibles para enviar mensajes transaccionales y asistenciales. | 11 | 5 | 76 | COINCIDE |
 | [message_queues](#message_queues) | Cataloga colas usadas para desacoplar procesos y administrar entregas asíncronas. | 13 | 5 | 16 | COINCIDE |
-| [message_templates](#message_templates) | Define plantillas reutilizables para comunicaciones con pacientes, profesionales y organizaciones. | 16 | 8 | 49 | COINCIDE |
-| [messaging_providers](#messaging_providers) | Identifica proveedores que transportan mensajes por los canales habilitados. | 22 | 6 | 57 | COINCIDE |
-| [notification_deliveries](#notification_deliveries) | Mantiene intentos y resultados de entrega de notificaciones para verificar comunicaciones enviadas. | 36 | 8 | 92 | COINCIDE |
-| [notification_requests](#notification_requests) | Registra solicitudes de notificación y su contexto antes de seleccionar canal y proveedor de entrega. | 35 | 11 | 162 | COINCIDE |
+| [message_templates](#message_templates) | Define plantillas reutilizables para comunicaciones con pacientes, profesionales y organizaciones. | 16 | 8 | 51 | COINCIDE |
+| [messaging_providers](#messaging_providers) | Identifica proveedores que transportan mensajes por los canales habilitados. | 22 | 6 | 58 | COINCIDE |
+| [notification_deliveries](#notification_deliveries) | Mantiene intentos y resultados de entrega de notificaciones para verificar comunicaciones enviadas. | 36 | 8 | 95 | COINCIDE |
+| [notification_requests](#notification_requests) | Registra solicitudes de notificación y su contexto antes de seleccionar canal y proveedor de entrega. | 35 | 11 | 165 | COINCIDE |
 | [outbox_messages](#outbox_messages) | Mantiene mensajes salientes en la misma frontera transaccional que cambios de negocio para publicarlos sin perder eventos. | 20 | 7 | 257 | COINCIDE |
-| [provider_channel_configs](#provider_channel_configs) | Configura la relación entre un proveedor de mensajería y un canal para dirigir entregas. | 26 | 8 | 56 | COINCIDE |
+| [provider_channel_configs](#provider_channel_configs) | Configura la relación entre un proveedor de mensajería y un canal para dirigir entregas. | 26 | 8 | 57 | COINCIDE |
 | [queued_jobs](#queued_jobs) | Representa trabajos encolados para ejecutar operaciones diferidas del sistema médico. | 22 | 7 | 66 | COINCIDE |
-| [recipient_preferences](#recipient_preferences) | Registra preferencias de destinatarios para respetar canales, horarios y elecciones de comunicación. | 13 | 8 | 74 | COINCIDE |
+| [recipient_preferences](#recipient_preferences) | Registra preferencias de destinatarios para respetar canales, horarios y elecciones de comunicación. | 13 | 8 | 75 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -1205,7 +1205,7 @@ Registra notificaciones visibles dentro de la aplicación para comunicar eventos
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_35_messaging.puml: in_app_notifications`
 - **Dominio:** Integraciones y Contratos · **Diagrama:** `Mantra Core Health Context/modules/diagram_35_messaging.puml` · **DDL:** `SQL/35_messaging/02_tables.sql`
 - **Entidad del ORM:** `InAppNotifications` — `src/modules/messaging/entities/in_app_notifications.entity.ts`
-- **Resumen:** 31 columnas · 8 índices · 10 FK salientes · 0 entrantes · 84 operaciones
+- **Resumen:** 31 columnas · 8 índices · 10 FK salientes · 0 entrantes · 83 operaciones
 
 #### Columnas
 
@@ -1294,6 +1294,8 @@ Registra notificaciones visibles dentro de la aplicación para comunicar eventos
 | POST /community/conversations/{conversationId}/messages | LEE | DIRECTA |
 | POST /consent/practitioner-access-requests | CREA | DIRECTA |
 | POST /consent/practitioner-access-requests/{id}/decision | CREA | DIRECTA |
+| POST /iam/auth/register-practitioner | CREA | DIRECTA |
+| POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
 | POST /insurance-claims/{id}/patient-invoice | CREA | DIRECTA |
 | POST /insurance-claims/{id}/patient-invoice | LEE | DIRECTA |
 | POST /internal/notifications/{requestId}/deliver | CREA | DIRECTA |
@@ -1302,8 +1304,6 @@ Registra notificaciones visibles dentro de la aplicación para comunicar eventos
 | POST /notifications/in-app/read-all | ACTUALIZA | POR_TIPO |
 | POST /notifications/in-app/read-all | LEE | DIRECTA |
 | GET /notifications/me | LEE | DIRECTA |
-| POST /internal/reservations/expire | CREA | DIRECTA |
-| POST /internal/reservations/expire | LEE | DIRECTA |
 | GET /pharmacy/orders | CREA | DIRECTA |
 | GET /pharmacy/orders | LEE | DIRECTA |
 | GET /pharmacy/orders/{id} | CREA | DIRECTA |
@@ -1343,7 +1343,6 @@ Registra notificaciones visibles dentro de la aplicación para comunicar eventos
 | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke | CREA | DIRECTA |
 | POST /scheduling/appointments/direct | CREA | DIRECTA |
 | POST /scheduling/bookings/{id}/accept | CREA | DIRECTA |
-| POST /scheduling/bookings/{id}/accept | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/cancel | CREA | DIRECTA |
 | POST /scheduling/bookings/{id}/delay | CREA | DIRECTA |
 | POST /scheduling/bookings/{id}/payment-receipts | CREA | DIRECTA |
@@ -1383,7 +1382,7 @@ Cataloga canales de comunicación disponibles para enviar mensajes transaccional
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_35_messaging.puml: message_channels`
 - **Dominio:** Integraciones y Contratos · **Diagrama:** `Mantra Core Health Context/modules/diagram_35_messaging.puml` · **DDL:** `SQL/35_messaging/02_tables.sql`
 - **Entidad del ORM:** `MessageChannels` — `src/modules/messaging/entities/message_channels.entity.ts`
-- **Resumen:** 11 columnas · 5 índices · 4 FK salientes · 11 entrantes · 75 operaciones
+- **Resumen:** 11 columnas · 5 índices · 4 FK salientes · 11 entrantes · 76 operaciones
 
 #### Columnas
 
@@ -1456,6 +1455,8 @@ Cataloga canales de comunicación disponibles para enviar mensajes transaccional
 | POST /community/groups/{groupId}/posts | LEE | DIRECTA |
 | POST /consent/practitioner-access-requests | LEE | DIRECTA |
 | POST /consent/practitioner-access-requests/{id}/decision | LEE | DIRECTA |
+| POST /me/practitioner/support-staff | LEE | DIRECTA |
+| POST /org/support-staff | LEE | DIRECTA |
 | POST /iam/auth/forgot-password | LEE | DIRECTA |
 | POST /iam/auth/register-organization | LEE | DIRECTA |
 | POST /iam/auth/register-patient | LEE | DIRECTA |
@@ -1473,7 +1474,6 @@ Cataloga canales de comunicación disponibles para enviar mensajes transaccional
 | GET /notifications/preferences/me | LEE | DIRECTA |
 | PUT /notifications/preferences/me | LEE | DIRECTA |
 | POST /notifications/requests | LEE | DIRECTA |
-| POST /internal/reservations/expire | LEE | DIRECTA |
 | GET /pharmacy/orders | LEE | DIRECTA |
 | GET /pharmacy/orders/{id} | LEE | DIRECTA |
 | POST /pharmacy/orders/{id}/confirm | LEE | DIRECTA |
@@ -1596,10 +1596,10 @@ Cataloga colas usadas para desacoplar procesos y administrar entregas asíncrona
 | POST /internal/audio-assets/pregenerate | LEE | DIRECTA |
 | POST /common/files/upload | LEE | DIRECTA |
 | POST /internal/storage-lifecycle/audio/{assetId}/begin | LEE | DIRECTA |
-| POST /iam/auth/register-practitioner | LEE | DIRECTA |
 | POST /iam/auth/upload-registration-document | LEE | DIRECTA |
 | POST /iam/auth/upload-registration-logo | LEE | DIRECTA |
 | POST /iam/auth/upload-registration-signature-image | LEE | DIRECTA |
+| POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /internal/identity/evidence/lifecycle-scan | LEE | DIRECTA |
 | POST /insurance/portability/export | LEE | DIRECTA |
 | POST /internal/events/{domainEventId}/dispatch | LEE | DIRECTA |
@@ -1632,7 +1632,7 @@ Define plantillas reutilizables para comunicaciones con pacientes, profesionales
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_35_messaging.puml: message_templates`
 - **Dominio:** Integraciones y Contratos · **Diagrama:** `Mantra Core Health Context/modules/diagram_35_messaging.puml` · **DDL:** `SQL/35_messaging/02_tables.sql`
 - **Entidad del ORM:** `MessageTemplates` — `src/modules/messaging/entities/message_templates.entity.ts`
-- **Resumen:** 16 columnas · 8 índices · 6 FK salientes · 3 entrantes · 49 operaciones
+- **Resumen:** 16 columnas · 8 índices · 6 FK salientes · 3 entrantes · 51 operaciones
 
 #### Columnas
 
@@ -1699,6 +1699,8 @@ Define plantillas reutilizables para comunicaciones con pacientes, profesionales
 | POST /community/groups/{groupId}/posts | LEE | DIRECTA |
 | POST /consent/practitioner-access-requests | LEE | DIRECTA |
 | POST /consent/practitioner-access-requests/{id}/decision | LEE | DIRECTA |
+| POST /me/practitioner/support-staff | LEE | DIRECTA |
+| POST /org/support-staff | LEE | DIRECTA |
 | POST /iam/auth/forgot-password | LEE | DIRECTA |
 | POST /iam/auth/register-organization | LEE | DIRECTA |
 | POST /iam/auth/register-patient | LEE | DIRECTA |
@@ -1765,7 +1767,7 @@ Identifica proveedores que transportan mensajes por los canales habilitados.
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_35_messaging.puml: messaging_providers`
 - **Dominio:** Integraciones y Contratos · **Diagrama:** `Mantra Core Health Context/modules/diagram_35_messaging.puml` · **DDL:** `SQL/35_messaging/02_tables.sql`
 - **Entidad del ORM:** `MessagingProviders` — `src/modules/messaging/entities/messaging_providers.entity.ts`
-- **Resumen:** 22 columnas · 6 índices · 6 FK salientes · 5 entrantes · 57 operaciones
+- **Resumen:** 22 columnas · 6 índices · 6 FK salientes · 5 entrantes · 58 operaciones
 
 #### Columnas
 
@@ -1842,10 +1844,11 @@ Identifica proveedores que transportan mensajes por los canales habilitados.
 | POST /community/conversations/{conversationId}/messages | LEE | DIRECTA |
 | POST /consent/practitioner-access-requests | LEE | DIRECTA |
 | POST /consent/practitioner-access-requests/{id}/decision | LEE | DIRECTA |
+| POST /iam/auth/register-practitioner | LEE | DIRECTA |
+| POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /insurance-claims/{id}/patient-invoice | LEE | DIRECTA |
 | POST /internal/notifications/{requestId}/deliver | LEE | DIRECTA |
 | POST /webhooks/providers/{providerCode}/receipts | LEE | DIRECTA |
-| POST /internal/reservations/expire | LEE | DIRECTA |
 | GET /pharmacy/orders | LEE | DIRECTA |
 | GET /pharmacy/orders/{id} | LEE | DIRECTA |
 | POST /pharmacy/orders/{id}/confirm | LEE | DIRECTA |
@@ -1912,7 +1915,7 @@ Mantiene intentos y resultados de entrega de notificaciones para verificar comun
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_35_messaging.puml: notification_deliveries`
 - **Dominio:** Integraciones y Contratos · **Diagrama:** `Mantra Core Health Context/modules/diagram_35_messaging.puml` · **DDL:** `SQL/35_messaging/02_tables.sql`
 - **Entidad del ORM:** `NotificationDeliveries` — `src/modules/messaging/entities/notification_deliveries.entity.ts`
-- **Resumen:** 36 columnas · 8 índices · 9 FK salientes · 7 entrantes · 92 operaciones
+- **Resumen:** 36 columnas · 8 índices · 9 FK salientes · 7 entrantes · 95 operaciones
 
 #### Columnas
 
@@ -2013,12 +2016,15 @@ Mantiene intentos y resultados de entrega de notificaciones para verificar comun
 | POST /consent/practitioner-access-requests | LEE | DIRECTA |
 | POST /consent/practitioner-access-requests/{id}/decision | CREA | DIRECTA |
 | POST /consent/practitioner-access-requests/{id}/decision | LEE | DIRECTA |
+| POST /iam/auth/register-practitioner | CREA | DIRECTA |
+| POST /iam/auth/register-practitioner | LEE | DIRECTA |
+| POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
+| POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /insurance-claims/{id}/patient-invoice | CREA | DIRECTA |
 | POST /internal/notifications/{requestId}/deliver | CREA | DIRECTA |
 | POST /internal/notifications/{requestId}/deliver | LEE | DIRECTA |
 | POST /webhooks/providers/{providerCode}/receipts | ACTUALIZA | POR_TIPO |
 | POST /webhooks/providers/{providerCode}/receipts | LEE | DIRECTA |
-| POST /internal/reservations/expire | CREA | DIRECTA |
 | GET /pharmacy/orders | CREA | DIRECTA |
 | GET /pharmacy/orders/{id} | CREA | DIRECTA |
 | POST /pharmacy/orders/{id}/confirm | CREA | DIRECTA |
@@ -2115,7 +2121,7 @@ Registra solicitudes de notificación y su contexto antes de seleccionar canal y
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_35_messaging.puml: notification_requests`
 - **Dominio:** Integraciones y Contratos · **Diagrama:** `Mantra Core Health Context/modules/diagram_35_messaging.puml` · **DDL:** `SQL/35_messaging/02_tables.sql`
 - **Entidad del ORM:** `NotificationRequests` — `src/modules/messaging/entities/notification_requests.entity.ts`
-- **Resumen:** 35 columnas · 11 índices · 16 FK salientes · 7 entrantes · 162 operaciones
+- **Resumen:** 35 columnas · 11 índices · 16 FK salientes · 7 entrantes · 165 operaciones
 
 #### Columnas
 
@@ -2231,6 +2237,10 @@ Registra solicitudes de notificación y su contexto antes de seleccionar canal y
 | POST /consent/practitioner-access-requests/{id}/decision | CREA | DIRECTA |
 | POST /consent/practitioner-access-requests/{id}/decision | ACTUALIZA | POR_TIPO |
 | POST /consent/practitioner-access-requests/{id}/decision | LEE | DIRECTA |
+| POST /me/practitioner/support-staff | CREA | DIRECTA |
+| POST /me/practitioner/support-staff | LEE | DIRECTA |
+| POST /org/support-staff | CREA | DIRECTA |
+| POST /org/support-staff | LEE | DIRECTA |
 | POST /iam/auth/forgot-password | CREA | DIRECTA |
 | POST /iam/auth/forgot-password | LEE | DIRECTA |
 | POST /iam/auth/register-organization | CREA | DIRECTA |
@@ -2244,8 +2254,8 @@ Registra solicitudes de notificación y su contexto antes de seleccionar canal y
 | POST /iam/auth/register-support-staff | LEE | DIRECTA |
 | POST /iam/auth/resend-verification | CREA | DIRECTA |
 | POST /iam/auth/resend-verification | LEE | DIRECTA |
-| POST /iam/users/assisted-practitioner-registration | ACTUALIZA | POR_TIPO |
 | POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
+| POST /iam/users/assisted-practitioner-registration | ACTUALIZA | POR_TIPO |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /identity/me/identity-verification | CREA | DIRECTA |
 | POST /identity/me/identity-verification | LEE | DIRECTA |
@@ -2264,7 +2274,6 @@ Registra solicitudes de notificación y su contexto antes de seleccionar canal y
 | POST /notifications/requests | LEE | DIRECTA |
 | POST /webhooks/providers/{providerCode}/receipts | ACTUALIZA | POR_TIPO |
 | POST /webhooks/providers/{providerCode}/receipts | LEE | DIRECTA |
-| POST /internal/reservations/expire | CREA | DIRECTA |
 | GET /pharmacy/orders | CREA | DIRECTA |
 | GET /pharmacy/orders/{id} | CREA | DIRECTA |
 | POST /pharmacy/orders/{id}/confirm | CREA | DIRECTA |
@@ -2731,7 +2740,7 @@ Configura la relación entre un proveedor de mensajería y un canal para dirigir
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_35_messaging.puml: provider_channel_configs`
 - **Dominio:** Integraciones y Contratos · **Diagrama:** `Mantra Core Health Context/modules/diagram_35_messaging.puml` · **DDL:** `SQL/35_messaging/02_tables.sql`
 - **Entidad del ORM:** `ProviderChannelConfigs` — `src/modules/messaging/entities/provider_channel_configs.entity.ts`
-- **Resumen:** 26 columnas · 8 índices · 12 FK salientes · 4 entrantes · 56 operaciones
+- **Resumen:** 26 columnas · 8 índices · 12 FK salientes · 4 entrantes · 57 operaciones
 
 #### Columnas
 
@@ -2813,9 +2822,10 @@ Configura la relación entre un proveedor de mensajería y un canal para dirigir
 | POST /community/conversations/{conversationId}/messages | LEE | DIRECTA |
 | POST /consent/practitioner-access-requests | LEE | DIRECTA |
 | POST /consent/practitioner-access-requests/{id}/decision | LEE | DIRECTA |
+| POST /iam/auth/register-practitioner | LEE | DIRECTA |
+| POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /insurance-claims/{id}/patient-invoice | LEE | DIRECTA |
 | POST /internal/notifications/{requestId}/deliver | LEE | DIRECTA |
-| POST /internal/reservations/expire | LEE | DIRECTA |
 | GET /pharmacy/orders | LEE | DIRECTA |
 | GET /pharmacy/orders/{id} | LEE | DIRECTA |
 | POST /pharmacy/orders/{id}/confirm | LEE | DIRECTA |
@@ -2972,8 +2982,6 @@ Representa trabajos encolados para ejecutar operaciones diferidas del sistema m�
 | POST /internal/storage-lifecycle/recover | LEE | DIRECTA |
 | POST /tenants/{tenantId}/affiliation-documents | LEE | DIRECTA |
 | POST /iam/auth/register-organization | LEE | DIRECTA |
-| POST /iam/auth/register-practitioner | CREA | DIRECTA |
-| POST /iam/auth/register-practitioner | ACTUALIZA | POR_TIPO |
 | POST /iam/auth/register-practitioner | LEE | DIRECTA |
 | POST /iam/auth/upload-registration-document | CREA | DIRECTA |
 | POST /iam/auth/upload-registration-document | ACTUALIZA | POR_TIPO |
@@ -2984,6 +2992,8 @@ Representa trabajos encolados para ejecutar operaciones diferidas del sistema m�
 | POST /iam/auth/upload-registration-signature-image | CREA | DIRECTA |
 | POST /iam/auth/upload-registration-signature-image | ACTUALIZA | POR_TIPO |
 | POST /iam/auth/upload-registration-signature-image | LEE | DIRECTA |
+| POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
+| POST /iam/users/assisted-practitioner-registration | ACTUALIZA | POR_TIPO |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /identity/me/identity-verification | LEE | DIRECTA |
 | POST /identity/me/practitioner/identity-verification | LEE | DIRECTA |
@@ -3034,7 +3044,7 @@ Registra preferencias de destinatarios para respetar canales, horarios y eleccio
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_35_messaging.puml: recipient_preferences`
 - **Dominio:** Integraciones y Contratos · **Diagrama:** `Mantra Core Health Context/modules/diagram_35_messaging.puml` · **DDL:** `SQL/35_messaging/02_tables.sql`
 - **Entidad del ORM:** `RecipientPreferences` — `src/modules/messaging/entities/recipient_preferences.entity.ts`
-- **Resumen:** 13 columnas · 8 índices · 7 FK salientes · 0 entrantes · 74 operaciones
+- **Resumen:** 13 columnas · 8 índices · 7 FK salientes · 0 entrantes · 75 operaciones
 
 #### Columnas
 
@@ -3098,6 +3108,8 @@ Registra preferencias de destinatarios para respetar canales, horarios y eleccio
 | POST /community/groups/{groupId}/posts | LEE | DIRECTA |
 | POST /consent/practitioner-access-requests | LEE | DIRECTA |
 | POST /consent/practitioner-access-requests/{id}/decision | LEE | DIRECTA |
+| POST /me/practitioner/support-staff | LEE | DIRECTA |
+| POST /org/support-staff | LEE | DIRECTA |
 | POST /iam/auth/forgot-password | LEE | DIRECTA |
 | POST /iam/auth/register-organization | LEE | DIRECTA |
 | POST /iam/auth/register-patient | LEE | DIRECTA |
@@ -3114,7 +3126,6 @@ Registra preferencias de destinatarios para respetar canales, horarios y eleccio
 | PUT /notifications/preferences/me | CREA | DIRECTA |
 | PUT /notifications/preferences/me | LEE | DIRECTA |
 | POST /notifications/requests | LEE | DIRECTA |
-| POST /internal/reservations/expire | LEE | DIRECTA |
 | GET /pharmacy/orders | LEE | DIRECTA |
 | GET /pharmacy/orders/{id} | LEE | DIRECTA |
 | POST /pharmacy/orders/{id}/confirm | LEE | DIRECTA |

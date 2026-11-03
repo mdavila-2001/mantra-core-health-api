@@ -9,7 +9,7 @@
 ## Proceso: Integraciones externas
 
 - **Código:** `integrations` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 15
-- **Actores:** Cualquier sesión válida · Público (sin sesión) · SECURITY_ADMIN · SYSTEM
+- **Actores:** Público (sin sesión) · SECURITY_ADMIN · SYSTEM
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/integrations/README.md`
 
@@ -25,7 +25,7 @@ _Fuente: `src/modules/integrations/README.md:3`_
 |---|---|---|---|---|---|
 | `ctrl:IntegrationsConnectionsController` | Operaciones de IntegrationsConnectionsController que el README no asigna a un caso de uso | POST /integrations/connections/{id}:pause | SECURITY_ADMIN | MEDIO | 3 |
 |  |  | POST /integrations/connections/{id}/credentials:rotate | SECURITY_ADMIN | MEDIO | 4 |
-| `ctrl:IntegrationsMessagesController` | Operaciones de IntegrationsMessagesController que el README no asigna a un caso de uso | POST /integrations/messages:outbound | Cualquier sesión válida | ALTO | 3 |
+| `ctrl:IntegrationsMessagesController` | Operaciones de IntegrationsMessagesController que el README no asigna a un caso de uso | POST /integrations/messages:outbound | SYSTEM · SECURITY_ADMIN | MEDIO | 3 |
 |  |  | POST /integrations/messages/{id}:correlate | SYSTEM · SECURITY_ADMIN | MEDIO | 6 |
 |  |  | POST /integrations/messages/{id}:dead-letter | SYSTEM · SECURITY_ADMIN | MEDIO | 4 |
 |  |  | POST /integrations/messages/{id}:dispatch | SYSTEM · SECURITY_ADMIN | MEDIO | 7 |
@@ -44,42 +44,41 @@ _Fuente: `src/modules/integrations/README.md:3`_
 ```mermaid
 flowchart LR
   a2(["SECURITY_ADMIN"]):::actor
-  a8(["Cualquier sesión válida"]):::actor
-  a10(["SYSTEM · SECURITY_ADMIN"]):::actor
-  a30(["Público (sin sesión)"]):::actor
+  a8(["SYSTEM · SECURITY_ADMIN"]):::actor
+  a29(["Público (sin sesión)"]):::actor
   t3[("integrations.outbound_messages")]:::tabla
   t4[("integrations.provider_connections")]:::tabla
   t6[("integrations.provider_credentials")]:::tabla
-  t11[("integrations.inbound_messages")]:::tabla
-  t12[("integrations.message_responses")]:::tabla
-  t14[("integrations.message_retries")]:::tabla
-  t16[("integrations.external_providers")]:::tabla
-  t17[("integrations.integration_endpoints")]:::tabla
-  t26[("integrations.integration_field_mappings")]:::tabla
-  t28[("integrations.webhook_subscriptions")]:::tabla
+  t10[("integrations.inbound_messages")]:::tabla
+  t11[("integrations.message_responses")]:::tabla
+  t13[("integrations.message_retries")]:::tabla
+  t15[("integrations.external_providers")]:::tabla
+  t16[("integrations.integration_endpoints")]:::tabla
+  t25[("integrations.integration_field_mappings")]:::tabla
+  t27[("integrations.webhook_subscriptions")]:::tabla
   subgraph s0["ctrl:IntegrationsConnectionsController · Operaciones de IntegrationsConnections…"]
     o1["POST /integrations/connections/{id}:pause"]:::op
     o5["POST /integrations/connections/{id}/credentials:rotate"]:::op
   end
-  t18[("+1 tablas más")]
+  t17[("+1 tablas más")]
   subgraph s1["ctrl:IntegrationsMessagesController · Operaciones de IntegrationsMessagesContro…"]
     o7["POST /integrations/messages:outbound"]:::op
     o9["POST /integrations/messages/{id}:correlate"]:::op
-    o13["POST /integrations/messages/{id}:dead-letter"]:::op
-    o15["POST /integrations/messages/{id}:dispatch"]:::op
-    o19["POST /integrations/messages/{id}:retry"]:::op
-    o20["GET /integrations/messages/pending-correlation"]:::op
-    o21["GET /integrations/messages/pending-dispatch"]:::op
-    o22["GET /integrations/messages/pending-retry"]:::op
+    o12["POST /integrations/messages/{id}:dead-letter"]:::op
+    o14["POST /integrations/messages/{id}:dispatch"]:::op
+    o18["POST /integrations/messages/{id}:retry"]:::op
+    o19["GET /integrations/messages/pending-correlation"]:::op
+    o20["GET /integrations/messages/pending-dispatch"]:::op
+    o21["GET /integrations/messages/pending-retry"]:::op
   end
   subgraph s2["ctrl:IntegrationsProvidersController · Operaciones de IntegrationsProvidersCont…"]
-    o23["POST /integrations/providers"]:::op
-    o24["POST /integrations/providers/{id}/connections"]:::op
-    o25["POST /integrations/providers/{id}/endpoints"]:::op
-    o27["POST /integrations/providers/{id}/webhook-subscriptions"]:::op
+    o22["POST /integrations/providers"]:::op
+    o23["POST /integrations/providers/{id}/connections"]:::op
+    o24["POST /integrations/providers/{id}/endpoints"]:::op
+    o26["POST /integrations/providers/{id}/webhook-subscriptions"]:::op
   end
   subgraph s3["ctrl:IntegrationsWebhooksController · Operaciones de IntegrationsWebhooksContro…"]
-    o29["POST /integrations/webhooks/inbound"]:::op
+    o28["POST /integrations/webhooks/inbound"]:::op
   end
   a2 --> o1
   o1 -->|"ACTUALIZA"| t3
@@ -94,63 +93,63 @@ flowchart LR
   o7 -->|"CREA"| t3
   o7 -->|"LEE"| t3
   o7 -->|"LEE"| t4
-  a10 --> o9
-  o9 -->|"ACTUALIZA"| t11
-  o9 -->|"LEE"| t11
-  o9 -->|"CREA"| t12
+  a8 --> o9
+  o9 -->|"ACTUALIZA"| t10
+  o9 -->|"LEE"| t10
+  o9 -->|"CREA"| t11
   o9 -->|"ACTUALIZA"| t3
   o9 -->|"LEE"| t3
   o9 -->|"LEE"| t4
-  a10 --> o13
-  o13 -->|"CREA"| t14
-  o13 -->|"LEE"| t14
-  o13 -->|"LEE"| t3
-  o13 -->|"LEE"| t4
-  a10 --> o15
-  o15 -->|"LEE"| t16
-  o15 -->|"LEE"| t17
-  o15 -->|"CREA"| t12
-  o15 -->|"ACTUALIZA"| t3
-  o15 -->|"LEE"| t3
-  o15 -->|"LEE"| t4
-  o15 -.-> t18
-  a10 --> o19
-  o19 -->|"CREA"| t14
-  o19 -->|"LEE"| t14
-  o19 -->|"LEE"| t3
+  a8 --> o12
+  o12 -->|"CREA"| t13
+  o12 -->|"LEE"| t13
+  o12 -->|"LEE"| t3
+  o12 -->|"LEE"| t4
+  a8 --> o14
+  o14 -->|"LEE"| t15
+  o14 -->|"LEE"| t16
+  o14 -->|"CREA"| t11
+  o14 -->|"ACTUALIZA"| t3
+  o14 -->|"LEE"| t3
+  o14 -->|"LEE"| t4
+  o14 -.-> t17
+  a8 --> o18
+  o18 -->|"CREA"| t13
+  o18 -->|"LEE"| t13
+  o18 -->|"LEE"| t3
+  o18 -->|"LEE"| t4
+  a8 --> o19
+  o19 -->|"LEE"| t10
   o19 -->|"LEE"| t4
-  a10 --> o20
-  o20 -->|"LEE"| t11
+  a8 --> o20
+  o20 -->|"LEE"| t3
   o20 -->|"LEE"| t4
-  a10 --> o21
+  a8 --> o21
+  o21 -->|"LEE"| t13
   o21 -->|"LEE"| t3
   o21 -->|"LEE"| t4
-  a10 --> o22
-  o22 -->|"LEE"| t14
-  o22 -->|"LEE"| t3
-  o22 -->|"LEE"| t4
+  a2 --> o22
+  o22 -->|"CREA"| t15
+  o22 -->|"LEE"| t15
   a2 --> o23
-  o23 -->|"CREA"| t16
-  o23 -->|"LEE"| t16
+  o23 -->|"LEE"| t15
+  o23 -->|"CREA"| t4
+  o23 -->|"CREA"| t6
   a2 --> o24
+  o24 -->|"LEE"| t15
+  o24 -->|"CREA"| t16
   o24 -->|"LEE"| t16
-  o24 -->|"CREA"| t4
-  o24 -->|"CREA"| t6
-  a2 --> o25
-  o25 -->|"LEE"| t16
-  o25 -->|"CREA"| t17
-  o25 -->|"LEE"| t17
-  o25 -->|"CREA"| t26
-  a2 --> o27
-  o27 -->|"LEE"| t16
-  o27 -->|"ACTUALIZA"| t28
-  o27 -->|"CREA"| t28
-  o27 -->|"LEE"| t28
-  a30 --> o29
-  o29 -->|"CREA"| t11
-  o29 -->|"LEE"| t11
-  o29 -->|"LEE"| t4
-  o29 -->|"LEE"| t6
+  o24 -->|"CREA"| t25
+  a2 --> o26
+  o26 -->|"LEE"| t15
+  o26 -->|"ACTUALIZA"| t27
+  o26 -->|"CREA"| t27
+  o26 -->|"LEE"| t27
+  a29 --> o28
+  o28 -->|"CREA"| t10
+  o28 -->|"LEE"| t10
+  o28 -->|"LEE"| t4
+  o28 -->|"LEE"| t6
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3

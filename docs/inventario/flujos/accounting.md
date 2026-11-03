@@ -3,13 +3,13 @@
 # Flujos del módulo `accounting`
 
 - **Procesos:** 1 · **Máquinas de estado:** 1
-- **Operaciones:** 63 (62 con decisiones propias, 1 sin ellas)
+- **Operaciones:** 68 (66 con decisiones propias, 2 sin ellas)
 - Inventario de endpoints del módulo: [accounting](../endpoints/accounting.md)
 
 ## Proceso: Módulo 16 — Accounting (Libro Mayor y Subledgers)
 
-- **Código:** `accounting` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 63
-- **Actores:** ACCOUNTING_APPROVER · Cualquier sesión válida · PRACTITIONER · SECURITY_ADMIN · SYSTEM
+- **Código:** `accounting` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 68
+- **Actores:** ACCOUNTING_APPROVER · Cualquier sesión válida · PLATFORM_ADMIN · PRACTITIONER · SECURITY_ADMIN · SUPERADMIN · SYSTEM
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/accounting/README.md`
 
@@ -86,6 +86,11 @@ _Fuente: `src/modules/accounting/README.md:3`_
 |  |  | PATCH /accounting/infrastructure-items/{id} | Cualquier sesión válida | ALTO | 13 |
 | `ctrl:AccountingSubledgerController` | Operaciones de AccountingSubledgerController que el README no asigna a un caso de uso | POST /accounting/clearing-documents | SECURITY_ADMIN | MEDIO | 16 |
 |  |  | POST /accounting/open-items | SECURITY_ADMIN | MEDIO | 5 |
+| `ctrl:ReportTemplatesController` | Operaciones de ReportTemplatesController que el README no asigna a un caso de uso | GET /admin/accounting/report-templates | SUPERADMIN · SECURITY_ADMIN · PLATFORM_ADMIN · ACCOUNTING_APPROVER · PRACTITIONER | BAJO | 1 |
+|  |  | POST /admin/accounting/report-templates | SUPERADMIN | MEDIO | 1 |
+|  |  | GET /admin/accounting/report-templates/{id} | SUPERADMIN · SECURITY_ADMIN · PLATFORM_ADMIN · ACCOUNTING_APPROVER · PRACTITIONER | BAJO | 1 |
+|  |  | PUT /admin/accounting/report-templates/{id} | SUPERADMIN | MEDIO | 2 |
+|  |  | POST /admin/accounting/report-templates/{id}/end | SUPERADMIN | MEDIO | 2 |
 
 ### Diagrama 1 de 4 — etapas `ctrl:AccountingAccrualController`, `ctrl:AccountingAssetController`, `ctrl:AccountingCockpitController`…
 
@@ -630,12 +635,14 @@ flowchart LR
   classDef evento fill:#efe,stroke:#3a3
 ```
 
-### Diagrama 4 de 4 — etapas `ctrl:AccountingSpaceController`, `ctrl:AccountingSubledgerController`
+### Diagrama 4 de 4 — etapas `ctrl:AccountingSpaceController`, `ctrl:AccountingSubledgerController`, `ctrl:ReportTemplatesController`
 
 ```mermaid
 flowchart LR
   a2(["Cualquier sesión válida"]):::actor
   a21(["SECURITY_ADMIN"]):::actor
+  a35(["SUPERADMIN · SECURITY_ADMIN · PLATFORM_ADMIN · ACCOUNTING_A…"]):::actor
+  a38(["SUPERADMIN"]):::actor
   t3[("accounting.cost_centers")]:::tabla
   t4[("delegated_access.organization_user_assignments")]:::tabla
   t5[("directory.branch_memberships")]:::tabla
@@ -656,6 +663,7 @@ flowchart LR
   t31[("accounting.open_items")]:::tabla
   t32[("accounting.subledger_accounts")]:::tabla
   t33[("practice.practices")]:::tabla
+  t36[("accounting.report_presentation_templates")]:::tabla
   t9[("+2 tablas más")]
   t12[("+7 tablas más")]
   t16[("+2 tablas más")]
@@ -670,6 +678,13 @@ flowchart LR
   subgraph s1["ctrl:AccountingSubledgerController · Operaciones de AccountingSubledgerControll…"]
     o20["POST /accounting/clearing-documents"]:::op
     o28["POST /accounting/open-items"]:::op
+  end
+  subgraph s2["ctrl:ReportTemplatesController · Operaciones de ReportTemplatesController que e…"]
+    o34["GET /admin/accounting/report-templates"]:::op
+    o37["POST /admin/accounting/report-templates"]:::op
+    o39["GET /admin/accounting/report-templates/{id}"]:::op
+    o40["PUT /admin/accounting/report-templates/{id}"]:::op
+    o41["POST /admin/accounting/report-templates/{id}/end"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -719,6 +734,18 @@ flowchart LR
   o28 -->|"CREA"| t31
   o28 -->|"LEE"| t32
   o28 -->|"LEE"| t33
+  a35 --> o34
+  o34 -->|"LEE"| t36
+  a38 --> o37
+  o37 -->|"CREA"| t36
+  a35 --> o39
+  o39 -->|"LEE"| t36
+  a38 --> o40
+  o40 -->|"ACTUALIZA"| t36
+  o40 -->|"LEE"| t36
+  a38 --> o41
+  o41 -->|"ACTUALIZA"| t36
+  o41 -->|"LEE"| t36
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -5803,6 +5830,204 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
+#### 63. POST /admin/accounting/report-templates
+
+Crear una plantilla global sin modificar cuentas ni asientos
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra); BadRequestException: {{ code: 'VALIDATION_FAILED', reason: AccountingErrorReason.…} |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {{ code: 'FORBIDDEN', reason: AccountingErrorReason.REPORT_T…} |
+| 409 | `CONFLICT` | ConflictException: Ya existe ese código para el tipo de usuario |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a ReportTemplatesService.create"]:::llamada
+  n2 --> n3
+  n4["Llama a ReportTemplatesService.assertEditor"]:::llamada
+  n3 --> n4
+  n5{"!roleAuthorizesInTenant(actor, 'SUPERADMIN', undefined)"}:::decision
+  n4 --> n5
+  n6(["403 FORBIDDEN {{ code: 'FORBIDDEN', reason: AccountingErrorReason.REPORT_T…}"]):::error
+  n5 -->|"sí"| n6
+  n7["Llama a ReportTemplatesService.assertColumns"]:::llamada
+  n5 -->|"no"| n7
+  n8{"!keys.length || new Set(keys).size !== keys.length || keys.some((k) =› !allowed.includes(k))"}:::decision
+  n7 --> n8
+  n9(["400 VALIDATION_FAILED {{ code: 'VALIDATION_FAILED', reason: AccountingErrorReason.…}"]):::error
+  n8 -->|"sí"| n9
+  n10["Llama a ReportTemplatesRepository.create"]:::llamada
+  n8 -->|"no"| n10
+  n11[("CREA accounting.report_presentation_templates")]:::efecto
+  n10 --> n11
+  n12{"!created"}:::decision
+  n11 --> n12
+  n13(["409 CONFLICT Ya existe ese código para el tipo de usuario"]):::error
+  n12 -->|"sí"| n13
+  n14(("201 Responde con éxito")):::ok
+  n12 -->|"no"| n14
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 64. GET /admin/accounting/report-templates/{id}
+
+Leer una plantilla de presentación contable
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La plantilla no existe |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a ReportTemplatesService.get"]:::llamada
+  n2 --> n3
+  n4["Llama a ReportTemplatesRepository.get"]:::llamada
+  n3 --> n4
+  n5[("LEE accounting.report_presentation_templates")]:::efecto
+  n4 --> n5
+  n6{"!found"}:::decision
+  n5 --> n6
+  n7(["404 NOT_FOUND La plantilla no existe"]):::error
+  n6 -->|"sí"| n7
+  n8(("200 Responde con éxito")):::ok
+  n6 -->|"no"| n8
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 65. PUT /admin/accounting/report-templates/{id}
+
+Editar presentación con control de versión (409 si cambió)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra); BadRequestException: {{ code: 'VALIDATION_FAILED', reason: AccountingErrorReason.…} |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {{ code: 'FORBIDDEN', reason: AccountingErrorReason.REPORT_T…} |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La plantilla no existe |
+| 409 | `CONFLICT` | ConflictException: La plantilla cambió: vuelva a leerla antes de editar |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a ReportTemplatesService.update"]:::llamada
+  n2 --> n3
+  n4["Llama a ReportTemplatesService.assertEditor"]:::llamada
+  n3 --> n4
+  n5{"!roleAuthorizesInTenant(actor, 'SUPERADMIN', undefined)"}:::decision
+  n4 --> n5
+  n6(["403 FORBIDDEN {{ code: 'FORBIDDEN', reason: AccountingErrorReason.REPORT_T…}"]):::error
+  n5 -->|"sí"| n6
+  n7["Llama a ReportTemplatesService.assertColumns"]:::llamada
+  n5 -->|"no"| n7
+  n8{"!keys.length || new Set(keys).size !== keys.length || keys.some((k) =› !allowed.includes(k))"}:::decision
+  n7 --> n8
+  n9(["400 VALIDATION_FAILED {{ code: 'VALIDATION_FAILED', reason: AccountingErrorReason.…}"]):::error
+  n8 -->|"sí"| n9
+  n10["Llama a ReportTemplatesRepository.update"]:::llamada
+  n8 -->|"no"| n10
+  n11[("ACTUALIZA accounting.report_presentation_templates")]:::efecto
+  n10 --> n11
+  n12["Llama a ReportTemplatesService.get"]:::llamada
+  n11 --> n12
+  n13["Llama a ReportTemplatesRepository.get"]:::llamada
+  n12 --> n13
+  n14[("LEE accounting.report_presentation_templates")]:::efecto
+  n13 --> n14
+  n15{"!found"}:::decision
+  n14 --> n15
+  n16(["404 NOT_FOUND La plantilla no existe"]):::error
+  n15 -->|"sí"| n16
+  n17(["409 CONFLICT La plantilla cambió: vuelva a leerla antes de editar"]):::error
+  n15 -->|"no"| n17
+  n18(("200 Responde con éxito")):::ok
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 66. POST /admin/accounting/report-templates/{id}/end
+
+Desactivar una plantilla sin borrarla (idempotente)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {{ code: 'FORBIDDEN', reason: AccountingErrorReason.REPORT_T…} |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La plantilla no existe |
+| 409 | `CONFLICT` | ConflictException: La plantilla cambió: vuelva a leerla antes de desactivar |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a ReportTemplatesService.end"]:::llamada
+  n2 --> n3
+  n4["Llama a ReportTemplatesService.assertEditor"]:::llamada
+  n3 --> n4
+  n5{"!roleAuthorizesInTenant(actor, 'SUPERADMIN', undefined)"}:::decision
+  n4 --> n5
+  n6(["403 FORBIDDEN {{ code: 'FORBIDDEN', reason: AccountingErrorReason.REPORT_T…}"]):::error
+  n5 -->|"sí"| n6
+  n7["Llama a ReportTemplatesRepository.end"]:::llamada
+  n5 -->|"no"| n7
+  n8[("ACTUALIZA accounting.report_presentation_templates")]:::efecto
+  n7 --> n8
+  n9["Llama a ReportTemplatesService.get"]:::llamada
+  n8 --> n9
+  n10["Llama a ReportTemplatesRepository.get"]:::llamada
+  n9 --> n10
+  n11[("LEE accounting.report_presentation_templates")]:::efecto
+  n10 --> n11
+  n12{"!found"}:::decision
+  n11 --> n12
+  n13(["404 NOT_FOUND La plantilla no existe"]):::error
+  n12 -->|"sí"| n13
+  n14(["409 CONFLICT La plantilla cambió: vuelva a leerla antes de desactivar"]):::error
+  n12 -->|"no"| n14
+  n15(("200 Responde con éxito")):::ok
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
 ### Operaciones sin decisiones propias
 
 Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su detalle está en la ficha de endpoints.
@@ -5810,3 +6035,4 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 | Operación | Respuestas posibles | Tablas |
 |---|---|---|
 | POST /accounting/open-items | 201, 400, 401, 403, 429 | 5 |
+| GET /admin/accounting/report-templates | 200, 401, 403, 429 | 1 |

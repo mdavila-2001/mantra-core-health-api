@@ -3,7 +3,7 @@
 # Endpoints del módulo `accounting`
 
 - **Bloque:** Financiero y ERP (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
-- **Operaciones:** 68 (63 en el contrato, 5 sólo en el código)
+- **Operaciones:** 68 (68 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 5 · MEDIO 37 · BAJO 26
 - **Tablas distintas que tocan:** 62
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/accounting.md` (generado aparte por `yarn docs:endpoints:generate`)
@@ -75,11 +75,11 @@
 | 61 | DELETE | `/accounting/practitioner/simple/transactions/{id}` | Borrar una transacción debe/haber | ALTO | 4 | PRACTITIONER |
 | 62 | PUT | `/accounting/practitioner/simple/transactions/{id}` | Editar una transacción debe/haber | MEDIO | 5 | PRACTITIONER |
 | 63 | GET | `/accounting/trial-balance` | Balance de sumas y saldos | BAJO | 5 | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER |
-| 64 | GET | `/admin/accounting/report-templates` | — | BAJO | 1 | SUPERADMIN, SECURITY_ADMIN, PLATFORM_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER |
-| 65 | POST | `/admin/accounting/report-templates` | — | MEDIO | 1 | SUPERADMIN |
-| 66 | GET | `/admin/accounting/report-templates/{id}` | — | BAJO | 1 | SUPERADMIN, SECURITY_ADMIN, PLATFORM_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER |
-| 67 | PUT | `/admin/accounting/report-templates/{id}` | — | MEDIO | 2 | SUPERADMIN |
-| 68 | POST | `/admin/accounting/report-templates/{id}/end` | — | MEDIO | 2 | SUPERADMIN |
+| 64 | GET | `/admin/accounting/report-templates` | Plantillas de presentación contable por tipo de usuario | BAJO | 1 | SUPERADMIN, SECURITY_ADMIN, PLATFORM_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER |
+| 65 | POST | `/admin/accounting/report-templates` | Crear una plantilla global sin modificar cuentas ni asientos | MEDIO | 1 | SUPERADMIN |
+| 66 | GET | `/admin/accounting/report-templates/{id}` | Leer una plantilla de presentación contable | BAJO | 1 | SUPERADMIN, SECURITY_ADMIN, PLATFORM_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER |
+| 67 | PUT | `/admin/accounting/report-templates/{id}` | Editar presentación con control de versión (409 si cambió) | MEDIO | 2 | SUPERADMIN |
+| 68 | POST | `/admin/accounting/report-templates/{id}/end` | Desactivar una plantilla sin borrarla (idempotente) | MEDIO | 2 | SUPERADMIN |
 
 ---
 
@@ -6883,8 +6883,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 64. GET /admin/accounting/report-templates
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Plantillas de presentación contable por tipo de usuario
 - **Bloque:** Financiero y ERP
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -6892,9 +6892,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dominio: Financiero y ERP.
+Plantillas de presentación contable por tipo de usuario. Dominio: Financiero y ERP.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -6919,7 +6919,9 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-a
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `ReportTemplateQueryDto` | — |
+| `userType` | query | No | `string` | — |
+| `after` | query | No | `string` | — |
+| `limit` | query | No | `number` | — |
 
 ### Cuerpo
 
@@ -6952,8 +6954,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 65. POST /admin/accounting/report-templates
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Crear una plantilla global sin modificar cuentas ni asientos
 - **Bloque:** Financiero y ERP
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -6961,13 +6963,13 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dominio: Financiero y ERP.
+Crear una plantilla global sin modificar cuentas ni asientos. Dominio: Financiero y ERP.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/accounting/report-templates` la atiende `ReportTemplatesController.create` (src/modules/accounting/report-templates/report-templates.controller.ts:80). Exige sesión con alguno de los roles SUPERADMIN. Valida el cuerpo como `CreateReportTemplateDto` (2 campos, 2 obligatorios). Delega en `ReportTemplatesService.create`. Crea filas en accounting.report_presentation_templates.
+`POST /admin/accounting/report-templates` la atiende `ReportTemplatesController.create` (src/modules/accounting/report-templates/report-templates.controller.ts:80). Exige sesión con alguno de los roles SUPERADMIN. Valida el cuerpo como `CreateReportTemplateDto` (7 campos, 7 obligatorios). Delega en `ReportTemplatesService.create`. Crea filas en accounting.report_presentation_templates.
 
 ### Requerimientos
 
@@ -6976,6 +6978,8 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-a
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SUPERADMIN | `src/modules/accounting/report-templates/report-templates.controller.ts:80` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -6984,18 +6988,31 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-a
 |---|---|---|---|---|---|
 | `accounting.report_presentation_templates (vista u objeto no catalogado)` | ESCRIBE | CREA | POR_SQL | ReportTemplatesController.create → ReportTemplatesService.create → ReportTemplatesRepository.create | `src/modules/accounting/report-templates/report-templates.repository.ts:87` |
 
-### Cuerpo — DTO `CreateReportTemplateDto`
+### Cuerpo — DTO `CreateReportTemplateDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `userType` | `object` | Sí | — | `@IsIn(TEMPLATE_AUDIENCES)` | Tipo TypeScript no expandido: (typeof TEMPLATE_AUDIENCES)[number] | `src/modules/accounting/report-templates/report-templates.dto.ts:77` |
-| `code` | `string` | Sí | patrón runtime /^[A-Z][A-Z0-9_]{1,79}$/ | `@Matches(/^[A-Z][A-Z0-9_]{1,79}$/)` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:80` |
+| `name` | `string` | Sí | longitud mínima 1; longitud máxima 160 | `@Transform(trim)` `@IsString()` `@MinLength(1)` `@MaxLength(160)` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:61` |
+| `reportKind` | `string` | Sí | valores: TRIAL_BALANCE, GENERAL_LEDGER, INCOME_STATEMENT | `@IsIn(Object.keys(REPORT_COLUMNS))` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:64` |
+| `columns` | `array<ReportTemplateColumnDto>` | Sí | mínimo 1 elemento(s); máximo 20 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ArrayMaxSize(20)` `@ValidateNested({ each: true })` `@Type(() => ReportTemplateColumnDto)` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:71` |
+| `columns[].key` | `string` | Sí | longitud máxima 64 | `@IsString()` `@MaxLength(64)` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:46` |
+| `columns[].label` | `string` | Sí | longitud mínima 1; longitud máxima 80 | `@Transform(trim)` `@IsString()` `@MinLength(1)` `@MaxLength(80)` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:52` |
+| `userType` | `string` | Sí | valores: PATIENT, PRACTITIONER, HEALTH_FACILITY, LABORATORY, PHARMACY, INSURER | `@IsIn(TEMPLATE_AUDIENCES)` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:77` |
+| `code` | `string` | Sí | patrón ^[A-Z][A-Z0-9_]{1,79}$; patrón runtime /^[A-Z][A-Z0-9_]{1,79}$/ | `@Matches(/^[A-Z][A-Z0-9_]{1,79}$/)` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:80` |
 
 **Payload mínimo** (sólo los obligatorios):
 
 ```json
 {
-  "userType": {},
+  "name": "Nombre de ejemplo",
+  "reportKind": "TRIAL_BALANCE",
+  "columns": [
+    {
+      "key": "valor-ejemplo",
+      "label": "valor-ejemplo"
+    }
+  ],
+  "userType": "PATIENT",
   "code": "CODIGO_EJEMPLO"
 }
 ```
@@ -7004,7 +7021,15 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-a
 
 ```json
 {
-  "userType": {},
+  "name": "Nombre de ejemplo",
+  "reportKind": "TRIAL_BALANCE",
+  "columns": [
+    {
+      "key": "valor-ejemplo",
+      "label": "valor-ejemplo"
+    }
+  ],
+  "userType": "PATIENT",
   "code": "CODIGO_EJEMPLO"
 }
 ```
@@ -7020,7 +7045,7 @@ _No se identificó un DTO de respuesta con campos._
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 201 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | BadRequestException: {{ code: 'VALIDATION_FAILED', reason: AccountingErrorReason.…} |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra); BadRequestException: {{ code: 'VALIDATION_FAILED', reason: AccountingErrorReason.…} |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {{ code: 'FORBIDDEN', reason: AccountingErrorReason.REPORT_T…} |
 | 409 | `CONFLICT` | ConflictException: Ya existe ese código para el tipo de usuario |
@@ -7040,8 +7065,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 66. GET /admin/accounting/report-templates/{id}
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Leer una plantilla de presentación contable
 - **Bloque:** Financiero y ERP
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -7049,9 +7074,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dominio: Financiero y ERP.
+Leer una plantilla de presentación contable. Dominio: Financiero y ERP.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -7112,8 +7137,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 67. PUT /admin/accounting/report-templates/{id}
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Editar presentación con control de versión (409 si cambió)
 - **Bloque:** Financiero y ERP
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -7121,13 +7146,13 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dominio: Financiero y ERP.
+Editar presentación con control de versión (409 si cambió). Dominio: Financiero y ERP.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
-`PUT /admin/accounting/report-templates/{id}` la atiende `ReportTemplatesController.update` (src/modules/accounting/report-templates/report-templates.controller.ts:100). Exige sesión con alguno de los roles SUPERADMIN. Valida el cuerpo como `UpdateReportTemplateDto` (2 campos, 2 obligatorios). Delega en `ReportTemplatesService.update`. Actualiza accounting.report_presentation_templates. Lee accounting.report_presentation_templates.
+`PUT /admin/accounting/report-templates/{id}` la atiende `ReportTemplatesController.update` (src/modules/accounting/report-templates/report-templates.controller.ts:100). Exige sesión con alguno de los roles SUPERADMIN. Valida el cuerpo como `UpdateReportTemplateDto` (7 campos, 7 obligatorios). Delega en `ReportTemplatesService.update`. Actualiza accounting.report_presentation_templates. Lee accounting.report_presentation_templates.
 
 ### Requerimientos
 
@@ -7137,6 +7162,8 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-a
 | ROL | Alguno de: SUPERADMIN | `src/modules/accounting/report-templates/report-templates.controller.ts:100` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/accounting/report-templates/report-templates.controller.ts:100` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -7152,10 +7179,15 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-a
 |---|---|---|---|---|
 | `id` | path | Sí | `string` | — |
 
-### Cuerpo — DTO `UpdateReportTemplateDto`
+### Cuerpo — DTO `UpdateReportTemplateDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
+| `name` | `string` | Sí | longitud mínima 1; longitud máxima 160 | `@Transform(trim)` `@IsString()` `@MinLength(1)` `@MaxLength(160)` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:61` |
+| `reportKind` | `string` | Sí | valores: TRIAL_BALANCE, GENERAL_LEDGER, INCOME_STATEMENT | `@IsIn(Object.keys(REPORT_COLUMNS))` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:64` |
+| `columns` | `array<ReportTemplateColumnDto>` | Sí | mínimo 1 elemento(s); máximo 20 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ArrayMaxSize(20)` `@ValidateNested({ each: true })` `@Type(() => ReportTemplateColumnDto)` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:71` |
+| `columns[].key` | `string` | Sí | longitud máxima 64 | `@IsString()` `@MaxLength(64)` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:46` |
+| `columns[].label` | `string` | Sí | longitud mínima 1; longitud máxima 80 | `@Transform(trim)` `@IsString()` `@MinLength(1)` `@MaxLength(80)` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:52` |
 | `expectedRowVersion` | `number` | Sí | mínimo 1 | `@IsInt()` `@Min(1)` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:84` |
 | `isActive` | `boolean` | Sí | — | `@IsBoolean()` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:85` |
 
@@ -7163,6 +7195,14 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-a
 
 ```json
 {
+  "name": "Nombre de ejemplo",
+  "reportKind": "TRIAL_BALANCE",
+  "columns": [
+    {
+      "key": "valor-ejemplo",
+      "label": "valor-ejemplo"
+    }
+  ],
   "expectedRowVersion": 1,
   "isActive": true
 }
@@ -7172,6 +7212,14 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-a
 
 ```json
 {
+  "name": "Nombre de ejemplo",
+  "reportKind": "TRIAL_BALANCE",
+  "columns": [
+    {
+      "key": "valor-ejemplo",
+      "label": "valor-ejemplo"
+    }
+  ],
   "expectedRowVersion": 1,
   "isActive": true
 }
@@ -7188,7 +7236,7 @@ _No se identificó un DTO de respuesta con campos._
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; BadRequestException: {{ code: 'VALIDATION_FAILED', reason: AccountingErrorReason.…} |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra); BadRequestException: {{ code: 'VALIDATION_FAILED', reason: AccountingErrorReason.…} |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {{ code: 'FORBIDDEN', reason: AccountingErrorReason.REPORT_T…} |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: La plantilla no existe |
@@ -7209,8 +7257,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 68. POST /admin/accounting/report-templates/{id}/end
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Desactivar una plantilla sin borrarla (idempotente)
 - **Bloque:** Financiero y ERP
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -7218,9 +7266,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dominio: Financiero y ERP.
+Desactivar una plantilla sin borrarla (idempotente). Dominio: Financiero y ERP.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -7234,6 +7282,8 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-a
 | ROL | Alguno de: SUPERADMIN | `src/modules/accounting/report-templates/report-templates.controller.ts:121` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/accounting/report-templates/report-templates.controller.ts:121` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -7249,7 +7299,7 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-a
 |---|---|---|---|---|
 | `id` | path | Sí | `string` | — |
 
-### Cuerpo — DTO `EndReportTemplateDto`
+### Cuerpo — DTO `EndReportTemplateDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
@@ -7282,7 +7332,7 @@ _No se identificó un DTO de respuesta con campos._
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {{ code: 'FORBIDDEN', reason: AccountingErrorReason.REPORT_T…} |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: La plantilla no existe |

@@ -5191,6 +5191,8 @@
     },
     "/admin/governance/data-quality/issues/{id}/resolution": {
       "post": {
+        "description": "Idempotente: repetir la misma acción devuelve 200 con `alreadyApplied: true`. Pedir la contraria sobre una incidencia ya cerrada responde 409.",
+        "operationId": "AdminDataQualityController_resolve",
         "parameters": [
           {
             "name": "id",
@@ -5202,6 +5204,16 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveIssueDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "La incidencia con su desenlace; `alreadyApplied` si ya estaba así"
@@ -5237,27 +5249,15 @@
             "$ref": "#/components/responses/GatewayTimeout"
           }
         },
-        "tags": [
-          "admin-governance-data-quality"
-        ],
-        "description": "Idempotente: repetir la misma acción devuelve 200 con `alreadyApplied: true`. Pedir la contraria sobre una incidencia ya cerrada responde 409.",
         "security": [
           {
             "bearer": []
           }
         ],
-        "operationId": "AdminDataQualityController_resolve",
         "summary": "Resolver o descartar una incidencia abierta",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ResolveIssueDto"
-              }
-            }
-          }
-        }
+        "tags": [
+          "admin-governance-data-quality"
+        ]
       }
     },
     "/admin/accounting/report-templates": {
@@ -5387,6 +5387,9 @@
           },
           "409": {
             "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
           },
           "422": {
             "$ref": "#/components/responses/PreconditionFailed"
@@ -7508,11 +7511,7 @@
     },
     "/admin/governance/data-quality/rules/{id}": {
       "get": {
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
+        "operationId": "AdminDataQualityController_rule",
         "parameters": [
           {
             "name": "id",
@@ -7524,8 +7523,6 @@
             }
           }
         ],
-        "operationId": "AdminDataQualityController_rule",
-        "summary": "Una regla de calidad con su expresión, sus incidencias por estado y sus últimas corridas",
         "responses": {
           "200": {
             "description": "Regla de calidad con incidencias y corridas\n\nLa regla"
@@ -7552,6 +7549,12 @@
             "$ref": "#/components/responses/GatewayTimeout"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Una regla de calidad con su expresión, sus incidencias por estado y sus últimas corridas",
         "tags": [
           "admin-governance-data-quality"
         ],
@@ -17762,6 +17765,9 @@
           "409": {
             "$ref": "#/components/responses/Conflict"
           },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
           "422": {
             "$ref": "#/components/responses/PreconditionFailed"
           },
@@ -23878,11 +23884,8 @@
     },
     "/admin/catalog/pii/reconciliation": {
       "get": {
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
+        "description": "Tres clases de discrepancia: personal aprobada sin declarar, declarada sin marca PII/PHI y declarada pero no observada. Sólo metadatos; `notMeasured` declara el registro vacío o el catálogo sin escanear.",
+        "operationId": "AdminCatalogController_piiReconciliation",
         "parameters": [
           {
             "name": "cursor",
@@ -23930,18 +23933,16 @@
             }
           }
         ],
-        "operationId": "AdminCatalogController_piiReconciliation",
-        "summary": "Conciliación de las columnas personales del catálogo con el registro declarado de gobierno",
         "responses": {
           "200": {
+            "description": "Resumen y página de discrepancias",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PiiReconciliationPageDto"
                 }
               }
-            },
-            "description": "Resumen y página de discrepancias"
+            }
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -23962,10 +23963,15 @@
             "$ref": "#/components/responses/GatewayTimeout"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Conciliación de las columnas personales del catálogo con el registro declarado de gobierno",
         "tags": [
           "admin-catalog"
-        ],
-        "description": "Tres clases de discrepancia: personal aprobada sin declarar, declarada sin marca PII/PHI y declarada pero no observada. Sólo metadatos; `notMeasured` declara el registro vacío o el catálogo sin escanear."
+        ]
       }
     },
     "/tracking/shipments/{id}/handoffs": {
@@ -65450,11 +65456,7 @@
     },
     "/admin/governance/data-quality/issues/{id}": {
       "get": {
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
+        "operationId": "AdminDataQualityController_issue",
         "parameters": [
           {
             "name": "id",
@@ -65466,8 +65468,6 @@
             }
           }
         ],
-        "operationId": "AdminDataQualityController_issue",
-        "summary": "Una incidencia de calidad de datos clínicos",
         "responses": {
           "200": {
             "description": "La incidencia"
@@ -65494,6 +65494,12 @@
             "$ref": "#/components/responses/GatewayTimeout"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Una incidencia de calidad de datos clínicos",
         "tags": [
           "admin-governance-data-quality"
         ],
@@ -97909,7 +97915,18 @@
     },
     "/telemetry/client-errors": {
       "post": {
+        "operationId": "TelemetryClientErrorsController_capture",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CaptureClientErrorsDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "",
@@ -97949,23 +97966,12 @@
             "$ref": "#/components/responses/GatewayTimeout"
           }
         },
+        "summary": "Registra un lote de errores del cliente (saneados en el servidor)",
         "tags": [
           "telemetry-client-errors"
         ],
-        "description": "Registra un lote de errores del cliente (saneados en el servidor). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.",
         "security": [],
-        "operationId": "TelemetryClientErrorsController_capture",
-        "summary": "Registra un lote de errores del cliente (saneados en el servidor)",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CaptureClientErrorsDto"
-              }
-            }
-          }
-        }
+        "description": "Registra un lote de errores del cliente (saneados en el servidor). Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/scheduling/bookings/{id}/delay": {
@@ -123692,6 +123698,9 @@
           "409": {
             "$ref": "#/components/responses/Conflict"
           },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
           "422": {
             "$ref": "#/components/responses/PreconditionFailed"
           },
@@ -124552,6 +124561,391 @@
         ],
         "security": [],
         "description": "Organizaciones en el directorio público. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/org/support-staff": {
+      "post": {
+        "operationId": "OrgSupportStaffProvisioningController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrgSupportStaffDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Crear cuenta de secretaria y vincularla a la organización de inmediato",
+        "tags": [
+          "delegated-access-support-staff"
+        ],
+        "description": "Crear cuenta de secretaria y vincularla a la organización de inmediato. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/me/practitioner/governance-panel": {
+      "get": {
+        "operationId": "PractitionerGovernanceController_panel",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PractitionerGovernancePanelDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Panel «Para su atención» del doctor",
+        "tags": [
+          "delegated-access-governance"
+        ],
+        "description": "Panel «Para su atención» del doctor. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/approvals/pending": {
+      "get": {
+        "operationId": "PractitionerGovernanceController_pending",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50,
+              "type": "number"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "`nextCursor` de la página anterior.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PendingApprovalsPageDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Aprobaciones que espera mi decisión",
+        "tags": [
+          "delegated-access-governance"
+        ],
+        "description": "Aprobaciones que espera mi decisión. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/me/practitioner/support-activity": {
+      "get": {
+        "operationId": "PractitionerSupportController_activity",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Actividad de mi equipo de apoyo",
+        "tags": [
+          "delegated-access-support-staff"
+        ],
+        "description": "Actividad de mi equipo de apoyo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/me/practitioner/support-staff": {
+      "post": {
+        "operationId": "PractitionerSupportController_createSecretary",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePractitionerSupportStaffDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Crear cuenta de secretaria y vincularla de inmediato",
+        "tags": [
+          "delegated-access-support-staff"
+        ],
+        "description": "Crear cuenta de secretaria y vincularla de inmediato. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/practitioners/me/joinable-practices": {
+      "get": {
+        "description": "Organizaciones activas de cualquier tenant, sin consultorios propios ni aquellas donde ya hay una vinculación pendiente, activa o suspendida.",
+        "operationId": "PractitionerSitesController_listJoinablePractices",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Organizaciones a las que puedo pedir vincularme",
+        "tags": [
+          "practice"
+        ]
+      }
+    },
+    "/scheduling/bookable-organizations": {
+      "get": {
+        "description": "Sólo identificador, nombre y cuántos profesionales y laboratorios tienen cupos por delante. Después se pide cada agenda con `X-Tenant-Id` de la organización elegida.",
+        "operationId": "SchedulingAgendaController_listBookableOrganizations",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar las organizaciones con cupos abiertos para pedir cita",
+        "tags": [
+          "scheduling-agenda"
+        ]
+      }
+    },
+    "/surveys/catalog": {
+      "get": {
+        "operationId": "SurveysCatalogController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Catálogo de encuestas con sus servicios",
+        "tags": [
+          "surveys-catalog"
+        ],
+        "description": "Catálogo de encuestas con sus servicios. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     }
   },
@@ -143599,6 +143993,9 @@
           "configuredAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "lastCheck": {
+            "$ref": "#/components/schemas/ExternalSystemLastCheckDto"
           }
         },
         "required": [
@@ -180818,46 +181215,48 @@
       "QualityRuleDto": {
         "type": "object",
         "properties": {
-          "ruleCode": {
+          "code": {
             "type": "string",
-            "maxLength": 100
+            "example": "CAT-PII-UNREVIEWED"
           },
-          "dimension": {
-            "type": "string",
-            "enum": [
-              "completeness",
-              "accuracy",
-              "consistency",
-              "timeliness",
-              "uniqueness",
-              "validity"
-            ]
+          "name": {
+            "type": "string"
           },
-          "expression": {
-            "type": "string",
-            "maxLength": 1000,
-            "description": "Expresión declarativa de la regla"
+          "description": {
+            "type": "string"
           },
           "severity": {
             "type": "string",
             "enum": [
-              "info",
-              "warning",
-              "blocking"
-            ],
-            "description": "`blocking` cuarentena el dataset"
+              "HIGH",
+              "MEDIUM",
+              "LOW"
+            ]
           },
-          "threshold": {
+          "target": {
             "type": "string",
-            "description": "Umbral a partir del cual la regla falla; cadena por ser numeric"
+            "enum": [
+              "COLUMN",
+              "OBJECT"
+            ]
+          },
+          "resolution": {
+            "type": "string"
+          },
+          "openIssues": {
+            "type": "number",
+            "description": "Incidencias abiertas ahora de esta regla"
           }
         },
         "required": [
-          "ruleCode",
-          "dimension",
-          "severity"
-        ],
-        "additionalProperties": false
+          "code",
+          "name",
+          "description",
+          "severity",
+          "target",
+          "resolution",
+          "openIssues"
+        ]
       },
       "CensusAdjustmentDto": {
         "type": "object",
@@ -189013,7 +189412,8 @@
         "required": [
           "action",
           "note"
-        ]
+        ],
+        "additionalProperties": false
       },
       "CreateWorkflowInstanceDto": {
         "type": "object",
@@ -190540,24 +190940,35 @@
       "ReviewDecisionDto": {
         "type": "object",
         "properties": {
+          "revisionNo": {
+            "type": "number"
+          },
           "decision": {
             "type": "string",
-            "description": "Decisión del revisor",
             "enum": [
               "APPROVED",
               "REJECTED"
             ]
           },
-          "decisionReason": {
+          "comment": {
+            "type": "object",
+            "nullable": true
+          },
+          "reviewerUserId": {
             "type": "string",
-            "description": "Motivo de la decisión",
-            "maxLength": 500
+            "format": "uuid"
+          },
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "required": [
-          "decision"
-        ],
-        "additionalProperties": false
+          "revisionNo",
+          "decision",
+          "reviewerUserId",
+          "decidedAt"
+        ]
       },
       "RuntimePieceDetailResponseDto": {
         "type": "object",
@@ -197632,6 +198043,413 @@
         "required": [
           "en"
         ]
+      },
+      "CreateOrgSupportStaffDto": {
+        "type": "object",
+        "properties": {
+          "nationalId": {
+            "type": "string",
+            "description": "Documento de identidad con el que se iniciará sesión",
+            "maxLength": 40
+          },
+          "issuerAdministrativeAreaConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Departamento emisor del documento (catálogo VS_BO_DEPARTMENT)"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 200
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Lucía"
+          },
+          "middleName": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Andrea"
+          },
+          "lastName": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Mamani"
+          },
+          "motherLastName": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Quispe"
+          },
+          "displayName": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Forma anterior de declarar el nombre. Preferí name/lastName.",
+            "deprecated": true
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 320
+          },
+          "birthDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Teléfono de contacto en formato E.164 o nacional: dígitos, espacios, paréntesis, + y guion, mínimo 6 caracteres",
+            "maxLength": 40
+          },
+          "gender": {
+            "type": "string",
+            "enum": [
+              "MALE",
+              "FEMALE",
+              "OTHER",
+              "UNKNOWN"
+            ],
+            "description": "Género administrativo (HL7 AdministrativeGender)"
+          },
+          "timeZone": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "targetKind": {
+            "type": "string",
+            "enum": [
+              "ORGANIZATION",
+              "SITE",
+              "SERVICE",
+              "SPACE",
+              "PRACTITIONER"
+            ],
+            "default": "ORGANIZATION"
+          },
+          "practiceSiteId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "clinicalUnitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "careSpaceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "practitionerRoleAssignmentId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "nationalId",
+          "issuerAdministrativeAreaConceptId",
+          "password",
+          "email",
+          "birthDate",
+          "phone"
+        ],
+        "additionalProperties": false
+      },
+      "GovernancePanelTeamMemberDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "engagementId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "El vínculo con el doctor."
+          },
+          "templateCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "liveGrants": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "userId",
+          "engagementId",
+          "templateCode",
+          "liveGrants"
+        ]
+      },
+      "GovernancePanelAnomalyDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kindConceptId": {
+            "type": "string",
+            "description": "Tipo de la alerta, p. ej. `ANOMALY_CANCEL_SPIKE`."
+          },
+          "windowStart": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "observed": {
+            "type": "number"
+          },
+          "threshold": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "userId",
+          "kindConceptId",
+          "windowStart",
+          "observed",
+          "threshold"
+        ]
+      },
+      "PractitionerGovernancePanelDto": {
+        "type": "object",
+        "properties": {
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "team": {
+            "description": "Reservado: la lista del equipo la da `GET /me/practitioner/support-team`; acá va vacía.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GovernancePanelTeamMemberDto"
+            }
+          },
+          "pendingReviews": {
+            "type": "number",
+            "description": "Revisiones de acceso que esperan al doctor."
+          },
+          "openAnomalies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GovernancePanelAnomalyDto"
+            }
+          }
+        },
+        "required": [
+          "generatedAt",
+          "team",
+          "pendingReviews",
+          "openAnomalies"
+        ]
+      },
+      "PendingApprovalDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tenantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string",
+            "description": "ACTION, GRANT_CHANGE, SOD_EXCEPTION…"
+          },
+          "status": {
+            "type": "string",
+            "example": "PENDING"
+          },
+          "approverKind": {
+            "type": "string",
+            "example": "DOCTOR_OWNER"
+          },
+          "atom": {
+            "type": "string"
+          },
+          "requesterUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "subjectUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reasonText": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "summary": {
+            "type": "string",
+            "description": "Qué se pide, en lenguaje simple."
+          }
+        },
+        "required": [
+          "id",
+          "tenantId",
+          "kind",
+          "status",
+          "approverKind",
+          "requesterUserId",
+          "createdAt",
+          "expiresAt",
+          "summary"
+        ]
+      },
+      "PendingApprovalsPageDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PendingApprovalDto"
+            }
+          },
+          "count": {
+            "type": "number"
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "count",
+          "nextCursor"
+        ]
+      },
+      "CreatePractitionerSupportStaffDto": {
+        "type": "object",
+        "properties": {
+          "nationalId": {
+            "type": "string",
+            "description": "Documento de identidad con el que se iniciará sesión",
+            "maxLength": 40
+          },
+          "issuerAdministrativeAreaConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Departamento emisor del documento (catálogo VS_BO_DEPARTMENT)"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 200
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Lucía"
+          },
+          "middleName": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Andrea"
+          },
+          "lastName": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Mamani"
+          },
+          "motherLastName": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Quispe"
+          },
+          "displayName": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Forma anterior de declarar el nombre. Preferí name/lastName.",
+            "deprecated": true
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 320
+          },
+          "birthDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Teléfono de contacto en formato E.164 o nacional: dígitos, espacios, paréntesis, + y guion, mínimo 6 caracteres",
+            "maxLength": 40
+          },
+          "gender": {
+            "type": "string",
+            "enum": [
+              "MALE",
+              "FEMALE",
+              "OTHER",
+              "UNKNOWN"
+            ],
+            "description": "Género administrativo (HL7 AdministrativeGender)"
+          },
+          "timeZone": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "practitionerRoleAssignmentId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID de la vinculación del doctor (practitioner_role_assignment_id)"
+          }
+        },
+        "required": [
+          "nationalId",
+          "issuerAdministrativeAreaConceptId",
+          "password",
+          "email",
+          "birthDate",
+          "phone",
+          "practitionerRoleAssignmentId"
+        ],
+        "additionalProperties": false
+      },
+      "ExternalSystemLastCheckDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "ERROR"
+            ]
+          },
+          "errorReason": {
+            "type": "string",
+            "enum": [
+              "AUTH_REJECTED",
+              "UNREACHABLE"
+            ],
+            "nullable": true
+          },
+          "checkedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "status",
+          "errorReason",
+          "checkedAt"
+        ]
       }
     },
     "responses": {
@@ -197874,7 +198692,7 @@
     },
     {
       "name": "accounting-report-templates",
-      "description": "Plantillas de presentación contable por audiencia"
+      "description": "Operaciones del dominio funcional accounting report templates. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
     {
       "name": "accounting-subledger",
@@ -198261,6 +199079,10 @@
       "description": "Operaciones del dominio funcional delegated access authz. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
     {
+      "name": "delegated-access-governance",
+      "description": "Operaciones del dominio funcional delegated access governance. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
+    },
+    {
       "name": "delegated-access-org",
       "description": "Operaciones del dominio funcional delegated access org. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
@@ -198429,10 +199251,6 @@
       "description": "Operaciones del dominio funcional iam users. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
     {
-      "name": "identity_assurance",
-      "description": "Operaciones del dominio funcional identity_assurance. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
-    },
-    {
       "name": "identity-assertions",
       "description": "Operaciones del dominio funcional identity assertions. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
@@ -198459,6 +199277,10 @@
     {
       "name": "identity-verification-cases",
       "description": "Operaciones del dominio funcional identity verification cases. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
+    },
+    {
+      "name": "identity_assurance",
+      "description": "Operaciones del dominio funcional identity_assurance. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
     {
       "name": "insurance",
@@ -198899,6 +199721,10 @@
     {
       "name": "surveys-assignments",
       "description": "Operaciones del dominio funcional surveys assignments. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
+    },
+    {
+      "name": "surveys-catalog",
+      "description": "Operaciones del dominio funcional surveys catalog. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
     {
       "name": "surveys-insights",

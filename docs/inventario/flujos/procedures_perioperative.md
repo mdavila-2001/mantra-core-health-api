@@ -64,13 +64,13 @@ _Fuente: `src/modules/procedures_perioperative/README.md:117`_
 | `UC-53-12` | Recuperación | POST /procedure-cases/{id}/pacu-stays | PERIOP_NURSE · ANESTHESIOLOGIST · PERIOP_ADMIN | MEDIO | 3 |
 | `UC-53-13` | Cancelar y liberar quirófano | POST /procedure-cases/{id}/cancel | SURGERY_SCHEDULER · SURGEON · PERIOP_ADMIN | MEDIO | 3 |
 | `UC-53-14` | Cargos y utilización | POST /procedure-cases/{id}/charge-items/post | PERIOP_ADMIN · BILLING | MEDIO | 3 |
-| `ctrl:DentalController` | Operaciones de DentalController que el README no asigna a un caso de uso | GET /dental-procedures | CLINICIAN · PRACTITIONER | BAJO | 20 |
-|  |  | POST /dental-procedures | CLINICIAN · PRACTITIONER | MEDIO | 24 |
+| `ctrl:DentalController` | Operaciones de DentalController que el README no asigna a un caso de uso | GET /dental-procedures | CLINICIAN · PRACTITIONER | BAJO | 22 |
+|  |  | POST /dental-procedures | CLINICIAN · PRACTITIONER | MEDIO | 26 |
 |  |  | GET /dental-procedures/catalog | CLINICIAN · PRACTITIONER | BAJO | 0 |
 | `ctrl:PeriopController` | Operaciones de PeriopController que el README no asigna a un caso de uso | POST /pacu-stays/{stayId}/assessments | PERIOP_NURSE · ANESTHESIOLOGIST · PERIOP_ADMIN | MEDIO | 2 |
 |  |  | POST /pacu-stays/{stayId}/discharge | ANESTHESIOLOGIST · PERIOP_ADMIN | MEDIO | 6 |
 |  |  | GET /procedure-cases | SURGEON · ANESTHESIOLOGIST · PERIOP_NURSE · SURGERY_SCHEDULER · PERIOP_ADMIN | BAJO | 5 |
-|  |  | GET /procedure-cases/{id} | SURGEON · ANESTHESIOLOGIST · PERIOP_NURSE · SURGERY_SCHEDULER · PERIOP_ADMIN | BAJO | 42 |
+|  |  | GET /procedure-cases/{id} | SURGEON · ANESTHESIOLOGIST · PERIOP_NURSE · SURGERY_SCHEDULER · PERIOP_ADMIN | BAJO | 44 |
 |  |  | PATCH /procedure-cases/{id} | SURGERY_SCHEDULER · SURGEON · PERIOP_ADMIN | MEDIO | 16 |
 |  |  | POST /procedure-cases/{id}/anesthesia-plans/{planId}/approve | ANESTHESIOLOGIST · PERIOP_ADMIN | MEDIO | 2 |
 |  |  | POST /procedure-cases/{id}/confirm | SURGERY_SCHEDULER · SURGEON · PERIOP_ADMIN | MEDIO | 9 |
@@ -195,8 +195,8 @@ flowchart LR
   subgraph s13["UC-53-14 · Cargos y utilización"]
     o61["POST /procedure-cases/{id}/charge-items/post"]:::op
   end
-  t72[("+14 tablas más")]
-  t74[("+18 tablas más")]
+  t72[("+16 tablas más")]
+  t74[("+20 tablas más")]
   subgraph s14["ctrl:DentalController · Operaciones de DentalController que el README no asigna…"]
     o64["GET /dental-procedures"]:::op
     o73["POST /dental-procedures"]:::op
@@ -369,7 +369,7 @@ flowchart LR
   t92[("procedures_perioperative.surgical_safety_checklis…")]:::tabla
   t93[("procedures_perioperative.surgical_safety_items")]:::tabla
   t94[("procedures_perioperative.surgical_safety_responses")]:::tabla
-  t24[("+36 tablas más")]
+  t24[("+38 tablas más")]
   t31[("+10 tablas más")]
   t38[("+3 tablas más")]
   t50[("+1 tablas más")]

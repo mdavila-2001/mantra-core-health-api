@@ -15,7 +15,7 @@
 
 ### Para qué sirve
 
-Agrupa los componentes relacionados con **identity assurance** y mantiene cohesionada esta responsabilidad del sistema.
+Groups **identity assurance**-related components and keeps this system responsibility cohesive.
 
 _Fuente: `src/modules/identity_assurance/README.md:3`_
 
@@ -37,7 +37,7 @@ _Fuente: `src/modules/identity_assurance/README.md:3`_
 |  |  | POST /identity/verification-cases/expire-sweep | SYSTEM · SECURITY_ADMIN | MEDIO | 11 |
 | `ctrl:IdentityChecksController` | Operaciones de IdentityChecksController que el README no asigna a un caso de uso | POST /identity/checks/{id}/attempts | SECURITY_ADMIN | MEDIO | 8 |
 |  |  | POST /identity/checks/{id}/results | SECURITY_ADMIN | ALTO | 50 |
-| `ctrl:IdentityManualReviewController` | Operaciones de IdentityManualReviewController que el README no asigna a un caso de uso | POST /identity/manual-review/{id}/decision | SECURITY_ADMIN | ALTO | 52 |
+| `ctrl:IdentityManualReviewController` | Operaciones de IdentityManualReviewController que el README no asigna a un caso de uso | POST /identity/manual-review/{id}/decision | SECURITY_ADMIN | MEDIO | 31 |
 | `ctrl:IdentityPoliciesController` | Operaciones de IdentityPoliciesController que el README no asigna a un caso de uso | POST /identity/verification-policies | SECURITY_ADMIN | MEDIO | 1 |
 | `ctrl:IdentitySelfServiceController` | Operaciones de IdentitySelfServiceController que el README no asigna a un caso de uso | POST /identity/me/identity-verification | Cualquier sesión válida | ALTO | 15 |
 |  |  | POST /identity/me/practitioner/identity-verification | Cualquier sesión válida | ALTO | 16 |
@@ -117,7 +117,7 @@ flowchart LR
     o41["POST /identity/checks/{id}/attempts"]:::op
     o44["POST /identity/checks/{id}/results"]:::op
   end
-  t50[("+46 tablas más")]
+  t50[("+25 tablas más")]
   subgraph s4["ctrl:IdentityManualReviewController · Operaciones de IdentityManualReviewContro…"]
     o49["POST /identity/manual-review/{id}/decision"]:::op
   end
@@ -237,10 +237,10 @@ flowchart LR
   a2 --> o49
   o49 -->|"CREA"| t3
   o49 -->|"LEE"| t45
-  o49 -->|"LEE"| t46
-  o49 -->|"LEE"| t29
-  o49 -->|"LEE"| t30
-  o49 -->|"LEE"| t47
+  o49 -->|"ACTUALIZA"| t4
+  o49 -->|"LEE"| t4
+  o49 -->|"ACTUALIZA"| t5
+  o49 -->|"CREA"| t5
   o49 -.-> t50
   a2 --> o51
   o51 -->|"CREA"| t19

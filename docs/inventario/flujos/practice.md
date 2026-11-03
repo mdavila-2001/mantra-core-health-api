@@ -3,13 +3,13 @@
 # Flujos del módulo `practice`
 
 - **Procesos:** 1 · **Máquinas de estado:** 1
-- **Operaciones:** 83 (76 con decisiones propias, 7 sin ellas)
+- **Operaciones:** 84 (77 con decisiones propias, 7 sin ellas)
 - Inventario de endpoints del módulo: [practice](../endpoints/practice.md)
 
 ## Proceso: Módulo Practice (14)
 
-- **Código:** `practice` · **Agrupación:** MIXTO · **Operaciones:** 83
-- **Actores:** ACCOUNTING_APPROVER · ANESTHESIOLOGIST · CLINICIAN · Cualquier sesión válida · PATIENT · PERIOP_ADMIN · PERIOP_NURSE · PRACTITIONER · SCHEDULING_ADMIN · SCHEDULING_AGENT · SECURITY_ADMIN · SURGEON · SURGERY_SCHEDULER · SYSTEM · SYSTEM_WORKER
+- **Código:** `practice` · **Agrupación:** MIXTO · **Operaciones:** 84
+- **Actores:** ACCOUNTING_APPROVER · ANESTHESIOLOGIST · CLINICIAN · Cualquier sesión válida · PATIENT · PERIOP_ADMIN · PERIOP_NURSE · PRACTITIONER · SCHEDULING_ADMIN · SCHEDULING_AGENT · SECURITY_ADMIN · SUPERADMIN · SURGEON · SURGERY_SCHEDULER · SYSTEM · SYSTEM_WORKER
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/practice/README.md`
 
@@ -78,6 +78,7 @@ _Fuente: `src/modules/practice/README.md:3`_
 | `ctrl:PractitionerInvitationsController` | Operaciones de PractitionerInvitationsController que el README no asigna a un caso de uso | POST /practitioners/me/role-assignments/{roleId}/accept | PRACTITIONER | MEDIO | 2 |
 |  |  | POST /practitioners/me/role-assignments/{roleId}/decline | PRACTITIONER | MEDIO | 2 |
 | `ctrl:PractitionerSitesController` | Operaciones de PractitionerSitesController que el README no asigna a un caso de uso | GET /practitioners/{profileId}/sites | SECURITY_ADMIN · SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · CLINICIAN · PATIENT | BAJO | 5 |
+|  |  | GET /practitioners/me/joinable-practices | PRACTITIONER | BAJO | 2 |
 |  |  | GET /practitioners/me/role-assignments | PRACTITIONER | BAJO | 3 |
 |  |  | POST /practitioners/me/sites | PRACTITIONER · CLINICIAN | MEDIO | 10 |
 |  |  | DELETE /practitioners/me/sites/{siteId} | PRACTITIONER · CLINICIAN | MEDIO | 4 |
@@ -98,7 +99,7 @@ _Fuente: `src/modules/practice/README.md:3`_
 |  |  | POST /sites/{siteId}/licenses | Cualquier sesión válida | ALTO | 6 |
 |  |  | GET /sites/{siteId}/regulatory | Cualquier sesión válida | BAJO | 5 |
 |  |  | PATCH /sites/{siteId}/regulatory | Cualquier sesión válida | ALTO | 6 |
-|  |  | POST /sites/{siteId}/regulatory/verify-snis | Cualquier sesión válida | ALTO | 6 |
+|  |  | POST /sites/{siteId}/regulatory/verify-snis | SECURITY_ADMIN · SUPERADMIN | MEDIO | 6 |
 |  |  | GET /sites/{siteId}/structure | Cualquier sesión válida | BAJO | 6 |
 | `ctrl:SiteLicensesController` | Operaciones de SiteLicensesController que el README no asigna a un caso de uso | PATCH /site-licenses/{id} | Cualquier sesión válida | ALTO | 4 |
 | `ctrl:SitesController` | Operaciones de SitesController que el README no asigna a un caso de uso | GET /sites/{siteId}/care-spaces | SECURITY_ADMIN · SURGERY_SCHEDULER · PERIOP_ADMIN · SURGEON · ANESTHESIOLOGIST · PERIOP_NURSE · SCHEDULING_ADMIN | BAJO | 3 |
@@ -505,7 +506,7 @@ flowchart LR
   a32(["SECURITY_ADMIN · PERIOP_ADMIN · SURGERY_SCHEDULER · SCHEDUL…"]):::actor
   a38(["PRACTITIONER"]):::actor
   a43(["SECURITY_ADMIN · SCHEDULING_ADMIN · SCHEDULING_AGENT · PRAC…"]):::actor
-  a48(["PRACTITIONER · CLINICIAN"]):::actor
+  a49(["PRACTITIONER · CLINICIAN"]):::actor
   t3[("delegated_access.organization_user_assignments")]:::tabla
   t4[("directory.branch_memberships")]:::tabla
   t5[("directory.tenant_memberships")]:::tabla
@@ -525,10 +526,10 @@ flowchart LR
   t33[("practice.inventory_items")]:::tabla
   t34[("practice.practice_accreditations")]:::tabla
   t44[("profiles.person_account_links")]:::tabla
-  t46[("community.public_profiles")]:::tabla
-  t49[("common.file_versions")]:::tabla
-  t50[("common.files")]:::tabla
-  t53[("profiles.health_practitioner_profiles")]:::tabla
+  t47[("community.public_profiles")]:::tabla
+  t50[("common.file_versions")]:::tabla
+  t51[("common.files")]:::tabla
+  t54[("profiles.health_practitioner_profiles")]:::tabla
   t9[("+1 tablas más")]
   subgraph s0["ctrl:InfrastructureAccessController · Operaciones de InfrastructureAccessContro…"]
     o1["GET /practice/infrastructure-access/me"]:::op
@@ -560,19 +561,20 @@ flowchart LR
     o40["POST /practitioners/me/role-assignments/{roleId}/accept"]:::op
     o41["POST /practitioners/me/role-assignments/{roleId}/decline"]:::op
   end
-  t51[("+4 tablas más")]
-  t55[("+3 tablas más")]
-  t58[("+1 tablas más")]
-  t60[("+3 tablas más")]
+  t52[("+4 tablas más")]
+  t56[("+3 tablas más")]
+  t59[("+1 tablas más")]
+  t61[("+3 tablas más")]
   subgraph s6["ctrl:PractitionerSitesController · Operaciones de PractitionerSitesController q…"]
     o42["GET /practitioners/{profileId}/sites"]:::op
-    o45["GET /practitioners/me/role-assignments"]:::op
-    o47["POST /practitioners/me/sites"]:::op
-    o52["DELETE /practitioners/me/sites/{siteId}"]:::op
-    o54["PATCH /practitioners/me/sites/{siteId}"]:::op
-    o56["PUT /practitioners/me/sites/{siteId}/bank-qr"]:::op
-    o57["PUT /practitioners/me/sites/{siteId}/contact-phone"]:::op
-    o59["PUT /practitioners/me/sites/{siteId}/logo"]:::op
+    o45["GET /practitioners/me/joinable-practices"]:::op
+    o46["GET /practitioners/me/role-assignments"]:::op
+    o48["POST /practitioners/me/sites"]:::op
+    o53["DELETE /practitioners/me/sites/{siteId}"]:::op
+    o55["PATCH /practitioners/me/sites/{siteId}"]:::op
+    o57["PUT /practitioners/me/sites/{siteId}/bank-qr"]:::op
+    o58["PUT /practitioners/me/sites/{siteId}/contact-phone"]:::op
+    o60["PUT /practitioners/me/sites/{siteId}/logo"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -658,53 +660,56 @@ flowchart LR
   o42 -->|"LEE"| t20
   o42 -->|"LEE"| t44
   a38 --> o45
-  o45 -->|"LEE"| t46
   o45 -->|"LEE"| t16
   o45 -->|"LEE"| t20
-  a48 --> o47
-  o47 -->|"CREA"| t14
-  o47 -->|"LEE"| t49
-  o47 -->|"LEE"| t50
-  o47 -->|"CREA"| t8
-  o47 -->|"LEE"| t8
-  o47 -->|"CREA"| t16
-  o47 -.-> t51
-  a48 --> o52
-  o52 -->|"ACTUALIZA"| t20
-  o52 -->|"LEE"| t20
-  o52 -->|"LEE"| t53
-  o52 -->|"LEE"| t44
-  a48 --> o54
-  o54 -->|"ACTUALIZA"| t14
-  o54 -->|"CREA"| t14
-  o54 -->|"LEE"| t14
-  o54 -->|"ACTUALIZA"| t8
-  o54 -->|"LEE"| t8
-  o54 -->|"LEE"| t16
-  o54 -.-> t55
-  a48 --> o56
-  o56 -->|"LEE"| t14
-  o56 -->|"LEE"| t8
-  o56 -->|"LEE"| t16
-  o56 -->|"LEE"| t20
-  o56 -->|"LEE"| t53
-  o56 -->|"LEE"| t44
-  a48 --> o57
+  a38 --> o46
+  o46 -->|"LEE"| t47
+  o46 -->|"LEE"| t16
+  o46 -->|"LEE"| t20
+  a49 --> o48
+  o48 -->|"CREA"| t14
+  o48 -->|"LEE"| t50
+  o48 -->|"LEE"| t51
+  o48 -->|"CREA"| t8
+  o48 -->|"LEE"| t8
+  o48 -->|"CREA"| t16
+  o48 -.-> t52
+  a49 --> o53
+  o53 -->|"ACTUALIZA"| t20
+  o53 -->|"LEE"| t20
+  o53 -->|"LEE"| t54
+  o53 -->|"LEE"| t44
+  a49 --> o55
+  o55 -->|"ACTUALIZA"| t14
+  o55 -->|"CREA"| t14
+  o55 -->|"LEE"| t14
+  o55 -->|"ACTUALIZA"| t8
+  o55 -->|"LEE"| t8
+  o55 -->|"LEE"| t16
+  o55 -.-> t56
+  a49 --> o57
   o57 -->|"LEE"| t14
   o57 -->|"LEE"| t8
   o57 -->|"LEE"| t16
-  o57 -->|"ACTUALIZA"| t20
   o57 -->|"LEE"| t20
-  o57 -->|"LEE"| t53
-  o57 -.-> t58
-  a48 --> o59
-  o59 -->|"LEE"| t14
-  o59 -->|"LEE"| t49
-  o59 -->|"LEE"| t50
-  o59 -->|"ACTUALIZA"| t8
-  o59 -->|"LEE"| t8
-  o59 -->|"LEE"| t16
-  o59 -.-> t60
+  o57 -->|"LEE"| t54
+  o57 -->|"LEE"| t44
+  a49 --> o58
+  o58 -->|"LEE"| t14
+  o58 -->|"LEE"| t8
+  o58 -->|"LEE"| t16
+  o58 -->|"ACTUALIZA"| t20
+  o58 -->|"LEE"| t20
+  o58 -->|"LEE"| t54
+  o58 -.-> t59
+  a49 --> o60
+  o60 -->|"LEE"| t14
+  o60 -->|"LEE"| t50
+  o60 -->|"LEE"| t51
+  o60 -->|"ACTUALIZA"| t8
+  o60 -->|"LEE"| t8
+  o60 -->|"LEE"| t16
+  o60 -.-> t61
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -717,7 +722,8 @@ flowchart LR
 flowchart LR
   a2(["Cualquier sesión válida"]):::actor
   a7(["SECURITY_ADMIN"]):::actor
-  a35(["SECURITY_ADMIN · SURGERY_SCHEDULER · PERIOP_ADMIN · SURGEON…"]):::actor
+  a31(["SECURITY_ADMIN · SUPERADMIN"]):::actor
+  a36(["SECURITY_ADMIN · SURGERY_SCHEDULER · PERIOP_ADMIN · SURGEON…"]):::actor
   t3[("directory.tenant_memberships")]:::tabla
   t4[("practice.practices")]:::tabla
   t5[("practice.practitioner_role_assignments")]:::tabla
@@ -730,18 +736,18 @@ flowchart LR
   t18[("practice.facility_typology_rules")]:::tabla
   t25[("organization_extensions.facility_licenses")]:::tabla
   t27[("practice.healthcare_services")]:::tabla
-  t32[("practice.space_unit_assignments")]:::tabla
-  t37[("delegated_access.organization_user_assignments")]:::tabla
-  t38[("diagnostic_units.diagnostic_equipment")]:::tabla
-  t39[("diagnostic_units.diagnostic_unit_sites")]:::tabla
-  t40[("diagnostic_units.diagnostic_units")]:::tabla
-  t43[("pharmacy_inventory.inventory_locations")]:::tabla
-  t44[("pharmacy_inventory.inventory_lots")]:::tabla
-  t45[("pharmacy_inventory.inventory_stock_positions")]:::tabla
-  t50[("clinical.encounter_locations")]:::tabla
-  t51[("clinical.encounters")]:::tabla
-  t52[("practice.care_space_status_events")]:::tabla
-  t53[("practice.cleaning_orders")]:::tabla
+  t33[("practice.space_unit_assignments")]:::tabla
+  t38[("delegated_access.organization_user_assignments")]:::tabla
+  t39[("diagnostic_units.diagnostic_equipment")]:::tabla
+  t40[("diagnostic_units.diagnostic_unit_sites")]:::tabla
+  t41[("diagnostic_units.diagnostic_units")]:::tabla
+  t44[("pharmacy_inventory.inventory_locations")]:::tabla
+  t45[("pharmacy_inventory.inventory_lots")]:::tabla
+  t46[("pharmacy_inventory.inventory_stock_positions")]:::tabla
+  t51[("clinical.encounter_locations")]:::tabla
+  t52[("clinical.encounters")]:::tabla
+  t53[("practice.care_space_status_events")]:::tabla
+  t54[("practice.cleaning_orders")]:::tabla
   subgraph s0["ctrl:RoleAssignmentsController · Operaciones de RoleAssignmentsController que e…"]
     o1["POST /role-assignments/{roleId}/approve"]:::op
     o6["POST /role-assignments/{roleId}/end"]:::op
@@ -761,23 +767,23 @@ flowchart LR
     o28["GET /sites/{siteId}/regulatory"]:::op
     o29["PATCH /sites/{siteId}/regulatory"]:::op
     o30["POST /sites/{siteId}/regulatory/verify-snis"]:::op
-    o31["GET /sites/{siteId}/structure"]:::op
+    o32["GET /sites/{siteId}/structure"]:::op
   end
   subgraph s2["ctrl:SiteLicensesController · Operaciones de SiteLicensesController que el READ…"]
-    o33["PATCH /site-licenses/{id}"]:::op
+    o34["PATCH /site-licenses/{id}"]:::op
   end
   subgraph s3["ctrl:SitesController · Operaciones de SitesController que el README no asigna a…"]
-    o34["GET /sites/{siteId}/care-spaces"]:::op
+    o35["GET /sites/{siteId}/care-spaces"]:::op
   end
-  t41[("+5 tablas más")]
-  t46[("+8 tablas más")]
-  t48[("+5 tablas más")]
-  t54[("+6 tablas más")]
+  t42[("+5 tablas más")]
+  t47[("+8 tablas más")]
+  t49[("+5 tablas más")]
+  t55[("+6 tablas más")]
   subgraph s4["ctrl:SpaceAssetsController · Operaciones de SpaceAssetsController que el README…"]
-    o36["GET /care-spaces/{id}/equipment"]:::op
-    o42["GET /care-spaces/{id}/stock"]:::op
-    o47["GET /sites/{siteId}/diagnostic-equipment"]:::op
-    o49["GET /sites/{siteId}/sample-collection-points"]:::op
+    o37["GET /care-spaces/{id}/equipment"]:::op
+    o43["GET /care-spaces/{id}/stock"]:::op
+    o48["GET /sites/{siteId}/diagnostic-equipment"]:::op
+    o50["GET /sites/{siteId}/sample-collection-points"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -852,61 +858,61 @@ flowchart LR
   o29 -->|"LEE"| t18
   o29 -->|"ACTUALIZA"| t13
   o29 -->|"LEE"| t13
-  a2 --> o30
+  a31 --> o30
   o30 -->|"LEE"| t16
   o30 -->|"LEE"| t3
   o30 -->|"LEE"| t12
   o30 -->|"LEE"| t18
   o30 -->|"ACTUALIZA"| t13
   o30 -->|"LEE"| t13
-  a2 --> o31
-  o31 -->|"LEE"| t16
-  o31 -->|"LEE"| t3
-  o31 -->|"LEE"| t12
-  o31 -->|"LEE"| t17
-  o31 -->|"LEE"| t13
-  o31 -->|"LEE"| t32
-  a2 --> o33
-  o33 -->|"LEE"| t3
-  o33 -->|"ACTUALIZA"| t25
-  o33 -->|"LEE"| t25
-  o33 -->|"LEE"| t13
-  a35 --> o34
-  o34 -->|"LEE"| t12
+  a2 --> o32
+  o32 -->|"LEE"| t16
+  o32 -->|"LEE"| t3
+  o32 -->|"LEE"| t12
+  o32 -->|"LEE"| t17
+  o32 -->|"LEE"| t13
+  o32 -->|"LEE"| t33
+  a2 --> o34
+  o34 -->|"LEE"| t3
+  o34 -->|"ACTUALIZA"| t25
+  o34 -->|"LEE"| t25
   o34 -->|"LEE"| t13
-  o34 -->|"LEE"| t4
-  a2 --> o36
-  o36 -->|"LEE"| t37
-  o36 -->|"LEE"| t38
-  o36 -->|"LEE"| t39
-  o36 -->|"LEE"| t40
-  o36 -->|"LEE"| t16
-  o36 -->|"LEE"| t3
-  o36 -.-> t41
-  a2 --> o42
-  o42 -->|"LEE"| t37
-  o42 -->|"LEE"| t16
-  o42 -->|"LEE"| t3
-  o42 -->|"LEE"| t43
-  o42 -->|"LEE"| t44
-  o42 -->|"LEE"| t45
-  o42 -.-> t46
-  a2 --> o47
-  o47 -->|"LEE"| t37
-  o47 -->|"LEE"| t38
-  o47 -->|"LEE"| t39
-  o47 -->|"LEE"| t40
-  o47 -->|"LEE"| t16
-  o47 -->|"LEE"| t3
-  o47 -.-> t48
-  a2 --> o49
-  o49 -->|"LEE"| t50
-  o49 -->|"LEE"| t51
-  o49 -->|"LEE"| t52
-  o49 -->|"LEE"| t12
-  o49 -->|"LEE"| t53
-  o49 -->|"LEE"| t17
-  o49 -.-> t54
+  a36 --> o35
+  o35 -->|"LEE"| t12
+  o35 -->|"LEE"| t13
+  o35 -->|"LEE"| t4
+  a2 --> o37
+  o37 -->|"LEE"| t38
+  o37 -->|"LEE"| t39
+  o37 -->|"LEE"| t40
+  o37 -->|"LEE"| t41
+  o37 -->|"LEE"| t16
+  o37 -->|"LEE"| t3
+  o37 -.-> t42
+  a2 --> o43
+  o43 -->|"LEE"| t38
+  o43 -->|"LEE"| t16
+  o43 -->|"LEE"| t3
+  o43 -->|"LEE"| t44
+  o43 -->|"LEE"| t45
+  o43 -->|"LEE"| t46
+  o43 -.-> t47
+  a2 --> o48
+  o48 -->|"LEE"| t38
+  o48 -->|"LEE"| t39
+  o48 -->|"LEE"| t40
+  o48 -->|"LEE"| t41
+  o48 -->|"LEE"| t16
+  o48 -->|"LEE"| t3
+  o48 -.-> t49
+  a2 --> o50
+  o50 -->|"LEE"| t51
+  o50 -->|"LEE"| t52
+  o50 -->|"LEE"| t53
+  o50 -->|"LEE"| t12
+  o50 -->|"LEE"| t54
+  o50 -->|"LEE"| t17
+  o50 -.-> t55
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -3823,25 +3829,32 @@ flowchart TD
   n1 --> n2
   n3["Llama a PracticeWorkforceService.listPracticeAssignments"]:::llamada
   n2 --> n3
-  n4["Llama a PracticeAdministrationService.assertCanAdministerPractice"]:::llamada
+  n4{"contextTenantId !== undefined"}:::decision
   n3 --> n4
   n5["Llama a PracticesRepository.findById"]:::llamada
-  n4 --> n5
+  n4 -->|"sí"| n5
   n6[("LEE practice.practices")]:::efecto
   n5 --> n6
-  n7{"!practice"}:::decision
+  n7["Llama a PracticeAdministrationService.assertCanAdministerPractice"]:::llamada
   n6 --> n7
-  n8(["↩ (relanza el error capturado)"]):::error
-  n7 -->|"sí"| n8
-  n9["Llama a TenantAdministrationService.assertCanAdminister"]:::llamada
-  n7 -->|"no"| n9
-  n10(["403 FORBIDDEN Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma"]):::error
+  n4 -->|"no"| n7
+  n8["Llama a PracticesRepository.findById"]:::llamada
+  n7 --> n8
+  n9[("LEE practice.practices")]:::efecto
+  n8 --> n9
+  n10{"!practice"}:::decision
   n9 --> n10
-  n11["Llama a PractitionerRoleAssignmentsRepository.findByPracticePage"]:::llamada
-  n12[("LEE practice.practitioner_role_assignments")]:::efecto
-  n11 --> n12
-  n13(("200 Responde con éxito")):::ok
+  n11(["↩ (relanza el error capturado)"]):::error
+  n10 -->|"sí"| n11
+  n12["Llama a TenantAdministrationService.assertCanAdminister"]:::llamada
+  n10 -->|"no"| n12
+  n13(["403 FORBIDDEN Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma"]):::error
   n12 --> n13
+  n14["Llama a PractitionerRoleAssignmentsRepository.findByPracticePage"]:::llamada
+  n15[("LEE practice.practitioner_role_assignments")]:::efecto
+  n14 --> n15
+  n16(("200 Responde con éxito")):::ok
+  n15 --> n16
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -4436,7 +4449,48 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 42. GET /practitioners/me/role-assignments
+#### 42. GET /practitioners/me/joinable-practices
+
+Organizaciones a las que puedo pedir vincularme
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PracticeWorkforceService.listJoinablePractices"]:::llamada
+  n2 --> n3
+  n4{"!actor.practitionerProfileId"}:::decision
+  n3 --> n4
+  n5(["422 PRECONDITION_FAILED La cuenta no tiene un perfil profesional asociado"]):::error
+  n4 -->|"sí"| n5
+  n6["Llama a PracticesRepository.findActive"]:::llamada
+  n4 -->|"no"| n6
+  n7[("LEE practice.practices")]:::efecto
+  n6 --> n7
+  n8["Llama a PractitionerRoleAssignmentsRepository.findByPractitioner"]:::llamada
+  n7 --> n8
+  n9[("LEE practice.practitioner_role_assignments")]:::efecto
+  n8 --> n9
+  n10(("200 Responde con éxito")):::ok
+  n9 --> n10
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 43. GET /practitioners/me/role-assignments
 
 Mis vinculaciones con organizaciones
 
@@ -4479,7 +4533,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 43. POST /practitioners/me/role-assignments/{roleId}/accept
+#### 44. POST /practitioners/me/role-assignments/{roleId}/accept
 
 Aceptar una invitación de un centro
 
@@ -4537,7 +4591,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 44. POST /practitioners/me/role-assignments/{roleId}/decline
+#### 45. POST /practitioners/me/role-assignments/{roleId}/decline
 
 Declinar una invitación de un centro
 
@@ -4595,7 +4649,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 45. POST /practitioners/me/sites
+#### 46. POST /practitioners/me/sites
 
 Registrar un consultorio propio
 
@@ -4739,7 +4793,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 46. DELETE /practitioners/me/sites/{siteId}
+#### 47. DELETE /practitioners/me/sites/{siteId}
 
 Retirar un consultorio propio
 
@@ -4797,7 +4851,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 47. PATCH /practitioners/me/sites/{siteId}
+#### 48. PATCH /practitioners/me/sites/{siteId}
 
 Corregir un consultorio propio
 
@@ -4906,7 +4960,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 48. PUT /practitioners/me/sites/{siteId}/bank-qr
+#### 49. PUT /practitioners/me/sites/{siteId}/bank-qr
 
 Fijar o quitar el QR bancario de una sede
 
@@ -4976,7 +5030,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 49. PUT /practitioners/me/sites/{siteId}/contact-phone
+#### 50. PUT /practitioners/me/sites/{siteId}/contact-phone
 
 Guardar o quitar mi teléfono en una sede
 
@@ -5052,7 +5106,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 50. PUT /practitioners/me/sites/{siteId}/logo
+#### 51. PUT /practitioners/me/sites/{siteId}/logo
 
 Fijar o quitar el logo del consultorio propio
 
@@ -5188,7 +5242,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 51. POST /role-assignments/{roleId}/approve
+#### 52. POST /role-assignments/{roleId}/approve
 
 Aprobar una vinculación pendiente
 
@@ -5256,7 +5310,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 52. POST /role-assignments/{roleId}/end
+#### 53. POST /role-assignments/{roleId}/end
 
 Finalizar una vinculación
 
@@ -5324,7 +5378,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 53. POST /role-assignments/{roleId}/reject
+#### 54. POST /role-assignments/{roleId}/reject
 
 Rechazar una vinculación pendiente
 
@@ -5392,7 +5446,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 54. POST /role-assignments/{roleId}/support-assignments
+#### 55. POST /role-assignments/{roleId}/support-assignments
 
 Adjuntar personal de apoyo a un rol de profesional
 
@@ -5446,7 +5500,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 55. POST /role-assignments/{roleId}/suspend
+#### 56. POST /role-assignments/{roleId}/suspend
 
 Suspender una vinculación activa
 
@@ -5514,7 +5568,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 56. PATCH /site-licenses/{id}
+#### 57. PATCH /site-licenses/{id}
 
 Editar una habilitación del establecimiento
 
@@ -5631,7 +5685,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 57. GET /sites/{siteId}/bed-board
+#### 58. GET /sites/{siteId}/bed-board
 
 Tablero de camas de una sede
 
@@ -5800,7 +5854,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 58. GET /sites/{siteId}/capacity
+#### 59. GET /sites/{siteId}/capacity
 
 Capacidad declarada vs. derivada del establecimiento
 
@@ -5857,7 +5911,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 59. GET /sites/{siteId}/care-spaces
+#### 60. GET /sites/{siteId}/care-spaces
 
 Listar los espacios de atención de la sede
 
@@ -5907,7 +5961,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 60. POST /sites/{siteId}/care-spaces
+#### 61. POST /sites/{siteId}/care-spaces
 
 Crear un espacio de atención bajo una unidad/sitio
 
@@ -6030,7 +6084,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 61. POST /sites/{siteId}/care-spaces/bulk
+#### 62. POST /sites/{siteId}/care-spaces/bulk
 
 Alta masiva de espacios por patrón
 
@@ -6147,7 +6201,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 62. POST /sites/{siteId}/care-spaces/import
+#### 63. POST /sites/{siteId}/care-spaces/import
 
 Importar espacios (dryRun=true valida sin escribir)
 
@@ -6236,7 +6290,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 63. GET /sites/{siteId}/cleaning-orders
+#### 64. GET /sites/{siteId}/cleaning-orders
 
 Cola de limpieza de una sede
 
@@ -6405,7 +6459,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 64. POST /sites/{siteId}/cleaning-orders
+#### 65. POST /sites/{siteId}/cleaning-orders
 
 Crear una orden de limpieza
 
@@ -6495,7 +6549,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 65. GET /sites/{siteId}/clinical-units
+#### 66. GET /sites/{siteId}/clinical-units
 
 Listar las unidades clínicas de la sede
 
@@ -6544,7 +6598,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 66. POST /sites/{siteId}/clinical-units
+#### 67. POST /sites/{siteId}/clinical-units
 
 Crear una unidad clínica jerárquica
 
@@ -6652,7 +6706,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 67. POST /sites/{siteId}/declared-capacities
+#### 68. POST /sites/{siteId}/declared-capacities
 
 Declarar capacidad del establecimiento
 
@@ -6732,7 +6786,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 68. GET /sites/{siteId}/diagnostic-equipment
+#### 69. GET /sites/{siteId}/diagnostic-equipment
 
 Equipos diagnósticos de una sede (F5a)
 
@@ -6812,7 +6866,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 69. GET /sites/{siteId}/licenses
+#### 70. GET /sites/{siteId}/licenses
 
 Habilitaciones del establecimiento
 
@@ -6861,7 +6915,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 70. POST /sites/{siteId}/licenses
+#### 71. POST /sites/{siteId}/licenses
 
 Registrar una habilitación del establecimiento
 
@@ -6961,7 +7015,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 71. GET /sites/{siteId}/regulatory
+#### 72. GET /sites/{siteId}/regulatory
 
 Datos regulatorios del establecimiento
 
@@ -7022,7 +7076,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 72. PATCH /sites/{siteId}/regulatory
+#### 73. PATCH /sites/{siteId}/regulatory
 
 Editar los datos regulatorios del establecimiento
 
@@ -7120,7 +7174,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 73. POST /sites/{siteId}/regulatory/verify-snis
+#### 74. POST /sites/{siteId}/regulatory/verify-snis
 
 Verificar el código SNIS del establecimiento (plataforma)
 
@@ -7140,7 +7194,7 @@ flowchart TD
   n1 --> n2
   n3["Llama a SiteEstablishmentService.verifySnis"]:::llamada
   n2 --> n3
-  n4{"!PLATFORM_ROLES.some((r) =› (actor.roles ?? []).includes(r))"}:::decision
+  n4{"!isGlobalPlatform(actor)"}:::decision
   n3 --> n4
   n5(["403 FORBIDDEN Sólo la plataforma verifica el código SNIS"]):::error
   n4 -->|"sí"| n5
@@ -7188,7 +7242,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 74. GET /sites/{siteId}/sample-collection-points
+#### 75. GET /sites/{siteId}/sample-collection-points
 
 Puntos de toma de muestra de una sede (F5b)
 
@@ -7286,7 +7340,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 75. GET /sites/{siteId}/structure
+#### 76. GET /sites/{siteId}/structure
 
 Estructura de la sede (espacios, unidades, vínculos)
 
@@ -7359,7 +7413,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 76. POST /tenants/{tenantId}/practices
+#### 77. POST /tenants/{tenantId}/practices
 
 Crear la práctica y la primera sede de una organización
 

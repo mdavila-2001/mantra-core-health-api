@@ -2,7 +2,7 @@
 
 # Catálogo del schema `system_ops`
 
-- **Tablas:** 32 · **Columnas:** 491 (100 con descripción: 20.4 %) · **Índices:** 196
+- **Tablas:** 32 · **Columnas:** 491 (108 con descripción: 22.0 %) · **Índices:** 196
 - **Dominio:** Operaciones de Plataforma
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -15,8 +15,8 @@
 | [assessment_findings](#assessment_findings) | Registra hallazgos de evaluaciones para priorizar riesgos y acciones correctivas. | 17 | 7 | 7 | COINCIDE |
 | [backup_policies](#backup_policies) | Define políticas de respaldo para proteger disponibilidad y recuperabilidad de información del sistema médico. | 16 | 7 | 4 | COINCIDE |
 | [breach_notifications](#breach_notifications) | Conserva notificaciones de brechas para documentar comunicaciones y obligaciones posteriores a un incidente. | 17 | 4 | 0 | COINCIDE |
-| [bulk_import_batch_rows](#bulk_import_batch_rows) | sin propósito | 13 | 5 | 0 | SIN_ENTIDAD |
-| [bulk_import_batches](#bulk_import_batches) | sin propósito | 33 | 7 | 0 | SIN_ENTIDAD |
+| [bulk_import_batch_rows](#bulk_import_batch_rows) | sin propósito | 13 | 5 | 0 | COINCIDE |
+| [bulk_import_batches](#bulk_import_batches) | sin propósito | 33 | 7 | 0 | COINCIDE |
 | [cross_border_transfer_events](#cross_border_transfer_events) | Registra transferencias internacionales de datos para mantener trazabilidad de movimientos entre jurisdicciones. | 10 | 9 | 2 | COINCIDE |
 | [data_classifications](#data_classifications) | Define niveles de clasificación de datos para gobernar su protección y uso en la plataforma médica. | 13 | 4 | 5 | COINCIDE |
 | [data_domains](#data_domains) | Cataloga dominios de datos para asignar ownership y organizar gobierno por área del sistema. | 10 | 3 | 4 | COINCIDE |
@@ -26,7 +26,7 @@
 | [entity_registry](#entity_registry) | Registra entidades del modelo para aplicar políticas de gobierno, retención y control operativo. | 21 | 7 | 21 | COINCIDE |
 | [field_registry](#field_registry) | Cataloga campos de entidades para mantener metadata de sensibilidad, clasificación y uso. | 14 | 6 | 13 | COINCIDE |
 | [governance_change_log](#governance_change_log) | Preserva cambios de gobierno de datos para reconstruir decisiones sobre clasificación, acceso y ciclo de vida. | 10 | 5 | 11 | COINCIDE |
-| [governance_policy_revisions](#governance_policy_revisions) | sin propósito | 15 | 5 | 0 | SIN_ENTIDAD |
+| [governance_policy_revisions](#governance_policy_revisions) | sin propósito | 15 | 5 | 0 | COINCIDE |
 | [key_rotation_events](#key_rotation_events) | Preserva eventos de rotación de claves para demostrar y operar el ciclo de vida criptográfico. | 9 | 2 | 0 | COINCIDE |
 | [legal_holds](#legal_holds) | Registra retenciones legales que suspenden disposición de información requerida para procesos o investigaciones. | 14 | 7 | 8 | COINCIDE |
 | [operational_framework_controls](#operational_framework_controls) | Define controles que componen marcos operativos para evaluar cumplimiento y preparación organizacional. | 15 | 7 | 1 | COINCIDE |
@@ -729,26 +729,26 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_11_system_ops.puml` · **DDL:** `SQL/11_system_ops/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `BulkImportBatchRows` — `src/modules/system_ops/entities/bulk_import_batch_rows.entity.ts`
 - **Resumen:** 13 columnas · 5 índices · 2 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `batch_id` | `uuid` | Clave foránea → system_ops.bulk_import_batches.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `tenant_id` | `uuid` | Clave foránea → system_ops.bulk_import_batches.tenant_id; Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `row_no` | `integer` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `outcome` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `reason_code` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `field_name` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `target_entity` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `target_id` | `uuid` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `processed_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `row_key` | `varchar(64)` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `row_data_json` | `jsonb` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/system_ops/entities/bulk_import_batch_rows.entity.ts:12`)_ | coincide |
+| 2 | `batch_id` | `uuid` | Clave foránea → system_ops.bulk_import_batches.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `tenant_id` | `uuid` | Clave foránea → system_ops.bulk_import_batches.tenant_id; Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `row_no` | `integer` | Obligatoria | _sin dato_ | coincide |
+| 5 | `outcome` | `varchar` | Opcional | _sin dato_ | coincide |
+| 6 | `reason_code` | `varchar` | Opcional | _sin dato_ | coincide |
+| 7 | `field_name` | `varchar` | Opcional | _sin dato_ | coincide |
+| 8 | `target_entity` | `varchar` | Opcional | _sin dato_ | coincide |
+| 9 | `target_id` | `uuid` | Opcional | _sin dato_ | coincide |
+| 10 | `processed_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 11 | `row_key` | `varchar(64)` | Opcional | _sin dato_ | coincide |
+| 12 | `row_data_json` | `jsonb` | Opcional | _sin dato_ | coincide |
+| 13 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/system_ops/entities/bulk_import_batch_rows.entity.ts:97`)_ | coincide |
 
 #### Relaciones
 
@@ -801,46 +801,46 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_11_system_ops.puml` · **DDL:** `SQL/11_system_ops/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `BulkImportBatches` — `src/modules/system_ops/entities/bulk_import_batches.entity.ts`
 - **Resumen:** 33 columnas · 7 índices · 5 FK salientes · 1 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Clave foránea → delegated_access.four_eyes_requests.tenant_id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `kind` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `kind_version` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `kind_group` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `status` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `source_format` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `source_byte_size` | `integer` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `file_sha256` | `varchar(64)` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `declared_reason` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `declared_source_organization` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `declared_legal_basis` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `declared_loaded_on` | `date` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `rows_total` | `integer` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `rows_valid` | `integer` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 16 | `rows_rejected` | `integer` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 17 | `issues_total` | `integer = 0` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 18 | `processed_rows` | `integer = 0` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 19 | `file_issues_json` | `jsonb` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 20 | `preview_issues_json` | `jsonb` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 21 | `confirm_key` | `varchar(128)` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 22 | `confirmed_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 23 | `confirmed_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 24 | `approval_request_id` | `uuid` | Clave foránea → delegated_access.four_eyes_requests.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 25 | `started_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 26 | `finished_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 27 | `failure_reason` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 28 | `report_json` | `jsonb` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 29 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 30 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 31 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 32 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 33 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/system_ops/entities/bulk_import_batches.entity.ts:12`)_ | coincide |
+| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Clave foránea → delegated_access.four_eyes_requests.tenant_id; Obligatoria | _sin dato_ | coincide |
+| 3 | `kind` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 4 | `kind_version` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 5 | `kind_group` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 6 | `status` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 7 | `source_format` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 8 | `source_byte_size` | `integer` | Obligatoria | _sin dato_ | coincide |
+| 9 | `file_sha256` | `varchar(64)` | Opcional | _sin dato_ | coincide |
+| 10 | `declared_reason` | `text` | Opcional | _sin dato_ | coincide |
+| 11 | `declared_source_organization` | `varchar` | Opcional | _sin dato_ | coincide |
+| 12 | `declared_legal_basis` | `varchar` | Opcional | _sin dato_ | coincide |
+| 13 | `declared_loaded_on` | `date` | Opcional | _sin dato_ | coincide |
+| 14 | `rows_total` | `integer` | Obligatoria | _sin dato_ | coincide |
+| 15 | `rows_valid` | `integer` | Obligatoria | _sin dato_ | coincide |
+| 16 | `rows_rejected` | `integer` | Obligatoria | _sin dato_ | coincide |
+| 17 | `issues_total` | `integer = 0` | Obligatoria | _sin dato_ | coincide |
+| 18 | `processed_rows` | `integer = 0` | Obligatoria | _sin dato_ | coincide |
+| 19 | `file_issues_json` | `jsonb` | Opcional | _sin dato_ | coincide |
+| 20 | `preview_issues_json` | `jsonb` | Opcional | _sin dato_ | coincide |
+| 21 | `confirm_key` | `varchar(128)` | Opcional | _sin dato_ | coincide |
+| 22 | `confirmed_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 23 | `confirmed_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 24 | `approval_request_id` | `uuid` | Clave foránea → delegated_access.four_eyes_requests.id; Opcional | _sin dato_ | coincide |
+| 25 | `started_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 26 | `finished_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 27 | `failure_reason` | `varchar` | Opcional | _sin dato_ | coincide |
+| 28 | `report_json` | `jsonb` | Opcional | _sin dato_ | coincide |
+| 29 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/system_ops/entities/bulk_import_batches.entity.ts:235`)_ | coincide |
+| 30 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/system_ops/entities/bulk_import_batches.entity.ts:241`)_ | coincide |
+| 31 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 32 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 33 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/system_ops/entities/bulk_import_batches.entity.ts:259`)_ | coincide |
 
 #### Relaciones
 
@@ -1639,28 +1639,28 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_11_system_ops.puml` · **DDL:** `SQL/11_system_ops/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `GovernancePolicyRevisions` — `src/modules/system_ops/entities/governance_policy_revisions.entity.ts`
 - **Resumen:** 15 columnas · 5 índices · 2 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `policy_type` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `policy_id` | `uuid` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `revision_no` | `integer` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `content_json` | `jsonb` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `content_hash` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `status` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `change_reason` | `text` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `submitted_by_user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `submitted_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `decided_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `decided_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `decision_comment` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `effective_from` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/system_ops/entities/governance_policy_revisions.entity.ts:12`)_ | coincide |
+| 2 | `policy_type` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 3 | `policy_id` | `uuid` | Obligatoria | _sin dato_ | coincide |
+| 4 | `revision_no` | `integer` | Obligatoria | _sin dato_ | coincide |
+| 5 | `content_json` | `jsonb` | Obligatoria | _sin dato_ | coincide |
+| 6 | `content_hash` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 7 | `status` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 8 | `change_reason` | `text` | Obligatoria | _sin dato_ | coincide |
+| 9 | `submitted_by_user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | coincide |
+| 10 | `submitted_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 11 | `decided_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 12 | `decided_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 13 | `decision_comment` | `text` | Opcional | _sin dato_ | coincide |
+| 14 | `effective_from` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 15 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/system_ops/entities/governance_policy_revisions.entity.ts:108`)_ | coincide |
 
 #### Relaciones
 

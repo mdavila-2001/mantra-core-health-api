@@ -61,7 +61,7 @@
 | 47 | GET | `/admin/portal/version` | Versión y tamaño del inventario publicado | BAJO | 0 | ...PORTAL_VIEW_ROLES |
 | 48 | POST | `/internal/catalog/fit/run` | Corre la sonda de ajuste y espera su desenlace (worker) | ALTO | 7 | SYSTEM |
 | 49 | POST | `/internal/catalog/inventory/import` | Importa el inventario de la API a las tablas de operaciones y procesos (worker) | ALTO | 15 | SYSTEM |
-| 50 | POST | `/internal/catalog/scans/run-next` | Sonda: reclama y ejecuta el siguiente escaneo (worker) | MEDIO | 15 | SYSTEM |
+| 50 | POST | `/internal/catalog/scans/run-next` | Sonda: reclama y ejecuta el siguiente escaneo (worker) | MEDIO | 12 | SYSTEM |
 
 ---
 
@@ -785,7 +785,14 @@ La operación no recibe cuerpo.
 | `history[].failedChecks` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:144` |
 | `history[].blindSpots` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:145` |
 | `retention` | `FitRetentionDto` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:216` |
-| `retention.kind` | `string` | Sí | valores: MEMORIA_DEL_PROCESO | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:172` |
+| `retention.kind` | `string` | Sí | valores: BASE_DE_DATOS, MEMORIA_DEL_PROCESO | — | `BASE_DE_DATOS`: leído de data_catalog.catalog_fit_runs. `MEMORIA_DEL_PROCESO`: sin repositorio o con la base caída (ver `fallbackReason`) | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:172` |
+| `retention.fallbackReason` | `string` | Sí | admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:178` |
+| `retention.storedForSeconds` | `number` | Sí | admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:180` |
+| `retention.lastWrite` | `FitPersistenceStatusDto` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:182` |
+| `retention.lastWrite.state` | `string` | Sí | valores: GUARDADA, CLAVE_REPETIDA, NO_GUARDADA, SIN_INTENTO | — | Desenlace de la última escritura en data_catalog.catalog_fit_runs intentada por este proceso | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:154` |
+| `retention.lastWrite.runId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:156` |
+| `retention.lastWrite.at` | `string` | Sí | admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:157` |
+| `retention.lastWrite.errorCode` | `string` | Sí | admite null | — | Clase del error, nunca el mensaje | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:163` |
 | `retention.ttlSeconds` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:183` |
 | `retention.historySize` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:184` |
 | `retention.tickIntervalSeconds` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:185` |
@@ -4133,6 +4140,7 @@ La operación no recibe cuerpo.
 | `failedChecks` | `number` | No | — | — | Comprobaciones que fallaron | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:238` |
 | `blindSpots` | `number` | No | — | — | Comprobaciones que no pudieron medir | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:240` |
 | `errorCode` | `string` | No | admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:241` |
+| `persisted` | `boolean` | No | — | — | Si el desenlace quedó en data_catalog.catalog_fit_runs | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:246` |
 
 ### Respuestas posibles
 
@@ -4276,7 +4284,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /internal/catalog/scans/run-next` la atiende `InternalCatalogScansController.runNext` (src/modules/data_catalog/presentation/controllers/internal-catalog.controller.ts:30). Exige sesión con alguno de los roles SYSTEM. Delega en `CatalogScanService.runNext`. Crea filas en data_catalog.catalog_annotation_revisions, data_catalog.catalog_annotations, data_catalog.catalog_change_events, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs. Actualiza data_catalog.catalog_annotations, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs. Lee data_catalog.catalog_annotations, data_catalog.catalog_change_events, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
+`POST /internal/catalog/scans/run-next` la atiende `InternalCatalogScansController.runNext` (src/modules/data_catalog/presentation/controllers/internal-catalog.controller.ts:30). Exige sesión con alguno de los roles SYSTEM. Delega en `CatalogScanService.runNext`. Crea filas en data_catalog.catalog_change_events, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs. Actualiza data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs. Lee data_catalog.catalog_annotations, data_catalog.catalog_change_events, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
 
 ### Requerimientos
 
@@ -4291,9 +4299,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `data_catalog.catalog_annotation_revisions` | ESCRIBE | CREA | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.runClaimed → CatalogScanService.execute → CatalogScanService.classifyInBackground → CatalogClassificationService.classifyScan → CatalogClassificationService.runScope → CatalogClassificationService.classifyOne → CatalogClassificationService.create → CatalogRepository.insertRevision | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:830` |
-| `data_catalog.catalog_annotations` | ESCRIBE | CREA | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.runClaimed → CatalogScanService.execute → CatalogScanService.classifyInBackground → CatalogClassificationService.classifyScan → CatalogClassificationService.runScope → CatalogClassificationService.classifyOne → CatalogClassificationService.create → CatalogRepository.insertAnnotation | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:715` |
-| `data_catalog.catalog_annotations` | ESCRIBE | ACTUALIZA | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.runClaimed → CatalogScanService.execute → CatalogScanService.classifyInBackground → CatalogClassificationService.classifyScan → CatalogClassificationService.runScope → CatalogClassificationService.classifyOne → CatalogClassificationService.raise → CatalogRepository.updateAnnotation | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:775` |
 | `data_catalog.catalog_annotations` | LEE | LEE | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.runClaimed → CatalogScanService.execute → CatalogScanService.classifyInBackground → CatalogClassificationService.classifyScan → CatalogClassificationService.runScope → CatalogRepository.annotationsOfColumns | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:395` |
 | `data_catalog.catalog_change_events` | ESCRIBE | CREA | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.runClaimed → CatalogScanService.execute → CatalogRepository.applyScan | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:1342` |
 | `data_catalog.catalog_change_events` | LEE | LEE | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.runClaimed → CatalogScanService.execute → CatalogScanService.classifyInBackground → CatalogClassificationService.classifyScan → CatalogClassificationService.runScope → CatalogRepository.columnsToClassify | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:417` |

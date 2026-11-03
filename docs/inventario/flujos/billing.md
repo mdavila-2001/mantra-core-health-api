@@ -2374,81 +2374,90 @@ flowchart TD
   n2 --> n3
   n4["Llama a BillingServiceCatalogService.assertRegistrationCanRegister"]:::llamada
   n3 --> n4
-  n5["Llama a PracticeTenantLookupService.isOwnOffice"]:::llamada
+  n5{"roles.some((role) =› actor.roles.includes(role))"}:::decision
   n4 --> n5
-  n6["Llama a PracticesRepository.findById"]:::llamada
-  n5 --> n6
-  n7[("LEE practice.practices")]:::efecto
+  n6["Llama a PracticeTenantLookupService.findTenantOfPractice"]:::llamada
+  n5 -->|"sí"| n6
+  n7["Llama a PracticesRepository.findById"]:::llamada
   n6 --> n7
-  n8(["404 NOT_FOUND Práctica no encontrada"]):::error
+  n8[("LEE practice.practices")]:::efecto
   n7 --> n8
-  n9{"dto.imageFileId !== undefined"}:::decision
-  n10["Llama a BillingServiceCatalogService.assertImageUsable"]:::llamada
-  n9 -->|"sí"| n10
-  n11["Intenta"]:::intento
+  n9["Llama a PracticeTenantLookupService.isOwnOffice"]:::llamada
+  n8 --> n9
+  n5 -->|"no"| n9
+  n10["Llama a PracticesRepository.findById"]:::llamada
+  n9 --> n10
+  n11[("LEE practice.practices")]:::efecto
   n10 --> n11
-  n12["Llama a AttachableFileService.assertUsableBy"]:::llamada
+  n12(["404 NOT_FOUND Práctica no encontrada"]):::error
   n11 --> n12
-  n13["Llama a FilesRepository.findById"]:::llamada
-  n12 --> n13
-  n14[("LEE common.files")]:::efecto
-  n13 --> n14
-  n15{"!file"}:::decision
+  n13{"dto.imageFileId !== undefined"}:::decision
+  n14["Llama a BillingServiceCatalogService.assertImageUsable"]:::llamada
+  n13 -->|"sí"| n14
+  n15["Intenta"]:::intento
   n14 --> n15
-  n16(["404 NOT_FOUND {labels.notFound}"]):::error
-  n15 -->|"sí"| n16
-  n17{"file.createdByUserId !== actor.id && !enAllowlist"}:::decision
-  n15 -->|"no"| n17
-  n18(["403 FORBIDDEN {labels.subject} no le pertenece"]):::error
-  n17 -->|"sí"| n18
-  n19{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
-  n17 -->|"no"| n19
-  n20(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
+  n16["Llama a AttachableFileService.assertUsableBy"]:::llamada
+  n15 --> n16
+  n17["Llama a FilesRepository.findById"]:::llamada
+  n16 --> n17
+  n18[("LEE common.files")]:::efecto
+  n17 --> n18
+  n19{"!file"}:::decision
+  n18 --> n19
+  n20(["404 NOT_FOUND {labels.notFound}"]):::error
   n19 -->|"sí"| n20
-  n21{"!file.currentVersionId"}:::decision
+  n21{"file.createdByUserId !== actor.id && !enAllowlist"}:::decision
   n19 -->|"no"| n21
-  n22(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
+  n22(["403 FORBIDDEN {labels.subject} no le pertenece"]):::error
   n21 -->|"sí"| n22
-  n23["Llama a AttachableFileService.assertVersionUsable"]:::llamada
+  n23{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
   n21 -->|"no"| n23
-  n24{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
-  n23 --> n24
-  n25(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
-  n24 -->|"sí"| n25
-  n26{"!file.currentVersionId"}:::decision
-  n24 -->|"no"| n26
-  n27(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
-  n26 -->|"sí"| n27
-  n28{"!version"}:::decision
-  n26 -->|"no"| n28
-  n29(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
+  n24(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
+  n23 -->|"sí"| n24
+  n25{"!file.currentVersionId"}:::decision
+  n23 -->|"no"| n25
+  n26(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
+  n25 -->|"sí"| n26
+  n27["Llama a AttachableFileService.assertVersionUsable"]:::llamada
+  n25 -->|"no"| n27
+  n28{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
+  n27 --> n28
+  n29(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
   n28 -->|"sí"| n29
-  n30{"version.malwareScanStatusConceptId === CONCEPTS.SCAN_INFECTED"}:::decision
+  n30{"!file.currentVersionId"}:::decision
   n28 -->|"no"| n30
-  n31(["422 PRECONDITION_FAILED {labels.subject} resultó infectado"]):::error
+  n31(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
   n30 -->|"sí"| n31
-  n32{"accepted && !accepted.includes(version.mimeType ?? '')"}:::decision
+  n32{"!version"}:::decision
   n30 -->|"no"| n32
-  n33(["422 PRECONDITION_FAILED {labels.subject} no es de un formato admitido para este uso"]):::error
+  n33(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
   n32 -->|"sí"| n33
-  n34(["404 NOT_FOUND Imagen no encontrada"]):::error
+  n34{"version.malwareScanStatusConceptId === CONCEPTS.SCAN_INFECTED"}:::decision
   n32 -->|"no"| n34
-  n35["Transacción: transactional(…)"]:::transaccion
-  n9 -->|"no"| n35
-  n36["Llama a ServiceCatalogRepository.findByCode"]:::llamada
-  n35 --> n36
-  n37[("LEE billing.service_catalog")]:::efecto
-  n36 --> n37
-  n38{"clash"}:::decision
-  n37 --> n38
-  n39(["409 CONFLICT Ya existe un servicio con ese código en el catálogo"]):::error
-  n38 -->|"sí"| n39
-  n40["Llama a ServiceCatalogRepository.create"]:::llamada
-  n38 -->|"no"| n40
-  n41[("CREA billing.service_catalog")]:::efecto
+  n35(["422 PRECONDITION_FAILED {labels.subject} resultó infectado"]):::error
+  n34 -->|"sí"| n35
+  n36{"accepted && !accepted.includes(version.mimeType ?? '')"}:::decision
+  n34 -->|"no"| n36
+  n37(["422 PRECONDITION_FAILED {labels.subject} no es de un formato admitido para este uso"]):::error
+  n36 -->|"sí"| n37
+  n38(["404 NOT_FOUND Imagen no encontrada"]):::error
+  n36 -->|"no"| n38
+  n39["Transacción: transactional(…)"]:::transaccion
+  n13 -->|"no"| n39
+  n40["Llama a ServiceCatalogRepository.findByCode"]:::llamada
+  n39 --> n40
+  n41[("LEE billing.service_catalog")]:::efecto
   n40 --> n41
-  n42(("201 Responde con éxito")):::ok
+  n42{"clash"}:::decision
   n41 --> n42
+  n43(["409 CONFLICT Ya existe un servicio con ese código en el catálogo"]):::error
+  n42 -->|"sí"| n43
+  n44["Llama a ServiceCatalogRepository.create"]:::llamada
+  n42 -->|"no"| n44
+  n45[("CREA billing.service_catalog")]:::efecto
+  n44 --> n45
+  n46(("201 Responde con éxito")):::ok
+  n45 --> n46
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2694,47 +2703,56 @@ flowchart TD
   n2 --> n3
   n4["Llama a BillingServiceCatalogService.assertRegistrationCanRegister"]:::llamada
   n3 --> n4
-  n5["Llama a PracticeTenantLookupService.isOwnOffice"]:::llamada
+  n5{"roles.some((role) =› actor.roles.includes(role))"}:::decision
   n4 --> n5
-  n6["Llama a PracticesRepository.findById"]:::llamada
-  n5 --> n6
-  n7[("LEE practice.practices")]:::efecto
+  n6["Llama a PracticeTenantLookupService.findTenantOfPractice"]:::llamada
+  n5 -->|"sí"| n6
+  n7["Llama a PracticesRepository.findById"]:::llamada
   n6 --> n7
-  n8(["404 NOT_FOUND Práctica no encontrada"]):::error
+  n8[("LEE practice.practices")]:::efecto
   n7 --> n8
-  n9["Llama a ProcedureImportService.select"]:::llamada
-  n10{"filter.specialties.length › 0"}:::decision
+  n9["Llama a PracticeTenantLookupService.isOwnOffice"]:::llamada
+  n8 --> n9
+  n5 -->|"no"| n9
+  n10["Llama a PracticesRepository.findById"]:::llamada
   n9 --> n10
-  n11[("LEE terminology.concept_properties")]:::efecto
-  n10 -->|"sí"| n11
-  n12[("LEE terminology.concept_properties · LEE terminology.catalog_concepts")]:::efecto
+  n11[("LEE practice.practices")]:::efecto
+  n10 --> n11
+  n12(["404 NOT_FOUND Práctica no encontrada"]):::error
   n11 --> n12
-  n10 -->|"no"| n12
-  n13{"result.length › PROCEDURE_IMPORT_MAX"}:::decision
-  n12 --> n13
-  n14(["400 VALIDATION_FAILED El filtro abarca más de {PROCEDURE_IMPORT_MAX} procedimientos; acotalo por especialidad…"]):::error
-  n13 -->|"sí"| n14
-  n15["Transacción: transactional(…)"]:::transaccion
-  n13 -->|"no"| n15
-  n16["Repite: ciclo for"]:::bucle
+  n13["Llama a ProcedureImportService.select"]:::llamada
+  n14{"filter.specialties.length › 0"}:::decision
+  n13 --> n14
+  n15[("LEE terminology.concept_properties")]:::efecto
+  n14 -->|"sí"| n15
+  n16[("LEE terminology.concept_properties · LEE terminology.catalog_concepts")]:::efecto
   n15 --> n16
-  n17["Llama a ServiceCatalogRepository.findExistingCodes"]:::llamada
-  n16 -->|"cada elemento"| n17
-  n18[("LEE billing.service_catalog")]:::efecto
-  n17 --> n18
-  n19["Repite: ciclo for"]:::bucle
-  n18 --> n19
-  n16 -->|"al terminar"| n19
-  n20["Repite: por cada const row de pending.slice(i, i + INSERT_CHUNK)"]:::bucle
-  n19 -->|"cada elemento"| n20
-  n21["Llama a ServiceCatalogRepository.create"]:::llamada
+  n14 -->|"no"| n16
+  n17{"result.length › PROCEDURE_IMPORT_MAX"}:::decision
+  n16 --> n17
+  n18(["400 VALIDATION_FAILED El filtro abarca más de {PROCEDURE_IMPORT_MAX} procedimientos; acotalo por especialidad…"]):::error
+  n17 -->|"sí"| n18
+  n19["Transacción: transactional(…)"]:::transaccion
+  n17 -->|"no"| n19
+  n20["Repite: ciclo for"]:::bucle
+  n19 --> n20
+  n21["Llama a ServiceCatalogRepository.findExistingCodes"]:::llamada
   n20 -->|"cada elemento"| n21
-  n22[("CREA billing.service_catalog")]:::efecto
+  n22[("LEE billing.service_catalog")]:::efecto
   n21 --> n22
-  n23(("201 Responde con éxito")):::ok
+  n23["Repite: ciclo for"]:::bucle
   n22 --> n23
   n20 -->|"al terminar"| n23
-  n19 -->|"al terminar"| n23
+  n24["Repite: por cada const row de pending.slice(i, i + INSERT_CHUNK)"]:::bucle
+  n23 -->|"cada elemento"| n24
+  n25["Llama a ServiceCatalogRepository.create"]:::llamada
+  n24 -->|"cada elemento"| n25
+  n26[("CREA billing.service_catalog")]:::efecto
+  n25 --> n26
+  n27(("201 Responde con éxito")):::ok
+  n26 --> n27
+  n24 -->|"al terminar"| n27
+  n23 -->|"al terminar"| n27
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

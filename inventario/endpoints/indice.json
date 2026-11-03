@@ -1,20 +1,20 @@
 {
   "resumen": {
-    "total": 1938,
+    "total": 1942,
     "porOrigen": {
-      "CONTRATO": 1916,
-      "CONTRATO_AUSENTE": 22
+      "CONTRATO": 1930,
+      "CONTRATO_AUSENTE": 12
     },
     "porRiesgo": {
-      "BAJO": 730,
-      "MEDIO": 947,
-      "ALTO": 261
+      "BAJO": 734,
+      "MEDIO": 948,
+      "ALTO": 260
     },
-    "conTablas": 1846,
+    "conTablas": 1850,
     "sinTablasSinDeterminar": 22,
     "sinExplicacionDeNegocio": 1,
     "conPruebas": 1047,
-    "conRequerimientos": 1938
+    "conRequerimientos": 1942
   },
   "endpoints": [
     {
@@ -1178,12 +1178,12 @@
     },
     {
       "id": "ReportTemplatesController_list",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/accounting/report-templates",
       "modulo": "accounting",
       "bloque": "Financiero y ERP",
-      "nombre": null,
+      "nombre": "Plantillas de presentación contable por tipo de usuario",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -1200,12 +1200,12 @@
     },
     {
       "id": "ReportTemplatesController_create",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "POST",
       "ruta": "/admin/accounting/report-templates",
       "modulo": "accounting",
       "bloque": "Financiero y ERP",
-      "nombre": null,
+      "nombre": "Crear una plantilla global sin modificar cuentas ni asientos",
       "riesgo": "MEDIO",
       "publica": false,
       "roles": [
@@ -1218,12 +1218,12 @@
     },
     {
       "id": "ReportTemplatesController_get",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/accounting/report-templates/{id}",
       "modulo": "accounting",
       "bloque": "Financiero y ERP",
-      "nombre": null,
+      "nombre": "Leer una plantilla de presentación contable",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -1240,12 +1240,12 @@
     },
     {
       "id": "ReportTemplatesController_update",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "PUT",
       "ruta": "/admin/accounting/report-templates/{id}",
       "modulo": "accounting",
       "bloque": "Financiero y ERP",
-      "nombre": null,
+      "nombre": "Editar presentación con control de versión (409 si cambió)",
       "riesgo": "MEDIO",
       "publica": false,
       "roles": [
@@ -1258,12 +1258,12 @@
     },
     {
       "id": "ReportTemplatesController_end",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "POST",
       "ruta": "/admin/accounting/report-templates/{id}/end",
       "modulo": "accounting",
       "bloque": "Financiero y ERP",
-      "nombre": null,
+      "nombre": "Desactivar una plantilla sin borrarla (idempotente)",
       "riesgo": "MEDIO",
       "publica": false,
       "roles": [
@@ -10958,7 +10958,7 @@
       "roles": [
         "SYSTEM"
       ],
-      "tablas": 15,
+      "tablas": 12,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -10979,6 +10979,25 @@
       "tablas": 4,
       "eventos": 0,
       "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PractitionerGovernanceController_pending",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/approvals/pending",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Aprobaciones que espera mi decisión",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 14,
+      "eventos": 0,
+      "pruebas": 0,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -11149,13 +11168,32 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "PractitionerGovernanceController_panel",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/me/practitioner/governance-panel",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Panel «Para su atención» del doctor",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 15,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "PractitionerSupportController_activity",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/me/practitioner/support-activity",
       "modulo": "delegated_access",
       "bloque": "Identidad y Seguridad",
-      "nombre": "Actividad reciente del equipo de apoyo.",
+      "nombre": "Actividad de mi equipo de apoyo",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -11189,12 +11227,12 @@
     },
     {
       "id": "PractitionerSupportController_createSecretary",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "POST",
       "ruta": "/me/practitioner/support-staff",
       "modulo": "delegated_access",
       "bloque": "Identidad y Seguridad",
-      "nombre": "Crea la cuenta de una secretaria y la vincula de inmediato con estado ACTIVE.",
+      "nombre": "Crear cuenta de secretaria y vincularla de inmediato",
       "riesgo": "MEDIO",
       "publica": false,
       "roles": [
@@ -11471,12 +11509,12 @@
     },
     {
       "id": "OrgSupportStaffProvisioningController_create",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "POST",
       "ruta": "/org/support-staff",
       "modulo": "delegated_access",
       "bloque": "Identidad y Seguridad",
-      "nombre": "Crea la cuenta de una secretaria y la vincula de inmediato con estado ACTIVE.",
+      "nombre": "Crear cuenta de secretaria y vincularla a la organización de inmediato",
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
@@ -15577,7 +15615,7 @@
       "riesgo": "ALTO",
       "publica": true,
       "roles": [],
-      "tablas": 72,
+      "tablas": 76,
       "eventos": 0,
       "pruebas": 38,
       "revision": "AUTO_DETECTADA"
@@ -16159,7 +16197,7 @@
       "roles": [
         "SECURITY_ADMIN"
       ],
-      "tablas": 69,
+      "tablas": 79,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -16299,12 +16337,12 @@
       "modulo": "identity_assurance",
       "bloque": "Identidad y Seguridad",
       "nombre": "Resolver una revisión manual (decisión)",
-      "riesgo": "ALTO",
+      "riesgo": "MEDIO",
       "publica": false,
       "roles": [
         "SECURITY_ADMIN"
       ],
-      "tablas": 52,
+      "tablas": 31,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -17172,7 +17210,7 @@
         "BILLING",
         "FINANCE"
       ],
-      "tablas": 19,
+      "tablas": 18,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -23625,7 +23663,7 @@
         "SYSTEM",
         "SECURITY_ADMIN"
       ],
-      "tablas": 24,
+      "tablas": 15,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -24421,12 +24459,12 @@
     },
     {
       "id": "OpsToolsController_list",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/ops/tool-registry",
       "modulo": "platform_ops",
       "bloque": "Operaciones de Plataforma",
-      "nombre": null,
+      "nombre": "Herramientas del catálogo con su salud",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -25841,6 +25879,24 @@
       "tablas": 5,
       "eventos": 0,
       "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PractitionerSitesController_listJoinablePractices",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/practitioners/me/joinable-practices",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Organizaciones a las que puedo pedir vincularme",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -30466,6 +30522,24 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "SchedulingAgendaController_listBookableOrganizations",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/scheduling/bookable-organizations",
+      "modulo": "scheduling",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Listar las organizaciones con cupos abiertos para pedir cita",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PATIENT"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "SchedulingController_createPolicy",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -30541,7 +30615,7 @@
         "SCHEDULING_AGENT",
         "PRACTITIONER"
       ],
-      "tablas": 55,
+      "tablas": 50,
       "eventos": 0,
       "pruebas": 4,
       "revision": "AUTO_DETECTADA"
@@ -30601,7 +30675,7 @@
         "SCHEDULING_AGENT",
         "PRACTITIONER"
       ],
-      "tablas": 21,
+      "tablas": 24,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -31069,7 +31143,7 @@
         "SCHEDULING_AGENT",
         "PATIENT"
       ],
-      "tablas": 49,
+      "tablas": 38,
       "eventos": 0,
       "pruebas": 6,
       "revision": "AUTO_DETECTADA"
@@ -31107,7 +31181,7 @@
         "SYSTEM",
         "SYSTEM_WORKER"
       ],
-      "tablas": 10,
+      "tablas": 8,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -31204,7 +31278,7 @@
         "SCHEDULING_ADMIN",
         "PRACTITIONER"
       ],
-      "tablas": 32,
+      "tablas": 37,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -31263,7 +31337,7 @@
         "SCHEDULING_ADMIN",
         "PRACTITIONER"
       ],
-      "tablas": 32,
+      "tablas": 37,
       "eventos": 0,
       "pruebas": 3,
       "revision": "AUTO_DETECTADA"
@@ -31835,12 +31909,12 @@
     },
     {
       "id": "SurveysCatalogController_list",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/surveys/catalog",
       "modulo": "surveys",
       "bloque": null,
-      "nombre": "Base surveys plus the practitioner's own, with their services.",
+      "nombre": "Catálogo de encuestas con sus servicios",
       "riesgo": "MEDIO",
       "publica": false,
       "roles": [

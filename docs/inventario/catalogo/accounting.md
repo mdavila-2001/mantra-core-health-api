@@ -2223,7 +2223,7 @@ Representa centros responsables de costos para atribuir gastos de operación y p
 | 10 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 11 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 12 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/accounting/entities/cost_centers.entity.ts:86`)_ | coincide |
-| 13 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | + v4.2.68 (infraestructura F5f, CONTRATO-F2-F5.md §F5f): unidad organizativa que imputa a este centro de costo (un solo centro ACTIVO por unidad: índice único parcial); los cargos devengados toman el centro de costo de la unidad dueña del espacio. `tenant_id` (no está en el contrato) es el de la práctica: lo completa un trigger y ata (tenant_id, practice_id) y (tenant_id, clinical_unit_id) con FK compuesta (patch 2026-10-29_infraestructura_f5_facturacion.sql). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_16_accounting.puml:138`)_ | coincide |
+| 13 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | + v4.2.68 (infraestructura F5f, CONTRATO-F2-F5.md §F5f): unidad organizativa que imputa a este centro de costo (un solo centro ACTIVO por unidad: índice único parcial); los cargos devengados toman el centro de costo de la unidad dueña del espacio. `tenant_id` (no está en el contrato) es el de la práctica: lo completa un trigger y ata (tenant_id, practice_id) y (tenant_id, clinical_unit_id) con FK compuesta (patch 2026-10-29_infraestructura_f5_facturacion.sql). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_16_accounting.puml:166`)_ | coincide |
 | 14 | `clinical_unit_id` | `uuid` | Clave foránea → practice.clinical_units.id; Opcional | _sin dato_ | coincide |
 
 #### Relaciones
@@ -2818,7 +2818,7 @@ Cataloga infraestructura física o tecnológica que representa recursos y activo
 | 12 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 13 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 14 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/accounting/entities/infrastructure_items.entity.ts:98`)_ | coincide |
-| 15 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | + v4.2.68 (infraestructura F5f): espacio físico donde está el activo (location_text queda sólo como lectura heredada). `tenant_id` como en cost_centers: trigger desde la práctica y FK compuestas (tenant_id, practice_id) y (tenant_id, care_space_id). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_16_accounting.puml:391`)_ | coincide |
+| 15 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | + v4.2.68 (infraestructura F5f): espacio físico donde está el activo (location_text queda sólo como lectura heredada). `tenant_id` como en cost_centers: trigger desde la práctica y FK compuestas (tenant_id, practice_id) y (tenant_id, care_space_id). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_16_accounting.puml:419`)_ | coincide |
 | 16 | `care_space_id` | `uuid` | Clave foránea → practice.care_spaces.id; Opcional | _sin dato_ | coincide |
 
 #### Relaciones
@@ -3160,7 +3160,7 @@ Agrupa asientos contables de una operación para conservar su registro financier
 | 18 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 19 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 20 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/accounting/entities/journal_transactions.entity.ts:138`)_ | coincide |
-| 21 | `approved_at` | `timestamptz` | Opcional | + v4.0.8 (ALOVIDA C-17): traza de aprobación del asiento. Los estados en sí viven en status_concept_id (DRAFT → AUTO_CLASSIFIED → PENDING_REVIEW → APPROVED → POSTED → REVERSED); estas dos columnas solo sellan quién aprobó y cuándo, en paralelo a posted_at/posted_by_user_id. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_16_accounting.puml:184`)_ | coincide |
+| 21 | `approved_at` | `timestamptz` | Opcional | + v4.0.8 (ALOVIDA C-17): traza de aprobación del asiento. Los estados en sí viven en status_concept_id (DRAFT → AUTO_CLASSIFIED → PENDING_REVIEW → APPROVED → POSTED → REVERSED); estas dos columnas solo sellan quién aprobó y cuándo, en paralelo a posted_at/posted_by_user_id. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_16_accounting.puml:212`)_ | coincide |
 | 22 | `approved_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 
 #### Relaciones
@@ -3974,18 +3974,18 @@ _Sin propósito registrado._
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/accounting/entities/practitioner_simple_transactions.entity.ts:18`)_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/accounting/entities/practitioner_simple_transactions.entity.ts:15`)_ | coincide |
 | 2 | `practice_id` | `uuid` | Clave foránea → practice.practices.id; Obligatoria | _sin dato_ | coincide |
-| 3 | `transaction_date` | `date` | Obligatoria | Fecha de la transacción. _(JSDOC_ENTIDAD, `src/modules/accounting/entities/practitioner_simple_transactions.entity.ts:30`)_ | coincide |
-| 4 | `description` | `varchar` | Obligatoria | Descripción libre de la transacción. _(JSDOC_ENTIDAD, `src/modules/accounting/entities/practitioner_simple_transactions.entity.ts:36`)_ | coincide |
-| 5 | `debit_account_id` | `uuid` | Clave foránea → accounting.practitioner_simple_accounts.id; Obligatoria | Cuenta del debe. _(JSDOC_ENTIDAD, `src/modules/accounting/entities/practitioner_simple_transactions.entity.ts:42`)_ | coincide |
-| 6 | `credit_account_id` | `uuid` | Clave foránea → accounting.practitioner_simple_accounts.id; Obligatoria | Cuenta del haber; distinta de la del debe. _(JSDOC_ENTIDAD, `src/modules/accounting/entities/practitioner_simple_transactions.entity.ts:48`)_ | coincide |
-| 7 | `amount` | `numeric` | Obligatoria | Importe, siempre positivo. _(JSDOC_ENTIDAD, `src/modules/accounting/entities/practitioner_simple_transactions.entity.ts:54`)_ | coincide |
-| 8 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/accounting/entities/practitioner_simple_transactions.entity.ts:60`)_ | coincide |
-| 9 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/accounting/entities/practitioner_simple_transactions.entity.ts:66`)_ | coincide |
+| 3 | `transaction_date` | `date` | Obligatoria | Fecha de la transacción. _(JSDOC_ENTIDAD, `src/modules/accounting/entities/practitioner_simple_transactions.entity.ts:27`)_ | coincide |
+| 4 | `description` | `varchar` | Obligatoria | Descripción libre de la transacción. _(JSDOC_ENTIDAD, `src/modules/accounting/entities/practitioner_simple_transactions.entity.ts:33`)_ | coincide |
+| 5 | `debit_account_id` | `uuid` | Clave foránea → accounting.practitioner_simple_accounts.id; Obligatoria | Cuenta del debe. _(JSDOC_ENTIDAD, `src/modules/accounting/entities/practitioner_simple_transactions.entity.ts:39`)_ | coincide |
+| 6 | `credit_account_id` | `uuid` | Clave foránea → accounting.practitioner_simple_accounts.id; Obligatoria | Cuenta del haber; distinta de la del debe. _(JSDOC_ENTIDAD, `src/modules/accounting/entities/practitioner_simple_transactions.entity.ts:45`)_ | coincide |
+| 7 | `amount` | `numeric` | Obligatoria | Importe, siempre positivo. _(JSDOC_ENTIDAD, `src/modules/accounting/entities/practitioner_simple_transactions.entity.ts:51`)_ | coincide |
+| 8 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/accounting/entities/practitioner_simple_transactions.entity.ts:57`)_ | coincide |
+| 9 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/accounting/entities/practitioner_simple_transactions.entity.ts:63`)_ | coincide |
 | 10 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 11 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 12 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/accounting/entities/practitioner_simple_transactions.entity.ts:84`)_ | coincide |
+| 12 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/accounting/entities/practitioner_simple_transactions.entity.ts:81`)_ | coincide |
 
 #### Relaciones
 

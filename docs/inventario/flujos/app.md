@@ -3,12 +3,12 @@
 # Flujos del módulo `app`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 6 (2 con decisiones propias, 4 sin ellas)
+- **Operaciones:** 7 (2 con decisiones propias, 5 sin ellas)
 - Inventario de endpoints del módulo: [app](../endpoints/app.md)
 
 ## Proceso: app
 
-- **Código:** `app` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 6
+- **Código:** `app` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 7
 - **Actores:** Cualquier sesión válida · PLATFORM_ADMIN · Público (sin sesión) · SECURITY_ADMIN · SRE
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** —
@@ -24,6 +24,7 @@ _Sin fuente: ni el README del módulo ni el modelo lo describen._
 | `ctrl:AppController` | Operaciones de AppController que el README no asigna a un caso de uso | GET / | Cualquier sesión válida | BAJO | 0 |
 |  |  | GET /health | Público (sin sesión) | BAJO | 0 |
 |  |  | GET /liveness | Público (sin sesión) | BAJO | 0 |
+|  |  | GET /metrics | Público (sin sesión) | BAJO | 0 |
 |  |  | GET /readiness | Público (sin sesión) | BAJO | 1 |
 | `ctrl:DataSourcesController` | Operaciones de DataSourcesController que el README no asigna a un caso de uso | GET /health/data-sources | PLATFORM_ADMIN · SRE · SECURITY_ADMIN | BAJO | 0 |
 |  |  | GET /health/data-sources/metrics | PLATFORM_ADMIN · SRE · SECURITY_ADMIN | BAJO | 0 |
@@ -34,25 +35,27 @@ _Sin fuente: ni el README del módulo ni el modelo lo describen._
 flowchart LR
   a2(["Cualquier sesión válida"]):::actor
   a4(["Público (sin sesión)"]):::actor
-  a9(["PLATFORM_ADMIN · SRE · SECURITY_ADMIN"]):::actor
-  t7[("terminology.catalog_concepts")]:::tabla
+  a10(["PLATFORM_ADMIN · SRE · SECURITY_ADMIN"]):::actor
+  t8[("terminology.catalog_concepts")]:::tabla
   subgraph s0["ctrl:AppController · Operaciones de AppController que el README no asigna a un…"]
     o1["GET /"]:::op
     o3["GET /health"]:::op
     o5["GET /liveness"]:::op
-    o6["GET /readiness"]:::op
+    o6["GET /metrics"]:::op
+    o7["GET /readiness"]:::op
   end
   subgraph s1["ctrl:DataSourcesController · Operaciones de DataSourcesController que el README…"]
-    o8["GET /health/data-sources"]:::op
-    o10["GET /health/data-sources/metrics"]:::op
+    o9["GET /health/data-sources"]:::op
+    o11["GET /health/data-sources/metrics"]:::op
   end
   a2 --> o1
   a4 --> o3
   a4 --> o5
   a4 --> o6
-  o6 -->|"LEE"| t7
-  a9 --> o8
-  a9 --> o10
+  a4 --> o7
+  o7 -->|"LEE"| t8
+  a10 --> o9
+  a10 --> o11
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -193,3 +196,4 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 | GET /health | 200, 401, 429 | 0 |
 | GET /health/data-sources/metrics | 200, 401, 403, 429 | 0 |
 | GET /liveness | 200, 401, 429 | 0 |
+| GET /metrics | 200, 401, 429 | 0 |

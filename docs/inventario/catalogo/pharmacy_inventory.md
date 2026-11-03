@@ -2,7 +2,7 @@
 
 # Catálogo del schema `pharmacy_inventory`
 
-- **Tablas:** 20 · **Columnas:** 296 (71 con descripción: 24.0 %) · **Índices:** 157
+- **Tablas:** 20 · **Columnas:** 296 (75 con descripción: 25.3 %) · **Índices:** 157
 - **Dominio:** Farmacia
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -873,11 +873,11 @@ Desglosa productos y cantidades comprometidos en una reserva de inventario.
 | 9 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
 | 10 | `unit_price_amount` | `numeric` | Opcional | + v4.2.1 — precio unitario CONGELADO al crear el pedido, con su moneda. Mismo patrón que `medication_dispensation_lines.unit_price_amount`, dos tablas más abajo, que ya congela el precio al dispensar: acá se congela antes, al pedir. `null` cuando el producto no tiene precio publicado — el contrato dice «sin precio», que no es lo mismo que cero. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:208`)_ | coincide |
 | 11 | `currency_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
-| 12 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/pharmacy_inventory/entities/inventory_reservation_lines.entity.ts:87`)_ | coincide |
-| 13 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/pharmacy_inventory/entities/inventory_reservation_lines.entity.ts:93`)_ | coincide |
+| 12 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/pharmacy_inventory/entities/inventory_reservation_lines.entity.ts:93`)_ | coincide |
+| 13 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/pharmacy_inventory/entities/inventory_reservation_lines.entity.ts:99`)_ | coincide |
 | 14 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 15 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 16 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/pharmacy_inventory/entities/inventory_reservation_lines.entity.ts:111`)_ | coincide |
+| 16 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/pharmacy_inventory/entities/inventory_reservation_lines.entity.ts:117`)_ | coincide |
 
 #### Relaciones
 
@@ -992,11 +992,11 @@ Aparta existencias para procesos que requieren disponibilidad comprometida antes
 | 15 | `currency_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
 | 16 | `pickup_code` | `varchar` | Opcional | + v4.2.1 — el código que el mostrador pide al entregar. Lo genera y lo sella el backend al pasar a LISTO_PARA_RETIRO: 6 caracteres de un alfabeto legible sin ambiguos, único mientras exista (índice PARCIAL, abajo). Un solo código por pedido, válido para todas las entregas parciales hasta RETIRADO — rotarlo por entrega obligaría a avisar de nuevo a alguien que ya está en el mostrador. Caduca con `expires_at`: sin ventana propia, una sola fecha que se renueva. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:177`)_ | coincide |
 | 17 | `rejection_reason_text` | `varchar` | Opcional | + v4.2.1 — por qué la farmacia rechazó el pedido, escrito por quien decidió y LEÍDO POR EL PACIENTE: un rechazo sin motivo es mudo para quien lo recibe. Texto libre y `varchar`, como `decision_reason_text` (v4.1.9) — categorizar motivos que ninguna farmacia pidió sería inventarlos. El tope de 500 vive en el DTO, que ya lo declara. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:184`)_ | coincide |
-| 18 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/pharmacy_inventory/entities/inventory_reservations.entity.ts:124`)_ | coincide |
-| 19 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/pharmacy_inventory/entities/inventory_reservations.entity.ts:130`)_ | coincide |
+| 18 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/pharmacy_inventory/entities/inventory_reservations.entity.ts:142`)_ | coincide |
+| 19 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/pharmacy_inventory/entities/inventory_reservations.entity.ts:148`)_ | coincide |
 | 20 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 21 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 22 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/pharmacy_inventory/entities/inventory_reservations.entity.ts:148`)_ | coincide |
+| 22 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/pharmacy_inventory/entities/inventory_reservations.entity.ts:166`)_ | coincide |
 
 #### Relaciones
 
@@ -1798,7 +1798,7 @@ Registra sustituciones de productos realizadas sobre una reserva de pedido de fa
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/pharmacy_inventory/entities/pharmacy_order_substitutions.entity.ts:15`)_ | coincide |
 | 2 | `inventory_reservation_id` | `uuid` | Clave foránea → pharmacy_inventory.inventory_reservations.id; Obligatoria | _sin dato_ | coincide |
 | 3 | `inventory_reservation_line_id` | `uuid` | Clave foránea → pharmacy_inventory.inventory_reservation_lines.id; Obligatoria | _sin dato_ | coincide |
 | 4 | `original_pharmacy_product_id` | `uuid` | Clave foránea → pharmacy.pharmacy_products.id; Obligatoria | _sin dato_ | coincide |
@@ -1808,11 +1808,11 @@ Registra sustituciones de productos realizadas sobre una reserva de pedido de fa
 | 8 | `currency_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
 | 9 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
 | 10 | `decided_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
-| 11 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 12 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 11 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/pharmacy_inventory/entities/pharmacy_order_substitutions.entity.ts:87`)_ | coincide |
+| 12 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/pharmacy_inventory/entities/pharmacy_order_substitutions.entity.ts:93`)_ | coincide |
 | 13 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 14 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 15 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+| 15 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/pharmacy_inventory/entities/pharmacy_order_substitutions.entity.ts:111`)_ | coincide |
 
 #### Relaciones
 

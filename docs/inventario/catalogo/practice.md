@@ -2,7 +2,7 @@
 
 # Catálogo del schema `practice`
 
-- **Tablas:** 20 · **Columnas:** 336 (69 con descripción: 20.5 %) · **Índices:** 186
+- **Tablas:** 20 · **Columnas:** 336 (87 con descripción: 25.9 %) · **Índices:** 186
 - **Dominio:** Práctica y Agenda
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -13,20 +13,20 @@
 | [care_space_blocks](#care_space_blocks) | Registra los bloqueos clínicos, administrativos o de mantenimiento de un espacio con vigencia sin solapes, para que el espacio no se ocupe ni se agende mientras dura. | 19 | 8 | 15 | COINCIDE |
 | [care_space_category_periods](#care_space_category_periods) | Conserva por período la categoría de cama de un espacio, para que el día-cama se valorice con la categoría vigente a cada medianoche. | 11 | 6 | 5 | COINCIDE |
 | [care_space_status_events](#care_space_status_events) | Bitácora inmutable (A20) de cada cambio de los ejes de estado de un espacio (disponibilidad, higiene, aislamiento, ocupación) para el tablero de camas y su auditoría. | 17 | 9 | 19 | COINCIDE |
-| [care_spaces](#care_spaces) | Cataloga consultorios, salas u otros espacios de cuidado disponibles para prestar atención. | 44 | 21 | 131 | DIVERGE |
+| [care_spaces](#care_spaces) | Cataloga consultorios, salas u otros espacios de cuidado disponibles para prestar atención. | 44 | 21 | 134 | COINCIDE |
 | [cleaning_orders](#cleaning_orders) | Orden de limpieza de un espacio con su ciclo (pendiente, en curso, terminada, inspeccionada); una sola abierta por espacio y la inspección la hace alguien distinto de quien limpió. | 28 | 19 | 22 | COINCIDE |
-| [clinical_units](#clinical_units) | Representa unidades clínicas que organizan áreas o equipos asistenciales dentro de una práctica o institución. | 19 | 11 | 94 | COINCIDE |
+| [clinical_units](#clinical_units) | Representa unidades clínicas que organizan áreas o equipos asistenciales dentro de una práctica o institución. | 19 | 11 | 97 | COINCIDE |
 | [facility_typology_rules](#facility_typology_rules) | Declara qué funciones de espacio admite o exige cada tipología de establecimiento de salud, para validar la infraestructura contra la norma sin reglas escritas en código. | 8 | 4 | 9 | COINCIDE |
 | [healthcare_services](#healthcare_services) | Define servicios de salud ofrecidos por una práctica para relacionar prestaciones con profesionales, sedes y procesos de atención. | 17 | 12 | 20 | COINCIDE |
 | [inventory_items](#inventory_items) | Cataloga insumos y bienes administrados por una práctica sanitaria para sostener su operación cotidiana. | 15 | 6 | 3 | COINCIDE |
 | [inventory_movements](#inventory_movements) | Registra entradas, salidas y ajustes de inventario de una práctica para preservar trazabilidad de existencias. | 9 | 4 | 1 | COINCIDE |
 | [practice_accreditations](#practice_accreditations) | Conserva acreditaciones de una práctica sanitaria para documentar reconocimientos o certificaciones institucionales. | 16 | 8 | 3 | COINCIDE |
 | [practice_settings](#practice_settings) | Almacena opciones operativas de una práctica para adaptar su funcionamiento dentro del sistema médico. | 10 | 4 | 24 | COINCIDE |
-| [practice_sites](#practice_sites) | Identifica ubicaciones donde una práctica presta servicios para vincular agenda, atención y recursos con una sede. | 30 | 21 | 205 | COINCIDE |
-| [practices](#practices) | Representa organizaciones o prácticas prestadoras de servicios de salud y su configuración de operación. | 15 | 9 | 222 | COINCIDE |
-| [practitioner_location_assignments](#practitioner_location_assignments) | Registra en qué espacios atiende cada profesional de una organización, lo que lo ubica para los permisos por ubicación y para la agenda combinada. | 12 | 7 | 0 | SIN_ENTIDAD |
-| [practitioner_role_assignments](#practitioner_role_assignments) | Asigna roles asistenciales a profesionales dentro de una organización o sede para precisar sus responsabilidades operativas. | 20 | 12 | 146 | COINCIDE |
-| [practitioner_support_assignments](#practitioner_support_assignments) | Vincula personal de apoyo con profesionales o ámbitos de práctica para coordinar tareas de atención y gestión. | 14 | 9 | 21 | DIVERGE |
+| [practice_sites](#practice_sites) | Identifica ubicaciones donde una práctica presta servicios para vincular agenda, atención y recursos con una sede. | 30 | 21 | 208 | COINCIDE |
+| [practices](#practices) | Representa organizaciones o prácticas prestadoras de servicios de salud y su configuración de operación. | 15 | 9 | 226 | COINCIDE |
+| [practitioner_location_assignments](#practitioner_location_assignments) | Registra en qué espacios atiende cada profesional de una organización, lo que lo ubica para los permisos por ubicación y para la agenda combinada. | 12 | 7 | 0 | COINCIDE |
+| [practitioner_role_assignments](#practitioner_role_assignments) | Asigna roles asistenciales a profesionales dentro de una organización o sede para precisar sus responsabilidades operativas. | 20 | 12 | 149 | COINCIDE |
+| [practitioner_support_assignments](#practitioner_support_assignments) | Vincula personal de apoyo con profesionales o ámbitos de práctica para coordinar tareas de atención y gestión. | 14 | 9 | 25 | COINCIDE |
 | [site_declared_capacities](#site_declared_capacities) | Registra la capacidad declarada ante la autoridad sanitaria (camas, consultorios, quirófanos…) para compararla con la capacidad real derivada de los espacios. | 13 | 6 | 3 | COINCIDE |
 | [space_form_parent_rules](#space_form_parent_rules) | Define qué forma de espacio físico puede contener a otra (edificio, piso, sala, local, cama…) para mantener coherente el árbol de ubicaciones. | 7 | 3 | 6 | COINCIDE |
 | [space_unit_assignments](#space_unit_assignments) | Vincula espacios físicos con unidades organizativas, con vigencia y rol (propietaria, compartida o préstamo), para separar el árbol físico del organizativo. | 12 | 7 | 60 | COINCIDE |
@@ -541,7 +541,7 @@ Cataloga consultorios, salas u otros espacios de cuidado disponibles para presta
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_14_practice.puml: care_spaces`
 - **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_14_practice.puml` · **DDL:** `SQL/14_practice/02_tables.sql`
 - **Entidad del ORM:** `CareSpaces` — `src/modules/practice/entities/care_spaces.entity.ts`
-- **Resumen:** 44 columnas · 21 índices · 18 FK salientes · 38 entrantes · 131 operaciones
+- **Resumen:** 44 columnas · 21 índices · 18 FK salientes · 38 entrantes · 134 operaciones
 
 #### Columnas
 
@@ -580,7 +580,7 @@ Cataloga consultorios, salas u otros espacios de cuidado disponibles para presta
 | 31 | `gln` | `varchar(13)` | Opcional | _sin dato_ | coincide |
 | 32 | `valid_from` | `timestamptz` | Opcional | _sin dato_ | coincide |
 | 33 | `valid_to` | `timestamptz` | Opcional | _sin dato_ | coincide |
-| 34 | `location_path` | `varchar` | Opcional | + v4.2.75 (jerarquia de ubicaciones): Sede (practice_sites) -> Edificio -> Piso -> Sala/Cama, todo como care_spaces anidados por parent_space_id. La FORMA (edificio, piso, ala, sala, cama) es la de v4.2.67: form_concept_id (LOC_FORM_bu¦lvl¦wi¦ro¦bd); no se agrega una segunda columna de tipo. location_path: ruta MATERIALIZADA de ids desde la sede, '/siteId/buildingId/levelId/roomId/' (termina en '/'); permite 'esta dentro de' con LIKE 'prefijo%' sin recursion. La mantiene la API al crear/mover un espacio. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_14_practice.puml:188`)_ | **AUSENTE_EN_ORM** |
+| 34 | `location_path` | `varchar` | Opcional | + v4.2.75 (jerarquia de ubicaciones): Sede (practice_sites) -> Edificio -> Piso -> Sala/Cama, todo como care_spaces anidados por parent_space_id. La FORMA (edificio, piso, ala, sala, cama) es la de v4.2.67: form_concept_id (LOC_FORM_bu¦lvl¦wi¦ro¦bd); no se agrega una segunda columna de tipo. location_path: ruta MATERIALIZADA de ids desde la sede, '/siteId/buildingId/levelId/roomId/' (termina en '/'); permite 'esta dentro de' con LIKE 'prefijo%' sin recursion. La mantiene la API al crear/mover un espacio. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_14_practice.puml:188`)_ | coincide |
 | 35 | `availability_reason_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | + v4.2.68 (infraestructura F2, operación): tres ejes MANUALES del estado operativo; la ocupación es derivada (F3) y no se guarda acá. Disponibilidad = operational_status_concept_id (SPACE_OP_*), con su motivo vigente (BLOCK_RSN_*), fecha estimada de fin y momento del cambio. Higiene (HYG_*) y aislamiento (ISO_*, con el organismo para cohortes). La bandera de limpieza terminal se activa con K o al terminar un aislamiento y sólo la apaga la inspección PASS de un supervisor. `ops_version` es la versión OPERATIVA (If-Match-Ops), separada de row_version para que limpieza/enfermería no choquen con ediciones de estructura; su DEFAULT 1 lo pone el patch 2026-10-29_infraestructura_f2_operacion.sql (gen_ddl sólo emite el default de row_version). Contrato: CONTRATO-F2-F5.md §F2.1. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_14_practice.puml:194`)_ | coincide |
 | 36 | `availability_expected_until` | `timestamptz` | Opcional | _sin dato_ | coincide |
 | 37 | `availability_changed_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
@@ -727,7 +727,10 @@ Cataloga consultorios, salas u otros espacios de cuidado disponibles para presta
 | POST /sites/{siteId}/census/{date}/close | LEE | DIRECTA |
 | GET /sites/{siteId}/inpatient-indicators | LEE | DIRECTA |
 | GET /sites/{siteId}/inpatients | LEE | DIRECTA |
+| GET /approvals/pending | LEE | POR_SQL |
+| GET /me/practitioner/governance-panel | LEE | POR_SQL |
 | POST /me/practitioner/support-invitations | LEE | POR_SQL |
+| POST /me/practitioner/support-staff | LEE | POR_SQL |
 | GET /me/practitioner/support-team | LEE | POR_SQL |
 | POST /me/practitioner/support-team/{id}/end | LEE | POR_SQL |
 | GET /me/support-access | LEE | POR_SQL |
@@ -987,7 +990,7 @@ Representa unidades clínicas que organizan áreas o equipos asistenciales dentr
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_14_practice.puml: clinical_units`
 - **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_14_practice.puml` · **DDL:** `SQL/14_practice/02_tables.sql`
 - **Entidad del ORM:** `ClinicalUnits` — `src/modules/practice/entities/clinical_units.entity.ts`
-- **Resumen:** 19 columnas · 11 índices · 10 FK salientes · 16 entrantes · 94 operaciones
+- **Resumen:** 19 columnas · 11 índices · 10 FK salientes · 16 entrantes · 97 operaciones
 
 #### Columnas
 
@@ -1100,7 +1103,10 @@ Representa unidades clínicas que organizan áreas o equipos asistenciales dentr
 | POST /sites/{siteId}/census/{date}/close | LEE | DIRECTA |
 | GET /sites/{siteId}/inpatient-indicators | LEE | DIRECTA |
 | GET /sites/{siteId}/inpatients | LEE | DIRECTA |
+| GET /approvals/pending | LEE | POR_SQL |
+| GET /me/practitioner/governance-panel | LEE | POR_SQL |
 | POST /me/practitioner/support-invitations | LEE | POR_SQL |
+| POST /me/practitioner/support-staff | LEE | POR_SQL |
 | GET /me/practitioner/support-team | LEE | POR_SQL |
 | POST /me/practitioner/support-team/{id}/end | LEE | POR_SQL |
 | GET /me/support-access | LEE | POR_SQL |
@@ -1197,11 +1203,11 @@ Declara qué funciones de espacio admite o exige cada tipología de establecimie
 | 1 | `typology_concept_id` | `uuid` | Clave primaria; Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
 | 2 | `space_function_concept_id` | `uuid` | Clave primaria; Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
 | 3 | `rule_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
-| 4 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 5 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 4 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/practice/entities/facility_typology_rules.entity.ts:30`)_ | coincide |
+| 5 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/practice/entities/facility_typology_rules.entity.ts:36`)_ | coincide |
 | 6 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 7 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 8 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+| 8 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/practice/entities/facility_typology_rules.entity.ts:54`)_ | coincide |
 
 #### Relaciones
 
@@ -1684,7 +1690,7 @@ Identifica ubicaciones donde una práctica presta servicios para vincular agenda
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_14_practice.puml: practice_sites`
 - **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_14_practice.puml` · **DDL:** `SQL/14_practice/02_tables.sql`
 - **Entidad del ORM:** `PracticeSites` — `src/modules/practice/entities/practice_sites.entity.ts`
-- **Resumen:** 30 columnas · 21 índices · 18 FK salientes · 30 entrantes · 205 operaciones
+- **Resumen:** 30 columnas · 21 índices · 18 FK salientes · 30 entrantes · 208 operaciones
 
 #### Columnas
 
@@ -1849,7 +1855,10 @@ Identifica ubicaciones donde una práctica presta servicios para vincular agenda
 | GET /p/{slug} | LEE | POR_SQL |
 | GET /public/profiles/{prefijo}/{slug} | LEE | POR_SQL |
 | GET /s/{slug} | LEE | POR_SQL |
+| GET /approvals/pending | LEE | POR_SQL |
+| GET /me/practitioner/governance-panel | LEE | POR_SQL |
 | POST /me/practitioner/support-invitations | LEE | POR_SQL |
+| POST /me/practitioner/support-staff | LEE | POR_SQL |
 | GET /me/practitioner/support-team | LEE | POR_SQL |
 | POST /me/practitioner/support-team/{id}/end | LEE | POR_SQL |
 | GET /me/support-access | LEE | POR_SQL |
@@ -2040,7 +2049,7 @@ Representa organizaciones o prácticas prestadoras de servicios de salud y su co
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_14_practice.puml: practices`
 - **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_14_practice.puml` · **DDL:** `SQL/14_practice/02_tables.sql`
 - **Entidad del ORM:** `Practices` — `src/modules/practice/entities/practices.entity.ts`
-- **Resumen:** 15 columnas · 9 índices · 7 FK salientes · 56 entrantes · 222 operaciones
+- **Resumen:** 15 columnas · 9 índices · 7 FK salientes · 56 entrantes · 226 operaciones
 
 #### Columnas
 
@@ -2259,7 +2268,10 @@ Representa organizaciones o prácticas prestadoras de servicios de salud y su co
 | GET /p/{slug} | LEE | POR_SQL |
 | GET /public/profiles/{prefijo}/{slug} | LEE | POR_SQL |
 | GET /s/{slug} | LEE | POR_SQL |
+| GET /approvals/pending | LEE | POR_SQL |
+| GET /me/practitioner/governance-panel | LEE | POR_SQL |
 | POST /me/practitioner/support-invitations | LEE | POR_SQL |
+| POST /me/practitioner/support-staff | LEE | POR_SQL |
 | GET /me/practitioner/support-team | LEE | POR_SQL |
 | POST /me/practitioner/support-team/{id}/end | LEE | POR_SQL |
 | GET /me/support-access | LEE | POR_SQL |
@@ -2336,6 +2348,7 @@ Representa organizaciones o prácticas prestadoras de servicios de salud y su co
 | GET /practices/{practiceId}/sites | LEE | DIRECTA |
 | DELETE /practices/{practiceId}/sites/{siteId} | LEE | DIRECTA |
 | GET /practitioners/{profileId}/sites | LEE | DIRECTA |
+| GET /practitioners/me/joinable-practices | LEE | DIRECTA |
 | GET /practitioners/me/role-assignments | LEE | DIRECTA |
 | POST /practitioners/me/sites | CREA | DIRECTA |
 | POST /practitioners/me/sites | LEE | DIRECTA |
@@ -2399,25 +2412,25 @@ Registra en qué espacios atiende cada profesional de una organización, lo que 
 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_14_practice.puml: practitioner_location_assignments`
 - **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_14_practice.puml` · **DDL:** `SQL/14_practice/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `PractitionerLocationAssignments` — `src/modules/practice/entities/practitioner_location_assignments.entity.ts`
 - **Resumen:** 12 columnas · 7 índices · 6 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | v4.2.76 (hardening): tenant_id = tenant del profesional y del espacio (trigger integrity.trg_support_tenant_consistency). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_14_practice.puml:853`)_ | **SIN_ENTIDAD** |
-| 3 | `practitioner_role_assignment_id` | `uuid` | Clave foránea → practice.practitioner_role_assignments.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `care_space_id` | `uuid` | Clave foránea → practice.care_spaces.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `valid_from` | `date` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `valid_to` | `date` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/practice/entities/practitioner_location_assignments.entity.ts:12`)_ | coincide |
+| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | v4.2.76 (hardening): tenant_id = tenant del profesional y del espacio (trigger integrity.trg_support_tenant_consistency). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_14_practice.puml:853`)_ | coincide |
+| 3 | `practitioner_role_assignment_id` | `uuid` | Clave foránea → practice.practitioner_role_assignments.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `care_space_id` | `uuid` | Clave foránea → practice.care_spaces.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `valid_from` | `date` | Opcional | _sin dato_ | coincide |
+| 6 | `valid_to` | `date` | Opcional | _sin dato_ | coincide |
+| 7 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 8 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/practice/entities/practitioner_location_assignments.entity.ts:54`)_ | coincide |
+| 9 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/practice/entities/practitioner_location_assignments.entity.ts:60`)_ | coincide |
+| 10 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 11 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 12 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/practice/entities/practitioner_location_assignments.entity.ts:78`)_ | coincide |
 
 #### Relaciones
 
@@ -2476,7 +2489,7 @@ Asigna roles asistenciales a profesionales dentro de una organización o sede pa
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_14_practice.puml: practitioner_role_assignments`
 - **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_14_practice.puml` · **DDL:** `SQL/14_practice/02_tables.sql`
 - **Entidad del ORM:** `PractitionerRoleAssignments` — `src/modules/practice/entities/practitioner_role_assignments.entity.ts`
-- **Resumen:** 20 columnas · 12 índices · 11 FK salientes · 11 entrantes · 146 operaciones
+- **Resumen:** 20 columnas · 12 índices · 11 FK salientes · 11 entrantes · 149 operaciones
 
 #### Columnas
 
@@ -2497,11 +2510,11 @@ Asigna roles asistenciales a profesionales dentro de una organización o sede pa
 | 13 | `valid_to` | `date` | Opcional | _sin dato_ | coincide |
 | 14 | `contact_phone` | `varchar` | Opcional | _sin dato_ | coincide |
 | 15 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
-| 16 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/practice/entities/practitioner_role_assignments.entity.ts:115`)_ | coincide |
-| 17 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/practice/entities/practitioner_role_assignments.entity.ts:121`)_ | coincide |
+| 16 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/practice/entities/practitioner_role_assignments.entity.ts:118`)_ | coincide |
+| 17 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/practice/entities/practitioner_role_assignments.entity.ts:124`)_ | coincide |
 | 18 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 19 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 20 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/practice/entities/practitioner_role_assignments.entity.ts:139`)_ | coincide |
+| 20 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/practice/entities/practitioner_role_assignments.entity.ts:142`)_ | coincide |
 
 #### Relaciones
 
@@ -2606,7 +2619,10 @@ Asigna roles asistenciales a profesionales dentro de una organización o sede pa
 | GET /p/{slug} | LEE | POR_SQL |
 | GET /public/profiles/{prefijo}/{slug} | LEE | POR_SQL |
 | GET /s/{slug} | LEE | POR_SQL |
+| GET /approvals/pending | LEE | POR_SQL |
+| GET /me/practitioner/governance-panel | LEE | POR_SQL |
 | POST /me/practitioner/support-invitations | LEE | POR_SQL |
+| POST /me/practitioner/support-staff | LEE | POR_SQL |
 | GET /me/practitioner/support-team | LEE | POR_SQL |
 | POST /me/practitioner/support-team/{id}/end | LEE | POR_SQL |
 | GET /me/support-access | LEE | POR_SQL |
@@ -2632,7 +2648,6 @@ Asigna roles asistenciales a profesionales dentro de una organización o sede pa
 | POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /identity/checks/{id}/results | LEE | DIRECTA |
-| POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
 | POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
 | GET /practitioners/{profileId}/insurance-networks | LEE | POR_SQL |
 | GET /medical-centers/search/for-my-orders | LEE | DIRECTA |
@@ -2655,6 +2670,7 @@ Asigna roles asistenciales a profesionales dentro de una organización o sede pa
 | DELETE /practices/{practiceId}/sites/{siteId} | ACTUALIZA | POR_TIPO |
 | DELETE /practices/{practiceId}/sites/{siteId} | LEE | DIRECTA |
 | GET /practitioners/{profileId}/sites | LEE | DIRECTA |
+| GET /practitioners/me/joinable-practices | LEE | DIRECTA |
 | GET /practitioners/me/role-assignments | LEE | DIRECTA |
 | POST /practitioners/me/role-assignments/{roleId}/accept | ACTUALIZA | POR_TIPO |
 | POST /practitioners/me/role-assignments/{roleId}/accept | LEE | DIRECTA |
@@ -2721,7 +2737,7 @@ Vincula personal de apoyo con profesionales o ámbitos de práctica para coordin
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_14_practice.puml: practitioner_support_assignments`
 - **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_14_practice.puml` · **DDL:** `SQL/14_practice/02_tables.sql`
 - **Entidad del ORM:** `PractitionerSupportAssignments` — `src/modules/practice/entities/practitioner_support_assignments.entity.ts`
-- **Resumen:** 14 columnas · 9 índices · 8 FK salientes · 0 entrantes · 21 operaciones
+- **Resumen:** 14 columnas · 9 índices · 8 FK salientes · 0 entrantes · 25 operaciones
 
 #### Columnas
 
@@ -2740,7 +2756,7 @@ Vincula personal de apoyo con profesionales o ámbitos de práctica para coordin
 | 11 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 12 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 13 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/practice/entities/practitioner_support_assignments.entity.ts:84`)_ | coincide |
-| 14 | `initiated_by_party_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | + v4.2.82 (alta de la secretaria por solicitud y aceptacion): QUIEN inicio el vinculo (delegated_access:DA_INITIATOR_SUPPORT_STAFF ¦ DA_INITIATOR_ORGANIZATION ¦ DA_INITIATOR_PRACTITIONER; los siembra la API). Decide la parte que NO inicio. NULL = no decidible (filas previas u otros flujos): la API falla cerrada. No se deduce de created_by_user_id (una cuenta puede ser secretaria y doctor a la vez). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_14_practice.puml:456`)_ | **AUSENTE_EN_ORM** |
+| 14 | `initiated_by_party_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | + v4.2.82 (alta de la secretaria por solicitud y aceptacion): QUIEN inicio el vinculo (delegated_access:DA_INITIATOR_SUPPORT_STAFF ¦ DA_INITIATOR_ORGANIZATION ¦ DA_INITIATOR_PRACTITIONER; los siembra la API). Decide la parte que NO inicio. NULL = no decidible (filas previas u otros flujos): la API falla cerrada. No se deduce de created_by_user_id (una cuenta puede ser secretaria y doctor a la vez). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_14_practice.puml:456`)_ | coincide |
 
 #### Relaciones
 
@@ -2773,8 +2789,12 @@ Vincula personal de apoyo con profesionales o ámbitos de práctica para coordin
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /approvals/pending | LEE | POR_SQL |
+| GET /me/practitioner/governance-panel | LEE | POR_SQL |
 | POST /me/practitioner/support-invitations | CREA | POR_SQL |
 | POST /me/practitioner/support-invitations | LEE | POR_SQL |
+| POST /me/practitioner/support-staff | CREA | POR_SQL |
+| POST /me/practitioner/support-staff | LEE | POR_SQL |
 | GET /me/practitioner/support-team | LEE | POR_SQL |
 | POST /me/practitioner/support-team/{id}/end | LEE | DIRECTA |
 | GET /me/support-access | LEE | POR_SQL |
@@ -2824,7 +2844,7 @@ Registra la capacidad declarada ante la autoridad sanitaria (camas, consultorios
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/practice/entities/site_declared_capacities.entity.ts:12`)_ | coincide |
 | 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
 | 3 | `practice_site_id` | `uuid` | Clave foránea → practice.practice_sites.id; Obligatoria | _sin dato_ | coincide |
 | 4 | `capacity_kind_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
@@ -2832,11 +2852,11 @@ Registra la capacidad declarada ante la autoridad sanitaria (camas, consultorios
 | 6 | `as_of` | `date` | Obligatoria | _sin dato_ | coincide |
 | 7 | `resolution_number` | `varchar` | Opcional | _sin dato_ | coincide |
 | 8 | `valid_to` | `date` | Opcional | _sin dato_ | coincide |
-| 9 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 10 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 9 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/practice/entities/site_declared_capacities.entity.ts:64`)_ | coincide |
+| 10 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/practice/entities/site_declared_capacities.entity.ts:70`)_ | coincide |
 | 11 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 12 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 13 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+| 13 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/practice/entities/site_declared_capacities.entity.ts:88`)_ | coincide |
 
 #### Relaciones
 
@@ -2898,11 +2918,11 @@ Define qué forma de espacio físico puede contener a otra (edificio, piso, sala
 |---|---|---|---|---|---|
 | 1 | `parent_form_concept_id` | `uuid` | Clave primaria; Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
 | 2 | `child_form_concept_id` | `uuid` | Clave primaria; Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
-| 3 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 4 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 3 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/practice/entities/space_form_parent_rules.entity.ts:24`)_ | coincide |
+| 4 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/practice/entities/space_form_parent_rules.entity.ts:30`)_ | coincide |
 | 5 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 6 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 7 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+| 7 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/practice/entities/space_form_parent_rules.entity.ts:48`)_ | coincide |
 
 #### Relaciones
 
@@ -2961,18 +2981,18 @@ Vincula espacios físicos con unidades organizativas, con vigencia y rol (propie
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/practice/entities/space_unit_assignments.entity.ts:12`)_ | coincide |
 | 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
 | 3 | `care_space_id` | `uuid` | Clave foránea → practice.care_spaces.id; Obligatoria | _sin dato_ | coincide |
 | 4 | `clinical_unit_id` | `uuid` | Clave foránea → practice.clinical_units.id; Obligatoria | _sin dato_ | coincide |
 | 5 | `role_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
 | 6 | `valid_from` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
 | 7 | `valid_to` | `timestamptz` | Opcional | _sin dato_ | coincide |
-| 8 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 9 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 8 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/practice/entities/space_unit_assignments.entity.ts:58`)_ | coincide |
+| 9 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/practice/entities/space_unit_assignments.entity.ts:64`)_ | coincide |
 | 10 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 11 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 12 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+| 12 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/practice/entities/space_unit_assignments.entity.ts:82`)_ | coincide |
 
 #### Relaciones
 

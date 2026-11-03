@@ -26,7 +26,7 @@ _Fuente: `src/modules/insurance/README.md:3`_
 | `ctrl:AppealsController` | Operaciones de AppealsController que el README no asigna a un caso de uso | POST /claim-disputes/{id}/appeal-decisions | BILLING · FINANCE | MEDIO | 4 |
 | `ctrl:BrokerCommissionController` | Operaciones de BrokerCommissionController que el README no asigna a un caso de uso | POST /broker-commission-statements | BILLING · FINANCE | MEDIO | 4 |
 | `ctrl:ClaimsController` | Operaciones de ClaimsController que el README no asigna a un caso de uso | POST /insurance-claims | BILLING · FINANCE | MEDIO | 22 |
-|  |  | POST /insurance-claims/{id}/adjudications | BILLING · FINANCE | MEDIO | 19 |
+|  |  | POST /insurance-claims/{id}/adjudications | BILLING · FINANCE | MEDIO | 18 |
 |  |  | POST /insurance-claims/{id}/disputes | BILLING · FINANCE · BILLING_OPERATOR · SECURITY_ADMIN · PATIENT | MEDIO | 10 |
 |  |  | POST /insurance-claims/{id}/eob | BILLING · FINANCE | MEDIO | 21 |
 |  |  | POST /insurance-claims/{id}/patient-invoice | BILLING · FINANCE | MEDIO | 25 |
@@ -107,7 +107,7 @@ _Fuente: `src/modules/insurance/README.md:3`_
 ```mermaid
 flowchart LR
   a2(["BILLING · FINANCE"]):::actor
-  a21(["BILLING · FINANCE · BILLING_OPERATOR · SECURITY_ADMIN · PAT…"]):::actor
+  a22(["BILLING · FINANCE · BILLING_OPERATOR · SECURITY_ADMIN · PAT…"]):::actor
   a45(["BILLING_OPERATOR · SECURITY_ADMIN"]):::actor
   a64(["BILLING · FINANCE · PATIENT"]):::actor
   a68(["Cualquier sesión válida"]):::actor
@@ -123,12 +123,12 @@ flowchart LR
   t14[("directory.tenant_memberships")]:::tabla
   t15[("insurance.insurance_claim_lines")]:::tabla
   t18[("insurance.claim_adjudication_versions")]:::tabla
-  t22[("insurance.insurance_claims")]:::tabla
-  t23[("insurance.patient_coverages")]:::tabla
-  t24[("messaging.domain_events")]:::tabla
-  t25[("messaging.outbox_messages")]:::tabla
-  e27>"~null"]:::evento
-  t29[("insurance.claim_line_adjudications")]:::tabla
+  t19[("insurance.claim_line_adjudications")]:::tabla
+  t23[("insurance.insurance_claims")]:::tabla
+  t24[("insurance.patient_coverages")]:::tabla
+  t25[("messaging.domain_events")]:::tabla
+  t26[("messaging.outbox_messages")]:::tabla
+  e28>"~null"]:::evento
   t32[("billing.invoice_lines")]:::tabla
   t33[("billing.invoices")]:::tabla
   t34[("iam.devices")]:::tabla
@@ -159,8 +159,8 @@ flowchart LR
     o5["POST /broker-commission-statements"]:::op
   end
   t16[("+16 tablas más")]
-  t19[("+13 tablas más")]
-  t26[("+4 tablas más")]
+  t20[("+12 tablas más")]
+  t27[("+4 tablas más")]
   t30[("+15 tablas más")]
   t35[("+19 tablas más")]
   t38[("+9 tablas más")]
@@ -168,8 +168,8 @@ flowchart LR
   subgraph s2["ctrl:ClaimsController · Operaciones de ClaimsController que el README no asigna…"]
     o9["POST /insurance-claims"]:::op
     o17["POST /insurance-claims/{id}/adjudications"]:::op
-    o20["POST /insurance-claims/{id}/disputes"]:::op
-    o28["POST /insurance-claims/{id}/eob"]:::op
+    o21["POST /insurance-claims/{id}/disputes"]:::op
+    o29["POST /insurance-claims/{id}/eob"]:::op
     o31["POST /insurance-claims/{id}/patient-invoice"]:::op
     o36["POST /insurance-claims/{id}/reversals"]:::op
     o39["POST /insurance-claims/quote"]:::op
@@ -213,27 +213,27 @@ flowchart LR
   o17 -->|"LEE"| t11
   o17 -->|"LEE"| t12
   o17 -->|"LEE"| t13
-  o17 -->|"LEE"| t14
   o17 -->|"CREA"| t18
   o17 -->|"LEE"| t18
-  o17 -.-> t19
-  a21 --> o20
-  o20 -->|"CREA"| t4
-  o20 -->|"LEE"| t4
-  o20 -->|"LEE"| t22
-  o20 -->|"LEE"| t23
-  o20 -->|"CREA"| t24
-  o20 -->|"CREA"| t25
-  o20 -.-> t26
-  o20 -->|"evento"| e27
-  a2 --> o28
-  o28 -->|"LEE"| t11
-  o28 -->|"LEE"| t12
-  o28 -->|"LEE"| t13
-  o28 -->|"LEE"| t14
-  o28 -->|"LEE"| t18
-  o28 -->|"LEE"| t29
-  o28 -.-> t30
+  o17 -->|"CREA"| t19
+  o17 -.-> t20
+  a22 --> o21
+  o21 -->|"CREA"| t4
+  o21 -->|"LEE"| t4
+  o21 -->|"LEE"| t23
+  o21 -->|"LEE"| t24
+  o21 -->|"CREA"| t25
+  o21 -->|"CREA"| t26
+  o21 -.-> t27
+  o21 -->|"evento"| e28
+  a2 --> o29
+  o29 -->|"LEE"| t11
+  o29 -->|"LEE"| t12
+  o29 -->|"LEE"| t13
+  o29 -->|"LEE"| t14
+  o29 -->|"LEE"| t18
+  o29 -->|"LEE"| t19
+  o29 -.-> t30
   a2 --> o31
   o31 -->|"CREA"| t32
   o31 -->|"LEE"| t32
@@ -242,7 +242,7 @@ flowchart LR
   o31 -->|"LEE"| t34
   o31 -->|"LEE"| t15
   o31 -.-> t35
-  o31 -->|"evento"| e27
+  o31 -->|"evento"| e28
   a2 --> o36
   o36 -->|"LEE"| t11
   o36 -->|"LEE"| t12
@@ -254,7 +254,7 @@ flowchart LR
   a2 --> o39
   o39 -->|"LEE"| t10
   o39 -->|"LEE"| t15
-  o39 -->|"LEE"| t22
+  o39 -->|"LEE"| t23
   o39 -->|"LEE"| t40
   o39 -->|"LEE"| t41
   o39 -->|"LEE"| t42
@@ -265,7 +265,7 @@ flowchart LR
   o44 -->|"LEE"| t4
   o44 -->|"LEE"| t8
   o44 -->|"LEE"| t46
-  o44 -->|"LEE"| t22
+  o44 -->|"LEE"| t23
   o44 -.-> t47
   a45 --> o48
   o48 -->|"LEE"| t49
@@ -279,28 +279,28 @@ flowchart LR
   o53 -->|"ACTUALIZA"| t54
   o53 -->|"CREA"| t54
   o53 -->|"LEE"| t54
-  o53 -->|"LEE"| t23
+  o53 -->|"LEE"| t24
   a2 --> o55
   o55 -->|"ACTUALIZA"| t56
   o55 -->|"CREA"| t56
   o55 -->|"LEE"| t56
   o55 -->|"CREA"| t57
-  o55 -->|"LEE"| t23
+  o55 -->|"LEE"| t24
   a2 --> o58
   o58 -->|"CREA"| t59
   o58 -->|"CREA"| t60
   o58 -->|"LEE"| t41
-  o58 -->|"CREA"| t23
-  o58 -->|"LEE"| t23
+  o58 -->|"CREA"| t24
+  o58 -->|"LEE"| t24
   a2 --> o61
   o61 -->|"LEE"| t10
   o61 -->|"LEE"| t46
   o61 -->|"LEE"| t41
   o61 -->|"LEE"| t42
-  o61 -->|"LEE"| t23
+  o61 -->|"LEE"| t24
   o61 -->|"LEE"| t62
   a64 --> o63
-  o63 -->|"LEE"| t23
+  o63 -->|"LEE"| t24
   o63 -->|"LEE"| t65
   o63 -->|"LEE"| t66
   a68 --> o67
@@ -935,7 +935,7 @@ flowchart LR
 
 ### Máquina de estados `TRANSITIONS`
 
-Declarada en `src/modules/insurance/application/services/insurance-campaigns.service.ts:124`. Los estados llevan el nombre del identificador del código; no se resuelven al catálogo de conceptos.
+Declarada en `src/modules/insurance/application/services/insurance-campaigns.service.ts:125`. Los estados llevan el nombre del identificador del código; no se resuelven al catálogo de conceptos.
 
 ```mermaid
 stateDiagram-v2

@@ -15,7 +15,7 @@
 
 ### Para qué sirve
 
-Agrupa los componentes relacionados con **chart** y mantiene cohesionada esta responsabilidad del sistema.
+Groups **chart**-related components and keeps this system responsibility cohesive.
 
 _Fuente: `src/modules/chart/README.md:3`_
 
@@ -24,23 +24,23 @@ _Fuente: `src/modules/chart/README.md:3`_
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
 | `ctrl:ChartCarePlansController` | Operaciones de ChartCarePlansController que el README no asigna a un caso de uso | POST /charts/care-plans | CLINICIAN · PRACTITIONER | MEDIO | 5 |
-|  |  | PATCH /charts/care-plans/{planId}/activities/{activityId} | CLINICIAN · PRACTITIONER | MEDIO | 20 |
+|  |  | PATCH /charts/care-plans/{planId}/activities/{activityId} | CLINICIAN · PRACTITIONER | MEDIO | 22 |
 | `ctrl:ChartDocumentsController` | Operaciones de ChartDocumentsController que el README no asigna a un caso de uso | POST /charts/documents | CLINICIAN · PRACTITIONER | MEDIO | 5 |
-|  |  | GET /charts/documents/{documentId}/files/{fileId}/content | CLINICIAN · PRACTITIONER | BAJO | 22 |
-| `ctrl:ChartEncountersController` | Operaciones de ChartEncountersController que el README no asigna a un caso de uso | GET /charts/encounters/{id}/pdf | CLINICIAN · PRACTITIONER | BAJO | 30 |
+|  |  | GET /charts/documents/{documentId}/files/{fileId}/content | CLINICIAN · PRACTITIONER | BAJO | 24 |
+| `ctrl:ChartEncountersController` | Operaciones de ChartEncountersController que el README no asigna a un caso de uso | GET /charts/encounters/{id}/pdf | CLINICIAN · PRACTITIONER | BAJO | 32 |
 | `ctrl:ChartMeController` | Operaciones de ChartMeController que el README no asigna a un caso de uso | GET /charts/me/documents | Cualquier sesión válida | ALTO | 3 |
 |  |  | GET /charts/me/documents/{documentId}/files/{fileId}/content | Cualquier sesión válida | ALTO | 5 |
 |  |  | GET /charts/me/encounters/{id}/pdf | Cualquier sesión válida | BAJO | 14 |
 |  |  | GET /charts/me/notes | Cualquier sesión válida | ALTO | 3 |
 | `ctrl:ChartNotesController` | Operaciones de ChartNotesController que el README no asigna a un caso de uso | GET /charts/notes | CLINICIAN · PRACTITIONER | BAJO | 2 |
 |  |  | POST /charts/notes | CLINICIAN · PRACTITIONER | MEDIO | 4 |
-|  |  | POST /charts/notes/{noteId}/amendments | CLINICIAN · PRACTITIONER | MEDIO | 20 |
-|  |  | PUT /charts/notes/{noteId}/versions | CLINICIAN · PRACTITIONER | MEDIO | 20 |
-|  |  | POST /charts/notes/{noteId}/versions/{versionId}/cosign | CLINICIAN · PRACTITIONER | MEDIO | 20 |
-|  |  | POST /charts/notes/{noteId}/versions/{versionId}/sign | CLINICIAN · PRACTITIONER | MEDIO | 19 |
-|  |  | POST /charts/notes/versions/{versionId}/exam-findings | CLINICIAN · PRACTITIONER | MEDIO | 20 |
-|  |  | POST /charts/notes/versions/{versionId}/release | CLINICIAN · PRACTITIONER | MEDIO | 20 |
-|  |  | POST /charts/notes/versions/{versionId}/withhold | CLINICIAN · PRACTITIONER | MEDIO | 20 |
+|  |  | POST /charts/notes/{noteId}/amendments | CLINICIAN · PRACTITIONER | MEDIO | 22 |
+|  |  | PUT /charts/notes/{noteId}/versions | CLINICIAN · PRACTITIONER | MEDIO | 22 |
+|  |  | POST /charts/notes/{noteId}/versions/{versionId}/cosign | CLINICIAN · PRACTITIONER | MEDIO | 22 |
+|  |  | POST /charts/notes/{noteId}/versions/{versionId}/sign | CLINICIAN · PRACTITIONER | MEDIO | 21 |
+|  |  | POST /charts/notes/versions/{versionId}/exam-findings | CLINICIAN · PRACTITIONER | MEDIO | 22 |
+|  |  | POST /charts/notes/versions/{versionId}/release | CLINICIAN · PRACTITIONER | MEDIO | 22 |
+|  |  | POST /charts/notes/versions/{versionId}/withhold | CLINICIAN · PRACTITIONER | MEDIO | 22 |
 | `ctrl:ChartReadController` | Operaciones de ChartReadController que el README no asigna a un caso de uso | GET /charts/patients/{patientProfileId}/chart | CLINICIAN · PRACTITIONER | BAJO | 6 |
 | `ctrl:ChartTemplatesController` | Operaciones de ChartTemplatesController que el README no asigna a un caso de uso | GET /charts/templates | CLINICIAN · PRACTITIONER · SECURITY_ADMIN | BAJO | 3 |
 |  |  | POST /charts/templates | SECURITY_ADMIN | MEDIO | 5 |
@@ -78,17 +78,17 @@ flowchart LR
   t55[("forms.field_assignments")]:::tabla
   t58[("forms.dynamic_field_sections")]:::tabla
   t61[("chart.chart_template_assignments")]:::tabla
-  t15[("+14 tablas más")]
+  t15[("+16 tablas más")]
   subgraph s0["ctrl:ChartCarePlansController · Operaciones de ChartCarePlansController que el…"]
     o1["POST /charts/care-plans"]:::op
     o8["PATCH /charts/care-plans/{planId}/activities/{activityId}"]:::op
   end
-  t22[("+16 tablas más")]
+  t22[("+18 tablas más")]
   subgraph s1["ctrl:ChartDocumentsController · Operaciones de ChartDocumentsController que el…"]
     o16["POST /charts/documents"]:::op
     o21["GET /charts/documents/{documentId}/files/{fileId}/content"]:::op
   end
-  t24[("+24 tablas más")]
+  t24[("+26 tablas más")]
   subgraph s2["ctrl:ChartEncountersController · Operaciones de ChartEncountersController que e…"]
     o23["GET /charts/encounters/{id}/pdf"]:::op
   end
@@ -99,13 +99,13 @@ flowchart LR
     o29["GET /charts/me/encounters/{id}/pdf"]:::op
     o33["GET /charts/me/notes"]:::op
   end
-  t37[("+14 tablas más")]
-  t39[("+14 tablas más")]
-  t41[("+14 tablas más")]
-  t43[("+13 tablas más")]
-  t45[("+14 tablas más")]
-  t47[("+14 tablas más")]
-  t49[("+14 tablas más")]
+  t37[("+16 tablas más")]
+  t39[("+16 tablas más")]
+  t41[("+16 tablas más")]
+  t43[("+15 tablas más")]
+  t45[("+16 tablas más")]
+  t47[("+16 tablas más")]
+  t49[("+16 tablas más")]
   subgraph s4["ctrl:ChartNotesController · Operaciones de ChartNotesController que el README n…"]
     o34["GET /charts/notes"]:::op
     o35["POST /charts/notes"]:::op

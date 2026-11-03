@@ -9,3 +9,4 @@ export * from './delegation-scope.repository';
 export * from './shared-access-links.repository';
 export * from './support-links.repository';
 export * from './support-staff-provisioning.repository';
+export * from './practitioner-governance.repository';

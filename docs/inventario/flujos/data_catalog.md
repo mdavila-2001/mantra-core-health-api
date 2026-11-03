@@ -105,7 +105,7 @@ _Fuente: `src/modules/data_catalog/README.md:99`_
 |  |  | GET /admin/governance/review-queue | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO · AUDITOR · DATA_STEWARD | BAJO | 4 |
 | `ctrl:InternalCatalogFitController` | Operaciones de InternalCatalogFitController que el README no asigna a un caso de uso | POST /internal/catalog/fit/run | SYSTEM | ALTO | 7 |
 | `ctrl:InternalCatalogInventoryController` | Operaciones de InternalCatalogInventoryController que el README no asigna a un caso de uso | POST /internal/catalog/inventory/import | SYSTEM | ALTO | 15 |
-| `ctrl:InternalCatalogScansController` | Operaciones de InternalCatalogScansController que el README no asigna a un caso de uso | POST /internal/catalog/scans/run-next | SYSTEM | MEDIO | 15 |
+| `ctrl:InternalCatalogScansController` | Operaciones de InternalCatalogScansController que el README no asigna a un caso de uso | POST /internal/catalog/scans/run-next | SYSTEM | MEDIO | 12 |
 
 ### Diagrama 1 de 3 — etapas `UC-67-01`, `UC-67-02`, `UC-67-03`…
 
@@ -382,7 +382,7 @@ flowchart LR
   subgraph s5["ctrl:InternalCatalogInventoryController · Operaciones de InternalCatalogInvento…"]
     o41["POST /internal/catalog/inventory/import"]:::op
   end
-  t45[("+9 tablas más")]
+  t45[("+6 tablas más")]
   subgraph s6["ctrl:InternalCatalogScansController · Operaciones de InternalCatalogScansContro…"]
     o44["POST /internal/catalog/scans/run-next"]:::op
   end
@@ -473,12 +473,12 @@ flowchart LR
   o41 -->|"LEE"| t27
   o41 -.-> t43
   a39 --> o44
-  o44 -->|"CREA"| t3
-  o44 -->|"CREA"| t4
-  o44 -->|"ACTUALIZA"| t4
   o44 -->|"LEE"| t4
   o44 -->|"CREA"| t5
   o44 -->|"LEE"| t5
+  o44 -->|"CREA"| t6
+  o44 -->|"ACTUALIZA"| t6
+  o44 -->|"LEE"| t6
   o44 -.-> t45
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a

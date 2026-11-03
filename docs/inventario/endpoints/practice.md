@@ -3,8 +3,8 @@
 # Endpoints del módulo `practice`
 
 - **Bloque:** Práctica y Agenda (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
-- **Operaciones:** 83 (83 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 25 · MEDIO 17 · BAJO 41
+- **Operaciones:** 84 (84 en el contrato, 0 sólo en el código)
+- **Riesgo:** ALTO 25 · MEDIO 17 · BAJO 42
 - **Tablas distintas que tocan:** 61
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/practice.md` (generado aparte por `yarn docs:endpoints:generate`)
 
@@ -60,41 +60,42 @@
 | 46 | POST | `/practices/{practiceId}/sites` | Dar de alta un sitio de práctica | ALTO | 4 | sesión (sin roles) |
 | 47 | DELETE | `/practices/{practiceId}/sites/{siteId}` | Desmantelar un sitio en cascada (soft-delete) | ALTO | 12 | sesión (sin roles) |
 | 48 | GET | `/practitioners/{profileId}/sites` | Consultorios donde atiende el profesional | BAJO | 5 | SECURITY_ADMIN, SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, CLINICIAN, PATIENT |
-| 49 | GET | `/practitioners/me/role-assignments` | Mis vinculaciones con organizaciones | BAJO | 3 | PRACTITIONER |
-| 50 | POST | `/practitioners/me/role-assignments/{roleId}/accept` | Aceptar una invitación de un centro | MEDIO | 2 | PRACTITIONER |
-| 51 | POST | `/practitioners/me/role-assignments/{roleId}/decline` | Declinar una invitación de un centro | MEDIO | 2 | PRACTITIONER |
-| 52 | POST | `/practitioners/me/sites` | Registrar un consultorio propio | MEDIO | 10 | PRACTITIONER, CLINICIAN |
-| 53 | DELETE | `/practitioners/me/sites/{siteId}` | Retirar un consultorio propio | MEDIO | 4 | PRACTITIONER, CLINICIAN |
-| 54 | PATCH | `/practitioners/me/sites/{siteId}` | Corregir un consultorio propio | MEDIO | 9 | PRACTITIONER, CLINICIAN |
-| 55 | PUT | `/practitioners/me/sites/{siteId}/bank-qr` | Fijar o quitar el QR bancario de una sede | BAJO | 6 | PRACTITIONER, CLINICIAN |
-| 56 | PUT | `/practitioners/me/sites/{siteId}/contact-phone` | Guardar o quitar mi teléfono en una sede | MEDIO | 7 | PRACTITIONER, CLINICIAN |
-| 57 | PUT | `/practitioners/me/sites/{siteId}/logo` | Fijar o quitar el logo del consultorio propio | MEDIO | 9 | PRACTITIONER, CLINICIAN |
-| 58 | POST | `/role-assignments/{roleId}/approve` | Aprobar una vinculación pendiente | BAJO | 3 | sesión (sin roles) |
-| 59 | POST | `/role-assignments/{roleId}/end` | Finalizar una vinculación | BAJO | 3 | SECURITY_ADMIN |
-| 60 | POST | `/role-assignments/{roleId}/reject` | Rechazar una vinculación pendiente | BAJO | 3 | sesión (sin roles) |
-| 61 | POST | `/role-assignments/{roleId}/support-assignments` | Adjuntar personal de apoyo a un rol de profesional | MEDIO | 3 | SECURITY_ADMIN |
-| 62 | POST | `/role-assignments/{roleId}/suspend` | Suspender una vinculación activa | BAJO | 3 | SECURITY_ADMIN |
-| 63 | PATCH | `/site-licenses/{id}` | Editar una habilitación del establecimiento | ALTO | 4 | sesión (sin roles) |
-| 64 | GET | `/sites/{siteId}/bed-board` | Tablero de camas de una sede | BAJO | 15 | sesión (sin roles) |
-| 65 | GET | `/sites/{siteId}/capacity` | Capacidad declarada vs. derivada del establecimiento | BAJO | 5 | sesión (sin roles) |
-| 66 | GET | `/sites/{siteId}/care-spaces` | Listar los espacios de atención de la sede | BAJO | 3 | SECURITY_ADMIN, SURGERY_SCHEDULER, PERIOP_ADMIN, SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SCHEDULING_ADMIN |
-| 67 | POST | `/sites/{siteId}/care-spaces` | Crear un espacio de atención bajo una unidad/sitio | ALTO | 8 | sesión (sin roles) |
-| 68 | POST | `/sites/{siteId}/care-spaces/bulk` | Alta masiva de espacios por patrón | ALTO | 8 | sesión (sin roles) |
-| 69 | POST | `/sites/{siteId}/care-spaces/import` | Importar espacios (dryRun=true valida sin escribir) | ALTO | 8 | sesión (sin roles) |
-| 70 | GET | `/sites/{siteId}/cleaning-orders` | Cola de limpieza de una sede | BAJO | 9 | sesión (sin roles) |
-| 71 | POST | `/sites/{siteId}/cleaning-orders` | Crear una orden de limpieza | ALTO | 14 | sesión (sin roles) |
-| 72 | GET | `/sites/{siteId}/clinical-units` | Listar las unidades clínicas de la sede | BAJO | 3 | sesión (sin roles) |
-| 73 | POST | `/sites/{siteId}/clinical-units` | Crear una unidad clínica jerárquica | ALTO | 5 | sesión (sin roles) |
-| 74 | POST | `/sites/{siteId}/declared-capacities` | Declarar capacidad del establecimiento | ALTO | 6 | sesión (sin roles) |
-| 75 | GET | `/sites/{siteId}/diagnostic-equipment` | Equipos diagnósticos de una sede (F5a) | BAJO | 11 | sesión (sin roles) |
-| 76 | GET | `/sites/{siteId}/licenses` | Habilitaciones del establecimiento | BAJO | 3 | sesión (sin roles) |
-| 77 | POST | `/sites/{siteId}/licenses` | Registrar una habilitación del establecimiento | ALTO | 6 | sesión (sin roles) |
-| 78 | GET | `/sites/{siteId}/regulatory` | Datos regulatorios del establecimiento | BAJO | 5 | sesión (sin roles) |
-| 79 | PATCH | `/sites/{siteId}/regulatory` | Editar los datos regulatorios del establecimiento | ALTO | 6 | sesión (sin roles) |
-| 80 | POST | `/sites/{siteId}/regulatory/verify-snis` | Verificar el código SNIS del establecimiento (plataforma) | MEDIO | 6 | SECURITY_ADMIN, SUPERADMIN |
-| 81 | GET | `/sites/{siteId}/sample-collection-points` | Puntos de toma de muestra de una sede (F5b) | BAJO | 12 | sesión (sin roles) |
-| 82 | GET | `/sites/{siteId}/structure` | Estructura de la sede (espacios, unidades, vínculos) | BAJO | 6 | sesión (sin roles) |
-| 83 | POST | `/tenants/{tenantId}/practices` | Crear la práctica y la primera sede de una organización | ALTO | 7 | sesión (sin roles) |
+| 49 | GET | `/practitioners/me/joinable-practices` | Organizaciones a las que puedo pedir vincularme | BAJO | 2 | PRACTITIONER |
+| 50 | GET | `/practitioners/me/role-assignments` | Mis vinculaciones con organizaciones | BAJO | 3 | PRACTITIONER |
+| 51 | POST | `/practitioners/me/role-assignments/{roleId}/accept` | Aceptar una invitación de un centro | MEDIO | 2 | PRACTITIONER |
+| 52 | POST | `/practitioners/me/role-assignments/{roleId}/decline` | Declinar una invitación de un centro | MEDIO | 2 | PRACTITIONER |
+| 53 | POST | `/practitioners/me/sites` | Registrar un consultorio propio | MEDIO | 10 | PRACTITIONER, CLINICIAN |
+| 54 | DELETE | `/practitioners/me/sites/{siteId}` | Retirar un consultorio propio | MEDIO | 4 | PRACTITIONER, CLINICIAN |
+| 55 | PATCH | `/practitioners/me/sites/{siteId}` | Corregir un consultorio propio | MEDIO | 9 | PRACTITIONER, CLINICIAN |
+| 56 | PUT | `/practitioners/me/sites/{siteId}/bank-qr` | Fijar o quitar el QR bancario de una sede | BAJO | 6 | PRACTITIONER, CLINICIAN |
+| 57 | PUT | `/practitioners/me/sites/{siteId}/contact-phone` | Guardar o quitar mi teléfono en una sede | MEDIO | 7 | PRACTITIONER, CLINICIAN |
+| 58 | PUT | `/practitioners/me/sites/{siteId}/logo` | Fijar o quitar el logo del consultorio propio | MEDIO | 9 | PRACTITIONER, CLINICIAN |
+| 59 | POST | `/role-assignments/{roleId}/approve` | Aprobar una vinculación pendiente | BAJO | 3 | sesión (sin roles) |
+| 60 | POST | `/role-assignments/{roleId}/end` | Finalizar una vinculación | BAJO | 3 | SECURITY_ADMIN |
+| 61 | POST | `/role-assignments/{roleId}/reject` | Rechazar una vinculación pendiente | BAJO | 3 | sesión (sin roles) |
+| 62 | POST | `/role-assignments/{roleId}/support-assignments` | Adjuntar personal de apoyo a un rol de profesional | MEDIO | 3 | SECURITY_ADMIN |
+| 63 | POST | `/role-assignments/{roleId}/suspend` | Suspender una vinculación activa | BAJO | 3 | SECURITY_ADMIN |
+| 64 | PATCH | `/site-licenses/{id}` | Editar una habilitación del establecimiento | ALTO | 4 | sesión (sin roles) |
+| 65 | GET | `/sites/{siteId}/bed-board` | Tablero de camas de una sede | BAJO | 15 | sesión (sin roles) |
+| 66 | GET | `/sites/{siteId}/capacity` | Capacidad declarada vs. derivada del establecimiento | BAJO | 5 | sesión (sin roles) |
+| 67 | GET | `/sites/{siteId}/care-spaces` | Listar los espacios de atención de la sede | BAJO | 3 | SECURITY_ADMIN, SURGERY_SCHEDULER, PERIOP_ADMIN, SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SCHEDULING_ADMIN |
+| 68 | POST | `/sites/{siteId}/care-spaces` | Crear un espacio de atención bajo una unidad/sitio | ALTO | 8 | sesión (sin roles) |
+| 69 | POST | `/sites/{siteId}/care-spaces/bulk` | Alta masiva de espacios por patrón | ALTO | 8 | sesión (sin roles) |
+| 70 | POST | `/sites/{siteId}/care-spaces/import` | Importar espacios (dryRun=true valida sin escribir) | ALTO | 8 | sesión (sin roles) |
+| 71 | GET | `/sites/{siteId}/cleaning-orders` | Cola de limpieza de una sede | BAJO | 9 | sesión (sin roles) |
+| 72 | POST | `/sites/{siteId}/cleaning-orders` | Crear una orden de limpieza | ALTO | 14 | sesión (sin roles) |
+| 73 | GET | `/sites/{siteId}/clinical-units` | Listar las unidades clínicas de la sede | BAJO | 3 | sesión (sin roles) |
+| 74 | POST | `/sites/{siteId}/clinical-units` | Crear una unidad clínica jerárquica | ALTO | 5 | sesión (sin roles) |
+| 75 | POST | `/sites/{siteId}/declared-capacities` | Declarar capacidad del establecimiento | ALTO | 6 | sesión (sin roles) |
+| 76 | GET | `/sites/{siteId}/diagnostic-equipment` | Equipos diagnósticos de una sede (F5a) | BAJO | 11 | sesión (sin roles) |
+| 77 | GET | `/sites/{siteId}/licenses` | Habilitaciones del establecimiento | BAJO | 3 | sesión (sin roles) |
+| 78 | POST | `/sites/{siteId}/licenses` | Registrar una habilitación del establecimiento | ALTO | 6 | sesión (sin roles) |
+| 79 | GET | `/sites/{siteId}/regulatory` | Datos regulatorios del establecimiento | BAJO | 5 | sesión (sin roles) |
+| 80 | PATCH | `/sites/{siteId}/regulatory` | Editar los datos regulatorios del establecimiento | ALTO | 6 | sesión (sin roles) |
+| 81 | POST | `/sites/{siteId}/regulatory/verify-snis` | Verificar el código SNIS del establecimiento (plataforma) | MEDIO | 6 | SECURITY_ADMIN, SUPERADMIN |
+| 82 | GET | `/sites/{siteId}/sample-collection-points` | Puntos de toma de muestra de una sede (F5b) | BAJO | 12 | sesión (sin roles) |
+| 83 | GET | `/sites/{siteId}/structure` | Estructura de la sede (espacios, unidades, vínculos) | BAJO | 6 | sesión (sin roles) |
+| 84 | POST | `/tenants/{tenantId}/practices` | Crear la práctica y la primera sede de una organización | ALTO | 7 | sesión (sin roles) |
 
 ---
 
@@ -6011,7 +6012,7 @@ El árbol de decisión completo está en [flujos](../flujos/practice.md).
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PractitionerSitesController.listSites` — `src/modules/practice/controllers/practitioner-sites.controller.ts:87`
+- **Implementación:** `PractitionerSitesController.listSites` — `src/modules/practice/controllers/practitioner-sites.controller.ts:107`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -6021,16 +6022,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /practitioners/{profileId}/sites` la atiende `PractitionerSitesController.listSites` (src/modules/practice/controllers/practitioner-sites.controller.ts:87). Exige sesión con alguno de los roles SECURITY_ADMIN, SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, CLINICIAN, PATIENT. Delega en `PractitionerSitesService.listSitesOfPractitioner`. Lee common.addresses, practice.practice_sites, practice.practices, practice.practitioner_role_assignments, profiles.person_account_links.
+`GET /practitioners/{profileId}/sites` la atiende `PractitionerSitesController.listSites` (src/modules/practice/controllers/practitioner-sites.controller.ts:107). Exige sesión con alguno de los roles SECURITY_ADMIN, SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, CLINICIAN, PATIENT. Delega en `PractitionerSitesService.listSitesOfPractitioner`. Lee common.addresses, practice.practice_sites, practice.practices, practice.practitioner_role_assignments, profiles.person_account_links.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, CLINICIAN, PATIENT | `src/modules/practice/controllers/practitioner-sites.controller.ts:87` |
+| ROL | Alguno de: SECURITY_ADMIN, SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, CLINICIAN, PATIENT | `src/modules/practice/controllers/practitioner-sites.controller.ts:107` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/practice/controllers/practitioner-sites.controller.ts:87` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/practice/controllers/practitioner-sites.controller.ts:107` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -6097,14 +6098,83 @@ El árbol de decisión completo está en [flujos](../flujos/practice.md).
 
 ---
 
-## 49. GET /practitioners/me/role-assignments
+## 49. GET /practitioners/me/joinable-practices
+
+- **Origen:** CONTRATO
+- **Nombre:** Organizaciones a las que puedo pedir vincularme
+- **Bloque:** Práctica y Agenda
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PractitionerSitesController.listJoinablePractices` — `src/modules/practice/controllers/practitioner-sites.controller.ts:93`
+
+### Qué es y para qué sirve (negocio)
+
+Organizaciones a las que puedo pedir vincularme. Dentro del módulo (descripción del modelo, en inglés): «General physical and care-delivery infrastructure for a private office, clinic, medical center, hospital, nursing station, laboratory, imaging site, pharmacy counter, mobile unit or virtual service.» Dominio: Práctica y Agenda.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_14_practice.puml:44`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+
+### Cómo se atiende (sistema)
+
+`GET /practitioners/me/joinable-practices` la atiende `PractitionerSitesController.listJoinablePractices` (src/modules/practice/controllers/practitioner-sites.controller.ts:93). Exige sesión con alguno de los roles PRACTITIONER. Delega en `PracticeWorkforceService.listJoinablePractices`. Lee practice.practices, practice.practitioner_role_assignments.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: PRACTITIONER | `src/modules/practice/controllers/practitioner-sites.controller.ts:93` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `practice.practices` | LEE | LEE | DIRECTA | PractitionerSitesController.listJoinablePractices → PracticeWorkforceService.listJoinablePractices → PracticesRepository.findActive | `src/modules/practice/repositories/practices.repository.ts:81` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | PractitionerSitesController.listJoinablePractices → PracticeWorkforceService.listJoinablePractices → PractitionerRoleAssignmentsRepository.findByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:151` |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<JoinablePracticeResponseDto[]>` · DTO `JoinablePracticeResponseDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | Organización (`practice.practices`). | `src/modules/practice/dto/self-request-role-assignment.dto.ts:115` |
+| `name` | `string` | Sí | — | — | Nombre legible de la organización. | `src/modules/practice/dto/self-request-role-assignment.dto.ts:117` |
+| `practiceType` | `string` | No | formato uuid; admite null | — | Tipo de organización (concepto). | `src/modules/practice/dto/self-request-role-assignment.dto.ts:120` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/practice.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Practice (14) — etapa `ctrl:PractitionerSitesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 50. GET /practitioners/me/role-assignments
 
 - **Origen:** CONTRATO
 - **Nombre:** Mis vinculaciones con organizaciones
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PractitionerSitesController.listMyAssignments` — `src/modules/practice/controllers/practitioner-sites.controller.ts:73`
+- **Implementación:** `PractitionerSitesController.listMyAssignments` — `src/modules/practice/controllers/practitioner-sites.controller.ts:74`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -6114,14 +6184,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /practitioners/me/role-assignments` la atiende `PractitionerSitesController.listMyAssignments` (src/modules/practice/controllers/practitioner-sites.controller.ts:73). Exige sesión con alguno de los roles PRACTITIONER. Delega en `PracticeWorkforceService.listMyAssignments`. Lee community.public_profiles, practice.practices, practice.practitioner_role_assignments.
+`GET /practitioners/me/role-assignments` la atiende `PractitionerSitesController.listMyAssignments` (src/modules/practice/controllers/practitioner-sites.controller.ts:74). Exige sesión con alguno de los roles PRACTITIONER. Delega en `PracticeWorkforceService.listMyAssignments`. Lee community.public_profiles, practice.practices, practice.practitioner_role_assignments.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRACTITIONER | `src/modules/practice/controllers/practitioner-sites.controller.ts:73` |
+| ROL | Alguno de: PRACTITIONER | `src/modules/practice/controllers/practitioner-sites.controller.ts:74` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -6129,7 +6199,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `community.public_profiles` | LEE | LEE | DIRECTA | PractitionerSitesController.listMyAssignments → PracticeWorkforceService.listMyAssignments | `src/modules/practice/services/practice-workforce.service.ts:358` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | PractitionerSitesController.listMyAssignments → PracticeWorkforceService.listMyAssignments | `src/modules/practice/services/practice-workforce.service.ts:359` |
 | `practice.practices` | LEE | LEE | DIRECTA | PractitionerSitesController.listMyAssignments → PracticeWorkforceService.listMyAssignments → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | PractitionerSitesController.listMyAssignments → PracticeWorkforceService.listMyAssignments → PractitionerRoleAssignmentsRepository.findByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:151` |
 
@@ -6176,7 +6246,7 @@ El árbol de decisión completo está en [flujos](../flujos/practice.md).
 
 ---
 
-## 50. POST /practitioners/me/role-assignments/{roleId}/accept
+## 51. POST /practitioners/me/role-assignments/{roleId}/accept
 
 - **Origen:** CONTRATO
 - **Nombre:** Aceptar una invitación de un centro
@@ -6264,7 +6334,7 @@ El árbol de decisión completo está en [flujos](../flujos/practice.md).
 
 ---
 
-## 51. POST /practitioners/me/role-assignments/{roleId}/decline
+## 52. POST /practitioners/me/role-assignments/{roleId}/decline
 
 - **Origen:** CONTRATO
 - **Nombre:** Declinar una invitación de un centro
@@ -6350,14 +6420,14 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 52. POST /practitioners/me/sites
+## 53. POST /practitioners/me/sites
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar un consultorio propio
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PractitionerSitesController.createOwnSite` — `src/modules/practice/controllers/practitioner-sites.controller.ts:115`
+- **Implementación:** `PractitionerSitesController.createOwnSite` — `src/modules/practice/controllers/practitioner-sites.controller.ts:135`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -6367,14 +6437,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /practitioners/me/sites` la atiende `PractitionerSitesController.createOwnSite` (src/modules/practice/controllers/practitioner-sites.controller.ts:115). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `CreateOwnSiteDto` (12 campos, 1 obligatorio). Delega en `PractitionerSitesService.createOwnSite`. Crea filas en common.addresses, practice.practice_sites, practice.practices, practice.practitioner_role_assignments. Lee common.file_versions, common.files, practice.practice_sites, practice.practices, profiles.health_practitioner_profiles, profiles.person_account_links.
+`POST /practitioners/me/sites` la atiende `PractitionerSitesController.createOwnSite` (src/modules/practice/controllers/practitioner-sites.controller.ts:135). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `CreateOwnSiteDto` (12 campos, 1 obligatorio). Delega en `PractitionerSitesService.createOwnSite`. Crea filas en common.addresses, practice.practice_sites, practice.practices, practice.practitioner_role_assignments. Lee common.file_versions, common.files, practice.practice_sites, practice.practices, profiles.health_practitioner_profiles, profiles.person_account_links.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/practice/controllers/practitioner-sites.controller.ts:115` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/practice/controllers/practitioner-sites.controller.ts:135` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
@@ -6486,14 +6556,14 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 53. DELETE /practitioners/me/sites/{siteId}
+## 54. DELETE /practitioners/me/sites/{siteId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Retirar un consultorio propio
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PractitionerSitesController.deleteOwnSite` — `src/modules/practice/controllers/practitioner-sites.controller.ts:241`
+- **Implementación:** `PractitionerSitesController.deleteOwnSite` — `src/modules/practice/controllers/practitioner-sites.controller.ts:261`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -6503,16 +6573,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`DELETE /practitioners/me/sites/{siteId}` la atiende `PractitionerSitesController.deleteOwnSite` (src/modules/practice/controllers/practitioner-sites.controller.ts:241). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Delega en `PractitionerSitesService.deleteOwnSite`. Actualiza practice.practitioner_role_assignments. Lee practice.practitioner_role_assignments, profiles.health_practitioner_profiles, profiles.person_account_links.
+`DELETE /practitioners/me/sites/{siteId}` la atiende `PractitionerSitesController.deleteOwnSite` (src/modules/practice/controllers/practitioner-sites.controller.ts:261). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Delega en `PractitionerSitesService.deleteOwnSite`. Actualiza practice.practitioner_role_assignments. Lee practice.practitioner_role_assignments, profiles.health_practitioner_profiles, profiles.person_account_links.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/practice/controllers/practitioner-sites.controller.ts:241` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/practice/controllers/practitioner-sites.controller.ts:261` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/practice/controllers/practitioner-sites.controller.ts:241` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/practice/controllers/practitioner-sites.controller.ts:261` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -6561,14 +6631,14 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 54. PATCH /practitioners/me/sites/{siteId}
+## 55. PATCH /practitioners/me/sites/{siteId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Corregir un consultorio propio
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PractitionerSitesController.updateOwnSite` — `src/modules/practice/controllers/practitioner-sites.controller.ts:142`
+- **Implementación:** `PractitionerSitesController.updateOwnSite` — `src/modules/practice/controllers/practitioner-sites.controller.ts:162`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -6578,16 +6648,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /practitioners/me/sites/{siteId}` la atiende `PractitionerSitesController.updateOwnSite` (src/modules/practice/controllers/practitioner-sites.controller.ts:142). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `UpdateOwnSiteDto` (10 campos, 0 obligatorios). Delega en `PractitionerSitesService.updateOwnSite`. Crea filas en common.addresses. Actualiza common.addresses, practice.practice_sites. Lee common.addresses, practice.practice_sites, practice.practices, practice.practitioner_role_assignments, profiles.health_practitioner_profiles, profiles.person_account_links.
+`PATCH /practitioners/me/sites/{siteId}` la atiende `PractitionerSitesController.updateOwnSite` (src/modules/practice/controllers/practitioner-sites.controller.ts:162). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `UpdateOwnSiteDto` (10 campos, 0 obligatorios). Delega en `PractitionerSitesService.updateOwnSite`. Crea filas en common.addresses. Actualiza common.addresses, practice.practice_sites. Lee common.addresses, practice.practice_sites, practice.practices, practice.practitioner_role_assignments, profiles.health_practitioner_profiles, profiles.person_account_links.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/practice/controllers/practitioner-sites.controller.ts:142` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/practice/controllers/practitioner-sites.controller.ts:162` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/practice/controllers/practitioner-sites.controller.ts:142` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/practice/controllers/practitioner-sites.controller.ts:162` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
@@ -6696,14 +6766,14 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 55. PUT /practitioners/me/sites/{siteId}/bank-qr
+## 56. PUT /practitioners/me/sites/{siteId}/bank-qr
 
 - **Origen:** CONTRATO
 - **Nombre:** Fijar o quitar el QR bancario de una sede
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PractitionerSitesController.setSiteBankQr` — `src/modules/practice/controllers/practitioner-sites.controller.ts:169`
+- **Implementación:** `PractitionerSitesController.setSiteBankQr` — `src/modules/practice/controllers/practitioner-sites.controller.ts:189`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -6713,16 +6783,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PUT /practitioners/me/sites/{siteId}/bank-qr` la atiende `PractitionerSitesController.setSiteBankQr` (src/modules/practice/controllers/practitioner-sites.controller.ts:169). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `SetSiteBankQrDto` (1 campo, 1 obligatorio). Delega en `PractitionerSitesService.setSiteBankQr`. Lee common.addresses, practice.practice_sites, practice.practices, practice.practitioner_role_assignments, profiles.health_practitioner_profiles, profiles.person_account_links.
+`PUT /practitioners/me/sites/{siteId}/bank-qr` la atiende `PractitionerSitesController.setSiteBankQr` (src/modules/practice/controllers/practitioner-sites.controller.ts:189). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `SetSiteBankQrDto` (1 campo, 1 obligatorio). Delega en `PractitionerSitesService.setSiteBankQr`. Lee common.addresses, practice.practice_sites, practice.practices, practice.practitioner_role_assignments, profiles.health_practitioner_profiles, profiles.person_account_links.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/practice/controllers/practitioner-sites.controller.ts:169` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/practice/controllers/practitioner-sites.controller.ts:189` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/practice/controllers/practitioner-sites.controller.ts:169` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/practice/controllers/practitioner-sites.controller.ts:189` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
@@ -6809,14 +6879,14 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 56. PUT /practitioners/me/sites/{siteId}/contact-phone
+## 57. PUT /practitioners/me/sites/{siteId}/contact-phone
 
 - **Origen:** CONTRATO
 - **Nombre:** Guardar o quitar mi teléfono en una sede
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PractitionerSitesController.setSiteContactPhone` — `src/modules/practice/controllers/practitioner-sites.controller.ts:217`
+- **Implementación:** `PractitionerSitesController.setSiteContactPhone` — `src/modules/practice/controllers/practitioner-sites.controller.ts:237`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -6826,16 +6896,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PUT /practitioners/me/sites/{siteId}/contact-phone` la atiende `PractitionerSitesController.setSiteContactPhone` (src/modules/practice/controllers/practitioner-sites.controller.ts:217). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `SetSiteContactPhoneDto` (1 campo, 1 obligatorio). Delega en `PractitionerSitesService.setSiteContactPhone`. Actualiza practice.practitioner_role_assignments. Lee common.addresses, practice.practice_sites, practice.practices, practice.practitioner_role_assignments, profiles.health_practitioner_profiles, profiles.person_account_links.
+`PUT /practitioners/me/sites/{siteId}/contact-phone` la atiende `PractitionerSitesController.setSiteContactPhone` (src/modules/practice/controllers/practitioner-sites.controller.ts:237). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `SetSiteContactPhoneDto` (1 campo, 1 obligatorio). Delega en `PractitionerSitesService.setSiteContactPhone`. Actualiza practice.practitioner_role_assignments. Lee common.addresses, practice.practice_sites, practice.practices, practice.practitioner_role_assignments, profiles.health_practitioner_profiles, profiles.person_account_links.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/practice/controllers/practitioner-sites.controller.ts:217` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/practice/controllers/practitioner-sites.controller.ts:237` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/practice/controllers/practitioner-sites.controller.ts:217` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/practice/controllers/practitioner-sites.controller.ts:237` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
@@ -6923,14 +6993,14 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 57. PUT /practitioners/me/sites/{siteId}/logo
+## 58. PUT /practitioners/me/sites/{siteId}/logo
 
 - **Origen:** CONTRATO
 - **Nombre:** Fijar o quitar el logo del consultorio propio
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PractitionerSitesController.setSiteLogo` — `src/modules/practice/controllers/practitioner-sites.controller.ts:196`
+- **Implementación:** `PractitionerSitesController.setSiteLogo` — `src/modules/practice/controllers/practitioner-sites.controller.ts:216`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -6940,16 +7010,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PUT /practitioners/me/sites/{siteId}/logo` la atiende `PractitionerSitesController.setSiteLogo` (src/modules/practice/controllers/practitioner-sites.controller.ts:196). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `SetSiteLogoDto` (1 campo, 1 obligatorio). Delega en `PractitionerSitesService.setSiteLogo`. Actualiza practice.practice_sites. Lee common.addresses, common.file_versions, common.files, practice.practice_sites, practice.practices, practice.practitioner_role_assignments, profiles.health_practitioner_profiles, profiles.person_account_links.
+`PUT /practitioners/me/sites/{siteId}/logo` la atiende `PractitionerSitesController.setSiteLogo` (src/modules/practice/controllers/practitioner-sites.controller.ts:216). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `SetSiteLogoDto` (1 campo, 1 obligatorio). Delega en `PractitionerSitesService.setSiteLogo`. Actualiza practice.practice_sites. Lee common.addresses, common.file_versions, common.files, practice.practice_sites, practice.practices, practice.practitioner_role_assignments, profiles.health_practitioner_profiles, profiles.person_account_links.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/practice/controllers/practitioner-sites.controller.ts:196` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/practice/controllers/practitioner-sites.controller.ts:216` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/practice/controllers/practitioner-sites.controller.ts:196` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/practice/controllers/practitioner-sites.controller.ts:216` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
@@ -7040,7 +7110,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 58. POST /role-assignments/{roleId}/approve
+## 59. POST /role-assignments/{roleId}/approve
 
 - **Origen:** CONTRATO
 - **Nombre:** Aprobar una vinculación pendiente
@@ -7142,7 +7212,7 @@ El árbol de decisión completo está en [flujos](../flujos/practice.md).
 
 ---
 
-## 59. POST /role-assignments/{roleId}/end
+## 60. POST /role-assignments/{roleId}/end
 
 - **Origen:** CONTRATO
 - **Nombre:** Finalizar una vinculación
@@ -7242,7 +7312,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 60. POST /role-assignments/{roleId}/reject
+## 61. POST /role-assignments/{roleId}/reject
 
 - **Origen:** CONTRATO
 - **Nombre:** Rechazar una vinculación pendiente
@@ -7344,7 +7414,7 @@ El árbol de decisión completo está en [flujos](../flujos/practice.md).
 
 ---
 
-## 61. POST /role-assignments/{roleId}/support-assignments
+## 62. POST /role-assignments/{roleId}/support-assignments
 
 - **Origen:** CONTRATO
 - **Nombre:** Adjuntar personal de apoyo a un rol de profesional
@@ -7453,7 +7523,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 62. POST /role-assignments/{roleId}/suspend
+## 63. POST /role-assignments/{roleId}/suspend
 
 - **Origen:** CONTRATO
 - **Nombre:** Suspender una vinculación activa
@@ -7553,7 +7623,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 63. PATCH /site-licenses/{id}
+## 64. PATCH /site-licenses/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Editar una habilitación del establecimiento
@@ -7676,7 +7746,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 64. GET /sites/{siteId}/bed-board
+## 65. GET /sites/{siteId}/bed-board
 
 - **Origen:** CONTRATO
 - **Nombre:** Tablero de camas de una sede
@@ -7833,7 +7903,7 @@ El árbol de decisión completo está en [flujos](../flujos/practice.md).
 
 ---
 
-## 65. GET /sites/{siteId}/capacity
+## 66. GET /sites/{siteId}/capacity
 
 - **Origen:** CONTRATO
 - **Nombre:** Capacidad declarada vs. derivada del establecimiento
@@ -7925,7 +7995,7 @@ El árbol de decisión completo está en [flujos](../flujos/practice.md).
 
 ---
 
-## 66. GET /sites/{siteId}/care-spaces
+## 67. GET /sites/{siteId}/care-spaces
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar los espacios de atención de la sede
@@ -8008,7 +8078,7 @@ El árbol de decisión completo está en [flujos](../flujos/practice.md).
 
 ---
 
-## 67. POST /sites/{siteId}/care-spaces
+## 68. POST /sites/{siteId}/care-spaces
 
 - **Origen:** CONTRATO
 - **Nombre:** Crear un espacio de atención bajo una unidad/sitio
@@ -8252,7 +8322,7 @@ El árbol de decisión completo está en [flujos](../flujos/practice.md).
 
 ---
 
-## 68. POST /sites/{siteId}/care-spaces/bulk
+## 69. POST /sites/{siteId}/care-spaces/bulk
 
 - **Origen:** CONTRATO
 - **Nombre:** Alta masiva de espacios por patrón
@@ -8491,7 +8561,7 @@ El árbol de decisión completo está en [flujos](../flujos/practice.md).
 
 ---
 
-## 69. POST /sites/{siteId}/care-spaces/import
+## 70. POST /sites/{siteId}/care-spaces/import
 
 - **Origen:** CONTRATO
 - **Nombre:** Importar espacios (dryRun=true valida sin escribir)
@@ -8614,7 +8684,7 @@ El árbol de decisión completo está en [flujos](../flujos/practice.md).
 
 ---
 
-## 70. GET /sites/{siteId}/cleaning-orders
+## 71. GET /sites/{siteId}/cleaning-orders
 
 - **Origen:** CONTRATO
 - **Nombre:** Cola de limpieza de una sede
@@ -8734,7 +8804,7 @@ El árbol de decisión completo está en [flujos](../flujos/practice.md).
 
 ---
 
-## 71. POST /sites/{siteId}/cleaning-orders
+## 72. POST /sites/{siteId}/cleaning-orders
 
 - **Origen:** CONTRATO
 - **Nombre:** Crear una orden de limpieza
@@ -8880,7 +8950,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 72. GET /sites/{siteId}/clinical-units
+## 73. GET /sites/{siteId}/clinical-units
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar las unidades clínicas de la sede
@@ -8966,7 +9036,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 73. POST /sites/{siteId}/clinical-units
+## 74. POST /sites/{siteId}/clinical-units
 
 - **Origen:** CONTRATO
 - **Nombre:** Crear una unidad clínica jerárquica
@@ -9087,7 +9157,7 @@ El árbol de decisión completo está en [flujos](../flujos/practice.md).
 
 ---
 
-## 74. POST /sites/{siteId}/declared-capacities
+## 75. POST /sites/{siteId}/declared-capacities
 
 - **Origen:** CONTRATO
 - **Nombre:** Declarar capacidad del establecimiento
@@ -9210,7 +9280,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 75. GET /sites/{siteId}/diagnostic-equipment
+## 76. GET /sites/{siteId}/diagnostic-equipment
 
 - **Origen:** CONTRATO
 - **Nombre:** Equipos diagnósticos de una sede (F5a)
@@ -9293,7 +9363,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 76. GET /sites/{siteId}/licenses
+## 77. GET /sites/{siteId}/licenses
 
 - **Origen:** CONTRATO
 - **Nombre:** Habilitaciones del establecimiento
@@ -9381,7 +9451,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 77. POST /sites/{siteId}/licenses
+## 78. POST /sites/{siteId}/licenses
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar una habilitación del establecimiento
@@ -9509,7 +9579,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 78. GET /sites/{siteId}/regulatory
+## 79. GET /sites/{siteId}/regulatory
 
 - **Origen:** CONTRATO
 - **Nombre:** Datos regulatorios del establecimiento
@@ -9616,7 +9686,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 79. PATCH /sites/{siteId}/regulatory
+## 80. PATCH /sites/{siteId}/regulatory
 
 - **Origen:** CONTRATO
 - **Nombre:** Editar los datos regulatorios del establecimiento
@@ -9762,7 +9832,7 @@ El árbol de decisión completo está en [flujos](../flujos/practice.md).
 
 ---
 
-## 80. POST /sites/{siteId}/regulatory/verify-snis
+## 81. POST /sites/{siteId}/regulatory/verify-snis
 
 - **Origen:** CONTRATO
 - **Nombre:** Verificar el código SNIS del establecimiento (plataforma)
@@ -9870,7 +9940,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 81. GET /sites/{siteId}/sample-collection-points
+## 82. GET /sites/{siteId}/sample-collection-points
 
 - **Origen:** CONTRATO
 - **Nombre:** Puntos de toma de muestra de una sede (F5b)
@@ -9955,7 +10025,7 @@ El árbol de decisión completo está en [flujos](../flujos/practice.md).
 
 ---
 
-## 82. GET /sites/{siteId}/structure
+## 83. GET /sites/{siteId}/structure
 
 - **Origen:** CONTRATO
 - **Nombre:** Estructura de la sede (espacios, unidades, vínculos)
@@ -10108,7 +10178,7 @@ El árbol de decisión completo está en [flujos](../flujos/practice.md).
 
 ---
 
-## 83. POST /tenants/{tenantId}/practices
+## 84. POST /tenants/{tenantId}/practices
 
 - **Origen:** CONTRATO
 - **Nombre:** Crear la práctica y la primera sede de una organización

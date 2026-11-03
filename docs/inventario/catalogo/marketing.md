@@ -44,7 +44,7 @@
 | [marketing_campaigns](#marketing_campaigns) | Representa campañas multicanal dirigidas a audiencias permitidas, sin usar PHI clínica para targeting. | 31 | 14 | 8 | COINCIDE |
 | [marketing_touchpoints](#marketing_touchpoints) | Registra interacciones de marketing observadas para conocer contactos entre audiencias y campañas. | 18 | 9 | 4 | COINCIDE |
 | [segment_members](#segment_members) | Asocia miembros a segmentos para medir alcance y preparar campañas sujetas a consentimiento. | 12 | 5 | 3 | COINCIDE |
-| [segments](#segments) | Define audiencias segmentadas a partir de fuentes y reglas autorizadas para comunicación no clínica. | 16 | 9 | 5 | DIVERGE |
+| [segments](#segments) | Define audiencias segmentadas a partir de fuentes y reglas autorizadas para comunicación no clínica. | 16 | 9 | 5 | COINCIDE |
 | [tracked_links](#tracked_links) | Cataloga enlaces con parámetros de seguimiento para medir respuesta a campañas y canales. | 15 | 6 | 6 | COINCIDE |
 
 ## Diagrama entidad-relación
@@ -2967,7 +2967,7 @@ Define audiencias segmentadas a partir de fuentes y reglas autorizadas para comu
 | 13 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 14 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 15 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/marketing/entities/segments.entity.ts:105`)_ | coincide |
-| 16 | `version_number` | `integer` | Opcional | + v4.2.49 (CAN-VERSION-001, issue #57): numero de version. Nullable: lo existente no lo tiene. Sus revisiones viven en audit.segments_history. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_50_marketing.puml:38`)_ | **AUSENTE_EN_ORM** |
+| 16 | `version_number` | `integer` | Opcional | + v4.2.49 (CAN-VERSION-001, issue #57): numero de version. Nullable: lo existente no lo tiene. Sus revisiones viven en audit.segments_history. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_50_marketing.puml:38`)_ | coincide |
 
 #### Relaciones
 

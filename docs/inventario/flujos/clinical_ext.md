@@ -24,11 +24,11 @@ _Fuente: `src/modules/clinical_ext/README.md:3`_
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
 | `ctrl:CareGapsController` | Operaciones de CareGapsController que el README no asigna a un caso de uso | PATCH /care-gaps/{id}/close | CLINICIAN · PRACTITIONER | MEDIO | 2 |
-|  |  | POST /care-gaps/recompute | CLINICIAN · PRACTITIONER | MEDIO | 18 |
+|  |  | POST /care-gaps/recompute | CLINICIAN · PRACTITIONER | MEDIO | 20 |
 |  |  | POST /immunization-schedules | SECURITY_ADMIN | MEDIO | 1 |
-|  |  | POST /patients/{id}/immunization-plan/project | CLINICIAN · PRACTITIONER | MEDIO | 20 |
-| `ctrl:CareTeamsController` | Operaciones de CareTeamsController que el README no asigna a un caso de uso | GET /care-teams | CLINICIAN · PRACTITIONER | BAJO | 19 |
-|  |  | POST /care-teams | CLINICIAN · PRACTITIONER | MEDIO | 18 |
+|  |  | POST /patients/{id}/immunization-plan/project | CLINICIAN · PRACTITIONER | MEDIO | 22 |
+| `ctrl:CareTeamsController` | Operaciones de CareTeamsController que el README no asigna a un caso de uso | GET /care-teams | CLINICIAN · PRACTITIONER | BAJO | 21 |
+|  |  | POST /care-teams | CLINICIAN · PRACTITIONER | MEDIO | 20 |
 |  |  | PATCH /care-teams/{id}/members/{memberId}/set-responsible | CLINICIAN · PRACTITIONER | MEDIO | 3 |
 | `ctrl:CdsController` | Operaciones de CdsController que el README no asigna a un caso de uso | POST /cds-rules | SECURITY_ADMIN | MEDIO | 2 |
 |  |  | POST /cds-rules/{id}/versions/publish | SECURITY_ADMIN | MEDIO | 2 |
@@ -39,18 +39,18 @@ _Fuente: `src/modules/clinical_ext/README.md:3`_
 | `ctrl:ClinicalAlertsController` | Operaciones de ClinicalAlertsController que el README no asigna a un caso de uso | PATCH /clinical-alerts/{id}/acknowledge | CLINICIAN · PRACTITIONER | BAJO | 1 |
 |  |  | PATCH /clinical-alerts/{id}/override | CLINICIAN · PRACTITIONER | BAJO | 1 |
 | `ctrl:OrderSetsController` | Operaciones de OrderSetsController que el README no asigna a un caso de uso | POST /order-sets | SECURITY_ADMIN | MEDIO | 3 |
-|  |  | POST /order-sets/{id}/apply | CLINICIAN · PRACTITIONER | MEDIO | 20 |
+|  |  | POST /order-sets/{id}/apply | CLINICIAN · PRACTITIONER | MEDIO | 22 |
 | `ctrl:PrescriptionFavoritesController` | Operaciones de PrescriptionFavoritesController que el README no asigna a un caso de uso | GET /prescription-favorites | Cualquier sesión válida | BAJO | 3 |
 |  |  | POST /prescription-favorites | Cualquier sesión válida | ALTO | 4 |
 |  |  | DELETE /prescription-favorites/{id} | Cualquier sesión válida | ALTO | 4 |
-| `ctrl:ReferralsController` | Operaciones de ReferralsController que el README no asigna a un caso de uso | GET /referrals | CLINICIAN · PRACTITIONER | BAJO | 22 |
-|  |  | POST /referrals | CLINICIAN · PRACTITIONER | MEDIO | 40 |
-|  |  | GET /referrals/{id} | CLINICIAN · PRACTITIONER | BAJO | 21 |
-|  |  | PATCH /referrals/{id}/arrival | CLINICIAN · PRACTITIONER | MEDIO | 20 |
-|  |  | PATCH /referrals/{id}/cancel | CLINICIAN · PRACTITIONER | MEDIO | 20 |
-|  |  | PATCH /referrals/{id}/counter-referral | CLINICIAN · PRACTITIONER | MEDIO | 20 |
+| `ctrl:ReferralsController` | Operaciones de ReferralsController que el README no asigna a un caso de uso | GET /referrals | CLINICIAN · PRACTITIONER | BAJO | 24 |
+|  |  | POST /referrals | CLINICIAN · PRACTITIONER | MEDIO | 42 |
+|  |  | GET /referrals/{id} | CLINICIAN · PRACTITIONER | BAJO | 23 |
+|  |  | PATCH /referrals/{id}/arrival | CLINICIAN · PRACTITIONER | MEDIO | 22 |
+|  |  | PATCH /referrals/{id}/cancel | CLINICIAN · PRACTITIONER | MEDIO | 22 |
+|  |  | PATCH /referrals/{id}/counter-referral | CLINICIAN · PRACTITIONER | MEDIO | 22 |
 |  |  | PATCH /referrals/{id}/respond | CLINICIAN · PRACTITIONER | MEDIO | 3 |
-|  |  | PATCH /referrals/{id}/transfer | CLINICIAN · PRACTITIONER | BAJO | 19 |
+|  |  | PATCH /referrals/{id}/transfer | CLINICIAN · PRACTITIONER | BAJO | 21 |
 |  |  | GET /referrals/me | CLINICIAN · PRACTITIONER · PATIENT | BAJO | 6 |
 |  |  | GET /referrals/target-services | CLINICIAN · PRACTITIONER | BAJO | 6 |
 |  |  | GET /referrals/targets | CLINICIAN · PRACTITIONER | BAJO | 5 |
@@ -83,16 +83,16 @@ flowchart LR
   t42[("clinical_ext.prescription_favorites")]:::tabla
   t43[("profiles.health_practitioner_profiles")]:::tabla
   t44[("profiles.person_account_links")]:::tabla
-  t11[("+12 tablas más")]
-  t16[("+14 tablas más")]
+  t11[("+14 tablas más")]
+  t16[("+16 tablas más")]
   subgraph s0["ctrl:CareGapsController · Operaciones de CareGapsController que el README no as…"]
     o1["PATCH /care-gaps/{id}/close"]:::op
     o4["POST /care-gaps/recompute"]:::op
     o12["POST /immunization-schedules"]:::op
     o15["POST /patients/{id}/immunization-plan/project"]:::op
   end
-  t18[("+13 tablas más")]
-  t20[("+12 tablas más")]
+  t18[("+15 tablas más")]
+  t20[("+14 tablas más")]
   subgraph s1["ctrl:CareTeamsController · Operaciones de CareTeamsController que el README no…"]
     o17["GET /care-teams"]:::op
     o19["POST /care-teams"]:::op
@@ -110,7 +110,7 @@ flowchart LR
     o33["PATCH /clinical-alerts/{id}/acknowledge"]:::op
     o34["PATCH /clinical-alerts/{id}/override"]:::op
   end
-  t39[("+14 tablas más")]
+  t39[("+16 tablas más")]
   subgraph s4["ctrl:OrderSetsController · Operaciones de OrderSetsController que el README no…"]
     o35["POST /order-sets"]:::op
     o38["POST /order-sets/{id}/apply"]:::op
@@ -240,13 +240,13 @@ flowchart LR
   t40[("clinical_ext.virtual_encounters")]:::tabla
   t41[("clinical.encounter_participants")]:::tabla
   t42[("clinical.encounters")]:::tabla
-  t9[("+16 tablas más")]
-  t11[("+34 tablas más")]
-  t13[("+15 tablas más")]
-  t15[("+14 tablas más")]
-  t17[("+14 tablas más")]
-  t19[("+14 tablas más")]
-  t24[("+13 tablas más")]
+  t9[("+18 tablas más")]
+  t11[("+36 tablas más")]
+  t13[("+17 tablas más")]
+  t15[("+16 tablas más")]
+  t17[("+16 tablas más")]
+  t19[("+16 tablas más")]
+  t24[("+15 tablas más")]
   subgraph s0["ctrl:ReferralsController · Operaciones de ReferralsController que el README no…"]
     o1["GET /referrals"]:::op
     o10["POST /referrals"]:::op

@@ -3,7 +3,7 @@ import { WRITE_MODES } from '../../../system_ops/mutability/mutability.types';
 import { mutabilityDeclared } from './checks/mutability-checks';
 import { NOW, baseInputs } from './fit.fixtures';
 import { MUTABILITY_CLASSES, available } from './fit.types';
-import { MutabilityFitSource } from './mutability-source.adapter';
+import { MutabilityFitSource } from '../../infrastructure/adapters/mutability-fit-source.adapter';
 
 /**
  * `FIT-MUT-001` contra la taxonomía REAL de mutabilidad: el catálogo generado

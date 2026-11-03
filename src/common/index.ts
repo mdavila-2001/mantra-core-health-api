@@ -18,6 +18,7 @@ export { RolesGuard, roleAuthorizesInTenant } from './auth/roles.guard';
 export { CurrentUser } from './auth/current-user.decorator';
 export { Public } from './auth/public.decorator';
 export { Roles } from './auth/roles.decorator';
+export { PatientAnyTenant } from './tenant/patient-any-tenant.decorator';
 export { RequiresVerifiedIdentity } from './auth/requires-verified-identity.decorator';
 export { VerifiedIdentityGuard } from './auth/verified-identity.guard';
 export { authEnvSchema, loadAuthEnv } from './auth/auth.env';

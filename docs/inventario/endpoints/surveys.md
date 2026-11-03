@@ -3,7 +3,7 @@
 # Endpoints del módulo `surveys`
 
 - **Bloque:** —
-- **Operaciones:** 19 (18 en el contrato, 1 sólo en el código)
+- **Operaciones:** 19 (19 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 2 · MEDIO 10 · BAJO 7
 - **Tablas distintas que tocan:** 14
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/surveys.md` (generado aparte por `yarn docs:endpoints:generate`)
@@ -13,7 +13,7 @@
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
 | 1 | POST | `/surveys/assignments` | Asociar una encuesta a una consulta o servicio | MEDIO | 10 | PRACTITIONER, CLINICIAN |
-| 2 | GET | `/surveys/catalog` | Base surveys plus the practitioner's own, with their services. | MEDIO | 11 | PRACTITIONER, CLINICIAN |
+| 2 | GET | `/surveys/catalog` | Catálogo de encuestas con sus servicios | MEDIO | 11 | PRACTITIONER, CLINICIAN |
 | 3 | GET | `/surveys/insights` | Resumen general de mis encuestas (agregado, sin pacientes) | BAJO | 11 | PRACTITIONER, CLINICIAN |
 | 4 | POST | `/surveys/invitations` | Emitir los cuestionarios de una atención completada | MEDIO | 16 | PRACTITIONER, CLINICIAN |
 | 5 | GET | `/surveys/me/invitations` | Ver mis cuestionarios | BAJO | 9 | sesión (sin roles) |
@@ -140,8 +140,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 2. GET /surveys/catalog
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** Base surveys plus the practitioner's own, with their services.
+- **Origen:** CONTRATO
+- **Nombre:** Catálogo de encuestas con sus servicios
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -149,7 +149,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Base surveys plus the practitioner's own, with their services. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
+Catálogo de encuestas con sus servicios. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
 _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
 

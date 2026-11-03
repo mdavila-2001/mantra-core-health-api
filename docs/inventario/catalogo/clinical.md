@@ -2,7 +2,7 @@
 
 # Catálogo del schema `clinical`
 
-- **Tablas:** 30 · **Columnas:** 526 (129 con descripción: 24.5 %) · **Índices:** 329
+- **Tablas:** 30 · **Columnas:** 526 (137 con descripción: 26.0 %) · **Índices:** 329
 - **Dominio:** Clínico y Diagnóstico
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -31,7 +31,7 @@
 | [observation_performers](#observation_performers) | Atribuye quién o qué dispositivo realizó una observación para dar procedencia al resultado clínico. | 8 | 4 | 1 | COINCIDE |
 | [observation_reference_ranges](#observation_reference_ranges) | Asocia rangos de referencia a observaciones o componentes para contextualizar la interpretación de resultados medibles. | 13 | 6 | 1 | COINCIDE |
 | [observations](#observations) | Conserva hallazgos y mediciones clínicas codificados, tipados y vinculables al paciente, encuentro, solicitud y método de obtención. | 44 | 28 | 10 | COINCIDE |
-| [patient_admission_footprints](#patient_admission_footprints) | sin propósito | 13 | 8 | 9 | SIN_ENTIDAD |
+| [patient_admission_footprints](#patient_admission_footprints) | sin propósito | 13 | 8 | 9 | COINCIDE |
 | [placement_incidents](#placement_incidents) | Registra la ubicación de un paciente que viola reglas de compatibilidad de cama (sexo, aislamiento, edad, categoría) con su justificación, autorización y revisión. | 18 | 11 | 8 | COINCIDE |
 | [prescription_signature_policies](#prescription_signature_policies) | Define las reglas de firma aplicables a prescripciones para controlar quién puede validarlas y bajo qué requisitos operativos. | 13 | 1 | 5 | COINCIDE |
 | [procedures](#procedures) | Documenta procedimientos asociados a la atención y enlaza su contexto con el encuentro, las solicitudes y, cuando corresponde, otros procedimientos. | 28 | 15 | 8 | COINCIDE |
@@ -2562,26 +2562,26 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_08_clinical.puml` · **DDL:** `SQL/08_clinical/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `PatientAdmissionFootprints` — `src/modules/clinical/entities/patient_admission_footprints.entity.ts`
 - **Resumen:** 13 columnas · 8 índices · 8 FK salientes · 0 entrantes · 9 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `patient_profile_id` | `uuid` | Clave foránea → profiles.patient_profiles.profile_id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `encounter_id` | `uuid` | Clave foránea → clinical.encounters.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `practice_site_id` | `uuid` | Clave foránea → practice.practice_sites.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `admission_origin_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `identity_verification_method_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `identity_document_type` | `varchar(32)` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `identity_document_last4` | `varchar(4)` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `identity_document_hmac` | `varchar(64)` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `referral_id` | `uuid` | Clave foránea → clinical_ext.referrals.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `recorded_by_user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/clinical/entities/patient_admission_footprints.entity.ts:12`)_ | coincide |
+| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `patient_profile_id` | `uuid` | Clave foránea → profiles.patient_profiles.profile_id; Obligatoria | _sin dato_ | coincide |
+| 4 | `encounter_id` | `uuid` | Clave foránea → clinical.encounters.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `practice_site_id` | `uuid` | Clave foránea → practice.practice_sites.id; Obligatoria | _sin dato_ | coincide |
+| 6 | `admission_origin_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 7 | `identity_verification_method_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 8 | `identity_document_type` | `varchar(32)` | Obligatoria | _sin dato_ | coincide |
+| 9 | `identity_document_last4` | `varchar(4)` | Obligatoria | _sin dato_ | coincide |
+| 10 | `identity_document_hmac` | `varchar(64)` | Obligatoria | _sin dato_ | coincide |
+| 11 | `referral_id` | `uuid` | Clave foránea → clinical_ext.referrals.id; Opcional | _sin dato_ | coincide |
+| 12 | `recorded_by_user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | coincide |
+| 13 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/clinical/entities/patient_admission_footprints.entity.ts:87`)_ | coincide |
 
 #### Relaciones
 
@@ -2956,7 +2956,7 @@ _Sin propósito registrado._
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/clinical/entities/received_services.entity.ts:12`)_ | coincide |
 | 2 | `custodian_tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
 | 3 | `patient_profile_id` | `uuid` | Clave foránea → profiles.patient_profiles.profile_id; Obligatoria | _sin dato_ | coincide |
 | 4 | `encounter_id` | `uuid` | Clave foránea → clinical.encounters.id; Opcional | _sin dato_ | coincide |
@@ -2974,11 +2974,11 @@ _Sin propósito registrado._
 | 16 | `performed_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
 | 17 | `outcome_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
 | 18 | `result_text` | `text` | Opcional | _sin dato_ | coincide |
-| 19 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 20 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 19 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/clinical/entities/received_services.entity.ts:128`)_ | coincide |
+| 20 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/clinical/entities/received_services.entity.ts:134`)_ | coincide |
 | 21 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 22 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 23 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+| 23 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/clinical/entities/received_services.entity.ts:152`)_ | coincide |
 
 #### Relaciones
 
@@ -3079,12 +3079,12 @@ _Sin propósito registrado._
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/clinical/entities/service_request_components.entity.ts:12`)_ | coincide |
 | 2 | `service_request_id` | `uuid` | Clave foránea → clinical.service_requests.id; Obligatoria | _sin dato_ | coincide |
 | 3 | `custodian_tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
 | 4 | `component_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
 | 5 | `ordinal` | `integer` | Obligatoria | _sin dato_ | coincide |
-| 6 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 6 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/clinical/entities/service_request_components.entity.ts:42`)_ | coincide |
 | 7 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 
 #### Relaciones
@@ -3242,13 +3242,13 @@ Representa solicitudes de servicios clínicos —por ejemplo, estudios o procedi
 | 13 | `performer_practitioner_profile_id` | `uuid` | Clave foránea → profiles.health_practitioner_profiles.profile_id; Opcional | _sin dato_ | coincide |
 | 14 | `suggested_practice_site_id` | `uuid` | Clave foránea → practice.practice_sites.id; Opcional | _sin dato_ | coincide |
 | 15 | `previous_diagnostic_report_id` | `uuid` | Clave foránea → clinical.diagnostic_reports.id; Opcional | + v4.2.17 (subtarea 3.2): antiduplicacion de estudios. El informe liberado o final del MISMO estudio (code_concept_id) que el motor encontro dentro de la ventana al pedir. Con duplicate_override_reason NULL la orden nace SR_SATISFIED_BY_PRIOR (satisfecha por ese informe, no facturable); con texto, el medico insistio y la aseguradora lo lee. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_08_clinical.puml:297`)_ | coincide |
-| 16 | `duplicate_override_reason` | `text` | Opcional | Justificación clínica del médico para repetir un estudio duplicado (v4.2.17). `null` cuando la orden reutiliza el informe previo (`previous_diagnostic_report_id` sin justificación) o cuando no hubo duplicado. Un CHECK de base impide el estado inverso: justificación sin informe previo enlazado. _(JSDOC_ENTIDAD, `src/modules/clinical/entities/service_requests.entity.ts:116`)_ | coincide |
+| 16 | `duplicate_override_reason` | `text` | Opcional | Justificación clínica del médico para repetir un estudio duplicado (v4.2.17). `null` cuando la orden reutiliza el informe previo (`previous_diagnostic_report_id` sin justificación) o cuando no hubo duplicado. Un CHECK de base impide el estado inverso: justificación sin informe previo enlazado. _(JSDOC_ENTIDAD, `src/modules/clinical/entities/service_requests.entity.ts:125`)_ | coincide |
 | 17 | `form_instance_id` | `uuid` | Clave foránea → forms.form_instances.id; Opcional | + v4.2.32 (P43): la orden puede salir de la respuesta CERRADA del formulario médico de una consulta. Nullable y sin backfill: desde la historia del paciente se sigue emitiendo sin formulario. La API valida (422) que la instancia exista, esté cerrada y sea del mismo encuentro. FK → forms.form_instances. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_08_clinical.puml:304`)_ | coincide |
-| 18 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/clinical/entities/service_requests.entity.ts:159`)_ | coincide |
-| 19 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/clinical/entities/service_requests.entity.ts:165`)_ | coincide |
+| 18 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/clinical/entities/service_requests.entity.ts:142`)_ | coincide |
+| 19 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/clinical/entities/service_requests.entity.ts:148`)_ | coincide |
 | 20 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 21 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 22 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/clinical/entities/service_requests.entity.ts:183`)_ | coincide |
+| 22 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/clinical/entities/service_requests.entity.ts:166`)_ | coincide |
 | 23 | `suggested_care_space_id` | `uuid` | Clave foránea → practice.care_spaces.id; Opcional | + infraestructura hospitalaria F5b: punto de toma de muestra sugerido (espacio de función SAMPLE_COLLECTION de suggested_practice_site_id; lo valida la API, 422 COLLECTION_POINT_INVALID). Recomendación, no custodia: no concede acceso. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_08_clinical.puml:314`)_ | coincide |
 | 24 | `requisition_id` | `uuid` | Opcional | + v4.2.82 (detalle de la orden de estudios): lo que el laboratorio o el centro de imagen necesita para ejecutar la orden. Todo NULLABLE y sin backfill: una orden anterior no declaró muestra ni región y reconstruirlas sería fabricar un dato clínico. requisition_id agrupa los renglones pedidos juntos (identificador de grupo, sin FK). Muestra (HL7 v2-0487) sólo en laboratorio; modalidad (DICOM CID 29), parte del cuerpo, lateralidad y contraste sólo en imagen: el cruce con la categoría lo valida la API, los CHECK que no leen conceptos viven en el módulo 33. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_08_clinical.puml:318`)_ | coincide |
 | 25 | `specimen_type_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |

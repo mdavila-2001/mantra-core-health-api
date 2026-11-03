@@ -2,7 +2,7 @@
 
 # Catálogo del schema `insurance`
 
-- **Tablas:** 33 · **Columnas:** 475 (111 con descripción: 23.4 %) · **Índices:** 244
+- **Tablas:** 33 · **Columnas:** 475 (123 con descripción: 25.9 %) · **Índices:** 244
 - **Dominio:** Financiero y ERP
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -10,7 +10,7 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [broker_carrier_agreements](#broker_carrier_agreements) | Documenta acuerdos entre corredores y aseguradoras para definir el marco de distribución o servicio. | 20 | 11 | 4 | DIVERGE |
+| [broker_carrier_agreements](#broker_carrier_agreements) | Documenta acuerdos entre corredores y aseguradoras para definir el marco de distribución o servicio. | 20 | 11 | 4 | COINCIDE |
 | [broker_clients](#broker_clients) | Vincula clientes con corredores para organizar la gestión de cobertura y relación de intermediación. | 14 | 9 | 2 | COINCIDE |
 | [broker_commission_statements](#broker_commission_statements) | Conserva estados de comisiones de corredores relacionadas con productos o coberturas intermediadas. | 14 | 6 | 2 | COINCIDE |
 | [claim_adjudication_versions](#claim_adjudication_versions) | Preserva versiones de adjudicación de reclamos para mantener el historial de decisiones del asegurador. | 11 | 4 | 20 | COINCIDE |
@@ -31,10 +31,10 @@
 | [insurance_claims](#insurance_claims) | Representa reclamos presentados a aseguradoras por servicios prestados a pacientes para gestionar reembolso o adjudicación. | 20 | 12 | 27 | COINCIDE |
 | [insurance_plan_benefits](#insurance_plan_benefits) | Detalla prestaciones o límites incluidos en cada plan para respaldar verificación de cobertura. | 18 | 6 | 15 | COINCIDE |
 | [insurance_plans](#insurance_plans) | Define planes de cobertura y sus condiciones generales para determinar beneficios aplicables a pacientes asegurados. | 16 | 7 | 39 | COINCIDE |
-| [insurance_products](#insurance_products) | Cataloga productos de seguro de salud disponibles para contratación y asociación con planes. | 19 | 7 | 35 | DIVERGE |
+| [insurance_products](#insurance_products) | Cataloga productos de seguro de salud disponibles para contratación y asociación con planes. | 19 | 7 | 35 | COINCIDE |
 | [insurance_reconciliation_batches](#insurance_reconciliation_batches) | Agrupa conciliaciones con aseguradoras para comparar reclamos, pagos y registros administrativos. | 16 | 6 | 6 | COINCIDE |
 | [insurance_reconciliation_items](#insurance_reconciliation_items) | Detalla discrepancias o coincidencias procesadas en conciliaciones de seguros. | 14 | 7 | 5 | COINCIDE |
-| [insurance_terms_conditions](#insurance_terms_conditions) | sin propósito | 19 | 11 | 0 | SIN_ENTIDAD |
+| [insurance_terms_conditions](#insurance_terms_conditions) | sin propósito | 19 | 11 | 0 | COINCIDE |
 | [network_provider_memberships](#network_provider_memberships) | Vincula prestadores con redes aseguradoras para resolver participación y vigencia de cobertura dentro de la red. | 20 | 12 | 7 | COINCIDE |
 | [patient_coverages](#patient_coverages) | Registra coberturas de seguro asociadas a pacientes para apoyar elegibilidad, autorización y facturación de atención. | 18 | 10 | 37 | COINCIDE |
 | [patient_explanations_of_benefit](#patient_explanations_of_benefit) | Conserva explicaciones de beneficios dirigidas al paciente para describir cómo se procesó una reclamación y qué cobertura aplicó. | 9 | 7 | 9 | COINCIDE |
@@ -433,12 +433,12 @@ Documenta acuerdos entre corredores y aseguradoras para definir el marco de dist
 | 12 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 13 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 14 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/insurance/entities/broker_carrier_agreements.entity.ts:94`)_ | coincide |
-| 15 | `representation_mode_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | + v4.2.49 (INS-BRK-003 / INS-BRK-004 / INS-BRK-009 / INS-BRK-012, issue #60): el vinculo del broker con una aseguradora. representation_mode_concept_id dice si ofrece como independiente o en representacion de la aseguradora; relationship_type_concept_id es el tipo de relacion (dependiente, asociado, externo, comisionista, representante) y ya no se infiere de commission_model_concept_id. sede, area comercial, supervisor y zona describen donde opera. Nullable: los acuerdos existentes no los declaran. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_26_insurance.puml:85`)_ | **AUSENTE_EN_ORM** |
-| 16 | `relationship_type_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 17 | `branch_id` | `uuid` | Clave foránea → directory.branches.id; Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 18 | `commercial_area` | `varchar` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 19 | `supervisor_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 20 | `assigned_zone` | `varchar` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 15 | `representation_mode_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | + v4.2.49 (INS-BRK-003 / INS-BRK-004 / INS-BRK-009 / INS-BRK-012, issue #60): el vinculo del broker con una aseguradora. representation_mode_concept_id dice si ofrece como independiente o en representacion de la aseguradora; relationship_type_concept_id es el tipo de relacion (dependiente, asociado, externo, comisionista, representante) y ya no se infiere de commission_model_concept_id. sede, area comercial, supervisor y zona describen donde opera. Nullable: los acuerdos existentes no los declaran. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_26_insurance.puml:85`)_ | coincide |
+| 16 | `relationship_type_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 17 | `branch_id` | `uuid` | Clave foránea → directory.branches.id; Opcional | _sin dato_ | coincide |
+| 18 | `commercial_area` | `varchar` | Opcional | _sin dato_ | coincide |
+| 19 | `supervisor_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 20 | `assigned_zone` | `varchar` | Opcional | _sin dato_ | coincide |
 
 #### Relaciones
 
@@ -1525,18 +1525,18 @@ Asocia prestadores de la red a campañas preventivas de una aseguradora, identif
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/insurance/entities/insurance_campaign_partners.entity.ts:13`)_ | coincide |
 | 2 | `insurance_campaign_id` | `uuid` | Clave foránea → insurance.insurance_campaigns.id; Obligatoria | _sin dato_ | coincide |
 | 3 | `partner_role_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
 | 4 | `partner_type_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
 | 5 | `partner_name` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 6 | `partner_tenant_id` | `uuid` | Opcional | _sin dato_ | coincide |
 | 7 | `network_provider_membership_id` | `uuid` | Clave foránea → insurance.network_provider_memberships.id; Opcional | _sin dato_ | coincide |
-| 8 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 9 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 8 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/insurance/entities/insurance_campaign_partners.entity.ts:59`)_ | coincide |
+| 9 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/insurance/entities/insurance_campaign_partners.entity.ts:65`)_ | coincide |
 | 10 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 11 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 12 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+| 12 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/insurance/entities/insurance_campaign_partners.entity.ts:83`)_ | coincide |
 
 #### Relaciones
 
@@ -1616,7 +1616,7 @@ Define campañas preventivas de una aseguradora para organizar acciones de promo
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/insurance/entities/insurance_campaigns.entity.ts:13`)_ | coincide |
 | 2 | `insurance_carrier_id` | `uuid` | Clave foránea → insurance.insurance_carriers.id; Obligatoria | _sin dato_ | coincide |
 | 3 | `code` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 4 | `title` | `varchar` | Obligatoria | _sin dato_ | coincide |
@@ -1628,11 +1628,11 @@ Define campañas preventivas de una aseguradora para organizar acciones de promo
 | 10 | `valid_to` | `date` | Obligatoria | _sin dato_ | coincide |
 | 11 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
 | 12 | `activated_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
-| 13 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 14 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 13 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/insurance/entities/insurance_campaigns.entity.ts:93`)_ | coincide |
+| 14 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/insurance/entities/insurance_campaigns.entity.ts:99`)_ | coincide |
 | 15 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 16 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 17 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+| 17 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/insurance/entities/insurance_campaigns.entity.ts:117`)_ | coincide |
 
 #### Relaciones
 
@@ -1908,7 +1908,7 @@ Detalla servicios, códigos y montos incluidos en reclamos para permitir adjudic
 | 9 | `billed_amount` | `numeric` | Opcional | _sin dato_ | coincide |
 | 10 | `patient_responsibility_amount` | `numeric` | Opcional | _sin dato_ | coincide |
 | 11 | `supporting_clinical_reference` | `varchar` | Opcional | _sin dato_ | coincide |
-| 12 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/insurance/entities/insurance_claim_lines.entity.ts:99`)_ | coincide |
+| 12 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/insurance/entities/insurance_claim_lines.entity.ts:102`)_ | coincide |
 
 #### Relaciones
 
@@ -2003,11 +2003,11 @@ Representa reclamos presentados a aseguradoras por servicios prestados a pacient
 | 13 | `total_amount` | `numeric` | Opcional | _sin dato_ | coincide |
 | 14 | `currency_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
 | 15 | `idempotency_key` | `varchar` | Opcional | _sin dato_ | coincide |
-| 16 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/insurance/entities/insurance_claims.entity.ts:116`)_ | coincide |
-| 17 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/insurance/entities/insurance_claims.entity.ts:122`)_ | coincide |
+| 16 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/insurance/entities/insurance_claims.entity.ts:122`)_ | coincide |
+| 17 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/insurance/entities/insurance_claims.entity.ts:128`)_ | coincide |
 | 18 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 19 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 20 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/insurance/entities/insurance_claims.entity.ts:140`)_ | coincide |
+| 20 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/insurance/entities/insurance_claims.entity.ts:146`)_ | coincide |
 
 #### Relaciones
 
@@ -2343,12 +2343,12 @@ Cataloga productos de seguro de salud disponibles para contratación y asociaci�
 | 11 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 12 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 13 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/insurance/entities/insurance_products.entity.ts:92`)_ | coincide |
-| 14 | `version_number` | `integer` | Opcional | + v4.2.49 (INS-SRV-007 / INS-SRV-013 / INS-SRV-014, issues #57 y #60): version y vigencia del producto (los planes ya tenian vigencia) y sus requisitos de contratacion: edad minima, maxima y requisitos de elegibilidad. Todo nullable: el producto existente no los declara. El historial de versiones vive en audit.insurance_products_history. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_26_insurance.puml:157`)_ | **AUSENTE_EN_ORM** |
-| 15 | `effective_from` | `date` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 16 | `effective_to` | `date` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 17 | `min_age_years` | `integer` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 18 | `max_age_years` | `integer` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 19 | `eligibility_requirements` | `jsonb` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 14 | `version_number` | `integer` | Opcional | + v4.2.49 (INS-SRV-007 / INS-SRV-013 / INS-SRV-014, issues #57 y #60): version y vigencia del producto (los planes ya tenian vigencia) y sus requisitos de contratacion: edad minima, maxima y requisitos de elegibilidad. Todo nullable: el producto existente no los declara. El historial de versiones vive en audit.insurance_products_history. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_26_insurance.puml:157`)_ | coincide |
+| 15 | `effective_from` | `date` | Opcional | _sin dato_ | coincide |
+| 16 | `effective_to` | `date` | Opcional | _sin dato_ | coincide |
+| 17 | `min_age_years` | `integer` | Opcional | _sin dato_ | coincide |
+| 18 | `max_age_years` | `integer` | Opcional | _sin dato_ | coincide |
+| 19 | `eligibility_requirements` | `jsonb` | Opcional | _sin dato_ | coincide |
 
 #### Relaciones
 
@@ -2604,32 +2604,32 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_26_insurance.puml` · **DDL:** `SQL/26_insurance/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `InsuranceTermsConditions` — `src/modules/insurance/entities/insurance_terms_conditions.entity.ts`
 - **Resumen:** 19 columnas · 11 índices · 11 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `insurance_carrier_id` | `uuid` | Clave foránea → insurance.insurance_carriers.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `title` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `version_number` | `integer` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `document_file_id` | `uuid` | Clave foránea → common.files.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `insurance_product_id` | `uuid` | Clave foránea → insurance.insurance_products.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `insurance_plan_id` | `uuid` | Clave foránea → insurance.insurance_plans.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `service_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `contract_id` | `uuid` | Clave foránea → erp.contracts.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `jurisdiction_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `client_type_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `effective_from` | `date` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `effective_to` | `date` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 16 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 17 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 18 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 19 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/insurance/entities/insurance_terms_conditions.entity.ts:12`)_ | coincide |
+| 2 | `insurance_carrier_id` | `uuid` | Clave foránea → insurance.insurance_carriers.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `title` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 4 | `version_number` | `integer` | Obligatoria | _sin dato_ | coincide |
+| 5 | `document_file_id` | `uuid` | Clave foránea → common.files.id; Obligatoria | _sin dato_ | coincide |
+| 6 | `insurance_product_id` | `uuid` | Clave foránea → insurance.insurance_products.id; Opcional | _sin dato_ | coincide |
+| 7 | `insurance_plan_id` | `uuid` | Clave foránea → insurance.insurance_plans.id; Opcional | _sin dato_ | coincide |
+| 8 | `service_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 9 | `contract_id` | `uuid` | Clave foránea → erp.contracts.id; Opcional | _sin dato_ | coincide |
+| 10 | `jurisdiction_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 11 | `client_type_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 12 | `effective_from` | `date` | Obligatoria | _sin dato_ | coincide |
+| 13 | `effective_to` | `date` | Opcional | _sin dato_ | coincide |
+| 14 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 15 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/insurance/entities/insurance_terms_conditions.entity.ts:104`)_ | coincide |
+| 16 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/insurance/entities/insurance_terms_conditions.entity.ts:110`)_ | coincide |
+| 17 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 18 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 19 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/insurance/entities/insurance_terms_conditions.entity.ts:128`)_ | coincide |
 
 #### Relaciones
 
@@ -3251,11 +3251,11 @@ Representa solicitudes de autorización previa para servicios que requieren apro
 | 9 | `priority_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
 | 10 | `submitted_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
 | 11 | `idempotency_key` | `varchar` | Opcional | _sin dato_ | coincide |
-| 12 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/insurance/entities/prior_authorization_requests.entity.ts:91`)_ | coincide |
-| 13 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/insurance/entities/prior_authorization_requests.entity.ts:97`)_ | coincide |
+| 12 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/insurance/entities/prior_authorization_requests.entity.ts:94`)_ | coincide |
+| 13 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/insurance/entities/prior_authorization_requests.entity.ts:100`)_ | coincide |
 | 14 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 15 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 16 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/insurance/entities/prior_authorization_requests.entity.ts:115`)_ | coincide |
+| 16 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/insurance/entities/prior_authorization_requests.entity.ts:118`)_ | coincide |
 
 #### Relaciones
 

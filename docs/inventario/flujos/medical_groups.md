@@ -24,7 +24,7 @@ _Fuente: `src/modules/medical_groups/README.md:3`_
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
 | `ctrl:MedicalGroupsController` | Operaciones de MedicalGroupsController que el README no asigna a un caso de uso | GET /medical-groups | PRACTITIONER · CLINICIAN | BAJO | 5 |
-|  |  | POST /medical-groups | PRACTITIONER · CLINICIAN | MEDIO | 27 |
+|  |  | POST /medical-groups | PRACTITIONER · CLINICIAN | MEDIO | 29 |
 |  |  | DELETE /medical-groups/{id} | PRACTITIONER · CLINICIAN | ALTO | 6 |
 |  |  | GET /medical-groups/{id} | PRACTITIONER · CLINICIAN | MEDIO | 6 |
 |  |  | PATCH /medical-groups/{id} | PRACTITIONER · CLINICIAN | MEDIO | 7 |
@@ -36,7 +36,7 @@ _Fuente: `src/modules/medical_groups/README.md:3`_
 |  |  | POST /medical-groups/{id}/reschedule-requests | PRACTITIONER · CLINICIAN | MEDIO | 6 |
 |  |  | POST /medical-groups/{id}/reschedule-requests/respond | PRACTITIONER · CLINICIAN | MEDIO | 6 |
 |  |  | GET /medical-groups/eligible-members | PRACTITIONER · CLINICIAN | BAJO | 5 |
-|  |  | GET /medical-groups/patients/{patientProfileId}/conditions | PRACTITIONER · CLINICIAN | BAJO | 20 |
+|  |  | GET /medical-groups/patients/{patientProfileId}/conditions | PRACTITIONER · CLINICIAN | BAJO | 22 |
 
 ### Diagrama — etapas `ctrl:MedicalGroupsController`
 
@@ -56,13 +56,13 @@ flowchart LR
   t14[("authz.permissions")]:::tabla
   t17[("practice.practitioner_role_assignments")]:::tabla
   t23[("practice.practices")]:::tabla
-  t15[("+21 tablas más")]
+  t15[("+23 tablas más")]
   t20[("+1 tablas más")]
   t24[("+4 tablas más")]
   t26[("+2 tablas más")]
   t28[("+1 tablas más")]
   t30[("+1 tablas más")]
-  t35[("+14 tablas más")]
+  t35[("+16 tablas más")]
   subgraph s0["ctrl:MedicalGroupsController · Operaciones de MedicalGroupsController que el RE…"]
     o1["GET /medical-groups"]:::op
     o8["POST /medical-groups"]:::op

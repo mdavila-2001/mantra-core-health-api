@@ -889,7 +889,7 @@ Asocia herramientas con componentes para especificar dependencias técnicas de o
 
 | Operación | Efecto | Confianza |
 |---|---|---|
-| GET /admin/ops/tools | LEE | DIRECTA |
+| GET /admin/ops/tool-registry | LEE | DIRECTA |
 | GET /admin/ops/tools/{code} | LEE | DIRECTA |
 
 #### Gobierno
@@ -1364,7 +1364,7 @@ Conserva ejecuciones de verificaciones para mantener historial de resultados de 
 
 | Operación | Efecto | Confianza |
 |---|---|---|
-| GET /admin/ops/tools | LEE | POR_SQL |
+| GET /admin/ops/tool-registry | LEE | POR_SQL |
 | GET /admin/ops/tools/{code} | LEE | DIRECTA |
 | POST /ops/health-checks/{id}/runs | CREA | DIRECTA |
 | POST /ops/health-checks/{id}/runs | LEE | DIRECTA |
@@ -1460,7 +1460,7 @@ Define verificaciones de salud usadas para observar disponibilidad y condiciones
 
 | Operación | Efecto | Confianza |
 |---|---|---|
-| GET /admin/ops/tools | LEE | DIRECTA |
+| GET /admin/ops/tool-registry | LEE | DIRECTA |
 | GET /admin/ops/tools/{code} | LEE | DIRECTA |
 | POST /ops/health-checks/{id}/runs | LEE | DIRECTA |
 
@@ -2958,7 +2958,7 @@ Cataloga componentes lógicos de la plataforma médica para relacionar servicios
 | GET /admin/ops/incidents | LEE | POR_SQL |
 | GET /admin/ops/incidents/{id} | LEE | POR_SQL |
 | GET /admin/ops/readiness | LEE | POR_SQL |
-| GET /admin/ops/tools | LEE | DIRECTA |
+| GET /admin/ops/tool-registry | LEE | DIRECTA |
 | GET /admin/ops/tools/{code} | LEE | DIRECTA |
 | POST /ops/artifacts | LEE | DIRECTA |
 | POST /ops/capacity-plans/{id}/measurements | LEE | DIRECTA |
@@ -3437,7 +3437,7 @@ Registra herramientas y tecnologías operativas disponibles para construir, desp
 | POST /admin/ops/runtime-pieces/discover | CREA | POR_SQL |
 | POST /admin/ops/runtime-pieces/discover | ACTUALIZA | POR_SQL |
 | POST /admin/ops/runtime-pieces/discover | LEE | POR_SQL |
-| GET /admin/ops/tools | LEE | DIRECTA |
+| GET /admin/ops/tool-registry | LEE | DIRECTA |
 | GET /admin/ops/tools/{code} | LEE | DIRECTA |
 | POST /ops/artifacts | LEE | DIRECTA |
 

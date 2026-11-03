@@ -68,7 +68,7 @@ _Fuente: `src/modules/platform_ops/README.md:80`_
 | `UC-46-13` | Versión y ejecución de runbook | POST /ops/runbook-executions | SRE · PLATFORM_ADMIN | MEDIO | 6 |
 |  |  | POST /ops/runbooks/{id}/versions | SRE · PLATFORM_ADMIN | MEDIO | 3 |
 | `UC-46-14` | Cerrar ejercicio de resiliencia | POST /ops/resilience-exercises/{id}/complete | SRE · PLATFORM_ADMIN | MEDIO | 3 |
-| `ctrl:OpsToolsController` | Operaciones de OpsToolsController que el README no asigna a un caso de uso | GET /admin/ops/tools | PLATFORM_ADMIN · SRE · SECURITY_ADMIN · RELEASE_MANAGER · GOVERNANCE_ADMIN | BAJO | 5 |
+| `ctrl:OpsToolsController` | Operaciones de OpsToolsController que el README no asigna a un caso de uso | GET /admin/ops/tool-registry | PLATFORM_ADMIN · SRE · SECURITY_ADMIN · RELEASE_MANAGER · GOVERNANCE_ADMIN | BAJO | 5 |
 |  |  | GET /admin/ops/tools/{code} | PLATFORM_ADMIN · SRE · SECURITY_ADMIN · RELEASE_MANAGER · GOVERNANCE_ADMIN | BAJO | 5 |
 | `ctrl:RuntimePiecesController` | Operaciones de RuntimePiecesController que el README no asigna a un caso de uso | GET /admin/ops/runtime-pieces | PLATFORM_ADMIN · SRE · SECURITY_ADMIN · RELEASE_MANAGER · GOVERNANCE_ADMIN | BAJO | 1 |
 |  |  | GET /admin/ops/runtime-pieces/{id} | PLATFORM_ADMIN · SRE · SECURITY_ADMIN · RELEASE_MANAGER · GOVERNANCE_ADMIN | BAJO | 1 |
@@ -168,7 +168,7 @@ flowchart LR
     o57["POST /ops/resilience-exercises/{id}/complete"]:::op
   end
   subgraph s14["ctrl:OpsToolsController · Operaciones de OpsToolsController que el README no as…"]
-    o60["GET /admin/ops/tools"]:::op
+    o60["GET /admin/ops/tool-registry"]:::op
     o63["GET /admin/ops/tools/{code}"]:::op
   end
   a2 --> o1
@@ -1652,4 +1652,4 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 | Operación | Respuestas posibles | Tablas |
 |---|---|---|
 | GET /admin/ops/runtime-pieces | 200, 401, 403, 429 | 1 |
-| GET /admin/ops/tools | 200, 401, 403, 429 | 5 |
+| GET /admin/ops/tool-registry | 200, 401, 403, 429 | 5 |
