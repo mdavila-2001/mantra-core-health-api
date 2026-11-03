@@ -62,6 +62,7 @@ import {
   DelayBookingDto,
   DelayNoticeResponseDto,
 } from '../dto';
+import { RequirePermission } from '../../../../common/auth/require-permission.decorator';
 
 /** Operaciones sobre una cita ya confirmada. */
 @ApiTags('scheduling-bookings')
@@ -241,6 +242,7 @@ export class SchedulingBookingsController {
   })
   @Post(':id/reject')
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
+  @RequirePermission('scheduling.bookings.reject', { resourceIdParam: 'id' })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Rechazar la solicitud de cita',
@@ -417,6 +419,9 @@ export class SchedulingBookingsController {
   })
   @Post(':id/payment-receipts/:receiptId/reject')
   @Roles('PRACTITIONER', 'SCHEDULING_ADMIN', 'SCHEDULING_AGENT')
+  @RequirePermission('scheduling.bookings_payment_receipts.reject', {
+    resourceIdParam: 'receiptId',
+  })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Rechazar un comprobante de pago',

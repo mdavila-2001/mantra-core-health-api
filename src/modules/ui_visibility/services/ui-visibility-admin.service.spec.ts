@@ -114,6 +114,26 @@ describe('UiVisibilityAdminService', () => {
 
   // ═══ sync ═════════════════════════════════════════════════════════════════
   describe('syncElements', () => {
+    it('el administrador sólo organizacional no registra ni sincroniza el catálogo global', async () => {
+      await expect(
+        svc.createElement(draft('manual.thing'), admin1),
+      ).rejects.toMatchObject({
+        response: { reason: 'UI_CATALOG_GLOBAL_ADMIN_REQUIRED' },
+      });
+      await expect(
+        svc.syncElements({ elements: [draft('manual.thing')] }, admin1),
+      ).rejects.toMatchObject({
+        response: { reason: 'UI_CATALOG_GLOBAL_ADMIN_REQUIRED' },
+      });
+      expect(store.writes).toBe(0);
+    });
+
+    it('un administrador de seguridad global puede mantener el catálogo sin volverse administrador de reglas de toda organización', async () => {
+      const security = { ...admin1, canManageCatalog: true };
+      const element = await svc.createElement(draft('manual.thing'), security);
+      expect(element.key).toBe('manual.thing');
+      expect(security.isPlatform).toBe(false);
+    });
     it('crea los elementos nuevos con source CODE y respeta la jerarquía aunque el hijo venga antes', async () => {
       const res = await seed(
         draft('pharmacy.orders.export-button', {

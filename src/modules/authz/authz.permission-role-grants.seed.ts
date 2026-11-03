@@ -41,8 +41,8 @@ export interface RoleGrantsSeedResult {
  *   revocada— no se inserta otra. Una revocada es una decisión de un administrador y no se
  *   deshace en el siguiente arranque.
  * - **No inventa roles.** Un código sin fila en `authz.roles` se omite y se informa en
- *   `skippedMissingRole`. Es el caso de `SECURITY_ADMIN`, que es un rol global de `iam` y no tiene
- *   fila propia en `authz.roles` (el código está reservado: `ROLE_CODE_RESERVED`).
+ *   `skippedMissingRole`. `SECURITY_ADMIN` usa un descriptor de política no asignable,
+ *   sembrado por IAM_POLICY_ROLE_SEED; su concesión real sigue siendo exclusiva de IAM.
  * - **Requiere los permisos ya persistidos** (los siembra `AuthzPlatformPermissionsSeedService`
  *   justo antes): un permiso que no se encuentra por código se omite.
  *

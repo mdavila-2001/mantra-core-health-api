@@ -370,7 +370,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunitySocialController.unblock` — `src/modules/community/controllers/community-social.controller.ts:325`
+- **Implementación:** `CommunitySocialController.unblock` — `src/modules/community/controllers/community-social.controller.ts:339`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -380,14 +380,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`DELETE /community/blocks` la atiende `CommunitySocialController.unblock` (src/modules/community/controllers/community-social.controller.ts:325). Exige sesión; el controlador no declara roles. Delega en `CommunitySocialService.unblock`. Actualiza community.user_blocks. Lee community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants.
+`DELETE /community/blocks` la atiende `CommunitySocialController.unblock` (src/modules/community/controllers/community-social.controller.ts:339). Exige sesión; el controlador no declara roles. Delega en `CommunitySocialService.unblock`. Actualiza community.user_blocks. Lee community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:325` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:339` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | blockerProfileId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | blockedProfileId (obligatorio) | `contrato (parameters)` |
@@ -449,7 +449,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunitySocialController.listBlocks` — `src/modules/community/controllers/community-social.controller.ts:534`
+- **Implementación:** `CommunitySocialController.listBlocks` — `src/modules/community/controllers/community-social.controller.ts:559`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -459,14 +459,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /community/blocks` la atiende `CommunitySocialController.listBlocks` (src/modules/community/controllers/community-social.controller.ts:534). Exige sesión; el controlador no declara roles. Delega en `CommunitySocialReadService.listBlocks`. Lee community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants.
+`GET /community/blocks` la atiende `CommunitySocialController.listBlocks` (src/modules/community/controllers/community-social.controller.ts:559). Exige sesión; el controlador no declara roles. Delega en `CommunitySocialReadService.listBlocks`. Lee community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:534` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:559` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | profileId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | cursor (obligatorio) | `contrato (parameters)` |
@@ -536,7 +536,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunitySocialController.block` — `src/modules/community/controllers/community-social.controller.ts:272`
+- **Implementación:** `CommunitySocialController.block` — `src/modules/community/controllers/community-social.controller.ts:283`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -546,16 +546,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 ### Cómo se atiende (sistema)
 
-`POST /community/blocks` la atiende `CommunitySocialController.block` (src/modules/community/controllers/community-social.controller.ts:272). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateBlockDto` (3 campos, 2 obligatorios). Delega en `CommunitySocialService.block`. Crea filas en community.user_blocks. Actualiza community.social_follows, community.user_blocks. Lee community.public_profiles, community.social_follows, community.user_blocks, directory.tenant_memberships, directory.tenants.
+`POST /community/blocks` la atiende `CommunitySocialController.block` (src/modules/community/controllers/community-social.controller.ts:283). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateBlockDto` (3 campos, 2 obligatorios). Delega en `CommunitySocialService.block`. Crea filas en community.user_blocks. Actualiza community.social_follows, community.user_blocks. Lee community.public_profiles, community.social_follows, community.user_blocks, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:272` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:283` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -641,7 +641,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** ALTO — Borra filas; Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunitySocialController.unbookmark` — `src/modules/community/controllers/community-social.controller.ts:310`
+- **Implementación:** `CommunitySocialController.unbookmark` — `src/modules/community/controllers/community-social.controller.ts:323`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -651,14 +651,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`DELETE /community/bookmarks` la atiende `CommunitySocialController.unbookmark` (src/modules/community/controllers/community-social.controller.ts:310). Exige sesión; el controlador no declara roles. Delega en `CommunitySocialService.unbookmark`. Borra de community.bookmarks. Lee community.bookmarks, community.public_profiles, directory.tenant_memberships, directory.tenants.
+`DELETE /community/bookmarks` la atiende `CommunitySocialController.unbookmark` (src/modules/community/controllers/community-social.controller.ts:323). Exige sesión; el controlador no declara roles. Delega en `CommunitySocialService.unbookmark`. Borra de community.bookmarks. Lee community.bookmarks, community.public_profiles, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:310` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:323` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | profileId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | bookmarkableType (obligatorio) | `contrato (parameters)` |
@@ -723,7 +723,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunitySocialController.listBookmarks` — `src/modules/community/controllers/community-social.controller.ts:517`
+- **Implementación:** `CommunitySocialController.listBookmarks` — `src/modules/community/controllers/community-social.controller.ts:541`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -733,14 +733,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /community/bookmarks` la atiende `CommunitySocialController.listBookmarks` (src/modules/community/controllers/community-social.controller.ts:517). Exige sesión; el controlador no declara roles. Delega en `CommunitySocialReadService.listBookmarks`. Lee community.bookmarks, community.public_profiles, directory.tenant_memberships, directory.tenants.
+`GET /community/bookmarks` la atiende `CommunitySocialController.listBookmarks` (src/modules/community/controllers/community-social.controller.ts:541). Exige sesión; el controlador no declara roles. Delega en `CommunitySocialReadService.listBookmarks`. Lee community.bookmarks, community.public_profiles, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:517` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:541` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | profileId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | collectionName (obligatorio) | `contrato (parameters)` |
@@ -813,7 +813,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunitySocialController.bookmark` — `src/modules/community/controllers/community-social.controller.ts:240`
+- **Implementación:** `CommunitySocialController.bookmark` — `src/modules/community/controllers/community-social.controller.ts:249`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -823,16 +823,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 ### Cómo se atiende (sistema)
 
-`POST /community/bookmarks` la atiende `CommunitySocialController.bookmark` (src/modules/community/controllers/community-social.controller.ts:240). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateBookmarkDto` (4 campos, 3 obligatorios). Delega en `CommunitySocialService.bookmark`. Crea filas en community.bookmarks. Lee community.bookmarks, community.public_profiles, directory.tenant_memberships, directory.tenants.
+`POST /community/bookmarks` la atiende `CommunitySocialController.bookmark` (src/modules/community/controllers/community-social.controller.ts:249). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateBookmarkDto` (4 campos, 3 obligatorios). Delega en `CommunitySocialService.bookmark`. Crea filas en community.bookmarks. Lee community.bookmarks, community.public_profiles, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:240` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:249` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -916,7 +916,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunitySocialController.createComment` — `src/modules/community/controllers/community-social.controller.ts:207`
+- **Implementación:** `CommunitySocialController.createComment` — `src/modules/community/controllers/community-social.controller.ts:214`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -926,16 +926,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 ### Cómo se atiende (sistema)
 
-`POST /community/comments` la atiende `CommunitySocialController.createComment` (src/modules/community/controllers/community-social.controller.ts:207). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateCommentDto` (14 campos, 4 obligatorios). Delega en `CommunitySocialService.createComment`. Crea filas en community.comment_media, community.comments, community.mentions. Actualiza community.comments. Lee common.file_versions, common.files, community.comments, community.public_profiles, directory.tenant_memberships, directory.tenants.
+`POST /community/comments` la atiende `CommunitySocialController.createComment` (src/modules/community/controllers/community-social.controller.ts:214). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateCommentDto` (14 campos, 4 obligatorios). Delega en `CommunitySocialService.createComment`. Crea filas en community.comment_media, community.comments, community.mentions. Actualiza community.comments. Lee common.file_versions, common.files, community.comments, community.public_profiles, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:207` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:214` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1055,7 +1055,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunitySocialController.getCommentMediaContent` — `src/modules/community/controllers/community-social.controller.ts:468`
+- **Implementación:** `CommunitySocialController.getCommentMediaContent` — `src/modules/community/controllers/community-social.controller.ts:489`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1065,17 +1065,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /community/comments/media/{fileId}/content` la atiende `CommunitySocialController.getCommentMediaContent` (src/modules/community/controllers/community-social.controller.ts:468). Exige sesión; el controlador no declara roles. Delega en `CommunitySocialReadService.getCommentMedia`. Lee common.file_versions, common.files, community.comment_media, community.comments, community.public_profiles, community.social_follows, community.social_posts, community.user_blocks y 2 más.
+`GET /community/comments/media/{fileId}/content` la atiende `CommunitySocialController.getCommentMediaContent` (src/modules/community/controllers/community-social.controller.ts:489). Exige sesión; el controlador no declara roles. Delega en `CommunitySocialReadService.getCommentMedia`. Lee common.file_versions, common.files, community.comment_media, community.comments, community.public_profiles, community.social_follows, community.social_posts, community.user_blocks y 2 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:468` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:489` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | actorProfileId (obligatorio) | `contrato (parameters)` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: fileId | `src/modules/community/controllers/community-social.controller.ts:468` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: fileId | `src/modules/community/controllers/community-social.controller.ts:489` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -1140,7 +1140,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityMessagingController.listConversations` — `src/modules/community/controllers/community-messaging.controller.ts:283`
+- **Implementación:** `CommunityMessagingController.listConversations` — `src/modules/community/controllers/community-messaging.controller.ts:299`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1150,14 +1150,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /community/conversations` la atiende `CommunityMessagingController.listConversations` (src/modules/community/controllers/community-messaging.controller.ts:283). Exige sesión; el controlador no declara roles. Delega en `CommunityMessagingReadService.listConversations`. Lee community.conversation_participants, community.conversations, community.direct_messages, community.public_profiles, directory.tenant_memberships, directory.tenants, profiles.practitioner_admissions.
+`GET /community/conversations` la atiende `CommunityMessagingController.listConversations` (src/modules/community/controllers/community-messaging.controller.ts:299). Exige sesión; el controlador no declara roles. Delega en `CommunityMessagingReadService.listConversations`. Lee community.conversation_participants, community.conversations, community.direct_messages, community.public_profiles, directory.tenant_memberships, directory.tenants, profiles.practitioner_admissions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:283` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:299` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | profileId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
@@ -1242,7 +1242,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/community-pharmacy-inbox.int-spec.ts:161` |
+| INTEGRACION | `test/integration/community-pharmacy-inbox.int-spec.ts:217` |
 | CONTROLADOR | `src/modules/community/controllers/community-messaging.controller.spec.ts:182` |
 
 ### Flujos
@@ -1258,7 +1258,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityMessagingController.createConversation` — `src/modules/community/controllers/community-messaging.controller.ts:70`
+- **Implementación:** `CommunityMessagingController.createConversation` — `src/modules/community/controllers/community-messaging.controller.ts:76`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1268,16 +1268,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /community/conversations` la atiende `CommunityMessagingController.createConversation` (src/modules/community/controllers/community-messaging.controller.ts:70). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateConversationDto` (2 campos, 1 obligatorio). Delega en `CommunityMessagingService.createConversation`. Crea filas en community.conversation_participants, community.conversations. Lee community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants.
+`POST /community/conversations` la atiende `CommunityMessagingController.createConversation` (src/modules/community/controllers/community-messaging.controller.ts:76). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateConversationDto` (2 campos, 1 obligatorio). Delega en `CommunityMessagingService.createConversation`. Crea filas en community.conversation_participants, community.conversations. Lee community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:70` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:76` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1349,8 +1349,8 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/community-pharmacy-inbox.int-spec.ts:138` |
-| INTEGRACION | `test/integration/community-realtime-chat.int-spec.ts:156` |
+| INTEGRACION | `test/integration/community-pharmacy-inbox.int-spec.ts:194` |
+| INTEGRACION | `test/integration/community-realtime-chat.int-spec.ts:160` |
 | CONTROLADOR | `src/modules/community/controllers/community-messaging.controller.spec.ts:66` |
 
 ### Flujos
@@ -1366,7 +1366,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityMessagingController.getAttachmentContent` — `src/modules/community/controllers/community-messaging.controller.ts:246`
+- **Implementación:** `CommunityMessagingController.getAttachmentContent` — `src/modules/community/controllers/community-messaging.controller.ts:261`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1376,17 +1376,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /community/conversations/{conversationId}/attachments/{fileId}/content` la atiende `CommunityMessagingController.getAttachmentContent` (src/modules/community/controllers/community-messaging.controller.ts:246). Exige sesión; el controlador no declara roles. Delega en `CommunityMessagingReadService.getAttachmentContent`. Lee common.file_versions, common.files, community.conversation_participants, community.direct_messages, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants.
+`GET /community/conversations/{conversationId}/attachments/{fileId}/content` la atiende `CommunityMessagingController.getAttachmentContent` (src/modules/community/controllers/community-messaging.controller.ts:261). Exige sesión; el controlador no declara roles. Delega en `CommunityMessagingReadService.getAttachmentContent`. Lee common.file_versions, common.files, community.conversation_participants, community.direct_messages, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:246` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:261` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | profileId (obligatorio) | `contrato (parameters)` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: conversationId, fileId | `src/modules/community/controllers/community-messaging.controller.ts:246` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: conversationId, fileId | `src/modules/community/controllers/community-messaging.controller.ts:261` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -1451,7 +1451,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityMessagingController.listMessages` — `src/modules/community/controllers/community-messaging.controller.ts:300`
+- **Implementación:** `CommunityMessagingController.listMessages` — `src/modules/community/controllers/community-messaging.controller.ts:317`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1461,19 +1461,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /community/conversations/{conversationId}/messages` la atiende `CommunityMessagingController.listMessages` (src/modules/community/controllers/community-messaging.controller.ts:300). Exige sesión; el controlador no declara roles. Delega en `CommunityMessagingReadService.listMessages`. Lee community.conversation_participants, community.conversations, community.direct_messages, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants, profiles.practitioner_admissions.
+`GET /community/conversations/{conversationId}/messages` la atiende `CommunityMessagingController.listMessages` (src/modules/community/controllers/community-messaging.controller.ts:317). Exige sesión; el controlador no declara roles. Delega en `CommunityMessagingReadService.listMessages`. Lee community.conversation_participants, community.conversations, community.direct_messages, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants, profiles.practitioner_admissions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:300` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:317` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | profileId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | cursor (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: conversationId | `src/modules/community/controllers/community-messaging.controller.ts:300` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: conversationId | `src/modules/community/controllers/community-messaging.controller.ts:317` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -1558,7 +1558,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/community-pharmacy-inbox.int-spec.ts:169` |
+| INTEGRACION | `test/integration/community-pharmacy-inbox.int-spec.ts:225` |
 
 ### Flujos
 
@@ -1573,7 +1573,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityMessagingController.sendMessage` — `src/modules/community/controllers/community-messaging.controller.ts:86`
+- **Implementación:** `CommunityMessagingController.sendMessage` — `src/modules/community/controllers/community-messaging.controller.ts:93`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1583,17 +1583,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 ### Cómo se atiende (sistema)
 
-`POST /community/conversations/{conversationId}/messages` la atiende `CommunityMessagingController.sendMessage` (src/modules/community/controllers/community-messaging.controller.ts:86). Exige sesión; el controlador no declara roles. Valida el cuerpo como `SendMessageDto` (5 campos, 1 obligatorio). Delega en `CommunityMessagingService.sendMessage`. Crea filas en community.direct_messages, community.message_receipts, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza community.conversation_participants, community.conversations, iam.devices. Lee common.file_versions, common.files, community.chat_auto_replies, community.conversation_participants, community.conversations, community.direct_messages, community.public_profiles, community.user_blocks y 9 más.
+`POST /community/conversations/{conversationId}/messages` la atiende `CommunityMessagingController.sendMessage` (src/modules/community/controllers/community-messaging.controller.ts:93). Exige sesión; el controlador no declara roles. Valida el cuerpo como `SendMessageDto` (5 campos, 1 obligatorio). Delega en `CommunityMessagingService.sendMessage`. Crea filas en community.direct_messages, community.message_receipts, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza community.conversation_participants, community.conversations, iam.devices. Lee common.file_versions, common.files, community.chat_auto_replies, community.conversation_participants, community.conversations, community.direct_messages, community.public_profiles, community.user_blocks y 9 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:86` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:93` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: conversationId | `src/modules/community/controllers/community-messaging.controller.ts:86` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: conversationId | `src/modules/community/controllers/community-messaging.controller.ts:93` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1691,8 +1691,8 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/community-pharmacy-inbox.int-spec.ts:153` |
-| INTEGRACION | `test/integration/community-realtime-chat.int-spec.ts:249` |
+| INTEGRACION | `test/integration/community-pharmacy-inbox.int-spec.ts:209` |
+| INTEGRACION | `test/integration/community-realtime-chat.int-spec.ts:272` |
 | CONTROLADOR | `src/modules/community/controllers/community-messaging.controller.spec.ts:73` |
 
 ### Flujos
@@ -1708,7 +1708,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityMessagingController.deleteMessage` — `src/modules/community/controllers/community-messaging.controller.ts:121`
+- **Implementación:** `CommunityMessagingController.deleteMessage` — `src/modules/community/controllers/community-messaging.controller.ts:130`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1718,17 +1718,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`DELETE /community/conversations/{conversationId}/messages/{messageId}` la atiende `CommunityMessagingController.deleteMessage` (src/modules/community/controllers/community-messaging.controller.ts:121). Exige sesión; el controlador no declara roles. Delega en `CommunityMessagingService.deleteMessage`. Actualiza community.conversations, community.direct_messages. Lee community.conversation_participants, community.conversations, community.direct_messages, community.public_profiles, directory.tenant_memberships, directory.tenants.
+`DELETE /community/conversations/{conversationId}/messages/{messageId}` la atiende `CommunityMessagingController.deleteMessage` (src/modules/community/controllers/community-messaging.controller.ts:130). Exige sesión; el controlador no declara roles. Delega en `CommunityMessagingService.deleteMessage`. Actualiza community.conversations, community.direct_messages. Lee community.conversation_participants, community.conversations, community.direct_messages, community.public_profiles, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:121` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:130` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | profileId (obligatorio) | `contrato (parameters)` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: conversationId, messageId | `src/modules/community/controllers/community-messaging.controller.ts:121` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: conversationId, messageId | `src/modules/community/controllers/community-messaging.controller.ts:130` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -1797,7 +1797,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityMessagingController.editMessage` — `src/modules/community/controllers/community-messaging.controller.ts:103`
+- **Implementación:** `CommunityMessagingController.editMessage` — `src/modules/community/controllers/community-messaging.controller.ts:111`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1807,17 +1807,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /community/conversations/{conversationId}/messages/{messageId}` la atiende `CommunityMessagingController.editMessage` (src/modules/community/controllers/community-messaging.controller.ts:103). Exige sesión; el controlador no declara roles. Valida el cuerpo como `EditMessageDto` (2 campos, 2 obligatorios). Delega en `CommunityMessagingService.editMessage`. Actualiza community.direct_messages. Lee community.conversation_participants, community.direct_messages, community.public_profiles, directory.tenant_memberships, directory.tenants.
+`PATCH /community/conversations/{conversationId}/messages/{messageId}` la atiende `CommunityMessagingController.editMessage` (src/modules/community/controllers/community-messaging.controller.ts:111). Exige sesión; el controlador no declara roles. Valida el cuerpo como `EditMessageDto` (2 campos, 2 obligatorios). Delega en `CommunityMessagingService.editMessage`. Actualiza community.direct_messages. Lee community.conversation_participants, community.direct_messages, community.public_profiles, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:103` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:111` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: conversationId, messageId | `src/modules/community/controllers/community-messaging.controller.ts:103` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: conversationId, messageId | `src/modules/community/controllers/community-messaging.controller.ts:111` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1914,7 +1914,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityMessagingController.updateParticipant` — `src/modules/community/controllers/community-messaging.controller.ts:161`
+- **Implementación:** `CommunityMessagingController.updateParticipant` — `src/modules/community/controllers/community-messaging.controller.ts:172`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1924,17 +1924,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /community/conversations/{conversationId}/participant` la atiende `CommunityMessagingController.updateParticipant` (src/modules/community/controllers/community-messaging.controller.ts:161). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateParticipantDto` (4 campos, 1 obligatorio). Delega en `CommunityMessagingService.updateParticipant`. Lee community.conversation_participants, community.public_profiles, directory.tenant_memberships, directory.tenants.
+`PATCH /community/conversations/{conversationId}/participant` la atiende `CommunityMessagingController.updateParticipant` (src/modules/community/controllers/community-messaging.controller.ts:172). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateParticipantDto` (4 campos, 1 obligatorio). Delega en `CommunityMessagingService.updateParticipant`. Lee community.conversation_participants, community.public_profiles, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:161` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:172` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: conversationId | `src/modules/community/controllers/community-messaging.controller.ts:161` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: conversationId | `src/modules/community/controllers/community-messaging.controller.ts:172` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2024,7 +2024,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityMessagingController.unpinMessage` — `src/modules/community/controllers/community-messaging.controller.ts:197`
+- **Implementación:** `CommunityMessagingController.unpinMessage` — `src/modules/community/controllers/community-messaging.controller.ts:210`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2034,17 +2034,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`DELETE /community/conversations/{conversationId}/pin` la atiende `CommunityMessagingController.unpinMessage` (src/modules/community/controllers/community-messaging.controller.ts:197). Exige sesión; el controlador no declara roles. Delega en `CommunityMessagingService.unpinMessage`. Actualiza community.conversations. Lee community.conversation_participants, community.conversations, community.public_profiles, directory.tenant_memberships, directory.tenants.
+`DELETE /community/conversations/{conversationId}/pin` la atiende `CommunityMessagingController.unpinMessage` (src/modules/community/controllers/community-messaging.controller.ts:210). Exige sesión; el controlador no declara roles. Delega en `CommunityMessagingService.unpinMessage`. Actualiza community.conversations. Lee community.conversation_participants, community.conversations, community.public_profiles, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:197` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:210` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | profileId (obligatorio) | `contrato (parameters)` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: conversationId | `src/modules/community/controllers/community-messaging.controller.ts:197` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: conversationId | `src/modules/community/controllers/community-messaging.controller.ts:210` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -2108,7 +2108,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityMessagingController.pinMessage` — `src/modules/community/controllers/community-messaging.controller.ts:180`
+- **Implementación:** `CommunityMessagingController.pinMessage` — `src/modules/community/controllers/community-messaging.controller.ts:192`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2118,17 +2118,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /community/conversations/{conversationId}/pin` la atiende `CommunityMessagingController.pinMessage` (src/modules/community/controllers/community-messaging.controller.ts:180). Exige sesión; el controlador no declara roles. Valida el cuerpo como `PinMessageDto` (2 campos, 2 obligatorios). Delega en `CommunityMessagingService.pinMessage`. Actualiza community.conversations. Lee community.conversation_participants, community.conversations, community.direct_messages, community.public_profiles, directory.tenant_memberships, directory.tenants.
+`POST /community/conversations/{conversationId}/pin` la atiende `CommunityMessagingController.pinMessage` (src/modules/community/controllers/community-messaging.controller.ts:192). Exige sesión; el controlador no declara roles. Valida el cuerpo como `PinMessageDto` (2 campos, 2 obligatorios). Delega en `CommunityMessagingService.pinMessage`. Actualiza community.conversations. Lee community.conversation_participants, community.conversations, community.direct_messages, community.public_profiles, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:180` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:192` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: conversationId | `src/modules/community/controllers/community-messaging.controller.ts:180` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: conversationId | `src/modules/community/controllers/community-messaging.controller.ts:192` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2216,7 +2216,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityMessagingController.conversationPresence` — `src/modules/community/controllers/community-messaging.controller.ts:316`
+- **Implementación:** `CommunityMessagingController.conversationPresence` — `src/modules/community/controllers/community-messaging.controller.ts:334`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2226,17 +2226,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /community/conversations/{conversationId}/presence` la atiende `CommunityMessagingController.conversationPresence` (src/modules/community/controllers/community-messaging.controller.ts:316). Exige sesión; el controlador no declara roles. Delega en `CommunityMessagingReadService.conversationPresence`. Lee community.conversation_participants, community.public_profiles, directory.tenant_memberships, directory.tenants.
+`GET /community/conversations/{conversationId}/presence` la atiende `CommunityMessagingController.conversationPresence` (src/modules/community/controllers/community-messaging.controller.ts:334). Exige sesión; el controlador no declara roles. Delega en `CommunityMessagingReadService.conversationPresence`. Lee community.conversation_participants, community.public_profiles, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:316` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:334` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | profileId (obligatorio) | `contrato (parameters)` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: conversationId | `src/modules/community/controllers/community-messaging.controller.ts:316` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: conversationId | `src/modules/community/controllers/community-messaging.controller.ts:334` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -2301,7 +2301,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityMessagingController.markRead` — `src/modules/community/controllers/community-messaging.controller.ts:144`
+- **Implementación:** `CommunityMessagingController.markRead` — `src/modules/community/controllers/community-messaging.controller.ts:154`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2311,17 +2311,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 ### Cómo se atiende (sistema)
 
-`POST /community/conversations/{conversationId}/read` la atiende `CommunityMessagingController.markRead` (src/modules/community/controllers/community-messaging.controller.ts:144). Exige sesión; el controlador no declara roles. Valida el cuerpo como `MarkReadDto` (2 campos, 1 obligatorio). Delega en `CommunityMessagingService.markRead`. Crea filas en community.message_receipts. Actualiza community.conversation_participants. Lee community.conversation_participants, community.conversations, community.direct_messages, community.public_profiles, directory.tenant_memberships, directory.tenants.
+`POST /community/conversations/{conversationId}/read` la atiende `CommunityMessagingController.markRead` (src/modules/community/controllers/community-messaging.controller.ts:154). Exige sesión; el controlador no declara roles. Valida el cuerpo como `MarkReadDto` (2 campos, 1 obligatorio). Delega en `CommunityMessagingService.markRead`. Crea filas en community.message_receipts. Actualiza community.conversation_participants. Lee community.conversation_participants, community.conversations, community.direct_messages, community.public_profiles, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:144` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:154` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: conversationId | `src/modules/community/controllers/community-messaging.controller.ts:144` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: conversationId | `src/modules/community/controllers/community-messaging.controller.ts:154` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2395,7 +2395,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/community-realtime-chat.int-spec.ts:302` |
+| INTEGRACION | `test/integration/community-realtime-chat.int-spec.ts:325` |
 | CONTROLADOR | `src/modules/community/controllers/community-messaging.controller.spec.ts:174` |
 
 ### Flujos
@@ -2411,7 +2411,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityMessagingController.searchContacts` — `src/modules/community/controllers/community-messaging.controller.ts:216`
+- **Implementación:** `CommunityMessagingController.searchContacts` — `src/modules/community/controllers/community-messaging.controller.ts:230`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2421,16 +2421,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /community/conversations/contacts/search` la atiende `CommunityMessagingController.searchContacts` (src/modules/community/controllers/community-messaging.controller.ts:216). Exige sesión; el controlador no declara roles. Valida el cuerpo como `SearchChatContactsRequestDto` (3 campos, 2 obligatorios). Delega en `CommunityMessagingReadService.searchContacts`. Lee community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants.
+`POST /community/conversations/contacts/search` la atiende `CommunityMessagingController.searchContacts` (src/modules/community/controllers/community-messaging.controller.ts:230). Exige sesión; el controlador no declara roles. Valida el cuerpo como `SearchChatContactsRequestDto` (3 campos, 2 obligatorios). Delega en `CommunityMessagingReadService.searchContacts`. Lee community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:216` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:230` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2449,7 +2449,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|---|
 | `profileId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/community/dto/read-messaging.dto.ts:146` |
 | `q` | `string` | Sí | longitud mínima 2; longitud máxima 80 | `@Transform(({ value }: TransformFnParams): unknown => typeof value === 'string' ? value.trim() : (value as unknown), )` `@IsString()` `@MinLength(2)` `@MaxLength(80)` | — | `src/modules/community/dto/read-messaging.dto.ts:156` |
-| `limit` | `object` | No | mínimo 1; máximo 20 | `@Type(() => Number)` `@IsOptional()` `@IsInt()` `@Min(1)` `@Max(20)` | — | `src/modules/community/dto/read-messaging.dto.ts:165` |
+| `limit` | `number` | No | mínimo 1; máximo 20 | `@Type(() => Number)` `@IsOptional()` `@IsInt()` `@Min(1)` `@Max(20)` | — | `src/modules/community/dto/read-messaging.dto.ts:165` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2513,7 +2513,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityTimelineController.getFeed` — `src/modules/community/controllers/community-timeline.controller.ts:34`
+- **Implementación:** `CommunityTimelineController.getFeed` — `src/modules/community/controllers/community-timeline.controller.ts:38`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2523,14 +2523,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /community/feed` la atiende `CommunityTimelineController.getFeed` (src/modules/community/controllers/community-timeline.controller.ts:34). Exige sesión; el controlador no declara roles. Delega en `CommunityTimelineReadService.getFeed`. Lee community.comments, community.feed_items, community.public_profiles, community.reactions, community.social_follows, community.social_posts, community.user_blocks, directory.tenant_memberships y 1 más.
+`GET /community/feed` la atiende `CommunityTimelineController.getFeed` (src/modules/community/controllers/community-timeline.controller.ts:38). Exige sesión; el controlador no declara roles. Delega en `CommunityTimelineReadService.getFeed`. Lee community.comments, community.feed_items, community.public_profiles, community.reactions, community.social_follows, community.social_posts, community.user_blocks, directory.tenant_memberships y 1 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-timeline.controller.ts:34` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-timeline.controller.ts:38` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | profileId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | cursor (obligatorio) | `contrato (parameters)` |
@@ -2629,7 +2629,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunitySocialController.unfollow` — `src/modules/community/controllers/community-social.controller.ts:295`
+- **Implementación:** `CommunitySocialController.unfollow` — `src/modules/community/controllers/community-social.controller.ts:307`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2639,14 +2639,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`DELETE /community/follows` la atiende `CommunitySocialController.unfollow` (src/modules/community/controllers/community-social.controller.ts:295). Exige sesión; el controlador no declara roles. Delega en `CommunitySocialService.unfollow`. Actualiza community.social_follows. Lee community.public_profiles, community.social_follows, directory.tenant_memberships, directory.tenants.
+`DELETE /community/follows` la atiende `CommunitySocialController.unfollow` (src/modules/community/controllers/community-social.controller.ts:307). Exige sesión; el controlador no declara roles. Delega en `CommunitySocialService.unfollow`. Actualiza community.social_follows. Lee community.public_profiles, community.social_follows, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:295` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:307` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | followerProfileId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | followableType (obligatorio) | `contrato (parameters)` |
@@ -2710,7 +2710,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunitySocialController.listFollows` — `src/modules/community/controllers/community-social.controller.ts:502`
+- **Implementación:** `CommunitySocialController.listFollows` — `src/modules/community/controllers/community-social.controller.ts:525`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2720,14 +2720,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /community/follows` la atiende `CommunitySocialController.listFollows` (src/modules/community/controllers/community-social.controller.ts:502). Exige sesión; el controlador no declara roles. Delega en `CommunitySocialReadService.listFollows`. Lee community.public_profiles, community.social_follows, directory.tenant_memberships, directory.tenants.
+`GET /community/follows` la atiende `CommunitySocialController.listFollows` (src/modules/community/controllers/community-social.controller.ts:525). Exige sesión; el controlador no declara roles. Delega en `CommunitySocialReadService.listFollows`. Lee community.public_profiles, community.social_follows, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:502` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:525` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | followerProfileId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | cursor (obligatorio) | `contrato (parameters)` |
@@ -2799,7 +2799,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunitySocialController.follow` — `src/modules/community/controllers/community-social.controller.ts:256`
+- **Implementación:** `CommunitySocialController.follow` — `src/modules/community/controllers/community-social.controller.ts:266`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2809,16 +2809,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 ### Cómo se atiende (sistema)
 
-`POST /community/follows` la atiende `CommunitySocialController.follow` (src/modules/community/controllers/community-social.controller.ts:256). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateFollowDto` (4 campos, 3 obligatorios). Delega en `CommunitySocialService.follow`. Crea filas en community.social_follows. Actualiza community.social_follows. Lee community.public_profiles, community.social_follows, directory.tenant_memberships, directory.tenants.
+`POST /community/follows` la atiende `CommunitySocialController.follow` (src/modules/community/controllers/community-social.controller.ts:266). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateFollowDto` (4 campos, 3 obligatorios). Delega en `CommunitySocialService.follow`. Crea filas en community.social_follows. Actualiza community.social_follows. Lee community.public_profiles, community.social_follows, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:256` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:266` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2905,7 +2905,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityGroupsController.listGroups` — `src/modules/community/controllers/community-groups.controller.ts:188`
+- **Implementación:** `CommunityGroupsController.listGroups` — `src/modules/community/controllers/community-groups.controller.ts:201`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2915,14 +2915,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /community/groups` la atiende `CommunityGroupsController.listGroups` (src/modules/community/controllers/community-groups.controller.ts:188). Exige sesión; el controlador no declara roles. Delega en `CommunityGroupsReadService.listGroups`. Lee clinical.encounters, community.groups, community.public_profiles, community.verified_badges, directory.tenant_memberships.
+`GET /community/groups` la atiende `CommunityGroupsController.listGroups` (src/modules/community/controllers/community-groups.controller.ts:201). Exige sesión; el controlador no declara roles. Delega en `CommunityGroupsReadService.listGroups`. Lee clinical.encounters, community.groups, community.public_profiles, community.verified_badges, directory.tenant_memberships.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-groups.controller.ts:188` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-groups.controller.ts:201` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | tenantId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | topicId (obligatorio) | `contrato (parameters)` |
@@ -3007,7 +3007,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityGroupsController.createGroup` — `src/modules/community/controllers/community-groups.controller.ts:78`
+- **Implementación:** `CommunityGroupsController.createGroup` — `src/modules/community/controllers/community-groups.controller.ts:86`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3017,16 +3017,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /community/groups` la atiende `CommunityGroupsController.createGroup` (src/modules/community/controllers/community-groups.controller.ts:78). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateGroupDto` (7 campos, 2 obligatorios). Delega en `CommunityGroupsService.createGroup`. Crea filas en community.group_members, community.groups. Lee clinical.encounters, community.groups, community.public_profiles, community.topics, community.verified_badges, directory.tenant_memberships, directory.tenants.
+`POST /community/groups` la atiende `CommunityGroupsController.createGroup` (src/modules/community/controllers/community-groups.controller.ts:86). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateGroupDto` (7 campos, 2 obligatorios). Delega en `CommunityGroupsService.createGroup`. Crea filas en community.group_members, community.groups. Lee clinical.encounters, community.groups, community.public_profiles, community.topics, community.verified_badges, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-groups.controller.ts:78` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-groups.controller.ts:86` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3121,7 +3121,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityGroupsController.getGroup` — `src/modules/community/controllers/community-groups.controller.ts:211`
+- **Implementación:** `CommunityGroupsController.getGroup` — `src/modules/community/controllers/community-groups.controller.ts:225`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3131,17 +3131,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /community/groups/{groupId}` la atiende `CommunityGroupsController.getGroup` (src/modules/community/controllers/community-groups.controller.ts:211). Exige sesión; el controlador no declara roles. Delega en `CommunityGroupsReadService.getGroup`. Lee clinical.encounters, community.group_members, community.groups, community.public_profiles, community.verified_badges, directory.tenant_memberships, directory.tenants.
+`GET /community/groups/{groupId}` la atiende `CommunityGroupsController.getGroup` (src/modules/community/controllers/community-groups.controller.ts:225). Exige sesión; el controlador no declara roles. Delega en `CommunityGroupsReadService.getGroup`. Lee clinical.encounters, community.group_members, community.groups, community.public_profiles, community.verified_badges, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-groups.controller.ts:211` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-groups.controller.ts:225` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | actorProfileId (obligatorio) | `contrato (parameters)` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: groupId | `src/modules/community/controllers/community-groups.controller.ts:211` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: groupId | `src/modules/community/controllers/community-groups.controller.ts:225` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -3225,7 +3225,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityGroupsController.listMembers` — `src/modules/community/controllers/community-groups.controller.ts:222`
+- **Implementación:** `CommunityGroupsController.listMembers` — `src/modules/community/controllers/community-groups.controller.ts:237`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3235,20 +3235,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /community/groups/{groupId}/members` la atiende `CommunityGroupsController.listMembers` (src/modules/community/controllers/community-groups.controller.ts:222). Exige sesión; el controlador no declara roles. Delega en `CommunityGroupsReadService.listMembers`. Lee clinical.encounters, community.group_members, community.groups, community.public_profiles, community.verified_badges, directory.tenant_memberships, directory.tenants.
+`GET /community/groups/{groupId}/members` la atiende `CommunityGroupsController.listMembers` (src/modules/community/controllers/community-groups.controller.ts:237). Exige sesión; el controlador no declara roles. Delega en `CommunityGroupsReadService.listMembers`. Lee clinical.encounters, community.group_members, community.groups, community.public_profiles, community.verified_badges, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-groups.controller.ts:222` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-groups.controller.ts:237` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | actorProfileId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | joinStatus (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | cursor (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: groupId | `src/modules/community/controllers/community-groups.controller.ts:222` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: groupId | `src/modules/community/controllers/community-groups.controller.ts:237` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -3324,7 +3324,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityGroupsController.joinGroup` — `src/modules/community/controllers/community-groups.controller.ts:94`
+- **Implementación:** `CommunityGroupsController.joinGroup` — `src/modules/community/controllers/community-groups.controller.ts:103`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3334,17 +3334,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 ### Cómo se atiende (sistema)
 
-`POST /community/groups/{groupId}/members` la atiende `CommunityGroupsController.joinGroup` (src/modules/community/controllers/community-groups.controller.ts:94). Exige sesión; el controlador no declara roles. Valida el cuerpo como `JoinGroupDto` (2 campos, 1 obligatorio). Delega en `CommunityGroupsService.joinGroup`. Crea filas en community.group_members. Actualiza community.group_members, community.groups. Lee clinical.encounters, community.group_members, community.groups, community.public_profiles, community.verified_badges, directory.tenant_memberships, directory.tenants.
+`POST /community/groups/{groupId}/members` la atiende `CommunityGroupsController.joinGroup` (src/modules/community/controllers/community-groups.controller.ts:103). Exige sesión; el controlador no declara roles. Valida el cuerpo como `JoinGroupDto` (2 campos, 1 obligatorio). Delega en `CommunityGroupsService.joinGroup`. Crea filas en community.group_members. Actualiza community.group_members, community.groups. Lee clinical.encounters, community.group_members, community.groups, community.public_profiles, community.verified_badges, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-groups.controller.ts:94` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-groups.controller.ts:103` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: groupId | `src/modules/community/controllers/community-groups.controller.ts:94` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: groupId | `src/modules/community/controllers/community-groups.controller.ts:103` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3435,7 +3435,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityGroupsController.leaveGroup` — `src/modules/community/controllers/community-groups.controller.ts:143`
+- **Implementación:** `CommunityGroupsController.leaveGroup` — `src/modules/community/controllers/community-groups.controller.ts:154`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3445,16 +3445,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`DELETE /community/groups/{groupId}/members/{member}` la atiende `CommunityGroupsController.leaveGroup` (src/modules/community/controllers/community-groups.controller.ts:143). Exige sesión; el controlador no declara roles. Delega en `CommunityGroupsService.leaveGroup`. Actualiza community.group_members, community.groups. Lee clinical.encounters, community.group_members, community.groups, community.public_profiles, community.verified_badges, directory.tenant_memberships, directory.tenants.
+`DELETE /community/groups/{groupId}/members/{member}` la atiende `CommunityGroupsController.leaveGroup` (src/modules/community/controllers/community-groups.controller.ts:154). Exige sesión; el controlador no declara roles. Delega en `CommunityGroupsService.leaveGroup`. Actualiza community.group_members, community.groups. Lee clinical.encounters, community.group_members, community.groups, community.public_profiles, community.verified_badges, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-groups.controller.ts:143` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-groups.controller.ts:154` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: groupId, member | `src/modules/community/controllers/community-groups.controller.ts:143` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: groupId, member | `src/modules/community/controllers/community-groups.controller.ts:154` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -3523,7 +3523,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityGroupsController.updateMember` — `src/modules/community/controllers/community-groups.controller.ts:111`
+- **Implementación:** `CommunityGroupsController.updateMember` — `src/modules/community/controllers/community-groups.controller.ts:121`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3533,17 +3533,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /community/groups/{groupId}/members/{member}` la atiende `CommunityGroupsController.updateMember` (src/modules/community/controllers/community-groups.controller.ts:111). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateGroupMemberDto` (3 campos, 0 obligatorios). Delega en `CommunityGroupsService.updateMember`. Crea filas en messaging.notification_requests. Actualiza community.group_members. Lee clinical.encounters, community.group_members, community.groups, community.public_profiles, community.verified_badges, directory.tenant_memberships, directory.tenants, messaging.message_channels y 3 más.
+`PATCH /community/groups/{groupId}/members/{member}` la atiende `CommunityGroupsController.updateMember` (src/modules/community/controllers/community-groups.controller.ts:121). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateGroupMemberDto` (3 campos, 0 obligatorios). Delega en `CommunityGroupsService.updateMember`. Crea filas en messaging.notification_requests. Actualiza community.group_members. Lee clinical.encounters, community.group_members, community.groups, community.public_profiles, community.verified_badges, directory.tenant_memberships, directory.tenants, messaging.message_channels y 3 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-groups.controller.ts:111` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-groups.controller.ts:121` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: groupId, member | `src/modules/community/controllers/community-groups.controller.ts:111` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: groupId, member | `src/modules/community/controllers/community-groups.controller.ts:121` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3639,7 +3639,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityGroupsController.listWall` — `src/modules/community/controllers/community-groups.controller.ts:242`
+- **Implementación:** `CommunityGroupsController.listWall` — `src/modules/community/controllers/community-groups.controller.ts:258`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3649,19 +3649,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /community/groups/{groupId}/posts` la atiende `CommunityGroupsController.listWall` (src/modules/community/controllers/community-groups.controller.ts:242). Exige sesión; el controlador no declara roles. Delega en `CommunityGroupWallService.listWall`. Lee clinical.encounters, community.comments, community.group_members, community.groups, community.public_profiles, community.verified_badges, directory.tenant_memberships, directory.tenants.
+`GET /community/groups/{groupId}/posts` la atiende `CommunityGroupsController.listWall` (src/modules/community/controllers/community-groups.controller.ts:258). Exige sesión; el controlador no declara roles. Delega en `CommunityGroupWallService.listWall`. Lee clinical.encounters, community.comments, community.group_members, community.groups, community.public_profiles, community.verified_badges, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-groups.controller.ts:242` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-groups.controller.ts:258` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | actorProfileId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | cursor (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: groupId | `src/modules/community/controllers/community-groups.controller.ts:242` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: groupId | `src/modules/community/controllers/community-groups.controller.ts:258` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -3739,7 +3739,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityGroupsController.createGroupPost` — `src/modules/community/controllers/community-groups.controller.ts:164`
+- **Implementación:** `CommunityGroupsController.createGroupPost` — `src/modules/community/controllers/community-groups.controller.ts:176`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3749,17 +3749,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /community/groups/{groupId}/posts` la atiende `CommunityGroupsController.createGroupPost` (src/modules/community/controllers/community-groups.controller.ts:164). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateGroupPostDto` (3 campos, 2 obligatorios). Delega en `CommunityGroupWallService.createPost`. Crea filas en community.comments, messaging.notification_requests. Actualiza community.comments. Lee clinical.encounters, community.comments, community.group_members, community.groups, community.public_profiles, community.verified_badges, directory.tenant_memberships, directory.tenants y 4 más.
+`POST /community/groups/{groupId}/posts` la atiende `CommunityGroupsController.createGroupPost` (src/modules/community/controllers/community-groups.controller.ts:176). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateGroupPostDto` (3 campos, 2 obligatorios). Delega en `CommunityGroupWallService.createPost`. Crea filas en community.comments, messaging.notification_requests. Actualiza community.comments. Lee clinical.encounters, community.comments, community.group_members, community.groups, community.public_profiles, community.verified_badges, directory.tenant_memberships, directory.tenants y 4 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-groups.controller.ts:164` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-groups.controller.ts:176` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: groupId | `src/modules/community/controllers/community-groups.controller.ts:164` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: groupId | `src/modules/community/controllers/community-groups.controller.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3864,7 +3864,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityModerationController.listAppeals` — `src/modules/community/controllers/community-moderation.controller.ts:182`
+- **Implementación:** `CommunityModerationController.listAppeals` — `src/modules/community/controllers/community-moderation.controller.ts:189`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3874,14 +3874,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /community/moderation/appeals` la atiende `CommunityModerationController.listAppeals` (src/modules/community/controllers/community-moderation.controller.ts:182). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `CommunityModerationReadService.listAppeals`. Lee community.moderation_appeals, community.moderation_decisions.
+`GET /community/moderation/appeals` la atiende `CommunityModerationController.listAppeals` (src/modules/community/controllers/community-moderation.controller.ts:189). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `CommunityModerationReadService.listAppeals`. Lee community.moderation_appeals, community.moderation_decisions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/community/controllers/community-moderation.controller.ts:182` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/community/controllers/community-moderation.controller.ts:189` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3962,7 +3962,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityModerationController.resolveAppeal` — `src/modules/community/controllers/community-moderation.controller.ts:112`
+- **Implementación:** `CommunityModerationController.resolveAppeal` — `src/modules/community/controllers/community-moderation.controller.ts:119`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3972,17 +3972,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /community/moderation/appeals/{appealId}/resolve` la atiende `CommunityModerationController.resolveAppeal` (src/modules/community/controllers/community-moderation.controller.ts:112). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CommunityResolveAppealDto` (1 campo, 1 obligatorio). Delega en `CommunityModerationService.resolveAppeal`. Actualiza community.moderation_appeals, community.moderation_queue. Lee community.moderation_appeals, community.moderation_decisions, community.moderation_queue.
+`POST /community/moderation/appeals/{appealId}/resolve` la atiende `CommunityModerationController.resolveAppeal` (src/modules/community/controllers/community-moderation.controller.ts:119). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CommunityResolveAppealDto` (1 campo, 1 obligatorio). Delega en `CommunityModerationService.resolveAppeal`. Actualiza community.moderation_appeals, community.moderation_queue. Lee community.moderation_appeals, community.moderation_decisions, community.moderation_queue.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/community/controllers/community-moderation.controller.ts:112` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/community/controllers/community-moderation.controller.ts:119` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: appealId | `src/modules/community/controllers/community-moderation.controller.ts:112` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: appealId | `src/modules/community/controllers/community-moderation.controller.ts:119` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4065,7 +4065,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityModerationController.listDecisions` — `src/modules/community/controllers/community-moderation.controller.ts:169`
+- **Implementación:** `CommunityModerationController.listDecisions` — `src/modules/community/controllers/community-moderation.controller.ts:176`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -4075,14 +4075,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /community/moderation/decisions` la atiende `CommunityModerationController.listDecisions` (src/modules/community/controllers/community-moderation.controller.ts:169). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `CommunityModerationReadService.listDecisions`. Lee community.moderation_decisions.
+`GET /community/moderation/decisions` la atiende `CommunityModerationController.listDecisions` (src/modules/community/controllers/community-moderation.controller.ts:176). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `CommunityModerationReadService.listDecisions`. Lee community.moderation_decisions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/community/controllers/community-moderation.controller.ts:169` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/community/controllers/community-moderation.controller.ts:176` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4152,7 +4152,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityModerationController.appeal` — `src/modules/community/controllers/community-moderation.controller.ts:95`
+- **Implementación:** `CommunityModerationController.appeal` — `src/modules/community/controllers/community-moderation.controller.ts:101`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -4162,17 +4162,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 ### Cómo se atiende (sistema)
 
-`POST /community/moderation/decisions/{decisionId}/appeal` la atiende `CommunityModerationController.appeal` (src/modules/community/controllers/community-moderation.controller.ts:95). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateAppealDto` (2 campos, 2 obligatorios). Delega en `CommunityModerationService.appeal`. Crea filas en community.moderation_appeals, community.moderation_queue. Lee community.moderation_appeals, community.moderation_decisions, community.moderation_queue, community.moderation_strikes, community.public_profiles, directory.tenant_memberships, directory.tenants.
+`POST /community/moderation/decisions/{decisionId}/appeal` la atiende `CommunityModerationController.appeal` (src/modules/community/controllers/community-moderation.controller.ts:101). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateAppealDto` (2 campos, 2 obligatorios). Delega en `CommunityModerationService.appeal`. Crea filas en community.moderation_appeals, community.moderation_queue. Lee community.moderation_appeals, community.moderation_decisions, community.moderation_queue, community.moderation_strikes, community.public_profiles, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-moderation.controller.ts:95` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-moderation.controller.ts:101` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: decisionId | `src/modules/community/controllers/community-moderation.controller.ts:95` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: decisionId | `src/modules/community/controllers/community-moderation.controller.ts:101` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4262,7 +4262,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityModerationController.listMyDecisions` — `src/modules/community/controllers/community-moderation.controller.ts:154`
+- **Implementación:** `CommunityModerationController.listMyDecisions` — `src/modules/community/controllers/community-moderation.controller.ts:161`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -4272,14 +4272,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /community/moderation/decisions/mine` la atiende `CommunityModerationController.listMyDecisions` (src/modules/community/controllers/community-moderation.controller.ts:154). Exige sesión; el controlador no declara roles. Delega en `CommunityModerationReadService.listMyDecisions`. Lee community.moderation_appeals, community.moderation_decisions, community.moderation_strikes, community.public_profiles, directory.tenant_memberships, directory.tenants.
+`GET /community/moderation/decisions/mine` la atiende `CommunityModerationController.listMyDecisions` (src/modules/community/controllers/community-moderation.controller.ts:161). Exige sesión; el controlador no declara roles. Delega en `CommunityModerationReadService.listMyDecisions`. Lee community.moderation_appeals, community.moderation_decisions, community.moderation_strikes, community.public_profiles, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-moderation.controller.ts:154` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-moderation.controller.ts:161` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | profileId (obligatorio) | `contrato (parameters)` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
@@ -4353,7 +4353,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityModerationController.listQueue` — `src/modules/community/controllers/community-moderation.controller.ts:136`
+- **Implementación:** `CommunityModerationController.listQueue` — `src/modules/community/controllers/community-moderation.controller.ts:143`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -4363,14 +4363,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /community/moderation/queue` la atiende `CommunityModerationController.listQueue` (src/modules/community/controllers/community-moderation.controller.ts:136). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `CommunityModerationReadService.listQueue`. Lee community.content_reports, community.moderation_queue.
+`GET /community/moderation/queue` la atiende `CommunityModerationController.listQueue` (src/modules/community/controllers/community-moderation.controller.ts:143). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `CommunityModerationReadService.listQueue`. Lee community.content_reports, community.moderation_queue.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/community/controllers/community-moderation.controller.ts:136` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/community/controllers/community-moderation.controller.ts:143` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4449,7 +4449,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityModerationController.decide` — `src/modules/community/controllers/community-moderation.controller.ts:77`
+- **Implementación:** `CommunityModerationController.decide` — `src/modules/community/controllers/community-moderation.controller.ts:83`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -4459,17 +4459,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 ### Cómo se atiende (sistema)
 
-`POST /community/moderation/queue/{queueId}/decision` la atiende `CommunityModerationController.decide` (src/modules/community/controllers/community-moderation.controller.ts:77). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ModerationDecisionDto` (4 campos, 2 obligatorios). Delega en `CommunityModerationService.decide`. Crea filas en community.moderation_decisions, community.moderation_strikes. Actualiza community.content_reports, community.moderation_queue. Lee community.content_reports, community.moderation_queue.
+`POST /community/moderation/queue/{queueId}/decision` la atiende `CommunityModerationController.decide` (src/modules/community/controllers/community-moderation.controller.ts:83). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ModerationDecisionDto` (4 campos, 2 obligatorios). Delega en `CommunityModerationService.decide`. Crea filas en community.moderation_decisions, community.moderation_strikes. Actualiza community.content_reports, community.moderation_queue. Lee community.content_reports, community.moderation_queue.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/community/controllers/community-moderation.controller.ts:77` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/community/controllers/community-moderation.controller.ts:83` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: queueId | `src/modules/community/controllers/community-moderation.controller.ts:77` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: queueId | `src/modules/community/controllers/community-moderation.controller.ts:83` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4562,7 +4562,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityTimelineController.listNotifications` — `src/modules/community/controllers/community-timeline.controller.ts:49`
+- **Implementación:** `CommunityTimelineController.listNotifications` — `src/modules/community/controllers/community-timeline.controller.ts:54`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -4572,14 +4572,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /community/notifications` la atiende `CommunityTimelineController.listNotifications` (src/modules/community/controllers/community-timeline.controller.ts:49). Exige sesión; el controlador no declara roles. Delega en `CommunityTimelineReadService.listNotifications`. Lee community.public_profiles, community.social_notifications, directory.tenant_memberships, directory.tenants.
+`GET /community/notifications` la atiende `CommunityTimelineController.listNotifications` (src/modules/community/controllers/community-timeline.controller.ts:54). Exige sesión; el controlador no declara roles. Delega en `CommunityTimelineReadService.listNotifications`. Lee community.public_profiles, community.social_notifications, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-timeline.controller.ts:49` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-timeline.controller.ts:54` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | profileId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | cursor (obligatorio) | `contrato (parameters)` |
@@ -4657,7 +4657,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityPollsController.getPoll` — `src/modules/community/controllers/community-polls.controller.ts:74`
+- **Implementación:** `CommunityPollsController.getPoll` — `src/modules/community/controllers/community-polls.controller.ts:85`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -4667,17 +4667,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /community/polls/{pollId}` la atiende `CommunityPollsController.getPoll` (src/modules/community/controllers/community-polls.controller.ts:74). Exige sesión; el controlador no declara roles. Delega en `CommunityPollsReadService.getPoll`. Lee community.poll_options, community.poll_votes, community.polls, community.public_profiles, community.social_follows, community.social_posts, community.user_blocks, directory.tenant_memberships y 1 más.
+`GET /community/polls/{pollId}` la atiende `CommunityPollsController.getPoll` (src/modules/community/controllers/community-polls.controller.ts:85). Exige sesión; el controlador no declara roles. Delega en `CommunityPollsReadService.getPoll`. Lee community.poll_options, community.poll_votes, community.polls, community.public_profiles, community.social_follows, community.social_posts, community.user_blocks, directory.tenant_memberships y 1 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-polls.controller.ts:74` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-polls.controller.ts:85` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | actorProfileId (obligatorio) | `contrato (parameters)` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pollId | `src/modules/community/controllers/community-polls.controller.ts:74` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pollId | `src/modules/community/controllers/community-polls.controller.ts:85` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -4753,7 +4753,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityPollsController.vote` — `src/modules/community/controllers/community-polls.controller.ts:57`
+- **Implementación:** `CommunityPollsController.vote` — `src/modules/community/controllers/community-polls.controller.ts:67`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -4763,17 +4763,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 ### Cómo se atiende (sistema)
 
-`POST /community/polls/{pollId}/votes` la atiende `CommunityPollsController.vote` (src/modules/community/controllers/community-polls.controller.ts:57). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateVoteDto` (2 campos, 2 obligatorios). Delega en `CommunityPollsService.vote`. Crea filas en community.poll_votes. Actualiza community.poll_options, community.polls. Lee community.poll_options, community.poll_votes, community.polls, community.public_profiles, community.social_follows, community.social_posts, community.user_blocks, directory.tenant_memberships y 1 más.
+`POST /community/polls/{pollId}/votes` la atiende `CommunityPollsController.vote` (src/modules/community/controllers/community-polls.controller.ts:67). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateVoteDto` (2 campos, 2 obligatorios). Delega en `CommunityPollsService.vote`. Crea filas en community.poll_votes. Actualiza community.poll_options, community.polls. Lee community.poll_options, community.poll_votes, community.polls, community.public_profiles, community.social_follows, community.social_posts, community.user_blocks, directory.tenant_memberships y 1 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-polls.controller.ts:57` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-polls.controller.ts:67` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pollId | `src/modules/community/controllers/community-polls.controller.ts:57` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pollId | `src/modules/community/controllers/community-polls.controller.ts:67` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4867,7 +4867,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunitySocialController.getPost` — `src/modules/community/controllers/community-social.controller.ts:432`
+- **Implementación:** `CommunitySocialController.getPost` — `src/modules/community/controllers/community-social.controller.ts:451`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -4877,17 +4877,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /community/posts/{postId}` la atiende `CommunitySocialController.getPost` (src/modules/community/controllers/community-social.controller.ts:432). Exige sesión; el controlador no declara roles. Delega en `CommunitySocialReadService.getPost`. Lee community.comments, community.content_hashtags, community.hashtags, community.mentions, community.post_media, community.public_profiles, community.reactions, community.social_follows y 4 más.
+`GET /community/posts/{postId}` la atiende `CommunitySocialController.getPost` (src/modules/community/controllers/community-social.controller.ts:451). Exige sesión; el controlador no declara roles. Delega en `CommunitySocialReadService.getPost`. Lee community.comments, community.content_hashtags, community.hashtags, community.mentions, community.post_media, community.public_profiles, community.reactions, community.social_follows y 4 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:432` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:451` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | actorProfileId (obligatorio) | `contrato (parameters)` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: postId | `src/modules/community/controllers/community-social.controller.ts:432` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: postId | `src/modules/community/controllers/community-social.controller.ts:451` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -4969,7 +4969,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunitySocialController.listPostComments` — `src/modules/community/controllers/community-social.controller.ts:443`
+- **Implementación:** `CommunitySocialController.listPostComments` — `src/modules/community/controllers/community-social.controller.ts:463`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -4979,19 +4979,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /community/posts/{postId}/comments` la atiende `CommunitySocialController.listPostComments` (src/modules/community/controllers/community-social.controller.ts:443). Exige sesión; el controlador no declara roles. Delega en `CommunitySocialReadService.listPostComments`. Lee community.comment_media, community.comments, community.public_profiles, community.social_follows, community.social_posts, community.user_blocks, directory.tenant_memberships, directory.tenants.
+`GET /community/posts/{postId}/comments` la atiende `CommunitySocialController.listPostComments` (src/modules/community/controllers/community-social.controller.ts:463). Exige sesión; el controlador no declara roles. Delega en `CommunitySocialReadService.listPostComments`. Lee community.comment_media, community.comments, community.public_profiles, community.social_follows, community.social_posts, community.user_blocks, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:443` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:463` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | actorProfileId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | cursor (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: postId | `src/modules/community/controllers/community-social.controller.ts:443` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: postId | `src/modules/community/controllers/community-social.controller.ts:463` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -5075,7 +5075,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityPollsController.createPoll` — `src/modules/community/controllers/community-polls.controller.ts:40`
+- **Implementación:** `CommunityPollsController.createPoll` — `src/modules/community/controllers/community-polls.controller.ts:49`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -5085,17 +5085,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /community/posts/{postId}/polls` la atiende `CommunityPollsController.createPoll` (src/modules/community/controllers/community-polls.controller.ts:40). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreatePollDto` (4 campos, 2 obligatorios). Delega en `CommunityPollsService.createPoll`. Crea filas en community.poll_options, community.polls. Lee community.public_profiles, community.social_posts, directory.tenant_memberships, directory.tenants.
+`POST /community/posts/{postId}/polls` la atiende `CommunityPollsController.createPoll` (src/modules/community/controllers/community-polls.controller.ts:49). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreatePollDto` (4 campos, 2 obligatorios). Delega en `CommunityPollsService.createPoll`. Crea filas en community.poll_options, community.polls. Lee community.public_profiles, community.social_posts, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-polls.controller.ts:40` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-polls.controller.ts:49` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: postId | `src/modules/community/controllers/community-polls.controller.ts:40` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: postId | `src/modules/community/controllers/community-polls.controller.ts:49` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -5192,7 +5192,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunitySocialController.getPostReactions` — `src/modules/community/controllers/community-social.controller.ts:489`
+- **Implementación:** `CommunitySocialController.getPostReactions` — `src/modules/community/controllers/community-social.controller.ts:511`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -5202,17 +5202,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /community/posts/{postId}/reactions` la atiende `CommunitySocialController.getPostReactions` (src/modules/community/controllers/community-social.controller.ts:489). Exige sesión; el controlador no declara roles. Delega en `CommunitySocialReadService.getPostReactions`. Lee community.public_profiles, community.reactions, community.social_follows, community.social_posts, community.user_blocks, directory.tenant_memberships, directory.tenants.
+`GET /community/posts/{postId}/reactions` la atiende `CommunitySocialController.getPostReactions` (src/modules/community/controllers/community-social.controller.ts:511). Exige sesión; el controlador no declara roles. Delega en `CommunitySocialReadService.getPostReactions`. Lee community.public_profiles, community.reactions, community.social_follows, community.social_posts, community.user_blocks, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:489` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:511` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | actorProfileId (obligatorio) | `contrato (parameters)` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: postId | `src/modules/community/controllers/community-social.controller.ts:489` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: postId | `src/modules/community/controllers/community-social.controller.ts:511` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -5282,7 +5282,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunitySocialController.getProfile` — `src/modules/community/controllers/community-social.controller.ts:405`
+- **Implementación:** `CommunitySocialController.getProfile` — `src/modules/community/controllers/community-social.controller.ts:422`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -5292,16 +5292,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /community/profiles/{profileId}` la atiende `CommunitySocialController.getProfile` (src/modules/community/controllers/community-social.controller.ts:405). Exige sesión; el controlador no declara roles. Delega en `CommunitySocialReadService.getProfile`. Lee community.prestige_scores, community.public_profiles, community.user_blocks, community.verified_badges, directory.tenant_memberships, directory.tenants.
+`GET /community/profiles/{profileId}` la atiende `CommunitySocialController.getProfile` (src/modules/community/controllers/community-social.controller.ts:422). Exige sesión; el controlador no declara roles. Delega en `CommunitySocialReadService.getProfile`. Lee community.prestige_scores, community.public_profiles, community.user_blocks, community.verified_badges, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:405` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:422` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/community/controllers/community-social.controller.ts:405` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/community/controllers/community-social.controller.ts:422` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -5386,7 +5386,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunitySocialController.getAutoReply` — `src/modules/community/controllers/community-social.controller.ts:372`
+- **Implementación:** `CommunitySocialController.getAutoReply` — `src/modules/community/controllers/community-social.controller.ts:387`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -5396,16 +5396,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /community/profiles/{profileId}/auto-reply` la atiende `CommunitySocialController.getAutoReply` (src/modules/community/controllers/community-social.controller.ts:372). Exige sesión; el controlador no declara roles. Delega en `CommunityChatAutoReplyService.get`. Lee community.chat_auto_replies, community.public_profiles, directory.tenant_memberships, directory.tenants.
+`GET /community/profiles/{profileId}/auto-reply` la atiende `CommunitySocialController.getAutoReply` (src/modules/community/controllers/community-social.controller.ts:387). Exige sesión; el controlador no declara roles. Delega en `CommunityChatAutoReplyService.get`. Lee community.chat_auto_replies, community.public_profiles, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:372` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:387` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/community/controllers/community-social.controller.ts:372` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/community/controllers/community-social.controller.ts:387` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -5471,7 +5471,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunitySocialController.upsertAutoReply` — `src/modules/community/controllers/community-social.controller.ts:388`
+- **Implementación:** `CommunitySocialController.upsertAutoReply` — `src/modules/community/controllers/community-social.controller.ts:404`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -5481,17 +5481,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PUT /community/profiles/{profileId}/auto-reply` la atiende `CommunitySocialController.upsertAutoReply` (src/modules/community/controllers/community-social.controller.ts:388). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpsertChatAutoReplyDto` (7 campos, 5 obligatorios). Delega en `CommunityChatAutoReplyService.upsert`. Lee community.chat_auto_replies, community.public_profiles, directory.tenant_memberships, directory.tenants.
+`PUT /community/profiles/{profileId}/auto-reply` la atiende `CommunitySocialController.upsertAutoReply` (src/modules/community/controllers/community-social.controller.ts:404). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpsertChatAutoReplyDto` (7 campos, 5 obligatorios). Delega en `CommunityChatAutoReplyService.upsert`. Lee community.chat_auto_replies, community.public_profiles, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:388` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:404` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/community/controllers/community-social.controller.ts:388` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/community/controllers/community-social.controller.ts:404` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -5594,7 +5594,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunitySocialController.listProfilePosts` — `src/modules/community/controllers/community-social.controller.ts:415`
+- **Implementación:** `CommunitySocialController.listProfilePosts` — `src/modules/community/controllers/community-social.controller.ts:433`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -5604,19 +5604,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /community/profiles/{profileId}/posts` la atiende `CommunitySocialController.listProfilePosts` (src/modules/community/controllers/community-social.controller.ts:415). Exige sesión; el controlador no declara roles. Delega en `CommunitySocialReadService.listProfilePosts`. Lee community.comments, community.public_profiles, community.reactions, community.social_follows, community.social_posts, community.user_blocks, directory.tenant_memberships, directory.tenants.
+`GET /community/profiles/{profileId}/posts` la atiende `CommunitySocialController.listProfilePosts` (src/modules/community/controllers/community-social.controller.ts:433). Exige sesión; el controlador no declara roles. Delega en `CommunitySocialReadService.listProfilePosts`. Lee community.comments, community.public_profiles, community.reactions, community.social_follows, community.social_posts, community.user_blocks, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:415` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:433` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | actorProfileId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | cursor (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/community/controllers/community-social.controller.ts:415` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/community/controllers/community-social.controller.ts:433` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -5702,7 +5702,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunitySocialController.publishPost` — `src/modules/community/controllers/community-social.controller.ts:190`
+- **Implementación:** `CommunitySocialController.publishPost` — `src/modules/community/controllers/community-social.controller.ts:196`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -5712,17 +5712,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 ### Cómo se atiende (sistema)
 
-`POST /community/profiles/{profileId}/posts` la atiende `CommunitySocialController.publishPost` (src/modules/community/controllers/community-social.controller.ts:190). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreatePostDto` (14 campos, 1 obligatorio). Delega en `CommunitySocialService.publishPost`. Crea filas en community.content_hashtags, community.hashtags, community.mentions, community.post_media, community.social_posts. Actualiza community.hashtags. Lee common.file_versions, common.files, community.hashtags, community.public_profiles, directory.tenant_memberships, directory.tenants.
+`POST /community/profiles/{profileId}/posts` la atiende `CommunitySocialController.publishPost` (src/modules/community/controllers/community-social.controller.ts:196). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreatePostDto` (14 campos, 1 obligatorio). Delega en `CommunitySocialService.publishPost`. Crea filas en community.content_hashtags, community.hashtags, community.mentions, community.post_media, community.social_posts. Actualiza community.hashtags. Lee common.file_versions, common.files, community.hashtags, community.public_profiles, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:190` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:196` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/community/controllers/community-social.controller.ts:190` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/community/controllers/community-social.controller.ts:196` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -5853,7 +5853,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityReviewsController.listProfileReviews` — `src/modules/community/controllers/community-reviews.controller.ts:73`
+- **Implementación:** `CommunityReviewsController.listProfileReviews` — `src/modules/community/controllers/community-reviews.controller.ts:80`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -5863,18 +5863,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /community/profiles/{profileId}/reviews` la atiende `CommunityReviewsController.listProfileReviews` (src/modules/community/controllers/community-reviews.controller.ts:73). Exige sesión; el controlador no declara roles. Delega en `CommunityReviewsReadService.listProfileReviews`. Lee community.public_profiles, community.review_dimension_scores, community.review_responses, community.service_reviews, profiles.persons.
+`GET /community/profiles/{profileId}/reviews` la atiende `CommunityReviewsController.listProfileReviews` (src/modules/community/controllers/community-reviews.controller.ts:80). Exige sesión; el controlador no declara roles. Delega en `CommunityReviewsReadService.listProfileReviews`. Lee community.public_profiles, community.review_dimension_scores, community.review_responses, community.service_reviews, profiles.persons.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-reviews.controller.ts:73` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-reviews.controller.ts:80` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | cursor (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/community/controllers/community-reviews.controller.ts:73` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/community/controllers/community-reviews.controller.ts:80` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -5957,7 +5957,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityReviewsController.publishReview` — `src/modules/community/controllers/community-reviews.controller.ts:51`
+- **Implementación:** `CommunityReviewsController.publishReview` — `src/modules/community/controllers/community-reviews.controller.ts:57`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -5967,17 +5967,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 ### Cómo se atiende (sistema)
 
-`POST /community/profiles/{profileId}/reviews` la atiende `CommunityReviewsController.publishReview` (src/modules/community/controllers/community-reviews.controller.ts:51). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CommunityCreateReviewDto` (7 campos, 2 obligatorios). Delega en `CommunityReviewsService.publishReview`. Crea filas en community.review_dimension_scores, community.service_reviews. Lee clinical.encounter_participants, clinical.encounters, community.public_profiles, community.service_reviews.
+`POST /community/profiles/{profileId}/reviews` la atiende `CommunityReviewsController.publishReview` (src/modules/community/controllers/community-reviews.controller.ts:57). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CommunityCreateReviewDto` (7 campos, 2 obligatorios). Delega en `CommunityReviewsService.publishReview`. Crea filas en community.review_dimension_scores, community.service_reviews. Lee clinical.encounter_participants, clinical.encounters, community.public_profiles, community.service_reviews.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-reviews.controller.ts:51` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-reviews.controller.ts:57` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/community/controllers/community-reviews.controller.ts:51` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/community/controllers/community-reviews.controller.ts:57` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -6082,7 +6082,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityReviewsController.respondToReview` — `src/modules/community/controllers/community-reviews.controller.ts:93`
+- **Implementación:** `CommunityReviewsController.respondToReview` — `src/modules/community/controllers/community-reviews.controller.ts:101`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -6092,17 +6092,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /community/profiles/{profileId}/reviews/{reviewId}/responses` la atiende `CommunityReviewsController.respondToReview` (src/modules/community/controllers/community-reviews.controller.ts:93). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CommunityCreateReviewResponseDto` (1 campo, 1 obligatorio). Delega en `CommunityReviewsService.respondToReview`. Crea filas en community.review_responses. Lee community.public_profiles, community.review_responses, community.service_reviews, directory.tenant_memberships, directory.tenants.
+`POST /community/profiles/{profileId}/reviews/{reviewId}/responses` la atiende `CommunityReviewsController.respondToReview` (src/modules/community/controllers/community-reviews.controller.ts:101). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CommunityCreateReviewResponseDto` (1 campo, 1 obligatorio). Delega en `CommunityReviewsService.respondToReview`. Crea filas en community.review_responses. Lee community.public_profiles, community.review_responses, community.service_reviews, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-reviews.controller.ts:93` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-reviews.controller.ts:101` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: profileId, reviewId | `src/modules/community/controllers/community-reviews.controller.ts:93` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: profileId, reviewId | `src/modules/community/controllers/community-reviews.controller.ts:101` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -6187,7 +6187,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunitySocialController.getProfileBySlug` — `src/modules/community/controllers/community-social.controller.ts:354`
+- **Implementación:** `CommunitySocialController.getProfileBySlug` — `src/modules/community/controllers/community-social.controller.ts:369`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -6197,14 +6197,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /community/profiles/by-slug/{slug}` la atiende `CommunitySocialController.getProfileBySlug` (src/modules/community/controllers/community-social.controller.ts:354). Exige sesión; el controlador no declara roles. Delega en `CommunitySocialReadService.getProfileBySlug`. Lee community.prestige_scores, community.public_profiles, community.user_blocks, community.verified_badges, directory.tenant_memberships, directory.tenants.
+`GET /community/profiles/by-slug/{slug}` la atiende `CommunitySocialController.getProfileBySlug` (src/modules/community/controllers/community-social.controller.ts:369). Exige sesión; el controlador no declara roles. Delega en `CommunitySocialReadService.getProfileBySlug`. Lee community.prestige_scores, community.public_profiles, community.user_blocks, community.verified_badges, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:354` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:369` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -6287,7 +6287,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunitySocialController.getOwnProfile` — `src/modules/community/controllers/community-social.controller.ts:115`
+- **Implementación:** `CommunitySocialController.getOwnProfile` — `src/modules/community/controllers/community-social.controller.ts:120`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -6297,14 +6297,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /community/profiles/me` la atiende `CommunitySocialController.getOwnProfile` (src/modules/community/controllers/community-social.controller.ts:115). Exige sesión; el controlador no declara roles. Delega en `CommunitySocialService.getOwnProfile`. Lee community.public_profiles.
+`GET /community/profiles/me` la atiende `CommunitySocialController.getOwnProfile` (src/modules/community/controllers/community-social.controller.ts:120). Exige sesión; el controlador no declara roles. Delega en `CommunitySocialService.getOwnProfile`. Lee community.public_profiles.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:115` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:120` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -6364,7 +6364,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunitySocialController.upsertOwnProfile` — `src/modules/community/controllers/community-social.controller.ts:127`
+- **Implementación:** `CommunitySocialController.upsertOwnProfile` — `src/modules/community/controllers/community-social.controller.ts:132`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -6374,16 +6374,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PUT /community/profiles/me` la atiende `CommunitySocialController.upsertOwnProfile` (src/modules/community/controllers/community-social.controller.ts:127). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpsertOwnPublicProfileDto` (9 campos, 3 obligatorios). Delega en `CommunitySocialService.upsertOwnProfile`. Crea filas en community.public_profiles. Lee common.file_versions, common.files, community.public_profiles.
+`PUT /community/profiles/me` la atiende `CommunitySocialController.upsertOwnProfile` (src/modules/community/controllers/community-social.controller.ts:132). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpsertOwnPublicProfileDto` (9 campos, 3 obligatorios). Delega en `CommunitySocialService.upsertOwnProfile`. Crea filas en community.public_profiles. Lee common.file_versions, common.files, community.public_profiles.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:127` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:132` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -6475,7 +6475,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/community-pharmacy-inbox.int-spec.ts:117` |
+| INTEGRACION | `test/integration/community-pharmacy-inbox.int-spec.ts:173` |
 | INTEGRACION | `test/integration/community-realtime-chat.int-spec.ts:111` |
 
 ### Flujos
@@ -6491,7 +6491,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunitySocialController.ownProfileStats` — `src/modules/community/controllers/community-social.controller.ts:153`
+- **Implementación:** `CommunitySocialController.ownProfileStats` — `src/modules/community/controllers/community-social.controller.ts:159`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -6501,14 +6501,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /community/profiles/me/stats` la atiende `CommunitySocialController.ownProfileStats` (src/modules/community/controllers/community-social.controller.ts:153). Exige sesión; el controlador no declara roles. Delega en `CommunitySocialService.getOwnProfileStats`. Lee community.public_profiles.
+`GET /community/profiles/me/stats` la atiende `CommunitySocialController.ownProfileStats` (src/modules/community/controllers/community-social.controller.ts:159). Exige sesión; el controlador no declara roles. Delega en `CommunitySocialService.getOwnProfileStats`. Lee community.public_profiles.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:153` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:159` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -6563,7 +6563,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunitySocialController.listOwnOrganizationShowcases` — `src/modules/community/controllers/community-social.controller.ts:179`
+- **Implementación:** `CommunitySocialController.listOwnOrganizationShowcases` — `src/modules/community/controllers/community-social.controller.ts:185`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -6573,14 +6573,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /community/profiles/organization-showcases/me` la atiende `CommunitySocialController.listOwnOrganizationShowcases` (src/modules/community/controllers/community-social.controller.ts:179). Exige sesión; el controlador no declara roles. Delega en `CommunitySocialReadService.listAttendableOrganizationShowcases`. Lee community.public_profiles, directory.tenant_memberships.
+`GET /community/profiles/organization-showcases/me` la atiende `CommunitySocialController.listOwnOrganizationShowcases` (src/modules/community/controllers/community-social.controller.ts:185). Exige sesión; el controlador no declara roles. Delega en `CommunitySocialReadService.listAttendableOrganizationShowcases`. Lee community.public_profiles, directory.tenant_memberships.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:179` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:185` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -6637,7 +6637,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunitySocialController.createProfile` — `src/modules/community/controllers/community-social.controller.ts:88`
+- **Implementación:** `CommunitySocialController.createProfile` — `src/modules/community/controllers/community-social.controller.ts:93`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -6647,16 +6647,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /community/public-profiles` la atiende `CommunitySocialController.createProfile` (src/modules/community/controllers/community-social.controller.ts:88). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreatePublicProfileDto` (9 campos, 4 obligatorios). Delega en `CommunitySocialService.createProfile`. Crea filas en community.public_profiles.
+`POST /community/public-profiles` la atiende `CommunitySocialController.createProfile` (src/modules/community/controllers/community-social.controller.ts:93). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreatePublicProfileDto` (9 campos, 4 obligatorios). Delega en `CommunitySocialService.createProfile`. Crea filas en community.public_profiles.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/community/controllers/community-social.controller.ts:88` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/community/controllers/community-social.controller.ts:93` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -6844,7 +6844,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/party-ratings.controller.ts:45` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -7085,7 +7085,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunitySocialController.react` — `src/modules/community/controllers/community-social.controller.ts:223`
+- **Implementación:** `CommunitySocialController.react` — `src/modules/community/controllers/community-social.controller.ts:231`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -7095,16 +7095,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 ### Cómo se atiende (sistema)
 
-`PUT /community/reactions` la atiende `CommunitySocialController.react` (src/modules/community/controllers/community-social.controller.ts:223). Exige sesión; el controlador no declara roles. Valida el cuerpo como `ReactionDto` (4 campos, 4 obligatorios). Delega en `CommunitySocialService.react`. Crea filas en community.reactions. Actualiza community.reactions. Lee community.public_profiles, community.reactions, directory.tenant_memberships, directory.tenants.
+`PUT /community/reactions` la atiende `CommunitySocialController.react` (src/modules/community/controllers/community-social.controller.ts:231). Exige sesión; el controlador no declara roles. Valida el cuerpo como `ReactionDto` (4 campos, 4 obligatorios). Delega en `CommunitySocialService.react`. Crea filas en community.reactions. Actualiza community.reactions. Lee community.public_profiles, community.reactions, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:223` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:231` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -7192,7 +7192,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityModerationController.report` — `src/modules/community/controllers/community-moderation.controller.ts:61`
+- **Implementación:** `CommunityModerationController.report` — `src/modules/community/controllers/community-moderation.controller.ts:66`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -7202,16 +7202,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 ### Cómo se atiende (sistema)
 
-`POST /community/reports` la atiende `CommunityModerationController.report` (src/modules/community/controllers/community-moderation.controller.ts:61). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateReportDto` (4 campos, 3 obligatorios). Delega en `CommunityModerationService.report`. Crea filas en community.content_reports, community.moderation_queue. Lee community.moderation_queue.
+`POST /community/reports` la atiende `CommunityModerationController.report` (src/modules/community/controllers/community-moderation.controller.ts:66). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateReportDto` (4 campos, 3 obligatorios). Delega en `CommunityModerationService.report`. Crea filas en community.content_reports, community.moderation_queue. Lee community.moderation_queue.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-moderation.controller.ts:61` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-moderation.controller.ts:66` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -7293,7 +7293,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommunityTopicsController.listTopics` — `src/modules/community/controllers/community-topics.controller.ts:27`
+- **Implementación:** `CommunityTopicsController.listTopics` — `src/modules/community/controllers/community-topics.controller.ts:31`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -7303,14 +7303,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /community/topics` la atiende `CommunityTopicsController.listTopics` (src/modules/community/controllers/community-topics.controller.ts:27). Exige sesión; el controlador no declara roles. Delega en `CommunityGroupsReadService.listTopics`. Lee community.topics.
+`GET /community/topics` la atiende `CommunityTopicsController.listTopics` (src/modules/community/controllers/community-topics.controller.ts:31). Exige sesión; el controlador no declara roles. Delega en `CommunityGroupsReadService.listTopics`. Lee community.topics.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-topics.controller.ts:27` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-topics.controller.ts:31` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -7602,7 +7602,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/community/controllers/community-feed.controller.ts:111` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -7786,7 +7786,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/community/controllers/community-feed.controller.ts:58` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -7958,7 +7958,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN, SEARCH_ADMIN | `src/modules/community/controllers/community-search-index.controller.ts:47` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -8059,7 +8059,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/community/controllers/community-verification.controller.ts:66` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -8158,7 +8158,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/community/controllers/community-verification.controller.ts:104` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -8822,7 +8822,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/community/controllers/patient-reviews.controller.ts:87` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 

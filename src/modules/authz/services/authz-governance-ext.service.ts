@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
+  CONCEPTS,
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
@@ -13,6 +14,8 @@ import {
   encodeKeysetCursor,
 } from '../../../common/pagination/keyset-cursor';
 import { AUTHZ } from '../authz.concepts';
+import { AUTHZ_GOVERNANCE } from '../authz-governance.concepts';
+import { SecurityEvents } from '../../iam/entities';
 import { AuthzErrorReason } from '../authz.error-reasons';
 import { AuthzGovernanceErrorReason as Reason } from '../authz-governance.error-reasons';
 import {
@@ -68,7 +71,9 @@ const MASK_BY_CONCEPT: Readonly<Record<string, string>> = {
  * **Alcance de tenant.** Un actor de plataforma lista y termina permisos de cualquier tenant. Un
  * actor con alcance sólo ve y termina los de SU tenant: tanto la búsqueda como el `UPDATE` llevan
  * `tenant_id`, y un permiso ajeno (o global, sin tenant) responde el mismo 404 que uno inexistente.
- * Terminar un permiso DENY exige motivo: levantar una denegación abre un acceso.
+ * Terminar un permiso DENY exige motivo: levantar una denegación abre un acceso. El motivo (y quién,
+ * cuándo, qué permiso y con qué efecto) se persiste en `iam.security_events` con el tipo
+ * `RESOURCE_SCOPE_GRANT_ENDED`, en la misma transacción que el `UPDATE`: o quedan los dos o ninguno.
  */
 @Injectable()
 export class AuthzGovernanceExtService {
@@ -202,9 +207,35 @@ export class AuthzGovernanceExtService {
           { grantId },
           Reason.RESOURCE_SCOPE_GRANT_ALREADY_ENDED,
         );
-      // El motivo no tiene columna donde persistir (el permiso no la tiene y no hay un tipo de
-      // evento de seguridad para esta acción): queda el sello de auditoría de la ruta, y aquí sólo
-      // el hecho de que se dio y su efecto, sin el texto libre.
+      // El permiso no tiene columna para el motivo: queda en el evento de seguridad, que es
+      // append-only y lleva actor e instante. Misma transacción que el UPDATE.
+      tx.create(
+        SecurityEvents,
+        {
+          eventTypeConceptId: AUTHZ_GOVERNANCE.EVENT_RESOURCE_SCOPE_GRANT_ENDED,
+          outcomeConceptId: CONCEPTS.OUTCOME_SUCCESS,
+          // `user_id` es el sujeto del evento: el usuario cuyo permiso terminó, si el sujeto es uno.
+          userId:
+            grant.subjectTypeConceptId === AUTHZ.SUBJECT_TYPE_USER
+              ? grant.subjectId
+              : undefined,
+          detailJson: {
+            grantId,
+            tenantId: grant.tenantId ?? null,
+            permissionId: grant.permissionId,
+            resourceId: grant.resourceId,
+            subjectType:
+              SUBJECT_BY_CONCEPT[grant.subjectTypeConceptId] ?? 'OTHER',
+            subjectId: grant.subjectId,
+            effect: EFFECT_BY_CONCEPT[grant.effectConceptId] ?? 'OTHER',
+            reason: reason.length > 0 ? reason : null,
+            endedAt: now.toISOString(),
+          },
+          recordedByUserId: actor.id,
+          recordedAt: now,
+        },
+        { partial: true },
+      );
       this.logger.info(
         {
           operation: 'authz.resource-scope-grant.end',

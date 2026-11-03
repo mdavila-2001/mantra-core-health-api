@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import {
   CONCEPTS,
   ConflictException,
@@ -80,6 +80,7 @@ function build(
     lifecycleHistory: mockFn().mockResolvedValue([]),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const businessRoles = { revokeAllForUser: mockFn().mockResolvedValue(2) };
   const service = new IamUsersService(
     em as any,
     usersRepo as any,
@@ -91,8 +92,10 @@ function build(
     eventsRepo as any,
     commonRecords({ contactPoints: { create: mockFn() } }),
     logger as any,
+    businessRoles as any,
   );
   return {
+    businessRoles,
     service,
     tx,
     em,
@@ -109,6 +112,7 @@ function build(
 
 /** Nada se escribió: ni estado, ni bloqueo, ni sesiones, ni bitácora. */
 function expectNoWrites(d: ReturnType<typeof build>) {
+  expect(d.businessRoles.revokeAllForUser).not.toHaveBeenCalled();
   expect(d.usersRepo.transitionStatus).not.toHaveBeenCalled();
   expect(d.lockoutsRepo.create).not.toHaveBeenCalled();
   expect(d.lockoutsRepo.releaseActiveForUser).not.toHaveBeenCalled();
@@ -208,6 +212,11 @@ describe('IamUsersService — ciclo de vida de la cuenta (H5)', () => {
         USER_ID,
       );
       expect(d.rolesRepo.revokeAllForUser).toHaveBeenCalledWith(d.tx, USER_ID);
+      expect(d.businessRoles.revokeAllForUser).toHaveBeenCalledWith(
+        d.tx,
+        USER_ID,
+        ACTOR.id,
+      );
       expect(d.tx).not.toHaveProperty('removeAndFlush');
       expect(d.tx).not.toHaveProperty('nativeDelete');
       expect(d.eventsRepo.record).toHaveBeenCalledWith(
@@ -315,6 +324,49 @@ describe('IamUsersService — ciclo de vida de la cuenta (H5)', () => {
   });
 
   describe('inválido', () => {
+    it.each(['suspend', 'deactivate', 'reactivate'] as const)(
+      '%s de SUPERADMIN requiere otro SUPERADMIN global',
+      async (op) => {
+        for (const actor of [
+          ACTOR,
+          {
+            ...ACTOR,
+            roles: ['SUPERADMIN'],
+            scopedRoles: { tenantA: ['SUPERADMIN'] },
+          },
+        ]) {
+          const d = build({ grants: [CONCEPTS.ROLE_SUPERADMIN] });
+          const error = await d.service[op](USER_ID, REASON, actor).catch(
+            (e: unknown) => e,
+          );
+          expect(error).toBeInstanceOf(ForbiddenException);
+          expect((error as ForbiddenException).getResponse()).toMatchObject({
+            code: 'FORBIDDEN',
+            reason: IamErrorReason.USER_SUPERADMIN_LIFECYCLE_FORBIDDEN,
+          });
+          expectNoWrites(d);
+        }
+      },
+    );
+
+    it('otro SUPERADMIN global puede suspender si queda administración activa', async () => {
+      const d = build({ grants: [CONCEPTS.ROLE_SUPERADMIN], otherAdmins: 1 });
+      await expect(
+        d.service.suspend(USER_ID, REASON, { ...ACTOR, roles: ['SUPERADMIN'] }),
+      ).resolves.toMatchObject({ changed: true });
+    });
+
+    it('si falla la revocación de negocio, la transacción falla sin registrar éxito', async () => {
+      const d = build();
+      d.businessRoles.revokeAllForUser.mockRejectedValue(
+        new Error('revocation failed'),
+      );
+      await expect(
+        d.service.deactivate(USER_ID, REASON, ACTOR),
+      ).rejects.toThrow('revocation failed');
+      expect(d.eventsRepo.record).not.toHaveBeenCalled();
+    });
+
     it('la cuenta no existe: 404 USER_NOT_FOUND y nada se escribe', async () => {
       const d = build({ user: false });
       const e = await d.service
@@ -394,9 +446,10 @@ describe('IamUsersService — ciclo de vida de la cuenta (H5)', () => {
           grants: [CONCEPTS.ROLE_SUPERADMIN],
           otherAdmins: 0,
         });
-        const e = await d.service[op](USER_ID, REASON, ACTOR).catch(
-          (x: unknown) => x,
-        );
+        const e = await d.service[op](USER_ID, REASON, {
+          ...ACTOR,
+          roles: ['SUPERADMIN'],
+        }).catch((x: unknown) => x);
 
         expect(e).toBeInstanceOf(PreconditionFailedException);
         expect((e as any).reason).toBe(IamErrorReason.USER_LAST_SECURITY_ADMIN);

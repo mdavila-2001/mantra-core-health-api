@@ -2,7 +2,7 @@
 
 # Catálogo del schema `delegated_access`
 
-- **Tablas:** 27 · **Columnas:** 453 (33 con descripción: 7.3 %) · **Índices:** 234
+- **Tablas:** 27 · **Columnas:** 456 (101 con descripción: 22.1 %) · **Índices:** 237
 - **Dominio:** Identidad y Seguridad
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -10,33 +10,33 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [access_anomalies](#access_anomalies) | Registra las anomalías de actividad de las personas de apoyo (picos de búsquedas, cuentas inactivas con acceso vivo, acumulación de privilegios) para que seguridad las revise y las cierre con un comentario. | 20 | 9 | 0 | SIN_ENTIDAD |
-| [access_decision_log](#access_decision_log) | Conserva, sin posibilidad de modificarse, las decisiones de acceso que niegan, desafían o ejercen un permiso sensible, con el permiso, la regla y el objetivo que las motivaron y sin datos del paciente. | 19 | 7 | 0 | SIN_ENTIDAD |
-| [access_review_campaigns](#access_review_campaigns) | Define las campañas de certificación de accesos (periódicas, de recertificación, por cambio de rol, dirigidas o de remediación) con su fecha límite, recordatorios, escalamiento y qué hacer con lo que nadie certifica. | 22 | 8 | 0 | SIN_ENTIDAD |
-| [access_review_items](#access_review_items) | Guarda cada tarea de una campaña: certificar, revocar o ajustar un vínculo o un permiso, con su revisor, la evidencia sellada con su huella y la decisión que se tomó. | 24 | 10 | 0 | SIN_ENTIDAD |
+| [access_anomalies](#access_anomalies) | Registra las anomalías de actividad de las personas de apoyo (picos de búsquedas, cuentas inactivas con acceso vivo, acumulación de privilegios) para que seguridad las revise y las cierre con un comentario. | 20 | 9 | 1 | COINCIDE |
+| [access_decision_log](#access_decision_log) | Conserva, sin posibilidad de modificarse, las decisiones de acceso que niegan, desafían o ejercen un permiso sensible, con el permiso, la regla y el objetivo que las motivaron y sin datos del paciente. | 19 | 7 | 0 | COINCIDE |
+| [access_review_campaigns](#access_review_campaigns) | Define las campañas de certificación de accesos (periódicas, de recertificación, por cambio de rol, dirigidas o de remediación) con su fecha límite, recordatorios, escalamiento y qué hacer con lo que nadie certifica. | 22 | 8 | 0 | COINCIDE |
+| [access_review_items](#access_review_items) | Guarda cada tarea de una campaña: certificar, revocar o ajustar un vínculo o un permiso, con su revisor, la evidencia sellada con su huella y la decisión que se tomó. | 24 | 10 | 1 | COINCIDE |
 | [delegated_access_approval_requests](#delegated_access_approval_requests) | Gestiona solicitudes de aprobación antes de habilitar permisos delegados sensibles. | 12 | 8 | 5 | COINCIDE |
 | [delegated_access_grants](#delegated_access_grants) | Conserva concesiones de acceso delegado con su sujeto, alcance, permisos y vigencia. | 16 | 11 | 6 | COINCIDE |
 | [delegated_permission_set_items](#delegated_permission_set_items) | Detalla permisos incluidos en conjuntos delegables para limitar acciones otorgadas a representantes. | 6 | 2 | 4 | COINCIDE |
 | [delegated_permission_sets](#delegated_permission_sets) | Define paquetes reutilizables de permisos que pueden concederse a delegados bajo un alcance específico. | 13 | 6 | 9 | COINCIDE |
 | [delegation_events](#delegation_events) | Mantiene eventos de creación, modificación, uso o revocación de delegaciones para auditoría. | 10 | 6 | 7 | COINCIDE |
-| [effective_support_access](#effective_support_access) | Tabla derivada que expande los permisos de apoyo vigentes a lo que cada persona puede hacer y sobre qué doctor, servicio y espacio, para decidir cada acción sin recalcular. | 9 | 6 | 0 | SIN_ENTIDAD |
-| [engagement_request_items](#engagement_request_items) | Detalla cada objetivo pedido en una solicitud o invitación de apoyo y la decisión por línea (aprobar, ajustar, rechazar), enlazada con el permiso que nace de ella. | 13 | 9 | 0 | SIN_ENTIDAD |
-| [engagement_requests](#engagement_requests) | Registra la solicitud de una persona a una organización, o la invitación de la organización a la persona, con su decisión y su vencimiento a los 15 días. | 17 | 9 | 0 | SIN_ENTIDAD |
-| [four_eyes_requests](#four_eyes_requests) | Lleva las aprobaciones de cuatro ojos: una acción sensible, un cambio por encima del techo, una excepción de separación de funciones, una reactivación o un traslado con más privilegio que debe decidir otra persona. | 26 | 11 | 0 | SIN_ENTIDAD |
-| [governance_rules](#governance_rules) | Guarda las reglas propias de cada organización sobre los permisos de apoyo: techos de delegación, denegaciones por rol, condiciones obligatorias y pisos de visibilidad de campos. | 16 | 6 | 0 | SIN_ENTIDAD |
-| [grant_usage_stats](#grant_usage_stats) | Acumula por hora el uso de cada permiso de apoyo (permitidos, negados, desafíos, fuera de horario y pacientes distintos) para certificar con evidencia y detectar anomalías. | 13 | 4 | 0 | SIN_ENTIDAD |
-| [handover_items](#handover_items) | Registra el traspaso del trabajo de quien se va o cambia de función: conversaciones, tareas, vínculos supervisados y citas pendientes, y a quién se reasignó cada uno. | 17 | 9 | 0 | SIN_ENTIDAD |
-| [lifecycle_cases](#lifecycle_cases) | Sigue el ingreso, el cambio, la baja, la suspensión y la reactivación de una persona de apoyo con su lista de pasos y su estado. | 18 | 9 | 0 | SIN_ENTIDAD |
-| [organization_user_assignments](#organization_user_assignments) | Asocia usuarios con organizaciones para determinar en qué ámbitos pueden actuar o administrar acceso delegado. | 35 | 24 | 82 | DIVERGE |
-| [patient_restriction_flags](#patient_restriction_flags) | Marca por organización a los pacientes VIP, confidenciales, familiares del personal o protegidos para limitar quién del equipo de apoyo puede verlos; es una marca de acceso, no un dato clínico. | 13 | 7 | 0 | SIN_ENTIDAD |
-| [practitioner_delegate_assignments](#practitioner_delegate_assignments) | Relaciona profesionales con delegados autorizados para realizar tareas en su nombre. | 22 | 12 | 8 | DIVERGE |
-| [role_templates](#role_templates) | Define los paquetes de acciones por defecto de cada rol de apoyo (secretaria, recepción, central telefónica, etc.), de plataforma o propios de una organización, para conceder permisos sin repetirlos uno a uno. | 14 | 6 | 0 | SIN_ENTIDAD |
+| [effective_support_access](#effective_support_access) | Tabla derivada que expande los permisos de apoyo vigentes a lo que cada persona puede hacer y sobre qué doctor, servicio y espacio, para decidir cada acción sin recalcular. | 9 | 6 | 0 | COINCIDE |
+| [engagement_request_items](#engagement_request_items) | Detalla cada objetivo pedido en una solicitud o invitación de apoyo y la decisión por línea (aprobar, ajustar, rechazar), enlazada con el permiso que nace de ella. | 13 | 9 | 0 | COINCIDE |
+| [engagement_requests](#engagement_requests) | Registra la solicitud de una persona a una organización, o la invitación de la organización a la persona, con su decisión y su vencimiento a los 15 días. | 17 | 9 | 0 | COINCIDE |
+| [four_eyes_requests](#four_eyes_requests) | Lleva las aprobaciones de cuatro ojos: una acción sensible, un cambio por encima del techo, una excepción de separación de funciones, una reactivación o un traslado con más privilegio que debe decidir otra persona. | 28 | 13 | 1 | COINCIDE |
+| [governance_rules](#governance_rules) | Guarda las reglas propias de cada organización sobre los permisos de apoyo: techos de delegación, denegaciones por rol, condiciones obligatorias y pisos de visibilidad de campos. | 16 | 6 | 0 | COINCIDE |
+| [grant_usage_stats](#grant_usage_stats) | Acumula por hora el uso de cada permiso de apoyo (permitidos, negados, desafíos, fuera de horario y pacientes distintos) para certificar con evidencia y detectar anomalías. | 13 | 4 | 0 | COINCIDE |
+| [handover_items](#handover_items) | Registra el traspaso del trabajo de quien se va o cambia de función: conversaciones, tareas, vínculos supervisados y citas pendientes, y a quién se reasignó cada uno. | 17 | 9 | 0 | COINCIDE |
+| [lifecycle_cases](#lifecycle_cases) | Sigue el ingreso, el cambio, la baja, la suspensión y la reactivación de una persona de apoyo con su lista de pasos y su estado. | 18 | 9 | 0 | COINCIDE |
+| [organization_user_assignments](#organization_user_assignments) | Asocia usuarios con organizaciones para determinar en qué ámbitos pueden actuar o administrar acceso delegado. | 36 | 25 | 86 | COINCIDE |
+| [patient_restriction_flags](#patient_restriction_flags) | Marca por organización a los pacientes VIP, confidenciales, familiares del personal o protegidos para limitar quién del equipo de apoyo puede verlos; es una marca de acceso, no un dato clínico. | 13 | 7 | 0 | COINCIDE |
+| [practitioner_delegate_assignments](#practitioner_delegate_assignments) | Relaciona profesionales con delegados autorizados para realizar tareas en su nombre. | 22 | 12 | 8 | COINCIDE |
+| [role_templates](#role_templates) | Define los paquetes de acciones por defecto de cada rol de apoyo (secretaria, recepción, central telefónica, etc.), de plataforma o propios de una organización, para conceder permisos sin repetirlos uno a uno. | 14 | 6 | 0 | COINCIDE |
 | [shared_access_link_uses](#shared_access_link_uses) | sin propósito | 8 | 4 | 3 | COINCIDE |
 | [shared_access_links](#shared_access_links) | sin propósito | 20 | 13 | 7 | COINCIDE |
-| [sod_exceptions](#sod_exceptions) | Registra las excepciones justificadas y con vencimiento a una regla de separación de funciones, nacidas de una aprobación de cuatro ojos. | 17 | 9 | 0 | SIN_ENTIDAD |
-| [sod_rules](#sod_rules) | Define las reglas de separación de funciones (de plataforma y de cada organización) que impiden que una misma persona reúna permisos incompatibles, con su alcance, su acción y si admiten excepción. | 19 | 9 | 0 | SIN_ENTIDAD |
-| [support_grant_actions](#support_grant_actions) | Lista las acciones concretas que habilita cada permiso de apoyo, para que cada permiso tenga sus propias acciones granulares. | 10 | 5 | 0 | SIN_ENTIDAD |
-| [support_scope_grants](#support_scope_grants) | Conserva cada permiso concedido a un vínculo de apoyo con su tipo de objetivo (doctor, servicio, ubicación o sus combinaciones), su modo de expansión y su vigencia; varias filas se suman. | 24 | 15 | 0 | SIN_ENTIDAD |
+| [sod_exceptions](#sod_exceptions) | Registra las excepciones justificadas y con vencimiento a una regla de separación de funciones, nacidas de una aprobación de cuatro ojos. | 17 | 9 | 0 | COINCIDE |
+| [sod_rules](#sod_rules) | Define las reglas de separación de funciones (de plataforma y de cada organización) que impiden que una misma persona reúna permisos incompatibles, con su alcance, su acción y si admiten excepción. | 19 | 9 | 0 | COINCIDE |
+| [support_grant_actions](#support_grant_actions) | Lista las acciones concretas que habilita cada permiso de apoyo, para que cada permiso tenga sus propias acciones granulares. | 10 | 5 | 0 | COINCIDE |
+| [support_scope_grants](#support_scope_grants) | Conserva cada permiso concedido a un vínculo de apoyo con su tipo de objetivo (doctor, servicio, ubicación o sus combinaciones), su modo de expansión y su vigencia; varias filas se suman. | 24 | 15 | 0 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -322,33 +322,33 @@ Registra las anomalías de actividad de las personas de apoyo (picos de búsqued
 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_29_delegated_access.puml: access_anomalies`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` · **DDL:** `SQL/29_delegated_access/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
-- **Resumen:** 20 columnas · 9 índices · 8 FK salientes · 0 entrantes · 0 operaciones
+- **Entidad del ORM:** `AccessAnomalies` — `src/modules/delegated_access/entities/access_anomalies.entity.ts`
+- **Resumen:** 20 columnas · 9 índices · 8 FK salientes · 0 entrantes · 1 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `organization_user_assignment_id` | `uuid` | Clave foránea → delegated_access.organization_user_assignments.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `kind_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `window_start` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `window_end` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `observed_value` | `numeric(12,2)` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `baseline_value` | `numeric(12,2)` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `threshold_value` | `numeric(12,2)` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `evidence_json` | `jsonb` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `acknowledged_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `acknowledged_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `resolution_comment_text` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 16 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 17 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 18 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 19 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 20 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/access_anomalies.entity.ts:12`)_ | coincide |
+| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `organization_user_assignment_id` | `uuid` | Clave foránea → delegated_access.organization_user_assignments.id; Opcional | _sin dato_ | coincide |
+| 5 | `kind_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 6 | `window_start` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 7 | `window_end` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 8 | `observed_value` | `numeric(12,2)` | Obligatoria | _sin dato_ | coincide |
+| 9 | `baseline_value` | `numeric(12,2)` | Opcional | _sin dato_ | coincide |
+| 10 | `threshold_value` | `numeric(12,2)` | Obligatoria | _sin dato_ | coincide |
+| 11 | `evidence_json` | `jsonb` | Obligatoria | _sin dato_ | coincide |
+| 12 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 13 | `acknowledged_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 14 | `acknowledged_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 15 | `resolution_comment_text` | `text` | Opcional | _sin dato_ | coincide |
+| 16 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/access_anomalies.entity.ts:122`)_ | coincide |
+| 17 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/access_anomalies.entity.ts:128`)_ | coincide |
+| 18 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 19 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 20 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/delegated_access/entities/access_anomalies.entity.ts:146`)_ | coincide |
 
 #### Relaciones
 
@@ -387,7 +387,9 @@ Registra las anomalías de actividad de las personas de apoyo (picos de búsqued
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| GET /me/practitioner/governance-panel | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -411,32 +413,32 @@ Conserva, sin posibilidad de modificarse, las decisiones de acceso que niegan, d
 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_29_delegated_access.puml: access_decision_log`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` · **DDL:** `SQL/29_delegated_access/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `AccessDecisionLog` — `src/modules/delegated_access/entities/access_decision_log.entity.ts`
 - **Resumen:** 19 columnas · 7 índices · 6 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `permission_code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `effect_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `reason_code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `grant_id` | `uuid` | Clave foránea → delegated_access.support_scope_grants.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `rule_id` | `uuid` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `practitioner_role_assignment_id` | `uuid` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `healthcare_service_id` | `uuid` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `care_space_id` | `uuid` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `patient_profile_id` | `uuid` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `approval_id` | `uuid` | Clave foránea → delegated_access.four_eyes_requests.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `correlation_id` | `uuid` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `session_id` | `uuid` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 16 | `ip` | `inet` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 17 | `detail_json` | `jsonb` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 18 | `recorded_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 19 | `recorded_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/access_decision_log.entity.ts:12`)_ | coincide |
+| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `permission_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 5 | `effect_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 6 | `reason_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 7 | `grant_id` | `uuid` | Clave foránea → delegated_access.support_scope_grants.id; Opcional | _sin dato_ | coincide |
+| 8 | `rule_id` | `uuid` | Opcional | _sin dato_ | coincide |
+| 9 | `practitioner_role_assignment_id` | `uuid` | Opcional | _sin dato_ | coincide |
+| 10 | `healthcare_service_id` | `uuid` | Opcional | _sin dato_ | coincide |
+| 11 | `care_space_id` | `uuid` | Opcional | _sin dato_ | coincide |
+| 12 | `patient_profile_id` | `uuid` | Opcional | _sin dato_ | coincide |
+| 13 | `approval_id` | `uuid` | Clave foránea → delegated_access.four_eyes_requests.id; Opcional | _sin dato_ | coincide |
+| 14 | `correlation_id` | `uuid` | Opcional | _sin dato_ | coincide |
+| 15 | `session_id` | `uuid` | Opcional | _sin dato_ | coincide |
+| 16 | `ip` | `inet` | Opcional | _sin dato_ | coincide |
+| 17 | `detail_json` | `jsonb` | Opcional | _sin dato_ | coincide |
+| 18 | `recorded_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 19 | `recorded_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 
 #### Relaciones
 
@@ -487,35 +489,35 @@ Define las campañas de certificación de accesos (periódicas, de recertificaci
 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_29_delegated_access.puml: access_review_campaigns`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` · **DDL:** `SQL/29_delegated_access/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `AccessReviewCampaigns` — `src/modules/delegated_access/entities/access_review_campaigns.entity.ts`
 - **Resumen:** 22 columnas · 8 índices · 7 FK salientes · 1 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `name` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `kind_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `scope_json` | `jsonb` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `scope_schema_version` | `integer` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `filters_json` | `jsonb` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `due_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `grace_days` | `integer = 7` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `reminder_days_before_json` | `jsonb = '[7,3,1]'` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `escalate_after_days` | `integer = 3` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `uncertified_action_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `owner_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `launched_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 16 | `closed_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 17 | `cancelled_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 18 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 19 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 20 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 21 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 22 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/access_review_campaigns.entity.ts:12`)_ | coincide |
+| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `name` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 4 | `kind_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `scope_json` | `jsonb` | Obligatoria | _sin dato_ | coincide |
+| 6 | `scope_schema_version` | `integer` | Obligatoria | _sin dato_ | coincide |
+| 7 | `filters_json` | `jsonb` | Opcional | _sin dato_ | coincide |
+| 8 | `due_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 9 | `grace_days` | `integer = 7` | Obligatoria | _sin dato_ | coincide |
+| 10 | `reminder_days_before_json` | `jsonb = '[7,3,1]'` | Obligatoria | _sin dato_ | coincide |
+| 11 | `escalate_after_days` | `integer = 3` | Obligatoria | _sin dato_ | coincide |
+| 12 | `uncertified_action_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 13 | `owner_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 14 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 15 | `launched_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 16 | `closed_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 17 | `cancelled_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 18 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/access_review_campaigns.entity.ts:136`)_ | coincide |
+| 19 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/access_review_campaigns.entity.ts:142`)_ | coincide |
+| 20 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 21 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 22 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/delegated_access/entities/access_review_campaigns.entity.ts:160`)_ | coincide |
 
 #### Relaciones
 
@@ -579,37 +581,37 @@ Guarda cada tarea de una campaña: certificar, revocar o ajustar un vínculo o u
 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_29_delegated_access.puml: access_review_items`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` · **DDL:** `SQL/29_delegated_access/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
-- **Resumen:** 24 columnas · 10 índices · 11 FK salientes · 0 entrantes · 0 operaciones
+- **Entidad del ORM:** `AccessReviewItems` — `src/modules/delegated_access/entities/access_review_items.entity.ts`
+- **Resumen:** 24 columnas · 10 índices · 11 FK salientes · 0 entrantes · 1 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `access_review_campaign_id` | `uuid` | Clave foránea → delegated_access.access_review_campaigns.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `organization_user_assignment_id` | `uuid` | Clave foránea → delegated_access.organization_user_assignments.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `support_scope_grant_id` | `uuid` | Clave foránea → delegated_access.support_scope_grants.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `reviewer_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `reviewer_kind_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `decision_concept_id` | `uuid = '55a6db07-19e7-5bb4-978a-3d246492f49d'` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `decided_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `decided_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `decision_comment_text` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `adjustment_json` | `jsonb` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `evidence_json` | `jsonb` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `evidence_hash` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `due_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 16 | `reminder_count` | `integer = 0` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 17 | `last_reminded_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 18 | `escalated_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 19 | `escalated_to_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 20 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 21 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 22 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 23 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 24 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/access_review_items.entity.ts:12`)_ | coincide |
+| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `access_review_campaign_id` | `uuid` | Clave foránea → delegated_access.access_review_campaigns.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `organization_user_assignment_id` | `uuid` | Clave foránea → delegated_access.organization_user_assignments.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `support_scope_grant_id` | `uuid` | Clave foránea → delegated_access.support_scope_grants.id; Opcional | _sin dato_ | coincide |
+| 6 | `reviewer_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 7 | `reviewer_kind_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 8 | `decision_concept_id` | `uuid = '55a6db07-19e7-5bb4-978a-3d246492f49d'` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 9 | `decided_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 10 | `decided_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 11 | `decision_comment_text` | `text` | Opcional | _sin dato_ | coincide |
+| 12 | `adjustment_json` | `jsonb` | Opcional | _sin dato_ | coincide |
+| 13 | `evidence_json` | `jsonb` | Obligatoria | _sin dato_ | coincide |
+| 14 | `evidence_hash` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 15 | `due_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 16 | `reminder_count` | `integer = 0` | Obligatoria | _sin dato_ | coincide |
+| 17 | `last_reminded_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 18 | `escalated_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 19 | `escalated_to_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 20 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/access_review_items.entity.ts:155`)_ | coincide |
+| 21 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/access_review_items.entity.ts:161`)_ | coincide |
+| 22 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 23 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 24 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/delegated_access/entities/access_review_items.entity.ts:179`)_ | coincide |
 
 #### Relaciones
 
@@ -653,7 +655,9 @@ Guarda cada tarea de una campaña: certificar, revocar o ajustar un vínculo o u
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| GET /me/practitioner/governance-panel | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -1054,22 +1058,22 @@ Tabla derivada que expande los permisos de apoyo vigentes a lo que cada persona 
 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_29_delegated_access.puml: effective_support_access`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` · **DDL:** `SQL/29_delegated_access/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `EffectiveSupportAccess` — `src/modules/delegated_access/entities/effective_support_access.entity.ts`
 - **Resumen:** 9 columnas · 6 índices · 6 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `practitioner_role_assignment_id` | `uuid` | Clave foránea → practice.practitioner_role_assignments.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `healthcare_service_id` | `uuid` | Clave foránea → practice.healthcare_services.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `care_space_id` | `uuid` | Clave foránea → practice.care_spaces.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `permission_code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `grant_id` | `uuid` | Clave foránea → delegated_access.support_scope_grants.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `refreshed_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/effective_support_access.entity.ts:12`)_ | coincide |
+| 2 | `user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `practitioner_role_assignment_id` | `uuid` | Clave foránea → practice.practitioner_role_assignments.id; Opcional | _sin dato_ | coincide |
+| 5 | `healthcare_service_id` | `uuid` | Clave foránea → practice.healthcare_services.id; Opcional | _sin dato_ | coincide |
+| 6 | `care_space_id` | `uuid` | Clave foránea → practice.care_spaces.id; Opcional | _sin dato_ | coincide |
+| 7 | `permission_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 8 | `grant_id` | `uuid` | Clave foránea → delegated_access.support_scope_grants.id; Obligatoria | _sin dato_ | coincide |
+| 9 | `refreshed_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
 
 #### Relaciones
 
@@ -1119,26 +1123,26 @@ Detalla cada objetivo pedido en una solicitud o invitación de apoyo y la decisi
 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_29_delegated_access.puml: engagement_request_items`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` · **DDL:** `SQL/29_delegated_access/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `EngagementRequestItems` — `src/modules/delegated_access/entities/engagement_request_items.entity.ts`
 - **Resumen:** 13 columnas · 9 índices · 9 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | v4.2.76: tenant_id = tenant de la solicitud (trigger integrity.trg_support_tenant_consistency). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_29_delegated_access.puml:538`)_ | **SIN_ENTIDAD** |
-| 3 | `engagement_request_id` | `uuid` | Clave foránea → delegated_access.engagement_requests.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `target_kind_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `practitioner_role_assignment_id` | `uuid` | Clave foránea → practice.practitioner_role_assignments.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `healthcare_service_id` | `uuid` | Clave foránea → practice.healthcare_services.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `care_space_id` | `uuid` | Clave foránea → practice.care_spaces.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `practice_site_id` | `uuid` | Clave foránea → practice.practice_sites.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `proposed_actions_json` | `jsonb` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `decision_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `decision_comment_text` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `resulting_grant_id` | `uuid` | Clave foránea → delegated_access.support_scope_grants.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/engagement_request_items.entity.ts:12`)_ | coincide |
+| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | v4.2.76: tenant_id = tenant de la solicitud (trigger integrity.trg_support_tenant_consistency). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_29_delegated_access.puml:544`)_ | coincide |
+| 3 | `engagement_request_id` | `uuid` | Clave foránea → delegated_access.engagement_requests.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `target_kind_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `practitioner_role_assignment_id` | `uuid` | Clave foránea → practice.practitioner_role_assignments.id; Opcional | _sin dato_ | coincide |
+| 6 | `healthcare_service_id` | `uuid` | Clave foránea → practice.healthcare_services.id; Opcional | _sin dato_ | coincide |
+| 7 | `care_space_id` | `uuid` | Clave foránea → practice.care_spaces.id; Opcional | _sin dato_ | coincide |
+| 8 | `practice_site_id` | `uuid` | Clave foránea → practice.practice_sites.id; Opcional | _sin dato_ | coincide |
+| 9 | `proposed_actions_json` | `jsonb` | Obligatoria | _sin dato_ | coincide |
+| 10 | `decision_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 11 | `decision_comment_text` | `text` | Opcional | _sin dato_ | coincide |
+| 12 | `resulting_grant_id` | `uuid` | Clave foránea → delegated_access.support_scope_grants.id; Opcional | _sin dato_ | coincide |
+| 13 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/engagement_request_items.entity.ts:100`)_ | coincide |
 
 #### Relaciones
 
@@ -1200,30 +1204,30 @@ Registra la solicitud de una persona a una organización, o la invitación de la
 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_29_delegated_access.puml: engagement_requests`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` · **DDL:** `SQL/29_delegated_access/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `EngagementRequests` — `src/modules/delegated_access/entities/engagement_requests.entity.ts`
 - **Resumen:** 17 columnas · 9 índices · 9 FK salientes · 1 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `requester_user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `direction_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `role_template_id` | `uuid` | Clave foránea → delegated_access.role_templates.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `parent_assignment_id` | `uuid` | Clave foránea → delegated_access.organization_user_assignments.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `message_text` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `expires_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `decided_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `decided_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `decision_reason_text` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 16 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 17 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/engagement_requests.entity.ts:12`)_ | coincide |
+| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `requester_user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `direction_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `role_template_id` | `uuid` | Clave foránea → delegated_access.role_templates.id; Obligatoria | _sin dato_ | coincide |
+| 6 | `parent_assignment_id` | `uuid` | Clave foránea → delegated_access.organization_user_assignments.id; Opcional | _sin dato_ | coincide |
+| 7 | `message_text` | `text` | Opcional | _sin dato_ | coincide |
+| 8 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 9 | `expires_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 10 | `decided_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 11 | `decided_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 12 | `decision_reason_text` | `text` | Opcional | _sin dato_ | coincide |
+| 13 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/engagement_requests.entity.ts:92`)_ | coincide |
+| 14 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/engagement_requests.entity.ts:98`)_ | coincide |
+| 15 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 16 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 17 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/delegated_access/entities/engagement_requests.entity.ts:116`)_ | coincide |
 
 #### Relaciones
 
@@ -1286,39 +1290,41 @@ Lleva las aprobaciones de cuatro ojos: una acción sensible, un cambio por encim
 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_29_delegated_access.puml: four_eyes_requests`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` · **DDL:** `SQL/29_delegated_access/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
-- **Resumen:** 26 columnas · 11 índices · 10 FK salientes · 2 entrantes · 0 operaciones
+- **Entidad del ORM:** `FourEyesRequests` — `src/modules/delegated_access/entities/four_eyes_requests.entity.ts`
+- **Resumen:** 28 columnas · 13 índices · 10 FK salientes · 3 entrantes · 1 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `kind_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `requester_user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `subject_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `organization_user_assignment_id` | `uuid` | Clave foránea → delegated_access.organization_user_assignments.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `permission_code` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `approver_kind_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `payload_json` | `jsonb` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `payload_hash` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `payload_schema_version` | `integer` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `reason_text` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `expires_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `decided_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 16 | `decided_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 17 | `decision_comment_text` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 18 | `approved_until` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 19 | `consumed_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 20 | `executed_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 21 | `execution_result_json` | `jsonb` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 22 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 23 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 24 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 25 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 26 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/four_eyes_requests.entity.ts:12`)_ | coincide |
+| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `kind_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `requester_user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `subject_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 6 | `organization_user_assignment_id` | `uuid` | Clave foránea → delegated_access.organization_user_assignments.id; Opcional | _sin dato_ | coincide |
+| 7 | `permission_code` | `varchar` | Opcional | _sin dato_ | coincide |
+| 8 | `subject_entity` | `varchar` | Opcional | _sin dato_ | coincide |
+| 9 | `subject_id` | `uuid` | Opcional | _sin dato_ | coincide |
+| 10 | `approver_kind_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 11 | `payload_json` | `jsonb` | Obligatoria | _sin dato_ | coincide |
+| 12 | `payload_hash` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 13 | `payload_schema_version` | `integer` | Obligatoria | _sin dato_ | coincide |
+| 14 | `reason_text` | `text` | Opcional | _sin dato_ | coincide |
+| 15 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 16 | `expires_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 17 | `decided_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 18 | `decided_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 19 | `decision_comment_text` | `text` | Opcional | _sin dato_ | coincide |
+| 20 | `approved_until` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 21 | `consumed_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 22 | `executed_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 23 | `execution_result_json` | `jsonb` | Opcional | _sin dato_ | coincide |
+| 24 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/four_eyes_requests.entity.ts:187`)_ | coincide |
+| 25 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/four_eyes_requests.entity.ts:193`)_ | coincide |
+| 26 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 27 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 28 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/delegated_access/entities/four_eyes_requests.entity.ts:211`)_ | coincide |
 
 #### Relaciones
 
@@ -1336,16 +1342,19 @@ Lleva las aprobaciones de cuatro ojos: una acción sensible, un cambio por encim
 | hacia | updated_by_user_id | iam.users (id) | fk_four_eyes_requests_updated_by_user_id |
 | desde | id | delegated_access.sod_exceptions (four_eyes_request_id) | fk_sod_exceptions_four_eyes_request_id |
 | desde | id | delegated_access.access_decision_log (approval_id) | fk_access_decision_log_approval_id |
+| desde | tenant_id, id | system_ops.bulk_import_batches (tenant_id, approval_request_id) | fk_bulk_import_batches_approval_request_id |
 
 #### Índices
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
+| `uq_four_eyes_requests_tenant_id_id` | sí | tenant_id, id | Garantiza que no se repita la combinación (tenant_id, id) _(DOCUMENTO)_; Soporta la clave foránea fk_four_eyes_requests_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_four_eyes_requests_tenant_id` | no | tenant_id, status_concept_id, expires_at | Soporta la clave foránea fk_four_eyes_requests_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_four_eyes_requests_requester` | no | requester_user_id, status_concept_id | Soporta la clave foránea fk_four_eyes_requests_requester_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `uq_four_eyes_requests_pending_payload` | sí | tenant_id, kind_concept_id, requester_user_id, (COALESCE(permission_code, '')), payload_hash donde WHERE status_concept_id = 'a977935a-9073-5113-9644-7df96732e776' | Garantiza que no se repita la combinación (tenant_id, kind_concept_id, requester_user_id, payload_hash) _(DOCUMENTO)_; Índice parcial: sólo indexa las filas donde WHERE status_concept_id = 'a977935a-9073-5113-9644-7df96732e776' _(ESTRUCTURAL)_ |
 | `ix_four_eyes_requests_kind_concept_id` | no | kind_concept_id | Soporta la clave foránea fk_four_eyes_requests_kind_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_four_eyes_requests_subject_user_id` | no | subject_user_id | Soporta la clave foránea fk_four_eyes_requests_subject_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_four_eyes_requests_subject` | no | subject_entity, subject_id donde WHERE subject_id IS NOT NULL | Índice parcial: sólo indexa las filas donde WHERE subject_id IS NOT NULL _(ESTRUCTURAL)_ |
 | `ix_four_eyes_requests_organization_user_assignment_id` | no | organization_user_assignment_id | Soporta la clave foránea fk_four_eyes_requests_organization_user_assignment_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_four_eyes_requests_approver_kind_concept_id` | no | approver_kind_concept_id | Soporta la clave foránea fk_four_eyes_requests_approver_kind_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_four_eyes_requests_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_four_eyes_requests_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -1357,16 +1366,20 @@ Lleva las aprobaciones de cuatro ojos: una acción sensible, un cambio por encim
 
 | Restricción | Tipo | Definición |
 |---|---|---|
+| `uq_four_eyes_requests_tenant_id_id` | UNIQUE INDEX | UNIQUE INDEX ("tenant_id", "id") |
 | `uq_four_eyes_requests_pending_payload` | UNIQUE INDEX | UNIQUE INDEX ("tenant_id", "kind_concept_id", "requester_user_id", COALESCE(permission_code, ''), "payload_hash") WHERE status_concept_id = 'a977935a-9073-5113-9644-7df96732e776' |
 | `ck_four_eyes_requests_not_self` | CHECK | CHECK (("decided_by_user_id" IS NULL OR ("decided_by_user_id" <> "requester_user_id" AND ("subject_user_id" IS NULL OR "decided_by_user_id" <> "subject_user_id")))) |
 | `ck_four_eyes_requests_hash` | CHECK | CHECK (("payload_hash" ~ '^[0-9a-f]{64}$')) |
 | `ck_four_eyes_requests_expiry` | CHECK | CHECK (("expires_at" > "created_at")) |
 | `ck_four_eyes_requests_decision` | CHECK | CHECK ((("status_concept_id" <> 'a977935a-9073-5113-9644-7df96732e776' OR ("decided_at" IS NULL AND "decided_by_user_id" IS NULL)) AND ("status_concept_id" NOT IN ('1627143e-d273-5fcb-b289-9e59b8b096f2', 'de15c53d-1aa0-5709-8ebd-69e9fd323e31', '013d578f-38af-564c-aff1-e36d1fdec6dd') OR ("decided_at" IS NOT NULL AND "decided_by_user_id" IS NOT NULL)))) |
 | `ck_four_eyes_requests_reject_comment` | CHECK | CHECK (("status_concept_id" <> 'de15c53d-1aa0-5709-8ebd-69e9fd323e31' OR COALESCE(char_length("decision_comment_text"), 0) >= 5)) |
+| `ck_four_eyes_requests_subject_pair` | CHECK | CHECK ((("subject_entity" IS NULL) = ("subject_id" IS NULL))) |
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| GET /approvals/pending | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -1390,29 +1403,29 @@ Guarda las reglas propias de cada organización sobre los permisos de apoyo: tec
 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_29_delegated_access.puml: governance_rules`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` · **DDL:** `SQL/29_delegated_access/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `GovernanceRules` — `src/modules/delegated_access/entities/governance_rules.entity.ts`
 - **Resumen:** 16 columnas · 6 índices · 5 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `rule_kind_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `role_template_code` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `permission_pattern` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `rule_json` | `jsonb` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `rule_schema_version` | `integer` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `message_text` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `valid_from` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `valid_to` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 16 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/governance_rules.entity.ts:12`)_ | coincide |
+| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `rule_kind_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `role_template_code` | `varchar` | Opcional | _sin dato_ | coincide |
+| 5 | `permission_pattern` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 6 | `rule_json` | `jsonb` | Opcional | _sin dato_ | coincide |
+| 7 | `rule_schema_version` | `integer` | Opcional | _sin dato_ | coincide |
+| 8 | `message_text` | `text` | Opcional | _sin dato_ | coincide |
+| 9 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 10 | `valid_from` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 11 | `valid_to` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 12 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/governance_rules.entity.ts:99`)_ | coincide |
+| 13 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/governance_rules.entity.ts:105`)_ | coincide |
+| 14 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 15 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 16 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/delegated_access/entities/governance_rules.entity.ts:123`)_ | coincide |
 
 #### Relaciones
 
@@ -1470,26 +1483,26 @@ Acumula por hora el uso de cada permiso de apoyo (permitidos, negados, desafíos
 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_29_delegated_access.puml: grant_usage_stats`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` · **DDL:** `SQL/29_delegated_access/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `GrantUsageStats` — `src/modules/delegated_access/entities/grant_usage_stats.entity.ts`
 - **Resumen:** 13 columnas · 4 índices · 3 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `support_scope_grant_id` | `uuid` | Clave foránea → delegated_access.support_scope_grants.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `permission_code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `bucket_start` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `permit_count` | `integer = 0` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `deny_count` | `integer = 0` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `challenge_count` | `integer = 0` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `off_hours_count` | `integer = 0` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `distinct_patients_in_bucket` | `integer = 0` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `last_used_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/grant_usage_stats.entity.ts:12`)_ | coincide |
+| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `support_scope_grant_id` | `uuid` | Clave foránea → delegated_access.support_scope_grants.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `permission_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 6 | `bucket_start` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 7 | `permit_count` | `integer = 0` | Obligatoria | _sin dato_ | coincide |
+| 8 | `deny_count` | `integer = 0` | Obligatoria | _sin dato_ | coincide |
+| 9 | `challenge_count` | `integer = 0` | Obligatoria | _sin dato_ | coincide |
+| 10 | `off_hours_count` | `integer = 0` | Obligatoria | _sin dato_ | coincide |
+| 11 | `distinct_patients_in_bucket` | `integer = 0` | Obligatoria | _sin dato_ | coincide |
+| 12 | `last_used_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 13 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/grant_usage_stats.entity.ts:92`)_ | coincide |
 
 #### Relaciones
 
@@ -1541,30 +1554,30 @@ Registra el traspaso del trabajo de quien se va o cambia de función: conversaci
 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_29_delegated_access.puml: handover_items`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` · **DDL:** `SQL/29_delegated_access/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `HandoverItems` — `src/modules/delegated_access/entities/handover_items.entity.ts`
 - **Resumen:** 17 columnas · 9 índices · 9 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `lifecycle_case_id` | `uuid` | Clave foránea → delegated_access.lifecycle_cases.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `item_kind_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `source_id` | `uuid` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `from_user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `to_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `summary_text` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `reassigned_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `reassigned_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `note_text` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 16 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 17 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/handover_items.entity.ts:12`)_ | coincide |
+| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `lifecycle_case_id` | `uuid` | Clave foránea → delegated_access.lifecycle_cases.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `item_kind_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `source_id` | `uuid` | Obligatoria | _sin dato_ | coincide |
+| 6 | `from_user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | coincide |
+| 7 | `to_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 8 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 9 | `summary_text` | `varchar` | Opcional | _sin dato_ | coincide |
+| 10 | `reassigned_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 11 | `reassigned_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 12 | `note_text` | `text` | Opcional | _sin dato_ | coincide |
+| 13 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/handover_items.entity.ts:96`)_ | coincide |
+| 14 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/handover_items.entity.ts:102`)_ | coincide |
+| 15 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 16 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 17 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/delegated_access/entities/handover_items.entity.ts:120`)_ | coincide |
 
 #### Relaciones
 
@@ -1628,31 +1641,31 @@ Sigue el ingreso, el cambio, la baja, la suspensión y la reactivación de una p
 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_29_delegated_access.puml: lifecycle_cases`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` · **DDL:** `SQL/29_delegated_access/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `LifecycleCases` — `src/modules/delegated_access/entities/lifecycle_cases.entity.ts`
 - **Resumen:** 18 columnas · 9 índices · 8 FK salientes · 1 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `organization_user_assignment_id` | `uuid` | Clave foránea → delegated_access.organization_user_assignments.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `subject_user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `kind_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `opened_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `opened_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `due_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `completed_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `reason_text` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `checklist_json` | `jsonb` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `details_json` | `jsonb` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 16 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 17 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 18 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/lifecycle_cases.entity.ts:12`)_ | coincide |
+| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `organization_user_assignment_id` | `uuid` | Clave foránea → delegated_access.organization_user_assignments.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `subject_user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `kind_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 6 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 7 | `opened_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 8 | `opened_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 9 | `due_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 10 | `completed_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 11 | `reason_text` | `text` | Opcional | _sin dato_ | coincide |
+| 12 | `checklist_json` | `jsonb` | Obligatoria | _sin dato_ | coincide |
+| 13 | `details_json` | `jsonb` | Opcional | _sin dato_ | coincide |
+| 14 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/lifecycle_cases.entity.ts:99`)_ | coincide |
+| 15 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/lifecycle_cases.entity.ts:105`)_ | coincide |
+| 16 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 17 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 18 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/delegated_access/entities/lifecycle_cases.entity.ts:123`)_ | coincide |
 
 #### Relaciones
 
@@ -1718,14 +1731,14 @@ Asocia usuarios con organizaciones para determinar en qué ámbitos pueden actua
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_29_delegated_access.puml: organization_user_assignments`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` · **DDL:** `SQL/29_delegated_access/02_tables.sql`
 - **Entidad del ORM:** `OrganizationUserAssignments` — `src/modules/delegated_access/entities/organization_user_assignments.entity.ts`
-- **Resumen:** 35 columnas · 24 índices · 20 FK salientes · 8 entrantes · 82 operaciones
+- **Resumen:** 36 columnas · 25 índices · 21 FK salientes · 8 entrantes · 86 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
 | 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/organization_user_assignments.entity.ts:15`)_ | coincide |
-| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | + v4.2.79 (revision de seguridad A-M1): tenant_id ancla el vinculo a la organizacion para RLS. Debe ser el tenant de su membresia y de cada nodo de alcance que traiga (trigger integrity.support_tenant_consistency). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_29_delegated_access.puml:29`)_ | **AUSENTE_EN_ORM** |
+| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | + v4.2.79 (revision de seguridad A-M1): tenant_id ancla el vinculo a la organizacion para RLS. Debe ser el tenant de su membresia y de cada nodo de alcance que traiga (trigger integrity.support_tenant_consistency). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_29_delegated_access.puml:29`)_ | coincide |
 | 3 | `tenant_membership_id` | `uuid` | Clave foránea → directory.tenant_memberships.id; Obligatoria | _sin dato_ | coincide |
 | 4 | `practice_id` | `uuid` | Clave foránea → practice.practices.id; Opcional | _sin dato_ | coincide |
 | 5 | `practice_site_id` | `uuid` | Clave foránea → practice.practice_sites.id; Opcional | _sin dato_ | coincide |
@@ -1739,26 +1752,27 @@ Asocia usuarios con organizaciones para determinar en qué ámbitos pueden actua
 | 13 | `valid_from` | `timestamptz` | Opcional | _sin dato_ | coincide |
 | 14 | `valid_to` | `timestamptz` | Opcional | _sin dato_ | coincide |
 | 15 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
-| 16 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/organization_user_assignments.entity.ts:107`)_ | coincide |
-| 17 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/organization_user_assignments.entity.ts:113`)_ | coincide |
+| 16 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/organization_user_assignments.entity.ts:113`)_ | coincide |
+| 17 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/organization_user_assignments.entity.ts:119`)_ | coincide |
 | 18 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 19 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 20 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/delegated_access/entities/organization_user_assignments.entity.ts:131`)_ | coincide |
-| 21 | `origin_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | + v4.2.75 (personal de apoyo): el vinculo de apoyo es persona + organizacion + plantilla + vigencia + recertificacion. Las columnas de alcance sueltas de arriba (practice_site_id, clinical_unit_id, care_space_id, diagnostic_unit_id, pharmacy_id) quedan DEPRECADAS: el alcance ahora son filas de support_scope_grants. No se borran todavia. Todas nullable: los vinculos existentes no las declaran. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_29_delegated_access.puml:50`)_ | **AUSENTE_EN_ORM** |
-| 22 | `owner_kind_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 23 | `role_template_id` | `uuid` | Clave foránea → delegated_access.role_templates.id; Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 24 | `recertify_every_months` | `integer` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 25 | `next_recertification_at` | `timestamptz` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 26 | `ended_reason_text` | `text` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 27 | `identity_verified_at` | `timestamptz` | Opcional | + v4.2.78 (gobierno de accesos): verificacion de identidad, suspension, incorporacion y certificacion del vinculo. supervisor_user_id pasa a significar DUENO DE LA CUENTA (sin renombrar la columna). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_29_delegated_access.puml:60`)_ | **AUSENTE_EN_ORM** |
-| 28 | `identity_verified_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 29 | `identity_method_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 30 | `suspended_at` | `timestamptz` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 31 | `suspension_reason_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 32 | `suspension_note_text` | `text` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 33 | `onboarding_completed_at` | `timestamptz` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 34 | `last_certified_at` | `timestamptz` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 35 | `last_active_at` | `timestamptz` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 20 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/delegated_access/entities/organization_user_assignments.entity.ts:137`)_ | coincide |
+| 21 | `origin_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | + v4.2.75 (personal de apoyo): el vinculo de apoyo es persona + organizacion + plantilla + vigencia + recertificacion. Las columnas de alcance sueltas de arriba (practice_site_id, clinical_unit_id, care_space_id, diagnostic_unit_id, pharmacy_id) quedan DEPRECADAS: el alcance ahora son filas de support_scope_grants. No se borran todavia. Todas nullable: los vinculos existentes no las declaran. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_29_delegated_access.puml:50`)_ | coincide |
+| 22 | `owner_kind_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 23 | `role_template_id` | `uuid` | Clave foránea → delegated_access.role_templates.id; Opcional | _sin dato_ | coincide |
+| 24 | `recertify_every_months` | `integer` | Opcional | _sin dato_ | coincide |
+| 25 | `next_recertification_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 26 | `ended_reason_text` | `text` | Opcional | _sin dato_ | coincide |
+| 27 | `initiated_by_party_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | + v4.2.82 (alta de la secretaria por solicitud y aceptacion): QUIEN inicio el vinculo (delegated_access:DA_INITIATOR_SUPPORT_STAFF ¦ DA_INITIATOR_ORGANIZATION ¦ DA_INITIATOR_PRACTITIONER; los siembra la API). Decide la parte que NO inicio. NULL = no decidible (filas previas u otros flujos): la API falla cerrada. No se deduce de created_by_user_id (una cuenta puede ser secretaria y doctor a la vez). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_29_delegated_access.puml:60`)_ | coincide |
+| 28 | `identity_verified_at` | `timestamptz` | Opcional | + v4.2.78 (gobierno de accesos): verificacion de identidad, suspension, incorporacion y certificacion del vinculo. supervisor_user_id pasa a significar DUENO DE LA CUENTA (sin renombrar la columna). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_29_delegated_access.puml:65`)_ | coincide |
+| 29 | `identity_verified_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 30 | `identity_method_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 31 | `suspended_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 32 | `suspension_reason_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 33 | `suspension_note_text` | `text` | Opcional | _sin dato_ | coincide |
+| 34 | `onboarding_completed_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 35 | `last_certified_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 36 | `last_active_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
 
 #### Relaciones
 
@@ -1781,6 +1795,7 @@ Asocia usuarios con organizaciones para determinar en qué ámbitos pueden actua
 | hacia | updated_by_user_id | iam.users (id) | fk_organization_user_assignments_updated_by_user_id |
 | hacia | origin_concept_id | terminology.catalog_concepts (id) | fk_organization_user_assignments_origin_concept_id |
 | hacia | owner_kind_concept_id | terminology.catalog_concepts (id) | fk_organization_user_assignments_owner_kind_concept_id |
+| hacia | initiated_by_party_concept_id | terminology.catalog_concepts (id) | fk_organization_user_assignments_initiated_by_party_concept_id |
 | hacia | identity_verified_by_user_id | iam.users (id) | fk_organization_user_assignments_identity_verified_by_user_id |
 | hacia | identity_method_concept_id | terminology.catalog_concepts (id) | fk_organization_user_assignments_identity_method_concept_id |
 | hacia | suspension_reason_concept_id | terminology.catalog_concepts (id) | fk_organization_user_assignments_suspension_reason_concept_id |
@@ -1815,6 +1830,7 @@ Asocia usuarios con organizaciones para determinar en qué ámbitos pueden actua
 | `ix_organization_user_assignments_owner_kind_concept_id` | no | owner_kind_concept_id | Soporta la clave foránea fk_organization_user_assignments_owner_kind_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_organization_user_assignments_role_template_id` | no | role_template_id | Soporta la clave foránea fk_organization_user_assignments_role_template_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_organization_user_assignments_next_recertification` | no | next_recertification_at donde WHERE next_recertification_at IS NOT NULL | Índice parcial: sólo indexa las filas donde WHERE next_recertification_at IS NOT NULL _(ESTRUCTURAL)_ |
+| `ix_org_user_assignments_initiated_by_party` | no | initiated_by_party_concept_id | Soporta la clave foránea fk_organization_user_assignments_initiated_by_party_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `uq_organization_user_assignments_active_template` | sí | tenant_membership_id, role_template_id donde WHERE role_template_id IS NOT NULL AND status_concept_id = '38a1d301-f40d-5b17-a695-5e6d605f8b19' | Garantiza que no se repita la combinación (tenant_membership_id, role_template_id) _(DOCUMENTO)_; Soporta la clave foránea fk_organization_user_assignments_tenant_membership_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; Índice parcial: sólo indexa las filas donde WHERE role_template_id IS NOT NULL AND status_concept_id = '38a1d301-f40d-5b17-a695-5e6d605f8b19' _(ESTRUCTURAL)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_membership_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_organization_user_assignments_identity_verified_by_user_id` | no | identity_verified_by_user_id | Soporta la clave foránea fk_organization_user_assignments_identity_verified_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_organization_user_assignments_identity_method_concept_id` | no | identity_method_concept_id | Soporta la clave foránea fk_organization_user_assignments_identity_method_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -1865,11 +1881,14 @@ Asocia usuarios con organizaciones para determinar en qué ámbitos pueden actua
 | POST /sites/{siteId}/census/{date}/close | LEE | POR_SQL |
 | GET /sites/{siteId}/inpatient-indicators | LEE | POR_SQL |
 | GET /sites/{siteId}/inpatients | LEE | POR_SQL |
+| GET /approvals/pending | LEE | POR_SQL |
 | POST /authz/effective-actor/evaluate | LEE | DIRECTA |
 | POST /delegated-access/expiry-sweep | ACTUALIZA | POR_TIPO |
 | POST /delegated-access/expiry-sweep | LEE | DIRECTA |
+| GET /me/practitioner/governance-panel | LEE | POR_SQL |
 | POST /me/practitioner/support-invitations | CREA | POR_SQL |
 | POST /me/practitioner/support-invitations | LEE | POR_SQL |
+| POST /me/practitioner/support-staff | LEE | POR_SQL |
 | GET /me/practitioner/support-team | LEE | POR_SQL |
 | POST /me/practitioner/support-team/{id}/end | LEE | DIRECTA |
 | GET /me/support-access | LEE | POR_SQL |
@@ -1884,6 +1903,7 @@ Asocia usuarios con organizaciones para determinar en qué ámbitos pueden actua
 | POST /org/support-engagement-requests/{id}/decision | LEE | DIRECTA |
 | GET /org/support-engagements | LEE | POR_SQL |
 | POST /org/support-engagements/{id}/end | LEE | DIRECTA |
+| POST /org/support-staff | CREA | POR_SQL |
 | POST /org/team/invitations | CREA | POR_SQL |
 | POST /org/team/invitations | LEE | POR_SQL |
 | PATCH /org/user-assignments/{id} | ACTUALIZA | POR_TIPO |
@@ -1940,26 +1960,26 @@ Marca por organización a los pacientes VIP, confidenciales, familiares del pers
 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_29_delegated_access.puml: patient_restriction_flags`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` · **DDL:** `SQL/29_delegated_access/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `PatientRestrictionFlags` — `src/modules/delegated_access/entities/patient_restriction_flags.entity.ts`
 - **Resumen:** 13 columnas · 7 índices · 6 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `patient_profile_id` | `uuid` | Clave foránea → profiles.patient_profiles.profile_id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `flag_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `reason_text` | `text` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `valid_from` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `valid_to` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/patient_restriction_flags.entity.ts:12`)_ | coincide |
+| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `patient_profile_id` | `uuid` | Clave foránea → profiles.patient_profiles.profile_id; Obligatoria | _sin dato_ | coincide |
+| 4 | `flag_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `reason_text` | `text` | Obligatoria | _sin dato_ | coincide |
+| 6 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 7 | `valid_from` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 8 | `valid_to` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 9 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/patient_restriction_flags.entity.ts:64`)_ | coincide |
+| 10 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/patient_restriction_flags.entity.ts:70`)_ | coincide |
+| 11 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 12 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 13 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/delegated_access/entities/patient_restriction_flags.entity.ts:88`)_ | coincide |
 
 #### Relaciones
 
@@ -2025,7 +2045,7 @@ Relaciona profesionales con delegados autorizados para realizar tareas en su nom
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
 | 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/practitioner_delegate_assignments.entity.ts:15`)_ | coincide |
-| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | + v4.2.79 (revision de seguridad A-M1): tenant_id ancla la delegacion a la organizacion para RLS. Debe ser el tenant de su set de permisos, de su vinculo y de su doctor (trigger integrity.support_tenant_consistency). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_29_delegated_access.puml:103`)_ | **AUSENTE_EN_ORM** |
+| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | + v4.2.79 (revision de seguridad A-M1): tenant_id ancla la delegacion a la organizacion para RLS. Debe ser el tenant de su set de permisos, de su vinculo y de su doctor (trigger integrity.support_tenant_consistency). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_29_delegated_access.puml:108`)_ | coincide |
 | 3 | `practitioner_role_assignment_id` | `uuid` | Clave foránea → practice.practitioner_role_assignments.id; Obligatoria | _sin dato_ | coincide |
 | 4 | `delegate_user_assignment_id` | `uuid` | Clave foránea → delegated_access.organization_user_assignments.id; Obligatoria | _sin dato_ | coincide |
 | 5 | `delegated_permission_set_id` | `uuid` | Clave foránea → delegated_access.delegated_permission_sets.id; Obligatoria | _sin dato_ | coincide |
@@ -2038,14 +2058,14 @@ Relaciona profesionales con delegados autorizados para realizar tareas en su nom
 | 12 | `valid_from` | `timestamptz` | Opcional | _sin dato_ | coincide |
 | 13 | `valid_to` | `timestamptz` | Opcional | _sin dato_ | coincide |
 | 14 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
-| 15 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/practitioner_delegate_assignments.entity.ts:117`)_ | coincide |
-| 16 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/practitioner_delegate_assignments.entity.ts:123`)_ | coincide |
+| 15 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/practitioner_delegate_assignments.entity.ts:123`)_ | coincide |
+| 16 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/practitioner_delegate_assignments.entity.ts:129`)_ | coincide |
 | 17 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 18 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 19 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/delegated_access/entities/practitioner_delegate_assignments.entity.ts:141`)_ | coincide |
-| 20 | `may_reply_on_behalf` | `boolean = false` | Obligatoria | + v4.2.75 (personal de apoyo): el doctor acepta UNA vez al afiliarse (clausula de personal de apoyo) y, para que la persona responda mensajes en su nombre, la acepta a ELLA (may_reply_on_behalf). reply_disclosure_concept_id: SHOW = el paciente ve 'respondido por su equipo' (activo por defecto). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_29_delegated_access.puml:123`)_ | **AUSENTE_EN_ORM** |
-| 21 | `reply_disclosure_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 22 | `accepted_at` | `timestamptz` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 19 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/delegated_access/entities/practitioner_delegate_assignments.entity.ts:147`)_ | coincide |
+| 20 | `may_reply_on_behalf` | `boolean = false` | Obligatoria | + v4.2.75 (personal de apoyo): el doctor acepta UNA vez al afiliarse (clausula de personal de apoyo) y, para que la persona responda mensajes en su nombre, la acepta a ELLA (may_reply_on_behalf). reply_disclosure_concept_id: SHOW = el paciente ve 'respondido por su equipo' (activo por defecto). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_29_delegated_access.puml:128`)_ | coincide |
+| 21 | `reply_disclosure_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 22 | `accepted_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
 
 #### Relaciones
 
@@ -2053,6 +2073,7 @@ Relaciona profesionales con delegados autorizados para realizar tareas en su nom
 |---|---|---|---|
 | hacia | delegate_user_assignment_id | delegated_access.organization_user_assignments (id) | fk_practitioner_delegate_assignments_delegate_user_ass_501b9011 |
 | hacia | delegated_permission_set_id | delegated_access.delegated_permission_sets (id) | fk_practitioner_delegate_assignments_delegated_permiss_f69e2298 |
+| hacia | tenant_id | directory.tenants (id) | fk_practitioner_delegate_assignments_tenant_id |
 | hacia | practitioner_role_assignment_id | practice.practitioner_role_assignments (id) | fk_practitioner_delegate_assignments_practitioner_role_7e0ebecf |
 | hacia | delegate_role_concept_id | terminology.catalog_concepts (id) | fk_practitioner_delegate_assignments_delegate_role_concept_id |
 | hacia | patient_scope_concept_id | terminology.catalog_concepts (id) | fk_practitioner_delegate_assignments_patient_scope_concept_id |
@@ -2061,7 +2082,6 @@ Relaciona profesionales con delegados autorizados para realizar tareas en su nom
 | hacia | created_by_user_id | iam.users (id) | fk_practitioner_delegate_assignments_created_by_user_id |
 | hacia | updated_by_user_id | iam.users (id) | fk_practitioner_delegate_assignments_updated_by_user_id |
 | hacia | reply_disclosure_concept_id | terminology.catalog_concepts (id) | fk_practitioner_delegate_assignments_reply_disclosure__d918f1cb |
-| hacia | tenant_id | directory.tenants (id) | fk_practitioner_delegate_assignments_tenant_id |
 | desde | id | delegated_access.delegated_access_grants (practitioner_delegate_assignment_id) | fk_delegated_access_grants_practitioner_delegate_assignment_id |
 | desde | id | delegated_access.delegated_access_approval_requests (practitioner_delegate_assignment_id) | fk_delegated_access_approval_requests_practitioner_del_a6db1929 |
 | desde | id | delegated_access.delegation_events (practitioner_delegate_assignment_id) | fk_delegation_events_practitioner_delegate_assignment_id |
@@ -2120,27 +2140,27 @@ Define los paquetes de acciones por defecto de cada rol de apoyo (secretaria, re
 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_29_delegated_access.puml: role_templates`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` · **DDL:** `SQL/29_delegated_access/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `RoleTemplates` — `src/modules/delegated_access/entities/role_templates.entity.ts`
 - **Resumen:** 14 columnas · 6 índices · 4 FK salientes · 4 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `name` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `default_actions_json` | `jsonb` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `version_number` | `integer` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `default_conditions_json` | `jsonb` | Opcional | + v4.2.78: default_conditions_json = mapa atomo -> condicion v1 que recibe una concesion NUEVA; ceiling_actions_json = arreglo de atomos o `prefijo.*` que la plantilla puede otorgar como maximo (NULL = sin techo propio). Las plantillas de plataforma v2 los traen. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_29_delegated_access.puml:448`)_ | **SIN_ENTIDAD** |
-| 14 | `ceiling_actions_json` | `jsonb` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/role_templates.entity.ts:12`)_ | coincide |
+| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Opcional | _sin dato_ | coincide |
+| 3 | `code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 4 | `name` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 5 | `default_actions_json` | `jsonb` | Obligatoria | _sin dato_ | coincide |
+| 6 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 7 | `version_number` | `integer` | Obligatoria | _sin dato_ | coincide |
+| 8 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/role_templates.entity.ts:58`)_ | coincide |
+| 9 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/role_templates.entity.ts:64`)_ | coincide |
+| 10 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 11 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 12 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/delegated_access/entities/role_templates.entity.ts:82`)_ | coincide |
+| 13 | `default_conditions_json` | `jsonb` | Opcional | + v4.2.78: default_conditions_json = mapa atomo -> condicion v1 que recibe una concesion NUEVA; ceiling_actions_json = arreglo de atomos o `prefijo.*` que la plantilla puede otorgar como maximo (NULL = sin techo propio). Las plantillas de plataforma v2 los traen. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_29_delegated_access.puml:454`)_ | coincide |
+| 14 | `ceiling_actions_json` | `jsonb` | Opcional | _sin dato_ | coincide |
 
 #### Relaciones
 
@@ -2209,14 +2229,14 @@ _Sin propósito registrado._
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/shared_access_link_uses.entity.ts:12`)_ | coincide |
 | 2 | `shared_access_link_id` | `uuid` | Clave foránea → delegated_access.shared_access_links.id; Obligatoria | _sin dato_ | coincide |
 | 3 | `action_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
 | 4 | `outcome_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
 | 5 | `source_ip` | `inet` | Opcional | _sin dato_ | coincide |
 | 6 | `user_agent` | `varchar` | Opcional | _sin dato_ | coincide |
 | 7 | `occurred_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 8 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 8 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/shared_access_link_uses.entity.ts:54`)_ | coincide |
 
 #### Relaciones
 
@@ -2272,7 +2292,7 @@ _Sin propósito registrado._
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/shared_access_links.entity.ts:12`)_ | coincide |
 | 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
 | 3 | `patient_profile_id` | `uuid` | Clave foránea → profiles.patient_profiles.profile_id; Obligatoria | _sin dato_ | coincide |
 | 4 | `resource_type_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
@@ -2287,11 +2307,11 @@ _Sin propósito registrado._
 | 13 | `revoked_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 14 | `revoke_reason_text` | `text` | Opcional | _sin dato_ | coincide |
 | 15 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
-| 16 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 17 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 16 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/shared_access_links.entity.ts:122`)_ | coincide |
+| 17 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/shared_access_links.entity.ts:128`)_ | coincide |
 | 18 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 19 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 20 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+| 20 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/delegated_access/entities/shared_access_links.entity.ts:146`)_ | coincide |
 
 #### Relaciones
 
@@ -2367,30 +2387,30 @@ Registra las excepciones justificadas y con vencimiento a una regla de separaci�
 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_29_delegated_access.puml: sod_exceptions`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` · **DDL:** `SQL/29_delegated_access/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `SodExceptions` — `src/modules/delegated_access/entities/sod_exceptions.entity.ts`
 - **Resumen:** 17 columnas · 9 índices · 8 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `sod_rule_id` | `uuid` | Clave foránea → delegated_access.sod_rules.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `organization_user_assignment_id` | `uuid` | Clave foránea → delegated_access.organization_user_assignments.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `four_eyes_request_id` | `uuid` | Clave foránea → delegated_access.four_eyes_requests.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `justification_text` | `text` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `valid_from` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `valid_to` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `revoked_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `revoked_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `revoke_reason_text` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 16 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 17 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/sod_exceptions.entity.ts:12`)_ | coincide |
+| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `sod_rule_id` | `uuid` | Clave foránea → delegated_access.sod_rules.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `organization_user_assignment_id` | `uuid` | Clave foránea → delegated_access.organization_user_assignments.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `four_eyes_request_id` | `uuid` | Clave foránea → delegated_access.four_eyes_requests.id; Obligatoria | _sin dato_ | coincide |
+| 6 | `justification_text` | `text` | Obligatoria | _sin dato_ | coincide |
+| 7 | `valid_from` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 8 | `valid_to` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 9 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 10 | `revoked_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 11 | `revoked_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 12 | `revoke_reason_text` | `text` | Opcional | _sin dato_ | coincide |
+| 13 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/sod_exceptions.entity.ts:92`)_ | coincide |
+| 14 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/sod_exceptions.entity.ts:98`)_ | coincide |
+| 15 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 16 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 17 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/delegated_access/entities/sod_exceptions.entity.ts:116`)_ | coincide |
 
 #### Relaciones
 
@@ -2453,32 +2473,32 @@ Define las reglas de separación de funciones (de plataforma y de cada organizac
 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_29_delegated_access.puml: sod_rules`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` · **DDL:** `SQL/29_delegated_access/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `SodRules` — `src/modules/delegated_access/entities/sod_rules.entity.ts`
 - **Resumen:** 19 columnas · 9 índices · 7 FK salientes · 2 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `name` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `base_rule_id` | `uuid` | Clave foránea → delegated_access.sod_rules.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `atoms_a_json` | `jsonb` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `atoms_b_json` | `jsonb` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `scope_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `action_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `is_hard` | `boolean = false` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `max_exception_days` | `integer` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `rationale_text` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `version_number` | `integer` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 16 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 17 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 18 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 19 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/sod_rules.entity.ts:12`)_ | coincide |
+| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Opcional | _sin dato_ | coincide |
+| 3 | `code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 4 | `name` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 5 | `base_rule_id` | `uuid` | Clave foránea → delegated_access.sod_rules.id; Opcional | _sin dato_ | coincide |
+| 6 | `atoms_a_json` | `jsonb` | Obligatoria | _sin dato_ | coincide |
+| 7 | `atoms_b_json` | `jsonb` | Obligatoria | _sin dato_ | coincide |
+| 8 | `scope_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 9 | `action_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 10 | `is_hard` | `boolean = false` | Obligatoria | _sin dato_ | coincide |
+| 11 | `max_exception_days` | `integer` | Opcional | _sin dato_ | coincide |
+| 12 | `rationale_text` | `text` | Opcional | _sin dato_ | coincide |
+| 13 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 14 | `version_number` | `integer` | Obligatoria | _sin dato_ | coincide |
+| 15 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/sod_rules.entity.ts:100`)_ | coincide |
+| 16 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/sod_rules.entity.ts:106`)_ | coincide |
+| 17 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 18 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 19 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/delegated_access/entities/sod_rules.entity.ts:124`)_ | coincide |
 
 #### Relaciones
 
@@ -2545,23 +2565,23 @@ Lista las acciones concretas que habilita cada permiso de apoyo, para que cada p
 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_29_delegated_access.puml: support_grant_actions`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` · **DDL:** `SQL/29_delegated_access/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `SupportGrantActions` — `src/modules/delegated_access/entities/support_grant_actions.entity.ts`
 - **Resumen:** 10 columnas · 5 índices · 4 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | v4.2.76: tenant_id = tenant del permiso (trigger integrity.trg_support_tenant_consistency). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_29_delegated_access.puml:496`)_ | **SIN_ENTIDAD** |
-| 3 | `support_scope_grant_id` | `uuid` | Clave foránea → delegated_access.support_scope_grants.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `permission_id` | `uuid` | Clave foránea → authz.permissions.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `condition_json` | `jsonb` | Opcional | + v4.2.78: condicion propia del atomo y marca de fila REEMPLAZADA por normalize-legacy (superseded_at: se ignora al evaluar, no se borra). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_29_delegated_access.puml:501`)_ | **SIN_ENTIDAD** |
-| 7 | `condition_schema_version` | `integer` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `superseded_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `updated_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/support_grant_actions.entity.ts:12`)_ | coincide |
+| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | v4.2.76: tenant_id = tenant del permiso (trigger integrity.trg_support_tenant_consistency). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_29_delegated_access.puml:502`)_ | coincide |
+| 3 | `support_scope_grant_id` | `uuid` | Clave foránea → delegated_access.support_scope_grants.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `permission_id` | `uuid` | Clave foránea → authz.permissions.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/support_grant_actions.entity.ts:36`)_ | coincide |
+| 6 | `condition_json` | `jsonb` | Opcional | + v4.2.78: condicion propia del atomo y marca de fila REEMPLAZADA por normalize-legacy (superseded_at: se ignora al evaluar, no se borra). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_29_delegated_access.puml:507`)_ | coincide |
+| 7 | `condition_schema_version` | `integer` | Opcional | _sin dato_ | coincide |
+| 8 | `superseded_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 9 | `updated_at` | `timestamptz` | Opcional | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/support_grant_actions.entity.ts:73`)_ | coincide |
+| 10 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 
 #### Relaciones
 
@@ -2615,37 +2635,37 @@ Conserva cada permiso concedido a un vínculo de apoyo con su tipo de objetivo (
 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_29_delegated_access.puml: support_scope_grants`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` · **DDL:** `SQL/29_delegated_access/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `SupportScopeGrants` — `src/modules/delegated_access/entities/support_scope_grants.entity.ts`
 - **Resumen:** 24 columnas · 15 índices · 14 FK salientes · 7 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | v4.2.76 (hardening): tenant_id ancla la fila a la organizacion para RLS. Debe ser el tenant del vinculo (organization_user_assignments -> tenant_memberships) y el de cada objetivo que traiga (doctor, servicio, espacio, sede): lo exige el trigger integrity.trg_support_tenant_consistency. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_29_delegated_access.puml:463`)_ | **SIN_ENTIDAD** |
-| 3 | `organization_user_assignment_id` | `uuid` | Clave foránea → delegated_access.organization_user_assignments.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `target_kind_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `practitioner_role_assignment_id` | `uuid` | Clave foránea → practice.practitioner_role_assignments.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `healthcare_service_id` | `uuid` | Clave foránea → practice.healthcare_services.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `care_space_id` | `uuid` | Clave foránea → practice.care_spaces.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `practice_site_id` | `uuid` | Clave foránea → practice.practice_sites.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `expansion_mode_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `fixed_snapshot_json` | `jsonb` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `valid_from` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `valid_to` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `approved_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 16 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 17 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 18 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 19 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 20 | `effect_concept_id` | `uuid = '6905e0db-1650-5d49-adca-8b2688ac049c'` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | + v4.2.78: efecto ALLOW (por defecto) o DENY. Un DENY NO es un permiso: refresh_effective_support_access y EffectiveSupportAccessService lo excluyen de la derivada. condition_json = condiciones ABAC v1 de la concesion (su version va en condition_schema_version). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_29_delegated_access.puml:484`)_ | **SIN_ENTIDAD** |
-| 21 | `condition_json` | `jsonb` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 22 | `condition_schema_version` | `integer` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 23 | `reason_text` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 24 | `source_role_template_id` | `uuid` | Clave foránea → delegated_access.role_templates.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/support_scope_grants.entity.ts:12`)_ | coincide |
+| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | v4.2.76 (hardening): tenant_id ancla la fila a la organizacion para RLS. Debe ser el tenant del vinculo (organization_user_assignments -> tenant_memberships) y el de cada objetivo que traiga (doctor, servicio, espacio, sede): lo exige el trigger integrity.trg_support_tenant_consistency. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_29_delegated_access.puml:469`)_ | coincide |
+| 3 | `organization_user_assignment_id` | `uuid` | Clave foránea → delegated_access.organization_user_assignments.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `target_kind_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `practitioner_role_assignment_id` | `uuid` | Clave foránea → practice.practitioner_role_assignments.id; Opcional | _sin dato_ | coincide |
+| 6 | `healthcare_service_id` | `uuid` | Clave foránea → practice.healthcare_services.id; Opcional | _sin dato_ | coincide |
+| 7 | `care_space_id` | `uuid` | Clave foránea → practice.care_spaces.id; Opcional | _sin dato_ | coincide |
+| 8 | `practice_site_id` | `uuid` | Clave foránea → practice.practice_sites.id; Opcional | _sin dato_ | coincide |
+| 9 | `expansion_mode_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 10 | `fixed_snapshot_json` | `jsonb` | Opcional | _sin dato_ | coincide |
+| 11 | `valid_from` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 12 | `valid_to` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 13 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 14 | `approved_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 15 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/support_scope_grants.entity.ts:117`)_ | coincide |
+| 16 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/delegated_access/entities/support_scope_grants.entity.ts:123`)_ | coincide |
+| 17 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 18 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 19 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/delegated_access/entities/support_scope_grants.entity.ts:141`)_ | coincide |
+| 20 | `effect_concept_id` | `uuid = '6905e0db-1650-5d49-adca-8b2688ac049c'` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | + v4.2.78: efecto ALLOW (por defecto) o DENY. Un DENY NO es un permiso: refresh_effective_support_access y EffectiveSupportAccessService lo excluyen de la derivada. condition_json = condiciones ABAC v1 de la concesion (su version va en condition_schema_version). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_29_delegated_access.puml:490`)_ | coincide |
+| 21 | `condition_json` | `jsonb` | Opcional | _sin dato_ | coincide |
+| 22 | `condition_schema_version` | `integer` | Opcional | _sin dato_ | coincide |
+| 23 | `reason_text` | `text` | Opcional | _sin dato_ | coincide |
+| 24 | `source_role_template_id` | `uuid` | Clave foránea → delegated_access.role_templates.id; Opcional | _sin dato_ | coincide |
 
 #### Relaciones
 

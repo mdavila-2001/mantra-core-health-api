@@ -41,6 +41,7 @@ import {
   AttachFileDto,
   AccountingStatusDto,
 } from '../dto';
+import { RequirePermission } from '../../../common/auth/require-permission.decorator';
 
 /**
  * Libro mayor: alta de cuentas, posteo de asientos por partida doble, reversas,
@@ -272,6 +273,9 @@ export class AccountingLedgerController {
   })
   @Post('journal-transactions/:id/approve')
   @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER')
+  @RequirePermission('accounting.journal_transactions.approve', {
+    resourceIdParam: 'id',
+  })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Aprobar el asiento (rol de aprobación)' })
   approve(

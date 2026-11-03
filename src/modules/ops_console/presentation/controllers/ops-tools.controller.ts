@@ -5,7 +5,13 @@ import { Roles } from '../../../../common';
 import { OpsToolsService } from '../../application/ops-tools.service';
 import { OPS_READ_ROLES } from './ops-console.controller';
 
-/** Catálogo de herramientas e integraciones con su estado: sólo lectura. */
+/**
+ * Catálogo de herramientas e integraciones con su estado: sólo lectura.
+ *
+ * Sirve el contrato `ops-tools/v1` consumido por el portal. El catálogo
+ * persistido de platform_ops se consulta en `/admin/ops/tool-registry`;
+ * `/admin/ops/tools/:code` conserva el detalle y su historial.
+ */
 @ApiTags('ops-console')
 @ApiBearerAuth()
 @PlatformScopeOptional()

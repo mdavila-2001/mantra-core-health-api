@@ -40,6 +40,12 @@ export interface StepResult {
 /** Resultado de una pasada. En la segunda corrida todo `inserted` vale cero. */
 export interface CatalogSeedResult {
   version: string;
+  /**
+   * Filas escritas en esta pasada (suma de cada `inserted` anidado). El resumen de la cadena
+   * de siembra solo suma contadores de primer nivel: sin este total informaba como «insertadas»
+   * las aristas de linaje descartadas (`lineageSkippedUncataloged`) y callaba las reales.
+   */
+  inserted: number;
   domains: StepResult;
   classifications: StepResult;
   glossaryTerms: StepResult;
@@ -147,10 +153,23 @@ export async function runCatalogSeed(args: {
     };
   }
 
+  const inserted = [
+    domains.result,
+    classifications.result,
+    terms.result,
+    termRevisions.result,
+    lineage.result,
+    annotations,
+    annotationRevisions,
+    evidence,
+    links,
+  ].reduce((total, step) => total + step.inserted, 0);
+
   return {
     plan,
     result: {
       version: CATALOG_SEED_VERSION,
+      inserted,
       domains: domains.result,
       classifications: classifications.result,
       glossaryTerms: terms.result,

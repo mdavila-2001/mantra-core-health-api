@@ -11,6 +11,13 @@ export interface BusinessRoleAssignment {
  * `authz`, no en `iam.user_global_roles`: `iam` los pide a su dueño.
  */
 export interface BusinessRolesPort {
+  /** Revoca todas las asignaciones activas, incluidas las de vigencia futura. */
+  revokeAllForUser(
+    em: EntityManager,
+    userId: string,
+    actorUserId: string,
+  ): Promise<number>;
+
   scopedAssignmentsForUser(
     em: EntityManager,
     userId: string,

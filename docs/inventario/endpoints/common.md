@@ -60,7 +60,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/common/controllers/common-addresses.controller.ts:27` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -189,7 +189,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/common/controllers/common-contact-points.controller.ts:40` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -300,7 +300,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/common/controllers/common-contact-points.controller.ts:57` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/common/controllers/common-contact-points.controller.ts:57` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -403,7 +403,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/common/controllers/common-files.controller.ts:151` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -490,7 +490,7 @@ El árbol de decisión completo está en [flujos](../flujos/common.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/common.int-spec.ts:106` |
-| INTEGRACION | `test/integration/identity-verification-self-service.int-spec.ts:101` |
+| INTEGRACION | `test/integration/identity-verification-self-service.int-spec.ts:116` |
 | INTEGRACION | `test/integration/practitioner-profile-identity-fields.int-spec.ts:209` |
 | CONTROLADOR | `src/modules/common/controllers/common-files.controller.spec.ts:53` |
 
@@ -575,7 +575,7 @@ El árbol de decisión completo está en [flujos](../flujos/common.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/common.int-spec.ts:187` |
-| INTEGRACION | `test/integration/fx15-documentos-del-expediente.int-spec.ts:187` |
+| INTEGRACION | `test/integration/fx15-documentos-del-expediente.int-spec.ts:207` |
 | CONTROLADOR | `src/modules/common/controllers/common-files.controller.spec.ts:115` |
 
 ### Flujos
@@ -774,7 +774,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/common/controllers/common-files.controller.ts:210` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/common/controllers/common-files.controller.ts:210` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -888,7 +888,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/common/controllers/common-files.controller.ts:169` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/common/controllers/common-files.controller.ts:169` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1008,7 +1008,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/common/controllers/common-files.controller.ts:186` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id, vid | `src/modules/common/controllers/common-files.controller.ts:186` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1298,7 +1298,7 @@ El árbol de decisión completo está en [flujos](../flujos/common.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/fx15-documentos-del-expediente.int-spec.ts:85` |
+| INTEGRACION | `test/integration/fx15-documentos-del-expediente.int-spec.ts:92` |
 | INTEGRACION | `test/integration/patient-own-profile.int-spec.ts:346` |
 
 ### Flujos
@@ -1333,7 +1333,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/common/controllers/common-identifiers.controller.ts:27` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1443,7 +1443,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/common/controllers/internal-files.controller.ts:81` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: vid | `src/modules/common/controllers/internal-files.controller.ts:81` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1626,7 +1626,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SYSTEM | `src/modules/common/controllers/internal-storage-lifecycle.controller.ts:49` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: assetId | `src/modules/common/controllers/internal-storage-lifecycle.controller.ts:49` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1708,7 +1708,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SYSTEM | `src/modules/common/controllers/internal-storage-lifecycle.controller.ts:21` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: assetId | `src/modules/common/controllers/internal-storage-lifecycle.controller.ts:21` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1793,7 +1793,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SYSTEM | `src/modules/common/controllers/internal-storage-lifecycle.controller.ts:36` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: assetId | `src/modules/common/controllers/internal-storage-lifecycle.controller.ts:36` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 

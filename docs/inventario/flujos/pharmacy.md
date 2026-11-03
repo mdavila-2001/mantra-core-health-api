@@ -32,7 +32,7 @@ _Fuente: `src/modules/pharmacy/README.md:3`_
 | `UC-24-04` | Publicar producto con identificadores (GTIN/NDC) | POST /pharmacies/{pharmacyId}/products | SECURITY_ADMIN · PHARMACY_STAFF | ALTO | 20 |
 | `UC-24-05` | Crear lista de precios (pública / por aseguradora) | POST /pharmacies/{pharmacyId}/price-lists | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 4 |
 | `UC-24-06` | Fijar/versionar precio | POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/prices | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 5 |
-| `UC-24-07` | Establecer conexión de integración | POST /pharmacies/{pharmacyId}/integration-connections | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 3 |
+| `UC-24-07` | Establecer conexión de integración | POST /pharmacies/{pharmacyId}/integration-connections | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 2 |
 | `UC-24-08` | Mapear producto a código externo | POST /pharmacies/{pharmacyId}/integration-connections/{connectionId}/product-mappings | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 4 |
 | `UC-24-09` | Retirar (soft-delete) producto en cascada | DELETE /pharmacies/{pharmacyId}/products/{productId} | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 6 |
 | `UC-24-10` | Cerrar/expirar lista de precios | POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/close | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 4 |
@@ -181,7 +181,6 @@ flowchart LR
   o25 -->|"LEE"| t10
   a2 --> o27
   o27 -->|"CREA"| t28
-  o27 -->|"LEE"| t28
   o27 -->|"LEE"| t16
   a2 --> o29
   o29 -->|"CREA"| t6
@@ -709,7 +708,6 @@ Establecer conexión de integración externa
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 409 | `CONFLICT` | ConflictException: Ya existe una conexión para esa integración |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La farmacia no está activa |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -732,24 +730,13 @@ flowchart TD
   n7 -->|"sí"| n8
   n9[("LEE pharmacy.pharmacy_sites")]:::efecto
   n8 --> n9
-  n10{"dto.connectionId"}:::decision
+  n10["Llama a PharmacyIntegrationConnectionsRepository.create"]:::llamada
   n9 --> n10
   n7 -->|"no"| n10
-  n11["Llama a PharmacyIntegrationConnectionsRepository.findByPharmacyAndConnection"]:::llamada
-  n10 -->|"sí"| n11
-  n12[("LEE pharmacy.pharmacy_integration_connections")]:::efecto
+  n11[("CREA pharmacy.pharmacy_integration_connections")]:::efecto
+  n10 --> n11
+  n12(("201 Responde con éxito")):::ok
   n11 --> n12
-  n13{"clash"}:::decision
-  n12 --> n13
-  n14(["409 CONFLICT Ya existe una conexión para esa integración"]):::error
-  n13 -->|"sí"| n14
-  n15["Llama a PharmacyIntegrationConnectionsRepository.create"]:::llamada
-  n13 -->|"no"| n15
-  n10 -->|"no"| n15
-  n16[("CREA pharmacy.pharmacy_integration_connections")]:::efecto
-  n15 --> n16
-  n17(("201 Responde con éxito")):::ok
-  n16 --> n17
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

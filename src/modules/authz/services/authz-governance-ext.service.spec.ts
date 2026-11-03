@@ -1,11 +1,14 @@
 import { jest } from '@jest/globals';
 import {
+  CONCEPTS,
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
 } from '../../../common';
 import { runWithTenant } from '../../../common/tenant/tenant-context';
 import { AUTHZ } from '../authz.concepts';
+import { AUTHZ_GOVERNANCE } from '../authz-governance.concepts';
+import { SecurityEvents } from '../../iam/entities';
 import { AuthzGovernanceErrorReason as Reason } from '../authz-governance.error-reasons';
 import { FieldPermissions, ResourceScopeGrants, Roles } from '../entities';
 import { AuthzGovernanceExtService } from './authz-governance-ext.service';
@@ -59,7 +62,12 @@ const grant = (
 
 function armar(grants: Row[], opts: { updateAffects?: number } = {}) {
   const nativeUpdates: { where: Row; data: Row }[] = [];
+  const created: { entity: unknown; data: Row }[] = [];
   const tx: any = {
+    create: mockFn((entity: unknown, data: Row) => {
+      created.push({ entity, data });
+      return data;
+    }),
     findOne: mockFn(
       async (_e: unknown, where: Row) =>
         grants.find((g) => matches(g, where)) ?? null,
@@ -81,6 +89,7 @@ function armar(grants: Row[], opts: { updateAffects?: number } = {}) {
     service: new AuthzGovernanceExtService(em, logger as never),
     tx,
     nativeUpdates,
+    created,
     logger,
     grants,
   };
@@ -277,6 +286,60 @@ describe('AuthzGovernanceExtService · motivo para terminar una denegación', ()
     const logged = JSON.stringify(logger.info.mock.calls);
     expect(logged).toContain('DENY');
     expect(logged).not.toContain(REASON.reason);
+  });
+
+  it('el motivo de terminar un DENY se persiste en iam.security_events (tipo RESOURCE_SCOPE_GRANT_ENDED)', async () => {
+    const { service, created, tx } = armar(escena());
+    await enTenant(TA, () =>
+      service.endResourceScopeGrant('g-a-deny', REASON, SCOPED_A),
+    );
+    expect(created).toHaveLength(1);
+    expect(created[0].entity).toBe(SecurityEvents);
+    expect(created[0].data).toMatchObject({
+      eventTypeConceptId: AUTHZ_GOVERNANCE.EVENT_RESOURCE_SCOPE_GRANT_ENDED,
+      outcomeConceptId: CONCEPTS.OUTCOME_SUCCESS,
+      userId: 'sub',
+      recordedByUserId: 'admin-a',
+      detailJson: {
+        grantId: 'g-a-deny',
+        tenantId: TA,
+        effect: 'DENY',
+        reason: REASON.reason,
+        permissionId: 'perm',
+        subjectType: 'USER',
+      },
+    });
+    expect(created[0].data.recordedAt).toBeInstanceOf(Date);
+    // Mismo `tx` que el UPDATE: o quedan los dos, o ninguno.
+    expect(tx.create).toHaveBeenCalledTimes(1);
+  });
+
+  it('sin evento si la terminación no ocurre (409 por ya terminado, 412 por falta de motivo)', async () => {
+    const yaTerminado = armar(escena(), { updateAffects: 0 });
+    await expect(
+      yaTerminado.service.endResourceScopeGrant('g-b-deny', REASON, PLATFORM),
+    ).rejects.toBeInstanceOf(ConflictException);
+    expect(yaTerminado.created).toHaveLength(0);
+    const sinMotivo = armar(escena());
+    await expect(
+      sinMotivo.service.endResourceScopeGrant('g-b-deny', undefined, PLATFORM),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+    expect(sinMotivo.created).toHaveLength(0);
+  });
+
+  it('un ALLOW sin motivo también deja evento, con reason null y sujeto no usuario sin user_id', async () => {
+    const { service, created } = armar([
+      grant('g-rol', TB, AUTHZ.EFFECT_ALLOW, {
+        subjectTypeConceptId: AUTHZ.SUBJECT_TYPE_ROLE,
+      }),
+    ]);
+    await service.endResourceScopeGrant('g-rol', undefined, PLATFORM);
+    expect(created[0].data.userId).toBeUndefined();
+    expect(created[0].data.detailJson).toMatchObject({
+      effect: 'ALLOW',
+      reason: null,
+      subjectType: 'ROLE',
+    });
   });
 
   it('un ALLOW no exige motivo (compatibilidad con los clientes que no mandan cuerpo)', async () => {

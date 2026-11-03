@@ -46,6 +46,23 @@ export interface CreateRoleAssignmentData {
 /** Acceso a datos de `authz.user_role_assignments`. */
 @Injectable()
 export class UserRoleAssignmentsRepository {
+  /** Revoca también concesiones futuras; cortar sólo validTo podría dejar una ventana inválida. */
+  revokeAllForUser(
+    em: EntityManager,
+    userId: string,
+    actorUserId: string,
+  ): Promise<number> {
+    return em.nativeUpdate(
+      UserRoleAssignments,
+      { userId, statusConceptId: CONCEPTS.STATE_ACTIVE },
+      {
+        statusConceptId: CONCEPTS.STATE_REVOKED,
+        updatedAt: new Date(),
+        updatedByUserId: actorUserId,
+      },
+    );
+  }
+
   /** Asignación activa concreta (user, role) si existe (evita solapes). */
   /**
    * Asignación activa concreta para un ámbito exacto (MCH-034).

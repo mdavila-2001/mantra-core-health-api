@@ -31,6 +31,7 @@ import {
   RoleFieldPermissionsDto,
 } from '../dto/authz-governance-ext.dto';
 import { AuthzGovernanceExtService } from '../services/authz-governance-ext.service';
+import { RequirePermission } from '../../../common/auth/require-permission.decorator';
 
 /**
  * Extensión del gobierno de acceso: lo que `AuthzGovernanceController` (quién puede qué,
@@ -87,6 +88,9 @@ export class AuthzGovernanceExtController {
   })
   @Delete('resource-scope-grants/:grantId')
   @Roles('SECURITY_ADMIN')
+  @RequirePermission('authz.resource_scope_grants.delete', {
+    resourceIdParam: 'grantId',
+  })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Terminar la vigencia de un permiso por alcance de recurso',

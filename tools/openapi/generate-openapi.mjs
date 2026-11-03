@@ -87,6 +87,7 @@ const KNOWN_PUBLIC_OPERATIONS = [
   ['post', '/iam/auth/register-patient'],
   ['post', '/iam/auth/register-organization'],
   ['post', '/iam/auth/register-practitioner'],
+  ['post', '/iam/auth/register-support-staff'],
   ['post', '/iam/auth/resend-verification'],
   ['post', '/iam/auth/forgot-password'],
   ['post', '/iam/auth/reset-password'],
@@ -159,6 +160,7 @@ const KNOWN_PUBLIC_OPERATIONS = [
   ['put', '/iam/onboarding-drafts/{formType}/{draftId}'],
   ['delete', '/iam/onboarding-drafts/{formType}/{draftId}'],
   ['post', '/telemetry/onboarding-events'],
+  ['post', '/telemetry/client-errors'],
   // Calle desde el punto del mapa en el alta (`reverse-geocoding.controller.ts`,
   // `@Public()`, 2026-10-26).
   ['post', '/public/geo/reverse'],
@@ -168,11 +170,6 @@ const KNOWN_PUBLIC_OPERATIONS = [
   // llevan `@Public()` y entraron sin sumarse acá (2026-10-30).
   ['get', '/public/prescription-shares/{token}'],
   ['post', '/payments/gateway-webhooks'],
-  // Alta de personal de apoyo (`iam-auth.controller.ts`, `@Public()`) y errores
-  // del portal y la app (`telemetry-client-errors.controller.ts`, `@Public()`):
-  // entraron sin sumarse acá y Redocly los daba como `security-defined` (01/11).
-  ['post', '/iam/auth/register-support-staff'],
-  ['post', '/telemetry/client-errors'],
 ];
 
 function markPublicOperations(document) {

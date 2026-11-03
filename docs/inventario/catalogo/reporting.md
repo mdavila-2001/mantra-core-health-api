@@ -466,7 +466,7 @@ Define reportes disponibles, su propósito y configuración de ejecución.
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_39_reporting.puml: report_definitions`
 - **Dominio:** Auditoría y Reporting · **Diagrama:** `Mantra Core Health Context/modules/diagram_39_reporting.puml` · **DDL:** `SQL/39_reporting/02_tables.sql`
 - **Entidad del ORM:** `ReportDefinitions` — `src/modules/reporting/entities/report_definitions.entity.ts`
-- **Resumen:** 18 columnas · 11 índices · 8 FK salientes · 7 entrantes · 9 operaciones
+- **Resumen:** 18 columnas · 11 índices · 8 FK salientes · 8 entrantes · 9 operaciones
 
 #### Columnas
 
@@ -510,6 +510,7 @@ Define reportes disponibles, su propósito y configuración de ejecución.
 | desde | id | reporting.report_executions (report_definition_id) | fk_report_executions_report_definition_id |
 | desde | id | reporting.dashboard_widgets (report_definition_id) | fk_dashboard_widgets_report_definition_id |
 | desde | id | audit.report_definitions_history (report_definition_id) | fk_report_definitions_history_report_definition_id |
+| desde | id | data_catalog.catalog_certifications (report_definition_id) | fk_catalog_certifications_report_definition_id |
 
 #### Índices
 

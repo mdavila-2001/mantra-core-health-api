@@ -9,7 +9,7 @@ export const mutabilityDeclared = defineCheck({
     'Toda tabla declara su clasificación de mutabilidad (append-only, actualizable, soft-delete, purga, legal-hold)',
   severity: 'MEDIA',
   remediation:
-    'La taxonomía de mutabilidad la implementa otro trabajo: al registrar su fuente con el token `FIT_MUTABILITY_SOURCE`, esta comprobación pasa de `NO_DECLARADO` a medir. Mientras tanto no falla el módulo.',
+    'Declarar la clase de la tabla en el gobierno de mutabilidad (`system_ops/mutability`: estereotipo o evidencia en el modelo, regenerar `mutability.catalog.json`). Una tabla con `writeMode = UNKNOWN` cuenta como sin declarar.',
   evaluate(i: FitInputs) {
     const { mutability, liveObjects, staticTables } = i;
     if (!mutability.ok) return noSource('taxonomía de mutabilidad', mutability);
@@ -17,7 +17,7 @@ export const mutabilityDeclared = defineCheck({
       return {
         kind: 'undeclared',
         reason:
-          'No hay una fuente de mutabilidad registrada (FIT_MUTABILITY_SOURCE): la taxonomía aún no existe, así que no se mide ni se inventa un cero.',
+          'No hay una fuente de mutabilidad registrada (FIT_MUTABILITY_SOURCE), así que no se mide ni se inventa un cero.',
       };
     const declaradas = mutability.value;
     const tablas = liveObjects.ok

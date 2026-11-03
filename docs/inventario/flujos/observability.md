@@ -134,7 +134,7 @@ Cada árbol se deriva del código del handler y de los métodos que invoca (hast
 
 #### 1. GET /admin/observability/endpoints
 
-
+Operaciones por tráfico, fallos y latencia
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -191,7 +191,7 @@ flowchart TD
 
 #### 2. GET /admin/observability/errors/events
 
-
+Eventos de error (sin mensajes), paginados
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -242,7 +242,7 @@ flowchart TD
 
 #### 3. GET /admin/observability/errors/groups
 
-
+Grupos de errores (huella estable) con su actividad
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -295,7 +295,7 @@ flowchart TD
 
 #### 4. GET /admin/observability/errors/groups/{id}
 
-
+Un grupo de errores con sus eventos recientes
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -360,12 +360,12 @@ flowchart TD
 
 #### 5. PATCH /admin/observability/errors/groups/{id}
 
-Cambia el estado de un grupo. **Sin** `@PlatformScopeOptional`: muta, así que exige una organización elegida (o un rol global con resolución propia, como `SUPERADMIN`). Es la decisión conservadora; ver el README del módulo.
+Marcar un grupo como visto, resuelto o ignorado (con motivo y versión)
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -374,7 +374,7 @@ Cambia el estado de un grupo. **Sin** `@PlatformScopeOptional`: muta, así que e
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
   n1 --> n2
   n3["Llama a ObservabilityReadService.changeGroupState"]:::llamada
   n2 --> n3
@@ -422,7 +422,7 @@ flowchart TD
 
 #### 6. GET /admin/observability/requests/{requestId}
 
-
+Qué se guardó de una petición (errores y muestra lenta) por su requestId
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -460,7 +460,7 @@ flowchart TD
 
 #### 7. GET /admin/observability/sql/slow
 
-
+Peticiones lentas o con error muestreadas, con su SQL
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -507,7 +507,7 @@ flowchart TD
 
 #### 8. GET /admin/observability/sql/statements
 
-
+Consultas SQL por coste (huella, nunca parámetros)
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -558,7 +558,7 @@ flowchart TD
 
 #### 9. GET /admin/observability/sql/statements/{hash}
 
-
+Una consulta normalizada y quién la dispara
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -625,11 +625,12 @@ flowchart TD
 
 #### 10. GET /admin/observability/timeseries
 
-
+Serie temporal de una métrica (un cubo sin fila es «sin dato»)
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -638,7 +639,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de consulta (400) · límite de tasa (429)"}}:::acceso
   n1 --> n2
   n3["Llama a ObservabilityReadService.timeseries"]:::llamada
   n2 --> n3

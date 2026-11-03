@@ -30,9 +30,9 @@ _Fuente: `src/modules/clinical/README.md:3`_
 |  |  | POST /clinical/encounters/{id}/bed-assignment | Cualquier sesión válida | ALTO | 21 |
 |  |  | POST /clinical/encounters/{id}/bed-compatibility | Cualquier sesión válida | BAJO | 13 |
 |  |  | POST /clinical/encounters/{id}/discharge | Cualquier sesión válida | ALTO | 26 |
-|  |  | GET /clinical/encounters/{id}/stay | Cualquier sesión válida | BAJO | 28 |
+|  |  | GET /clinical/encounters/{id}/stay | Cualquier sesión válida | BAJO | 30 |
 |  |  | POST /clinical/encounters/{id}/transfer | Cualquier sesión válida | ALTO | 21 |
-|  |  | GET /clinical/patients/{id}/inpatient-stay | Cualquier sesión válida | BAJO | 30 |
+|  |  | GET /clinical/patients/{id}/inpatient-stay | Cualquier sesión válida | BAJO | 32 |
 |  |  | PATCH /clinical/placement-incidents/{id} | Cualquier sesión válida | ALTO | 12 |
 |  |  | GET /sites/{siteId}/attending-practitioners | Cualquier sesión válida | BAJO | 9 |
 |  |  | GET /sites/{siteId}/inpatients | Cualquier sesión válida | BAJO | 9 |
@@ -42,49 +42,49 @@ _Fuente: `src/modules/clinical/README.md:3`_
 |  |  | POST /sites/{siteId}/census/{date}/close | Cualquier sesión válida | ALTO | 15 |
 |  |  | GET /sites/{siteId}/inpatient-indicators | Cualquier sesión válida | BAJO | 10 |
 | `ctrl:ClinicalEncountersController` | Operaciones de ClinicalEncountersController que el README no asigna a un caso de uso | POST /clinical/care-episodes | CLINICIAN · PRACTITIONER | MEDIO | 2 |
-|  |  | GET /clinical/encounters/{id}/attachments | CLINICIAN · PRACTITIONER · PATIENT | BAJO | 22 |
-|  |  | POST /clinical/encounters/{id}/attachments | CLINICIAN · PRACTITIONER | MEDIO | 21 |
-|  |  | POST /clinical/encounters/{id}/close | CLINICIAN · PRACTITIONER | MEDIO | 40 |
+|  |  | GET /clinical/encounters/{id}/attachments | CLINICIAN · PRACTITIONER · PATIENT | BAJO | 24 |
+|  |  | POST /clinical/encounters/{id}/attachments | CLINICIAN · PRACTITIONER | MEDIO | 23 |
+|  |  | POST /clinical/encounters/{id}/close | CLINICIAN · PRACTITIONER | MEDIO | 42 |
 |  |  | POST /clinical/encounters/check-in | CLINICIAN · PRACTITIONER | MEDIO | 31 |
 | `ctrl:ClinicalMedicalAspectsController` | Operaciones de ClinicalMedicalAspectsController que el README no asigna a un caso de uso | GET /clinical/me/medical-aspects | Cualquier sesión válida | BAJO | 3 |
 |  |  | PUT /clinical/me/medical-aspects | Cualquier sesión válida | ALTO | 4 |
 | `ctrl:ClinicalObservationsController` | Operaciones de ClinicalObservationsController que el README no asigna a un caso de uso | POST /clinical/observations | CLINICIAN · PRACTITIONER | MEDIO | 7 |
-|  |  | PATCH /clinical/observations/{id}/amend | CLINICIAN · PRACTITIONER | MEDIO | 20 |
+|  |  | PATCH /clinical/observations/{id}/amend | CLINICIAN · PRACTITIONER | MEDIO | 22 |
 | `ctrl:ClinicalOrdersController` | Operaciones de ClinicalOrdersController que el README no asigna a un caso de uso | POST /clinical/diagnostic-reports | CLINICIAN · PRACTITIONER | MEDIO | 3 |
-|  |  | POST /clinical/diagnostic-reports/{id}/release | CLINICIAN · PRACTITIONER | BAJO | 17 |
+|  |  | POST /clinical/diagnostic-reports/{id}/release | CLINICIAN · PRACTITIONER | BAJO | 19 |
 |  |  | POST /clinical/requisitions | CLINICIAN · PRACTITIONER | MEDIO | 37 |
 |  |  | POST /clinical/service-requests | CLINICIAN · PRACTITIONER | MEDIO | 36 |
-|  |  | GET /clinical/service-requests/{id} | CLINICIAN · PRACTITIONER | BAJO | 24 |
-|  |  | POST /clinical/service-requests/duplicate-check | CLINICIAN · PRACTITIONER | BAJO | 26 |
+|  |  | GET /clinical/service-requests/{id} | CLINICIAN · PRACTITIONER | BAJO | 26 |
+|  |  | POST /clinical/service-requests/duplicate-check | CLINICIAN · PRACTITIONER | BAJO | 28 |
 | `ctrl:ClinicalPrescriptionExpiryController` | Operaciones de ClinicalPrescriptionExpiryController que el README no asigna a un caso de uso | POST /clinical/internal/prescription-expiry-notices | SYSTEM · SYSTEM_WORKER | MEDIO | 13 |
 | `ctrl:ClinicalPrescriptionPoliciesController` | Operaciones de ClinicalPrescriptionPoliciesController que el README no asigna a un caso de uso | GET /clinical/prescription-signature-policies | CLINICIAN · SECURITY_ADMIN | BAJO | 1 |
 |  |  | POST /clinical/prescription-signature-policies | CLINICIAN · SECURITY_ADMIN | MEDIO | 1 |
 |  |  | POST /clinical/prescription-signature-policies/{id}/deactivate | CLINICIAN · SECURITY_ADMIN | MEDIO | 2 |
-| `ctrl:ClinicalPrescriptionsController` | Operaciones de ClinicalPrescriptionsController que el README no asigna a un caso de uso | GET /clinical/prescriptions/{id}/pdf | CLINICIAN · PRACTITIONER · PATIENT | BAJO | 30 |
+| `ctrl:ClinicalPrescriptionsController` | Operaciones de ClinicalPrescriptionsController que el README no asigna a un caso de uso | GET /clinical/prescriptions/{id}/pdf | CLINICIAN · PRACTITIONER · PATIENT | BAJO | 32 |
 | `ctrl:ClinicalPrescriptionsPublicController` | Operaciones de ClinicalPrescriptionsPublicController que el README no asigna a un caso de uso | GET /public/prescriptions/{id}/verify | Público (sin sesión) | BAJO | 2 |
 | `ctrl:ClinicalProcedureCentersController` | Operaciones de ClinicalProcedureCentersController que el README no asigna a un caso de uso | GET /clinical/me/procedure-centers | PATIENT | BAJO | 7 |
 | `ctrl:ClinicalReadController` | Operaciones de ClinicalReadController que el README no asigna a un caso de uso | GET /clinical/patients/{patientProfileId}/received-services | CLINICIAN · PRACTITIONER · PATIENT | BAJO | 6 |
 |  |  | GET /clinical/patients/{patientProfileId}/summary | CLINICIAN · PRACTITIONER · PATIENT | MEDIO | 9 |
 | `ctrl:ClinicalRecordsController` | Operaciones de ClinicalRecordsController que el README no asigna a un caso de uso | POST /clinical/allergy-intolerances | CLINICIAN · PRACTITIONER | MEDIO | 4 |
-|  |  | GET /clinical/allergy-intolerances/{id}/attachments | CLINICIAN · PRACTITIONER · PATIENT | BAJO | 22 |
-|  |  | POST /clinical/allergy-intolerances/{id}/attachments | CLINICIAN · PRACTITIONER | MEDIO | 21 |
+|  |  | GET /clinical/allergy-intolerances/{id}/attachments | CLINICIAN · PRACTITIONER · PATIENT | BAJO | 24 |
+|  |  | POST /clinical/allergy-intolerances/{id}/attachments | CLINICIAN · PRACTITIONER | MEDIO | 23 |
 |  |  | POST /clinical/conditions | CLINICIAN · PRACTITIONER | MEDIO | 9 |
-|  |  | POST /clinical/conditions/{id}/attachments | CLINICIAN · PRACTITIONER | MEDIO | 21 |
-|  |  | POST /clinical/conditions/{id}/change-status | CLINICIAN · PRACTITIONER | MEDIO | 24 |
-|  |  | POST /clinical/conditions/{id}/verification | CLINICIAN · PRACTITIONER | MEDIO | 27 |
+|  |  | POST /clinical/conditions/{id}/attachments | CLINICIAN · PRACTITIONER | MEDIO | 23 |
+|  |  | POST /clinical/conditions/{id}/change-status | CLINICIAN · PRACTITIONER | MEDIO | 26 |
+|  |  | POST /clinical/conditions/{id}/verification | CLINICIAN · PRACTITIONER | MEDIO | 29 |
 |  |  | POST /clinical/immunizations | CLINICIAN · PRACTITIONER | MEDIO | 4 |
 |  |  | POST /clinical/medication-records | CLINICIAN · PRACTITIONER | MEDIO | 3 |
 |  |  | POST /clinical/medication-requests | CLINICIAN · PRACTITIONER | MEDIO | 6 |
-|  |  | GET /clinical/medication-requests/{id}/attachments | CLINICIAN · PRACTITIONER · PATIENT | BAJO | 22 |
-|  |  | POST /clinical/medication-requests/{id}/attachments | CLINICIAN · PRACTITIONER | MEDIO | 21 |
-|  |  | POST /clinical/medication-requests/{id}/edit | CLINICIAN · PRACTITIONER | MEDIO | 22 |
-|  |  | POST /clinical/medication-requests/{id}/invalidate | CLINICIAN · PRACTITIONER | MEDIO | 24 |
-|  |  | POST /clinical/medication-requests/{id}/issue | CLINICIAN · PRACTITIONER | MEDIO | 35 |
-|  |  | POST /clinical/medication-requests/{id}/renew | CLINICIAN · PRACTITIONER | MEDIO | 24 |
-|  |  | POST /clinical/medication-requests/{id}/replace | CLINICIAN · PRACTITIONER | MEDIO | 25 |
-|  |  | POST /clinical/medication-requests/{id}/sign | CLINICIAN · PRACTITIONER | MEDIO | 24 |
+|  |  | GET /clinical/medication-requests/{id}/attachments | CLINICIAN · PRACTITIONER · PATIENT | BAJO | 24 |
+|  |  | POST /clinical/medication-requests/{id}/attachments | CLINICIAN · PRACTITIONER | MEDIO | 23 |
+|  |  | POST /clinical/medication-requests/{id}/edit | CLINICIAN · PRACTITIONER | MEDIO | 24 |
+|  |  | POST /clinical/medication-requests/{id}/invalidate | CLINICIAN · PRACTITIONER | MEDIO | 26 |
+|  |  | POST /clinical/medication-requests/{id}/issue | CLINICIAN · PRACTITIONER | MEDIO | 37 |
+|  |  | POST /clinical/medication-requests/{id}/renew | CLINICIAN · PRACTITIONER | MEDIO | 26 |
+|  |  | POST /clinical/medication-requests/{id}/replace | CLINICIAN · PRACTITIONER | MEDIO | 27 |
+|  |  | POST /clinical/medication-requests/{id}/sign | CLINICIAN · PRACTITIONER | MEDIO | 26 |
 |  |  | POST /clinical/procedures | CLINICIAN · PRACTITIONER | MEDIO | 7 |
-|  |  | POST /clinical/procedures/{id}/attachments | CLINICIAN · PRACTITIONER | MEDIO | 21 |
+|  |  | POST /clinical/procedures/{id}/attachments | CLINICIAN · PRACTITIONER | MEDIO | 23 |
 
 ### Diagrama 1 de 3 — etapas `ctrl:ClinicalAdtController`, `ctrl:ClinicalCensusController`, `ctrl:ClinicalEncountersController`…
 
@@ -136,9 +136,9 @@ flowchart LR
   t21[("+15 tablas más")]
   t24[("+7 tablas más")]
   t32[("+20 tablas más")]
-  t40[("+22 tablas más")]
+  t40[("+24 tablas más")]
   t42[("+15 tablas más")]
-  t44[("+24 tablas más")]
+  t44[("+26 tablas más")]
   t47[("+6 tablas más")]
   t51[("+3 tablas más")]
   t53[("+3 tablas más")]
@@ -169,9 +169,9 @@ flowchart LR
     o64["POST /sites/{siteId}/census/{date}/close"]:::op
     o66["GET /sites/{siteId}/inpatient-indicators"]:::op
   end
-  t72[("+16 tablas más")]
-  t74[("+15 tablas más")]
-  t76[("+34 tablas más")]
+  t72[("+18 tablas más")]
+  t74[("+17 tablas más")]
+  t76[("+36 tablas más")]
   t81[("+25 tablas más")]
   subgraph s2["ctrl:ClinicalEncountersController · Operaciones de ClinicalEncountersController…"]
     o68["POST /clinical/care-episodes"]:::op
@@ -440,16 +440,16 @@ flowchart LR
   t73[("clinical.care_episodes")]:::tabla
   t74[("clinical.conditions")]:::tabla
   t9[("+1 tablas más")]
-  t17[("+14 tablas más")]
+  t17[("+16 tablas más")]
   subgraph s0["ctrl:ClinicalObservationsController · Operaciones de ClinicalObservationsContro…"]
     o1["POST /clinical/observations"]:::op
     o10["PATCH /clinical/observations/{id}/amend"]:::op
   end
-  t22[("+11 tablas más")]
+  t22[("+13 tablas más")]
   t27[("+31 tablas más")]
   t31[("+30 tablas más")]
-  t33[("+18 tablas más")]
-  t35[("+20 tablas más")]
+  t33[("+20 tablas más")]
+  t35[("+22 tablas más")]
   subgraph s1["ctrl:ClinicalOrdersController · Operaciones de ClinicalOrdersController que el…"]
     o18["POST /clinical/diagnostic-reports"]:::op
     o21["POST /clinical/diagnostic-reports/{id}/release"]:::op
@@ -467,7 +467,7 @@ flowchart LR
     o46["POST /clinical/prescription-signature-policies"]:::op
     o47["POST /clinical/prescription-signature-policies/{id}/deactivate"]:::op
   end
-  t50[("+24 tablas más")]
+  t50[("+26 tablas más")]
   subgraph s4["ctrl:ClinicalPrescriptionsController · Operaciones de ClinicalPrescriptionsCont…"]
     o48["GET /clinical/prescriptions/{id}/pdf"]:::op
   end
@@ -628,22 +628,22 @@ flowchart LR
   t36[("forms.form_instances")]:::tabla
   t54[("clinical.procedures")]:::tabla
   t55[("clinical.service_requests")]:::tabla
-  t14[("+16 tablas más")]
-  t16[("+15 tablas más")]
+  t14[("+18 tablas más")]
+  t16[("+17 tablas más")]
   t21[("+3 tablas más")]
-  t23[("+15 tablas más")]
-  t25[("+18 tablas más")]
-  t27[("+21 tablas más")]
-  t38[("+16 tablas más")]
-  t40[("+15 tablas más")]
-  t42[("+16 tablas más")]
-  t44[("+18 tablas más")]
-  t46[("+29 tablas más")]
-  t48[("+18 tablas más")]
-  t50[("+19 tablas más")]
-  t52[("+18 tablas más")]
+  t23[("+17 tablas más")]
+  t25[("+20 tablas más")]
+  t27[("+23 tablas más")]
+  t38[("+18 tablas más")]
+  t40[("+17 tablas más")]
+  t42[("+18 tablas más")]
+  t44[("+20 tablas más")]
+  t46[("+31 tablas más")]
+  t48[("+20 tablas más")]
+  t50[("+21 tablas más")]
+  t52[("+20 tablas más")]
   t56[("+1 tablas más")]
-  t58[("+15 tablas más")]
+  t58[("+17 tablas más")]
   subgraph s0["ctrl:ClinicalRecordsController · Operaciones de ClinicalRecordsController que e…"]
     o1["POST /clinical/allergy-intolerances"]:::op
     o6["GET /clinical/allergy-intolerances/{id}/attachments"]:::op
@@ -3981,7 +3981,7 @@ flowchart TD
   n3 --> n4
   n5["Llama a MedicationsService.resolvePrescriber"]:::llamada
   n4 --> n5
-  n6{"actor.roles.includes('SUPERADMIN')"}:::decision
+  n6{"roleAuthorizesInTenant(actor, 'SUPERADMIN', undefined)"}:::decision
   n5 --> n6
   n7{"!chosen"}:::decision
   n6 -->|"sí"| n7
@@ -4361,7 +4361,7 @@ flowchart TD
   n25 -->|"no"| n27
   n28["Llama a MedicationsService.resolvePrescriber"]:::llamada
   n27 -->|"sí"| n28
-  n29{"actor.roles.includes('SUPERADMIN')"}:::decision
+  n29{"roleAuthorizesInTenant(actor, 'SUPERADMIN', undefined)"}:::decision
   n28 --> n29
   n30{"!chosen"}:::decision
   n29 -->|"sí"| n30

@@ -3,7 +3,7 @@
 # Flujos del módulo `profiles`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 85 (78 con decisiones propias, 7 sin ellas)
+- **Operaciones:** 85 (70 con decisiones propias, 15 sin ellas)
 - Inventario de endpoints del módulo: [profiles](../endpoints/profiles.md)
 
 ## Proceso: Profiles Module (05)
@@ -29,8 +29,8 @@ _Fuente: `src/modules/profiles/README.md:3`_
 |  |  | POST /profiles/patients/me/dependent-requests/{id}/reject | Cualquier sesión válida | ALTO | 14 |
 |  |  | GET /profiles/patients/me/dependent-requests/incoming | Cualquier sesión válida | BAJO | 4 |
 |  |  | POST /profiles/patients/search | SECURITY_ADMIN · SUPERADMIN · CLINICIAN · PRACTITIONER | BAJO | 6 |
-| `P5 §3` | Clear the practitioner profile photo (the file is not deleted) | DELETE /profiles/practitioners/{profileId}/photo | Cualquier sesión válida | ALTO | 17 |
-|  |  | PUT /profiles/practitioners/{profileId}/photo | Cualquier sesión válida | ALTO | 19 |
+| `P5 §3` | Clear the practitioner profile photo (the file is not deleted) | DELETE /profiles/practitioners/{profileId}/photo | Cualquier sesión válida | BAJO | 16 |
+|  |  | PUT /profiles/practitioners/{profileId}/photo | Cualquier sesión válida | BAJO | 16 |
 | `ctrl:AdmissionsController` | Operaciones de AdmissionsController que el README no asigna a un caso de uso | DESCONOCIDO /admissions | Cualquier sesión válida | BAJO | 0 |
 |  |  | GET /admissions | ADMISSIONS_REVIEWER · ADMISSIONS_APPROVER · SECURITY_ADMIN | BAJO | 17 |
 |  |  | GET /admissions/{id} | ADMISSIONS_REVIEWER · ADMISSIONS_APPROVER · SECURITY_ADMIN | BAJO | 18 |
@@ -92,16 +92,16 @@ _Fuente: `src/modules/profiles/README.md:3`_
 |  |  | POST /profiles/practitioners/me/affiliations | Cualquier sesión válida | ALTO | 25 |
 |  |  | DELETE /profiles/practitioners/me/affiliations/{affiliationId} | Cualquier sesión válida | ALTO | 4 |
 |  |  | PATCH /profiles/practitioners/me/affiliations/{affiliationId} | Cualquier sesión válida | ALTO | 4 |
-|  |  | POST /profiles/practitioners/me/credentials | Cualquier sesión válida | ALTO | 5 |
-|  |  | DELETE /profiles/practitioners/me/credentials/{credentialId} | Cualquier sesión válida | ALTO | 4 |
-|  |  | PATCH /profiles/practitioners/me/credentials/{credentialId} | Cualquier sesión válida | ALTO | 6 |
-|  |  | DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId} | Cualquier sesión válida | ALTO | 6 |
-|  |  | PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId} | Cualquier sesión válida | BAJO | 6 |
+|  |  | POST /profiles/practitioners/me/credentials | Cualquier sesión válida | BAJO | 0 |
+|  |  | DELETE /profiles/practitioners/me/credentials/{credentialId} | Cualquier sesión válida | BAJO | 0 |
+|  |  | PATCH /profiles/practitioners/me/credentials/{credentialId} | Cualquier sesión válida | BAJO | 0 |
+|  |  | DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId} | Cualquier sesión válida | BAJO | 0 |
+|  |  | PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId} | Cualquier sesión válida | BAJO | 0 |
 |  |  | GET /profiles/practitioners/me/linkable-organizations | Cualquier sesión válida | BAJO | 5 |
-|  |  | GET /profiles/practitioners/me/onboarding | Cualquier sesión válida | BAJO | 7 |
-|  |  | DELETE /profiles/practitioners/me/specialties/{specialtyId} | Cualquier sesión válida | ALTO | 4 |
-|  |  | PATCH /profiles/practitioners/me/specialties/{specialtyId} | Cualquier sesión válida | ALTO | 7 |
-|  |  | PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary | Cualquier sesión válida | ALTO | 4 |
+|  |  | GET /profiles/practitioners/me/onboarding | Cualquier sesión válida | BAJO | 8 |
+|  |  | DELETE /profiles/practitioners/me/specialties/{specialtyId} | Cualquier sesión válida | BAJO | 0 |
+|  |  | PATCH /profiles/practitioners/me/specialties/{specialtyId} | Cualquier sesión válida | BAJO | 0 |
+|  |  | PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary | Cualquier sesión válida | BAJO | 0 |
 |  |  | GET /profiles/practitioners/me/summary | Cualquier sesión válida | BAJO | 16 |
 |  |  | GET /profiles/practitioners/specialty-counts | Cualquier sesión válida | BAJO | 2 |
 | `ctrl:TenantPractitionerRequestsController` | Operaciones de TenantPractitionerRequestsController que el README no asigna a un caso de uso | GET /tenants/{tenantId}/practitioner-requests | Cualquier sesión válida | BAJO | 5 |
@@ -158,8 +158,8 @@ flowchart LR
     o18["GET /profiles/patients/me/dependent-requests/incoming"]:::op
     o19["POST /profiles/patients/search"]:::op
   end
-  t31[("+11 tablas más")]
-  t33[("+13 tablas más")]
+  t31[("+10 tablas más")]
+  t33[("+10 tablas más")]
   subgraph s1["P5 §3 · Clear the practitioner profile photo (the file is not deleted)"]
     o24["DELETE /profiles/practitioners/{profileId}/photo"]:::op
     o32["PUT /profiles/practitioners/{profileId}/photo"]:::op
@@ -693,14 +693,12 @@ flowchart LR
   t35[("profiles.person_account_links")]:::tabla
   t37[("profiles.practitioner_specialties")]:::tabla
   t44[("profiles.practitioner_affiliations")]:::tabla
-  t53[("audit.jurisdiction_authorizations_history")]:::tabla
-  t54[("identity_assurance.identity_verification_cases")]:::tabla
-  t57[("terminology.catalog_concepts")]:::tabla
-  t58[("terminology.concept_properties")]:::tabla
-  t59[("terminology.value_set_members")]:::tabla
-  t60[("terminology.value_set_versions")]:::tabla
-  t61[("terminology.value_sets")]:::tabla
-  t63[("scheduling.bookable_slots")]:::tabla
+  t55[("terminology.catalog_concepts")]:::tabla
+  t56[("terminology.concept_properties")]:::tabla
+  t57[("terminology.value_set_members")]:::tabla
+  t58[("terminology.value_set_versions")]:::tabla
+  t59[("terminology.value_sets")]:::tabla
+  t61[("scheduling.bookable_slots")]:::tabla
   t11[("+18 tablas más")]
   t20[("+6 tablas más")]
   t22[("+29 tablas más")]
@@ -710,9 +708,8 @@ flowchart LR
   t40[("+10 tablas más")]
   t42[("+21 tablas más")]
   t46[("+19 tablas más")]
-  t64[("+1 tablas más")]
-  t67[("+1 tablas más")]
-  t70[("+10 tablas más")]
+  t62[("+2 tablas más")]
+  t67[("+10 tablas más")]
   subgraph s0["ctrl:ProfilesPractitionersController · Operaciones de ProfilesPractitionersCont…"]
     o1["GET /profiles/credentials"]:::op
     o4["POST /profiles/credentials/{credentialId}/verify"]:::op
@@ -732,14 +729,14 @@ flowchart LR
     o50["DELETE /profiles/practitioners/me/credentials/{credentialId}"]:::op
     o51["PATCH /profiles/practitioners/me/credentials/{credentialId}"]:::op
     o52["DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licens…"]:::op
-    o55["PATCH /profiles/practitioners/me/jurisdiction-authorizations/{license…"]:::op
-    o56["GET /profiles/practitioners/me/linkable-organizations"]:::op
-    o62["GET /profiles/practitioners/me/onboarding"]:::op
-    o65["DELETE /profiles/practitioners/me/specialties/{specialtyId}"]:::op
-    o66["PATCH /profiles/practitioners/me/specialties/{specialtyId}"]:::op
-    o68["PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary"]:::op
-    o69["GET /profiles/practitioners/me/summary"]:::op
-    o71["GET /profiles/practitioners/specialty-counts"]:::op
+    o53["PATCH /profiles/practitioners/me/jurisdiction-authorizations/{license…"]:::op
+    o54["GET /profiles/practitioners/me/linkable-organizations"]:::op
+    o60["GET /profiles/practitioners/me/onboarding"]:::op
+    o63["DELETE /profiles/practitioners/me/specialties/{specialtyId}"]:::op
+    o64["PATCH /profiles/practitioners/me/specialties/{specialtyId}"]:::op
+    o65["PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary"]:::op
+    o66["GET /profiles/practitioners/me/summary"]:::op
+    o68["GET /profiles/practitioners/specialty-counts"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -836,80 +833,38 @@ flowchart LR
   o48 -->|"ACTUALIZA"| t44
   o48 -->|"LEE"| t44
   a13 --> o49
-  o49 -->|"LEE"| t7
-  o49 -->|"LEE"| t8
-  o49 -->|"LEE"| t33
-  o49 -->|"LEE"| t35
-  o49 -->|"CREA"| t3
   a13 --> o50
-  o50 -->|"LEE"| t33
-  o50 -->|"LEE"| t35
-  o50 -->|"BORRA"| t3
-  o50 -->|"LEE"| t3
   a13 --> o51
-  o51 -->|"LEE"| t7
-  o51 -->|"LEE"| t8
-  o51 -->|"LEE"| t33
-  o51 -->|"LEE"| t35
-  o51 -->|"ACTUALIZA"| t3
-  o51 -->|"LEE"| t3
   a13 --> o52
-  o52 -->|"LEE"| t53
-  o52 -->|"LEE"| t54
-  o52 -->|"LEE"| t33
-  o52 -->|"BORRA"| t34
-  o52 -->|"LEE"| t34
-  o52 -->|"LEE"| t35
-  a13 --> o55
-  o55 -->|"LEE"| t7
-  o55 -->|"LEE"| t8
-  o55 -->|"LEE"| t54
-  o55 -->|"LEE"| t33
-  o55 -->|"LEE"| t34
-  o55 -->|"LEE"| t35
-  a13 --> o56
-  o56 -->|"LEE"| t57
-  o56 -->|"LEE"| t58
-  o56 -->|"LEE"| t59
-  o56 -->|"LEE"| t60
-  o56 -->|"LEE"| t61
-  a13 --> o62
-  o62 -->|"LEE"| t33
-  o62 -->|"LEE"| t34
-  o62 -->|"LEE"| t35
-  o62 -->|"LEE"| t44
-  o62 -->|"LEE"| t37
-  o62 -->|"LEE"| t63
-  o62 -.-> t64
+  a13 --> o53
+  a13 --> o54
+  o54 -->|"LEE"| t55
+  o54 -->|"LEE"| t56
+  o54 -->|"LEE"| t57
+  o54 -->|"LEE"| t58
+  o54 -->|"LEE"| t59
+  a13 --> o60
+  o60 -->|"LEE"| t33
+  o60 -->|"LEE"| t34
+  o60 -->|"LEE"| t35
+  o60 -->|"LEE"| t44
+  o60 -->|"LEE"| t37
+  o60 -->|"LEE"| t61
+  o60 -.-> t62
+  a13 --> o63
+  a13 --> o64
   a13 --> o65
-  o65 -->|"LEE"| t33
-  o65 -->|"LEE"| t35
-  o65 -->|"BORRA"| t37
-  o65 -->|"LEE"| t37
   a13 --> o66
-  o66 -->|"LEE"| t33
-  o66 -->|"LEE"| t35
-  o66 -->|"ACTUALIZA"| t37
-  o66 -->|"LEE"| t37
-  o66 -->|"LEE"| t59
-  o66 -->|"LEE"| t60
+  o66 -->|"LEE"| t14
+  o66 -->|"LEE"| t15
+  o66 -->|"LEE"| t16
+  o66 -->|"LEE"| t17
+  o66 -->|"LEE"| t5
+  o66 -->|"LEE"| t6
   o66 -.-> t67
   a13 --> o68
   o68 -->|"LEE"| t33
-  o68 -->|"LEE"| t35
-  o68 -->|"ACTUALIZA"| t37
   o68 -->|"LEE"| t37
-  a13 --> o69
-  o69 -->|"LEE"| t14
-  o69 -->|"LEE"| t15
-  o69 -->|"LEE"| t16
-  o69 -->|"LEE"| t17
-  o69 -->|"LEE"| t5
-  o69 -->|"LEE"| t6
-  o69 -.-> t70
-  a13 --> o71
-  o71 -->|"LEE"| t33
-  o71 -->|"LEE"| t37
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -5847,8 +5802,8 @@ Quitar la foto del perfil profesional
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo el titular del perfil profesional o la plataforma pueden modificarlo |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Profesional no encontrado; ResourceNotFoundException: Perfil profesional no encontrado |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Perfil profesional no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -5858,67 +5813,48 @@ flowchart TD
   n1 --> n2
   n3["Llama a ProfilesPractitionersService.removePractitionerPhoto"]:::llamada
   n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
+  n4["Llama a ProfilesPractitionersService.getPractitionerSummary"]:::llamada
   n3 --> n4
-  n5["Llama a ProfileOwnershipService.assertOwnsPractitionerProfile"]:::llamada
+  n5["Llama a PersonAccountLinksRepository.findActiveByPerson"]:::llamada
   n4 --> n5
-  n6["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n6[("LEE profiles.person_account_links")]:::efecto
   n5 --> n6
-  n7[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n7["Llama a ProfilesPractitionersService.buildSummary"]:::llamada
   n6 --> n7
-  n8(["403 FORBIDDEN Sólo el titular del perfil profesional o la plataforma pueden modificarlo"]):::error
+  n8["Llama a PersonsRepository.findById"]:::llamada
   n7 --> n8
-  n9["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
-  n10[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n9[("LEE profiles.persons")]:::efecto
+  n8 --> n9
+  n10["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
   n9 --> n10
-  n11{"!practitioner"}:::decision
+  n11[("LEE profiles.health_practitioner_profiles")]:::efecto
   n10 --> n11
-  n12(["404 NOT_FOUND Profesional no encontrado"]):::error
-  n11 -->|"sí"| n12
-  n13[("ACTUALIZA profiles.health_practitioner_profiles")]:::efecto
-  n11 -->|"no"| n13
-  n14["Llama a ProfilesPractitionersService.getPractitionerSummary"]:::llamada
-  n13 --> n14
-  n15["Llama a PersonAccountLinksRepository.findActiveByPerson"]:::llamada
+  n12{"!person || !practitioner"}:::decision
+  n11 --> n12
+  n13(["404 NOT_FOUND Perfil profesional no encontrado"]):::error
+  n12 -->|"sí"| n13
+  n14["Llama a PractitionerSpecialtiesRepository.findAllByPractitioner"]:::llamada
+  n12 -->|"no"| n14
+  n15[("LEE profiles.practitioner_specialties")]:::efecto
   n14 --> n15
-  n16[("LEE profiles.person_account_links")]:::efecto
+  n16["Llama a ProfessionalCredentialsRepository.findByPractitioner"]:::llamada
   n15 --> n16
-  n17["Llama a ProfilesPractitionersService.buildSummary"]:::llamada
+  n17[("LEE profiles.professional_credentials")]:::efecto
   n16 --> n17
-  n18["Llama a PersonsRepository.findById"]:::llamada
+  n18["Llama a JurisdictionAuthorizationsRepository.findByPractitioner"]:::llamada
   n17 --> n18
-  n19[("LEE profiles.persons")]:::efecto
+  n19[("LEE profiles.jurisdiction_authorizations")]:::efecto
   n18 --> n19
-  n20["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n20["Llama a PractitionerLanguagesRepository.findByPractitioner"]:::llamada
   n19 --> n20
-  n21[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n21[("LEE profiles.practitioner_languages")]:::efecto
   n20 --> n21
-  n22{"!person || !practitioner"}:::decision
+  n22["Llama a PractitionerAffiliationsRepository.findByPractitioner"]:::llamada
   n21 --> n22
-  n23(["404 NOT_FOUND Perfil profesional no encontrado"]):::error
-  n22 -->|"sí"| n23
-  n24["Llama a PractitionerSpecialtiesRepository.findAllByPractitioner"]:::llamada
-  n22 -->|"no"| n24
-  n25[("LEE profiles.practitioner_specialties")]:::efecto
-  n24 --> n25
-  n26["Llama a ProfessionalCredentialsRepository.findByPractitioner"]:::llamada
-  n25 --> n26
-  n27[("LEE profiles.professional_credentials")]:::efecto
-  n26 --> n27
-  n28["Llama a JurisdictionAuthorizationsRepository.findByPractitioner"]:::llamada
-  n27 --> n28
-  n29[("LEE profiles.jurisdiction_authorizations")]:::efecto
-  n28 --> n29
-  n30["Llama a PractitionerLanguagesRepository.findByPractitioner"]:::llamada
-  n29 --> n30
-  n31[("LEE profiles.practitioner_languages")]:::efecto
-  n30 --> n31
-  n32["Llama a PractitionerAffiliationsRepository.findByPractitioner"]:::llamada
-  n31 --> n32
-  n33[("LEE profiles.practitioner_affiliations")]:::efecto
-  n32 --> n33
-  n34(("200 Responde con éxito")):::ok
-  n33 --> n34
+  n23[("LEE profiles.practitioner_affiliations")]:::efecto
+  n22 --> n23
+  n24(("200 Responde con éxito")):::ok
+  n23 --> n24
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -5936,9 +5872,8 @@ Fijar la foto del perfil profesional
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo el titular del perfil profesional o la plataforma pueden modificarlo; ForbiddenException: {labels.subject} no le pertenece |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Profesional no encontrado; ResourceNotFoundException: {labels.notFound}; ResourceNotFoundException: Perfil profesional no encontrado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: {labels.subject} resultó infectado; PreconditionFailedException: {labels.subject} no es de un formato admitido para este uso |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Perfil profesional no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -5948,113 +5883,48 @@ flowchart TD
   n1 --> n2
   n3["Llama a ProfilesPractitionersService.setPractitionerPhoto"]:::llamada
   n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
+  n4["Llama a ProfilesPractitionersService.getPractitionerSummary"]:::llamada
   n3 --> n4
-  n5["Llama a ProfileOwnershipService.assertOwnsPractitionerProfile"]:::llamada
+  n5["Llama a PersonAccountLinksRepository.findActiveByPerson"]:::llamada
   n4 --> n5
-  n6["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n6[("LEE profiles.person_account_links")]:::efecto
   n5 --> n6
-  n7[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n7["Llama a ProfilesPractitionersService.buildSummary"]:::llamada
   n6 --> n7
-  n8(["403 FORBIDDEN Sólo el titular del perfil profesional o la plataforma pueden modificarlo"]):::error
+  n8["Llama a PersonsRepository.findById"]:::llamada
   n7 --> n8
-  n9["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
-  n10[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n9[("LEE profiles.persons")]:::efecto
+  n8 --> n9
+  n10["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
   n9 --> n10
-  n11{"!practitioner"}:::decision
+  n11[("LEE profiles.health_practitioner_profiles")]:::efecto
   n10 --> n11
-  n12(["404 NOT_FOUND Profesional no encontrado"]):::error
-  n11 -->|"sí"| n12
-  n13["Llama a AttachableFilesAdapter.assertUsableBy"]:::llamada
-  n11 -->|"no"| n13
-  n14["Llama a AttachableFileService.assertUsableBy"]:::llamada
-  n13 --> n14
-  n15["Llama a FilesRepository.findById"]:::llamada
+  n12{"!person || !practitioner"}:::decision
+  n11 --> n12
+  n13(["404 NOT_FOUND Perfil profesional no encontrado"]):::error
+  n12 -->|"sí"| n13
+  n14["Llama a PractitionerSpecialtiesRepository.findAllByPractitioner"]:::llamada
+  n12 -->|"no"| n14
+  n15[("LEE profiles.practitioner_specialties")]:::efecto
   n14 --> n15
-  n16[("LEE common.files")]:::efecto
+  n16["Llama a ProfessionalCredentialsRepository.findByPractitioner"]:::llamada
   n15 --> n16
-  n17{"!file"}:::decision
+  n17[("LEE profiles.professional_credentials")]:::efecto
   n16 --> n17
-  n18(["404 NOT_FOUND {labels.notFound}"]):::error
-  n17 -->|"sí"| n18
-  n19{"file.createdByUserId !== actor.id && !enAllowlist"}:::decision
-  n17 -->|"no"| n19
-  n20(["403 FORBIDDEN {labels.subject} no le pertenece"]):::error
-  n19 -->|"sí"| n20
-  n21{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
-  n19 -->|"no"| n21
-  n22(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
-  n21 -->|"sí"| n22
-  n23{"!file.currentVersionId"}:::decision
-  n21 -->|"no"| n23
-  n24(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
-  n23 -->|"sí"| n24
-  n25["Llama a AttachableFileService.assertVersionUsable"]:::llamada
-  n23 -->|"no"| n25
-  n26{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
-  n25 --> n26
-  n27(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
-  n26 -->|"sí"| n27
-  n28{"!file.currentVersionId"}:::decision
-  n26 -->|"no"| n28
-  n29(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
-  n28 -->|"sí"| n29
-  n30{"!version"}:::decision
-  n28 -->|"no"| n30
-  n31(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
-  n30 -->|"sí"| n31
-  n32{"version.malwareScanStatusConceptId === CONCEPTS.SCAN_INFECTED"}:::decision
-  n30 -->|"no"| n32
-  n33(["422 PRECONDITION_FAILED {labels.subject} resultó infectado"]):::error
-  n32 -->|"sí"| n33
-  n34{"accepted && !accepted.includes(version.mimeType ?? '')"}:::decision
-  n32 -->|"no"| n34
-  n35(["422 PRECONDITION_FAILED {labels.subject} no es de un formato admitido para este uso"]):::error
-  n34 -->|"sí"| n35
-  n36[("ACTUALIZA profiles.health_practitioner_profiles")]:::efecto
-  n34 -->|"no"| n36
-  n37["Llama a ProfilesPractitionersService.getPractitionerSummary"]:::llamada
-  n36 --> n37
-  n38["Llama a PersonAccountLinksRepository.findActiveByPerson"]:::llamada
-  n37 --> n38
-  n39[("LEE profiles.person_account_links")]:::efecto
-  n38 --> n39
-  n40["Llama a ProfilesPractitionersService.buildSummary"]:::llamada
-  n39 --> n40
-  n41["Llama a PersonsRepository.findById"]:::llamada
-  n40 --> n41
-  n42[("LEE profiles.persons")]:::efecto
-  n41 --> n42
-  n43["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
-  n42 --> n43
-  n44[("LEE profiles.health_practitioner_profiles")]:::efecto
-  n43 --> n44
-  n45{"!person || !practitioner"}:::decision
-  n44 --> n45
-  n46(["404 NOT_FOUND Perfil profesional no encontrado"]):::error
-  n45 -->|"sí"| n46
-  n47["Llama a PractitionerSpecialtiesRepository.findAllByPractitioner"]:::llamada
-  n45 -->|"no"| n47
-  n48[("LEE profiles.practitioner_specialties")]:::efecto
-  n47 --> n48
-  n49["Llama a ProfessionalCredentialsRepository.findByPractitioner"]:::llamada
-  n48 --> n49
-  n50[("LEE profiles.professional_credentials")]:::efecto
-  n49 --> n50
-  n51["Llama a JurisdictionAuthorizationsRepository.findByPractitioner"]:::llamada
-  n50 --> n51
-  n52[("LEE profiles.jurisdiction_authorizations")]:::efecto
-  n51 --> n52
-  n53["Llama a PractitionerLanguagesRepository.findByPractitioner"]:::llamada
-  n52 --> n53
-  n54[("LEE profiles.practitioner_languages")]:::efecto
-  n53 --> n54
-  n55["Llama a PractitionerAffiliationsRepository.findByPractitioner"]:::llamada
-  n54 --> n55
-  n56[("LEE profiles.practitioner_affiliations")]:::efecto
-  n55 --> n56
-  n57(("200 Responde con éxito")):::ok
-  n56 --> n57
+  n18["Llama a JurisdictionAuthorizationsRepository.findByPractitioner"]:::llamada
+  n17 --> n18
+  n19[("LEE profiles.jurisdiction_authorizations")]:::efecto
+  n18 --> n19
+  n20["Llama a PractitionerLanguagesRepository.findByPractitioner"]:::llamada
+  n19 --> n20
+  n21[("LEE profiles.practitioner_languages")]:::efecto
+  n20 --> n21
+  n22["Llama a PractitionerAffiliationsRepository.findByPractitioner"]:::llamada
+  n21 --> n22
+  n23[("LEE profiles.practitioner_affiliations")]:::efecto
+  n22 --> n23
+  n24(("200 Responde con éxito")):::ok
+  n23 --> n24
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -7108,532 +6978,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 62. POST /profiles/practitioners/me/credentials
-
-Agregar un título propio (diplomado, maestría, doctorado…)
-
-| HTTP | Código | Cuándo |
-|---|---|---|
-| 201 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cuenta no tiene un perfil profesional asociado; ForbiddenException: {labels.subject} no le pertenece |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: {labels.notFound} |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Ese concepto no es un tipo de credencial profesional; PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: {labels.subject} resultó infectado; PreconditionFailedException: {labels.subject} no es de un formato admitido para este uso |
-| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-
-```mermaid
-flowchart TD
-  n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
-  n1 --> n2
-  n3["Llama a ProfilesPractitionersService.addOwnCredential"]:::llamada
-  n2 --> n3
-  n4{"!ProfilesPractitionersService.CREDENTIAL_TYPES.includes( dto.credentialTypeConceptId, )"}:::decision
-  n3 --> n4
-  n5(["422 PRECONDITION_FAILED Ese concepto no es un tipo de credencial profesional"]):::error
-  n4 -->|"sí"| n5
-  n6["Transacción: transactional(…)"]:::transaccion
-  n4 -->|"no"| n6
-  n7["Llama a ProfileOwnershipService.requireOwnPractitionerProfileId"]:::llamada
-  n6 --> n7
-  n8["Llama a ProfileOwnershipService.personOf"]:::llamada
-  n7 --> n8
-  n9["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
-  n8 --> n9
-  n10[("LEE profiles.person_account_links")]:::efecto
-  n9 --> n10
-  n11{"personId"}:::decision
-  n10 --> n11
-  n12["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
-  n11 -->|"sí"| n12
-  n13[("LEE profiles.health_practitioner_profiles")]:::efecto
-  n12 --> n13
-  n14(["403 FORBIDDEN Esta cuenta no tiene un perfil profesional asociado"]):::error
-  n13 --> n14
-  n11 -->|"no"| n14
-  n15{"dto.fileId !== undefined"}:::decision
-  n16["Llama a AttachableFilesAdapter.assertUsableBy"]:::llamada
-  n15 -->|"sí"| n16
-  n17["Llama a AttachableFileService.assertUsableBy"]:::llamada
-  n16 --> n17
-  n18["Llama a FilesRepository.findById"]:::llamada
-  n17 --> n18
-  n19[("LEE common.files")]:::efecto
-  n18 --> n19
-  n20{"!file"}:::decision
-  n19 --> n20
-  n21(["404 NOT_FOUND {labels.notFound}"]):::error
-  n20 -->|"sí"| n21
-  n22{"file.createdByUserId !== actor.id && !enAllowlist"}:::decision
-  n20 -->|"no"| n22
-  n23(["403 FORBIDDEN {labels.subject} no le pertenece"]):::error
-  n22 -->|"sí"| n23
-  n24{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
-  n22 -->|"no"| n24
-  n25(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
-  n24 -->|"sí"| n25
-  n26{"!file.currentVersionId"}:::decision
-  n24 -->|"no"| n26
-  n27(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
-  n26 -->|"sí"| n27
-  n28["Llama a AttachableFileService.assertVersionUsable"]:::llamada
-  n26 -->|"no"| n28
-  n29{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
-  n28 --> n29
-  n30(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
-  n29 -->|"sí"| n30
-  n31{"!file.currentVersionId"}:::decision
-  n29 -->|"no"| n31
-  n32(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
-  n31 -->|"sí"| n32
-  n33{"!version"}:::decision
-  n31 -->|"no"| n33
-  n34(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
-  n33 -->|"sí"| n34
-  n35{"version.malwareScanStatusConceptId === CONCEPTS.SCAN_INFECTED"}:::decision
-  n33 -->|"no"| n35
-  n36(["422 PRECONDITION_FAILED {labels.subject} resultó infectado"]):::error
-  n35 -->|"sí"| n36
-  n37{"accepted && !accepted.includes(version.mimeType ?? '')"}:::decision
-  n35 -->|"no"| n37
-  n38(["422 PRECONDITION_FAILED {labels.subject} no es de un formato admitido para este uso"]):::error
-  n37 -->|"sí"| n38
-  n39["Llama a ProfessionalCredentialsRepository.create"]:::llamada
-  n37 -->|"no"| n39
-  n15 -->|"no"| n39
-  n40[("CREA profiles.professional_credentials")]:::efecto
-  n39 --> n40
-  n41(("201 Responde con éxito")):::ok
-  n40 --> n41
-  classDef acceso fill:#eef,stroke:#66a
-  classDef error fill:#fee,stroke:#c33
-  classDef ok fill:#efe,stroke:#3a3
-  classDef efecto fill:#ffd,stroke:#aa3
-  classDef decision fill:#fff,stroke:#555
-  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
-```
-
-#### 63. DELETE /profiles/practitioners/me/credentials/{credentialId}
-
-Retirar un título propio pendiente
-
-| HTTP | Código | Cuándo |
-|---|---|---|
-| 204 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cuenta no tiene un perfil profesional asociado |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Título no encontrado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Ese título ya fue verificado o rechazado; no se puede retirar |
-| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-
-```mermaid
-flowchart TD
-  n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
-  n1 --> n2
-  n3["Llama a ProfilesPractitionersService.removeOwnCredential"]:::llamada
-  n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
-  n3 --> n4
-  n5["Llama a ProfileOwnershipService.requireOwnPractitionerProfileId"]:::llamada
-  n4 --> n5
-  n6["Llama a ProfileOwnershipService.personOf"]:::llamada
-  n5 --> n6
-  n7["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
-  n6 --> n7
-  n8[("LEE profiles.person_account_links")]:::efecto
-  n7 --> n8
-  n9{"personId"}:::decision
-  n8 --> n9
-  n10["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
-  n9 -->|"sí"| n10
-  n11[("LEE profiles.health_practitioner_profiles")]:::efecto
-  n10 --> n11
-  n12(["403 FORBIDDEN Esta cuenta no tiene un perfil profesional asociado"]):::error
-  n11 --> n12
-  n9 -->|"no"| n12
-  n13["Llama a ProfessionalCredentialsRepository.findByIdForUpdate"]:::llamada
-  n14[("LEE profiles.professional_credentials")]:::efecto
-  n13 --> n14
-  n15{"!credential || credential.practitionerProfileId !== profileId"}:::decision
-  n14 --> n15
-  n16(["404 NOT_FOUND Título no encontrado"]):::error
-  n15 -->|"sí"| n16
-  n17{"credential.stateConceptId !== PROF.CRED_PENDING"}:::decision
-  n15 -->|"no"| n17
-  n18(["422 PRECONDITION_FAILED Ese título ya fue verificado o rechazado; no se puede retirar"]):::error
-  n17 -->|"sí"| n18
-  n19["Llama a ProfessionalCredentialsRepository.remove"]:::llamada
-  n17 -->|"no"| n19
-  n20[("BORRA profiles.professional_credentials")]:::efecto
-  n19 --> n20
-  n21(("204 Responde con éxito")):::ok
-  n20 --> n21
-  classDef acceso fill:#eef,stroke:#66a
-  classDef error fill:#fee,stroke:#c33
-  classDef ok fill:#efe,stroke:#3a3
-  classDef efecto fill:#ffd,stroke:#aa3
-  classDef decision fill:#fff,stroke:#555
-  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
-```
-
-#### 64. PATCH /profiles/practitioners/me/credentials/{credentialId}
-
-Editar un título propio pendiente de verificación
-
-| HTTP | Código | Cuándo |
-|---|---|---|
-| 204 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cuenta no tiene un perfil profesional asociado; ForbiddenException: {labels.subject} no le pertenece |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Título no encontrado; ResourceNotFoundException: {labels.notFound} |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Ese concepto no es un tipo de credencial profesional; PreconditionFailedException: Ese título ya fue verificado o rechazado; no se puede editar; PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: {labels.subject} resultó infectado; PreconditionFailedException: {labels.subject} no es de un formato admitido para este uso |
-| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-
-```mermaid
-flowchart TD
-  n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
-  n1 --> n2
-  n3["Llama a ProfilesPractitionersService.updateOwnCredential"]:::llamada
-  n2 --> n3
-  n4{"dto.credentialTypeConceptId !== undefined && !ProfilesPractitionersService.CREDENTIAL_TYPES.includes( dto.cre…"}:::decision
-  n3 --> n4
-  n5(["422 PRECONDITION_FAILED Ese concepto no es un tipo de credencial profesional"]):::error
-  n4 -->|"sí"| n5
-  n6["Transacción: transactional(…)"]:::transaccion
-  n4 -->|"no"| n6
-  n7["Llama a ProfileOwnershipService.requireOwnPractitionerProfileId"]:::llamada
-  n6 --> n7
-  n8["Llama a ProfileOwnershipService.personOf"]:::llamada
-  n7 --> n8
-  n9["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
-  n8 --> n9
-  n10[("LEE profiles.person_account_links")]:::efecto
-  n9 --> n10
-  n11{"personId"}:::decision
-  n10 --> n11
-  n12["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
-  n11 -->|"sí"| n12
-  n13[("LEE profiles.health_practitioner_profiles")]:::efecto
-  n12 --> n13
-  n14(["403 FORBIDDEN Esta cuenta no tiene un perfil profesional asociado"]):::error
-  n13 --> n14
-  n11 -->|"no"| n14
-  n15["Llama a ProfessionalCredentialsRepository.findByIdForUpdate"]:::llamada
-  n16[("LEE profiles.professional_credentials")]:::efecto
-  n15 --> n16
-  n17{"!credential || credential.practitionerProfileId !== profileId"}:::decision
-  n16 --> n17
-  n18(["404 NOT_FOUND Título no encontrado"]):::error
-  n17 -->|"sí"| n18
-  n19{"credential.stateConceptId !== PROF.CRED_PENDING"}:::decision
-  n17 -->|"no"| n19
-  n20(["422 PRECONDITION_FAILED Ese título ya fue verificado o rechazado; no se puede editar"]):::error
-  n19 -->|"sí"| n20
-  n21{"dto.fileId !== undefined"}:::decision
-  n19 -->|"no"| n21
-  n22["Llama a AttachableFilesAdapter.assertUsableBy"]:::llamada
-  n21 -->|"sí"| n22
-  n23["Llama a AttachableFileService.assertUsableBy"]:::llamada
-  n22 --> n23
-  n24["Llama a FilesRepository.findById"]:::llamada
-  n23 --> n24
-  n25[("LEE common.files")]:::efecto
-  n24 --> n25
-  n26{"!file"}:::decision
-  n25 --> n26
-  n27(["404 NOT_FOUND {labels.notFound}"]):::error
-  n26 -->|"sí"| n27
-  n28{"file.createdByUserId !== actor.id && !enAllowlist"}:::decision
-  n26 -->|"no"| n28
-  n29(["403 FORBIDDEN {labels.subject} no le pertenece"]):::error
-  n28 -->|"sí"| n29
-  n30{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
-  n28 -->|"no"| n30
-  n31(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
-  n30 -->|"sí"| n31
-  n32{"!file.currentVersionId"}:::decision
-  n30 -->|"no"| n32
-  n33(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
-  n32 -->|"sí"| n33
-  n34["Llama a AttachableFileService.assertVersionUsable"]:::llamada
-  n32 -->|"no"| n34
-  n35{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
-  n34 --> n35
-  n36(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
-  n35 -->|"sí"| n36
-  n37{"!file.currentVersionId"}:::decision
-  n35 -->|"no"| n37
-  n38(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
-  n37 -->|"sí"| n38
-  n39{"!version"}:::decision
-  n37 -->|"no"| n39
-  n40(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
-  n39 -->|"sí"| n40
-  n41{"version.malwareScanStatusConceptId === CONCEPTS.SCAN_INFECTED"}:::decision
-  n39 -->|"no"| n41
-  n42(["422 PRECONDITION_FAILED {labels.subject} resultó infectado"]):::error
-  n41 -->|"sí"| n42
-  n43{"accepted && !accepted.includes(version.mimeType ?? '')"}:::decision
-  n41 -->|"no"| n43
-  n44(["422 PRECONDITION_FAILED {labels.subject} no es de un formato admitido para este uso"]):::error
-  n43 -->|"sí"| n44
-  n45{"dto.credentialTypeConceptId !== undefined"}:::decision
-  n43 -->|"no"| n45
-  n21 -->|"no"| n45
-  n46[("ACTUALIZA profiles.professional_credentials")]:::efecto
-  n45 -->|"sí"| n46
-  n47[("ACTUALIZA profiles.professional_credentials")]:::efecto
-  n46 --> n47
-  n45 -->|"no"| n47
-  n48{"dto.number !== undefined"}:::decision
-  n47 --> n48
-  n49[("ACTUALIZA profiles.professional_credentials")]:::efecto
-  n48 -->|"sí"| n49
-  n50{"dto.issuingInstitutionText !== undefined"}:::decision
-  n49 --> n50
-  n48 -->|"no"| n50
-  n51[("ACTUALIZA profiles.professional_credentials")]:::efecto
-  n50 -->|"sí"| n51
-  n52{"dto.issuingCityText !== undefined"}:::decision
-  n51 --> n52
-  n50 -->|"no"| n52
-  n53[("ACTUALIZA profiles.professional_credentials")]:::efecto
-  n52 -->|"sí"| n53
-  n54{"dto.issuingCountryText !== undefined"}:::decision
-  n53 --> n54
-  n52 -->|"no"| n54
-  n55[("ACTUALIZA profiles.professional_credentials")]:::efecto
-  n54 -->|"sí"| n55
-  n56{"dto.professionConceptId !== undefined"}:::decision
-  n55 --> n56
-  n54 -->|"no"| n56
-  n57[("ACTUALIZA profiles.professional_credentials")]:::efecto
-  n56 -->|"sí"| n57
-  n58{"dto.titleText !== undefined"}:::decision
-  n57 --> n58
-  n56 -->|"no"| n58
-  n59[("ACTUALIZA profiles.professional_credentials")]:::efecto
-  n58 -->|"sí"| n59
-  n60{"dto.issueDate !== undefined"}:::decision
-  n59 --> n60
-  n58 -->|"no"| n60
-  n61[("ACTUALIZA profiles.professional_credentials")]:::efecto
-  n60 -->|"sí"| n61
-  n62[("ACTUALIZA profiles.professional_credentials")]:::efecto
-  n61 --> n62
-  n60 -->|"no"| n62
-  n63{"dto.fileId !== undefined"}:::decision
-  n62 --> n63
-  n64[("ACTUALIZA profiles.professional_credentials")]:::efecto
-  n63 -->|"sí"| n64
-  n65(("204 Responde con éxito")):::ok
-  n64 --> n65
-  n63 -->|"no"| n65
-  classDef acceso fill:#eef,stroke:#66a
-  classDef error fill:#fee,stroke:#c33
-  classDef ok fill:#efe,stroke:#3a3
-  classDef efecto fill:#ffd,stroke:#aa3
-  classDef decision fill:#fff,stroke:#555
-  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
-```
-
-#### 65. DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}
-
-Retirar una matrícula propia pendiente de verificación
-
-| HTTP | Código | Cuándo |
-|---|---|---|
-| 204 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cuenta no tiene un perfil profesional asociado |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Matrícula no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Esa matrícula ya no está pendiente; no se puede {verb}; PreconditionFailedException: Esa matrícula tiene una verificación en curso; no se puede {verb}; PreconditionFailedException: Esa matrícula ya tiene historial de auditoría; no se puede borrar |
-| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-
-```mermaid
-flowchart TD
-  n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
-  n1 --> n2
-  n3["Llama a ProfilesPractitionersService.removeOwnLicense"]:::llamada
-  n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
-  n3 --> n4
-  n5["Llama a ProfilesPractitionersService.lockOwnEditableLicense"]:::llamada
-  n4 --> n5
-  n6["Llama a ProfileOwnershipService.requireOwnPractitionerProfileId"]:::llamada
-  n5 --> n6
-  n7{"personId"}:::decision
-  n6 --> n7
-  n8["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
-  n7 -->|"sí"| n8
-  n9[("LEE profiles.health_practitioner_profiles")]:::efecto
-  n8 --> n9
-  n10(["403 FORBIDDEN Esta cuenta no tiene un perfil profesional asociado"]):::error
-  n9 --> n10
-  n7 -->|"no"| n10
-  n11["Llama a JurisdictionAuthorizationsRepository.findByIdForUpdate"]:::llamada
-  n12[("LEE profiles.jurisdiction_authorizations")]:::efecto
-  n11 --> n12
-  n13{"!license || license.practitionerProfileId !== profileId"}:::decision
-  n12 --> n13
-  n14(["404 NOT_FOUND Matrícula no encontrada"]):::error
-  n13 -->|"sí"| n14
-  n15{"license.stateConceptId !== PROF.AUTH_PENDING"}:::decision
-  n13 -->|"no"| n15
-  n16(["422 PRECONDITION_FAILED Esa matrícula ya no está pendiente; no se puede {verb}"]):::error
-  n15 -->|"sí"| n16
-  n17["Llama a PractitionerContextAdapter.hasOpenIdentityCase"]:::llamada
-  n15 -->|"no"| n17
-  n18[("LEE identity_assurance.identity_verification_cases")]:::efecto
-  n17 --> n18
-  n19{"await this.practitionerContext.hasOpenIdentityCase(tx, licenseId)"}:::decision
-  n18 --> n19
-  n20(["422 PRECONDITION_FAILED Esa matrícula tiene una verificación en curso; no se puede {verb}"]):::error
-  n19 -->|"sí"| n20
-  n21["Llama a PractitionerContextAdapter.hasAuthorizationHistory"]:::llamada
-  n19 -->|"no"| n21
-  n22[("LEE audit.jurisdiction_authorizations_history")]:::efecto
-  n21 --> n22
-  n23{"await this.practitionerContext.hasAuthorizationHistory(tx, licenseId)"}:::decision
-  n22 --> n23
-  n24(["422 PRECONDITION_FAILED Esa matrícula ya tiene historial de auditoría; no se puede borrar"]):::error
-  n23 -->|"sí"| n24
-  n25["Llama a JurisdictionAuthorizationsRepository.remove"]:::llamada
-  n23 -->|"no"| n25
-  n26[("BORRA profiles.jurisdiction_authorizations")]:::efecto
-  n25 --> n26
-  n27(("204 Responde con éxito")):::ok
-  n26 --> n27
-  classDef acceso fill:#eef,stroke:#66a
-  classDef error fill:#fee,stroke:#c33
-  classDef ok fill:#efe,stroke:#3a3
-  classDef efecto fill:#ffd,stroke:#aa3
-  classDef decision fill:#fff,stroke:#555
-  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
-```
-
-#### 66. PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}
-
-Corregir una matrícula propia pendiente de verificación
-
-| HTTP | Código | Cuándo |
-|---|---|---|
-| 204 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cuenta no tiene un perfil profesional asociado; ForbiddenException: {labels.subject} no le pertenece |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Matrícula no encontrada; ResourceNotFoundException: {labels.notFound} |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Esa matrícula ya no está pendiente; no se puede {verb}; PreconditionFailedException: Esa matrícula tiene una verificación en curso; no se puede {verb}; PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: {labels.subject} resultó infectado; PreconditionFailedException: {labels.subject} no es de un formato admitido para este uso |
-| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-
-```mermaid
-flowchart TD
-  n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
-  n1 --> n2
-  n3["Llama a ProfilesPractitionersService.updateOwnLicense"]:::llamada
-  n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
-  n3 --> n4
-  n5["Llama a ProfilesPractitionersService.lockOwnEditableLicense"]:::llamada
-  n4 --> n5
-  n6["Llama a ProfileOwnershipService.requireOwnPractitionerProfileId"]:::llamada
-  n5 --> n6
-  n7{"personId"}:::decision
-  n6 --> n7
-  n8["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
-  n7 -->|"sí"| n8
-  n9[("LEE profiles.health_practitioner_profiles")]:::efecto
-  n8 --> n9
-  n10(["403 FORBIDDEN Esta cuenta no tiene un perfil profesional asociado"]):::error
-  n9 --> n10
-  n7 -->|"no"| n10
-  n11["Llama a JurisdictionAuthorizationsRepository.findByIdForUpdate"]:::llamada
-  n12[("LEE profiles.jurisdiction_authorizations")]:::efecto
-  n11 --> n12
-  n13{"!license || license.practitionerProfileId !== profileId"}:::decision
-  n12 --> n13
-  n14(["404 NOT_FOUND Matrícula no encontrada"]):::error
-  n13 -->|"sí"| n14
-  n15{"license.stateConceptId !== PROF.AUTH_PENDING"}:::decision
-  n13 -->|"no"| n15
-  n16(["422 PRECONDITION_FAILED Esa matrícula ya no está pendiente; no se puede {verb}"]):::error
-  n15 -->|"sí"| n16
-  n17["Llama a PractitionerContextAdapter.hasOpenIdentityCase"]:::llamada
-  n15 -->|"no"| n17
-  n18[("LEE identity_assurance.identity_verification_cases")]:::efecto
-  n17 --> n18
-  n19{"await this.practitionerContext.hasOpenIdentityCase(tx, licenseId)"}:::decision
-  n18 --> n19
-  n20(["422 PRECONDITION_FAILED Esa matrícula tiene una verificación en curso; no se puede {verb}"]):::error
-  n19 -->|"sí"| n20
-  n21{"dto.fileId !== undefined"}:::decision
-  n19 -->|"no"| n21
-  n22["Llama a AttachableFilesAdapter.assertUsableBy"]:::llamada
-  n21 -->|"sí"| n22
-  n23["Llama a AttachableFileService.assertUsableBy"]:::llamada
-  n22 --> n23
-  n24["Llama a FilesRepository.findById"]:::llamada
-  n23 --> n24
-  n25[("LEE common.files")]:::efecto
-  n24 --> n25
-  n26{"!file"}:::decision
-  n25 --> n26
-  n27(["404 NOT_FOUND {labels.notFound}"]):::error
-  n26 -->|"sí"| n27
-  n28{"file.createdByUserId !== actor.id && !enAllowlist"}:::decision
-  n26 -->|"no"| n28
-  n29(["403 FORBIDDEN {labels.subject} no le pertenece"]):::error
-  n28 -->|"sí"| n29
-  n30{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
-  n28 -->|"no"| n30
-  n31(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
-  n30 -->|"sí"| n31
-  n32{"!file.currentVersionId"}:::decision
-  n30 -->|"no"| n32
-  n33(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
-  n32 -->|"sí"| n33
-  n34["Llama a AttachableFileService.assertVersionUsable"]:::llamada
-  n32 -->|"no"| n34
-  n35{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
-  n34 --> n35
-  n36(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
-  n35 -->|"sí"| n36
-  n37{"!file.currentVersionId"}:::decision
-  n35 -->|"no"| n37
-  n38(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
-  n37 -->|"sí"| n38
-  n39{"!version"}:::decision
-  n37 -->|"no"| n39
-  n40(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
-  n39 -->|"sí"| n40
-  n41{"version.malwareScanStatusConceptId === CONCEPTS.SCAN_INFECTED"}:::decision
-  n39 -->|"no"| n41
-  n42(["422 PRECONDITION_FAILED {labels.subject} resultó infectado"]):::error
-  n41 -->|"sí"| n42
-  n43{"accepted && !accepted.includes(version.mimeType ?? '')"}:::decision
-  n41 -->|"no"| n43
-  n44(["422 PRECONDITION_FAILED {labels.subject} no es de un formato admitido para este uso"]):::error
-  n43 -->|"sí"| n44
-  n45(("204 Responde con éxito")):::ok
-  n43 -->|"no"| n45
-  n21 -->|"no"| n45
-  classDef acceso fill:#eef,stroke:#66a
-  classDef error fill:#fee,stroke:#c33
-  classDef ok fill:#efe,stroke:#3a3
-  classDef efecto fill:#ffd,stroke:#aa3
-  classDef decision fill:#fff,stroke:#555
-  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
-```
-
-#### 67. GET /profiles/practitioners/me/onboarding
+#### 62. GET /profiles/practitioners/me/onboarding
 
 Qué le falta al profesional para completar su alta
 
@@ -7682,7 +7027,7 @@ flowchart TD
   n16 --> n17
   n18["Llama a PractitionerContextAdapter.onboardingContext"]:::llamada
   n17 --> n18
-  n19[("LEE scheduling.schedulable_resources · LEE scheduling.bookable_slots")]:::efecto
+  n19[("LEE scheduling.schedulable_resources · LEE scheduling.bookable_slots · LEE scheduling.schedule_templates")]:::efecto
   n18 --> n19
   n20(("200 Responde con éxito")):::ok
   n19 --> n20
@@ -7694,7 +7039,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 68. GET /profiles/practitioners/me/primary-patients
+#### 63. GET /profiles/practitioners/me/primary-patients
 
 Listar los pacientes que me eligieron como médico de cabecera
 
@@ -7747,7 +7092,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 69. GET /profiles/practitioners/me/signature-assets
+#### 64. GET /profiles/practitioners/me/signature-assets
 
 Consultar las imágenes de firma y sello propias
 
@@ -7798,7 +7143,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 70. PUT /profiles/practitioners/me/signature-assets
+#### 65. PUT /profiles/practitioners/me/signature-assets
 
 Guardar o quitar las imágenes de firma y sello propias
 
@@ -7916,238 +7261,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 71. DELETE /profiles/practitioners/me/specialties/{specialtyId}
-
-Retirar una especialidad propia pendiente de verificación
-
-| HTTP | Código | Cuándo |
-|---|---|---|
-| 204 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cuenta no tiene un perfil profesional asociado |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Especialidad no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Esa especialidad ya no está pendiente de verificación; no se puede {verb} |
-| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-
-```mermaid
-flowchart TD
-  n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
-  n1 --> n2
-  n3["Llama a ProfilesPractitionersService.removeOwnSpecialty"]:::llamada
-  n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
-  n3 --> n4
-  n5["Llama a ProfileOwnershipService.requireOwnPractitionerProfileId"]:::llamada
-  n4 --> n5
-  n6["Llama a ProfileOwnershipService.personOf"]:::llamada
-  n5 --> n6
-  n7["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
-  n6 --> n7
-  n8[("LEE profiles.person_account_links")]:::efecto
-  n7 --> n8
-  n9{"personId"}:::decision
-  n8 --> n9
-  n10["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
-  n9 -->|"sí"| n10
-  n11[("LEE profiles.health_practitioner_profiles")]:::efecto
-  n10 --> n11
-  n12(["403 FORBIDDEN Esta cuenta no tiene un perfil profesional asociado"]):::error
-  n11 --> n12
-  n9 -->|"no"| n12
-  n13["Llama a PractitionerSpecialtiesRepository.findByIdForUpdate"]:::llamada
-  n14[("LEE profiles.practitioner_specialties")]:::efecto
-  n13 --> n14
-  n15{"!specialty || specialty.practitionerProfileId !== profileId"}:::decision
-  n14 --> n15
-  n16(["404 NOT_FOUND Especialidad no encontrada"]):::error
-  n15 -->|"sí"| n16
-  n17["Llama a ProfilesPractitionersService.assertSpecialtyEditable"]:::llamada
-  n15 -->|"no"| n17
-  n18{"specialty.verificationStatusConceptId !== PROF.SPEC_VERIF_PENDING || specialty.validTo"}:::decision
-  n17 --> n18
-  n19(["422 PRECONDITION_FAILED Esa especialidad ya no está pendiente de verificación; no se puede {verb}"]):::error
-  n18 -->|"sí"| n19
-  n20["Llama a PractitionerSpecialtiesRepository.remove"]:::llamada
-  n18 -->|"no"| n20
-  n21[("BORRA profiles.practitioner_specialties")]:::efecto
-  n20 --> n21
-  n22(("204 Responde con éxito")):::ok
-  n21 --> n22
-  classDef acceso fill:#eef,stroke:#66a
-  classDef error fill:#fee,stroke:#c33
-  classDef ok fill:#efe,stroke:#3a3
-  classDef efecto fill:#ffd,stroke:#aa3
-  classDef decision fill:#fff,stroke:#555
-  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
-```
-
-#### 72. PATCH /profiles/practitioners/me/specialties/{specialtyId}
-
-Corregir una especialidad propia pendiente de verificación
-
-| HTTP | Código | Cuándo |
-|---|---|---|
-| 204 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cuenta no tiene un perfil profesional asociado |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Especialidad no encontrada |
-| 409 | `CONFLICT` | ConflictException: El profesional ya tiene esa especialidad activa |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Esa especialidad ya no está pendiente de verificación; no se puede {verb}; PreconditionFailedException: El catálogo de especialidades médicas no está disponible; PreconditionFailedException: La especialidad no pertenece al catálogo de especialidades médicas |
-| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-
-```mermaid
-flowchart TD
-  n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
-  n1 --> n2
-  n3["Llama a ProfilesPractitionersService.updateOwnSpecialty"]:::llamada
-  n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
-  n3 --> n4
-  n5["Llama a ProfileOwnershipService.requireOwnPractitionerProfileId"]:::llamada
-  n4 --> n5
-  n6["Llama a ProfileOwnershipService.personOf"]:::llamada
-  n5 --> n6
-  n7["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
-  n6 --> n7
-  n8[("LEE profiles.person_account_links")]:::efecto
-  n7 --> n8
-  n9{"personId"}:::decision
-  n8 --> n9
-  n10["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
-  n9 -->|"sí"| n10
-  n11[("LEE profiles.health_practitioner_profiles")]:::efecto
-  n10 --> n11
-  n12(["403 FORBIDDEN Esta cuenta no tiene un perfil profesional asociado"]):::error
-  n11 --> n12
-  n9 -->|"no"| n12
-  n13["Llama a PractitionerSpecialtiesRepository.findByIdForUpdate"]:::llamada
-  n14[("LEE profiles.practitioner_specialties")]:::efecto
-  n13 --> n14
-  n15{"!specialty || specialty.practitionerProfileId !== profileId"}:::decision
-  n14 --> n15
-  n16(["404 NOT_FOUND Especialidad no encontrada"]):::error
-  n15 -->|"sí"| n16
-  n17["Llama a ProfilesPractitionersService.assertSpecialtyEditable"]:::llamada
-  n15 -->|"no"| n17
-  n18{"specialty.verificationStatusConceptId !== PROF.SPEC_VERIF_PENDING || specialty.validTo"}:::decision
-  n17 --> n18
-  n19(["422 PRECONDITION_FAILED Esa especialidad ya no está pendiente de verificación; no se puede {verb}"]):::error
-  n18 -->|"sí"| n19
-  n20{"dto.specialtyConceptId !== undefined && dto.specialtyConceptId !== specialty.specialtyConceptId"}:::decision
-  n18 -->|"no"| n20
-  n21["Llama a MedicalSpecialtyCatalogService.assertIsMedicalSpecialty"]:::llamada
-  n20 -->|"sí"| n21
-  n22["Llama a MedicalSpecialtyCatalogService.listMemberIds"]:::llamada
-  n21 --> n22
-  n23{"members === null"}:::decision
-  n22 --> n23
-  n24(["422 PRECONDITION_FAILED El catálogo de especialidades médicas no está disponible"]):::error
-  n23 -->|"sí"| n24
-  n25{"!members.has(specialtyConceptId)"}:::decision
-  n23 -->|"no"| n25
-  n26(["422 PRECONDITION_FAILED La especialidad no pertenece al catálogo de especialidades médicas"]):::error
-  n25 -->|"sí"| n26
-  n27["Llama a PractitionerSpecialtiesRepository.findActive"]:::llamada
-  n25 -->|"no"| n27
-  n28[("LEE profiles.practitioner_specialties")]:::efecto
-  n27 --> n28
-  n29{"duplicate"}:::decision
-  n28 --> n29
-  n30(["409 CONFLICT El profesional ya tiene esa especialidad activa"]):::error
-  n29 -->|"sí"| n30
-  n31[("ACTUALIZA profiles.practitioner_specialties")]:::efecto
-  n29 -->|"no"| n31
-  n32{"dto.boardCertified !== undefined"}:::decision
-  n31 --> n32
-  n20 -->|"no"| n32
-  n33[("ACTUALIZA profiles.practitioner_specialties")]:::efecto
-  n32 -->|"sí"| n33
-  n34(("204 Responde con éxito")):::ok
-  n33 --> n34
-  n32 -->|"no"| n34
-  classDef acceso fill:#eef,stroke:#66a
-  classDef error fill:#fee,stroke:#c33
-  classDef ok fill:#efe,stroke:#3a3
-  classDef efecto fill:#ffd,stroke:#aa3
-  classDef decision fill:#fff,stroke:#555
-  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
-```
-
-#### 73. PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary
-
-Marcar una especialidad propia como la principal
-
-| HTTP | Código | Cuándo |
-|---|---|---|
-| 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cuenta no tiene un perfil profesional asociado |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Especialidad no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una especialidad que ya no ejerce no puede ser la principal |
-| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-
-```mermaid
-flowchart TD
-  n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
-  n1 --> n2
-  n3["Llama a ProfilesPractitionersService.setOwnPrimarySpecialty"]:::llamada
-  n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
-  n3 --> n4
-  n5["Llama a ProfileOwnershipService.requireOwnPractitionerProfileId"]:::llamada
-  n4 --> n5
-  n6["Llama a ProfileOwnershipService.personOf"]:::llamada
-  n5 --> n6
-  n7["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
-  n6 --> n7
-  n8[("LEE profiles.person_account_links")]:::efecto
-  n7 --> n8
-  n9{"personId"}:::decision
-  n8 --> n9
-  n10["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
-  n9 -->|"sí"| n10
-  n11[("LEE profiles.health_practitioner_profiles")]:::efecto
-  n10 --> n11
-  n12(["403 FORBIDDEN Esta cuenta no tiene un perfil profesional asociado"]):::error
-  n11 --> n12
-  n9 -->|"no"| n12
-  n13["Llama a PractitionerSpecialtiesRepository.findById"]:::llamada
-  n14[("LEE profiles.practitioner_specialties")]:::efecto
-  n13 --> n14
-  n15{"!specialty || specialty.practitionerProfileId !== profileId"}:::decision
-  n14 --> n15
-  n16(["404 NOT_FOUND Especialidad no encontrada"]):::error
-  n15 -->|"sí"| n16
-  n17{"specialty.validTo"}:::decision
-  n15 -->|"no"| n17
-  n18(["422 PRECONDITION_FAILED Una especialidad que ya no ejerce no puede ser la principal"]):::error
-  n17 -->|"sí"| n18
-  n19{"specialty.isPrimary !== true"}:::decision
-  n17 -->|"no"| n19
-  n20["Llama a PractitionerSpecialtiesRepository.demotePrimary"]:::llamada
-  n19 -->|"sí"| n20
-  n21[("ACTUALIZA profiles.practitioner_specialties")]:::efecto
-  n20 --> n21
-  n22[("ACTUALIZA profiles.practitioner_specialties")]:::efecto
-  n21 --> n22
-  n23(("200 Responde con éxito")):::ok
-  n22 --> n23
-  n19 -->|"no"| n23
-  classDef acceso fill:#eef,stroke:#66a
-  classDef error fill:#fee,stroke:#c33
-  classDef ok fill:#efe,stroke:#3a3
-  classDef efecto fill:#ffd,stroke:#aa3
-  classDef decision fill:#fff,stroke:#555
-  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
-```
-
-#### 74. GET /profiles/practitioners/me/summary
+#### 66. GET /profiles/practitioners/me/summary
 
 Consultar el perfil profesional propio (trayectoria y actividad)
 
@@ -8249,7 +7363,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 75. GET /tenants/{tenantId}/practitioner-requests
+#### 67. GET /tenants/{tenantId}/practitioner-requests
 
 Solicitudes de médicos que piden atender en la organización
 
@@ -8295,7 +7409,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 76. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve
+#### 68. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve
 
 Aprobar la solicitud de un profesional
 
@@ -8377,7 +7491,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 77. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject
+#### 69. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject
 
 Rechazar la solicitud de un profesional
 
@@ -8459,7 +7573,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 78. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke
+#### 70. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke
 
 Dar de baja un vínculo ya aprobado
 
@@ -8552,5 +7666,13 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 | GET /profiles/patients/me/dependent-requests/incoming | 200, 401, 403, 429 | 4 |
 | GET /profiles/patients/me/dependents | 200, 401, 403, 429 | 5 |
 | GET /profiles/patients/merge-events | 200, 401, 403, 429 | 1 |
+| POST /profiles/practitioners/me/credentials | 201, 400, 401, 403, 429 | 0 |
+| DELETE /profiles/practitioners/me/credentials/{credentialId} | 204, 400, 401, 403, 429 | 0 |
+| PATCH /profiles/practitioners/me/credentials/{credentialId} | 204, 400, 401, 403, 429 | 0 |
+| DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId} | 204, 400, 401, 403, 429 | 0 |
+| PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId} | 204, 400, 401, 403, 429 | 0 |
 | GET /profiles/practitioners/me/linkable-organizations | 200, 401, 403, 429 | 5 |
+| DELETE /profiles/practitioners/me/specialties/{specialtyId} | 204, 400, 401, 403, 429 | 0 |
+| PATCH /profiles/practitioners/me/specialties/{specialtyId} | 204, 400, 401, 403, 429 | 0 |
+| PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary | 200, 400, 401, 403, 429 | 0 |
 | GET /profiles/practitioners/specialty-counts | 200, 401, 403, 429 | 2 |

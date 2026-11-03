@@ -139,7 +139,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:320` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -257,7 +257,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PACS_GATEWAY, SYSTEM, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:139` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -418,7 +418,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:159` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -428,7 +428,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 |---|---|---|---|---|---|
 | `object_storage.large_payload_manifests` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.registerLargePayload → ObjectStorageService.registerLargePayload → ObjectStorageRepository.createLargePayload | `src/modules/object_storage/repositories/object-storage.repository.ts:628` |
 | `object_storage.large_payload_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.registerLargePayload → ObjectStorageService.registerLargePayload → ObjectStorageRepository.findLargePayloadBySource | `src/modules/object_storage/repositories/object-storage.repository.ts:653` |
-| `object_storage.object_manifests` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.registerLargePayload → ObjectStorageService.registerLargePayload | `src/modules/object_storage/services/object-storage.service.ts:509` |
+| `object_storage.object_manifests` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.registerLargePayload → ObjectStorageService.registerLargePayload | `src/modules/object_storage/services/object-storage.service.ts:512` |
 | `object_storage.object_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.registerLargePayload → ObjectStorageService.registerLargePayload → ObjectStorageRepository.findManifestForUpdate | `src/modules/object_storage/repositories/object-storage.repository.ts:266` |
 
 ### Cuerpo — DTO `RegisterLargePayloadDto` · `application/json`
@@ -531,7 +531,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: STORAGE_CLIENT, SYSTEM, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:78` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -646,7 +646,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 | ROL | Alguno de: COMPLIANCE_OFFICER, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:339` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: manifestId | `src/modules/object_storage/controllers/object-storage.controller.ts:339` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -759,7 +759,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 | ROL | Alguno de: SYSTEM, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:119` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: manifestId | `src/modules/object_storage/controllers/object-storage.controller.ts:119` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -770,7 +770,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 | `object_storage.object_checksums` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.createVersion → ObjectStorageService.createVersion → ObjectStorageService.materialiseVersion → ObjectStorageRepository.createChecksum | `src/modules/object_storage/repositories/object-storage.repository.ts:392` |
 | `object_storage.object_encryption_envelopes` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.createVersion → ObjectStorageService.createVersion → ObjectStorageService.materialiseVersion → ObjectStorageRepository.createEncryptionEnvelope | `src/modules/object_storage/repositories/object-storage.repository.ts:474` |
 | `object_storage.object_locations` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.createVersion → ObjectStorageService.createVersion → ObjectStorageService.materialiseVersion → ObjectStorageRepository.createLocation | `src/modules/object_storage/repositories/object-storage.repository.ts:540` |
-| `object_storage.object_manifests` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.createVersion → ObjectStorageService.createVersion | `src/modules/object_storage/services/object-storage.service.ts:450` |
+| `object_storage.object_manifests` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.createVersion → ObjectStorageService.createVersion | `src/modules/object_storage/services/object-storage.service.ts:453` |
 | `object_storage.object_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.createVersion → ObjectStorageService.createVersion → ObjectStorageRepository.findManifestForUpdate | `src/modules/object_storage/repositories/object-storage.repository.ts:266` |
 | `object_storage.object_namespaces` | LEE | LEE | DIRECTA | ObjectStorageController.createVersion → ObjectStorageService.createVersion → ObjectStorageRepository.findNamespaceById | `src/modules/object_storage/repositories/object-storage.repository.ts:95` |
 | `object_storage.object_versions` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.createVersion → ObjectStorageService.createVersion → ObjectStorageService.materialiseVersion → ObjectStorageRepository.createVersion | `src/modules/object_storage/repositories/object-storage.repository.ts:293` |
@@ -907,7 +907,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 | ROL | Alguno de: STORAGE_CLIENT, SYSTEM, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:99` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/object_storage/controllers/object-storage.controller.ts:99` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -915,12 +915,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `object_storage.multipart_uploads` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.completeUpload → ObjectStorageService.completeUpload | `src/modules/object_storage/services/object-storage.service.ts:301` |
+| `object_storage.multipart_uploads` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.completeUpload → ObjectStorageService.completeUpload | `src/modules/object_storage/services/object-storage.service.ts:304` |
 | `object_storage.multipart_uploads` | LEE | LEE | DIRECTA | ObjectStorageController.completeUpload → ObjectStorageService.completeUpload → ObjectStorageRepository.findUploadForUpdate | `src/modules/object_storage/repositories/object-storage.repository.ts:180` |
 | `object_storage.object_checksums` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.completeUpload → ObjectStorageService.completeUpload → ObjectStorageService.materialiseVersion → ObjectStorageRepository.createChecksum | `src/modules/object_storage/repositories/object-storage.repository.ts:392` |
 | `object_storage.object_encryption_envelopes` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.completeUpload → ObjectStorageService.completeUpload → ObjectStorageService.materialiseVersion → ObjectStorageRepository.createEncryptionEnvelope | `src/modules/object_storage/repositories/object-storage.repository.ts:474` |
 | `object_storage.object_locations` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.completeUpload → ObjectStorageService.completeUpload → ObjectStorageService.materialiseVersion → ObjectStorageRepository.createLocation | `src/modules/object_storage/repositories/object-storage.repository.ts:540` |
-| `object_storage.object_manifests` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.completeUpload → ObjectStorageService.completeUpload | `src/modules/object_storage/services/object-storage.service.ts:343` |
+| `object_storage.object_manifests` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.completeUpload → ObjectStorageService.completeUpload | `src/modules/object_storage/services/object-storage.service.ts:346` |
 | `object_storage.object_manifests` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.completeUpload → ObjectStorageService.completeUpload → ObjectStorageRepository.createManifest | `src/modules/object_storage/repositories/object-storage.repository.ts:229` |
 | `object_storage.object_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.completeUpload → ObjectStorageService.completeUpload → ObjectStorageRepository.findManifestByLogicalIdForUpdate | `src/modules/object_storage/repositories/object-storage.repository.ts:279` |
 | `object_storage.object_namespaces` | LEE | LEE | DIRECTA | ObjectStorageController.completeUpload → ObjectStorageService.completeUpload → ObjectStorageRepository.findNamespaceById | `src/modules/object_storage/repositories/object-storage.repository.ts:95` |
@@ -1118,8 +1118,8 @@ El árbol de decisión completo está en [flujos](../flujos/object_storage.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/hardening/mch-009.int-spec.ts:129` |
-| INTEGRACION | `test/integration/hardening/mch-010.int-spec.ts:117` |
+| INTEGRACION | `test/integration/hardening/mch-009.int-spec.ts:163` |
+| INTEGRACION | `test/integration/hardening/mch-010.int-spec.ts:153` |
 
 ### Flujos
 
@@ -1154,7 +1154,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 | ROL | Alguno de: SYSTEM, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:299` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: versionId | `src/modules/object_storage/controllers/object-storage.controller.ts:299` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1265,7 +1265,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: LEGAL_COUNSEL, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:199` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: versionId | `src/modules/object_storage/controllers/object-storage.controller.ts:199` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1459,7 +1459,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 | ROL | Alguno de: COMPLIANCE_OFFICER, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:178` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: versionId | `src/modules/object_storage/controllers/object-storage.controller.ts:178` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1573,7 +1573,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 | ROL | Alguno de: DICOM_VIEWER, CLINICIAN, SYSTEM, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:242` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: versionId | `src/modules/object_storage/controllers/object-storage.controller.ts:242` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1657,8 +1657,8 @@ El árbol de decisión completo está en [flujos](../flujos/object_storage.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/hardening/mch-009.int-spec.ts:52` |
-| INTEGRACION | `test/integration/hardening/mch-010.int-spec.ts:61` |
+| INTEGRACION | `test/integration/hardening/mch-009.int-spec.ts:86` |
+| INTEGRACION | `test/integration/hardening/mch-010.int-spec.ts:97` |
 | INTEGRACION | `test/integration/hardening/mch-020.int-spec.ts:61` |
 | INTEGRACION | `test/integration/hardening/mch-021.int-spec.ts:209` |
 | CONTROLADOR | `src/modules/object_storage/controllers/object-storage.controller.spec.ts:149` |

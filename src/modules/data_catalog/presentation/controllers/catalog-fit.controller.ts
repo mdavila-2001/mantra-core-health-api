@@ -50,11 +50,11 @@ export class AdminCatalogFitController {
   @ApiOperation({
     summary: 'Último resultado de la sonda de ajuste de la catalogación',
     description:
-      'Puntaje por dimensión con numerador y denominador (`null` cuando no hay base, nunca 0), comprobaciones con id estable, severidad, evidencia y cómo corregir, e historial resumido. El resultado vive en la memoria del proceso con TTL declarado (`retention`); `state` distingue VIGENTE, ATRASADO y SIN_RESULTADO.',
+      'Puntaje por dimensión con numerador y denominador (`null` cuando no hay base, nunca 0), comprobaciones con id estable, severidad, evidencia y cómo corregir, e historial resumido. El resultado se lee de `data_catalog.catalog_fit_runs`; si la base no responde, de la memoria del proceso, y `retention.kind`/`fallbackReason` lo dicen. `state` distingue VIGENTE, ATRASADO y SIN_RESULTADO.',
   })
   @ApiResponse({ status: 200, type: CatalogFitDto })
-  latest(): CatalogFitDto {
-    return this.fit.latest() as unknown as CatalogFitDto;
+  async latest(): Promise<CatalogFitDto> {
+    return (await this.fit.latest()) as unknown as CatalogFitDto;
   }
 
   @Audited({
@@ -107,7 +107,7 @@ export class InternalCatalogFitController {
   constructor(private readonly fit: CatalogFitService) {}
 
   @NotAudited(
-    'Plomería del worker: la sonda no escribe en el catálogo; su resultado vive en memoria y el sello por tick sólo repetiría la hora.',
+    'Plomería del worker: la sonda no escribe en el catálogo; su desenlace queda en data_catalog.catalog_fit_runs y el sello por tick sólo repetiría la hora.',
   )
   @Post('run')
   @Roles('SYSTEM')
@@ -130,7 +130,7 @@ export class InternalCatalogFitController {
         'Idempotency-Key',
         'La cabecera Idempotency-Key debe tener 8–128 caracteres: letras, números, . _ : -',
       );
-    const { run, created, summary } = await this.fit.requestAndWait(
+    const { run, created, summary, persisted } = await this.fit.requestAndWait(
       'TICK',
       key ?? null,
     );
@@ -139,6 +139,7 @@ export class InternalCatalogFitController {
       status: run.status,
       created,
       ...(summary ?? {}),
+      ...(persisted !== undefined ? { persisted } : {}),
       ...(run.errorCode ? { errorCode: run.errorCode } : {}),
     };
   }

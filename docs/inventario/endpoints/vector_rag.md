@@ -57,7 +57,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: RAG_COLLECTION_ADMIN, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-governance.controller.ts:106` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -188,7 +188,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 | CABECERA | idempotency-key (obligatoria) | `contrato (parameters)` |
 | CABECERA | Idempotency-Key (opcional) | `contrato (parameters)` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-governance.controller.ts:170` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -305,7 +305,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: AI_GOVERNANCE_OFFICER, RAG_COLLECTION_ADMIN, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-governance.controller.ts:225` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-governance.controller.ts:225` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -413,7 +413,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 | ROL | Alguno de: AI_GOVERNANCE_OFFICER, MLOPS_ENGINEER, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-governance.controller.ts:203` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-governance.controller.ts:203` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -531,7 +531,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 | ROL | Alguno de: SYSTEM, RECONCILIATION_WORKER, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:210` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:210` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -654,7 +654,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRIVACY_OFFICER, DPO, SYSTEM, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:189` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -776,7 +776,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 | ROL | Alguno de: SYSTEM, EMBEDDING_WORKER, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:79` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:79` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1022,7 +1022,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: AI_GOVERNANCE_OFFICER, MLOPS_ENGINEER, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-governance.controller.ts:63` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1145,7 +1145,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: AI_GOVERNANCE_OFFICER, MLOPS_ENGINEER, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-governance.controller.ts:84` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-governance.controller.ts:84` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1258,7 +1258,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRIVACY_OFFICER, DPO, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-governance.controller.ts:127` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1383,7 +1383,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: PRIVACY_OFFICER, DPO, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-governance.controller.ts:148` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-governance.controller.ts:148` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1490,7 +1490,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, AGENT_RUNTIME, SYSTEM, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:101` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1610,7 +1610,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 | ROL | Alguno de: SYSTEM, RETRIEVAL_WORKER, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:145` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:145` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1735,7 +1735,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 | ROL | Alguno de: CLINICIAN, AGENT_RUNTIME, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:167` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:167` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1851,7 +1851,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 | ROL | Alguno de: SYSTEM, RETRIEVAL_WORKER, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:122` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:122` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 

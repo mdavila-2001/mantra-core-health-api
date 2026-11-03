@@ -120,7 +120,7 @@ El árbol de decisión completo está en [flujos](../flujos/medical_centers.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/medical-centers.int-spec.ts:527` |
+| INTEGRACION | `test/integration/medical-centers.int-spec.ts:583` |
 | CONTROLADOR | `src/modules/medical_centers/controllers/medical-centers.controller.spec.ts:37` |
 
 ### Flujos
@@ -234,7 +234,7 @@ El árbol de decisión completo está en [flujos](../flujos/medical_centers.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/medical-centers.int-spec.ts:947` |
+| INTEGRACION | `test/integration/medical-centers.int-spec.ts:1010` |
 | CONTROLADOR | `src/modules/medical_centers/controllers/medical-centers.controller.spec.ts:38` |
 
 ### Flujos

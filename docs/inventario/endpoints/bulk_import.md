@@ -5,18 +5,18 @@
 - **Bloque:** —
 - **Operaciones:** 7 (7 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 0 · MEDIO 3 · BAJO 4
-- **Tablas distintas que tocan:** 13
+- **Tablas distintas que tocan:** 15
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/bulk-import.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
 
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
-| 1 | GET | `/admin/bulk-imports` | Lotes de la organización | BAJO | 11 | SECURITY_ADMIN, PLATFORM_ADMIN |
-| 2 | POST | `/admin/bulk-imports` | Crea un lote: valida el archivo y devuelve la vista previa (VALIDADO o RECHAZADO) | BAJO | 11 | SECURITY_ADMIN, PLATFORM_ADMIN |
-| 3 | GET | `/admin/bulk-imports/{id}` | Estado, vista previa y avance de un lote | MEDIO | 14 | SECURITY_ADMIN, PLATFORM_ADMIN |
-| 4 | POST | `/admin/bulk-imports/{id}/confirm` | Confirma un lote VALIDADO y lo encola (idempotente por Idempotency-Key) | MEDIO | 14 | SECURITY_ADMIN, PLATFORM_ADMIN |
-| 5 | GET | `/admin/bulk-imports/{id}/report` | Informe de un lote: creados, omitidos y rechazados con su motivo | MEDIO | 14 | SECURITY_ADMIN, PLATFORM_ADMIN |
+| 1 | GET | `/admin/bulk-imports` | Lotes de la organización | BAJO | 13 | SECURITY_ADMIN, PLATFORM_ADMIN |
+| 2 | POST | `/admin/bulk-imports` | Crea un lote: valida el archivo y devuelve la vista previa (VALIDADO o RECHAZADO) | BAJO | 13 | SECURITY_ADMIN, PLATFORM_ADMIN |
+| 3 | GET | `/admin/bulk-imports/{id}` | Estado, vista previa y avance de un lote | MEDIO | 16 | SECURITY_ADMIN, PLATFORM_ADMIN |
+| 4 | POST | `/admin/bulk-imports/{id}/confirm` | Confirma un lote VALIDADO y lo encola (idempotente por Idempotency-Key) | MEDIO | 16 | SECURITY_ADMIN, PLATFORM_ADMIN |
+| 5 | GET | `/admin/bulk-imports/{id}/report` | Informe de un lote: creados, omitidos y rechazados con su motivo | MEDIO | 16 | SECURITY_ADMIN, PLATFORM_ADMIN |
 | 6 | GET | `/admin/bulk-imports/templates` | Catálogo de plantillas, topes y estado declarado del motor | BAJO | 0 | SECURITY_ADMIN, PLATFORM_ADMIN |
 | 7 | GET | `/admin/bulk-imports/templates/{kind}` | Descarga la plantilla de un tipo de carga en CSV o JSON | BAJO | 0 | SECURITY_ADMIN, PLATFORM_ADMIN |
 
@@ -39,7 +39,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/bulk-imports` la atiende `BulkImportController.list` (src/modules/bulk_import/controllers/bulk-import.controller.ts:117). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN. Delega en `BulkImportService.list`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 3 más.
+`GET /admin/bulk-imports` la atiende `BulkImportController.list` (src/modules/bulk_import/controllers/bulk-import.controller.ts:117). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN. Delega en `BulkImportService.list`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 5 más.
 
 ### Requerimientos
 
@@ -62,9 +62,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `authz.permissions` | LEE | LEE | DIRECTA | BulkImportController.list → BulkImportService.list → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | BulkImportController.list → BulkImportService.list → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | BulkImportController.list → BulkImportService.list → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | BulkImportController.list → BulkImportService.list → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | BulkImportController.list → BulkImportService.list → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | BulkImportController.list → BulkImportService.list → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | BulkImportController.list → BulkImportService.list → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | BulkImportController.list → BulkImportService.list → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | BulkImportController.list → BulkImportService.list → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | BulkImportController.list → BulkImportService.list → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 
 ### Parámetros
 
@@ -118,7 +120,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/bulk-imports` la atiende `BulkImportController.create` (src/modules/bulk_import/controllers/bulk-import.controller.ts:127). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `CreateBulkImportDto` (6 campos, 1 obligatorio). Delega en `BulkImportService.create`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 3 más.
+`POST /admin/bulk-imports` la atiende `BulkImportController.create` (src/modules/bulk_import/controllers/bulk-import.controller.ts:127). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `CreateBulkImportDto` (6 campos, 1 obligatorio). Delega en `BulkImportService.create`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 5 más.
 
 ### Requerimientos
 
@@ -143,9 +145,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `authz.permissions` | LEE | LEE | DIRECTA | BulkImportController.create → BulkImportService.create → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | BulkImportController.create → BulkImportService.create → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | BulkImportController.create → BulkImportService.create → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | BulkImportController.create → BulkImportService.create → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | BulkImportController.create → BulkImportService.create → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | BulkImportController.create → BulkImportService.create → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | BulkImportController.create → BulkImportService.create → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | BulkImportController.create → BulkImportService.create → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | BulkImportController.create → BulkImportService.create → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | BulkImportController.create → BulkImportService.create → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 
 ### Cuerpo — DTO `CreateBulkImportDto` · `multipart/form-data`
 
@@ -228,7 +232,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/bulk-imports/{id}` la atiende `BulkImportController.get` (src/modules/bulk_import/controllers/bulk-import.controller.ts:191). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN. Delega en `BulkImportService.get`. Crea filas en audit.audit_log. Lee audit.audit_log, authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants y 5 más.
+`GET /admin/bulk-imports/{id}` la atiende `BulkImportController.get` (src/modules/bulk_import/controllers/bulk-import.controller.ts:191). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN. Delega en `BulkImportService.get`. Crea filas en audit.audit_log. Lee audit.audit_log, authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants y 7 más.
 
 ### Requerimientos
 
@@ -254,10 +258,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `authz.permissions` | LEE | LEE | DIRECTA | BulkImportController.get → BulkImportService.get → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | BulkImportController.get → BulkImportService.get → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | BulkImportController.get → BulkImportService.get → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | BulkImportController.get → BulkImportService.get → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | BulkImportController.get → BulkImportService.get → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | BulkImportController.get → BulkImportService.get → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | BulkImportController.get → BulkImportService.get → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | BulkImportController.get → BulkImportService.get → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `iam.sessions` | LEE | LEE | POR_SQL | BulkImportController.get → BulkImportService.get → BulkImportService.auditRead → TrailAuditAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | BulkImportController.get → BulkImportService.get → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | BulkImportController.get → BulkImportService.get → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 
 ### Parámetros
 
@@ -312,7 +318,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/bulk-imports/{id}/confirm` la atiende `BulkImportController.confirm` (src/modules/bulk_import/controllers/bulk-import.controller.ts:170). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN. Delega en `BulkImportService.confirm`. Crea filas en audit.audit_log. Lee audit.audit_log, authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants y 5 más.
+`POST /admin/bulk-imports/{id}/confirm` la atiende `BulkImportController.confirm` (src/modules/bulk_import/controllers/bulk-import.controller.ts:170). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN. Delega en `BulkImportService.confirm`. Crea filas en audit.audit_log. Lee audit.audit_log, authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants y 7 más.
 
 ### Requerimientos
 
@@ -339,10 +345,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `authz.permissions` | LEE | LEE | DIRECTA | BulkImportController.confirm → BulkImportService.confirm → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | BulkImportController.confirm → BulkImportService.confirm → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | BulkImportController.confirm → BulkImportService.confirm → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | BulkImportController.confirm → BulkImportService.confirm → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | BulkImportController.confirm → BulkImportService.confirm → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | BulkImportController.confirm → BulkImportService.confirm → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | BulkImportController.confirm → BulkImportService.confirm → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | BulkImportController.confirm → BulkImportService.confirm → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `iam.sessions` | LEE | LEE | POR_SQL | BulkImportController.confirm → BulkImportService.confirm → BulkImportProcessor.enqueue → BulkImportProcessor.process → BulkImportProcessor.processRow → BulkImportProcessor.provisionUser → TrailAuditAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | BulkImportController.confirm → BulkImportService.confirm → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | BulkImportController.confirm → BulkImportService.confirm → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 
 ### Parámetros
 
@@ -399,7 +407,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/bulk-imports/{id}/report` la atiende `BulkImportController.report` (src/modules/bulk_import/controllers/bulk-import.controller.ts:208). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN. Delega en `BulkImportService.report`, `BulkImportService.reportCsv`. Crea filas en audit.audit_log. Lee audit.audit_log, authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants y 5 más.
+`GET /admin/bulk-imports/{id}/report` la atiende `BulkImportController.report` (src/modules/bulk_import/controllers/bulk-import.controller.ts:208). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN. Delega en `BulkImportService.report`, `BulkImportService.reportCsv`. Crea filas en audit.audit_log. Lee audit.audit_log, authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants y 7 más.
 
 ### Requerimientos
 
@@ -425,10 +433,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `authz.permissions` | LEE | LEE | DIRECTA | BulkImportController.report → BulkImportService.report → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | BulkImportController.report → BulkImportService.report → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | BulkImportController.report → BulkImportService.report → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | BulkImportController.report → BulkImportService.report → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | BulkImportController.report → BulkImportService.report → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | BulkImportController.report → BulkImportService.report → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | BulkImportController.report → BulkImportService.report → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | BulkImportController.report → BulkImportService.report → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `iam.sessions` | LEE | LEE | POR_SQL | BulkImportController.report → BulkImportService.report → BulkImportService.auditRead → TrailAuditAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | BulkImportController.report → BulkImportService.report → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | BulkImportController.report → BulkImportService.report → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 
 ### Parámetros
 

@@ -119,6 +119,10 @@ export class AdminDataQualityController {
   })
   @ApiResponse({ status: 200, description: 'La regla' })
   @ApiResponse({ status: 404, description: 'No existe la regla' })
+  @ApiResponse({
+    status: 200,
+    description: 'Regla de calidad con incidencias y corridas',
+  })
   rule(@Param() p: IdParamDto) {
     return this.service.getRule(p.id);
   }

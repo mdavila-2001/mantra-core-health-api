@@ -5,7 +5,7 @@
 - **Bloque:** Clínico y Diagnóstico (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 - **Operaciones:** 34 (34 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 2 · MEDIO 21 · BAJO 11
-- **Tablas distintas que tocan:** 52
+- **Tablas distintas que tocan:** 54
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/clinical-ext.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -13,9 +13,9 @@
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
 | 1 | PATCH | `/care-gaps/{id}/close` | Cerrar una brecha de cuidado por evento clínico | MEDIO | 2 | CLINICIAN, PRACTITIONER |
-| 2 | POST | `/care-gaps/recompute` | Detectar y abrir brechas de cuidado (batch) | MEDIO | 18 | CLINICIAN, PRACTITIONER |
-| 3 | GET | `/care-teams` | Listar equipos de cuidado de un paciente | BAJO | 19 | CLINICIAN, PRACTITIONER |
-| 4 | POST | `/care-teams` | Crear un equipo de cuidado con sus miembros | MEDIO | 18 | CLINICIAN, PRACTITIONER |
+| 2 | POST | `/care-gaps/recompute` | Detectar y abrir brechas de cuidado (batch) | MEDIO | 20 | CLINICIAN, PRACTITIONER |
+| 3 | GET | `/care-teams` | Listar equipos de cuidado de un paciente | BAJO | 21 | CLINICIAN, PRACTITIONER |
+| 4 | POST | `/care-teams` | Crear un equipo de cuidado con sus miembros | MEDIO | 20 | CLINICIAN, PRACTITIONER |
 | 5 | PATCH | `/care-teams/{id}/members/{memberId}/set-responsible` | Designar miembro responsable (transferir liderazgo) | MEDIO | 3 | CLINICIAN, PRACTITIONER |
 | 6 | POST | `/cds-rules` | Crear una regla CDS en borrador | MEDIO | 2 | SECURITY_ADMIN |
 | 7 | POST | `/cds-rules/{id}/versions/publish` | Publicar una versión de la regla CDS | MEDIO | 2 | SECURITY_ADMIN |
@@ -27,19 +27,19 @@
 | 13 | POST | `/drug-interactions` | Registrar un par de interacción medicamentosa | MEDIO | 1 | SECURITY_ADMIN |
 | 14 | POST | `/immunization-schedules` | Registrar una dosis del calendario de inmunización | MEDIO | 1 | SECURITY_ADMIN |
 | 15 | POST | `/order-sets` | Crear una plantilla de órdenes (order set) con sus ítems | MEDIO | 3 | SECURITY_ADMIN |
-| 16 | POST | `/order-sets/{id}/apply` | Aplicar un order set (fan-out de órdenes) | MEDIO | 20 | CLINICIAN, PRACTITIONER |
-| 17 | POST | `/patients/{id}/immunization-plan/project` | Proyectar el plan de inmunización y abrir brechas | MEDIO | 20 | CLINICIAN, PRACTITIONER |
+| 16 | POST | `/order-sets/{id}/apply` | Aplicar un order set (fan-out de órdenes) | MEDIO | 22 | CLINICIAN, PRACTITIONER |
+| 17 | POST | `/patients/{id}/immunization-plan/project` | Proyectar el plan de inmunización y abrir brechas | MEDIO | 22 | CLINICIAN, PRACTITIONER |
 | 18 | GET | `/prescription-favorites` | Listar mis favoritos de prescripción | BAJO | 3 | sesión (sin roles) |
 | 19 | POST | `/prescription-favorites` | Guardar un favorito de prescripción | ALTO | 4 | sesión (sin roles) |
 | 20 | DELETE | `/prescription-favorites/{id}` | Borrar un favorito de prescripción propio | ALTO | 4 | sesión (sin roles) |
-| 21 | GET | `/referrals` | Listar derivaciones de un paciente | BAJO | 22 | CLINICIAN, PRACTITIONER |
-| 22 | POST | `/referrals` | Emitir una referencia desde un encuentro | MEDIO | 40 | CLINICIAN, PRACTITIONER |
-| 23 | GET | `/referrals/{id}` | Leer una derivación | BAJO | 21 | CLINICIAN, PRACTITIONER |
-| 24 | PATCH | `/referrals/{id}/arrival` | Registrar la llegada del paciente derivado | MEDIO | 20 | CLINICIAN, PRACTITIONER |
-| 25 | PATCH | `/referrals/{id}/cancel` | Anular una derivación | MEDIO | 20 | CLINICIAN, PRACTITIONER |
-| 26 | PATCH | `/referrals/{id}/counter-referral` | Registrar la contrarreferencia de una derivación | MEDIO | 20 | CLINICIAN, PRACTITIONER |
+| 21 | GET | `/referrals` | Listar derivaciones de un paciente | BAJO | 24 | CLINICIAN, PRACTITIONER |
+| 22 | POST | `/referrals` | Emitir una referencia desde un encuentro | MEDIO | 42 | CLINICIAN, PRACTITIONER |
+| 23 | GET | `/referrals/{id}` | Leer una derivación | BAJO | 23 | CLINICIAN, PRACTITIONER |
+| 24 | PATCH | `/referrals/{id}/arrival` | Registrar la llegada del paciente derivado | MEDIO | 22 | CLINICIAN, PRACTITIONER |
+| 25 | PATCH | `/referrals/{id}/cancel` | Anular una derivación | MEDIO | 22 | CLINICIAN, PRACTITIONER |
+| 26 | PATCH | `/referrals/{id}/counter-referral` | Registrar la contrarreferencia de una derivación | MEDIO | 22 | CLINICIAN, PRACTITIONER |
 | 27 | PATCH | `/referrals/{id}/respond` | Responder / aceptar una referencia inter-tenant | MEDIO | 3 | CLINICIAN, PRACTITIONER |
-| 28 | PATCH | `/referrals/{id}/transfer` | Completar o corregir el traslado de una derivación | BAJO | 19 | CLINICIAN, PRACTITIONER |
+| 28 | PATCH | `/referrals/{id}/transfer` | Completar o corregir el traslado de una derivación | BAJO | 21 | CLINICIAN, PRACTITIONER |
 | 29 | GET | `/referrals/me` | Mis derivaciones | BAJO | 6 | CLINICIAN, PRACTITIONER, PATIENT |
 | 30 | GET | `/referrals/target-services` | Servicios activos de un destino de derivación | BAJO | 6 | CLINICIAN, PRACTITIONER |
 | 31 | GET | `/referrals/targets` | Buscar destinos de derivación | BAJO | 5 | CLINICIAN, PRACTITIONER |
@@ -76,7 +76,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/care-gaps.controller.ts:63` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/care-gaps.controller.ts:63` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -166,7 +166,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /care-gaps/recompute` la atiende `CareGapsController.recompute` (src/modules/clinical_ext/controllers/care-gaps.controller.ts:46). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `RecomputeCareGapsDto` (5 campos, 3 obligatorios). Delega en `CareGapsService.recompute`. Crea filas en clinical_ext.care_gaps. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 9 más.
+`POST /care-gaps/recompute` la atiende `CareGapsController.recompute` (src/modules/clinical_ext/controllers/care-gaps.controller.ts:46). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `RecomputeCareGapsDto` (5 campos, 3 obligatorios). Delega en `CareGapsService.recompute`. Crea filas en clinical_ext.care_gaps. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 11 más.
 
 ### Requerimientos
 
@@ -175,7 +175,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/care-gaps.controller.ts:46` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -191,16 +191,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.permissions` | LEE | LEE | DIRECTA | CareGapsController.recompute → CareGapsService.recompute → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | CareGapsController.recompute → CareGapsService.recompute → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | CareGapsController.recompute → CareGapsService.recompute → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | CareGapsController.recompute → CareGapsService.recompute → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | CareGapsController.recompute → CareGapsService.recompute → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | CareGapsController.recompute → CareGapsService.recompute → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | CareGapsController.recompute → CareGapsService.recompute → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | CareGapsController.recompute → CareGapsService.recompute → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `clinical_ext.care_gaps` | ESCRIBE | CREA | DIRECTA | CareGapsController.recompute → CareGapsService.recompute → CareGapsRepository.create | `src/modules/clinical_ext/repositories/care-gaps.repository.ts:72` |
 | `clinical_ext.care_gaps` | LEE | LEE | DIRECTA | CareGapsController.recompute → CareGapsService.recompute → CareGapsRepository.findOpen | `src/modules/clinical_ext/repositories/care-gaps.repository.ts:56` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | CareGapsController.recompute → CareGapsService.recompute → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | CareGapsController.recompute → CareGapsService.recompute → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | CareGapsController.recompute → CareGapsService.recompute → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | CareGapsController.recompute → CareGapsService.recompute → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | CareGapsController.recompute → CareGapsService.recompute → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1031` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CareGapsController.recompute → CareGapsService.recompute → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1057` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CareGapsController.recompute → CareGapsService.recompute → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1031` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | CareGapsController.recompute → CareGapsService.recompute → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CareGapsController.recompute → CareGapsService.recompute → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CareGapsController.recompute → CareGapsService.recompute → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Cuerpo — DTO `RecomputeCareGapsDto` · `application/json`
 
@@ -291,7 +293,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /care-teams` la atiende `CareTeamsController.listByPatient` (src/modules/clinical_ext/controllers/care-teams.controller.ts:84). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `CareTeamsService.listByPatient`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 11 más.
+`GET /care-teams` la atiende `CareTeamsController.listByPatient` (src/modules/clinical_ext/controllers/care-teams.controller.ts:84). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `CareTeamsService.listByPatient`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 13 más.
 
 ### Requerimientos
 
@@ -315,17 +317,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.permissions` | LEE | LEE | DIRECTA | CareTeamsController.listByPatient → CareTeamsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | CareTeamsController.listByPatient → CareTeamsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | CareTeamsController.listByPatient → CareTeamsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | CareTeamsController.listByPatient → CareTeamsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | CareTeamsController.listByPatient → CareTeamsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | CareTeamsController.listByPatient → CareTeamsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | CareTeamsController.listByPatient → CareTeamsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | CareTeamsController.listByPatient → CareTeamsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `clinical_ext.care_teams` | LEE | LEE | DIRECTA | CareTeamsController.listByPatient → CareTeamsService.listByPatient → CareTeamsRepository.findByPatient | `src/modules/clinical_ext/repositories/care-teams.repository.ts:84` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | CareTeamsController.listByPatient → CareTeamsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | CareTeamsController.listByPatient → CareTeamsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | CareTeamsController.listByPatient → CareTeamsService.listByPatient → ClinicalReadService.assertCanReadHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | CareTeamsController.listByPatient → CareTeamsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
 | `profiles.patient_profiles` | LEE | LEE | DIRECTA | CareTeamsController.listByPatient → CareTeamsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | CareTeamsController.listByPatient → CareTeamsService.listByPatient → ClinicalReadService.assertCanReadHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | CareTeamsController.listByPatient → CareTeamsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1031` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CareTeamsController.listByPatient → CareTeamsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1057` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CareTeamsController.listByPatient → CareTeamsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1031` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | CareTeamsController.listByPatient → CareTeamsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CareTeamsController.listByPatient → CareTeamsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CareTeamsController.listByPatient → CareTeamsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -382,7 +386,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /care-teams` la atiende `CareTeamsController.create` (src/modules/clinical_ext/controllers/care-teams.controller.ts:45). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CreateCareTeamDto` (11 campos, 4 obligatorios). Delega en `CareTeamsService.create`. Crea filas en clinical_ext.care_team_members, clinical_ext.care_teams. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 8 más.
+`POST /care-teams` la atiende `CareTeamsController.create` (src/modules/clinical_ext/controllers/care-teams.controller.ts:45). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CreateCareTeamDto` (11 campos, 4 obligatorios). Delega en `CareTeamsService.create`. Crea filas en clinical_ext.care_team_members, clinical_ext.care_teams. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 10 más.
 
 ### Requerimientos
 
@@ -391,7 +395,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/care-teams.controller.ts:45` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -407,16 +411,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.permissions` | LEE | LEE | DIRECTA | CareTeamsController.create → CareTeamsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | CareTeamsController.create → CareTeamsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | CareTeamsController.create → CareTeamsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | CareTeamsController.create → CareTeamsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | CareTeamsController.create → CareTeamsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | CareTeamsController.create → CareTeamsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | CareTeamsController.create → CareTeamsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | CareTeamsController.create → CareTeamsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `clinical_ext.care_team_members` | ESCRIBE | CREA | DIRECTA | CareTeamsController.create → CareTeamsService.create → CareTeamMembersRepository.create | `src/modules/clinical_ext/repositories/care-team-members.repository.ts:80` |
 | `clinical_ext.care_teams` | ESCRIBE | CREA | DIRECTA | CareTeamsController.create → CareTeamsService.create → CareTeamsRepository.create | `src/modules/clinical_ext/repositories/care-teams.repository.ts:92` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | CareTeamsController.create → CareTeamsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | CareTeamsController.create → CareTeamsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | CareTeamsController.create → CareTeamsService.create → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | CareTeamsController.create → CareTeamsService.create → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | CareTeamsController.create → CareTeamsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1031` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CareTeamsController.create → CareTeamsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1057` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CareTeamsController.create → CareTeamsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1031` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | CareTeamsController.create → CareTeamsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CareTeamsController.create → CareTeamsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CareTeamsController.create → CareTeamsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Cuerpo — DTO `CreateCareTeamDto` · `application/json`
 
@@ -615,7 +621,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/clinical_ext/controllers/cds.controller.ts:53` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -727,7 +733,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/clinical_ext/controllers/cds.controller.ts:70` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/cds.controller.ts:70` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -915,7 +921,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/cds.controller.ts:137` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1025,7 +1031,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/cds.controller.ts:113` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1225,7 +1231,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/clinical-alerts.controller.ts:53` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/clinical-alerts.controller.ts:53` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1323,7 +1329,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/clinical_ext/controllers/cds.controller.ts:157` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1420,7 +1426,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/clinical_ext/controllers/care-gaps.controller.ts:101` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1521,7 +1527,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/clinical_ext/controllers/order-sets.controller.ts:41` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1640,7 +1646,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /order-sets/{id}/apply` la atiende `OrderSetsController.apply` (src/modules/clinical_ext/controllers/order-sets.controller.ts:60). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `ApplyOrderSetDto` (4 campos, 2 obligatorios). Delega en `OrderSetsService.apply`. Crea filas en clinical.service_requests. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 11 más.
+`POST /order-sets/{id}/apply` la atiende `OrderSetsController.apply` (src/modules/clinical_ext/controllers/order-sets.controller.ts:60). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `ApplyOrderSetDto` (4 campos, 2 obligatorios). Delega en `OrderSetsService.apply`. Crea filas en clinical.service_requests. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 13 más.
 
 ### Requerimientos
 
@@ -1650,7 +1656,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/order-sets.controller.ts:60` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/order-sets.controller.ts:60` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1666,18 +1672,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.permissions` | LEE | LEE | DIRECTA | OrderSetsController.apply → OrderSetsService.apply → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | OrderSetsController.apply → OrderSetsService.apply → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | OrderSetsController.apply → OrderSetsService.apply → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | OrderSetsController.apply → OrderSetsService.apply → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | OrderSetsController.apply → OrderSetsService.apply → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | OrderSetsController.apply → OrderSetsService.apply → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | OrderSetsController.apply → OrderSetsService.apply → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | OrderSetsController.apply → OrderSetsService.apply → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `clinical_ext.order_set_items` | LEE | LEE | DIRECTA | OrderSetsController.apply → OrderSetsService.apply → OrderSetsRepository.itemsBySet | `src/modules/clinical_ext/repositories/order-sets.repository.ts:119` |
 | `clinical_ext.order_sets` | LEE | LEE | DIRECTA | OrderSetsController.apply → OrderSetsService.apply → OrderSetsRepository.findById | `src/modules/clinical_ext/repositories/order-sets.repository.ts:97` |
 | `clinical.encounters` | LEE | LEE | DIRECTA | OrderSetsController.apply → OrderSetsService.apply → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:174` |
 | `clinical.service_requests` | ESCRIBE | CREA | DIRECTA | OrderSetsController.apply → OrderSetsService.apply → ServiceRequestsRepository.create | `src/modules/clinical/repositories/service-requests.repository.ts:118` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | OrderSetsController.apply → OrderSetsService.apply → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | OrderSetsController.apply → OrderSetsService.apply → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | OrderSetsController.apply → OrderSetsService.apply → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | OrderSetsController.apply → OrderSetsService.apply → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | OrderSetsController.apply → OrderSetsService.apply → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1031` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | OrderSetsController.apply → OrderSetsService.apply → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1057` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | OrderSetsController.apply → OrderSetsService.apply → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1031` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | OrderSetsController.apply → OrderSetsService.apply → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | OrderSetsController.apply → OrderSetsService.apply → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | OrderSetsController.apply → OrderSetsService.apply → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -1774,7 +1782,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /patients/{id}/immunization-plan/project` la atiende `CareGapsController.projectImmunizationPlan` (src/modules/clinical_ext/controllers/care-gaps.controller.ts:81). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `ProjectImmunizationPlanDto` (3 campos, 0 obligatorios). Delega en `CareGapsService.projectImmunizationPlan`. Crea filas en clinical_ext.care_gaps. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 11 más.
+`POST /patients/{id}/immunization-plan/project` la atiende `CareGapsController.projectImmunizationPlan` (src/modules/clinical_ext/controllers/care-gaps.controller.ts:81). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `ProjectImmunizationPlanDto` (3 campos, 0 obligatorios). Delega en `CareGapsService.projectImmunizationPlan`. Crea filas en clinical_ext.care_gaps. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 13 más.
 
 ### Requerimientos
 
@@ -1784,7 +1792,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/care-gaps.controller.ts:81` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/care-gaps.controller.ts:81` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1800,18 +1808,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.permissions` | LEE | LEE | DIRECTA | CareGapsController.projectImmunizationPlan → CareGapsService.projectImmunizationPlan → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | CareGapsController.projectImmunizationPlan → CareGapsService.projectImmunizationPlan → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | CareGapsController.projectImmunizationPlan → CareGapsService.projectImmunizationPlan → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | CareGapsController.projectImmunizationPlan → CareGapsService.projectImmunizationPlan → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | CareGapsController.projectImmunizationPlan → CareGapsService.projectImmunizationPlan → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | CareGapsController.projectImmunizationPlan → CareGapsService.projectImmunizationPlan → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | CareGapsController.projectImmunizationPlan → CareGapsService.projectImmunizationPlan → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | CareGapsController.projectImmunizationPlan → CareGapsService.projectImmunizationPlan → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `clinical_ext.care_gaps` | ESCRIBE | CREA | DIRECTA | CareGapsController.projectImmunizationPlan → CareGapsService.projectImmunizationPlan → CareGapsRepository.create | `src/modules/clinical_ext/repositories/care-gaps.repository.ts:72` |
 | `clinical_ext.care_gaps` | LEE | LEE | DIRECTA | CareGapsController.projectImmunizationPlan → CareGapsService.projectImmunizationPlan → CareGapsRepository.findOpen | `src/modules/clinical_ext/repositories/care-gaps.repository.ts:56` |
 | `clinical_ext.immunization_schedules` | LEE | LEE | DIRECTA | CareGapsController.projectImmunizationPlan → CareGapsService.projectImmunizationPlan → ImmunizationSchedulesRepository.findActive | `src/modules/clinical_ext/repositories/immunization-schedules.repository.ts:61` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | CareGapsController.projectImmunizationPlan → CareGapsService.projectImmunizationPlan → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | CareGapsController.projectImmunizationPlan → CareGapsService.projectImmunizationPlan → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | CareGapsController.projectImmunizationPlan → CareGapsService.projectImmunizationPlan → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | CareGapsController.projectImmunizationPlan → CareGapsService.projectImmunizationPlan → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `profiles.persons` | LEE | LEE | DIRECTA | CareGapsController.projectImmunizationPlan → CareGapsService.projectImmunizationPlan → CareGapsService.resolveBirthDate → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | CareGapsController.projectImmunizationPlan → CareGapsService.projectImmunizationPlan → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1031` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CareGapsController.projectImmunizationPlan → CareGapsService.projectImmunizationPlan → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1057` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CareGapsController.projectImmunizationPlan → CareGapsService.projectImmunizationPlan → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1031` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | CareGapsController.projectImmunizationPlan → CareGapsService.projectImmunizationPlan → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CareGapsController.projectImmunizationPlan → CareGapsService.projectImmunizationPlan → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CareGapsController.projectImmunizationPlan → CareGapsService.projectImmunizationPlan → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -1980,7 +1990,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/clinical_ext/controllers/prescription-favorites.controller.ts:57` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2165,7 +2175,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /referrals` la atiende `ReferralsController.listByPatient` (src/modules/clinical_ext/controllers/referrals.controller.ts:202). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `ReferralsService.listByPatient`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 14 más.
+`GET /referrals` la atiende `ReferralsController.listByPatient` (src/modules/clinical_ext/controllers/referrals.controller.ts:202). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `ReferralsService.listByPatient`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 16 más.
 
 ### Requerimientos
 
@@ -2189,20 +2199,22 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.permissions` | LEE | LEE | DIRECTA | ReferralsController.listByPatient → ReferralsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ReferralsController.listByPatient → ReferralsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | ReferralsController.listByPatient → ReferralsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | ReferralsController.listByPatient → ReferralsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | ReferralsController.listByPatient → ReferralsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | ReferralsController.listByPatient → ReferralsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ReferralsController.listByPatient → ReferralsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ReferralsController.listByPatient → ReferralsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `billing.service_catalog` | LEE | LEE | DIRECTA | ReferralsController.listByPatient → ReferralsService.listByPatient → ReferralsService.toListItems → SchedulingOfferingsRepository.findCatalogItems | `src/modules/scheduling/infrastructure/repositories/scheduling-offerings.repository.ts:116` |
 | `clinical_ext.referrals` | LEE | LEE | DIRECTA | ReferralsController.listByPatient → ReferralsService.listByPatient → ReferralsRepository.findByPatient | `src/modules/clinical_ext/repositories/referrals.repository.ts:174` |
 | `directory.branches` | LEE | LEE | DIRECTA | ReferralsController.listByPatient → ReferralsService.listByPatient → ReferralsService.toListItems → ReferralsService.resolveNames | `src/modules/clinical_ext/services/referrals.service.ts:890` |
 | `directory.tenants` | LEE | LEE | DIRECTA | ReferralsController.listByPatient → ReferralsService.listByPatient → ReferralsService.toListItems → TenantsRepository.findById | `src/modules/directory/repositories/tenants.repository.ts:77` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | ReferralsController.listByPatient → ReferralsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | ReferralsController.listByPatient → ReferralsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ReferralsController.listByPatient → ReferralsService.listByPatient → ClinicalReadService.assertCanReadHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | ReferralsController.listByPatient → ReferralsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
 | `profiles.patient_profiles` | LEE | LEE | DIRECTA | ReferralsController.listByPatient → ReferralsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ReferralsController.listByPatient → ReferralsService.listByPatient → ClinicalReadService.assertCanReadHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ReferralsController.listByPatient → ReferralsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1031` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ReferralsController.listByPatient → ReferralsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1057` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ReferralsController.listByPatient → ReferralsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1031` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ReferralsController.listByPatient → ReferralsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ReferralsController.listByPatient → ReferralsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ReferralsController.listByPatient → ReferralsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -2250,6 +2262,32 @@ La operación no recibe cuerpo.
 | `rejectReason` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:631` |
 | `counterReferralText` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:637` |
 | `counterReferralAt` | `string` | No | formato date-time | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:643` |
+| `transfer` | `ReferralTransferResponseDto` | Sí | admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:650` |
+| `transfer.required` | `boolean` | Sí | admite null | — | — | sin fuente |
+| `transfer.transportMode` | `string` | Sí | valores: AMBULANCE_BASIC, AMBULANCE_ADVANCED, AIR_AMBULANCE, RIVER, PRIVATE_VEHICLE, PUBLIC_TRANSPORT, ON_FOOT, OTHER; admite null | — | — | sin fuente |
+| `transfer.transportDetail` | `string` | Sí | admite null | — | — | sin fuente |
+| `transfer.companionName` | `string` | Sí | admite null | — | — | sin fuente |
+| `transfer.companionRelationship` | `string` | Sí | admite null | — | — | sin fuente |
+| `transfer.companionPhone` | `string` | Sí | admite null | — | — | sin fuente |
+| `transfer.escortProfessionalName` | `string` | Sí | admite null | — | — | sin fuente |
+| `transfer.escortProfessionalRole` | `string` | Sí | admite null | — | — | sin fuente |
+| `transfer.departureCondition` | `string` | Sí | valores: STABLE, UNSTABLE, CRITICAL; admite null | — | — | sin fuente |
+| `transfer.vitals` | `ReferralTransferVitalsResponseDto` | Sí | admite null | — | — | sin fuente |
+| `transfer.vitals.recordedAt` | `string` | Sí | formato date-time; admite null | — | — | sin fuente |
+| `transfer.vitals.systolicBp` | `number` | Sí | admite null | — | — | sin fuente |
+| `transfer.vitals.diastolicBp` | `number` | Sí | admite null | — | — | sin fuente |
+| `transfer.vitals.heartRate` | `number` | Sí | admite null | — | — | sin fuente |
+| `transfer.vitals.respiratoryRate` | `number` | Sí | admite null | — | — | sin fuente |
+| `transfer.vitals.temperatureC` | `number` | Sí | admite null | — | — | sin fuente |
+| `transfer.vitals.oxygenSaturation` | `number` | Sí | admite null | — | — | sin fuente |
+| `transfer.vitals.glasgow` | `number` | Sí | admite null | — | — | sin fuente |
+| `transfer.receiverContacted` | `boolean` | Sí | admite null | — | — | sin fuente |
+| `transfer.receiverContactName` | `string` | Sí | admite null | — | — | sin fuente |
+| `transfer.receiverContactedAt` | `string` | Sí | formato date-time; admite null | — | — | sin fuente |
+| `transfer.departedAt` | `string` | Sí | formato date-time; admite null | — | — | sin fuente |
+| `transfer.arrivedAt` | `string` | Sí | formato date-time; admite null | — | — | sin fuente |
+| `transfer.arrivalCondition` | `string` | Sí | valores: STABLE, UNSTABLE, CRITICAL, DECEASED; admite null | — | — | sin fuente |
+| `transfer.arrivalNotes` | `string` | Sí | admite null | — | — | sin fuente |
 | `updatedAt` | `string` | No | formato date-time | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:656` |
 | `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:662` |
 | `createdByUserId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:685` |
@@ -2299,7 +2337,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /referrals` la atiende `ReferralsController.create` (src/modules/clinical_ext/controllers/referrals.controller.ts:68). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `ClinicalExtCreateReferralDto` (44 campos, 1 obligatorio). Delega en `ReferralsService.create`. Crea filas en clinical_ext.referrals, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza iam.devices, messaging.notification_requests. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 26 más.
+`POST /referrals` la atiende `ReferralsController.create` (src/modules/clinical_ext/controllers/referrals.controller.ts:68). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `ClinicalExtCreateReferralDto` (44 campos, 1 obligatorio). Delega en `ReferralsService.create`. Crea filas en clinical_ext.referrals, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza iam.devices, messaging.notification_requests. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 28 más.
 
 ### Requerimientos
 
@@ -2308,7 +2346,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/referrals.controller.ts:68` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2324,9 +2362,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.permissions` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `billing.service_catalog` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ReferralsService.assertServiceOfTarget → ServiceCatalogRepository.findById | `src/modules/billing/repositories/service-catalog.repository.ts:101` |
 | `clinical_ext.referrals` | ESCRIBE | CREA | DIRECTA | ReferralsController.create → ReferralsService.create → ReferralsRepository.create | `src/modules/clinical_ext/repositories/referrals.repository.ts:182` |
 | `clinical_ext.referrals` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ReferralsRepository.findDuplicate | `src/modules/clinical_ext/repositories/referrals.repository.ts:148` |
@@ -2336,6 +2374,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `directory.tenants` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ReferralsService.assertTargetTenantActive → TenantsRepository.findById | `src/modules/directory/repositories/tenants.repository.ts:77` |
 | `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | ReferralsController.create → ReferralsService.create → ReferralNotifier.notifyRecommended → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
 | `iam.devices` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ReferralNotifier.notifyRecommended → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | ReferralsController.create → ReferralsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | ReferralsController.create → ReferralsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | ReferralsController.create → ReferralsService.create → ReferralNotifier.notifyRecommended → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ReferralNotifier.notifyRecommended → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
 | `messaging.message_templates` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ReferralNotifier.notifyRecommended → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
@@ -2352,10 +2392,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `profiles.person_profiles` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ReferralNotifier.notifyRecommended → ReferralNotifier.accountOf → ReferralNotifier.personIdOf | `src/modules/clinical_ext/services/referral-notifier.service.ts:271` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ReferralNotifier.notifyRecommended → ReferralNotifier.displayNameOf | `src/modules/clinical_ext/services/referral-notifier.service.ts:294` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ReferralsController.create → ReferralsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1031` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ReferralsController.create → ReferralsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1057` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ReferralsController.create → ReferralsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ReferralsController.create → ReferralsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
 | `scheduling.practitioner_service_offerings` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ReferralsService.assertServiceOfTarget → SchedulingOfferingsRepository.findOfferingOf | `src/modules/scheduling/infrastructure/repositories/scheduling-offerings.repository.ts:62` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ReferralsController.create → ReferralsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1031` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ReferralsController.create → ReferralsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Cuerpo — DTO `ClinicalExtCreateReferralDto` · `application/json`
 
@@ -2521,7 +2561,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /referrals/{id}` la atiende `ReferralsController.get` (src/modules/clinical_ext/controllers/referrals.controller.ts:233). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `ReferralsService.get`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 13 más.
+`GET /referrals/{id}` la atiende `ReferralsController.get` (src/modules/clinical_ext/controllers/referrals.controller.ts:233). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `ReferralsService.get`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 15 más.
 
 ### Requerimientos
 
@@ -2545,19 +2585,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.permissions` | LEE | LEE | DIRECTA | ReferralsController.get → ReferralsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ReferralsController.get → ReferralsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | ReferralsController.get → ReferralsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | ReferralsController.get → ReferralsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | ReferralsController.get → ReferralsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | ReferralsController.get → ReferralsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ReferralsController.get → ReferralsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ReferralsController.get → ReferralsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `clinical_ext.referrals` | LEE | LEE | DIRECTA | ReferralsController.get → ReferralsService.get → ReferralsService.findOrFail → ReferralsRepository.findById | `src/modules/clinical_ext/repositories/referrals.repository.ts:99` |
 | `directory.branches` | LEE | LEE | DIRECTA | ReferralsController.get → ReferralsService.get → ReferralsService.isDestination | `src/modules/clinical_ext/services/referrals.service.ts:863` |
 | `directory.tenants` | LEE | LEE | DIRECTA | ReferralsController.get → ReferralsService.get → ReferralsService.resolveNames | `src/modules/clinical_ext/services/referrals.service.ts:893` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | ReferralsController.get → ReferralsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | ReferralsController.get → ReferralsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ReferralsController.get → ReferralsService.get → ClinicalReadService.assertCanReadHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | ReferralsController.get → ReferralsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
 | `profiles.patient_profiles` | LEE | LEE | DIRECTA | ReferralsController.get → ReferralsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ReferralsController.get → ReferralsService.get → ClinicalReadService.assertCanReadHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ReferralsController.get → ReferralsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1031` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ReferralsController.get → ReferralsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1057` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ReferralsController.get → ReferralsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1031` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ReferralsController.get → ReferralsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ReferralsController.get → ReferralsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ReferralsController.get → ReferralsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -2619,7 +2661,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /referrals/{id}/arrival` la atiende `ReferralsController.recordArrival` (src/modules/clinical_ext/controllers/referrals.controller.ts:164). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `ReferralArrivalDto` (3 campos, 2 obligatorios). Delega en `ReferralsService.recordArrival`. Actualiza clinical_ext.referrals. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 11 más.
+`PATCH /referrals/{id}/arrival` la atiende `ReferralsController.recordArrival` (src/modules/clinical_ext/controllers/referrals.controller.ts:164). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `ReferralArrivalDto` (3 campos, 2 obligatorios). Delega en `ReferralsService.recordArrival`. Actualiza clinical_ext.referrals. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 13 más.
 
 ### Requerimientos
 
@@ -2629,7 +2671,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/referrals.controller.ts:164` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/referrals.controller.ts:164` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2645,18 +2687,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.permissions` | LEE | LEE | DIRECTA | ReferralsController.recordArrival → ReferralsService.recordArrival → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ReferralsController.recordArrival → ReferralsService.recordArrival → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | ReferralsController.recordArrival → ReferralsService.recordArrival → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | ReferralsController.recordArrival → ReferralsService.recordArrival → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | ReferralsController.recordArrival → ReferralsService.recordArrival → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | ReferralsController.recordArrival → ReferralsService.recordArrival → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ReferralsController.recordArrival → ReferralsService.recordArrival → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ReferralsController.recordArrival → ReferralsService.recordArrival → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `clinical_ext.referrals` | ESCRIBE | ACTUALIZA | POR_TIPO | ReferralsController.recordArrival → ReferralsService.recordArrival | `src/modules/clinical_ext/services/referrals.service.ts:728` |
 | `clinical_ext.referrals` | LEE | LEE | DIRECTA | ReferralsController.recordArrival → ReferralsService.recordArrival → ReferralsService.findOrFail → ReferralsRepository.findById | `src/modules/clinical_ext/repositories/referrals.repository.ts:99` |
 | `directory.branches` | LEE | LEE | DIRECTA | ReferralsController.recordArrival → ReferralsService.recordArrival → ReferralsService.isDestination | `src/modules/clinical_ext/services/referrals.service.ts:863` |
 | `directory.tenants` | LEE | LEE | DIRECTA | ReferralsController.recordArrival → ReferralsService.recordArrival → ReferralsService.resolveNames | `src/modules/clinical_ext/services/referrals.service.ts:893` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | ReferralsController.recordArrival → ReferralsService.recordArrival → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | ReferralsController.recordArrival → ReferralsService.recordArrival → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ReferralsController.recordArrival → ReferralsService.recordArrival → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ReferralsController.recordArrival → ReferralsService.recordArrival → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ReferralsController.recordArrival → ReferralsService.recordArrival → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1031` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ReferralsController.recordArrival → ReferralsService.recordArrival → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1057` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ReferralsController.recordArrival → ReferralsService.recordArrival → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1031` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ReferralsController.recordArrival → ReferralsService.recordArrival → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ReferralsController.recordArrival → ReferralsService.recordArrival → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ReferralsController.recordArrival → ReferralsService.recordArrival → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -2744,7 +2788,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /referrals/{id}/cancel` la atiende `ReferralsController.cancel` (src/modules/clinical_ext/controllers/referrals.controller.ts:182). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `ReferralsService.cancel`. Actualiza clinical_ext.referrals. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 11 más.
+`PATCH /referrals/{id}/cancel` la atiende `ReferralsController.cancel` (src/modules/clinical_ext/controllers/referrals.controller.ts:182). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `ReferralsService.cancel`. Actualiza clinical_ext.referrals. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 13 más.
 
 ### Requerimientos
 
@@ -2768,18 +2812,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.permissions` | LEE | LEE | DIRECTA | ReferralsController.cancel → ReferralsService.cancel → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ReferralsController.cancel → ReferralsService.cancel → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | ReferralsController.cancel → ReferralsService.cancel → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | ReferralsController.cancel → ReferralsService.cancel → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | ReferralsController.cancel → ReferralsService.cancel → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | ReferralsController.cancel → ReferralsService.cancel → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ReferralsController.cancel → ReferralsService.cancel → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ReferralsController.cancel → ReferralsService.cancel → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `clinical_ext.referrals` | ESCRIBE | ACTUALIZA | POR_TIPO | ReferralsController.cancel → ReferralsService.cancel | `src/modules/clinical_ext/services/referrals.service.ts:769` |
 | `clinical_ext.referrals` | LEE | LEE | DIRECTA | ReferralsController.cancel → ReferralsService.cancel → ReferralsService.findOrFail → ReferralsRepository.findById | `src/modules/clinical_ext/repositories/referrals.repository.ts:99` |
 | `directory.branches` | LEE | LEE | DIRECTA | ReferralsController.cancel → ReferralsService.cancel → ReferralsService.resolveNames | `src/modules/clinical_ext/services/referrals.service.ts:890` |
 | `directory.tenants` | LEE | LEE | DIRECTA | ReferralsController.cancel → ReferralsService.cancel → ReferralsService.resolveNames | `src/modules/clinical_ext/services/referrals.service.ts:893` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | ReferralsController.cancel → ReferralsService.cancel → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | ReferralsController.cancel → ReferralsService.cancel → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ReferralsController.cancel → ReferralsService.cancel → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ReferralsController.cancel → ReferralsService.cancel → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ReferralsController.cancel → ReferralsService.cancel → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1031` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ReferralsController.cancel → ReferralsService.cancel → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1057` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ReferralsController.cancel → ReferralsService.cancel → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1031` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ReferralsController.cancel → ReferralsService.cancel → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ReferralsController.cancel → ReferralsService.cancel → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ReferralsController.cancel → ReferralsService.cancel → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -2842,7 +2888,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /referrals/{id}/counter-referral` la atiende `ReferralsController.counterReferral` (src/modules/clinical_ext/controllers/referrals.controller.ts:127). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CounterReferralDto` (1 campo, 1 obligatorio). Delega en `ReferralsService.counterReferral`. Actualiza clinical_ext.referrals. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 11 más.
+`PATCH /referrals/{id}/counter-referral` la atiende `ReferralsController.counterReferral` (src/modules/clinical_ext/controllers/referrals.controller.ts:127). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CounterReferralDto` (1 campo, 1 obligatorio). Delega en `ReferralsService.counterReferral`. Actualiza clinical_ext.referrals. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 13 más.
 
 ### Requerimientos
 
@@ -2852,7 +2898,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/referrals.controller.ts:127` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/referrals.controller.ts:127` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2868,18 +2914,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.permissions` | LEE | LEE | DIRECTA | ReferralsController.counterReferral → ReferralsService.counterReferral → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ReferralsController.counterReferral → ReferralsService.counterReferral → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | ReferralsController.counterReferral → ReferralsService.counterReferral → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | ReferralsController.counterReferral → ReferralsService.counterReferral → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | ReferralsController.counterReferral → ReferralsService.counterReferral → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | ReferralsController.counterReferral → ReferralsService.counterReferral → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ReferralsController.counterReferral → ReferralsService.counterReferral → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ReferralsController.counterReferral → ReferralsService.counterReferral → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `clinical_ext.referrals` | ESCRIBE | ACTUALIZA | POR_TIPO | ReferralsController.counterReferral → ReferralsService.counterReferral | `src/modules/clinical_ext/services/referrals.service.ts:603` |
 | `clinical_ext.referrals` | LEE | LEE | DIRECTA | ReferralsController.counterReferral → ReferralsService.counterReferral → ReferralsService.findOrFail → ReferralsRepository.findById | `src/modules/clinical_ext/repositories/referrals.repository.ts:99` |
 | `directory.branches` | LEE | LEE | DIRECTA | ReferralsController.counterReferral → ReferralsService.counterReferral → ReferralsService.isDestination | `src/modules/clinical_ext/services/referrals.service.ts:863` |
 | `directory.tenants` | LEE | LEE | DIRECTA | ReferralsController.counterReferral → ReferralsService.counterReferral → ReferralsService.resolveNames | `src/modules/clinical_ext/services/referrals.service.ts:893` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | ReferralsController.counterReferral → ReferralsService.counterReferral → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | ReferralsController.counterReferral → ReferralsService.counterReferral → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ReferralsController.counterReferral → ReferralsService.counterReferral → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ReferralsController.counterReferral → ReferralsService.counterReferral → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ReferralsController.counterReferral → ReferralsService.counterReferral → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1031` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ReferralsController.counterReferral → ReferralsService.counterReferral → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1057` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ReferralsController.counterReferral → ReferralsService.counterReferral → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1031` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ReferralsController.counterReferral → ReferralsService.counterReferral → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ReferralsController.counterReferral → ReferralsService.counterReferral → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ReferralsController.counterReferral → ReferralsService.counterReferral → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -2972,7 +3020,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/referrals.controller.ts:110` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/referrals.controller.ts:110` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3065,7 +3113,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /referrals/{id}/transfer` la atiende `ReferralsController.updateTransfer` (src/modules/clinical_ext/controllers/referrals.controller.ts:144). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `ReferralTransferDto` (22 campos, 0 obligatorios). Delega en `ReferralsService.updateTransfer`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 11 más.
+`PATCH /referrals/{id}/transfer` la atiende `ReferralsController.updateTransfer` (src/modules/clinical_ext/controllers/referrals.controller.ts:144). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `ReferralTransferDto` (22 campos, 0 obligatorios). Delega en `ReferralsService.updateTransfer`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 13 más.
 
 ### Requerimientos
 
@@ -3075,7 +3123,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/referrals.controller.ts:144` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/referrals.controller.ts:144` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3091,17 +3139,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.permissions` | LEE | LEE | DIRECTA | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `clinical_ext.referrals` | LEE | LEE | DIRECTA | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ReferralsService.findOrFail → ReferralsRepository.findById | `src/modules/clinical_ext/repositories/referrals.repository.ts:99` |
 | `directory.branches` | LEE | LEE | DIRECTA | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ReferralsService.resolveNames | `src/modules/clinical_ext/services/referrals.service.ts:890` |
 | `directory.tenants` | LEE | LEE | DIRECTA | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ReferralsService.resolveNames | `src/modules/clinical_ext/services/referrals.service.ts:893` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1031` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1057` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1031` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -3287,6 +3337,32 @@ La operación no recibe cuerpo.
 | `rejectReason` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:631` |
 | `counterReferralText` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:637` |
 | `counterReferralAt` | `string` | No | formato date-time | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:643` |
+| `transfer` | `ReferralTransferResponseDto` | Sí | admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:650` |
+| `transfer.required` | `boolean` | Sí | admite null | — | — | sin fuente |
+| `transfer.transportMode` | `string` | Sí | valores: AMBULANCE_BASIC, AMBULANCE_ADVANCED, AIR_AMBULANCE, RIVER, PRIVATE_VEHICLE, PUBLIC_TRANSPORT, ON_FOOT, OTHER; admite null | — | — | sin fuente |
+| `transfer.transportDetail` | `string` | Sí | admite null | — | — | sin fuente |
+| `transfer.companionName` | `string` | Sí | admite null | — | — | sin fuente |
+| `transfer.companionRelationship` | `string` | Sí | admite null | — | — | sin fuente |
+| `transfer.companionPhone` | `string` | Sí | admite null | — | — | sin fuente |
+| `transfer.escortProfessionalName` | `string` | Sí | admite null | — | — | sin fuente |
+| `transfer.escortProfessionalRole` | `string` | Sí | admite null | — | — | sin fuente |
+| `transfer.departureCondition` | `string` | Sí | valores: STABLE, UNSTABLE, CRITICAL; admite null | — | — | sin fuente |
+| `transfer.vitals` | `ReferralTransferVitalsResponseDto` | Sí | admite null | — | — | sin fuente |
+| `transfer.vitals.recordedAt` | `string` | Sí | formato date-time; admite null | — | — | sin fuente |
+| `transfer.vitals.systolicBp` | `number` | Sí | admite null | — | — | sin fuente |
+| `transfer.vitals.diastolicBp` | `number` | Sí | admite null | — | — | sin fuente |
+| `transfer.vitals.heartRate` | `number` | Sí | admite null | — | — | sin fuente |
+| `transfer.vitals.respiratoryRate` | `number` | Sí | admite null | — | — | sin fuente |
+| `transfer.vitals.temperatureC` | `number` | Sí | admite null | — | — | sin fuente |
+| `transfer.vitals.oxygenSaturation` | `number` | Sí | admite null | — | — | sin fuente |
+| `transfer.vitals.glasgow` | `number` | Sí | admite null | — | — | sin fuente |
+| `transfer.receiverContacted` | `boolean` | Sí | admite null | — | — | sin fuente |
+| `transfer.receiverContactName` | `string` | Sí | admite null | — | — | sin fuente |
+| `transfer.receiverContactedAt` | `string` | Sí | formato date-time; admite null | — | — | sin fuente |
+| `transfer.departedAt` | `string` | Sí | formato date-time; admite null | — | — | sin fuente |
+| `transfer.arrivedAt` | `string` | Sí | formato date-time; admite null | — | — | sin fuente |
+| `transfer.arrivalCondition` | `string` | Sí | valores: STABLE, UNSTABLE, CRITICAL, DECEASED; admite null | — | — | sin fuente |
+| `transfer.arrivalNotes` | `string` | Sí | admite null | — | — | sin fuente |
 | `updatedAt` | `string` | No | formato date-time | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:656` |
 | `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:662` |
 | `createdByUserId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:685` |
@@ -3519,7 +3595,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/virtual-encounters.controller.ts:44` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3624,7 +3700,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/virtual-encounters.controller.ts:77` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/virtual-encounters.controller.ts:77` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 

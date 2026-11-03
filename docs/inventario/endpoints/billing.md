@@ -3,7 +3,7 @@
 # Endpoints del módulo `billing`
 
 - **Bloque:** Financiero y ERP (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
-- **Operaciones:** 53 (52 en el contrato, 1 sólo en el código)
+- **Operaciones:** 53 (53 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 9 · MEDIO 16 · BAJO 28
 - **Tablas distintas que tocan:** 55
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/billing.md` (generado aparte por `yarn docs:endpoints:generate`)
@@ -18,7 +18,7 @@
 | 4 | PATCH | `/admin/catalogs/services/{id}` | Editar un servicio con precondición de versión | BAJO | 2 | SECURITY_ADMIN |
 | 5 | POST | `/admin/catalogs/services/{id}/deactivate` | Desactivar un servicio (no se borra) | BAJO | 2 | SECURITY_ADMIN |
 | 6 | POST | `/admin/catalogs/services/{id}/reactivate` | Reactivar un servicio desactivado | BAJO | 2 | SECURITY_ADMIN |
-| 7 | GET | `/admin/catalogs/services/scopes` | — | BAJO | 2 | SECURITY_ADMIN |
+| 7 | GET | `/admin/catalogs/services/scopes` | Tipos de organización, prácticas y monedas del editor de servicios | BAJO | 2 | SECURITY_ADMIN |
 | 8 | GET | `/billing/bed-day/stays` | Estancias de internación de una sede (F5e) | BAJO | 12 | sesión (sin roles) |
 | 9 | POST | `/billing/bills` | Registrar factura de proveedor con three-way match | MEDIO | 7 | SECURITY_ADMIN |
 | 10 | POST | `/billing/charge-captures/{id}/void` | Anular un cargo devengado | ALTO | 13 | sesión (sin roles) |
@@ -189,7 +189,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/admin-service-catalog.controller.ts:95` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -401,7 +401,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/admin-service-catalog.controller.ts:114` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/billing/controllers/admin-service-catalog.controller.ts:114` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -524,7 +524,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/admin-service-catalog.controller.ts:130` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/billing/controllers/admin-service-catalog.controller.ts:130` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -635,7 +635,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/admin-service-catalog.controller.ts:146` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/billing/controllers/admin-service-catalog.controller.ts:146` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -721,8 +721,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 7. GET /admin/catalogs/services/scopes
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Tipos de organización, prácticas y monedas del editor de servicios
 - **Bloque:** Financiero y ERP
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -730,9 +730,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dominio: Financiero y ERP.
+Tipos de organización, prácticas y monedas del editor de servicios. Dominio: Financiero y ERP.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -832,7 +832,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinical.encounter_locations` | LEE | LEE | POR_SQL | BillingSpaceChargesController.stays → SpaceChargesService.stays | `src/modules/billing/services/space-charges.service.ts:744` |
 | `clinical.encounters` | LEE | LEE | POR_SQL | BillingSpaceChargesController.stays → SpaceChargesService.stays | `src/modules/billing/services/space-charges.service.ts:744` |
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | BillingSpaceChargesController.stays → SpaceChargesService.stays → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
-| `directory.branch_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.stays → SpaceChargesService.stays → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:257` |
+| `directory.branch_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.stays → SpaceChargesService.stays → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.stays → SpaceChargesService.stays → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
 | `practice.care_spaces` | LEE | LEE | DIRECTA | BillingSpaceChargesController.stays → SpaceChargesService.stays → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → CareSpacesRepository.findById | `src/modules/practice/repositories/care-spaces.repository.ts:85` |
 | `practice.clinical_units` | LEE | LEE | DIRECTA | BillingSpaceChargesController.stays → SpaceChargesService.stays → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:65` |
@@ -909,7 +909,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/billing-payables.controller.ts:37` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1063,7 +1063,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-space-charges.controller.ts:194` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/billing/controllers/billing-space-charges.controller.ts:194` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1074,7 +1074,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `billing.charge_captures` | ESCRIBE | ACTUALIZA | POR_TIPO | BillingSpaceChargesController.void → SpaceChargesService.voidCharge | `src/modules/billing/services/space-charges.service.ts:676` |
 | `billing.charge_captures` | LEE | LEE | DIRECTA | BillingSpaceChargesController.void → SpaceChargesService.voidCharge | `src/modules/billing/services/space-charges.service.ts:636` |
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | BillingSpaceChargesController.void → SpaceChargesService.voidCharge → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
-| `directory.branch_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.void → SpaceChargesService.voidCharge → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:257` |
+| `directory.branch_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.void → SpaceChargesService.voidCharge → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.void → SpaceChargesService.voidCharge → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | BillingSpaceChargesController.void → SpaceChargesService.voidCharge → SpaceChargesService.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
 | `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | BillingSpaceChargesController.void → SpaceChargesService.voidCharge → SpaceChargesService.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
@@ -1177,7 +1177,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/billing-operations.controller.ts:60` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/billing/controllers/billing-operations.controller.ts:60` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1283,7 +1283,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/billing-operations.controller.ts:95` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1422,7 +1422,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinical.encounter_locations` | LEE | LEE | POR_SQL | BillingSpaceChargesController.run → SpaceChargesService.runBedDays | `src/modules/billing/services/space-charges.service.ts:357` |
 | `clinical.encounters` | LEE | LEE | POR_SQL | BillingSpaceChargesController.run → SpaceChargesService.runBedDays → SpaceChargesService.encounter | `src/modules/billing/services/space-charges.service.ts:883` |
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | BillingSpaceChargesController.run → SpaceChargesService.runBedDays → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
-| `directory.branch_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.run → SpaceChargesService.runBedDays → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:257` |
+| `directory.branch_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.run → SpaceChargesService.runBedDays → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.run → SpaceChargesService.runBedDays → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | BillingSpaceChargesController.run → SpaceChargesService.runBedDays → SpaceChargesService.capture → SpaceChargesService.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
 | `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | BillingSpaceChargesController.run → SpaceChargesService.runBedDays → SpaceChargesService.capture → SpaceChargesService.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
@@ -1516,7 +1516,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinical.encounter_locations` | LEE | LEE | POR_SQL | BillingSpaceChargesController.pending → SpaceChargesService.pending | `src/modules/billing/services/space-charges.service.ts:580` |
 | `clinical.encounters` | LEE | LEE | POR_SQL | BillingSpaceChargesController.pending → SpaceChargesService.pending → SpaceChargesService.encounter | `src/modules/billing/services/space-charges.service.ts:883` |
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | BillingSpaceChargesController.pending → SpaceChargesService.pending → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
-| `directory.branch_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.pending → SpaceChargesService.pending → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:257` |
+| `directory.branch_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.pending → SpaceChargesService.pending → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.pending → SpaceChargesService.pending → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
 | `practice.care_spaces` | LEE | LEE | DIRECTA | BillingSpaceChargesController.pending → SpaceChargesService.pending → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → CareSpacesRepository.findById | `src/modules/practice/repositories/care-spaces.repository.ts:85` |
 | `practice.clinical_units` | LEE | LEE | DIRECTA | BillingSpaceChargesController.pending → SpaceChargesService.pending → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:65` |
@@ -1590,7 +1590,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/billing/controllers/billing-operations.controller.ts:118` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1781,7 +1781,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/billing-receivables.controller.ts:154` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2038,7 +2038,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/billing-receivables.controller.ts:190` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/billing/controllers/billing-receivables.controller.ts:190` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2171,7 +2171,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/billing-operations.controller.ts:139` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2368,7 +2368,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/billing-receivables.controller.ts:229` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2482,7 +2482,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/billing-receivables.controller.ts:246` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2598,7 +2598,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/billing-payables.controller.ts:56` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2731,7 +2731,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/billing-receivables.controller.ts:171` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2866,7 +2866,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/billing-operations.controller.ts:78` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2968,7 +2968,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/billing-receivables.controller.ts:210` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3175,7 +3175,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PRACTITIONER, CLINICIAN | `src/modules/billing/controllers/billing-service-catalog.controller.ts:160` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3187,7 +3187,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `billing.service_catalog` | LEE | LEE | DIRECTA | BillingServiceCatalogController.create → BillingServiceCatalogService.create → ServiceCatalogRepository.findByCode | `src/modules/billing/repositories/service-catalog.repository.ts:132` |
 | `common.file_versions` | LEE | LEE | DIRECTA | BillingServiceCatalogController.create → BillingServiceCatalogService.create → BillingServiceCatalogService.assertImageUsable → AttachableFileService.assertUsableBy → AttachableFileService.assertVersionUsable → FileVersionsRepository.findById | `src/modules/common/repositories/file-versions.repository.ts:75` |
 | `common.files` | LEE | LEE | DIRECTA | BillingServiceCatalogController.create → BillingServiceCatalogService.create → BillingServiceCatalogService.assertImageUsable → AttachableFileService.assertUsableBy → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
-| `practice.practices` | LEE | LEE | DIRECTA | BillingServiceCatalogController.create → BillingServiceCatalogService.create → BillingServiceCatalogService.assertRegistrationCanRegister → PracticeTenantLookupService.isOwnOffice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
+| `practice.practices` | LEE | LEE | DIRECTA | BillingServiceCatalogController.create → BillingServiceCatalogService.create → BillingServiceCatalogService.assertRegistrationCanRegister → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 
 ### Cuerpo — DTO `CreateServiceCatalogItemDto` · `application/json`
 
@@ -3309,7 +3309,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: PRACTITIONER, CLINICIAN, SECURITY_ADMIN | `src/modules/billing/controllers/billing-service-catalog.controller.ts:229` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/billing/controllers/billing-service-catalog.controller.ts:229` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3317,7 +3317,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `billing.service_catalog` | ESCRIBE | ACTUALIZA | POR_TIPO | BillingServiceCatalogController.update → BillingServiceCatalogService.update | `src/modules/billing/services/billing-service-catalog.service.ts:421` |
+| `billing.service_catalog` | ESCRIBE | ACTUALIZA | POR_TIPO | BillingServiceCatalogController.update → BillingServiceCatalogService.update | `src/modules/billing/services/billing-service-catalog.service.ts:418` |
 | `billing.service_catalog` | LEE | LEE | DIRECTA | BillingServiceCatalogController.update → BillingServiceCatalogService.update → ServiceCatalogRepository.findById | `src/modules/billing/repositories/service-catalog.repository.ts:101` |
 | `practice.practices` | LEE | LEE | DIRECTA | BillingServiceCatalogController.update → BillingServiceCatalogService.update → BillingServiceCatalogService.assertCanEdit → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | BillingServiceCatalogController.update → BillingServiceCatalogService.update → BillingServiceCatalogService.assertCanEdit → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
@@ -3505,7 +3505,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PRACTITIONER, CLINICIAN | `src/modules/billing/controllers/billing-service-catalog.controller.ts:195` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3515,7 +3515,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `billing.service_catalog` | ESCRIBE | CREA | DIRECTA | BillingServiceCatalogController.importProcedures → ProcedureImportService.importProcedures → ServiceCatalogRepository.create | `src/modules/billing/repositories/service-catalog.repository.ts:253` |
 | `billing.service_catalog` | LEE | LEE | DIRECTA | BillingServiceCatalogController.importProcedures → ProcedureImportService.importProcedures → ServiceCatalogRepository.findExistingCodes | `src/modules/billing/repositories/service-catalog.repository.ts:153` |
-| `practice.practices` | LEE | LEE | DIRECTA | BillingServiceCatalogController.importProcedures → ProcedureImportService.importProcedures → BillingServiceCatalogService.assertRegistrationCanRegister → PracticeTenantLookupService.isOwnOffice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
+| `practice.practices` | LEE | LEE | DIRECTA | BillingServiceCatalogController.importProcedures → ProcedureImportService.importProcedures → BillingServiceCatalogService.assertRegistrationCanRegister → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `terminology.catalog_concepts` | LEE | LEE | POR_SQL | BillingServiceCatalogController.importProcedures → ProcedureImportService.importProcedures → ProcedureImportService.select | `src/modules/billing/services/procedure-import.service.ts:421` |
 | `terminology.concept_properties` | LEE | LEE | POR_SQL | BillingServiceCatalogController.importProcedures → ProcedureImportService.importProcedures → ProcedureImportService.select | `src/modules/billing/services/procedure-import.service.ts:391` |
 
@@ -3982,7 +3982,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-simulated.controller.ts:77` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4090,7 +4090,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-simulated.controller.ts:101` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4218,7 +4218,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-simulated.controller.ts:61` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4420,7 +4420,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-simulated.controller.ts:130` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4605,7 +4605,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-simulated.controller.ts:161` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4991,7 +4991,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `billing.service_catalog` | LEE | LEE | POR_SQL | BillingSpaceChargesController.list → SpaceChargesService.listTariffs → SpaceChargesService.tariffViews | `src/modules/billing/services/space-charges.service.ts:833` |
 | `billing.space_tariffs` | LEE | LEE | DIRECTA | BillingSpaceChargesController.list → SpaceChargesService.listTariffs | `src/modules/billing/services/space-charges.service.ts:154` |
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | BillingSpaceChargesController.list → SpaceChargesService.listTariffs → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
-| `directory.branch_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.list → SpaceChargesService.listTariffs → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:257` |
+| `directory.branch_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.list → SpaceChargesService.listTariffs → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.list → SpaceChargesService.listTariffs → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
 | `practice.care_spaces` | LEE | LEE | POR_SQL | BillingSpaceChargesController.list → SpaceChargesService.listTariffs → SpaceChargesService.tariffViews | `src/modules/billing/services/space-charges.service.ts:828` |
 | `practice.clinical_units` | LEE | LEE | POR_SQL | BillingSpaceChargesController.list → SpaceChargesService.listTariffs → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
@@ -5064,7 +5064,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-space-charges.controller.ts:126` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -5075,7 +5075,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `billing.service_catalog` | LEE | LEE | POR_SQL | BillingSpaceChargesController.create → SpaceChargesService.createTariff | `src/modules/billing/services/space-charges.service.ts:200` |
 | `billing.space_tariffs` | ESCRIBE | CREA | DIRECTA | BillingSpaceChargesController.create → SpaceChargesService.createTariff | `src/modules/billing/services/space-charges.service.ts:237` |
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | BillingSpaceChargesController.create → SpaceChargesService.createTariff → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
-| `directory.branch_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.create → SpaceChargesService.createTariff → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:257` |
+| `directory.branch_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.create → SpaceChargesService.createTariff → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.create → SpaceChargesService.createTariff → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | BillingSpaceChargesController.create → SpaceChargesService.createTariff → SpaceChargesService.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
 | `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | BillingSpaceChargesController.create → SpaceChargesService.createTariff → SpaceChargesService.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
@@ -5198,7 +5198,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-space-charges.controller.ts:141` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/billing/controllers/billing-space-charges.controller.ts:141` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -5210,7 +5210,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `billing.space_tariffs` | ESCRIBE | ACTUALIZA | POR_TIPO | BillingSpaceChargesController.close → SpaceChargesService.closeTariff | `src/modules/billing/services/space-charges.service.ts:315` |
 | `billing.space_tariffs` | LEE | LEE | DIRECTA | BillingSpaceChargesController.close → SpaceChargesService.closeTariff | `src/modules/billing/services/space-charges.service.ts:292` |
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | BillingSpaceChargesController.close → SpaceChargesService.closeTariff → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
-| `directory.branch_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.close → SpaceChargesService.closeTariff → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:257` |
+| `directory.branch_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.close → SpaceChargesService.closeTariff → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.close → SpaceChargesService.closeTariff → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | BillingSpaceChargesController.close → SpaceChargesService.closeTariff → SpaceChargesService.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
 | `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | BillingSpaceChargesController.close → SpaceChargesService.closeTariff → SpaceChargesService.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
@@ -5311,7 +5311,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SYSTEM_WORKER | `src/modules/billing/controllers/billing-space-charges.controller.ts:211` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -5326,7 +5326,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinical.encounter_locations` | LEE | LEE | POR_SQL | BillingSpaceChargesController.runInternal → SpaceChargesService.runInternal | `src/modules/billing/services/space-charges.service.ts:539` |
 | `clinical.encounters` | LEE | LEE | POR_SQL | BillingSpaceChargesController.runInternal → SpaceChargesService.runInternal → SpaceChargesService.runBedDays → SpaceChargesService.encounter | `src/modules/billing/services/space-charges.service.ts:883` |
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | BillingSpaceChargesController.runInternal → SpaceChargesService.runInternal → SpaceChargesService.runBedDays → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
-| `directory.branch_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.runInternal → SpaceChargesService.runInternal → SpaceChargesService.runBedDays → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:257` |
+| `directory.branch_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.runInternal → SpaceChargesService.runInternal → SpaceChargesService.runBedDays → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.runInternal → SpaceChargesService.runInternal → SpaceChargesService.runBedDays → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | BillingSpaceChargesController.runInternal → SpaceChargesService.runInternal → SpaceChargesService.runBedDays → SpaceChargesService.capture → SpaceChargesService.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
 | `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | BillingSpaceChargesController.runInternal → SpaceChargesService.runInternal → SpaceChargesService.runBedDays → SpaceChargesService.capture → SpaceChargesService.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |

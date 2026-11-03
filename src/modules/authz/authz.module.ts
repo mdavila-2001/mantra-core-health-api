@@ -1,7 +1,11 @@
 import { AuthzModulesCatalogController } from './controllers/authz-modules-catalog.controller';
 import { AuthzModulesCatalogService } from './services/authz-modules-catalog.service';
 import { AuthzModulesRouteInventory } from './services/authz-modules-route-inventory';
+import { AuthzPermissionDecisionPoint } from './services/authz-permission-decision-point';
+import { PERMISSION_DECISION_POINT } from '../../common/auth/permission-decision.port';
 import { Module } from '@nestjs/common';
+import { IAM_PDP_ROLES } from './ports/iam-global-roles.port';
+import { IamGlobalRolesAdapter } from './infrastructure/iam-global-roles.adapter';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
 import {
@@ -54,6 +58,7 @@ import {
 } from './repositories';
 import { DataAccessLogRepository } from '../audit/repositories';
 import { AuditModule } from '../audit/audit.module';
+import { RouteIndexModule } from '../../observability/route-index/route-index.module';
 import { MessagingModule } from '../messaging/messaging.module';
 // Igual que `clinical` la provee bare (sin importar `ProfilesModule` entero):
 // es una clase sin estado que recibe el `EntityManager` por parámetro.
@@ -77,6 +82,8 @@ import {
     MikroOrmModule.forFeature(Object.values(entities)),
     AuditModule,
     MessagingModule,
+    // `AuthzModulesRouteInventory` lee el índice único de rutas (`RouteMetadataService`).
+    RouteIndexModule,
   ],
   controllers: [
     AuthzCatalogController,
@@ -93,6 +100,8 @@ import {
     AuthzModulesCatalogController,
   ],
   providers: [
+    IamGlobalRolesAdapter,
+    { provide: IAM_PDP_ROLES, useExisting: IamGlobalRolesAdapter },
     AuthzModulesCatalogService,
     AuthzModulesRouteInventory,
     // Repositorios
@@ -135,6 +144,13 @@ import {
     AuthzAssignmentRevocationService,
     AuthzGovernanceService,
     AuthzGovernanceExtService,
+    // `@RequirePermission` (common/auth) consulta el PDP por este token; la
+    // guarda lo busca en todo el contenedor, así que no hace falta exportarlo.
+    AuthzPermissionDecisionPoint,
+    {
+      provide: PERMISSION_DECISION_POINT,
+      useExisting: AuthzPermissionDecisionPoint,
+    },
   ],
   // `iam` consume el primero al emitir y refrescar el token: es la única forma
   // de que un rol asistencial llegue al `RolesGuard`. El segundo lo consume

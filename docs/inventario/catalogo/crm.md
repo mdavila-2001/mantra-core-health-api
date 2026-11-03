@@ -2,7 +2,7 @@
 
 # Catálogo del schema `crm`
 
-- **Tablas:** 33 · **Columnas:** 479 (107 con descripción: 22.3 %) · **Índices:** 285
+- **Tablas:** 33 · **Columnas:** 479 (109 con descripción: 22.8 %) · **Índices:** 285
 - **Dominio:** Marketing y Crecimiento
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -24,9 +24,9 @@
 | [crm_case_comments](#crm_case_comments) | Conserva comentarios y actualizaciones asociados a la atención de casos CRM. | 7 | 5 | 1 | COINCIDE |
 | [crm_case_contacts](#crm_case_contacts) | Vincula contactos participantes a casos para identificar solicitantes y personas involucradas. | 7 | 5 | 0 | COINCIDE |
 | [crm_case_milestones](#crm_case_milestones) | Registra hitos y vencimientos de casos para medir compromisos de atención al cliente. | 13 | 7 | 0 | COINCIDE |
-| [crm_case_owner_history](#crm_case_owner_history) | sin propósito | 8 | 6 | 0 | SIN_ENTIDAD |
+| [crm_case_owner_history](#crm_case_owner_history) | sin propósito | 8 | 6 | 0 | COINCIDE |
 | [crm_case_status_history](#crm_case_status_history) | Preserva transiciones de estado de casos para reconstruir su atención y resolución. | 8 | 6 | 3 | COINCIDE |
-| [crm_cases](#crm_cases) | Gestiona casos de servicio o relación comercial abiertos por cuentas y contactos. | 24 | 19 | 7 | DIVERGE |
+| [crm_cases](#crm_cases) | Gestiona casos de servicio o relación comercial abiertos por cuentas y contactos. | 24 | 19 | 7 | COINCIDE |
 | [crm_email_messages](#crm_email_messages) | Conserva emails asociados a relaciones CRM para documentar comunicaciones comerciales. | 14 | 5 | 0 | COINCIDE |
 | [crm_email_recipients](#crm_email_recipients) | Identifica destinatarios de mensajes CRM para trazar a quién se comunicó cada email. | 11 | 7 | 0 | COINCIDE |
 | [crm_entitlements](#crm_entitlements) | Define niveles o derechos de servicio que determinan qué asistencia corresponde a cada cuenta. | 17 | 10 | 0 | COINCIDE |
@@ -1536,21 +1536,21 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_49_crm.puml` · **DDL:** `SQL/49_crm/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `CrmCaseOwnerHistory` — `src/modules/crm/entities/crm_case_owner_history.entity.ts`
 - **Resumen:** 8 columnas · 6 índices · 4 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `crm_case_id` | `uuid` | Clave foránea → crm.crm_cases.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `from_owner_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `to_owner_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `changed_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `changed_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `reason_text` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/crm/entities/crm_case_owner_history.entity.ts:12`)_ | coincide |
+| 2 | `crm_case_id` | `uuid` | Clave foránea → crm.crm_cases.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `from_owner_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 4 | `to_owner_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 5 | `changed_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 6 | `changed_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 7 | `reason_text` | `varchar` | Opcional | _sin dato_ | coincide |
+| 8 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/crm/entities/crm_case_owner_history.entity.ts:58`)_ | coincide |
 
 #### Relaciones
 
@@ -1694,7 +1694,7 @@ Gestiona casos de servicio o relación comercial abiertos por cuentas y contacto
 | 21 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 22 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 23 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/crm/entities/crm_cases.entity.ts:152`)_ | coincide |
-| 24 | `insurance_claim_id` | `uuid` | Clave foránea → insurance.insurance_claims.id; Opcional | + v4.2.49 (INS-INC-001 / INS-INC-008, issue #60): une la gestion (el caso CRM) con la adjudicacion (insurance.insurance_claims). Nullable: la mayoria de los casos no son un siniestro. Un siniestro puede tener varios casos de gestion. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_49_crm.puml:590`)_ | **AUSENTE_EN_ORM** |
+| 24 | `insurance_claim_id` | `uuid` | Clave foránea → insurance.insurance_claims.id; Opcional | + v4.2.49 (INS-INC-001 / INS-INC-008, issue #60): une la gestion (el caso CRM) con la adjudicacion (insurance.insurance_claims). Nullable: la mayoria de los casos no son un siniestro. Un siniestro puede tener varios casos de gestion. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_49_crm.puml:590`)_ | coincide |
 
 #### Relaciones
 

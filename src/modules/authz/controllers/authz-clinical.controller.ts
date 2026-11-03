@@ -22,6 +22,7 @@ import {
   AuthzIdResponseDto,
   AuthzStatusResultDto,
 } from '../dto';
+import { RequirePermission } from '../../../common/auth/require-permission.decorator';
 
 /** UC-06-06 (acceso clínico), UC-06-07 (break-the-glass), UC-06-10 (revocar). */
 @ApiTags('authz-clinical')
@@ -82,6 +83,9 @@ export class AuthzClinicalController {
   })
   @Delete('clinical-access-grants/:grantId')
   @Roles('SECURITY_ADMIN')
+  @RequirePermission('authz.clinical_access_grants.delete', {
+    resourceIdParam: 'grantId',
+  })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Revocar o expirar una concesión de acceso clínico',

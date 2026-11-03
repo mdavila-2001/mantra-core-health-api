@@ -2,7 +2,7 @@
 
 # Catálogo del schema `surveys`
 
-- **Tablas:** 8 · **Columnas:** 100 (61 con descripción: 61.0 %) · **Índices:** 26
+- **Tablas:** 8 · **Columnas:** 100 (63 con descripción: 63.0 %) · **Índices:** 26
 - **Dominio:** sin dato
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -11,13 +11,13 @@
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
 | [survey_answers](#survey_answers) | Conserva respuestas por pregunta para permitir análisis de experiencia sin mezclar resultados con reseñas públicas. | 12 | 3 | 3 | COINCIDE |
-| [survey_assignments](#survey_assignments) | Asocia versiones de encuestas a profesionales o tipos de atención que deben utilizarlas. | 11 | 3 | 8 | COINCIDE |
-| [survey_invitation_reminders](#survey_invitation_reminders) | sin propósito | 7 | 3 | 0 | SIN_ENTIDAD |
+| [survey_assignments](#survey_assignments) | Asocia versiones de encuestas a profesionales o tipos de atención que deben utilizarlas. | 11 | 3 | 10 | COINCIDE |
+| [survey_invitation_reminders](#survey_invitation_reminders) | sin propósito | 7 | 3 | 0 | COINCIDE |
 | [survey_invitations](#survey_invitations) | Emite invitaciones para responder una encuesta a un paciente después de una atención y controla su vigencia. | 18 | 8 | 10 | COINCIDE |
-| [survey_questions](#survey_questions) | Define preguntas que componen cada versión de un cuestionario post-visita. | 14 | 1 | 18 | COINCIDE |
+| [survey_questions](#survey_questions) | Define preguntas que componen cada versión de un cuestionario post-visita. | 14 | 1 | 20 | COINCIDE |
 | [survey_responses](#survey_responses) | Registra respuestas privadas de pacientes a encuestas post-visita sin alimentar la calificación pública de prestadores. | 11 | 4 | 3 | COINCIDE |
-| [survey_templates](#survey_templates) | Define cuestionarios post-atención que profesionales pueden usar para consultar la experiencia del paciente. | 13 | 3 | 25 | COINCIDE |
-| [survey_versions](#survey_versions) | Preserva versiones inmutables de cuestionarios para conocer qué preguntas se presentaron en cada atención. | 14 | 1 | 24 | COINCIDE |
+| [survey_templates](#survey_templates) | Define cuestionarios post-atención que profesionales pueden usar para consultar la experiencia del paciente. | 13 | 3 | 27 | COINCIDE |
+| [survey_versions](#survey_versions) | Preserva versiones inmutables de cuestionarios para conocer qué preguntas se presentaron en cada atención. | 14 | 1 | 26 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -188,7 +188,7 @@ Asocia versiones de encuestas a profesionales o tipos de atención que deben uti
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_65_surveys.puml: survey_assignments`
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_65_surveys.puml` · **DDL:** `SQL/65_surveys/02_tables.sql`
 - **Entidad del ORM:** `SurveyAssignments` — `src/modules/surveys/entities/survey_assignments.entity.ts`
-- **Resumen:** 11 columnas · 3 índices · 5 FK salientes · 1 entrantes · 8 operaciones
+- **Resumen:** 11 columnas · 3 índices · 5 FK salientes · 1 entrantes · 10 operaciones
 
 #### Columnas
 
@@ -239,6 +239,8 @@ Asocia versiones de encuestas a profesionales o tipos de atención que deben uti
 | POST /scheduling/bookings/{id}/complete | LEE | DIRECTA |
 | POST /surveys/assignments | CREA | DIRECTA |
 | POST /surveys/assignments | LEE | DIRECTA |
+| GET /surveys/catalog | CREA | DIRECTA |
+| GET /surveys/catalog | LEE | DIRECTA |
 | GET /surveys/insights | LEE | POR_SQL |
 | POST /surveys/invitations | CREA | DIRECTA |
 | POST /surveys/invitations | LEE | DIRECTA |
@@ -266,20 +268,20 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_65_surveys.puml` · **DDL:** `SQL/65_surveys/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `SurveyInvitationReminders` — `src/modules/surveys/entities/survey_invitation_reminders.entity.ts`
 - **Resumen:** 7 columnas · 3 índices · 3 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `survey_invitation_id` | `uuid` | Clave foránea → surveys.survey_invitations.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `reminder_number` | `integer` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `sent_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `channel_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/surveys/entities/survey_invitation_reminders.entity.ts:12`)_ | coincide |
+| 2 | `survey_invitation_id` | `uuid` | Clave foránea → surveys.survey_invitations.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `reminder_number` | `integer` | Obligatoria | _sin dato_ | coincide |
+| 4 | `sent_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 5 | `channel_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 6 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/surveys/entities/survey_invitation_reminders.entity.ts:42`)_ | coincide |
+| 7 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 
 #### Relaciones
 
@@ -432,7 +434,7 @@ Define preguntas que componen cada versión de un cuestionario post-visita.
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_65_surveys.puml: survey_questions`
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_65_surveys.puml` · **DDL:** `SQL/65_surveys/02_tables.sql`
 - **Entidad del ORM:** `SurveyQuestions` — `src/modules/surveys/entities/survey_questions.entity.ts`
-- **Resumen:** 14 columnas · 1 índices · 4 FK salientes · 1 entrantes · 18 operaciones
+- **Resumen:** 14 columnas · 1 índices · 4 FK salientes · 1 entrantes · 20 operaciones
 
 #### Columnas
 
@@ -475,6 +477,8 @@ Define preguntas que componen cada versión de un cuestionario post-visita.
 |---|---|---|
 | POST /scheduling/bookings/{id}/complete | CREA | DIRECTA |
 | POST /scheduling/bookings/{id}/complete | LEE | DIRECTA |
+| GET /surveys/catalog | CREA | DIRECTA |
+| GET /surveys/catalog | LEE | DIRECTA |
 | GET /surveys/insights | LEE | POR_SQL |
 | POST /surveys/invitations | CREA | DIRECTA |
 | POST /surveys/invitations | LEE | DIRECTA |
@@ -591,7 +595,7 @@ Define cuestionarios post-atención que profesionales pueden usar para consultar
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_65_surveys.puml: survey_templates; BIZ note`
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_65_surveys.puml` · **DDL:** `SQL/65_surveys/02_tables.sql`
 - **Entidad del ORM:** `SurveyTemplates` — `src/modules/surveys/entities/survey_templates.entity.ts`
-- **Resumen:** 13 columnas · 3 índices · 6 FK salientes · 1 entrantes · 25 operaciones
+- **Resumen:** 13 columnas · 3 índices · 6 FK salientes · 1 entrantes · 27 operaciones
 
 #### Columnas
 
@@ -642,9 +646,11 @@ Define cuestionarios post-atención que profesionales pueden usar para consultar
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /scheduling/bookings/{id}/complete | ACTUALIZA | POR_TIPO |
-| POST /scheduling/bookings/{id}/complete | CREA | DIRECTA |
 | POST /scheduling/bookings/{id}/complete | LEE | DIRECTA |
 | POST /surveys/assignments | LEE | DIRECTA |
+| GET /surveys/catalog | ACTUALIZA | POR_TIPO |
+| GET /surveys/catalog | CREA | DIRECTA |
+| GET /surveys/catalog | LEE | DIRECTA |
 | GET /surveys/insights | LEE | POR_SQL |
 | POST /surveys/invitations | ACTUALIZA | POR_TIPO |
 | POST /surveys/invitations | CREA | DIRECTA |
@@ -690,7 +696,7 @@ Preserva versiones inmutables de cuestionarios para conocer qué preguntas se pr
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_65_surveys.puml: survey_versions; BIZ note`
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_65_surveys.puml` · **DDL:** `SQL/65_surveys/02_tables.sql`
 - **Entidad del ORM:** `SurveyVersions` — `src/modules/surveys/entities/survey_versions.entity.ts`
-- **Resumen:** 14 columnas · 1 índices · 4 FK salientes · 5 entrantes · 24 operaciones
+- **Resumen:** 14 columnas · 1 índices · 4 FK salientes · 5 entrantes · 26 operaciones
 
 #### Columnas
 
@@ -743,9 +749,11 @@ Preserva versiones inmutables de cuestionarios para conocer qué preguntas se pr
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /scheduling/bookings/{id}/complete | ACTUALIZA | POR_TIPO |
-| POST /scheduling/bookings/{id}/complete | CREA | DIRECTA |
 | POST /scheduling/bookings/{id}/complete | LEE | DIRECTA |
 | POST /surveys/assignments | LEE | DIRECTA |
+| GET /surveys/catalog | ACTUALIZA | POR_TIPO |
+| GET /surveys/catalog | CREA | DIRECTA |
+| GET /surveys/catalog | LEE | DIRECTA |
 | GET /surveys/insights | LEE | POR_SQL |
 | POST /surveys/invitations | ACTUALIZA | POR_TIPO |
 | POST /surveys/invitations | CREA | DIRECTA |

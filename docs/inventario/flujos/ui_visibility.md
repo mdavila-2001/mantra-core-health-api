@@ -111,11 +111,12 @@ Cada árbol se deriva del código del handler y de los métodos que invoca (hast
 
 #### 1. POST /admin/ui-visibility/elements
 
-
+Alta manual de un elemento (source ADMIN)
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -123,39 +124,43 @@ Cada árbol se deriva del código del handler y de los métodos que invoca (hast
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
   n1 --> n2
   n3["Llama a UiVisibilityAdminService.createElement"]:::llamada
   n2 --> n3
-  n4["Transacción: transaction(…)"]:::transaccion
+  n4{"!actor.isPlatform && !actor.canManageCatalog"}:::decision
   n3 --> n4
-  n5{"existing"}:::decision
-  n4 --> n5
-  n6(["↩ (relanza el error capturado)"]):::error
-  n5 -->|"sí"| n6
-  n7{"dto.parentKey"}:::decision
-  n5 -->|"no"| n7
-  n8{"!parent"}:::decision
+  n5(["↩ (relanza el error capturado)"]):::error
+  n4 -->|"sí"| n5
+  n6["Transacción: transaction(…)"]:::transaccion
+  n4 -->|"no"| n6
+  n7{"existing"}:::decision
+  n6 --> n7
+  n8(["↩ (relanza el error capturado)"]):::error
   n7 -->|"sí"| n8
-  n9(["↩ (relanza el error capturado)"]):::error
-  n8 -->|"sí"| n9
-  n10{"parent.status === 'RETIRED'"}:::decision
-  n8 -->|"no"| n10
+  n9{"dto.parentKey"}:::decision
+  n7 -->|"no"| n9
+  n10{"!parent"}:::decision
+  n9 -->|"sí"| n10
   n11(["↩ (relanza el error capturado)"]):::error
   n10 -->|"sí"| n11
-  n12["Llama a UiVisibilityAdminService.toElementViews"]:::llamada
+  n12{"parent.status === 'RETIRED'"}:::decision
   n10 -->|"no"| n12
-  n7 -->|"no"| n12
-  n13["Llama a MikroOrmUiVisibilityStore.findElementsByIds"]:::llamada
-  n12 --> n13
-  n14[("LEE authz.ui_visibility_elements")]:::efecto
-  n13 --> n14
-  n15["Llama a MikroOrmUiVisibilityStore.countActiveRules"]:::llamada
+  n13(["↩ (relanza el error capturado)"]):::error
+  n12 -->|"sí"| n13
+  n14["Llama a UiVisibilityAdminService.toElementViews"]:::llamada
+  n12 -->|"no"| n14
+  n9 -->|"no"| n14
+  n15["Llama a MikroOrmUiVisibilityStore.findElementsByIds"]:::llamada
   n14 --> n15
-  n16[("LEE authz.ui_visibility_rules")]:::efecto
+  n16[("LEE authz.ui_visibility_elements")]:::efecto
   n15 --> n16
-  n17(("201 Responde con éxito")):::ok
+  n17["Llama a MikroOrmUiVisibilityStore.countActiveRules"]:::llamada
   n16 --> n17
+  n18[("LEE authz.ui_visibility_rules")]:::efecto
+  n17 --> n18
+  n19(("201 Responde con éxito")):::ok
+  n18 --> n19
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -166,11 +171,12 @@ flowchart TD
 
 #### 2. POST /admin/ui-visibility/elements/sync
 
-
+Sincroniza el registro del front (idempotente por key)
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -178,47 +184,51 @@ flowchart TD
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
   n1 --> n2
   n3["Llama a UiVisibilityAdminService.syncElements"]:::llamada
   n2 --> n3
-  n4["Llama a UiVisibilityAdminService.dedupeDrafts"]:::llamada
+  n4{"!actor.isPlatform && !actor.canManageCatalog"}:::decision
   n3 --> n4
-  n5{"list.length === 0"}:::decision
-  n4 --> n5
-  n6(["↩ (relanza el error capturado)"]):::error
-  n5 -->|"sí"| n6
-  n7["Repite: por cada const d de list"]:::bucle
-  n5 -->|"no"| n7
-  n8{"prev && JSON.stringify(sortedDraft(prev)) !== JSON.stringify(sortedDraft(norm))"}:::decision
-  n7 -->|"cada elemento"| n8
-  n9(["↩ (relanza el error capturado)"]):::error
-  n8 -->|"sí"| n9
-  n10["Llama a InMemoryUiVisibilityStore.transaction"]:::llamada
-  n8 -->|"no"| n10
-  n7 -->|"al terminar"| n10
-  n11["Intenta"]:::intento
-  n10 --> n11
-  n12(["↩ (relanza el error capturado)"]):::error
-  n11 -->|"si falla"| n12
-  n13["Llama a UiVisibilityAdminService.applySync"]:::llamada
-  n11 --> n13
-  n14["Repite: por cada const d de drafts"]:::bucle
-  n13 --> n14
-  n15{"!ok"}:::decision
-  n14 -->|"cada elemento"| n15
-  n16(["↩ (relanza el error capturado)"]):::error
-  n15 -->|"sí"| n16
-  n17["Repite: por cada const d de ordered"]:::bucle
-  n15 -->|"no"| n17
-  n14 -->|"al terminar"| n17
-  n18{"current.source === 'ADMIN'"}:::decision
-  n17 -->|"cada elemento"| n18
-  n19(["↩ (relanza el error capturado)"]):::error
-  n18 -->|"sí"| n19
-  n20(("200 Responde con éxito")):::ok
-  n18 -->|"no"| n20
-  n17 -->|"al terminar"| n20
+  n5(["↩ (relanza el error capturado)"]):::error
+  n4 -->|"sí"| n5
+  n6["Llama a UiVisibilityAdminService.dedupeDrafts"]:::llamada
+  n4 -->|"no"| n6
+  n7{"list.length === 0"}:::decision
+  n6 --> n7
+  n8(["↩ (relanza el error capturado)"]):::error
+  n7 -->|"sí"| n8
+  n9["Repite: por cada const d de list"]:::bucle
+  n7 -->|"no"| n9
+  n10{"prev && JSON.stringify(sortedDraft(prev)) !== JSON.stringify(sortedDraft(norm))"}:::decision
+  n9 -->|"cada elemento"| n10
+  n11(["↩ (relanza el error capturado)"]):::error
+  n10 -->|"sí"| n11
+  n12["Llama a InMemoryUiVisibilityStore.transaction"]:::llamada
+  n10 -->|"no"| n12
+  n9 -->|"al terminar"| n12
+  n13["Intenta"]:::intento
+  n12 --> n13
+  n14(["↩ (relanza el error capturado)"]):::error
+  n13 -->|"si falla"| n14
+  n15["Llama a UiVisibilityAdminService.applySync"]:::llamada
+  n13 --> n15
+  n16["Repite: por cada const d de drafts"]:::bucle
+  n15 --> n16
+  n17{"!ok"}:::decision
+  n16 -->|"cada elemento"| n17
+  n18(["↩ (relanza el error capturado)"]):::error
+  n17 -->|"sí"| n18
+  n19["Repite: por cada const d de ordered"]:::bucle
+  n17 -->|"no"| n19
+  n16 -->|"al terminar"| n19
+  n20{"current.source === 'ADMIN'"}:::decision
+  n19 -->|"cada elemento"| n20
+  n21(["↩ (relanza el error capturado)"]):::error
+  n20 -->|"sí"| n21
+  n22(("200 Responde con éxito")):::ok
+  n20 -->|"no"| n22
+  n19 -->|"al terminar"| n22
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -229,7 +239,7 @@ flowchart TD
 
 #### 3. GET /admin/ui-visibility/preview
 
-
+Vista previa «ver como»: lo oculto y la regla ganadora de cada elemento
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -310,7 +320,7 @@ flowchart TD
 
 #### 4. GET /admin/ui-visibility/rules
 
-
+Reglas de visibilidad (cursor por fecha de alta)
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -385,11 +395,12 @@ flowchart TD
 
 #### 5. POST /admin/ui-visibility/rules
 
-
+Crear una regla SHOW/HIDE
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -397,7 +408,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
   n1 --> n2
   n3["Llama a UiVisibilityAdminService.createRule"]:::llamada
   n2 --> n3
@@ -553,11 +564,12 @@ flowchart TD
 
 #### 6. PATCH /admin/ui-visibility/rules/{id}
 
-
+Editar una regla con bloqueo optimista (409 si cambió)
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -565,7 +577,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
   n1 --> n2
   n3["Llama a UiVisibilityAdminService.updateRule"]:::llamada
   n2 --> n3
@@ -677,7 +689,7 @@ flowchart TD
 
 #### 7. POST /admin/ui-visibility/rules/{id}/end
 
-
+Terminar una regla (validTo = ahora). Idempotente.
 
 | HTTP | Código | Cuándo |
 |---|---|---|

@@ -17,11 +17,11 @@ import { OpsToolsService } from '../services/ops-tools.service';
 /** Registro de herramientas e instancias de la plataforma: solo lectura. */
 @ApiTags('ops-tools')
 @ApiBearerAuth()
-@Controller('admin/ops/tools')
+@Controller('admin/ops')
 export class OpsToolsController {
   constructor(private readonly tools: OpsToolsService) {}
 
-  @Get()
+  @Get('tool-registry')
   @Roles(...OPS_READ_ROLES)
   @ApiOperation({
     summary: 'Herramientas del catálogo con su salud',
@@ -35,7 +35,7 @@ export class OpsToolsController {
     return this.tools.list();
   }
 
-  @Get(':code')
+  @Get('tools/:code')
   @Roles(...OPS_READ_ROLES)
   @ApiOperation({
     summary: 'Una herramienta con su historial corto de comprobaciones',

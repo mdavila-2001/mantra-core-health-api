@@ -946,7 +946,7 @@ Define proyecciones optimizadas para lectura que alimentan portales y experienci
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_30_read_models.puml: read_model_definitions`
 - **Dominio:** Auditoría y Reporting · **Diagrama:** `Mantra Core Health Context/modules/diagram_30_read_models.puml` · **DDL:** `SQL/30_read_models/02_tables.sql`
 - **Entidad del ORM:** `ReadModelDefinitions` — `src/modules/read_models/entities/read_model_definitions.entity.ts`
-- **Resumen:** 23 columnas · 6 índices · 5 FK salientes · 5 entrantes · 15 operaciones
+- **Resumen:** 23 columnas · 6 índices · 5 FK salientes · 6 entrantes · 15 operaciones
 
 #### Columnas
 
@@ -990,6 +990,7 @@ Define proyecciones optimizadas para lectura que alimentan portales y experienci
 | desde | id | read_models.read_model_refresh_runs (read_model_definition_id) | fk_read_model_refresh_runs_read_model_definition_id |
 | desde | id | reporting.report_data_sources (read_model_definition_id) | fk_report_data_sources_read_model_definition_id |
 | desde | id | marketing.segments (source_read_model_id) | fk_segments_source_read_model_id |
+| desde | id | data_catalog.catalog_certifications (read_model_definition_id) | fk_catalog_certifications_read_model_definition_id |
 
 #### Índices
 

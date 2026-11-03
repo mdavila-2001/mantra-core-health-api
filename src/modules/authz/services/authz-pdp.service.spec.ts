@@ -20,7 +20,10 @@ const actor = { id: 'sys-1', roles: ['SECURITY_ADMIN'] } as any;
 function build() {
   const forkEm = {};
   const em = { fork: mockFn(() => forkEm) };
-  const rolesRepo = { findById: mockFn().mockResolvedValue(null) };
+  const rolesRepo = {
+    findById: mockFn().mockResolvedValue(null),
+    findIamPolicyRoles: mockFn().mockResolvedValue([]),
+  };
   const rolePermsRepo = { findActiveForRoles: mockFn().mockResolvedValue([]) };
   const permissionsRepo = {
     findByResourceAction: mockFn().mockResolvedValue(null),
@@ -42,6 +45,7 @@ function build() {
   };
   const fieldPermsRepo = { findForRoles: mockFn().mockResolvedValue([]) };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const iamGlobalRoles = { codesForUser: mockFn().mockResolvedValue([]) };
   const service = new AuthzPdpService(
     em as any,
     rolesRepo as any,
@@ -56,8 +60,10 @@ function build() {
     resourceGrantsRepo as any,
     fieldPermsRepo as any,
     logger as any,
+    iamGlobalRoles,
   );
   return {
+    iamGlobalRoles,
     service,
     rolesRepo,
     rolePermsRepo,
@@ -102,6 +108,44 @@ describe('AuthzPdpService', () => {
   });
 
   describe('evaluate (UC-06-12)', () => {
+    it('incorpora el rol global vigente de IAM y conserva deny-overrides', async () => {
+      const d = build();
+      d.permissionsRepo.findByResourceAction.mockResolvedValue({
+        id: 'perm-1',
+      });
+      d.iamGlobalRoles.codesForUser.mockResolvedValue(['SECURITY_ADMIN']);
+      d.rolesRepo.findIamPolicyRoles.mockResolvedValue([
+        { id: 'security-policy' },
+      ]);
+      d.rolesRepo.findById.mockResolvedValue({
+        id: 'security-policy',
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
+        tenantId: null,
+      });
+      d.rolePermsRepo.findActiveForRoles.mockResolvedValue([
+        { permissionId: 'perm-1', effectConceptId: AUTHZ.EFFECT_ALLOW },
+      ]);
+      expect((await d.service.evaluate(baseDto, actor)).decision).toBe(
+        'PERMIT',
+      );
+      expect(d.iamGlobalRoles.codesForUser).toHaveBeenCalledWith(
+        expect.anything(),
+        'u1',
+      );
+      d.permGrantsRepo.findActiveForUser.mockResolvedValue([
+        { permissionId: 'perm-1', effectConceptId: AUTHZ.EFFECT_DENY },
+      ]);
+      expect((await d.service.evaluate(baseDto, actor)).decision).toBe('DENY');
+    });
+
+    it('el claim SECURITY_ADMIN no concede nada si IAM no devuelve una concesión vigente', async () => {
+      const d = build();
+      d.permissionsRepo.findByResourceAction.mockResolvedValue({
+        id: 'perm-1',
+      });
+      expect((await d.service.evaluate(baseDto, actor)).decision).toBe('DENY');
+      expect(d.rolesRepo.findIamPolicyRoles).not.toHaveBeenCalled();
+    });
     it('DENY by default when there is no permission or signal', async () => {
       const d = build();
       const res = await d.service.evaluate(baseDto, actor);

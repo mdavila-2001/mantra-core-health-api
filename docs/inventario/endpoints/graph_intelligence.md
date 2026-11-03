@@ -56,7 +56,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: DATA_GOVERNANCE_ADMIN, COMPLIANCE_OFFICER, PLATFORM_ADMIN | `src/modules/graph_intelligence/controllers/graph-query.controller.ts:58` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -188,7 +188,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 | ROL | Alguno de: DATA_GOVERNANCE_ADMIN, COMPLIANCE_OFFICER, PLATFORM_ADMIN | `src/modules/graph_intelligence/controllers/graph-query.controller.ts:79` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/graph_intelligence/controllers/graph-query.controller.ts:79` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -308,7 +308,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, GRAPH_ANALYTICS_WORKER, PLATFORM_ADMIN | `src/modules/graph_intelligence/controllers/graph-query.controller.ts:151` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -435,7 +435,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, GRAPH_ANALYTICS_WORKER, PLATFORM_ADMIN | `src/modules/graph_intelligence/controllers/graph-query.controller.ts:171` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -566,7 +566,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: DATA_GOVERNANCE_ADMIN, SYSTEM, PLATFORM_ADMIN | `src/modules/graph_intelligence/controllers/graph-query.controller.ts:240` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -691,7 +691,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 | ROL | Alguno de: SYSTEM, GRAPH_PROJECTION_WORKER, PLATFORM_ADMIN | `src/modules/graph_intelligence/controllers/graph-projection.controller.ts:155` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/graph_intelligence/controllers/graph-projection.controller.ts:155` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -808,7 +808,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: GRAPH_ANALYST, API_CONSUMER, COMPLIANCE_OFFICER, PLATFORM_ADMIN | `src/modules/graph_intelligence/controllers/graph-query.controller.ts:126` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -934,7 +934,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 | ROL | Alguno de: SYSTEM, GRAPH_ANALYST, PLATFORM_ADMIN | `src/modules/graph_intelligence/controllers/graph-projection.controller.ts:112` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/graph_intelligence/controllers/graph-projection.controller.ts:112` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1035,7 +1035,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 | ROL | Alguno de: SYSTEM, GRAPH_PROJECTION_WORKER, PLATFORM_ADMIN | `src/modules/graph_intelligence/controllers/graph-projection.controller.ts:134` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/graph_intelligence/controllers/graph-projection.controller.ts:134` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1153,7 +1153,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, GRAPH_PROJECTION_WORKER, PLATFORM_ADMIN | `src/modules/graph_intelligence/controllers/graph-projection.controller.ts:71` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1296,7 +1296,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, GRAPH_PROJECTION_WORKER, PLATFORM_ADMIN | `src/modules/graph_intelligence/controllers/graph-projection.controller.ts:50` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1427,7 +1427,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, GRAPH_PROJECTION_WORKER, PLATFORM_ADMIN | `src/modules/graph_intelligence/controllers/graph-projection.controller.ts:92` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1545,7 +1545,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 | ROL | Alguno de: COMPLIANCE_OFFICER, GRAPH_ANALYST, PLATFORM_ADMIN | `src/modules/graph_intelligence/controllers/graph-query.controller.ts:218` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/graph_intelligence/controllers/graph-query.controller.ts:218` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1655,7 +1655,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 | ROL | Alguno de: SYSTEM, GRAPH_ANALYTICS_WORKER, COMPLIANCE_OFFICER, PLATFORM_ADMIN | `src/modules/graph_intelligence/controllers/graph-query.controller.ts:191` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/graph_intelligence/controllers/graph-query.controller.ts:191` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1789,7 +1789,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: GRAPH_ANALYST, API_CONSUMER, COMPLIANCE_OFFICER, PLATFORM_ADMIN | `src/modules/graph_intelligence/controllers/graph-query.controller.ts:101` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 

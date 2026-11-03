@@ -10,15 +10,15 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [external_providers](#external_providers) | Cataloga proveedores externos que intercambian datos o servicios con la plataforma médica. | 13 | 6 | 6 | COINCIDE |
+| [external_providers](#external_providers) | Cataloga proveedores externos que intercambian datos o servicios con la plataforma médica. | 13 | 6 | 9 | COINCIDE |
 | [inbound_messages](#inbound_messages) | Registra mensajes recibidos desde integraciones externas para procesarlos y conservar su procedencia. | 14 | 6 | 5 | COINCIDE |
 | [integration_endpoints](#integration_endpoints) | Registra endpoints externos disponibles para intercambios de datos y operaciones de integración. | 16 | 6 | 4 | COINCIDE |
 | [integration_field_mappings](#integration_field_mappings) | Mapea campos entre contratos externos y estructuras internas para intercambiar datos con significado consistente. | 12 | 5 | 1 | COINCIDE |
 | [message_responses](#message_responses) | Conserva respuestas asociadas a mensajes intercambiados para conocer el resultado informado por sistemas externos. | 12 | 3 | 2 | COINCIDE |
 | [message_retries](#message_retries) | Traza reintentos de mensajes fallidos para sostener entrega confiable sin perder historial operativo. | 14 | 5 | 5 | COINCIDE |
 | [outbound_messages](#outbound_messages) | Mantiene mensajes salientes hacia proveedores o sistemas conectados para rastrear entregas e interoperabilidad. | 18 | 6 | 12 | COINCIDE |
-| [provider_connections](#provider_connections) | Configura vínculos operativos con proveedores externos para mantener su contexto y estado de integración. | 14 | 8 | 13 | COINCIDE |
-| [provider_credentials](#provider_credentials) | Gestiona referencias protegidas a credenciales usadas para autenticar conexiones con proveedores. | 13 | 5 | 6 | COINCIDE |
+| [provider_connections](#provider_connections) | Configura vínculos operativos con proveedores externos para mantener su contexto y estado de integración. | 14 | 8 | 23 | COINCIDE |
+| [provider_credentials](#provider_credentials) | Gestiona referencias protegidas a credenciales usadas para autenticar conexiones con proveedores. | 13 | 5 | 17 | COINCIDE |
 | [webhook_subscriptions](#webhook_subscriptions) | Define suscripciones a webhooks para comunicar eventos del sistema a consumidores externos autorizados. | 12 | 6 | 3 | COINCIDE |
 
 ## Diagrama entidad-relación
@@ -133,7 +133,7 @@ Cataloga proveedores externos que intercambian datos o servicios con la platafor
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_12_integrations.puml: external_providers`
 - **Dominio:** Integraciones y Contratos · **Diagrama:** `Mantra Core Health Context/modules/diagram_12_integrations.puml` · **DDL:** `SQL/12_integrations/02_tables.sql`
 - **Entidad del ORM:** `ExternalProviders` — `src/modules/integrations/entities/external_providers.entity.ts`
-- **Resumen:** 13 columnas · 6 índices · 5 FK salientes · 8 entrantes · 6 operaciones
+- **Resumen:** 13 columnas · 6 índices · 5 FK salientes · 8 entrantes · 9 operaciones
 
 #### Columnas
 
@@ -175,7 +175,7 @@ Cataloga proveedores externos que intercambian datos o servicios con la platafor
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_external_providers_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «code», la primera columna del índice _(CONSULTA)_ |
+| `uq_external_providers_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «code», la primera columna del índice _(CONSULTA)_ |
 | `ix_external_providers_provider_type_concept_id` | no | provider_type_concept_id | Soporta la clave foránea fk_external_providers_provider_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_external_providers_auth_type_concept_id` | no | auth_type_concept_id | Soporta la clave foránea fk_external_providers_auth_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_external_providers_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_external_providers_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -198,6 +198,9 @@ Cataloga proveedores externos que intercambian datos o servicios con la platafor
 | POST /integrations/providers/{id}/connections | LEE | DIRECTA |
 | POST /integrations/providers/{id}/endpoints | LEE | DIRECTA |
 | POST /integrations/providers/{id}/webhook-subscriptions | LEE | DIRECTA |
+| PUT /pharmacies/{pharmacyId}/integration-connections/{connectionId}/external-system | CREA | DIRECTA |
+| PUT /pharmacies/{pharmacyId}/integration-connections/{connectionId}/external-system | GUARDA | POR_TIPO |
+| PUT /pharmacies/{pharmacyId}/integration-connections/{connectionId}/external-system | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -704,7 +707,7 @@ Configura vínculos operativos con proveedores externos para mantener su context
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_12_integrations.puml: provider_connections`
 - **Dominio:** Integraciones y Contratos · **Diagrama:** `Mantra Core Health Context/modules/diagram_12_integrations.puml` · **DDL:** `SQL/12_integrations/02_tables.sql`
 - **Entidad del ORM:** `ProviderConnections` — `src/modules/integrations/entities/provider_connections.entity.ts`
-- **Resumen:** 14 columnas · 8 índices · 7 FK salientes · 5 entrantes · 13 operaciones
+- **Resumen:** 14 columnas · 8 índices · 7 FK salientes · 5 entrantes · 23 operaciones
 
 #### Columnas
 
@@ -747,7 +750,7 @@ Configura vínculos operativos con proveedores externos para mantener su context
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
 | `ix_provider_connections_provider_id` | no | provider_id | Soporta la clave foránea fk_provider_connections_provider_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «provider_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_provider_connections_tenant_id` | no | tenant_id | Soporta la clave foránea fk_provider_connections_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_provider_connections_tenant_id` | no | tenant_id | Soporta la clave foránea fk_provider_connections_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_provider_connections_environment_concept_id` | no | environment_concept_id | Soporta la clave foránea fk_provider_connections_environment_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_provider_connections_credential_id` | no | credential_id | Soporta la clave foránea fk_provider_connections_credential_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_provider_connections_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_provider_connections_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -772,6 +775,16 @@ Configura vínculos operativos con proveedores externos para mantener su context
 | GET /integrations/messages/pending-retry | LEE | DIRECTA |
 | POST /integrations/providers/{id}/connections | CREA | DIRECTA |
 | POST /integrations/webhooks/inbound | LEE | DIRECTA |
+| GET /pharmacies/{pharmacyId}/integration-connections | LEE | DIRECTA |
+| GET /pharmacies/{pharmacyId}/integration-connections/{connectionId}/external-products | LEE | DIRECTA |
+| DELETE /pharmacies/{pharmacyId}/integration-connections/{connectionId}/external-system | ACTUALIZA | POR_TIPO |
+| DELETE /pharmacies/{pharmacyId}/integration-connections/{connectionId}/external-system | LEE | DIRECTA |
+| PUT /pharmacies/{pharmacyId}/integration-connections/{connectionId}/external-system | CREA | DIRECTA |
+| PUT /pharmacies/{pharmacyId}/integration-connections/{connectionId}/external-system | GUARDA | POR_TIPO |
+| PUT /pharmacies/{pharmacyId}/integration-connections/{connectionId}/external-system | LEE | DIRECTA |
+| POST /pharmacies/{pharmacyId}/integration-connections/{connectionId}/external-system/test | LEE | DIRECTA |
+| POST /pharmacies/{pharmacyId}/integration-connections/{connectionId}/sync | LEE | DIRECTA |
+| POST /pharmacy/orders | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -796,7 +809,7 @@ Gestiona referencias protegidas a credenciales usadas para autenticar conexiones
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_12_integrations.puml: provider_credentials`
 - **Dominio:** Integraciones y Contratos · **Diagrama:** `Mantra Core Health Context/modules/diagram_12_integrations.puml` · **DDL:** `SQL/12_integrations/02_tables.sql`
 - **Entidad del ORM:** `ProviderCredentials` — `src/modules/integrations/entities/provider_credentials.entity.ts`
-- **Resumen:** 13 columnas · 5 índices · 5 FK salientes · 6 entrantes · 6 operaciones
+- **Resumen:** 13 columnas · 5 índices · 5 FK salientes · 6 entrantes · 17 operaciones
 
 #### Columnas
 
@@ -836,9 +849,9 @@ Gestiona referencias protegidas a credenciales usadas para autenticar conexiones
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_provider_credentials_connection_id` | no | connection_id | Soporta la clave foránea fk_provider_credentials_connection_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «connection_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_provider_credentials_connection_id` | no | connection_id | Soporta la clave foránea fk_provider_credentials_connection_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «connection_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_provider_credentials_secret_type_concept_id` | no | secret_type_concept_id | Soporta la clave foránea fk_provider_credentials_secret_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_provider_credentials_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_provider_credentials_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «state_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_provider_credentials_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_provider_credentials_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «state_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_provider_credentials_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_provider_credentials_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_provider_credentials_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_provider_credentials_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 
@@ -852,6 +865,17 @@ Gestiona referencias protegidas a credenciales usadas para autenticar conexiones
 | POST /integrations/messages/{id}:dispatch | LEE | DIRECTA |
 | POST /integrations/providers/{id}/connections | CREA | DIRECTA |
 | POST /integrations/webhooks/inbound | LEE | DIRECTA |
+| GET /pharmacies/{pharmacyId}/integration-connections | LEE | DIRECTA |
+| GET /pharmacies/{pharmacyId}/integration-connections/{connectionId}/external-products | LEE | DIRECTA |
+| DELETE /pharmacies/{pharmacyId}/integration-connections/{connectionId}/external-system | ACTUALIZA | POR_TIPO |
+| DELETE /pharmacies/{pharmacyId}/integration-connections/{connectionId}/external-system | LEE | DIRECTA |
+| PUT /pharmacies/{pharmacyId}/integration-connections/{connectionId}/external-system | ACTUALIZA | POR_TIPO |
+| PUT /pharmacies/{pharmacyId}/integration-connections/{connectionId}/external-system | CREA | DIRECTA |
+| PUT /pharmacies/{pharmacyId}/integration-connections/{connectionId}/external-system | GUARDA | POR_TIPO |
+| PUT /pharmacies/{pharmacyId}/integration-connections/{connectionId}/external-system | LEE | DIRECTA |
+| POST /pharmacies/{pharmacyId}/integration-connections/{connectionId}/external-system/test | LEE | DIRECTA |
+| POST /pharmacies/{pharmacyId}/integration-connections/{connectionId}/sync | LEE | DIRECTA |
+| POST /pharmacy/orders | LEE | DIRECTA |
 
 #### Gobierno
 

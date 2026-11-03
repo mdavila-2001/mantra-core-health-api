@@ -3,7 +3,7 @@
 # Flujos del módulo `iam`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 46 (39 con decisiones propias, 7 sin ellas)
+- **Operaciones:** 46 (40 con decisiones propias, 6 sin ellas)
 - Inventario de endpoints del módulo: [iam](../endpoints/iam.md)
 
 ## Proceso: IAM
@@ -34,7 +34,7 @@ _Fuente: `src/modules/iam/README.md:3`_
 |  |  | POST /iam/auth/logout-all | Cualquier sesión válida | ALTO | 4 |
 |  |  | POST /iam/auth/register-organization | Público (sin sesión) | ALTO | 40 |
 |  |  | POST /iam/auth/register-patient | Público (sin sesión) | ALTO | 21 |
-|  |  | POST /iam/auth/register-practitioner | Público (sin sesión) | ALTO | 72 |
+|  |  | POST /iam/auth/register-practitioner | Público (sin sesión) | ALTO | 76 |
 |  |  | POST /iam/auth/register-support-staff | Público (sin sesión) | ALTO | 21 |
 |  |  | POST /iam/auth/resend-verification | Público (sin sesión) | ALTO | 9 |
 |  |  | POST /iam/auth/reset-password | Público (sin sesión) | ALTO | 8 |
@@ -54,7 +54,7 @@ _Fuente: `src/modules/iam/README.md:3`_
 |  |  | GET /iam/users/{id}/credentials | SECURITY_ADMIN | BAJO | 2 |
 |  |  | POST /iam/users/{id}/credentials/{cid}/revoke | SECURITY_ADMIN | MEDIO | 3 |
 |  |  | POST /iam/users/{id}/credentials/federated | SECURITY_ADMIN | MEDIO | 4 |
-|  |  | POST /iam/users/{id}/deactivate | SECURITY_ADMIN | MEDIO | 13 |
+|  |  | POST /iam/users/{id}/deactivate | SECURITY_ADMIN | MEDIO | 14 |
 |  |  | GET /iam/users/{id}/devices | SECURITY_ADMIN | BAJO | 2 |
 |  |  | POST /iam/users/{id}/devices | Cualquier sesión válida | ALTO | 3 |
 |  |  | GET /iam/users/{id}/global-roles | SECURITY_ADMIN | BAJO | 2 |
@@ -63,10 +63,10 @@ _Fuente: `src/modules/iam/README.md:3`_
 |  |  | POST /iam/users/{id}/lock | SECURITY_ADMIN | MEDIO | 7 |
 |  |  | GET /iam/users/{id}/mfa-factors | SECURITY_ADMIN | BAJO | 2 |
 |  |  | POST /iam/users/{id}/mfa-factors | Cualquier sesión válida | ALTO | 6 |
-|  |  | POST /iam/users/{id}/reactivate | SECURITY_ADMIN | MEDIO | 13 |
+|  |  | POST /iam/users/{id}/reactivate | SECURITY_ADMIN | MEDIO | 14 |
 |  |  | GET /iam/users/{id}/sessions | SECURITY_ADMIN | BAJO | 2 |
-|  |  | POST /iam/users/{id}/suspend | SECURITY_ADMIN | MEDIO | 13 |
-|  |  | POST /iam/users/assisted-practitioner-registration | SECURITY_ADMIN | ALTO | 69 |
+|  |  | POST /iam/users/{id}/suspend | SECURITY_ADMIN | MEDIO | 14 |
+|  |  | POST /iam/users/assisted-practitioner-registration | SECURITY_ADMIN | ALTO | 79 |
 |  |  | POST /iam/users/assisted-registration | CLINICIAN · SECURITY_ADMIN | MEDIO | 10 |
 |  |  | POST /iam/users/search | SECURITY_ADMIN | BAJO | 2 |
 
@@ -111,7 +111,7 @@ flowchart LR
   t26[("+17 tablas más")]
   t35[("+34 tablas más")]
   t38[("+15 tablas más")]
-  t40[("+66 tablas más")]
+  t40[("+70 tablas más")]
   t42[("+15 tablas más")]
   t46[("+3 tablas más")]
   t48[("+2 tablas más")]
@@ -290,7 +290,7 @@ flowchart LR
 ```mermaid
 flowchart LR
   a2(["SECURITY_ADMIN"]):::actor
-  a23(["Cualquier sesión válida"]):::actor
+  a24(["Cualquier sesión válida"]):::actor
   a44(["CLINICIAN · SECURITY_ADMIN"]):::actor
   t3[("iam.authentication_credentials")]:::tabla
   t4[("iam.users")]:::tabla
@@ -299,20 +299,20 @@ flowchart LR
   t8[("iam.user_global_roles")]:::tabla
   t11[("iam.refresh_tokens")]:::tabla
   t12[("iam.sessions")]:::tabla
-  t18[("iam.account_lockouts")]:::tabla
-  t21[("iam.devices")]:::tabla
-  t31[("iam.mfa_factors")]:::tabla
-  t39[("authz.roles")]:::tabla
-  t40[("authz.user_role_assignments")]:::tabla
+  t18[("authz.user_role_assignments")]:::tabla
+  t19[("iam.account_lockouts")]:::tabla
+  t22[("iam.devices")]:::tabla
+  t32[("iam.mfa_factors")]:::tabla
+  t40[("authz.roles")]:::tabla
   t41[("common.addresses")]:::tabla
   t45[("iam.account_activations")]:::tabla
   t13[("+2 tablas más")]
-  t19[("+7 tablas más")]
-  t26[("+2 tablas más")]
-  t29[("+1 tablas más")]
-  t34[("+7 tablas más")]
-  t37[("+7 tablas más")]
-  t42[("+63 tablas más")]
+  t20[("+8 tablas más")]
+  t27[("+2 tablas más")]
+  t30[("+1 tablas más")]
+  t35[("+8 tablas más")]
+  t38[("+8 tablas más")]
+  t42[("+73 tablas más")]
   t46[("+4 tablas más")]
   subgraph s0["ctrl:IamUsersController · Operaciones de IamUsersController que el README no as…"]
     o1["GET /iam/users"]:::op
@@ -323,18 +323,18 @@ flowchart LR
     o15["POST /iam/users/{id}/credentials/{cid}/revoke"]:::op
     o16["POST /iam/users/{id}/credentials/federated"]:::op
     o17["POST /iam/users/{id}/deactivate"]:::op
-    o20["GET /iam/users/{id}/devices"]:::op
-    o22["POST /iam/users/{id}/devices"]:::op
-    o24["GET /iam/users/{id}/global-roles"]:::op
-    o25["POST /iam/users/{id}/global-roles"]:::op
-    o27["GET /iam/users/{id}/lifecycle"]:::op
-    o28["POST /iam/users/{id}/lock"]:::op
-    o30["GET /iam/users/{id}/mfa-factors"]:::op
-    o32["POST /iam/users/{id}/mfa-factors"]:::op
-    o33["POST /iam/users/{id}/reactivate"]:::op
-    o35["GET /iam/users/{id}/sessions"]:::op
-    o36["POST /iam/users/{id}/suspend"]:::op
-    o38["POST /iam/users/assisted-practitioner-registration"]:::op
+    o21["GET /iam/users/{id}/devices"]:::op
+    o23["POST /iam/users/{id}/devices"]:::op
+    o25["GET /iam/users/{id}/global-roles"]:::op
+    o26["POST /iam/users/{id}/global-roles"]:::op
+    o28["GET /iam/users/{id}/lifecycle"]:::op
+    o29["POST /iam/users/{id}/lock"]:::op
+    o31["GET /iam/users/{id}/mfa-factors"]:::op
+    o33["POST /iam/users/{id}/mfa-factors"]:::op
+    o34["POST /iam/users/{id}/reactivate"]:::op
+    o36["GET /iam/users/{id}/sessions"]:::op
+    o37["POST /iam/users/{id}/suspend"]:::op
+    o39["POST /iam/users/assisted-practitioner-registration"]:::op
     o43["POST /iam/users/assisted-registration"]:::op
     o47["POST /iam/users/search"]:::op
   end
@@ -372,78 +372,78 @@ flowchart LR
   o16 -->|"LEE"| t4
   a2 --> o17
   o17 -->|"ACTUALIZA"| t18
-  o17 -->|"CREA"| t18
-  o17 -->|"LEE"| t18
+  o17 -->|"ACTUALIZA"| t19
+  o17 -->|"CREA"| t19
+  o17 -->|"LEE"| t19
   o17 -->|"ACTUALIZA"| t3
   o17 -->|"ACTUALIZA"| t11
-  o17 -->|"CREA"| t7
-  o17 -.-> t19
-  a2 --> o20
-  o20 -->|"LEE"| t21
-  o20 -->|"LEE"| t4
-  a23 --> o22
-  o22 -->|"CREA"| t21
-  o22 -->|"CREA"| t7
-  o22 -->|"LEE"| t4
-  a2 --> o24
-  o24 -->|"LEE"| t8
-  o24 -->|"LEE"| t4
+  o17 -.-> t20
+  a2 --> o21
+  o21 -->|"LEE"| t22
+  o21 -->|"LEE"| t4
+  a24 --> o23
+  o23 -->|"CREA"| t22
+  o23 -->|"CREA"| t7
+  o23 -->|"LEE"| t4
   a2 --> o25
-  o25 -->|"ACTUALIZA"| t11
-  o25 -->|"CREA"| t7
-  o25 -->|"ACTUALIZA"| t12
-  o25 -->|"LEE"| t12
-  o25 -->|"ACTUALIZA"| t8
-  o25 -->|"CREA"| t8
-  o25 -.-> t26
-  a2 --> o27
-  o27 -->|"LEE"| t7
-  o27 -->|"LEE"| t4
+  o25 -->|"LEE"| t8
+  o25 -->|"LEE"| t4
+  a2 --> o26
+  o26 -->|"ACTUALIZA"| t11
+  o26 -->|"CREA"| t7
+  o26 -->|"ACTUALIZA"| t12
+  o26 -->|"LEE"| t12
+  o26 -->|"ACTUALIZA"| t8
+  o26 -->|"CREA"| t8
+  o26 -.-> t27
   a2 --> o28
-  o28 -->|"CREA"| t18
-  o28 -->|"ACTUALIZA"| t11
-  o28 -->|"CREA"| t7
-  o28 -->|"ACTUALIZA"| t12
-  o28 -->|"LEE"| t12
-  o28 -->|"ACTUALIZA"| t4
-  o28 -.-> t29
-  a2 --> o30
-  o30 -->|"LEE"| t31
-  o30 -->|"LEE"| t4
-  a23 --> o32
-  o32 -->|"ACTUALIZA"| t31
-  o32 -->|"CREA"| t31
-  o32 -->|"LEE"| t31
-  o32 -->|"CREA"| t7
-  o32 -->|"ACTUALIZA"| t4
-  o32 -->|"LEE"| t4
-  a2 --> o33
-  o33 -->|"ACTUALIZA"| t18
-  o33 -->|"CREA"| t18
-  o33 -->|"LEE"| t18
-  o33 -->|"ACTUALIZA"| t3
-  o33 -->|"ACTUALIZA"| t11
+  o28 -->|"LEE"| t7
+  o28 -->|"LEE"| t4
+  a2 --> o29
+  o29 -->|"CREA"| t19
+  o29 -->|"ACTUALIZA"| t11
+  o29 -->|"CREA"| t7
+  o29 -->|"ACTUALIZA"| t12
+  o29 -->|"LEE"| t12
+  o29 -->|"ACTUALIZA"| t4
+  o29 -.-> t30
+  a2 --> o31
+  o31 -->|"LEE"| t32
+  o31 -->|"LEE"| t4
+  a24 --> o33
+  o33 -->|"ACTUALIZA"| t32
+  o33 -->|"CREA"| t32
+  o33 -->|"LEE"| t32
   o33 -->|"CREA"| t7
-  o33 -.-> t34
-  a2 --> o35
-  o35 -->|"LEE"| t12
-  o35 -->|"LEE"| t4
+  o33 -->|"ACTUALIZA"| t4
+  o33 -->|"LEE"| t4
+  a2 --> o34
+  o34 -->|"ACTUALIZA"| t18
+  o34 -->|"ACTUALIZA"| t19
+  o34 -->|"CREA"| t19
+  o34 -->|"LEE"| t19
+  o34 -->|"ACTUALIZA"| t3
+  o34 -->|"ACTUALIZA"| t11
+  o34 -.-> t35
   a2 --> o36
-  o36 -->|"ACTUALIZA"| t18
-  o36 -->|"CREA"| t18
-  o36 -->|"LEE"| t18
-  o36 -->|"ACTUALIZA"| t3
-  o36 -->|"ACTUALIZA"| t11
-  o36 -->|"CREA"| t7
-  o36 -.-> t37
-  a2 --> o38
-  o38 -->|"LEE"| t39
-  o38 -->|"CREA"| t40
-  o38 -->|"LEE"| t40
-  o38 -->|"CREA"| t41
-  o38 -->|"LEE"| t41
-  o38 -->|"CREA"| t6
-  o38 -.-> t42
+  o36 -->|"LEE"| t12
+  o36 -->|"LEE"| t4
+  a2 --> o37
+  o37 -->|"ACTUALIZA"| t18
+  o37 -->|"ACTUALIZA"| t19
+  o37 -->|"CREA"| t19
+  o37 -->|"LEE"| t19
+  o37 -->|"ACTUALIZA"| t3
+  o37 -->|"ACTUALIZA"| t11
+  o37 -.-> t38
+  a2 --> o39
+  o39 -->|"LEE"| t40
+  o39 -->|"CREA"| t18
+  o39 -->|"LEE"| t18
+  o39 -->|"CREA"| t41
+  o39 -->|"LEE"| t41
+  o39 -->|"CREA"| t6
+  o39 -.-> t42
   a44 --> o43
   o43 -->|"CREA"| t45
   o43 -->|"CREA"| t3
@@ -910,7 +910,63 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 5. POST /iam/auth/register-organization
+#### 5. POST /iam/auth/logout
+
+Cerrar la sesión actual del usuario
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Redis no está disponible para revocar sesiones |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a IamAuthService.logout"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a SessionsRepository.findActiveByTokenId"]:::llamada
+  n4 --> n5
+  n6[("LEE iam.sessions")]:::efecto
+  n5 --> n6
+  n7["Llama a SessionsRepository.revokeById"]:::llamada
+  n6 --> n7
+  n8[("ACTUALIZA iam.sessions")]:::efecto
+  n7 --> n8
+  n9["Llama a RefreshTokensRepository.revokeBySessionId"]:::llamada
+  n8 --> n9
+  n10[("ACTUALIZA iam.refresh_tokens")]:::efecto
+  n9 --> n10
+  n11["Llama a SecurityEventsRepository.record"]:::llamada
+  n10 --> n11
+  n12[("CREA iam.security_events")]:::efecto
+  n11 --> n12
+  n13{"result.revoked && actor.sessionId"}:::decision
+  n12 --> n13
+  n14["Llama a SessionValidator.revokeSession"]:::llamada
+  n13 -->|"sí"| n14
+  n15{"!this.redis"}:::decision
+  n14 --> n15
+  n16(["500 INTERNAL Redis no está disponible para revocar sesiones"]):::error
+  n15 -->|"sí"| n16
+  n17(("200 Responde con éxito")):::ok
+  n15 -->|"no"| n17
+  n13 -->|"no"| n17
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 6. POST /iam/auth/register-organization
 
 Registrar una organización con su cuenta owner
 
@@ -1066,7 +1122,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 6. POST /iam/auth/register-patient
+#### 7. POST /iam/auth/register-patient
 
 Registrarse como paciente con documento de identidad
 
@@ -1203,7 +1259,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. POST /iam/auth/register-practitioner
+#### 8. POST /iam/auth/register-practitioner
 
 Registrarse como profesional de salud con su matrícula
 
@@ -1372,7 +1428,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. POST /iam/auth/register-support-staff
+#### 9. POST /iam/auth/register-support-staff
 
 Registrarse como secretaria (personal de apoyo hospitalario)
 
@@ -1534,7 +1590,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. POST /iam/auth/resend-verification
+#### 10. POST /iam/auth/resend-verification
 
 Reenviar el enlace de verificación del correo
 
@@ -1622,7 +1678,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. POST /iam/auth/reset-password
+#### 11. POST /iam/auth/reset-password
 
 Fijar una contraseña nueva con el token recibido por correo
 
@@ -1699,7 +1755,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. POST /iam/auth/token/refresh
+#### 12. POST /iam/auth/token/refresh
 
 Rotar el refresh token
 
@@ -1829,7 +1885,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. POST /iam/auth/upload-registration-document
+#### 13. POST /iam/auth/upload-registration-document
 
 Pre-cargar un PDF para un registro de organización o profesional
 
@@ -1851,53 +1907,55 @@ flowchart TD
   n2 --> n3
   n4["Llama a CommonRegistrationFilesAdapter.uploadAnonymous"]:::llamada
   n3 --> n4
-  n5["Llama a FileUploadService.uploadAnonymous"]:::llamada
+  n5["Transacción: transactional(…)"]:::transaccion
   n4 --> n5
-  n6{"!file?.buffer?.byteLength"}:::decision
+  n6["Llama a FileUploadService.uploadAnonymous"]:::llamada
   n5 --> n6
-  n7(["422 PRECONDITION_FAILED No se recibió contenido en el campo 'file'"]):::error
-  n6 -->|"sí"| n7
-  n8{"file.buffer.byteLength › this.maxSizeBytes"}:::decision
-  n6 -->|"no"| n8
-  n9(["422 PRECONDITION_FAILED El archivo excede el tamaño máximo permitido"]):::error
-  n8 -->|"sí"| n9
-  n10{"!detectedMimeType || !policy.allowedMimeTypes.includes(detectedMimeType)"}:::decision
-  n8 -->|"no"| n10
-  n11(["422 PRECONDITION_FAILED Solo se admiten documentos PDF"]):::error
-  n10 -->|"sí"| n11
-  n12{"this.publication"}:::decision
-  n10 -->|"no"| n12
-  n13["Llama a FileUploadService.publishUpload"]:::llamada
-  n12 -->|"sí"| n13
-  n14{"!this.publication"}:::decision
-  n13 --> n14
-  n15(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
-  n14 -->|"sí"| n15
-  n16{"loadStorageEnv().lifecycleBinding"}:::decision
-  n14 -->|"no"| n16
-  n12 -->|"no"| n16
-  n17(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
-  n16 -->|"sí"| n17
-  n18["Llama a LocalDiskFileStorageAdapter.store"]:::llamada
-  n16 -->|"no"| n18
-  n19{"this.lifecycleBinding"}:::decision
-  n18 --> n19
-  n20{"!permit || plan.identity.kind === 'UNKNOWN'"}:::decision
-  n19 -->|"sí"| n20
-  n21(["500 INTERNAL WRITE_RESERVATION_REQUIRED"]):::error
+  n7{"!file?.buffer?.byteLength"}:::decision
+  n6 --> n7
+  n8(["422 PRECONDITION_FAILED No se recibió contenido en el campo 'file'"]):::error
+  n7 -->|"sí"| n8
+  n9{"file.buffer.byteLength › this.maxSizeBytes"}:::decision
+  n7 -->|"no"| n9
+  n10(["422 PRECONDITION_FAILED El archivo excede el tamaño máximo permitido"]):::error
+  n9 -->|"sí"| n10
+  n11{"!detectedMimeType || !policy.allowedMimeTypes.includes(detectedMimeType)"}:::decision
+  n9 -->|"no"| n11
+  n12(["422 PRECONDITION_FAILED Solo se admiten documentos PDF"]):::error
+  n11 -->|"sí"| n12
+  n13{"this.publication"}:::decision
+  n11 -->|"no"| n13
+  n14["Llama a FileUploadService.publishUpload"]:::llamada
+  n13 -->|"sí"| n14
+  n15{"!this.publication"}:::decision
+  n14 --> n15
+  n16(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
+  n15 -->|"sí"| n16
+  n17{"loadStorageEnv().lifecycleBinding"}:::decision
+  n15 -->|"no"| n17
+  n13 -->|"no"| n17
+  n18(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
+  n17 -->|"sí"| n18
+  n19["Llama a LocalDiskFileStorageAdapter.store"]:::llamada
+  n17 -->|"no"| n19
+  n20{"this.lifecycleBinding"}:::decision
+  n19 --> n20
+  n21{"!permit || plan.identity.kind === 'UNKNOWN'"}:::decision
   n20 -->|"sí"| n21
-  n22["Llama a S3FileStorageAdapter.store"]:::llamada
-  n20 -->|"no"| n22
-  n19 -->|"no"| n22
-  n23{"this.env.lifecycleBinding"}:::decision
-  n22 --> n23
-  n24{"!permit || plan.identity.kind === 'UNKNOWN'"}:::decision
-  n23 -->|"sí"| n24
-  n25(["500 INTERNAL WRITE_RESERVATION_REQUIRED"]):::error
+  n22(["500 INTERNAL WRITE_RESERVATION_REQUIRED"]):::error
+  n21 -->|"sí"| n22
+  n23["Llama a S3FileStorageAdapter.store"]:::llamada
+  n21 -->|"no"| n23
+  n20 -->|"no"| n23
+  n24{"this.env.lifecycleBinding"}:::decision
+  n23 --> n24
+  n25{"!permit || plan.identity.kind === 'UNKNOWN'"}:::decision
   n24 -->|"sí"| n25
-  n26(("201 Responde con éxito")):::ok
-  n24 -->|"no"| n26
-  n23 -->|"no"| n26
+  n26(["500 INTERNAL WRITE_RESERVATION_REQUIRED"]):::error
+  n25 -->|"sí"| n26
+  n27(("201 Responde con éxito")):::ok
+  n25 -->|"no"| n27
+  n24 -->|"no"| n27
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1906,7 +1964,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 13. POST /iam/auth/upload-registration-logo
+#### 14. POST /iam/auth/upload-registration-logo
 
 Pre-cargar el logo del consultorio propio para el registro
 
@@ -1932,53 +1990,55 @@ flowchart TD
   n4 -->|"sí"| n5
   n6["Llama a CommonRegistrationFilesAdapter.uploadAnonymous"]:::llamada
   n4 -->|"no"| n6
-  n7["Llama a FileUploadService.uploadAnonymous"]:::llamada
+  n7["Transacción: transactional(…)"]:::transaccion
   n6 --> n7
-  n8{"!file?.buffer?.byteLength"}:::decision
+  n8["Llama a FileUploadService.uploadAnonymous"]:::llamada
   n7 --> n8
-  n9(["422 PRECONDITION_FAILED No se recibió contenido en el campo 'file'"]):::error
-  n8 -->|"sí"| n9
-  n10{"file.buffer.byteLength › this.maxSizeBytes"}:::decision
-  n8 -->|"no"| n10
-  n11(["422 PRECONDITION_FAILED El archivo excede el tamaño máximo permitido"]):::error
-  n10 -->|"sí"| n11
-  n12{"!detectedMimeType || !policy.allowedMimeTypes.includes(detectedMimeType)"}:::decision
-  n10 -->|"no"| n12
-  n13(["422 PRECONDITION_FAILED Solo se admiten documentos PDF"]):::error
-  n12 -->|"sí"| n13
-  n14{"this.publication"}:::decision
-  n12 -->|"no"| n14
-  n15["Llama a FileUploadService.publishUpload"]:::llamada
-  n14 -->|"sí"| n15
-  n16{"!this.publication"}:::decision
-  n15 --> n16
-  n17(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
-  n16 -->|"sí"| n17
-  n18{"loadStorageEnv().lifecycleBinding"}:::decision
-  n16 -->|"no"| n18
-  n14 -->|"no"| n18
-  n19(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
-  n18 -->|"sí"| n19
-  n20["Llama a LocalDiskFileStorageAdapter.store"]:::llamada
-  n18 -->|"no"| n20
-  n21{"this.lifecycleBinding"}:::decision
-  n20 --> n21
-  n22{"!permit || plan.identity.kind === 'UNKNOWN'"}:::decision
-  n21 -->|"sí"| n22
-  n23(["500 INTERNAL WRITE_RESERVATION_REQUIRED"]):::error
+  n9{"!file?.buffer?.byteLength"}:::decision
+  n8 --> n9
+  n10(["422 PRECONDITION_FAILED No se recibió contenido en el campo 'file'"]):::error
+  n9 -->|"sí"| n10
+  n11{"file.buffer.byteLength › this.maxSizeBytes"}:::decision
+  n9 -->|"no"| n11
+  n12(["422 PRECONDITION_FAILED El archivo excede el tamaño máximo permitido"]):::error
+  n11 -->|"sí"| n12
+  n13{"!detectedMimeType || !policy.allowedMimeTypes.includes(detectedMimeType)"}:::decision
+  n11 -->|"no"| n13
+  n14(["422 PRECONDITION_FAILED Solo se admiten documentos PDF"]):::error
+  n13 -->|"sí"| n14
+  n15{"this.publication"}:::decision
+  n13 -->|"no"| n15
+  n16["Llama a FileUploadService.publishUpload"]:::llamada
+  n15 -->|"sí"| n16
+  n17{"!this.publication"}:::decision
+  n16 --> n17
+  n18(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
+  n17 -->|"sí"| n18
+  n19{"loadStorageEnv().lifecycleBinding"}:::decision
+  n17 -->|"no"| n19
+  n15 -->|"no"| n19
+  n20(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
+  n19 -->|"sí"| n20
+  n21["Llama a LocalDiskFileStorageAdapter.store"]:::llamada
+  n19 -->|"no"| n21
+  n22{"this.lifecycleBinding"}:::decision
+  n21 --> n22
+  n23{"!permit || plan.identity.kind === 'UNKNOWN'"}:::decision
   n22 -->|"sí"| n23
-  n24["Llama a S3FileStorageAdapter.store"]:::llamada
-  n22 -->|"no"| n24
-  n21 -->|"no"| n24
-  n25{"this.env.lifecycleBinding"}:::decision
-  n24 --> n25
-  n26{"!permit || plan.identity.kind === 'UNKNOWN'"}:::decision
-  n25 -->|"sí"| n26
-  n27(["500 INTERNAL WRITE_RESERVATION_REQUIRED"]):::error
+  n24(["500 INTERNAL WRITE_RESERVATION_REQUIRED"]):::error
+  n23 -->|"sí"| n24
+  n25["Llama a S3FileStorageAdapter.store"]:::llamada
+  n23 -->|"no"| n25
+  n22 -->|"no"| n25
+  n26{"this.env.lifecycleBinding"}:::decision
+  n25 --> n26
+  n27{"!permit || plan.identity.kind === 'UNKNOWN'"}:::decision
   n26 -->|"sí"| n27
-  n28(("201 Responde con éxito")):::ok
-  n26 -->|"no"| n28
-  n25 -->|"no"| n28
+  n28(["500 INTERNAL WRITE_RESERVATION_REQUIRED"]):::error
+  n27 -->|"sí"| n28
+  n29(("201 Responde con éxito")):::ok
+  n27 -->|"no"| n29
+  n26 -->|"no"| n29
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1987,7 +2047,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 14. POST /iam/auth/upload-registration-signature-image
+#### 15. POST /iam/auth/upload-registration-signature-image
 
 Pre-cargar una imagen de firma o sello para el registro
 
@@ -2013,53 +2073,55 @@ flowchart TD
   n4 -->|"sí"| n5
   n6["Llama a CommonRegistrationFilesAdapter.uploadAnonymous"]:::llamada
   n4 -->|"no"| n6
-  n7["Llama a FileUploadService.uploadAnonymous"]:::llamada
+  n7["Transacción: transactional(…)"]:::transaccion
   n6 --> n7
-  n8{"!file?.buffer?.byteLength"}:::decision
+  n8["Llama a FileUploadService.uploadAnonymous"]:::llamada
   n7 --> n8
-  n9(["422 PRECONDITION_FAILED No se recibió contenido en el campo 'file'"]):::error
-  n8 -->|"sí"| n9
-  n10{"file.buffer.byteLength › this.maxSizeBytes"}:::decision
-  n8 -->|"no"| n10
-  n11(["422 PRECONDITION_FAILED El archivo excede el tamaño máximo permitido"]):::error
-  n10 -->|"sí"| n11
-  n12{"!detectedMimeType || !policy.allowedMimeTypes.includes(detectedMimeType)"}:::decision
-  n10 -->|"no"| n12
-  n13(["422 PRECONDITION_FAILED Solo se admiten documentos PDF"]):::error
-  n12 -->|"sí"| n13
-  n14{"this.publication"}:::decision
-  n12 -->|"no"| n14
-  n15["Llama a FileUploadService.publishUpload"]:::llamada
-  n14 -->|"sí"| n15
-  n16{"!this.publication"}:::decision
-  n15 --> n16
-  n17(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
-  n16 -->|"sí"| n17
-  n18{"loadStorageEnv().lifecycleBinding"}:::decision
-  n16 -->|"no"| n18
-  n14 -->|"no"| n18
-  n19(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
-  n18 -->|"sí"| n19
-  n20["Llama a LocalDiskFileStorageAdapter.store"]:::llamada
-  n18 -->|"no"| n20
-  n21{"this.lifecycleBinding"}:::decision
-  n20 --> n21
-  n22{"!permit || plan.identity.kind === 'UNKNOWN'"}:::decision
-  n21 -->|"sí"| n22
-  n23(["500 INTERNAL WRITE_RESERVATION_REQUIRED"]):::error
+  n9{"!file?.buffer?.byteLength"}:::decision
+  n8 --> n9
+  n10(["422 PRECONDITION_FAILED No se recibió contenido en el campo 'file'"]):::error
+  n9 -->|"sí"| n10
+  n11{"file.buffer.byteLength › this.maxSizeBytes"}:::decision
+  n9 -->|"no"| n11
+  n12(["422 PRECONDITION_FAILED El archivo excede el tamaño máximo permitido"]):::error
+  n11 -->|"sí"| n12
+  n13{"!detectedMimeType || !policy.allowedMimeTypes.includes(detectedMimeType)"}:::decision
+  n11 -->|"no"| n13
+  n14(["422 PRECONDITION_FAILED Solo se admiten documentos PDF"]):::error
+  n13 -->|"sí"| n14
+  n15{"this.publication"}:::decision
+  n13 -->|"no"| n15
+  n16["Llama a FileUploadService.publishUpload"]:::llamada
+  n15 -->|"sí"| n16
+  n17{"!this.publication"}:::decision
+  n16 --> n17
+  n18(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
+  n17 -->|"sí"| n18
+  n19{"loadStorageEnv().lifecycleBinding"}:::decision
+  n17 -->|"no"| n19
+  n15 -->|"no"| n19
+  n20(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
+  n19 -->|"sí"| n20
+  n21["Llama a LocalDiskFileStorageAdapter.store"]:::llamada
+  n19 -->|"no"| n21
+  n22{"this.lifecycleBinding"}:::decision
+  n21 --> n22
+  n23{"!permit || plan.identity.kind === 'UNKNOWN'"}:::decision
   n22 -->|"sí"| n23
-  n24["Llama a S3FileStorageAdapter.store"]:::llamada
-  n22 -->|"no"| n24
-  n21 -->|"no"| n24
-  n25{"this.env.lifecycleBinding"}:::decision
-  n24 --> n25
-  n26{"!permit || plan.identity.kind === 'UNKNOWN'"}:::decision
-  n25 -->|"sí"| n26
-  n27(["500 INTERNAL WRITE_RESERVATION_REQUIRED"]):::error
+  n24(["500 INTERNAL WRITE_RESERVATION_REQUIRED"]):::error
+  n23 -->|"sí"| n24
+  n25["Llama a S3FileStorageAdapter.store"]:::llamada
+  n23 -->|"no"| n25
+  n22 -->|"no"| n25
+  n26{"this.env.lifecycleBinding"}:::decision
+  n25 --> n26
+  n27{"!permit || plan.identity.kind === 'UNKNOWN'"}:::decision
   n26 -->|"sí"| n27
-  n28(("201 Responde con éxito")):::ok
-  n26 -->|"no"| n28
-  n25 -->|"no"| n28
+  n28(["500 INTERNAL WRITE_RESERVATION_REQUIRED"]):::error
+  n27 -->|"sí"| n28
+  n29(("201 Responde con éxito")):::ok
+  n27 -->|"no"| n29
+  n26 -->|"no"| n29
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2068,7 +2130,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 15. POST /iam/auth/verify-email
+#### 16. POST /iam/auth/verify-email
 
 Verificar el correo con el token recibido
 
@@ -2129,7 +2191,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 16. POST /iam/me/sessions/{id}/revoke
+#### 17. POST /iam/me/sessions/{id}/revoke
 
 Cerrar una de mis sesiones
 
@@ -2181,7 +2243,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 17. DELETE /iam/onboarding-drafts/{formType}/{draftId}
+#### 18. DELETE /iam/onboarding-drafts/{formType}/{draftId}
 
 Elimina el borrador al completar el alta exitosamente o por descarte del usuario
 
@@ -2214,7 +2276,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 18. GET /iam/onboarding-drafts/{formType}/{draftId}
+#### 19. GET /iam/onboarding-drafts/{formType}/{draftId}
 
 Recupera un borrador de alta guardado por identificador y tipo de formulario
 
@@ -2247,7 +2309,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 19. PUT /iam/onboarding-drafts/{formType}/{draftId}
+#### 20. PUT /iam/onboarding-drafts/{formType}/{draftId}
 
 Guarda o actualiza el avance del formulario de alta en borrador
 
@@ -2317,7 +2379,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 20. POST /iam/users
+#### 21. POST /iam/users
 
 Crear un usuario con credencial de contraseña y rol inicial
 
@@ -2382,7 +2444,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 21. GET /iam/users/{id}
+#### 22. GET /iam/users/{id}
 
 Ficha de un usuario
 
@@ -2420,7 +2482,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 22. POST /iam/users/{id}/anonymize
+#### 23. POST /iam/users/{id}/anonymize
 
 Anonimizar (DSAR) la cuenta
 
@@ -2486,7 +2548,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 23. GET /iam/users/{id}/credentials
+#### 24. GET /iam/users/{id}/credentials
 
 Credenciales del usuario
 
@@ -2530,7 +2592,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 24. POST /iam/users/{id}/credentials/{cid}/revoke
+#### 25. POST /iam/users/{id}/credentials/{cid}/revoke
 
 Revocar una credencial del usuario
 
@@ -2576,7 +2638,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 25. POST /iam/users/{id}/credentials/federated
+#### 26. POST /iam/users/{id}/credentials/federated
 
 Enlazar una credencial de identidad federada
 
@@ -2633,7 +2695,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 26. POST /iam/users/{id}/deactivate
+#### 27. POST /iam/users/{id}/deactivate
 
 Dar de baja la cuenta con motivo (sin borrado físico; idempotente)
 
@@ -2642,7 +2704,7 @@ Dar de baja la cuenta con motivo (sin borrado físico; idempotente)
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {{ code: 'FORBIDDEN', reason: IamErrorReason.USER_SUPERADMIN…} |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Usuario no encontrado |
 | 409 | `CONFLICT` | ConflictException: La cuenta no puede pasar a ese estado desde el que tiene; ConflictException: La cuenta cambió de estado mientras se aplicaba: reintentá |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un administrador no puede suspender ni dar de baja su propia cuenta; PreconditionFailedException: Es la última cuenta que administra accesos: concedé ese rol a otra antes |
@@ -2671,90 +2733,94 @@ flowchart TD
   n9 --> n10
   n11(["404 NOT_FOUND Usuario no encontrado"]):::error
   n10 -->|"sí"| n11
-  n12["Llama a IamUsersService.lifecycleStateOf"]:::llamada
+  n12["Llama a UserGlobalRolesRepository.findActiveForUser"]:::llamada
   n10 -->|"no"| n12
-  n13["Llama a SecurityEventsRepository.latestLifecycleAction"]:::llamada
+  n13[("LEE iam.user_global_roles")]:::efecto
   n12 --> n13
-  n14[("LEE iam.security_events")]:::efecto
+  n14{"grants.some((g) =› g.roleConceptId === CONCEPTS.ROLE_SUPERADMIN) && !roleAuthorizesInTenant(actor, 'SUPERADMI…"}:::decision
   n13 --> n14
-  n15{"!from || !rule.from.includes(from)"}:::decision
-  n14 --> n15
-  n16(["409 CONFLICT La cuenta no puede pasar a ese estado desde el que tiene"]):::error
-  n15 -->|"sí"| n16
-  n17{"action !== 'REACTIVATE'"}:::decision
-  n15 -->|"no"| n17
-  n18["Llama a UserGlobalRolesRepository.findActiveForUser"]:::llamada
-  n17 -->|"sí"| n18
-  n19[("LEE iam.user_global_roles")]:::efecto
+  n15(["403 FORBIDDEN {{ code: 'FORBIDDEN', reason: IamErrorReason.USER_SUPERADMIN…}"]):::error
+  n14 -->|"sí"| n15
+  n16["Llama a IamUsersService.lifecycleStateOf"]:::llamada
+  n14 -->|"no"| n16
+  n17["Llama a SecurityEventsRepository.latestLifecycleAction"]:::llamada
+  n16 --> n17
+  n18[("LEE iam.security_events")]:::efecto
+  n17 --> n18
+  n19{"!from || !rule.from.includes(from)"}:::decision
   n18 --> n19
-  n20["Llama a UserGlobalRolesRepository.countOtherActiveHolders"]:::llamada
-  n19 --> n20
-  n21[("LEE iam.user_global_roles · LEE iam.users")]:::efecto
-  n20 --> n21
-  n22{"isAccessAdmin && (await this.rolesRepo.countOtherActiveHolders( tx, ACCESS_ADMIN_ROLE_CONCEPTS, userId, )) ==…"}:::decision
-  n21 --> n22
-  n23(["422 PRECONDITION_FAILED Es la última cuenta que administra accesos: concedé ese rol a otra antes"]):::error
-  n22 -->|"sí"| n23
-  n24["Llama a UsersRepository.transitionStatus"]:::llamada
-  n22 -->|"no"| n24
-  n17 -->|"no"| n24
-  n25[("ACTUALIZA iam.users")]:::efecto
-  n24 --> n25
-  n26{"!applied"}:::decision
-  n25 --> n26
-  n27(["409 CONFLICT La cuenta cambió de estado mientras se aplicaba: reintentá"]):::error
-  n26 -->|"sí"| n27
-  n28{"action === 'REACTIVATE'"}:::decision
-  n26 -->|"no"| n28
-  n29["Llama a AccountLockoutsRepository.releaseActiveForUser"]:::llamada
+  n20(["409 CONFLICT La cuenta no puede pasar a ese estado desde el que tiene"]):::error
+  n19 -->|"sí"| n20
+  n21{"action !== 'REACTIVATE'"}:::decision
+  n19 -->|"no"| n21
+  n22["Llama a UserGlobalRolesRepository.countOtherActiveHolders"]:::llamada
+  n21 -->|"sí"| n22
+  n23[("LEE iam.user_global_roles · LEE iam.users")]:::efecto
+  n22 --> n23
+  n24{"isAccessAdmin && (await this.rolesRepo.countOtherActiveHolders( tx, ACCESS_ADMIN_ROLE_CONCEPTS, userId, )) ==…"}:::decision
+  n23 --> n24
+  n25(["422 PRECONDITION_FAILED Es la última cuenta que administra accesos: concedé ese rol a otra antes"]):::error
+  n24 -->|"sí"| n25
+  n26["Llama a UsersRepository.transitionStatus"]:::llamada
+  n24 -->|"no"| n26
+  n21 -->|"no"| n26
+  n27[("ACTUALIZA iam.users")]:::efecto
+  n26 --> n27
+  n28{"!applied"}:::decision
+  n27 --> n28
+  n29(["409 CONFLICT La cuenta cambió de estado mientras se aplicaba: reintentá"]):::error
   n28 -->|"sí"| n29
-  n30["Llama a AccountLockoutsRepository.findActiveForUser"]:::llamada
-  n29 --> n30
-  n31[("LEE iam.account_lockouts")]:::efecto
-  n30 --> n31
-  n32[("ACTUALIZA iam.account_lockouts · ACTUALIZA iam.account_lockouts · ACTUALIZA iam.account_lockouts · ACTUALIZA…")]:::efecto
+  n30{"action === 'REACTIVATE'"}:::decision
+  n28 -->|"no"| n30
+  n31["Llama a AccountLockoutsRepository.releaseActiveForUser"]:::llamada
+  n30 -->|"sí"| n31
+  n32["Llama a AccountLockoutsRepository.findActiveForUser"]:::llamada
   n31 --> n32
-  n33["Llama a AccountLockoutsRepository.findActiveForUser"]:::llamada
-  n28 -->|"no"| n33
-  n34[("LEE iam.account_lockouts")]:::efecto
+  n33[("LEE iam.account_lockouts")]:::efecto
+  n32 --> n33
+  n34[("ACTUALIZA iam.account_lockouts · ACTUALIZA iam.account_lockouts · ACTUALIZA iam.account_lockouts · ACTUALIZA…")]:::efecto
   n33 --> n34
-  n35{"!(await this.lockoutsRepo.findActiveForUser(tx, userId))"}:::decision
-  n34 --> n35
-  n36["Llama a AccountLockoutsRepository.create"]:::llamada
-  n35 -->|"sí"| n36
-  n37[("CREA iam.account_lockouts")]:::efecto
+  n35["Llama a AccountLockoutsRepository.findActiveForUser"]:::llamada
+  n30 -->|"no"| n35
+  n36[("LEE iam.account_lockouts")]:::efecto
+  n35 --> n36
+  n37{"!(await this.lockoutsRepo.findActiveForUser(tx, userId))"}:::decision
   n36 --> n37
-  n38["Llama a SessionsRepository.activeSessionIdsForUser"]:::llamada
-  n37 --> n38
-  n35 -->|"no"| n38
-  n39[("LEE iam.sessions")]:::efecto
+  n38["Llama a AccountLockoutsRepository.create"]:::llamada
+  n37 -->|"sí"| n38
+  n39[("CREA iam.account_lockouts")]:::efecto
   n38 --> n39
-  n40["Llama a SessionsRepository.revokeAllActiveForUser"]:::llamada
+  n40["Llama a SessionsRepository.activeSessionIdsForUser"]:::llamada
   n39 --> n40
-  n41[("ACTUALIZA iam.sessions")]:::efecto
+  n37 -->|"no"| n40
+  n41[("LEE iam.sessions")]:::efecto
   n40 --> n41
-  n42["Llama a RefreshTokensRepository.revokeActiveBySessionIds"]:::llamada
+  n42["Llama a SessionsRepository.revokeAllActiveForUser"]:::llamada
   n41 --> n42
-  n43[("ACTUALIZA iam.refresh_tokens")]:::efecto
+  n43[("ACTUALIZA iam.sessions")]:::efecto
   n42 --> n43
-  n44{"action === 'DEACTIVATE'"}:::decision
+  n44["Llama a RefreshTokensRepository.revokeActiveBySessionIds"]:::llamada
   n43 --> n44
-  n45["Llama a CredentialsRepository.revokeAllForUser"]:::llamada
-  n44 -->|"sí"| n45
-  n46[("ACTUALIZA iam.authentication_credentials")]:::efecto
+  n45[("ACTUALIZA iam.refresh_tokens")]:::efecto
+  n44 --> n45
+  n46{"action === 'DEACTIVATE'"}:::decision
   n45 --> n46
-  n47["Llama a UserGlobalRolesRepository.revokeAllForUser"]:::llamada
-  n46 --> n47
-  n48[("ACTUALIZA iam.user_global_roles")]:::efecto
+  n47["Llama a CredentialsRepository.revokeAllForUser"]:::llamada
+  n46 -->|"sí"| n47
+  n48[("ACTUALIZA iam.authentication_credentials")]:::efecto
   n47 --> n48
-  n49["Llama a SecurityEventsRepository.record"]:::llamada
-  n32 --> n49
+  n49["Llama a UserGlobalRolesRepository.revokeAllForUser"]:::llamada
   n48 --> n49
-  n44 -->|"no"| n49
-  n50[("CREA iam.security_events")]:::efecto
+  n50[("ACTUALIZA iam.user_global_roles")]:::efecto
   n49 --> n50
-  n51(("200 Responde con éxito")):::ok
+  n51["Llama a SecurityEventsRepository.record"]:::llamada
+  n34 --> n51
   n50 --> n51
+  n46 -->|"no"| n51
+  n52[("CREA iam.security_events")]:::efecto
+  n51 --> n52
+  n53(("200 Responde con éxito")):::ok
+  n52 --> n53
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2763,7 +2829,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 27. GET /iam/users/{id}/devices
+#### 28. GET /iam/users/{id}/devices
 
 Dispositivos del usuario
 
@@ -2807,7 +2873,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 28. POST /iam/users/{id}/devices
+#### 29. POST /iam/users/{id}/devices
 
 Registrar un dispositivo del usuario
 
@@ -2862,7 +2928,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 29. GET /iam/users/{id}/global-roles
+#### 30. GET /iam/users/{id}/global-roles
 
 Roles globales del usuario
 
@@ -2906,7 +2972,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 30. POST /iam/users/{id}/global-roles
+#### 31. POST /iam/users/{id}/global-roles
 
 Conceder o revocar un rol global
 
@@ -2988,7 +3054,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 31. GET /iam/users/{id}/lifecycle
+#### 32. GET /iam/users/{id}/lifecycle
 
 Estado de ciclo de vida de la cuenta y su historia, paginada
 
@@ -3040,7 +3106,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 32. POST /iam/users/{id}/lock
+#### 33. POST /iam/users/{id}/lock
 
 Bloquear la cuenta y revocar sus sesiones
 
@@ -3102,7 +3168,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 33. GET /iam/users/{id}/mfa-factors
+#### 34. GET /iam/users/{id}/mfa-factors
 
 Factores de MFA del usuario
 
@@ -3146,7 +3212,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 34. POST /iam/users/{id}/mfa-factors
+#### 35. POST /iam/users/{id}/mfa-factors
 
 Enrolar o verificar un factor MFA
 
@@ -3245,7 +3311,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 35. POST /iam/users/{id}/reactivate
+#### 36. POST /iam/users/{id}/reactivate
 
 Reactivar una cuenta suspendida con motivo (idempotente)
 
@@ -3254,7 +3320,7 @@ Reactivar una cuenta suspendida con motivo (idempotente)
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {{ code: 'FORBIDDEN', reason: IamErrorReason.USER_SUPERADMIN…} |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Usuario no encontrado |
 | 409 | `CONFLICT` | ConflictException: La cuenta no puede pasar a ese estado desde el que tiene; ConflictException: La cuenta cambió de estado mientras se aplicaba: reintentá |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un administrador no puede suspender ni dar de baja su propia cuenta; PreconditionFailedException: Es la última cuenta que administra accesos: concedé ese rol a otra antes |
@@ -3283,90 +3349,94 @@ flowchart TD
   n9 --> n10
   n11(["404 NOT_FOUND Usuario no encontrado"]):::error
   n10 -->|"sí"| n11
-  n12["Llama a IamUsersService.lifecycleStateOf"]:::llamada
+  n12["Llama a UserGlobalRolesRepository.findActiveForUser"]:::llamada
   n10 -->|"no"| n12
-  n13["Llama a SecurityEventsRepository.latestLifecycleAction"]:::llamada
+  n13[("LEE iam.user_global_roles")]:::efecto
   n12 --> n13
-  n14[("LEE iam.security_events")]:::efecto
+  n14{"grants.some((g) =› g.roleConceptId === CONCEPTS.ROLE_SUPERADMIN) && !roleAuthorizesInTenant(actor, 'SUPERADMI…"}:::decision
   n13 --> n14
-  n15{"!from || !rule.from.includes(from)"}:::decision
-  n14 --> n15
-  n16(["409 CONFLICT La cuenta no puede pasar a ese estado desde el que tiene"]):::error
-  n15 -->|"sí"| n16
-  n17{"action !== 'REACTIVATE'"}:::decision
-  n15 -->|"no"| n17
-  n18["Llama a UserGlobalRolesRepository.findActiveForUser"]:::llamada
-  n17 -->|"sí"| n18
-  n19[("LEE iam.user_global_roles")]:::efecto
+  n15(["403 FORBIDDEN {{ code: 'FORBIDDEN', reason: IamErrorReason.USER_SUPERADMIN…}"]):::error
+  n14 -->|"sí"| n15
+  n16["Llama a IamUsersService.lifecycleStateOf"]:::llamada
+  n14 -->|"no"| n16
+  n17["Llama a SecurityEventsRepository.latestLifecycleAction"]:::llamada
+  n16 --> n17
+  n18[("LEE iam.security_events")]:::efecto
+  n17 --> n18
+  n19{"!from || !rule.from.includes(from)"}:::decision
   n18 --> n19
-  n20["Llama a UserGlobalRolesRepository.countOtherActiveHolders"]:::llamada
-  n19 --> n20
-  n21[("LEE iam.user_global_roles · LEE iam.users")]:::efecto
-  n20 --> n21
-  n22{"isAccessAdmin && (await this.rolesRepo.countOtherActiveHolders( tx, ACCESS_ADMIN_ROLE_CONCEPTS, userId, )) ==…"}:::decision
-  n21 --> n22
-  n23(["422 PRECONDITION_FAILED Es la última cuenta que administra accesos: concedé ese rol a otra antes"]):::error
-  n22 -->|"sí"| n23
-  n24["Llama a UsersRepository.transitionStatus"]:::llamada
-  n22 -->|"no"| n24
-  n17 -->|"no"| n24
-  n25[("ACTUALIZA iam.users")]:::efecto
-  n24 --> n25
-  n26{"!applied"}:::decision
-  n25 --> n26
-  n27(["409 CONFLICT La cuenta cambió de estado mientras se aplicaba: reintentá"]):::error
-  n26 -->|"sí"| n27
-  n28{"action === 'REACTIVATE'"}:::decision
-  n26 -->|"no"| n28
-  n29["Llama a AccountLockoutsRepository.releaseActiveForUser"]:::llamada
+  n20(["409 CONFLICT La cuenta no puede pasar a ese estado desde el que tiene"]):::error
+  n19 -->|"sí"| n20
+  n21{"action !== 'REACTIVATE'"}:::decision
+  n19 -->|"no"| n21
+  n22["Llama a UserGlobalRolesRepository.countOtherActiveHolders"]:::llamada
+  n21 -->|"sí"| n22
+  n23[("LEE iam.user_global_roles · LEE iam.users")]:::efecto
+  n22 --> n23
+  n24{"isAccessAdmin && (await this.rolesRepo.countOtherActiveHolders( tx, ACCESS_ADMIN_ROLE_CONCEPTS, userId, )) ==…"}:::decision
+  n23 --> n24
+  n25(["422 PRECONDITION_FAILED Es la última cuenta que administra accesos: concedé ese rol a otra antes"]):::error
+  n24 -->|"sí"| n25
+  n26["Llama a UsersRepository.transitionStatus"]:::llamada
+  n24 -->|"no"| n26
+  n21 -->|"no"| n26
+  n27[("ACTUALIZA iam.users")]:::efecto
+  n26 --> n27
+  n28{"!applied"}:::decision
+  n27 --> n28
+  n29(["409 CONFLICT La cuenta cambió de estado mientras se aplicaba: reintentá"]):::error
   n28 -->|"sí"| n29
-  n30["Llama a AccountLockoutsRepository.findActiveForUser"]:::llamada
-  n29 --> n30
-  n31[("LEE iam.account_lockouts")]:::efecto
-  n30 --> n31
-  n32[("ACTUALIZA iam.account_lockouts · ACTUALIZA iam.account_lockouts · ACTUALIZA iam.account_lockouts · ACTUALIZA…")]:::efecto
+  n30{"action === 'REACTIVATE'"}:::decision
+  n28 -->|"no"| n30
+  n31["Llama a AccountLockoutsRepository.releaseActiveForUser"]:::llamada
+  n30 -->|"sí"| n31
+  n32["Llama a AccountLockoutsRepository.findActiveForUser"]:::llamada
   n31 --> n32
-  n33["Llama a AccountLockoutsRepository.findActiveForUser"]:::llamada
-  n28 -->|"no"| n33
-  n34[("LEE iam.account_lockouts")]:::efecto
+  n33[("LEE iam.account_lockouts")]:::efecto
+  n32 --> n33
+  n34[("ACTUALIZA iam.account_lockouts · ACTUALIZA iam.account_lockouts · ACTUALIZA iam.account_lockouts · ACTUALIZA…")]:::efecto
   n33 --> n34
-  n35{"!(await this.lockoutsRepo.findActiveForUser(tx, userId))"}:::decision
-  n34 --> n35
-  n36["Llama a AccountLockoutsRepository.create"]:::llamada
-  n35 -->|"sí"| n36
-  n37[("CREA iam.account_lockouts")]:::efecto
+  n35["Llama a AccountLockoutsRepository.findActiveForUser"]:::llamada
+  n30 -->|"no"| n35
+  n36[("LEE iam.account_lockouts")]:::efecto
+  n35 --> n36
+  n37{"!(await this.lockoutsRepo.findActiveForUser(tx, userId))"}:::decision
   n36 --> n37
-  n38["Llama a SessionsRepository.activeSessionIdsForUser"]:::llamada
-  n37 --> n38
-  n35 -->|"no"| n38
-  n39[("LEE iam.sessions")]:::efecto
+  n38["Llama a AccountLockoutsRepository.create"]:::llamada
+  n37 -->|"sí"| n38
+  n39[("CREA iam.account_lockouts")]:::efecto
   n38 --> n39
-  n40["Llama a SessionsRepository.revokeAllActiveForUser"]:::llamada
+  n40["Llama a SessionsRepository.activeSessionIdsForUser"]:::llamada
   n39 --> n40
-  n41[("ACTUALIZA iam.sessions")]:::efecto
+  n37 -->|"no"| n40
+  n41[("LEE iam.sessions")]:::efecto
   n40 --> n41
-  n42["Llama a RefreshTokensRepository.revokeActiveBySessionIds"]:::llamada
+  n42["Llama a SessionsRepository.revokeAllActiveForUser"]:::llamada
   n41 --> n42
-  n43[("ACTUALIZA iam.refresh_tokens")]:::efecto
+  n43[("ACTUALIZA iam.sessions")]:::efecto
   n42 --> n43
-  n44{"action === 'DEACTIVATE'"}:::decision
+  n44["Llama a RefreshTokensRepository.revokeActiveBySessionIds"]:::llamada
   n43 --> n44
-  n45["Llama a CredentialsRepository.revokeAllForUser"]:::llamada
-  n44 -->|"sí"| n45
-  n46[("ACTUALIZA iam.authentication_credentials")]:::efecto
+  n45[("ACTUALIZA iam.refresh_tokens")]:::efecto
+  n44 --> n45
+  n46{"action === 'DEACTIVATE'"}:::decision
   n45 --> n46
-  n47["Llama a UserGlobalRolesRepository.revokeAllForUser"]:::llamada
-  n46 --> n47
-  n48[("ACTUALIZA iam.user_global_roles")]:::efecto
+  n47["Llama a CredentialsRepository.revokeAllForUser"]:::llamada
+  n46 -->|"sí"| n47
+  n48[("ACTUALIZA iam.authentication_credentials")]:::efecto
   n47 --> n48
-  n49["Llama a SecurityEventsRepository.record"]:::llamada
-  n32 --> n49
+  n49["Llama a UserGlobalRolesRepository.revokeAllForUser"]:::llamada
   n48 --> n49
-  n44 -->|"no"| n49
-  n50[("CREA iam.security_events")]:::efecto
+  n50[("ACTUALIZA iam.user_global_roles")]:::efecto
   n49 --> n50
-  n51(("200 Responde con éxito")):::ok
+  n51["Llama a SecurityEventsRepository.record"]:::llamada
+  n34 --> n51
   n50 --> n51
+  n46 -->|"no"| n51
+  n52[("CREA iam.security_events")]:::efecto
+  n51 --> n52
+  n53(("200 Responde con éxito")):::ok
+  n52 --> n53
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -3375,7 +3445,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 36. GET /iam/users/{id}/sessions
+#### 37. GET /iam/users/{id}/sessions
 
 Sesiones del usuario
 
@@ -3419,7 +3489,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 37. POST /iam/users/{id}/suspend
+#### 38. POST /iam/users/{id}/suspend
 
 Suspender la cuenta con motivo (idempotente, cierra sus sesiones)
 
@@ -3428,7 +3498,7 @@ Suspender la cuenta con motivo (idempotente, cierra sus sesiones)
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {{ code: 'FORBIDDEN', reason: IamErrorReason.USER_SUPERADMIN…} |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Usuario no encontrado |
 | 409 | `CONFLICT` | ConflictException: La cuenta no puede pasar a ese estado desde el que tiene; ConflictException: La cuenta cambió de estado mientras se aplicaba: reintentá |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un administrador no puede suspender ni dar de baja su propia cuenta; PreconditionFailedException: Es la última cuenta que administra accesos: concedé ese rol a otra antes |
@@ -3457,90 +3527,94 @@ flowchart TD
   n9 --> n10
   n11(["404 NOT_FOUND Usuario no encontrado"]):::error
   n10 -->|"sí"| n11
-  n12["Llama a IamUsersService.lifecycleStateOf"]:::llamada
+  n12["Llama a UserGlobalRolesRepository.findActiveForUser"]:::llamada
   n10 -->|"no"| n12
-  n13["Llama a SecurityEventsRepository.latestLifecycleAction"]:::llamada
+  n13[("LEE iam.user_global_roles")]:::efecto
   n12 --> n13
-  n14[("LEE iam.security_events")]:::efecto
+  n14{"grants.some((g) =› g.roleConceptId === CONCEPTS.ROLE_SUPERADMIN) && !roleAuthorizesInTenant(actor, 'SUPERADMI…"}:::decision
   n13 --> n14
-  n15{"!from || !rule.from.includes(from)"}:::decision
-  n14 --> n15
-  n16(["409 CONFLICT La cuenta no puede pasar a ese estado desde el que tiene"]):::error
-  n15 -->|"sí"| n16
-  n17{"action !== 'REACTIVATE'"}:::decision
-  n15 -->|"no"| n17
-  n18["Llama a UserGlobalRolesRepository.findActiveForUser"]:::llamada
-  n17 -->|"sí"| n18
-  n19[("LEE iam.user_global_roles")]:::efecto
+  n15(["403 FORBIDDEN {{ code: 'FORBIDDEN', reason: IamErrorReason.USER_SUPERADMIN…}"]):::error
+  n14 -->|"sí"| n15
+  n16["Llama a IamUsersService.lifecycleStateOf"]:::llamada
+  n14 -->|"no"| n16
+  n17["Llama a SecurityEventsRepository.latestLifecycleAction"]:::llamada
+  n16 --> n17
+  n18[("LEE iam.security_events")]:::efecto
+  n17 --> n18
+  n19{"!from || !rule.from.includes(from)"}:::decision
   n18 --> n19
-  n20["Llama a UserGlobalRolesRepository.countOtherActiveHolders"]:::llamada
-  n19 --> n20
-  n21[("LEE iam.user_global_roles · LEE iam.users")]:::efecto
-  n20 --> n21
-  n22{"isAccessAdmin && (await this.rolesRepo.countOtherActiveHolders( tx, ACCESS_ADMIN_ROLE_CONCEPTS, userId, )) ==…"}:::decision
-  n21 --> n22
-  n23(["422 PRECONDITION_FAILED Es la última cuenta que administra accesos: concedé ese rol a otra antes"]):::error
-  n22 -->|"sí"| n23
-  n24["Llama a UsersRepository.transitionStatus"]:::llamada
-  n22 -->|"no"| n24
-  n17 -->|"no"| n24
-  n25[("ACTUALIZA iam.users")]:::efecto
-  n24 --> n25
-  n26{"!applied"}:::decision
-  n25 --> n26
-  n27(["409 CONFLICT La cuenta cambió de estado mientras se aplicaba: reintentá"]):::error
-  n26 -->|"sí"| n27
-  n28{"action === 'REACTIVATE'"}:::decision
-  n26 -->|"no"| n28
-  n29["Llama a AccountLockoutsRepository.releaseActiveForUser"]:::llamada
+  n20(["409 CONFLICT La cuenta no puede pasar a ese estado desde el que tiene"]):::error
+  n19 -->|"sí"| n20
+  n21{"action !== 'REACTIVATE'"}:::decision
+  n19 -->|"no"| n21
+  n22["Llama a UserGlobalRolesRepository.countOtherActiveHolders"]:::llamada
+  n21 -->|"sí"| n22
+  n23[("LEE iam.user_global_roles · LEE iam.users")]:::efecto
+  n22 --> n23
+  n24{"isAccessAdmin && (await this.rolesRepo.countOtherActiveHolders( tx, ACCESS_ADMIN_ROLE_CONCEPTS, userId, )) ==…"}:::decision
+  n23 --> n24
+  n25(["422 PRECONDITION_FAILED Es la última cuenta que administra accesos: concedé ese rol a otra antes"]):::error
+  n24 -->|"sí"| n25
+  n26["Llama a UsersRepository.transitionStatus"]:::llamada
+  n24 -->|"no"| n26
+  n21 -->|"no"| n26
+  n27[("ACTUALIZA iam.users")]:::efecto
+  n26 --> n27
+  n28{"!applied"}:::decision
+  n27 --> n28
+  n29(["409 CONFLICT La cuenta cambió de estado mientras se aplicaba: reintentá"]):::error
   n28 -->|"sí"| n29
-  n30["Llama a AccountLockoutsRepository.findActiveForUser"]:::llamada
-  n29 --> n30
-  n31[("LEE iam.account_lockouts")]:::efecto
-  n30 --> n31
-  n32[("ACTUALIZA iam.account_lockouts · ACTUALIZA iam.account_lockouts · ACTUALIZA iam.account_lockouts · ACTUALIZA…")]:::efecto
+  n30{"action === 'REACTIVATE'"}:::decision
+  n28 -->|"no"| n30
+  n31["Llama a AccountLockoutsRepository.releaseActiveForUser"]:::llamada
+  n30 -->|"sí"| n31
+  n32["Llama a AccountLockoutsRepository.findActiveForUser"]:::llamada
   n31 --> n32
-  n33["Llama a AccountLockoutsRepository.findActiveForUser"]:::llamada
-  n28 -->|"no"| n33
-  n34[("LEE iam.account_lockouts")]:::efecto
+  n33[("LEE iam.account_lockouts")]:::efecto
+  n32 --> n33
+  n34[("ACTUALIZA iam.account_lockouts · ACTUALIZA iam.account_lockouts · ACTUALIZA iam.account_lockouts · ACTUALIZA…")]:::efecto
   n33 --> n34
-  n35{"!(await this.lockoutsRepo.findActiveForUser(tx, userId))"}:::decision
-  n34 --> n35
-  n36["Llama a AccountLockoutsRepository.create"]:::llamada
-  n35 -->|"sí"| n36
-  n37[("CREA iam.account_lockouts")]:::efecto
+  n35["Llama a AccountLockoutsRepository.findActiveForUser"]:::llamada
+  n30 -->|"no"| n35
+  n36[("LEE iam.account_lockouts")]:::efecto
+  n35 --> n36
+  n37{"!(await this.lockoutsRepo.findActiveForUser(tx, userId))"}:::decision
   n36 --> n37
-  n38["Llama a SessionsRepository.activeSessionIdsForUser"]:::llamada
-  n37 --> n38
-  n35 -->|"no"| n38
-  n39[("LEE iam.sessions")]:::efecto
+  n38["Llama a AccountLockoutsRepository.create"]:::llamada
+  n37 -->|"sí"| n38
+  n39[("CREA iam.account_lockouts")]:::efecto
   n38 --> n39
-  n40["Llama a SessionsRepository.revokeAllActiveForUser"]:::llamada
+  n40["Llama a SessionsRepository.activeSessionIdsForUser"]:::llamada
   n39 --> n40
-  n41[("ACTUALIZA iam.sessions")]:::efecto
+  n37 -->|"no"| n40
+  n41[("LEE iam.sessions")]:::efecto
   n40 --> n41
-  n42["Llama a RefreshTokensRepository.revokeActiveBySessionIds"]:::llamada
+  n42["Llama a SessionsRepository.revokeAllActiveForUser"]:::llamada
   n41 --> n42
-  n43[("ACTUALIZA iam.refresh_tokens")]:::efecto
+  n43[("ACTUALIZA iam.sessions")]:::efecto
   n42 --> n43
-  n44{"action === 'DEACTIVATE'"}:::decision
+  n44["Llama a RefreshTokensRepository.revokeActiveBySessionIds"]:::llamada
   n43 --> n44
-  n45["Llama a CredentialsRepository.revokeAllForUser"]:::llamada
-  n44 -->|"sí"| n45
-  n46[("ACTUALIZA iam.authentication_credentials")]:::efecto
+  n45[("ACTUALIZA iam.refresh_tokens")]:::efecto
+  n44 --> n45
+  n46{"action === 'DEACTIVATE'"}:::decision
   n45 --> n46
-  n47["Llama a UserGlobalRolesRepository.revokeAllForUser"]:::llamada
-  n46 --> n47
-  n48[("ACTUALIZA iam.user_global_roles")]:::efecto
+  n47["Llama a CredentialsRepository.revokeAllForUser"]:::llamada
+  n46 -->|"sí"| n47
+  n48[("ACTUALIZA iam.authentication_credentials")]:::efecto
   n47 --> n48
-  n49["Llama a SecurityEventsRepository.record"]:::llamada
-  n32 --> n49
+  n49["Llama a UserGlobalRolesRepository.revokeAllForUser"]:::llamada
   n48 --> n49
-  n44 -->|"no"| n49
-  n50[("CREA iam.security_events")]:::efecto
+  n50[("ACTUALIZA iam.user_global_roles")]:::efecto
   n49 --> n50
-  n51(("200 Responde con éxito")):::ok
+  n51["Llama a SecurityEventsRepository.record"]:::llamada
+  n34 --> n51
   n50 --> n51
+  n46 -->|"no"| n51
+  n52[("CREA iam.security_events")]:::efecto
+  n51 --> n52
+  n53(("200 Responde con éxito")):::ok
+  n52 --> n53
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -3549,7 +3623,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 38. POST /iam/users/assisted-practitioner-registration
+#### 39. POST /iam/users/assisted-practitioner-registration
 
 Alta administrativa de un profesional (devuelve token de activación)
 
@@ -3719,7 +3793,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 39. POST /iam/users/assisted-registration
+#### 40. POST /iam/users/assisted-registration
 
 Registro asistido de un paciente (devuelve token de activación)
 
@@ -3810,7 +3884,6 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 | Operación | Respuestas posibles | Tablas |
 |---|---|---|
 | DESCONOCIDO /iam/auth | 200, 401, 403, 429 | 0 |
-| POST /iam/auth/logout | 200, 401, 403, 429 | 4 |
 | POST /iam/auth/logout-all | 200, 401, 403, 429 | 4 |
 | POST /iam/auth/sessions/purge | 200, 401, 403, 429 | 3 |
 | GET /iam/me/sessions | 200, 401, 403, 429 | 1 |

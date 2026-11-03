@@ -1,5 +1,6 @@
 import { deterministicId } from '../../common/constants/concepts';
 import type { BaseRole, RoleScope } from './dto';
+import { PILOT_PERMISSION_DEFINITIONS } from './authz.permission-pilot.seed';
 
 /**
  * Roles asistenciales de sistema materializados en `authz.roles`.
@@ -20,6 +21,7 @@ import type { BaseRole, RoleScope } from './dto';
  * duplica.
  */
 export interface ClinicalRoleSeed {
+  isAssignable?: boolean;
   /** Identificador determinista de la fila en `authz.roles`. */
   id: string;
   /** Código que viaja en el claim `roles` y que exige `@Roles(...)`. */
@@ -213,6 +215,27 @@ const BULK_IMPORT_ROLE_CODES = ['SECURITY_ADMIN', 'PLATFORM_ADMIN'] as const;
 
 /** Los permisos de sistema, en el orden en que se siembran. */
 export const PLATFORM_PERMISSION_SEED: readonly PlatformPermissionSeed[] = [
+  ...PILOT_PERMISSION_DEFINITIONS.map(
+    ([code, name, action, scope, grantToRoleCodes]) => ({
+      id: platformPermissionId(code),
+      code,
+      name,
+      resource: code,
+      action,
+      scope,
+      grantToRoleCodes,
+      allowDirectUserGrant: false,
+      isDangerous: true,
+      provenance: {
+        catalog: 'INTERNO' as const,
+        source:
+          'Piloto @RequirePermission: mismos roles que las rutas y controles de propiedad existentes',
+        reference: 'src/modules/authz/authz.permission-pilot.seed.ts',
+        obtainedAt: '2026-11-02',
+        license: 'Interno de la plataforma',
+      },
+    }),
+  ),
   {
     id: platformPermissionId(DIAGNOSTIC_RESULT_READ_PERMISSION_CODE),
     code: DIAGNOSTIC_RESULT_READ_PERMISSION_CODE,

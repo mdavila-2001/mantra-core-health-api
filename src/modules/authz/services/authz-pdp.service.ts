@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { CONCEPTS, type AuthenticatedUser } from '../../../common';
@@ -23,6 +23,10 @@ import {
   MaskedFieldDto,
 } from '../dto';
 import { AUTHZ } from '../authz.concepts';
+import {
+  IAM_PDP_ROLES,
+  type IamGlobalRolesPort,
+} from '../ports/iam-global-roles.port';
 
 const ACTION_CONCEPT: Record<string, string> = {
   READ: AUTHZ.ACTION_READ,
@@ -120,6 +124,7 @@ export class AuthzPdpService {
     private readonly resourceGrantsRepo: ResourceScopeGrantsRepository,
     private readonly fieldPermsRepo: FieldPermissionsRepository,
     private readonly logger: PinoLogger,
+    @Inject(IAM_PDP_ROLES) private readonly iamGlobalRoles: IamGlobalRolesPort,
   ) {
     this.logger.setContext(AuthzPdpService.name);
   }
@@ -185,6 +190,14 @@ export class AuthzPdpService {
           (!a.tenantId || a.tenantId === dto.tenantId),
       )
       .map((a) => a.roleId);
+    const globalCodes = await this.iamGlobalRoles.codesForUser(em, dto.userId);
+    if (globalCodes.length) {
+      const globalRoles = await this.rolesRepo.findIamPolicyRoles(
+        em,
+        globalCodes,
+      );
+      directRoleIds.push(...globalRoles.map((role) => role.id));
+    }
     const effectiveRoleIds = await this.resolveRoleInheritance(
       em,
       directRoleIds,

@@ -2,7 +2,7 @@
 
 # Catálogo del schema `diagnostics`
 
-- **Tablas:** 36 · **Columnas:** 474 (100 con descripción: 21.1 %) · **Índices:** 301
+- **Tablas:** 36 · **Columnas:** 478 (102 con descripción: 21.3 %) · **Índices:** 304
 - **Dominio:** Clínico y Diagnóstico
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -25,7 +25,7 @@
 | [dicom_structured_reports](#dicom_structured_reports) | Cataloga informes estructurados DICOM para conservar referencias y metadata de resultados de imagenología interoperables. | 16 | 10 | 0 | COINCIDE |
 | [imaging_endpoints](#imaging_endpoints) | Registra puntos de conexión con sistemas de imagenología para intercambiar estudios con PACS, VNA u otros servicios autorizados. | 13 | 8 | 2 | COINCIDE |
 | [imaging_instances](#imaging_instances) | Registra instancias individuales de imagen dentro de una serie para referenciar cada objeto diagnóstico. | 9 | 3 | 1 | COINCIDE |
-| [imaging_procedure_steps](#imaging_procedure_steps) | Registra etapas de procedimientos de imagenología para representar el flujo técnico de adquisición de un estudio. | 17 | 10 | 0 | DIVERGE |
+| [imaging_procedure_steps](#imaging_procedure_steps) | Registra etapas de procedimientos de imagenología para representar el flujo técnico de adquisición de un estudio. | 20 | 12 | 0 | COINCIDE |
 | [imaging_selection_items](#imaging_selection_items) | Relaciona instancias de imagen con una selección para especificar qué imágenes forman parte de un conjunto revisable. | 8 | 4 | 0 | COINCIDE |
 | [imaging_selections](#imaging_selections) | Define selecciones o conjuntos de imágenes organizados para revisión diagnóstica o tareas clínicas específicas. | 13 | 7 | 0 | COINCIDE |
 | [imaging_series](#imaging_series) | Agrupa series de imágenes pertenecientes a un estudio para organizar sus instancias diagnósticas. | 11 | 5 | 2 | COINCIDE |
@@ -38,7 +38,7 @@
 | [radiation_dose_events](#radiation_dose_events) | Registra eventos y datos de dosis de radiación asociados a estudios para dar seguimiento a la exposición durante imagenología. | 14 | 8 | 1 | COINCIDE |
 | [result_verifications](#result_verifications) | Registra verificaciones de resultados diagnósticos para documentar su revisión antes de liberar o utilizar resultados. | 12 | 10 | 1 | COINCIDE |
 | [specimen_chain_of_custody_events](#specimen_chain_of_custody_events) | Preserva los traspasos y controles de custodia de muestras para reconstruir su recorrido y responsables. | 14 | 10 | 7 | COINCIDE |
-| [specimen_collection_events](#specimen_collection_events) | Registra eventos de recolección de muestras para documentar cuándo, dónde y bajo qué contexto se obtuvieron. | 12 | 8 | 2 | DIVERGE |
+| [specimen_collection_events](#specimen_collection_events) | Registra eventos de recolección de muestras para documentar cuándo, dónde y bajo qué contexto se obtuvieron. | 13 | 9 | 2 | COINCIDE |
 | [specimen_container_events](#specimen_container_events) | Traza cambios y eventos relacionados con recipientes de muestras durante su preparación, traslado o recepción. | 11 | 6 | 1 | COINCIDE |
 | [specimen_containers](#specimen_containers) | Representa recipientes que contienen muestras para identificar el soporte físico usado en su manejo diagnóstico. | 16 | 10 | 9 | COINCIDE |
 | [specimen_identifiers](#specimen_identifiers) | Conserva identificadores alternativos de muestras para reconciliar etiquetas internas y referencias de laboratorio externo. | 14 | 6 | 0 | COINCIDE |
@@ -1593,7 +1593,7 @@ Registra etapas de procedimientos de imagenología para representar el flujo té
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_20_diagnostics.puml: imaging_procedure_steps`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_20_diagnostics.puml` · **DDL:** `SQL/20_diagnostics/02_tables.sql`
 - **Entidad del ORM:** `ImagingProcedureSteps` — `src/modules/diagnostics/entities/imaging_procedure_steps.entity.ts`
-- **Resumen:** 17 columnas · 10 índices · 9 FK salientes · 0 entrantes · 0 operaciones
+- **Resumen:** 20 columnas · 12 índices · 11 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
@@ -1616,6 +1616,9 @@ Registra etapas de procedimientos de imagenología para representar el flujo té
 | 15 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 16 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 17 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/diagnostics/entities/imaging_procedure_steps.entity.ts:124`)_ | coincide |
+| 18 | `scheduled_equipment_id` | `uuid` | Clave foránea → diagnostic_units.diagnostic_equipment.id; Opcional | + infraestructura hospitalaria F5a: Scheduled Procedure Step para la Modality Worklist (DICOM): equipo y sala programados y hora de inicio programada. La sala es la del equipo (diagnostic_equipment.care_space_id); la API lo valida. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_20_diagnostics.puml:541`)_ | coincide |
+| 19 | `scheduled_care_space_id` | `uuid` | Clave foránea → practice.care_spaces.id; Opcional | _sin dato_ | coincide |
+| 20 | `scheduled_start_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
 
 #### Relaciones
 
@@ -1630,6 +1633,8 @@ Registra etapas de procedimientos de imagenología para representar el flujo té
 | hacia | status_concept_id | terminology.catalog_concepts (id) | fk_imaging_procedure_steps_status_concept_id |
 | hacia | created_by_user_id | iam.users (id) | fk_imaging_procedure_steps_created_by_user_id |
 | hacia | updated_by_user_id | iam.users (id) | fk_imaging_procedure_steps_updated_by_user_id |
+| hacia | scheduled_equipment_id | diagnostic_units.diagnostic_equipment (id) | fk_imaging_procedure_steps_scheduled_equipment_id |
+| hacia | scheduled_care_space_id | practice.care_spaces (id) | fk_imaging_procedure_steps_scheduled_care_space_id |
 
 #### Índices
 
@@ -1645,6 +1650,8 @@ Registra etapas de procedimientos de imagenología para representar el flujo té
 | `ix_imaging_procedure_steps_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_imaging_procedure_steps_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_imaging_procedure_steps_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_imaging_procedure_steps_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `uk_imaging_procedure_steps_study_step` | sí | imaging_study_id, step_number | Garantiza que no se repita la combinación (imaging_study_id, step_number) _(DOCUMENTO)_; Soporta la clave foránea fk_imaging_procedure_steps_imaging_study_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_imaging_procedure_steps_scheduled_equipment_id` | no | scheduled_equipment_id | Soporta la clave foránea fk_imaging_procedure_steps_scheduled_equipment_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_imaging_procedure_steps_scheduled_care_space_id` | no | scheduled_care_space_id, scheduled_start_at | Soporta la clave foránea fk_imaging_procedure_steps_scheduled_care_space_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 
 #### Restricciones
 
@@ -2656,7 +2663,7 @@ Registra eventos de recolección de muestras para documentar cuándo, dónde y b
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_20_diagnostics.puml: specimen_collection_events`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_20_diagnostics.puml` · **DDL:** `SQL/20_diagnostics/02_tables.sql`
 - **Entidad del ORM:** `SpecimenCollectionEvents` — `src/modules/diagnostics/entities/specimen_collection_events.entity.ts`
-- **Resumen:** 12 columnas · 8 índices · 7 FK salientes · 0 entrantes · 2 operaciones
+- **Resumen:** 13 columnas · 9 índices · 8 FK salientes · 0 entrantes · 2 operaciones
 
 #### Columnas
 
@@ -2674,6 +2681,7 @@ Registra eventos de recolección de muestras para documentar cuándo, dónde y b
 | 10 | `condition_json` | `jsonb` | Opcional | _sin dato_ | coincide |
 | 11 | `notes` | `text` | Opcional | _sin dato_ | coincide |
 | 12 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/diagnostics/entities/specimen_collection_events.entity.ts:87`)_ | coincide |
+| 13 | `collection_care_space_id` | `uuid` | Clave foránea → practice.care_spaces.id; Opcional | + infraestructura hospitalaria F5b: espacio físico donde se tomó la muestra (función SAMPLE_COLLECTION). collection_site_id se conserva. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_20_diagnostics.puml:305`)_ | coincide |
 
 #### Relaciones
 
@@ -2686,6 +2694,7 @@ Registra eventos de recolección de muestras para documentar cuándo, dónde y b
 | hacia | body_site_concept_id | terminology.catalog_concepts (id) | fk_specimen_collection_events_body_site_concept_id |
 | hacia | method_concept_id | terminology.catalog_concepts (id) | fk_specimen_collection_events_method_concept_id |
 | hacia | fasting_status_concept_id | terminology.catalog_concepts (id) | fk_specimen_collection_events_fasting_status_concept_id |
+| hacia | collection_care_space_id | practice.care_spaces (id) | fk_specimen_collection_events_collection_care_space_id |
 
 #### Índices
 
@@ -2698,6 +2707,7 @@ Registra eventos de recolección de muestras para documentar cuándo, dónde y b
 | `ix_specimen_collection_events_body_site_concept_id` | no | body_site_concept_id | Soporta la clave foránea fk_specimen_collection_events_body_site_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_specimen_collection_events_method_concept_id` | no | method_concept_id | Soporta la clave foránea fk_specimen_collection_events_method_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_specimen_collection_events_fasting_status_concept_id` | no | fasting_status_concept_id | Soporta la clave foránea fk_specimen_collection_events_fasting_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_specimen_collection_events_collection_care_space_id` | no | collection_care_space_id | Soporta la clave foránea fk_specimen_collection_events_collection_care_space_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `brin_specimen_collection_events_occurred_at` | no | occurred_at | BRIN para logs e historiales append-only de gran volumen _(DOCUMENTO)_ |
 
 #### Operaciones que la tocan

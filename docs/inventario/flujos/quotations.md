@@ -23,8 +23,8 @@ _Fuente: `src/modules/quotations/README.md:3`_
 
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
-| `ctrl:QuotationsController` | Operaciones de QuotationsController que el README no asigna a un caso de uso | GET /quotations | Cualquier sesión válida | BAJO | 22 |
-|  |  | POST /quotations | PRACTITIONER · CLINICIAN | MEDIO | 24 |
+| `ctrl:QuotationsController` | Operaciones de QuotationsController que el README no asigna a un caso de uso | GET /quotations | Cualquier sesión válida | BAJO | 24 |
+|  |  | POST /quotations | PRACTITIONER · CLINICIAN | MEDIO | 26 |
 |  |  | GET /quotations/{id} | Cualquier sesión válida | BAJO | 4 |
 
 ### Diagrama — etapas `ctrl:QuotationsController`
@@ -43,8 +43,8 @@ flowchart LR
   t15[("billing.quotations")]:::tabla
   t16[("practice.practices")]:::tabla
   t17[("practice.practitioner_role_assignments")]:::tabla
-  t9[("+16 tablas más")]
-  t12[("+18 tablas más")]
+  t9[("+18 tablas más")]
+  t12[("+20 tablas más")]
   subgraph s0["ctrl:QuotationsController · Operaciones de QuotationsController que el README n…"]
     o1["GET /quotations"]:::op
     o10["POST /quotations"]:::op
@@ -107,7 +107,7 @@ flowchart TD
   n3 --> n4
   n5{"actor.roles.includes('SECURITY_ADMIN')"}:::decision
   n4 --> n5
-  n6{"tenantId !== undefined"}:::decision
+  n6{"tenantId !== undefined && roleAuthorizesInTenant(actor, 'SECURITY_ADMIN', tenantId)"}:::decision
   n5 -->|"sí"| n6
   n7["Llama a PracticeTenantLookupService.findActivePracticeIdsForTenant"]:::llamada
   n6 -->|"sí"| n7

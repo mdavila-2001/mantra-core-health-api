@@ -82,7 +82,7 @@ Cada árbol se deriva del código del handler y de los métodos que invoca (hast
 
 #### 1. GET /admin/governance/data-quality/issues/{id}
 
-
+Una incidencia de calidad de datos clínicos
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -119,11 +119,12 @@ flowchart TD
 
 #### 2. POST /admin/governance/data-quality/issues/{id}/resolution
 
-
+Resolver o descartar una incidencia abierta
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Incidencia no encontrada |
@@ -133,7 +134,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
   n1 --> n2
   n3["Llama a DataQualityService.resolve"]:::llamada
   n2 --> n3
@@ -164,7 +165,7 @@ flowchart TD
 
 #### 3. GET /admin/governance/data-quality/rules/{id}
 
-
+Una regla de calidad con su expresión, sus incidencias por estado y sus últimas corridas
 
 | HTTP | Código | Cuándo |
 |---|---|---|

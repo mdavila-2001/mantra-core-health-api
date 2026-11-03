@@ -2,7 +2,7 @@
 
 # Catálogo del schema `medical_groups`
 
-- **Tablas:** 2 · **Columnas:** 37 (9 con descripción: 24.3 %) · **Índices:** 10
+- **Tablas:** 2 · **Columnas:** 37 (17 con descripción: 45.9 %) · **Índices:** 10
 - **Dominio:** sin dato
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -59,21 +59,21 @@ Relaciona perfiles de profesionales o integrantes con un grupo médico, permitie
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/medical_groups/entities/medical_group_members.entity.ts:27`)_ | coincide |
 | 2 | `group_id` | `uuid` | Clave foránea → medical_groups.groups.id; Obligatoria | _sin dato_ | coincide |
 | 3 | `practitioner_profile_id` | `uuid` | Clave foránea → profiles.health_practitioner_profiles.profile_id; Obligatoria | _sin dato_ | coincide |
-| 4 | `role_title` | `varchar` | Obligatoria | Cargo/función dentro del grupo (texto libre — ver known_gaps del carril). _(JSDOC_ENTIDAD, `src/modules/medical_groups/entities/medical_group_members.entity.ts:31`)_ | coincide |
+| 4 | `role_title` | `varchar` | Obligatoria | Cargo/función dentro del grupo (texto libre — ver known_gaps del carril). _(JSDOC_ENTIDAD, `src/modules/medical_groups/entities/medical_group_members.entity.ts:43`)_ | coincide |
 | 5 | `agreed_payment_amount` | `numeric` | Obligatoria | _sin dato_ | coincide |
 | 6 | `agreed_payment_currency_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
-| 7 | `additional_terms_text` | `text` | Opcional | Adicionales de términos y condiciones opcionales para este cargo (AC-21-14). _(JSDOC_ENTIDAD, `src/modules/medical_groups/entities/medical_group_members.entity.ts:45`)_ | coincide |
-| 8 | `is_creator` | `boolean` | Obligatoria | El creador del grupo también es un miembro (siempre `ACCEPTED`). _(JSDOC_ENTIDAD, `src/modules/medical_groups/entities/medical_group_members.entity.ts:53`)_ | coincide |
+| 7 | `additional_terms_text` | `text` | Opcional | Adicionales de términos y condiciones opcionales para este cargo (AC-21-14). _(JSDOC_ENTIDAD, `src/modules/medical_groups/entities/medical_group_members.entity.ts:63`)_ | coincide |
+| 8 | `is_creator` | `boolean` | Obligatoria | El creador del grupo también es un miembro (siempre `ACCEPTED`). _(JSDOC_ENTIDAD, `src/modules/medical_groups/entities/medical_group_members.entity.ts:71`)_ | coincide |
 | 9 | `invitation_status` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 10 | `responded_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
-| 11 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 12 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 11 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/medical_groups/entities/medical_group_members.entity.ts:93`)_ | coincide |
+| 12 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/medical_groups/entities/medical_group_members.entity.ts:99`)_ | coincide |
 | 13 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 14 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 15 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+| 15 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/medical_groups/entities/medical_group_members.entity.ts:117`)_ | coincide |
 
 #### Relaciones
 
@@ -152,28 +152,28 @@ Representa grupos médicos para organizar equipos de profesionales y vincular a 
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/medical_groups/entities/medical_groups.entity.ts:35`)_ | coincide |
 | 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
 | 3 | `practice_id` | `uuid` | Clave foránea → practice.practices.id; Obligatoria | _sin dato_ | coincide |
 | 4 | `service_catalog_id` | `uuid` | Clave foránea → billing.service_catalog.id; Obligatoria | _sin dato_ | coincide |
-| 5 | `requesting_practitioner_id` | `uuid` | Clave foránea → profiles.health_practitioner_profiles.profile_id; Obligatoria | Doctor que crea la solicitud y arma el grupo. _(JSDOC_ENTIDAD, `src/modules/medical_groups/entities/medical_groups.entity.ts:42`)_ | coincide |
+| 5 | `requesting_practitioner_id` | `uuid` | Clave foránea → profiles.health_practitioner_profiles.profile_id; Obligatoria | Doctor que crea la solicitud y arma el grupo. _(JSDOC_ENTIDAD, `src/modules/medical_groups/entities/medical_groups.entity.ts:57`)_ | coincide |
 | 6 | `patient_profile_id` | `uuid` | Clave foránea → profiles.patient_profiles.profile_id; Opcional | _sin dato_ | coincide |
-| 7 | `condition_id` | `uuid` | Clave foránea → clinical.conditions.id; Opcional | Diagnóstico observado del paciente (`clinical.conditions`), opcional. _(JSDOC_ENTIDAD, `src/modules/medical_groups/entities/medical_groups.entity.ts:49`)_ | coincide |
+| 7 | `condition_id` | `uuid` | Clave foránea → clinical.conditions.id; Opcional | Diagnóstico observado del paciente (`clinical.conditions`), opcional. _(JSDOC_ENTIDAD, `src/modules/medical_groups/entities/medical_groups.entity.ts:67`)_ | coincide |
 | 8 | `scheduled_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
 | 9 | `location_text` | `varchar` | Obligatoria | _sin dato_ | coincide |
-| 10 | `notes_text` | `text` | Opcional | Notas adicionales cargadas por el creador al armar el grupo. _(JSDOC_ENTIDAD, `src/modules/medical_groups/entities/medical_groups.entity.ts:59`)_ | coincide |
-| 11 | `terms_text` | `text` | Obligatoria | Términos y condiciones vigentes del grupo: default del servicio + adicionales del solicitante (AC-21-10/11/12/13). Se congela como texto al crear — no es un puntero al servicio, que puede cambiar después. _(JSDOC_ENTIDAD, `src/modules/medical_groups/entities/medical_groups.entity.ts:67`)_ | coincide |
+| 10 | `notes_text` | `text` | Opcional | Notas adicionales cargadas por el creador al armar el grupo. _(JSDOC_ENTIDAD, `src/modules/medical_groups/entities/medical_groups.entity.ts:83`)_ | coincide |
+| 11 | `terms_text` | `text` | Obligatoria | Términos y condiciones vigentes del grupo: default del servicio + adicionales del solicitante (AC-21-10/11/12/13). Se congela como texto al crear — no es un puntero al servicio, que puede cambiar después. _(JSDOC_ENTIDAD, `src/modules/medical_groups/entities/medical_groups.entity.ts:91`)_ | coincide |
 | 12 | `status` | `varchar` | Obligatoria | _sin dato_ | coincide |
-| 13 | `exercise_notes_text` | `text` | Opcional | "NOTAS DEL EJERCICIO" — arriba a la izquierda en la consulta (AC-21-14). _(JSDOC_ENTIDAD, `src/modules/medical_groups/entities/medical_groups.entity.ts:74`)_ | coincide |
+| 13 | `exercise_notes_text` | `text` | Opcional | "NOTAS DEL EJERCICIO" — arriba a la izquierda en la consulta (AC-21-14). _(JSDOC_ENTIDAD, `src/modules/medical_groups/entities/medical_groups.entity.ts:101`)_ | coincide |
 | 14 | `exercise_notes_updated_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
 | 15 | `proposed_reschedule_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
 | 16 | `proposed_by_practitioner_id` | `uuid` | Clave foránea → profiles.health_practitioner_profiles.profile_id; Opcional | _sin dato_ | coincide |
-| 17 | `closed_at` | `timestamptz` | Opcional | Se fija la primera vez que se observa el expediente vencido (AC-21-19). _(JSDOC_ENTIDAD, `src/modules/medical_groups/entities/medical_groups.entity.ts:103`)_ | coincide |
-| 18 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 19 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 17 | `closed_at` | `timestamptz` | Opcional | Se fija la primera vez que se observa el expediente vencido (AC-21-19). _(JSDOC_ENTIDAD, `src/modules/medical_groups/entities/medical_groups.entity.ts:139`)_ | coincide |
+| 18 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/medical_groups/entities/medical_groups.entity.ts:149`)_ | coincide |
+| 19 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/medical_groups/entities/medical_groups.entity.ts:155`)_ | coincide |
 | 20 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 21 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 22 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+| 22 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/medical_groups/entities/medical_groups.entity.ts:173`)_ | coincide |
 
 #### Relaciones
 

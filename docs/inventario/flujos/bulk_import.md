@@ -23,11 +23,11 @@ _Fuente: `src/modules/bulk_import/README.md:3`_
 
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
-| `ctrl:BulkImportController` | Operaciones de BulkImportController que el README no asigna a un caso de uso | GET /admin/bulk-imports | SECURITY_ADMIN · PLATFORM_ADMIN | BAJO | 11 |
-|  |  | POST /admin/bulk-imports | SECURITY_ADMIN · PLATFORM_ADMIN | BAJO | 11 |
-|  |  | GET /admin/bulk-imports/{id} | SECURITY_ADMIN · PLATFORM_ADMIN | MEDIO | 14 |
-|  |  | POST /admin/bulk-imports/{id}/confirm | SECURITY_ADMIN · PLATFORM_ADMIN | MEDIO | 14 |
-|  |  | GET /admin/bulk-imports/{id}/report | SECURITY_ADMIN · PLATFORM_ADMIN | MEDIO | 14 |
+| `ctrl:BulkImportController` | Operaciones de BulkImportController que el README no asigna a un caso de uso | GET /admin/bulk-imports | SECURITY_ADMIN · PLATFORM_ADMIN | BAJO | 13 |
+|  |  | POST /admin/bulk-imports | SECURITY_ADMIN · PLATFORM_ADMIN | BAJO | 13 |
+|  |  | GET /admin/bulk-imports/{id} | SECURITY_ADMIN · PLATFORM_ADMIN | MEDIO | 16 |
+|  |  | POST /admin/bulk-imports/{id}/confirm | SECURITY_ADMIN · PLATFORM_ADMIN | MEDIO | 16 |
+|  |  | GET /admin/bulk-imports/{id}/report | SECURITY_ADMIN · PLATFORM_ADMIN | MEDIO | 16 |
 |  |  | GET /admin/bulk-imports/templates | SECURITY_ADMIN · PLATFORM_ADMIN | BAJO | 0 |
 |  |  | GET /admin/bulk-imports/templates/{kind} | SECURITY_ADMIN · PLATFORM_ADMIN | BAJO | 0 |
 
@@ -43,11 +43,11 @@ flowchart LR
   t7[("authz.patient_legal_representations")]:::tabla
   t8[("authz.permissions")]:::tabla
   t13[("audit.audit_log")]:::tabla
-  t9[("+5 tablas más")]
-  t11[("+5 tablas más")]
-  t14[("+8 tablas más")]
-  t16[("+8 tablas más")]
-  t18[("+8 tablas más")]
+  t9[("+7 tablas más")]
+  t11[("+7 tablas más")]
+  t14[("+10 tablas más")]
+  t16[("+10 tablas más")]
+  t18[("+10 tablas más")]
   subgraph s0["ctrl:BulkImportController · Operaciones de BulkImportController que el README n…"]
     o1["GET /admin/bulk-imports"]:::op
     o10["POST /admin/bulk-imports"]:::op
@@ -164,53 +164,64 @@ flowchart TD
   n8 --> n9
   n10[("LEE authz.user_role_assignments")]:::efecto
   n9 --> n10
-  n11{"!permission"}:::decision
+  n11["Llama a IamGlobalRolesAdapter.codesForUser"]:::llamada
   n10 --> n11
-  n12["Llama a RolePermissionsRepository.findActiveForRoles"]:::llamada
-  n11 -->|"no"| n12
-  n13[("LEE authz.role_permissions")]:::efecto
+  n12[("LEE iam.user_global_roles · LEE iam.users")]:::efecto
+  n11 --> n12
+  n13{"globalCodes.length"}:::decision
   n12 --> n13
-  n14["Llama a UserPermissionGrantsRepository.findActiveForUser"]:::llamada
-  n13 --> n14
-  n15[("LEE authz.user_permission_grants")]:::efecto
+  n14["Llama a RolesRepository.findIamPolicyRoles"]:::llamada
+  n13 -->|"sí"| n14
+  n15[("LEE authz.roles")]:::efecto
   n14 --> n15
-  n16{"dto.resourceId"}:::decision
+  n16{"!permission"}:::decision
   n15 --> n16
-  n17["Llama a ResourceScopeGrantsRepository.findForSubjectResource"]:::llamada
-  n16 -->|"sí"| n17
-  n18[("LEE authz.resource_scope_grants")]:::efecto
+  n13 -->|"no"| n16
+  n17["Llama a RolePermissionsRepository.findActiveForRoles"]:::llamada
+  n16 -->|"no"| n17
+  n18[("LEE authz.role_permissions")]:::efecto
   n17 --> n18
-  n19["Llama a AccessPoliciesRepository.findActiveForTarget"]:::llamada
-  n11 -->|"sí"| n19
+  n19["Llama a UserPermissionGrantsRepository.findActiveForUser"]:::llamada
   n18 --> n19
-  n16 -->|"no"| n19
-  n20[("LEE authz.access_policies")]:::efecto
+  n20[("LEE authz.user_permission_grants")]:::efecto
   n19 --> n20
-  n21{"dto.patientProfileId"}:::decision
+  n21{"dto.resourceId"}:::decision
   n20 --> n21
-  n22["Llama a ClinicalAccessGrantsRepository.findActiveForUserPatient"]:::llamada
+  n22["Llama a ResourceScopeGrantsRepository.findForSubjectResource"]:::llamada
   n21 -->|"sí"| n22
-  n23[("LEE authz.clinical_access_grants")]:::efecto
+  n23[("LEE authz.resource_scope_grants")]:::efecto
   n22 --> n23
-  n24{"dto.practitionerProfileId"}:::decision
+  n24["Llama a AccessPoliciesRepository.findActiveForTarget"]:::llamada
+  n16 -->|"sí"| n24
   n23 --> n24
-  n25["Llama a CareRelationshipsRepository.findActiveForPractitionerPatient"]:::llamada
-  n24 -->|"sí"| n25
-  n26[("LEE authz.care_relationships")]:::efecto
+  n21 -->|"no"| n24
+  n25[("LEE authz.access_policies")]:::efecto
+  n24 --> n25
+  n26{"dto.patientProfileId"}:::decision
   n25 --> n26
-  n27["Llama a PatientLegalRepresentationsRepository.findActiveForRepresentativePatient"]:::llamada
-  n26 --> n27
-  n24 -->|"no"| n27
-  n28[("LEE authz.patient_legal_representations")]:::efecto
+  n27["Llama a ClinicalAccessGrantsRepository.findActiveForUserPatient"]:::llamada
+  n26 -->|"sí"| n27
+  n28[("LEE authz.clinical_access_grants")]:::efecto
   n27 --> n28
-  n29{"allowed.size === 0"}:::decision
+  n29{"dto.practitionerProfileId"}:::decision
   n28 --> n29
-  n21 -->|"no"| n29
-  n4 -->|"al terminar"| n29
-  n30(["↩ (relanza el error capturado)"]):::error
+  n30["Llama a CareRelationshipsRepository.findActiveForPractitionerPatient"]:::llamada
   n29 -->|"sí"| n30
-  n31(("200 Responde con éxito")):::ok
-  n29 -->|"no"| n31
+  n31[("LEE authz.care_relationships")]:::efecto
+  n30 --> n31
+  n32["Llama a PatientLegalRepresentationsRepository.findActiveForRepresentativePatient"]:::llamada
+  n31 --> n32
+  n29 -->|"no"| n32
+  n33[("LEE authz.patient_legal_representations")]:::efecto
+  n32 --> n33
+  n34{"allowed.size === 0"}:::decision
+  n33 --> n34
+  n26 -->|"no"| n34
+  n4 -->|"al terminar"| n34
+  n35(["↩ (relanza el error capturado)"]):::error
+  n34 -->|"sí"| n35
+  n36(("200 Responde con éxito")):::ok
+  n34 -->|"no"| n36
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

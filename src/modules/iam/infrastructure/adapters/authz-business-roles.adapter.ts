@@ -8,6 +8,12 @@ import type { BusinessRolesPort } from '../../application/ports/business-roles.p
 export class AuthzBusinessRolesAdapter implements BusinessRolesPort {
   constructor(private readonly effectiveRoles: AuthzEffectiveRolesService) {}
 
+  revokeAllForUser(
+    ...args: Parameters<BusinessRolesPort['revokeAllForUser']>
+  ): Promise<number> {
+    return this.effectiveRoles.revokeAllForUser(...args);
+  }
+
   scopedAssignmentsForUser(em: EntityManager, userId: string) {
     return this.effectiveRoles.scopedAssignmentsForUser(em, userId);
   }

@@ -13,6 +13,9 @@ export function toAdminActor(user: AuthenticatedUser): UiAdminActor {
   return {
     userId: user.id,
     isPlatform: roleAuthorizesInTenant(user, 'SUPERADMIN', undefined),
+    canManageCatalog:
+      roleAuthorizesInTenant(user, 'SUPERADMIN', undefined) ||
+      roleAuthorizesInTenant(user, 'SECURITY_ADMIN', undefined),
     tenantId: getCurrentTenantId() ?? null,
   };
 }

@@ -6,6 +6,7 @@ import { AUTHZ } from '../../modules/authz/authz.concepts';
 import { CLINICAL_ROLE_SEED } from '../../modules/authz/authz.seed';
 import { AUTHZ_BUSINESS_ROLE_SEED } from '../../modules/authz/authz.business-roles.seed';
 import { AUTHZ_PLATFORM_ROLE_SEED } from '../../modules/authz/authz.platform-roles.seed';
+import { IAM_POLICY_ROLE_SEED } from '../../modules/authz/authz.global-role-bindings';
 import { DATA_CATALOG_ROLE_SEED } from '../../modules/data_catalog/data_catalog.roles';
 import { PHARMA_LAB_ROLE_SEED } from '../../modules/pharma_lab/pharma_lab.roles';
 import { SCHEDULING_ROLE_SEED } from '../../modules/scheduling/infrastructure/seed/scheduling.roles';
@@ -21,6 +22,7 @@ import { CONCEPTS } from '../constants/concepts';
  * editar el mismo archivo.
  */
 export const SYSTEM_ROLE_SEED = [
+  ...IAM_POLICY_ROLE_SEED,
   ...CLINICAL_ROLE_SEED,
   ...AUTHZ_BUSINESS_ROLE_SEED,
   ...AUTHZ_PLATFORM_ROLE_SEED,
@@ -102,7 +104,7 @@ export class AuthzClinicalRolesSeedService {
           baseRoleConceptId: BASE_ROLE_CONCEPT[seed.baseRole],
           scopeConceptId: SCOPE_CONCEPT[seed.scope],
           isSystem: true,
-          isAssignable: true,
+          isAssignable: seed.isAssignable ?? true,
           stateConceptId: CONCEPTS.STATE_ACTIVE,
           createdAt: now,
           updatedAt: now,

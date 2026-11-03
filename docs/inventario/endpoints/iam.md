@@ -5,7 +5,7 @@
 - **Bloque:** Identidad y Seguridad (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 - **Operaciones:** 46 (45 en el contrato, 1 sólo en el código)
 - **Riesgo:** ALTO 21 · MEDIO 11 · BAJO 14
-- **Tablas distintas que tocan:** 64
+- **Tablas distintas que tocan:** 68
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/iam.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -21,7 +21,7 @@
 | 7 | POST | `/iam/auth/logout-all` | Cerrar todas las sesiones del usuario actual | ALTO | 4 | sesión (sin roles) |
 | 8 | POST | `/iam/auth/register-organization` | Registrar una organización con su cuenta owner | ALTO | 40 | pública |
 | 9 | POST | `/iam/auth/register-patient` | Registrarse como paciente con documento de identidad | ALTO | 21 | pública |
-| 10 | POST | `/iam/auth/register-practitioner` | Registrarse como profesional de salud con su matrícula | ALTO | 72 | pública |
+| 10 | POST | `/iam/auth/register-practitioner` | Registrarse como profesional de salud con su matrícula | ALTO | 76 | pública |
 | 11 | POST | `/iam/auth/register-support-staff` | Registrarse como secretaria (personal de apoyo hospitalario) | ALTO | 21 | pública |
 | 12 | POST | `/iam/auth/resend-verification` | Reenviar el enlace de verificación del correo | ALTO | 9 | pública |
 | 13 | POST | `/iam/auth/reset-password` | Fijar una contraseña nueva con el token recibido por correo | ALTO | 8 | pública |
@@ -43,7 +43,7 @@
 | 29 | GET | `/iam/users/{id}/credentials` | Credenciales del usuario | BAJO | 2 | SECURITY_ADMIN |
 | 30 | POST | `/iam/users/{id}/credentials/{cid}/revoke` | Revocar una credencial del usuario | MEDIO | 3 | SECURITY_ADMIN |
 | 31 | POST | `/iam/users/{id}/credentials/federated` | Enlazar una credencial de identidad federada | MEDIO | 4 | SECURITY_ADMIN |
-| 32 | POST | `/iam/users/{id}/deactivate` | Dar de baja la cuenta con motivo (sin borrado físico; idempotente) | MEDIO | 13 | SECURITY_ADMIN |
+| 32 | POST | `/iam/users/{id}/deactivate` | Dar de baja la cuenta con motivo (sin borrado físico; idempotente) | MEDIO | 14 | SECURITY_ADMIN |
 | 33 | GET | `/iam/users/{id}/devices` | Dispositivos del usuario | BAJO | 2 | SECURITY_ADMIN |
 | 34 | POST | `/iam/users/{id}/devices` | Registrar un dispositivo del usuario | ALTO | 3 | sesión (sin roles) |
 | 35 | GET | `/iam/users/{id}/global-roles` | Roles globales del usuario | BAJO | 2 | SECURITY_ADMIN |
@@ -52,10 +52,10 @@
 | 38 | POST | `/iam/users/{id}/lock` | Bloquear la cuenta y revocar sus sesiones | MEDIO | 7 | SECURITY_ADMIN |
 | 39 | GET | `/iam/users/{id}/mfa-factors` | Factores de MFA del usuario | BAJO | 2 | SECURITY_ADMIN |
 | 40 | POST | `/iam/users/{id}/mfa-factors` | Enrolar o verificar un factor MFA | ALTO | 6 | sesión (sin roles) |
-| 41 | POST | `/iam/users/{id}/reactivate` | Reactivar una cuenta suspendida con motivo (idempotente) | MEDIO | 13 | SECURITY_ADMIN |
+| 41 | POST | `/iam/users/{id}/reactivate` | Reactivar una cuenta suspendida con motivo (idempotente) | MEDIO | 14 | SECURITY_ADMIN |
 | 42 | GET | `/iam/users/{id}/sessions` | Sesiones del usuario | BAJO | 2 | SECURITY_ADMIN |
-| 43 | POST | `/iam/users/{id}/suspend` | Suspender la cuenta con motivo (idempotente, cierra sus sesiones) | MEDIO | 13 | SECURITY_ADMIN |
-| 44 | POST | `/iam/users/assisted-practitioner-registration` | Alta administrativa de un profesional (devuelve token de activación) | ALTO | 69 | SECURITY_ADMIN |
+| 43 | POST | `/iam/users/{id}/suspend` | Suspender la cuenta con motivo (idempotente, cierra sus sesiones) | MEDIO | 14 | SECURITY_ADMIN |
+| 44 | POST | `/iam/users/assisted-practitioner-registration` | Alta administrativa de un profesional (devuelve token de activación) | ALTO | 79 | SECURITY_ADMIN |
 | 45 | POST | `/iam/users/assisted-registration` | Registro asistido de un paciente (devuelve token de activación) | MEDIO | 10 | CLINICIAN, SECURITY_ADMIN |
 | 46 | POST | `/iam/users/search` | Listado paginado de usuarios, con los filtros en el cuerpo | BAJO | 2 | SECURITY_ADMIN |
 
@@ -150,7 +150,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:358` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 10, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:358` |
 
@@ -248,7 +248,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/iam/presentation/controllers/iam-account-security.controller.ts:45` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/iam/presentation/controllers/iam-account-security.controller.ts:45` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 5, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-account-security.controller.ts:45` |
 
@@ -343,7 +343,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:410` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 5, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:410` |
 
@@ -410,7 +410,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:187` |
+| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:257` |
 
 ### Flujos
 
@@ -442,7 +442,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:377` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 10, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:377` |
 
@@ -450,12 +450,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `authz.roles` | LEE | LEE | DIRECTA | IamAuthController.login → IamAuthService.login → IamAuthService.performLogin → IamAuthService.mergeRoleCodes → AuthzBusinessRolesAdapter.scopedAssignmentsForUser → AuthzEffectiveRolesService.scopedAssignmentsForUser | `src/modules/authz/services/authz-effective-roles.service.ts:96` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | IamAuthController.login → IamAuthService.login → IamAuthService.performLogin → IamAuthService.mergeRoleCodes → AuthzBusinessRolesAdapter.scopedAssignmentsForUser → AuthzEffectiveRolesService.scopedAssignmentsForUser → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.roles` | LEE | LEE | DIRECTA | IamAuthController.login → IamAuthService.login → IamAuthService.performLogin → IamAuthService.mergeRoleCodes → AuthzBusinessRolesAdapter.scopedAssignmentsForUser → AuthzEffectiveRolesService.scopedAssignmentsForUser | `src/modules/authz/services/authz-effective-roles.service.ts:105` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | IamAuthController.login → IamAuthService.login → IamAuthService.performLogin → IamAuthService.mergeRoleCodes → AuthzBusinessRolesAdapter.scopedAssignmentsForUser → AuthzEffectiveRolesService.scopedAssignmentsForUser → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `common.contact_points` | LEE | LEE | DIRECTA | IamAuthController.login → IamAuthService.login → IamAuthService.performLogin → CredentialsRepository.findActivePasswordByLoginIdentifier | `src/modules/iam/infrastructure/repositories/credentials.repository.ts:108` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | IamAuthController.login → IamAuthService.login → IamAuthService.performLogin → IamAuthService.loadActiveTenantIds → DirectoryTenantClaimsAdapter.listActiveTenantIds | `src/modules/iam/infrastructure/adapters/directory-tenant-claims.adapter.ts:26` |
 | `directory.tenants` | LEE | LEE | DIRECTA | IamAuthController.login → IamAuthService.login → IamAuthService.performLogin → IamAuthService.loadTenantDisplay → DirectoryTenantClaimsAdapter.describeTenants | `src/modules/iam/infrastructure/adapters/directory-tenant-claims.adapter.ts:47` |
-| `iam.account_lockouts` | ESCRIBE | ACTUALIZA | POR_TIPO | IamAuthController.login → IamAuthService.login → IamAuthService.performLogin → IamAuthService.handleFailedPassword | `src/modules/iam/application/services/iam-auth.service.ts:826` |
+| `iam.account_lockouts` | ESCRIBE | ACTUALIZA | POR_TIPO | IamAuthController.login → IamAuthService.login → IamAuthService.performLogin → IamAuthService.handleFailedPassword | `src/modules/iam/application/services/iam-auth.service.ts:841` |
 | `iam.account_lockouts` | ESCRIBE | CREA | DIRECTA | IamAuthController.login → IamAuthService.login → IamAuthService.performLogin → IamAuthService.handleFailedPassword → AccountLockoutsRepository.create | `src/modules/iam/infrastructure/repositories/account-lockouts.repository.ts:35` |
 | `iam.account_lockouts` | LEE | LEE | DIRECTA | IamAuthController.login → IamAuthService.login → IamAuthService.performLogin → IamAuthService.handleFailedPassword → AccountLockoutsRepository.findActiveForUser | `src/modules/iam/infrastructure/repositories/account-lockouts.repository.ts:55` |
 | `iam.authentication_credentials` | LEE | LEE | DIRECTA | IamAuthController.login → IamAuthService.login → IamAuthService.performLogin → CredentialsRepository.findActivePasswordByLoginIdentifier | `src/modules/iam/infrastructure/repositories/credentials.repository.ts:100` |
@@ -468,7 +468,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `iam.sessions` | ESCRIBE | CREA | DIRECTA | IamAuthController.login → IamAuthService.login → IamAuthService.performLogin → SessionsRepository.create | `src/modules/iam/infrastructure/repositories/sessions.repository.ts:43` |
 | `iam.sessions` | LEE | LEE | DIRECTA | IamAuthController.login → IamAuthService.login → IamAuthService.performLogin → IamAuthService.handleFailedPassword → SessionsRepository.activeSessionIdsForUser | `src/modules/iam/infrastructure/repositories/sessions.repository.ts:94` |
 | `iam.user_global_roles` | LEE | LEE | DIRECTA | IamAuthController.login → IamAuthService.login → IamAuthService.performLogin → UserGlobalRolesRepository.findActiveForUser | `src/modules/iam/infrastructure/repositories/user-global-roles.repository.ts:57` |
-| `iam.users` | ESCRIBE | ACTUALIZA | POR_TIPO | IamAuthController.login → IamAuthService.login → IamAuthService.performLogin | `src/modules/iam/application/services/iam-auth.service.ts:448` |
+| `iam.users` | ESCRIBE | ACTUALIZA | POR_TIPO | IamAuthController.login → IamAuthService.login → IamAuthService.performLogin | `src/modules/iam/application/services/iam-auth.service.ts:452` |
 | `iam.users` | LEE | LEE | DIRECTA | IamAuthController.login → IamAuthService.login → IamAuthService.performLogin → UsersRepository.findById | `src/modules/iam/infrastructure/repositories/users.repository.ts:45` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | IamAuthController.login → IamAuthService.login → IamAuthService.performLogin → IamAuthService.loadPractitionerProfileId → ProfilesAccountProfileIdsAdapter.findPractitionerProfileId → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.patient_profiles` | LEE | LEE | DIRECTA | IamAuthController.login → IamAuthService.login → IamAuthService.performLogin → IamAuthService.loadPatientProfileId → ProfilesAccountProfileIdsAdapter.findPatientProfileId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
@@ -535,13 +535,13 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | INTEGRACION | `test/integration/community-pharmacy-inbox.int-spec.ts:60` |
 | INTEGRACION | `test/integration/community-realtime-chat.int-spec.ts:104` |
 | INTEGRACION | `test/integration/dependent-link-requests.int-spec.ts:72` |
-| INTEGRACION | `test/integration/diagnostics-release.int-spec.ts:61` |
+| INTEGRACION | `test/integration/diagnostics-release.int-spec.ts:67` |
 | INTEGRACION | `test/integration/fx1-doctor-publica-agenda.int-spec.ts:51` |
 | INTEGRACION | `test/integration/fx10-mostrador-atomico.int-spec.ts:142` |
-| INTEGRACION | `test/integration/fx11-notas-de-evolucion-coleccion.int-spec.ts:73` |
+| INTEGRACION | `test/integration/fx11-notas-de-evolucion-coleccion.int-spec.ts:74` |
 | INTEGRACION | `test/integration/fx12-check-in-idempotente-por-cita.int-spec.ts:136` |
 | INTEGRACION | `test/integration/fx13-encuentro-en-la-reserva.int-spec.ts:78` |
-| INTEGRACION | `test/integration/fx15-documentos-del-expediente.int-spec.ts:77` |
+| INTEGRACION | `test/integration/fx15-documentos-del-expediente.int-spec.ts:84` |
 | INTEGRACION | `test/integration/fx16-dependientes-y-tutor-legal.int-spec.ts:79` |
 | INTEGRACION | `test/integration/fx17-sello-del-encuentro.int-spec.ts:94` |
 | INTEGRACION | `test/integration/fx2-medico-multisede-publica-agenda.int-spec.ts:73` |
@@ -556,7 +556,8 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | INTEGRACION | `test/integration/hardening/mch-005.int-spec.ts:50` |
 | INTEGRACION | `test/integration/hardening/mch-034.int-spec.ts:81` |
 | INTEGRACION | `test/integration/iam.int-spec.ts:80` |
-| INTEGRACION | `test/integration/identity-verification-self-service.int-spec.ts:73` |
+| INTEGRACION | `test/integration/identity-verification-cycle.int-spec.ts:67` |
+| INTEGRACION | `test/integration/identity-verification-self-service.int-spec.ts:88` |
 | INTEGRACION | `test/integration/infrastructure-fixture.ts:75` |
 | INTEGRACION | `test/integration/infrastructure-or-f4.int-spec.ts:94` |
 | INTEGRACION | `test/integration/insurance-campaigns.int-spec.ts:76` |
@@ -564,7 +565,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | INTEGRACION | `test/integration/insurance-portability.int-spec.ts:65` |
 | INTEGRACION | `test/integration/insurer-patients.int-spec.ts:66` |
 | INTEGRACION | `test/integration/lab-reception-inbox.int-spec.ts:66` |
-| INTEGRACION | `test/integration/medical-centers.int-spec.ts:182` |
+| INTEGRACION | `test/integration/medical-centers.int-spec.ts:208` |
 | INTEGRACION | `test/integration/observability.int-spec.ts:76` |
 | INTEGRACION | `test/integration/organization-headquarters-location.int-spec.ts:111` |
 | INTEGRACION | `test/integration/organization-legal-representative.int-spec.ts:96` |
@@ -586,8 +587,8 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | INTEGRACION | `test/integration/practitioner-profile-identity-fields.int-spec.ts:53` |
 | INTEGRACION | `test/integration/practitioner-registration.int-spec.ts:137` |
 | INTEGRACION | `test/integration/practitioner-signature-registration.int-spec.ts:72` |
-| INTEGRACION | `test/integration/quitar-punto-del-mapa.int-spec.ts:91` |
-| INTEGRACION | `test/integration/refresh-cookie.int-spec.ts:57` |
+| INTEGRACION | `test/integration/quitar-punto-del-mapa.int-spec.ts:94` |
+| INTEGRACION | `test/integration/refresh-cookie.int-spec.ts:53` |
 | INTEGRACION | `test/integration/tj1-onboarding-medico.int-spec.ts:108` |
 | INTEGRACION | `test/integration/tj2-reglas-cita.int-spec.ts:140` |
 | INTEGRACION | `test/integration/virtual-encounter-auth.int-spec.ts:50` |
@@ -655,6 +656,7 @@ La operación no recibe cuerpo.
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Redis no está disponible para revocar sesiones |
 
 El árbol de decisión completo está en [flujos](../flujos/iam.md).
 
@@ -663,7 +665,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/hardening/mch-004.int-spec.ts:76` |
-| INTEGRACION | `test/integration/refresh-cookie.int-spec.ts:151` |
+| INTEGRACION | `test/integration/refresh-cookie.int-spec.ts:148` |
 
 ### Flujos
 
@@ -735,7 +737,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 |---|---|
 | INTEGRACION | `test/integration/hardening/mch-004.int-spec.ts:87` |
 | INTEGRACION | `test/integration/iam.int-spec.ts:177` |
-| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:114` |
+| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:184` |
 
 ### Flujos
 
@@ -767,7 +769,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:160` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 10, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:160` |
 
@@ -1263,8 +1265,8 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | INTEGRACION | `test/integration/lab-reception-inbox.int-spec.ts:52` |
 | INTEGRACION | `test/integration/laboratory-registration.int-spec.ts:206` |
 | INTEGRACION | `test/integration/medical-center-registration.int-spec.ts:35` |
-| INTEGRACION | `test/integration/medical-centers.int-spec.ts:129` |
-| INTEGRACION | `test/integration/medical-facility-registration.int-spec.ts:112` |
+| INTEGRACION | `test/integration/medical-centers.int-spec.ts:144` |
+| INTEGRACION | `test/integration/medical-facility-registration.int-spec.ts:120` |
 | INTEGRACION | `test/integration/organization-headquarters-location.int-spec.ts:141` |
 | INTEGRACION | `test/integration/organization-legal-documents.int-spec.ts:97` |
 | INTEGRACION | `test/integration/organization-legal-entity-type.int-spec.ts:46` |
@@ -1274,7 +1276,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | INTEGRACION | `test/integration/practice-infrastructure.int-spec.ts:61` |
 | INTEGRACION | `test/integration/practice-structure-tenancy.int-spec.ts:60` |
 | INTEGRACION | `test/integration/tenant-external-verification-requirements.int-spec.ts:46` |
-| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:158` |
+| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:228` |
 
 ### Flujos
 
@@ -1306,7 +1308,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:114` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 10, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:114` |
 
@@ -1489,9 +1491,11 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | INTEGRACION | `test/integration/community-pharmacy-inbox.int-spec.ts:49` |
 | INTEGRACION | `test/integration/community-realtime-chat.int-spec.ts:124` |
 | INTEGRACION | `test/integration/dependent-link-requests.int-spec.ts:59` |
-| INTEGRACION | `test/integration/diagnostics-release.int-spec.ts:51` |
+| INTEGRACION | `test/integration/diagnostics-release.int-spec.ts:57` |
+| INTEGRACION | `test/integration/fx11-notas-de-evolucion-coleccion.int-spec.ts:114` |
 | INTEGRACION | `test/integration/fx12-check-in-idempotente-por-cita.int-spec.ts:67` |
 | INTEGRACION | `test/integration/fx13-encuentro-en-la-reserva.int-spec.ts:160` |
+| INTEGRACION | `test/integration/fx15-documentos-del-expediente.int-spec.ts:121` |
 | INTEGRACION | `test/integration/fx16-dependientes-y-tutor-legal.int-spec.ts:68` |
 | INTEGRACION | `test/integration/fx3-agenda-respiro-y-avisos.int-spec.ts:122` |
 | INTEGRACION | `test/integration/fx4-retirar-horario-publicado.int-spec.ts:103` |
@@ -1500,12 +1504,13 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | INTEGRACION | `test/integration/hardening/mch-001.int-spec.ts:89` |
 | INTEGRACION | `test/integration/hardening/mch-004.int-spec.ts:41` |
 | INTEGRACION | `test/integration/hardening/mch-005.int-spec.ts:40` |
-| INTEGRACION | `test/integration/identity-verification-self-service.int-spec.ts:61` |
-| INTEGRACION | `test/integration/infrastructure-fixture.ts:309` |
+| INTEGRACION | `test/integration/identity-verification-cycle.int-spec.ts:57` |
+| INTEGRACION | `test/integration/identity-verification-self-service.int-spec.ts:76` |
+| INTEGRACION | `test/integration/infrastructure-fixture.ts:312` |
 | INTEGRACION | `test/integration/insurance-portability.int-spec.ts:51` |
 | INTEGRACION | `test/integration/issuer-administrative-area.int-spec.ts:50` |
 | INTEGRACION | `test/integration/lab-reception-inbox.int-spec.ts:135` |
-| INTEGRACION | `test/integration/medical-centers.int-spec.ts:200` |
+| INTEGRACION | `test/integration/medical-centers.int-spec.ts:226` |
 | INTEGRACION | `test/integration/p23-cambiar-horario-con-citas.int-spec.ts:176` |
 | INTEGRACION | `test/integration/p36-horario-flexible.int-spec.ts:69` |
 | INTEGRACION | `test/integration/p39-nota-medica-filas.int-spec.ts:109` |
@@ -1513,12 +1518,12 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | INTEGRACION | `test/integration/patient-diagnostic-orders.int-spec.ts:56` |
 | INTEGRACION | `test/integration/patient-own-profile.int-spec.ts:45` |
 | INTEGRACION | `test/integration/patient-spending-http.int-spec.ts:66` |
-| INTEGRACION | `test/integration/quitar-punto-del-mapa.int-spec.ts:78` |
+| INTEGRACION | `test/integration/quitar-punto-del-mapa.int-spec.ts:81` |
 | INTEGRACION | `test/integration/tj1-onboarding-medico.int-spec.ts:237` |
 | INTEGRACION | `test/integration/tj2-reglas-cita.int-spec.ts:130` |
 | INTEGRACION | `test/integration/virtual-encounter-auth.int-spec.ts:75` |
 | INTEGRACION | `test/integration/waitlist-cupo-liberado.int-spec.ts:108` |
-| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:141` |
+| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:211` |
 
 ### Flujos
 
@@ -1543,14 +1548,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /iam/auth/register-practitioner` la atiende `IamAuthController.registerPractitioner` (src/modules/iam/presentation/controllers/iam-auth.controller.ts:292). Es una ruta pública: no exige token. Valida el cuerpo como `RegisterPractitionerDto` (79 campos, 5 obligatorios). Delega en `IamPractitionerSelfRegistrationService.registerPractitioner`. Crea filas en authz.user_role_assignments, common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, directory.tenant_memberships, iam.account_activations y 23 más. Actualiza common.files, messaging.notification_requests, messaging.queued_jobs, profiles.jurisdiction_authorizations, profiles.practitioner_admission_reviews, profiles.practitioner_specialties, profiles.professional_credentials. Borra de profiles.practitioner_admission_reviews. Lee authz.roles, authz.user_role_assignments, common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, community.public_profiles y 25 más.
+`POST /iam/auth/register-practitioner` la atiende `IamAuthController.registerPractitioner` (src/modules/iam/presentation/controllers/iam-auth.controller.ts:292). Es una ruta pública: no exige token. Valida el cuerpo como `RegisterPractitionerDto` (79 campos, 5 obligatorios). Delega en `IamPractitionerSelfRegistrationService.registerPractitioner`. Crea filas en authz.user_role_assignments, common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, directory.tenant_memberships, iam.account_activations y 24 más. Actualiza common.files, iam.devices, messaging.notification_requests, profiles.jurisdiction_authorizations, profiles.practitioner_admission_reviews, profiles.practitioner_specialties, profiles.professional_credentials. Borra de profiles.practitioner_admission_reviews. Lee authz.roles, authz.user_role_assignments, common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, community.public_profiles y 28 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:292` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 10, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:292` |
 
@@ -1558,9 +1563,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `authz.roles` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → AuthzBusinessRolesAdapter.ensureRoleByCode → AuthzEffectiveRolesService.ensureRoleByCode | `src/modules/authz/services/authz-effective-roles.service.ts:139` |
-| `authz.user_role_assignments` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → AuthzBusinessRolesAdapter.ensureRoleByCode → AuthzEffectiveRolesService.ensureRoleByCode → UserRoleAssignmentsRepository.create | `src/modules/authz/repositories/user-role-assignments.repository.ts:123` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → AuthzBusinessRolesAdapter.ensureRoleByCode → AuthzEffectiveRolesService.ensureRoleByCode → UserRoleAssignmentsRepository.findActive | `src/modules/authz/repositories/user-role-assignments.repository.ts:73` |
+| `authz.roles` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → AuthzBusinessRolesAdapter.ensureRoleByCode → AuthzEffectiveRolesService.ensureRoleByCode | `src/modules/authz/services/authz-effective-roles.service.ts:148` |
+| `authz.user_role_assignments` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → AuthzBusinessRolesAdapter.ensureRoleByCode → AuthzEffectiveRolesService.ensureRoleByCode → UserRoleAssignmentsRepository.create | `src/modules/authz/repositories/user-role-assignments.repository.ts:140` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → AuthzBusinessRolesAdapter.ensureRoleByCode → AuthzEffectiveRolesService.ensureRoleByCode → UserRoleAssignmentsRepository.findActive | `src/modules/authz/repositories/user-role-assignments.repository.ts:90` |
 | `common.addresses` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → PracticeOwnSiteProvisioningAdapter.provision → OwnSiteProvisioningService.provision → AddressesRepository.create | `src/modules/common/repositories/addresses.repository.ts:154` |
 | `common.addresses` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.buildSnapshot → AdmissionForeignReadsAdapter.addresses | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:137` |
 | `common.contact_points` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → CommonRecordsAdapter.createContactPoint → ContactPointsRepository.create | `src/modules/common/repositories/contact-points.repository.ts:198` |
@@ -1578,6 +1583,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `iam.account_activations` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → AccountActivationsRepository.create | `src/modules/iam/infrastructure/repositories/account-activations.repository.ts:46` |
 | `iam.authentication_credentials` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → CredentialsRepository.createPendingPassword | `src/modules/iam/infrastructure/repositories/credentials.repository.ts:297` |
 | `iam.authentication_credentials` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → CredentialsRepository.findLivePasswordByEmail | `src/modules/iam/infrastructure/repositories/credentials.repository.ts:227` |
+| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.notify → RegistrationAffiliationsService.notifyPending → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
+| `iam.devices` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.notify → RegistrationAffiliationsService.notifyPending → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
 | `iam.email_verifications` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → EmailVerificationsRepository.create | `src/modules/iam/infrastructure/repositories/email-verifications.repository.ts:41` |
 | `iam.security_events` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → SecurityEventsRepository.record | `src/modules/iam/infrastructure/repositories/security-events.repository.ts:47` |
 | `iam.user_global_roles` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → UserGlobalRolesRepository.create | `src/modules/iam/infrastructure/repositories/user-global-roles.repository.ts:27` |
@@ -1585,14 +1592,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `insurance.insurance_carriers` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.request → PractitionerInsurerRequestsService.requestWithin → PractitionerInsurerRequestsRepository.findCarriers | `src/modules/insurance/infrastructure/repositories/practitioner-insurer-requests.repository.ts:111` |
 | `insurance.practitioner_insurer_requests` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.request → PractitionerInsurerRequestsService.requestWithin → PractitionerInsurerRequestsRepository.create | `src/modules/insurance/infrastructure/repositories/practitioner-insurer-requests.repository.ts:98` |
 | `insurance.practitioner_insurer_requests` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.request → PractitionerInsurerRequestsService.requestWithin → PractitionerInsurerRequestsRepository.findLivePair | `src/modules/insurance/infrastructure/repositories/practitioner-insurer-requests.repository.ts:31` |
+| `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.notify → RegistrationAffiliationsService.notifyPending → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
-| `messaging.message_queues` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.uploadProfilePhoto → CommonRegistrationFilesAdapter.uploadAnonymous → FileUploadService.uploadAnonymous → FileUploadService.publishUpload → StoragePublicationService.publish → StorageLifecycleCoordinator.begin → QueuesRepository.findQueueByCode | `src/modules/messaging/repositories/queues.repository.ts:77` |
 | `messaging.message_templates` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
+| `messaging.messaging_providers` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.notify → RegistrationAffiliationsService.notifyPending → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findProviderById | `src/modules/messaging/repositories/notifications.repository.ts:437` |
+| `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.notify → RegistrationAffiliationsService.notifyPending → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
+| `messaging.notification_deliveries` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.notify → RegistrationAffiliationsService.notifyPending → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
 | `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.notify → RegistrationAffiliationsService.notifyPending → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
-| `messaging.queued_jobs` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.uploadProfilePhoto → CommonRegistrationFilesAdapter.uploadAnonymous → FileUploadService.uploadAnonymous → FileUploadService.publishUpload → StoragePublicationService.publish → StorageLifecycleCoordinator.begin → QueuesRepository.createJob | `src/modules/messaging/repositories/queues.repository.ts:101` |
-| `messaging.queued_jobs` | ESCRIBE | ACTUALIZA | POR_TIPO | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.uploadProfilePhoto → CommonRegistrationFilesAdapter.uploadAnonymous → FileUploadService.uploadAnonymous → FileUploadService.publishUpload → StoragePublicationService.publish → StorageLifecycleCoordinator.reuse → StorageLifecycleCoordinator.change | `src/common/storage/storage-lifecycle-coordinator.service.ts:651` |
+| `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.notify → RegistrationAffiliationsService.notifyPending → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.queued_jobs` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → CommonRegistrationFilesAdapter.claimAnonymousUpload → AttachableFileService.claimAnonymousUpload → StoragePublicationService.guardFile → StorageLifecycleCoordinator.assertNoContender → QueuesRepository.findStorageIntents | `src/modules/messaging/repositories/queues.repository.ts:62` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
 | `practice.practice_sites` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → PracticeOwnSiteProvisioningAdapter.provision → OwnSiteProvisioningService.provision → PracticeSitesRepository.create | `src/modules/practice/repositories/practice-sites.repository.ts:116` |
@@ -1872,13 +1881,13 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | INTEGRACION | `test/integration/clinical-c14-c23-notas-e-internacion.int-spec.ts:81` |
 | INTEGRACION | `test/integration/clinical-prescriptions-pdf.int-spec.ts:93` |
 | INTEGRACION | `test/integration/community-realtime-chat.int-spec.ts:92` |
-| INTEGRACION | `test/integration/diagnostics-release.int-spec.ts:214` |
+| INTEGRACION | `test/integration/diagnostics-release.int-spec.ts:220` |
 | INTEGRACION | `test/integration/fx1-doctor-publica-agenda.int-spec.ts:37` |
 | INTEGRACION | `test/integration/fx10-mostrador-atomico.int-spec.ts:128` |
-| INTEGRACION | `test/integration/fx11-notas-de-evolucion-coleccion.int-spec.ts:59` |
+| INTEGRACION | `test/integration/fx11-notas-de-evolucion-coleccion.int-spec.ts:60` |
 | INTEGRACION | `test/integration/fx12-check-in-idempotente-por-cita.int-spec.ts:122` |
 | INTEGRACION | `test/integration/fx13-encuentro-en-la-reserva.int-spec.ts:64` |
-| INTEGRACION | `test/integration/fx15-documentos-del-expediente.int-spec.ts:63` |
+| INTEGRACION | `test/integration/fx15-documentos-del-expediente.int-spec.ts:70` |
 | INTEGRACION | `test/integration/fx17-sello-del-encuentro.int-spec.ts:80` |
 | INTEGRACION | `test/integration/fx2-medico-multisede-publica-agenda.int-spec.ts:152` |
 | INTEGRACION | `test/integration/fx3-agenda-respiro-y-avisos.int-spec.ts:100` |
@@ -1889,7 +1898,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | INTEGRACION | `test/integration/fx9-carreras-de-la-agenda.int-spec.ts:155` |
 | INTEGRACION | `test/integration/hardening/mch-034.int-spec.ts:68` |
 | INTEGRACION | `test/integration/issuer-administrative-area.int-spec.ts:139` |
-| INTEGRACION | `test/integration/medical-centers.int-spec.ts:170` |
+| INTEGRACION | `test/integration/medical-centers.int-spec.ts:196` |
 | INTEGRACION | `test/integration/p23-cambiar-horario-con-citas.int-spec.ts:143` |
 | INTEGRACION | `test/integration/p36-horario-flexible.int-spec.ts:122` |
 | INTEGRACION | `test/integration/p39-nota-medica-filas.int-spec.ts:57` |
@@ -1936,7 +1945,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:138` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 10, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:138` |
 
@@ -2079,7 +2088,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:325` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 5, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:325` |
 
@@ -2174,7 +2183,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:431` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 10, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:431` |
 
@@ -2182,9 +2191,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `iam.authentication_credentials` | ESCRIBE | ACTUALIZA | POR_TIPO | IamAuthController.resetPassword → IamPasswordResetService.resetPassword | `src/modules/iam/application/services/iam-password-reset.service.ts:242` |
+| `iam.authentication_credentials` | ESCRIBE | ACTUALIZA | POR_TIPO | IamAuthController.resetPassword → IamPasswordResetService.resetPassword | `src/modules/iam/application/services/iam-password-reset.service.ts:243` |
 | `iam.authentication_credentials` | LEE | LEE | DIRECTA | IamAuthController.resetPassword → IamPasswordResetService.resetPassword → CredentialsRepository.findActivePasswordBySubject | `src/modules/iam/infrastructure/repositories/credentials.repository.ts:67` |
-| `iam.password_resets` | ESCRIBE | ACTUALIZA | POR_TIPO | IamAuthController.resetPassword → IamPasswordResetService.resetPassword | `src/modules/iam/application/services/iam-password-reset.service.ts:222` |
+| `iam.password_resets` | ESCRIBE | ACTUALIZA | POR_TIPO | IamAuthController.resetPassword → IamPasswordResetService.resetPassword | `src/modules/iam/application/services/iam-password-reset.service.ts:223` |
 | `iam.password_resets` | LEE | LEE | DIRECTA | IamAuthController.resetPassword → IamPasswordResetService.resetPassword → PasswordResetsRepository.findByTokenHash | `src/modules/iam/infrastructure/repositories/password-resets.repository.ts:58` |
 | `iam.refresh_tokens` | ESCRIBE | ACTUALIZA | DIRECTA | IamAuthController.resetPassword → IamPasswordResetService.resetPassword → RefreshTokensRepository.revokeActiveBySessionIds | `src/modules/iam/infrastructure/repositories/refresh-tokens.repository.ts:96` |
 | `iam.security_events` | ESCRIBE | CREA | DIRECTA | IamAuthController.resetPassword → IamPasswordResetService.resetPassword → SecurityEventsRepository.record | `src/modules/iam/infrastructure/repositories/security-events.repository.ts:47` |
@@ -2240,7 +2249,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:197` |
+| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:267` |
 
 ### Flujos
 
@@ -2311,7 +2320,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/iam.int-spec.ts:148` |
-| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:121` |
+| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:191` |
 
 ### Flujos
 
@@ -2343,7 +2352,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:447` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 20, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:447` |
 
@@ -2351,8 +2360,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `authz.roles` | LEE | LEE | DIRECTA | IamAuthController.refresh → IamAuthService.refresh → IamAuthService.mergeRoleCodes → AuthzBusinessRolesAdapter.scopedAssignmentsForUser → AuthzEffectiveRolesService.scopedAssignmentsForUser | `src/modules/authz/services/authz-effective-roles.service.ts:96` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | IamAuthController.refresh → IamAuthService.refresh → IamAuthService.mergeRoleCodes → AuthzBusinessRolesAdapter.scopedAssignmentsForUser → AuthzEffectiveRolesService.scopedAssignmentsForUser → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.roles` | LEE | LEE | DIRECTA | IamAuthController.refresh → IamAuthService.refresh → IamAuthService.mergeRoleCodes → AuthzBusinessRolesAdapter.scopedAssignmentsForUser → AuthzEffectiveRolesService.scopedAssignmentsForUser | `src/modules/authz/services/authz-effective-roles.service.ts:105` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | IamAuthController.refresh → IamAuthService.refresh → IamAuthService.mergeRoleCodes → AuthzBusinessRolesAdapter.scopedAssignmentsForUser → AuthzEffectiveRolesService.scopedAssignmentsForUser → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | IamAuthController.refresh → IamAuthService.refresh → IamAuthService.loadActiveTenantIds → DirectoryTenantClaimsAdapter.listActiveTenantIds | `src/modules/iam/infrastructure/adapters/directory-tenant-claims.adapter.ts:26` |
 | `directory.tenants` | LEE | LEE | DIRECTA | IamAuthController.refresh → IamAuthService.refresh → IamAuthService.loadTenantDisplay → DirectoryTenantClaimsAdapter.describeTenants | `src/modules/iam/infrastructure/adapters/directory-tenant-claims.adapter.ts:47` |
 | `iam.refresh_tokens` | ESCRIBE | ACTUALIZA | DIRECTA | IamAuthController.refresh → IamAuthService.refresh → RefreshTokensRepository.revokeBySessionId | `src/modules/iam/infrastructure/repositories/refresh-tokens.repository.ts:83` |
@@ -2414,8 +2423,8 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 |---|---|
 | INTEGRACION | `test/integration/hardening/mch-005.int-spec.ts:57` |
 | INTEGRACION | `test/integration/iam.int-spec.ts:97` |
-| INTEGRACION | `test/integration/refresh-cookie.int-spec.ts:83` |
-| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:105` |
+| INTEGRACION | `test/integration/refresh-cookie.int-spec.ts:80` |
+| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:141` |
 
 ### Flujos
 
@@ -2512,6 +2521,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 
 | Tipo | Archivo |
 |---|---|
+| INTEGRACION | `test/integration/community-pharmacy-inbox.int-spec.ts:125` |
 | INTEGRACION | `test/integration/laboratory-registration.int-spec.ts:391` |
 | INTEGRACION | `test/integration/organization-legal-documents.int-spec.ts:37` |
 | INTEGRACION | `test/integration/organization-legal-representative.int-spec.ts:41` |
@@ -2519,7 +2529,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | INTEGRACION | `test/integration/pharmacy-registration.int-spec.ts:54` |
 | INTEGRACION | `test/integration/practitioner-credential-registration-files.int-spec.ts:25` |
 | INTEGRACION | `test/integration/practitioner-license-registration-files.int-spec.ts:32` |
-| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:171` |
+| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:241` |
 
 ### Flujos
 
@@ -2743,7 +2753,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:342` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 10, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:342` |
 
@@ -2751,9 +2761,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `iam.email_verifications` | ESCRIBE | ACTUALIZA | POR_TIPO | IamAuthController.verifyEmail → IamPatientSelfRegistrationService.verifyEmail | `src/modules/iam/application/services/iam-patient-self-registration.service.ts:552` |
+| `iam.email_verifications` | ESCRIBE | ACTUALIZA | POR_TIPO | IamAuthController.verifyEmail → IamPatientSelfRegistrationService.verifyEmail | `src/modules/iam/application/services/iam-patient-self-registration.service.ts:556` |
 | `iam.email_verifications` | LEE | LEE | DIRECTA | IamAuthController.verifyEmail → IamPatientSelfRegistrationService.verifyEmail → EmailVerificationsRepository.findByTokenHash | `src/modules/iam/infrastructure/repositories/email-verifications.repository.ts:60` |
-| `iam.users` | ESCRIBE | ACTUALIZA | POR_TIPO | IamAuthController.verifyEmail → IamPatientSelfRegistrationService.verifyEmail | `src/modules/iam/application/services/iam-patient-self-registration.service.ts:566` |
+| `iam.users` | ESCRIBE | ACTUALIZA | POR_TIPO | IamAuthController.verifyEmail → IamPatientSelfRegistrationService.verifyEmail | `src/modules/iam/application/services/iam-patient-self-registration.service.ts:570` |
 | `iam.users` | LEE | LEE | DIRECTA | IamAuthController.verifyEmail → IamPatientSelfRegistrationService.verifyEmail → UsersRepository.findById | `src/modules/iam/infrastructure/repositories/users.repository.ts:45` |
 
 ### Cuerpo — DTO `VerifyEmailDto` · `application/json`
@@ -2802,7 +2812,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:180` |
+| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:250` |
 
 ### Flujos
 
@@ -3171,7 +3181,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IamUsersController.searchUsers` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:135`
+- **Implementación:** `IamUsersController.searchUsers` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:136`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3181,14 +3191,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /iam/users` la atiende `IamUsersController.searchUsers` (src/modules/iam/presentation/controllers/iam-users.controller.ts:135). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `IamUsersReadService.searchUsers`. Lee iam.authentication_credentials, iam.users.
+`GET /iam/users` la atiende `IamUsersController.searchUsers` (src/modules/iam/presentation/controllers/iam-users.controller.ts:136). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `IamUsersReadService.searchUsers`. Lee iam.authentication_credentials, iam.users.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:135` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:136` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3244,6 +3254,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 
 | Tipo | Archivo |
 |---|---|
+| INTEGRACION | `test/integration/refresh-cookie.int-spec.ts:159` |
 | CONTROLADOR | `src/modules/iam/presentation/controllers/iam-users.controller.spec.ts:147` |
 
 ### Flujos
@@ -3259,7 +3270,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IamUsersController.createUser` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:371`
+- **Implementación:** `IamUsersController.createUser` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:372`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3269,16 +3280,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /iam/users` la atiende `IamUsersController.createUser` (src/modules/iam/presentation/controllers/iam-users.controller.ts:371). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateUserDto` (6 campos, 3 obligatorios). Delega en `IamUsersService.createUser`. Crea filas en common.contact_points, iam.authentication_credentials, iam.security_events, iam.user_global_roles, iam.users. Lee iam.authentication_credentials.
+`POST /iam/users` la atiende `IamUsersController.createUser` (src/modules/iam/presentation/controllers/iam-users.controller.ts:372). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateUserDto` (6 campos, 3 obligatorios). Delega en `IamUsersService.createUser`. Crea filas en common.contact_points, iam.authentication_credentials, iam.security_events, iam.user_global_roles, iam.users. Lee iam.authentication_credentials.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:371` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:372` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3356,7 +3367,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/iam.int-spec.ts:41` |
-| INTEGRACION | `test/integration/refresh-cookie.int-spec.ts:36` |
+| INTEGRACION | `test/integration/refresh-cookie.int-spec.ts:33` |
 | CONTROLADOR | `src/modules/iam/presentation/controllers/iam-users.controller.spec.ts:73` |
 
 ### Flujos
@@ -3372,7 +3383,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IamUsersController.getUser` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:225`
+- **Implementación:** `IamUsersController.getUser` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:226`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3382,16 +3393,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /iam/users/{id}` la atiende `IamUsersController.getUser` (src/modules/iam/presentation/controllers/iam-users.controller.ts:225). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `IamUsersReadService.getUserById`. Lee iam.users.
+`GET /iam/users/{id}` la atiende `IamUsersController.getUser` (src/modules/iam/presentation/controllers/iam-users.controller.ts:226). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `IamUsersReadService.getUserById`. Lee iam.users.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:225` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:226` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:225` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:226` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -3455,7 +3466,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IamUsersController.anonymize` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:578`
+- **Implementación:** `IamUsersController.anonymize` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:579`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3465,16 +3476,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /iam/users/{id}/anonymize` la atiende `IamUsersController.anonymize` (src/modules/iam/presentation/controllers/iam-users.controller.ts:578). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `IamUsersService.anonymize`. Crea filas en iam.security_events. Actualiza iam.authentication_credentials, iam.refresh_tokens, iam.sessions, iam.user_global_roles, iam.users. Lee iam.sessions, iam.users.
+`POST /iam/users/{id}/anonymize` la atiende `IamUsersController.anonymize` (src/modules/iam/presentation/controllers/iam-users.controller.ts:579). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `IamUsersService.anonymize`. Crea filas en iam.security_events. Actualiza iam.authentication_credentials, iam.refresh_tokens, iam.sessions, iam.user_global_roles, iam.users. Lee iam.sessions, iam.users.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:578` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:579` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:578` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:579` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -3487,7 +3498,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `iam.sessions` | ESCRIBE | ACTUALIZA | DIRECTA | IamUsersController.anonymize → IamUsersService.anonymize → SessionsRepository.revokeAllActiveForUser | `src/modules/iam/infrastructure/repositories/sessions.repository.ts:104` |
 | `iam.sessions` | LEE | LEE | DIRECTA | IamUsersController.anonymize → IamUsersService.anonymize → SessionsRepository.activeSessionIdsForUser | `src/modules/iam/infrastructure/repositories/sessions.repository.ts:94` |
 | `iam.user_global_roles` | ESCRIBE | ACTUALIZA | DIRECTA | IamUsersController.anonymize → IamUsersService.anonymize → UserGlobalRolesRepository.revokeAllForUser | `src/modules/iam/infrastructure/repositories/user-global-roles.repository.ts:65` |
-| `iam.users` | ESCRIBE | ACTUALIZA | POR_TIPO | IamUsersController.anonymize → IamUsersService.anonymize | `src/modules/iam/application/services/iam-users.service.ts:566` |
+| `iam.users` | ESCRIBE | ACTUALIZA | POR_TIPO | IamUsersController.anonymize → IamUsersService.anonymize | `src/modules/iam/application/services/iam-users.service.ts:589` |
 | `iam.users` | LEE | LEE | DIRECTA | IamUsersController.anonymize → IamUsersService.anonymize → UsersRepository.findById | `src/modules/iam/infrastructure/repositories/users.repository.ts:45` |
 
 ### Parámetros
@@ -3539,7 +3550,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IamUsersController.listCredentials` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:235`
+- **Implementación:** `IamUsersController.listCredentials` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:236`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3549,16 +3560,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /iam/users/{id}/credentials` la atiende `IamUsersController.listCredentials` (src/modules/iam/presentation/controllers/iam-users.controller.ts:235). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `IamUsersReadService.listCredentials`. Lee iam.authentication_credentials, iam.users.
+`GET /iam/users/{id}/credentials` la atiende `IamUsersController.listCredentials` (src/modules/iam/presentation/controllers/iam-users.controller.ts:236). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `IamUsersReadService.listCredentials`. Lee iam.authentication_credentials, iam.users.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:235` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:236` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:235` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:236` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -3623,7 +3634,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IamUsersController.revokeCredential` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:408`
+- **Implementación:** `IamUsersController.revokeCredential` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:409`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3633,16 +3644,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /iam/users/{id}/credentials/{cid}/revoke` la atiende `IamUsersController.revokeCredential` (src/modules/iam/presentation/controllers/iam-users.controller.ts:408). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `IamCredentialsService.revokeCredential`. Crea filas en iam.security_events. Actualiza iam.authentication_credentials. Lee iam.authentication_credentials.
+`POST /iam/users/{id}/credentials/{cid}/revoke` la atiende `IamUsersController.revokeCredential` (src/modules/iam/presentation/controllers/iam-users.controller.ts:409). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `IamCredentialsService.revokeCredential`. Crea filas en iam.security_events. Actualiza iam.authentication_credentials. Lee iam.authentication_credentials.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:408` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:409` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id, cid | `src/modules/iam/presentation/controllers/iam-users.controller.ts:408` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id, cid | `src/modules/iam/presentation/controllers/iam-users.controller.ts:409` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -3702,7 +3713,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IamUsersController.linkFederated` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:390`
+- **Implementación:** `IamUsersController.linkFederated` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:391`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3712,17 +3723,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /iam/users/{id}/credentials/federated` la atiende `IamUsersController.linkFederated` (src/modules/iam/presentation/controllers/iam-users.controller.ts:390). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `LinkFederatedCredentialDto` (2 campos, 2 obligatorios). Delega en `IamCredentialsService.linkFederated`. Crea filas en iam.authentication_credentials, iam.security_events. Lee iam.authentication_credentials, iam.users.
+`POST /iam/users/{id}/credentials/federated` la atiende `IamUsersController.linkFederated` (src/modules/iam/presentation/controllers/iam-users.controller.ts:391). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `LinkFederatedCredentialDto` (2 campos, 2 obligatorios). Delega en `IamCredentialsService.linkFederated`. Crea filas en iam.authentication_credentials, iam.security_events. Lee iam.authentication_credentials, iam.users.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:390` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:391` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:390` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:391` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3811,7 +3822,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IamUsersController.deactivate` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:532`
+- **Implementación:** `IamUsersController.deactivate` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:533`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3821,17 +3832,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /iam/users/{id}/deactivate` la atiende `IamUsersController.deactivate` (src/modules/iam/presentation/controllers/iam-users.controller.ts:532). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `UserLifecycleReasonDto` (1 campo, 1 obligatorio). Delega en `IamUsersService.deactivate`. Crea filas en iam.account_lockouts, iam.security_events. Actualiza iam.account_lockouts, iam.authentication_credentials, iam.refresh_tokens, iam.sessions, iam.user_global_roles, iam.users. Lee iam.account_lockouts, iam.security_events, iam.sessions, iam.user_global_roles, iam.users.
+`POST /iam/users/{id}/deactivate` la atiende `IamUsersController.deactivate` (src/modules/iam/presentation/controllers/iam-users.controller.ts:533). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `UserLifecycleReasonDto` (1 campo, 1 obligatorio). Delega en `IamUsersService.deactivate`. Crea filas en iam.account_lockouts, iam.security_events. Actualiza authz.user_role_assignments, iam.account_lockouts, iam.authentication_credentials, iam.refresh_tokens, iam.sessions, iam.user_global_roles, iam.users. Lee iam.account_lockouts, iam.security_events, iam.sessions, iam.user_global_roles, iam.users.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:532` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:533` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:532` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:533` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3839,6 +3850,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `authz.user_role_assignments` | ESCRIBE | ACTUALIZA | DIRECTA | IamUsersController.deactivate → IamUsersService.deactivate → IamUsersService.applyLifecycle → AuthzBusinessRolesAdapter.revokeAllForUser → AuthzEffectiveRolesService.revokeAllForUser → UserRoleAssignmentsRepository.revokeAllForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:55` |
 | `iam.account_lockouts` | ESCRIBE | ACTUALIZA | POR_TIPO | IamUsersController.deactivate → IamUsersService.deactivate → IamUsersService.applyLifecycle → AccountLockoutsRepository.releaseActiveForUser | `src/modules/iam/infrastructure/repositories/account-lockouts.repository.ts:73` |
 | `iam.account_lockouts` | ESCRIBE | CREA | DIRECTA | IamUsersController.deactivate → IamUsersService.deactivate → IamUsersService.applyLifecycle → AccountLockoutsRepository.create | `src/modules/iam/infrastructure/repositories/account-lockouts.repository.ts:35` |
 | `iam.account_lockouts` | LEE | LEE | DIRECTA | IamUsersController.deactivate → IamUsersService.deactivate → IamUsersService.applyLifecycle → AccountLockoutsRepository.findActiveForUser | `src/modules/iam/infrastructure/repositories/account-lockouts.repository.ts:55` |
@@ -3899,7 +3911,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {{ code: 'FORBIDDEN', reason: IamErrorReason.USER_SUPERADMIN…} |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Usuario no encontrado |
 | 409 | `CONFLICT` | ConflictException: La cuenta no puede pasar a ese estado desde el que tiene; ConflictException: La cuenta cambió de estado mientras se aplicaba: reintentá |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un administrador no puede suspender ni dar de baja su propia cuenta; PreconditionFailedException: Es la última cuenta que administra accesos: concedé ese rol a otra antes |
@@ -3924,7 +3936,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IamUsersController.listDevices` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:248`
+- **Implementación:** `IamUsersController.listDevices` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:249`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3934,16 +3946,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /iam/users/{id}/devices` la atiende `IamUsersController.listDevices` (src/modules/iam/presentation/controllers/iam-users.controller.ts:248). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `IamUsersReadService.listDevices`. Lee iam.devices, iam.users.
+`GET /iam/users/{id}/devices` la atiende `IamUsersController.listDevices` (src/modules/iam/presentation/controllers/iam-users.controller.ts:249). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `IamUsersReadService.listDevices`. Lee iam.devices, iam.users.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:248` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:249` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:248` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:249` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -4006,7 +4018,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IamUsersController.registerDevice` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:443`
+- **Implementación:** `IamUsersController.registerDevice` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:444`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -4016,17 +4028,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /iam/users/{id}/devices` la atiende `IamUsersController.registerDevice` (src/modules/iam/presentation/controllers/iam-users.controller.ts:443). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateDeviceDto` (4 campos, 1 obligatorio). Delega en `IamDevicesService.register`. Crea filas en iam.devices, iam.security_events. Lee iam.users.
+`POST /iam/users/{id}/devices` la atiende `IamUsersController.registerDevice` (src/modules/iam/presentation/controllers/iam-users.controller.ts:444). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateDeviceDto` (4 campos, 1 obligatorio). Delega en `IamDevicesService.register`. Crea filas en iam.devices, iam.security_events. Lee iam.users.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/iam/presentation/controllers/iam-users.controller.ts:443` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/iam/presentation/controllers/iam-users.controller.ts:444` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:443` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:444` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4115,7 +4127,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IamUsersController.listGlobalRoles` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:287`
+- **Implementación:** `IamUsersController.listGlobalRoles` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:288`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -4125,16 +4137,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /iam/users/{id}/global-roles` la atiende `IamUsersController.listGlobalRoles` (src/modules/iam/presentation/controllers/iam-users.controller.ts:287). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `IamUsersReadService.listGlobalRoles`. Lee iam.user_global_roles, iam.users.
+`GET /iam/users/{id}/global-roles` la atiende `IamUsersController.listGlobalRoles` (src/modules/iam/presentation/controllers/iam-users.controller.ts:288). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `IamUsersReadService.listGlobalRoles`. Lee iam.user_global_roles, iam.users.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:287` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:288` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:287` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:288` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -4195,7 +4207,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IamUsersController.changeGlobalRole` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:560`
+- **Implementación:** `IamUsersController.changeGlobalRole` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:561`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -4205,17 +4217,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /iam/users/{id}/global-roles` la atiende `IamUsersController.changeGlobalRole` (src/modules/iam/presentation/controllers/iam-users.controller.ts:560). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `GlobalRoleDto` (2 campos, 2 obligatorios). Delega en `IamUsersService.changeGlobalRole`. Crea filas en iam.security_events, iam.user_global_roles. Actualiza iam.refresh_tokens, iam.sessions, iam.user_global_roles. Lee iam.sessions, iam.user_global_roles, iam.users.
+`POST /iam/users/{id}/global-roles` la atiende `IamUsersController.changeGlobalRole` (src/modules/iam/presentation/controllers/iam-users.controller.ts:561). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `GlobalRoleDto` (2 campos, 2 obligatorios). Delega en `IamUsersService.changeGlobalRole`. Crea filas en iam.security_events, iam.user_global_roles. Actualiza iam.refresh_tokens, iam.sessions, iam.user_global_roles. Lee iam.sessions, iam.user_global_roles, iam.users.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:560` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:561` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:560` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:561` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4227,7 +4239,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `iam.security_events` | ESCRIBE | CREA | DIRECTA | IamUsersController.changeGlobalRole → IamUsersService.changeGlobalRole → SecurityEventsRepository.record | `src/modules/iam/infrastructure/repositories/security-events.repository.ts:47` |
 | `iam.sessions` | ESCRIBE | ACTUALIZA | DIRECTA | IamUsersController.changeGlobalRole → IamUsersService.changeGlobalRole → SessionsRepository.revokeAllActiveForUser | `src/modules/iam/infrastructure/repositories/sessions.repository.ts:104` |
 | `iam.sessions` | LEE | LEE | DIRECTA | IamUsersController.changeGlobalRole → IamUsersService.changeGlobalRole → SessionsRepository.activeSessionIdsForUser | `src/modules/iam/infrastructure/repositories/sessions.repository.ts:94` |
-| `iam.user_global_roles` | ESCRIBE | ACTUALIZA | POR_TIPO | IamUsersController.changeGlobalRole → IamUsersService.changeGlobalRole | `src/modules/iam/application/services/iam-users.service.ts:523` |
+| `iam.user_global_roles` | ESCRIBE | ACTUALIZA | POR_TIPO | IamUsersController.changeGlobalRole → IamUsersService.changeGlobalRole | `src/modules/iam/application/services/iam-users.service.ts:546` |
 | `iam.user_global_roles` | ESCRIBE | CREA | DIRECTA | IamUsersController.changeGlobalRole → IamUsersService.changeGlobalRole → UserGlobalRolesRepository.create | `src/modules/iam/infrastructure/repositories/user-global-roles.repository.ts:27` |
 | `iam.user_global_roles` | LEE | LEE | DIRECTA | IamUsersController.changeGlobalRole → IamUsersService.changeGlobalRole → UserGlobalRolesRepository.findActive | `src/modules/iam/infrastructure/repositories/user-global-roles.repository.ts:45` |
 | `iam.users` | LEE | LEE | DIRECTA | IamUsersController.changeGlobalRole → IamUsersService.changeGlobalRole → UsersRepository.findById | `src/modules/iam/infrastructure/repositories/users.repository.ts:45` |
@@ -4306,7 +4318,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IamUsersController.lifecycle` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:297`
+- **Implementación:** `IamUsersController.lifecycle` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:298`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -4316,16 +4328,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /iam/users/{id}/lifecycle` la atiende `IamUsersController.lifecycle` (src/modules/iam/presentation/controllers/iam-users.controller.ts:297). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `IamUsersService.lifecycleOf`. Lee iam.security_events, iam.users.
+`GET /iam/users/{id}/lifecycle` la atiende `IamUsersController.lifecycle` (src/modules/iam/presentation/controllers/iam-users.controller.ts:298). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `IamUsersService.lifecycleOf`. Lee iam.security_events, iam.users.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:297` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:298` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:297` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:298` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -4392,7 +4404,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IamUsersController.lock` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:460`
+- **Implementación:** `IamUsersController.lock` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:461`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -4402,17 +4414,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /iam/users/{id}/lock` la atiende `IamUsersController.lock` (src/modules/iam/presentation/controllers/iam-users.controller.ts:460). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `LockUserDto` (1 campo, 0 obligatorios). Delega en `IamUsersService.lock`. Crea filas en iam.account_lockouts, iam.security_events. Actualiza iam.refresh_tokens, iam.sessions, iam.users. Lee iam.sessions, iam.users.
+`POST /iam/users/{id}/lock` la atiende `IamUsersController.lock` (src/modules/iam/presentation/controllers/iam-users.controller.ts:461). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `LockUserDto` (1 campo, 0 obligatorios). Delega en `IamUsersService.lock`. Crea filas en iam.account_lockouts, iam.security_events. Actualiza iam.refresh_tokens, iam.sessions, iam.users. Lee iam.sessions, iam.users.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:460` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:461` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:460` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:461` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4425,7 +4437,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `iam.security_events` | ESCRIBE | CREA | DIRECTA | IamUsersController.lock → IamUsersService.lock → SecurityEventsRepository.record | `src/modules/iam/infrastructure/repositories/security-events.repository.ts:47` |
 | `iam.sessions` | ESCRIBE | ACTUALIZA | DIRECTA | IamUsersController.lock → IamUsersService.lock → SessionsRepository.revokeAllActiveForUser | `src/modules/iam/infrastructure/repositories/sessions.repository.ts:104` |
 | `iam.sessions` | LEE | LEE | DIRECTA | IamUsersController.lock → IamUsersService.lock → SessionsRepository.activeSessionIdsForUser | `src/modules/iam/infrastructure/repositories/sessions.repository.ts:94` |
-| `iam.users` | ESCRIBE | ACTUALIZA | POR_TIPO | IamUsersController.lock → IamUsersService.lock | `src/modules/iam/application/services/iam-users.service.ts:213` |
+| `iam.users` | ESCRIBE | ACTUALIZA | POR_TIPO | IamUsersController.lock → IamUsersService.lock | `src/modules/iam/application/services/iam-users.service.ts:225` |
 | `iam.users` | LEE | LEE | DIRECTA | IamUsersController.lock → IamUsersService.lock → UsersRepository.findById | `src/modules/iam/infrastructure/repositories/users.repository.ts:45` |
 
 ### Parámetros
@@ -4496,7 +4508,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IamUsersController.listMfaFactors` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:261`
+- **Implementación:** `IamUsersController.listMfaFactors` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:262`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -4506,16 +4518,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /iam/users/{id}/mfa-factors` la atiende `IamUsersController.listMfaFactors` (src/modules/iam/presentation/controllers/iam-users.controller.ts:261). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `IamUsersReadService.listMfaFactors`. Lee iam.mfa_factors, iam.users.
+`GET /iam/users/{id}/mfa-factors` la atiende `IamUsersController.listMfaFactors` (src/modules/iam/presentation/controllers/iam-users.controller.ts:262). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `IamUsersReadService.listMfaFactors`. Lee iam.mfa_factors, iam.users.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:261` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:262` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:261` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:262` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -4577,7 +4589,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IamUsersController.mfaFactor` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:426`
+- **Implementación:** `IamUsersController.mfaFactor` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:427`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -4587,17 +4599,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /iam/users/{id}/mfa-factors` la atiende `IamUsersController.mfaFactor` (src/modules/iam/presentation/controllers/iam-users.controller.ts:426). Exige sesión; el controlador no declara roles. Valida el cuerpo como `MfaFactorDto` (5 campos, 0 obligatorios). Delega en `IamMfaService.enrollOrVerify`. Crea filas en iam.mfa_factors, iam.security_events. Actualiza iam.mfa_factors, iam.users. Lee iam.mfa_factors, iam.users.
+`POST /iam/users/{id}/mfa-factors` la atiende `IamUsersController.mfaFactor` (src/modules/iam/presentation/controllers/iam-users.controller.ts:427). Exige sesión; el controlador no declara roles. Valida el cuerpo como `MfaFactorDto` (5 campos, 0 obligatorios). Delega en `IamMfaService.enrollOrVerify`. Crea filas en iam.mfa_factors, iam.security_events. Actualiza iam.mfa_factors, iam.users. Lee iam.mfa_factors, iam.users.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/iam/presentation/controllers/iam-users.controller.ts:426` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/iam/presentation/controllers/iam-users.controller.ts:427` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:426` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:427` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4693,7 +4705,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IamUsersController.reactivate` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:506`
+- **Implementación:** `IamUsersController.reactivate` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:507`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -4703,17 +4715,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /iam/users/{id}/reactivate` la atiende `IamUsersController.reactivate` (src/modules/iam/presentation/controllers/iam-users.controller.ts:506). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `UserLifecycleReasonDto` (1 campo, 1 obligatorio). Delega en `IamUsersService.reactivate`. Crea filas en iam.account_lockouts, iam.security_events. Actualiza iam.account_lockouts, iam.authentication_credentials, iam.refresh_tokens, iam.sessions, iam.user_global_roles, iam.users. Lee iam.account_lockouts, iam.security_events, iam.sessions, iam.user_global_roles, iam.users.
+`POST /iam/users/{id}/reactivate` la atiende `IamUsersController.reactivate` (src/modules/iam/presentation/controllers/iam-users.controller.ts:507). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `UserLifecycleReasonDto` (1 campo, 1 obligatorio). Delega en `IamUsersService.reactivate`. Crea filas en iam.account_lockouts, iam.security_events. Actualiza authz.user_role_assignments, iam.account_lockouts, iam.authentication_credentials, iam.refresh_tokens, iam.sessions, iam.user_global_roles, iam.users. Lee iam.account_lockouts, iam.security_events, iam.sessions, iam.user_global_roles, iam.users.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:506` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:507` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:506` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:507` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4721,6 +4733,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `authz.user_role_assignments` | ESCRIBE | ACTUALIZA | DIRECTA | IamUsersController.reactivate → IamUsersService.reactivate → IamUsersService.applyLifecycle → AuthzBusinessRolesAdapter.revokeAllForUser → AuthzEffectiveRolesService.revokeAllForUser → UserRoleAssignmentsRepository.revokeAllForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:55` |
 | `iam.account_lockouts` | ESCRIBE | ACTUALIZA | POR_TIPO | IamUsersController.reactivate → IamUsersService.reactivate → IamUsersService.applyLifecycle → AccountLockoutsRepository.releaseActiveForUser | `src/modules/iam/infrastructure/repositories/account-lockouts.repository.ts:73` |
 | `iam.account_lockouts` | ESCRIBE | CREA | DIRECTA | IamUsersController.reactivate → IamUsersService.reactivate → IamUsersService.applyLifecycle → AccountLockoutsRepository.create | `src/modules/iam/infrastructure/repositories/account-lockouts.repository.ts:35` |
 | `iam.account_lockouts` | LEE | LEE | DIRECTA | IamUsersController.reactivate → IamUsersService.reactivate → IamUsersService.applyLifecycle → AccountLockoutsRepository.findActiveForUser | `src/modules/iam/infrastructure/repositories/account-lockouts.repository.ts:55` |
@@ -4781,7 +4794,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {{ code: 'FORBIDDEN', reason: IamErrorReason.USER_SUPERADMIN…} |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Usuario no encontrado |
 | 409 | `CONFLICT` | ConflictException: La cuenta no puede pasar a ese estado desde el que tiene; ConflictException: La cuenta cambió de estado mientras se aplicaba: reintentá |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un administrador no puede suspender ni dar de baja su propia cuenta; PreconditionFailedException: Es la última cuenta que administra accesos: concedé ese rol a otra antes |
@@ -4806,7 +4819,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IamUsersController.listSessions` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:274`
+- **Implementación:** `IamUsersController.listSessions` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:275`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -4816,16 +4829,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /iam/users/{id}/sessions` la atiende `IamUsersController.listSessions` (src/modules/iam/presentation/controllers/iam-users.controller.ts:274). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `IamUsersReadService.listSessions`. Lee iam.sessions, iam.users.
+`GET /iam/users/{id}/sessions` la atiende `IamUsersController.listSessions` (src/modules/iam/presentation/controllers/iam-users.controller.ts:275). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `IamUsersReadService.listSessions`. Lee iam.sessions, iam.users.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:274` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:275` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:275` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -4888,7 +4901,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IamUsersController.suspend` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:478`
+- **Implementación:** `IamUsersController.suspend` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:479`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -4898,17 +4911,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /iam/users/{id}/suspend` la atiende `IamUsersController.suspend` (src/modules/iam/presentation/controllers/iam-users.controller.ts:478). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `UserLifecycleReasonDto` (1 campo, 1 obligatorio). Delega en `IamUsersService.suspend`. Crea filas en iam.account_lockouts, iam.security_events. Actualiza iam.account_lockouts, iam.authentication_credentials, iam.refresh_tokens, iam.sessions, iam.user_global_roles, iam.users. Lee iam.account_lockouts, iam.security_events, iam.sessions, iam.user_global_roles, iam.users.
+`POST /iam/users/{id}/suspend` la atiende `IamUsersController.suspend` (src/modules/iam/presentation/controllers/iam-users.controller.ts:479). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `UserLifecycleReasonDto` (1 campo, 1 obligatorio). Delega en `IamUsersService.suspend`. Crea filas en iam.account_lockouts, iam.security_events. Actualiza authz.user_role_assignments, iam.account_lockouts, iam.authentication_credentials, iam.refresh_tokens, iam.sessions, iam.user_global_roles, iam.users. Lee iam.account_lockouts, iam.security_events, iam.sessions, iam.user_global_roles, iam.users.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:478` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:479` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:478` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:479` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -4916,6 +4929,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `authz.user_role_assignments` | ESCRIBE | ACTUALIZA | DIRECTA | IamUsersController.suspend → IamUsersService.suspend → IamUsersService.applyLifecycle → AuthzBusinessRolesAdapter.revokeAllForUser → AuthzEffectiveRolesService.revokeAllForUser → UserRoleAssignmentsRepository.revokeAllForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:55` |
 | `iam.account_lockouts` | ESCRIBE | ACTUALIZA | POR_TIPO | IamUsersController.suspend → IamUsersService.suspend → IamUsersService.applyLifecycle → AccountLockoutsRepository.releaseActiveForUser | `src/modules/iam/infrastructure/repositories/account-lockouts.repository.ts:73` |
 | `iam.account_lockouts` | ESCRIBE | CREA | DIRECTA | IamUsersController.suspend → IamUsersService.suspend → IamUsersService.applyLifecycle → AccountLockoutsRepository.create | `src/modules/iam/infrastructure/repositories/account-lockouts.repository.ts:35` |
 | `iam.account_lockouts` | LEE | LEE | DIRECTA | IamUsersController.suspend → IamUsersService.suspend → IamUsersService.applyLifecycle → AccountLockoutsRepository.findActiveForUser | `src/modules/iam/infrastructure/repositories/account-lockouts.repository.ts:55` |
@@ -4976,7 +4990,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {{ code: 'FORBIDDEN', reason: IamErrorReason.USER_SUPERADMIN…} |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Usuario no encontrado |
 | 409 | `CONFLICT` | ConflictException: La cuenta no puede pasar a ese estado desde el que tiene; ConflictException: La cuenta cambió de estado mientras se aplicaba: reintentá |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un administrador no puede suspender ni dar de baja su propia cuenta; PreconditionFailedException: Es la última cuenta que administra accesos: concedé ese rol a otra antes |
@@ -5001,7 +5015,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** ALTO — Borra filas
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IamUsersController.assistedPractitionerRegistration` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:348`
+- **Implementación:** `IamUsersController.assistedPractitionerRegistration` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:349`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -5011,16 +5025,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /iam/users/assisted-practitioner-registration` la atiende `IamUsersController.assistedPractitionerRegistration` (src/modules/iam/presentation/controllers/iam-users.controller.ts:348). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `AssistedPractitionerRegistrationDto` (80 campos, 5 obligatorios). Delega en `IamPractitionerSelfRegistrationService.assistedRegisterPractitioner`. Crea filas en authz.user_role_assignments, common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, directory.tenant_memberships, iam.account_activations y 22 más. Actualiza common.files, messaging.notification_requests, profiles.jurisdiction_authorizations, profiles.practitioner_admission_reviews, profiles.practitioner_specialties, profiles.professional_credentials. Borra de profiles.practitioner_admission_reviews. Lee authz.roles, authz.user_role_assignments, common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, community.public_profiles y 24 más.
+`POST /iam/users/assisted-practitioner-registration` la atiende `IamUsersController.assistedPractitionerRegistration` (src/modules/iam/presentation/controllers/iam-users.controller.ts:349). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `AssistedPractitionerRegistrationDto` (80 campos, 5 obligatorios). Delega en `IamPractitionerSelfRegistrationService.assistedRegisterPractitioner`. Crea filas en authz.user_role_assignments, common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, directory.tenant_memberships, iam.account_activations y 25 más. Actualiza common.files, iam.devices, messaging.notification_requests, messaging.queued_jobs, profiles.jurisdiction_authorizations, profiles.practitioner_admission_reviews, profiles.practitioner_specialties, profiles.professional_credentials. Borra de profiles.practitioner_admission_reviews. Lee authz.roles, authz.user_role_assignments, common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, community.public_profiles y 29 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:348` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:349` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -5028,9 +5042,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `authz.roles` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → AuthzBusinessRolesAdapter.ensureRoleByCode → AuthzEffectiveRolesService.ensureRoleByCode | `src/modules/authz/services/authz-effective-roles.service.ts:139` |
-| `authz.user_role_assignments` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → AuthzBusinessRolesAdapter.ensureRoleByCode → AuthzEffectiveRolesService.ensureRoleByCode → UserRoleAssignmentsRepository.create | `src/modules/authz/repositories/user-role-assignments.repository.ts:123` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → AuthzBusinessRolesAdapter.ensureRoleByCode → AuthzEffectiveRolesService.ensureRoleByCode → UserRoleAssignmentsRepository.findActive | `src/modules/authz/repositories/user-role-assignments.repository.ts:73` |
+| `authz.roles` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → AuthzBusinessRolesAdapter.ensureRoleByCode → AuthzEffectiveRolesService.ensureRoleByCode | `src/modules/authz/services/authz-effective-roles.service.ts:148` |
+| `authz.user_role_assignments` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → AuthzBusinessRolesAdapter.ensureRoleByCode → AuthzEffectiveRolesService.ensureRoleByCode → UserRoleAssignmentsRepository.create | `src/modules/authz/repositories/user-role-assignments.repository.ts:140` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → AuthzBusinessRolesAdapter.ensureRoleByCode → AuthzEffectiveRolesService.ensureRoleByCode → UserRoleAssignmentsRepository.findActive | `src/modules/authz/repositories/user-role-assignments.repository.ts:90` |
 | `common.addresses` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → PracticeOwnSiteProvisioningAdapter.provision → OwnSiteProvisioningService.provision → AddressesRepository.create | `src/modules/common/repositories/addresses.repository.ts:154` |
 | `common.addresses` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.buildSnapshot → AdmissionForeignReadsAdapter.addresses | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:137` |
 | `common.contact_points` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → CommonRecordsAdapter.createContactPoint → ContactPointsRepository.create | `src/modules/common/repositories/contact-points.repository.ts:198` |
@@ -5048,6 +5062,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `iam.account_activations` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → AccountActivationsRepository.create | `src/modules/iam/infrastructure/repositories/account-activations.repository.ts:46` |
 | `iam.authentication_credentials` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → CredentialsRepository.createPendingPassword | `src/modules/iam/infrastructure/repositories/credentials.repository.ts:297` |
 | `iam.authentication_credentials` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → CredentialsRepository.findLivePasswordByEmail | `src/modules/iam/infrastructure/repositories/credentials.repository.ts:227` |
+| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.notify → RegistrationAffiliationsService.notifyPending → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
+| `iam.devices` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.notify → RegistrationAffiliationsService.notifyPending → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
 | `iam.email_verifications` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → EmailVerificationsRepository.create | `src/modules/iam/infrastructure/repositories/email-verifications.repository.ts:41` |
 | `iam.security_events` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → SecurityEventsRepository.record | `src/modules/iam/infrastructure/repositories/security-events.repository.ts:47` |
 | `iam.user_global_roles` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → UserGlobalRolesRepository.create | `src/modules/iam/infrastructure/repositories/user-global-roles.repository.ts:27` |
@@ -5055,11 +5071,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `insurance.insurance_carriers` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.request → PractitionerInsurerRequestsService.requestWithin → PractitionerInsurerRequestsRepository.findCarriers | `src/modules/insurance/infrastructure/repositories/practitioner-insurer-requests.repository.ts:111` |
 | `insurance.practitioner_insurer_requests` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.request → PractitionerInsurerRequestsService.requestWithin → PractitionerInsurerRequestsRepository.create | `src/modules/insurance/infrastructure/repositories/practitioner-insurer-requests.repository.ts:98` |
 | `insurance.practitioner_insurer_requests` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.request → PractitionerInsurerRequestsService.requestWithin → PractitionerInsurerRequestsRepository.findLivePair | `src/modules/insurance/infrastructure/repositories/practitioner-insurer-requests.repository.ts:31` |
+| `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.notify → RegistrationAffiliationsService.notifyPending → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
+| `messaging.message_queues` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.uploadProfilePhoto → CommonRegistrationFilesAdapter.uploadAnonymous → FileUploadService.uploadAnonymous → FileUploadService.publishUpload → StoragePublicationService.publish → StorageLifecycleCoordinator.begin → QueuesRepository.findQueueByCode | `src/modules/messaging/repositories/queues.repository.ts:77` |
 | `messaging.message_templates` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.notify → RegistrationAffiliationsService.notifyPending → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.messaging_providers` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.notify → RegistrationAffiliationsService.notifyPending → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findProviderById | `src/modules/messaging/repositories/notifications.repository.ts:437` |
+| `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.notify → RegistrationAffiliationsService.notifyPending → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
+| `messaging.notification_deliveries` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.notify → RegistrationAffiliationsService.notifyPending → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.notify → RegistrationAffiliationsService.notifyPending → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
+| `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.notify → RegistrationAffiliationsService.notifyPending → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
+| `messaging.queued_jobs` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.uploadProfilePhoto → CommonRegistrationFilesAdapter.uploadAnonymous → FileUploadService.uploadAnonymous → FileUploadService.publishUpload → StoragePublicationService.publish → StorageLifecycleCoordinator.begin → QueuesRepository.createJob | `src/modules/messaging/repositories/queues.repository.ts:101` |
+| `messaging.queued_jobs` | ESCRIBE | ACTUALIZA | POR_TIPO | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.uploadProfilePhoto → CommonRegistrationFilesAdapter.uploadAnonymous → FileUploadService.uploadAnonymous → FileUploadService.publishUpload → StoragePublicationService.publish → StorageLifecycleCoordinator.reuse → StorageLifecycleCoordinator.change | `src/common/storage/storage-lifecycle-coordinator.service.ts:651` |
 | `messaging.queued_jobs` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → CommonRegistrationFilesAdapter.claimAnonymousUpload → AttachableFileService.claimAnonymousUpload → StoragePublicationService.guardFile → StorageLifecycleCoordinator.assertNoContender → QueuesRepository.findStorageIntents | `src/modules/messaging/repositories/queues.repository.ts:62` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
 | `practice.practice_sites` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → PracticeOwnSiteProvisioningAdapter.provision → OwnSiteProvisioningService.provision → PracticeSitesRepository.create | `src/modules/practice/repositories/practice-sites.repository.ts:116` |
@@ -5342,7 +5366,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IamUsersController.assistedRegistration` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:317`
+- **Implementación:** `IamUsersController.assistedRegistration` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:318`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -5352,16 +5376,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /iam/users/assisted-registration` la atiende `IamUsersController.assistedRegistration` (src/modules/iam/presentation/controllers/iam-users.controller.ts:317). Exige sesión con alguno de los roles CLINICIAN, SECURITY_ADMIN. Valida el cuerpo como `AssistedRegistrationDto` (10 campos, 2 obligatorios). Delega en `IamAssistedRegistrationService.assistedRegistration`. Crea filas en iam.account_activations, iam.authentication_credentials, iam.security_events, iam.user_global_roles, iam.users, profiles.patient_profiles, profiles.person_account_links, profiles.person_profiles y 1 más. Lee iam.authentication_credentials.
+`POST /iam/users/assisted-registration` la atiende `IamUsersController.assistedRegistration` (src/modules/iam/presentation/controllers/iam-users.controller.ts:318). Exige sesión con alguno de los roles CLINICIAN, SECURITY_ADMIN. Valida el cuerpo como `AssistedRegistrationDto` (10 campos, 2 obligatorios). Delega en `IamAssistedRegistrationService.assistedRegistration`. Crea filas en iam.account_activations, iam.authentication_credentials, iam.security_events, iam.user_global_roles, iam.users, profiles.patient_profiles, profiles.person_account_links, profiles.person_profiles y 1 más. Lee iam.authentication_credentials.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:317` |
+| ROL | Alguno de: CLINICIAN, SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:318` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -5462,7 +5486,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IamUsersController.searchUsersByBody` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:196`
+- **Implementación:** `IamUsersController.searchUsersByBody` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:197`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -5472,16 +5496,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /iam/users/search` la atiende `IamUsersController.searchUsersByBody` (src/modules/iam/presentation/controllers/iam-users.controller.ts:196). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `SearchUsersBodyDto` (4 campos, 0 obligatorios). Delega en `IamUsersReadService.searchUsers`. Lee iam.authentication_credentials, iam.users.
+`POST /iam/users/search` la atiende `IamUsersController.searchUsersByBody` (src/modules/iam/presentation/controllers/iam-users.controller.ts:197). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `SearchUsersBodyDto` (4 campos, 0 obligatorios). Delega en `IamUsersReadService.searchUsers`. Lee iam.authentication_credentials, iam.users.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:196` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:197` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 

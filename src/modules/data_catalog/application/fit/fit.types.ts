@@ -5,6 +5,10 @@
  * Todo lo de esta carpeta es puro salvo el colector de entradas y el repositorio: las
  * comprobaciones reciben {@link FitInputs} ya armadas y devuelven {@link FitCheckOutcome}.
  */
+import {
+  WRITE_MODES,
+  type WriteMode,
+} from '../../../system_ops/mutability/mutability.types';
 
 export const FIT_DIMENSIONS = [
   'ROUTES',
@@ -43,27 +47,23 @@ export const FIT_VERDICTS = [
 ] as const;
 export type FitVerdict = (typeof FIT_VERDICTS)[number];
 
-/** Clases de mutabilidad que declarará la taxonomía (la implementa otro trabajo). */
 /**
- * Modos de escritura de la taxonomía real de mutabilidad (`system_ops/mutability`, `WriteMode`).
- * `UNKNOWN` queda fuera a propósito: «sin evidencia» no es una declaración.
+ * Modos de escritura de la taxonomía real de mutabilidad (`system_ops/mutability`, `WRITE_MODES`),
+ * derivados de ella para no duplicarla: si la taxonomía suma un modo, la sonda lo acepta sin
+ * tocar esta carpeta. `UNKNOWN` queda fuera a propósito: «sin evidencia» no es una declaración.
  */
-export const MUTABILITY_CLASSES = [
-  'APPEND_ONLY',
-  'APPEND_ONLY_PURGEABLE',
-  'LIFECYCLE_ONLY',
-  'UPDATABLE',
-  'UPDATABLE_DELETABLE',
-  'SOFT_DELETE',
-] as const;
-export type MutabilityClass = (typeof MUTABILITY_CLASSES)[number];
+export const MUTABILITY_CLASSES = WRITE_MODES.filter(
+  (m): m is Exclude<WriteMode, 'UNKNOWN'> => m !== 'UNKNOWN',
+);
+export type MutabilityClass = Exclude<WriteMode, 'UNKNOWN'>;
 
 /** `schema.tabla` → clase declarada. */
 export type MutabilityDeclarations = ReadonlyMap<string, string>;
 
 /**
- * Punto de extensión de la taxonomía de mutabilidad. Quien la implemente registra un proveedor con
- * el token {@link FIT_MUTABILITY_SOURCE}; mientras no exista, la comprobación informa `NO_DECLARADO`.
+ * Punto de extensión de la taxonomía de mutabilidad. `DataCatalogModule` registra
+ * `MutabilityFitSource` (lee `system_ops/mutability`) con el token {@link FIT_MUTABILITY_SOURCE};
+ * sin proveedor, la comprobación informa `NO_DECLARADO`.
  */
 export interface FitMutabilitySource {
   declarations(): Promise<MutabilityDeclarations>;

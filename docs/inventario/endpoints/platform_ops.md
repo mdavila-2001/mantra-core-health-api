@@ -3,7 +3,7 @@
 # Endpoints del módulo `platform_ops`
 
 - **Bloque:** Operaciones de Plataforma (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
-- **Operaciones:** 20 (16 en el contrato, 4 sólo en el código)
+- **Operaciones:** 20 (20 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 0 · MEDIO 16 · BAJO 4
 - **Tablas distintas que tocan:** 33
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/platform-ops.md` (generado aparte por `yarn docs:endpoints:generate`)
@@ -12,10 +12,10 @@
 
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
-| 1 | GET | `/admin/ops/runtime-pieces` | — | BAJO | 1 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN |
-| 2 | GET | `/admin/ops/runtime-pieces/{id}` | — | BAJO | 1 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN |
-| 3 | POST | `/admin/ops/runtime-pieces/discover` | — | MEDIO | 5 | PLATFORM_ADMIN, SRE |
-| 4 | GET | `/admin/ops/tools` | — | BAJO | 5 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN |
+| 1 | GET | `/admin/ops/runtime-pieces` | Piezas descubiertas en el código, con su estado contrastado | BAJO | 1 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN |
+| 2 | GET | `/admin/ops/runtime-pieces/{id}` | Una pieza con su evidencia, su registro y sus hallazgos | BAJO | 1 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN |
+| 3 | POST | `/admin/ops/runtime-pieces/discover` | Descubrir y registrar las piezas del código (idempotente) | MEDIO | 5 | PLATFORM_ADMIN, SRE |
+| 4 | GET | `/admin/ops/tool-registry` | Herramientas del catálogo con su salud | BAJO | 5 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN |
 | 5 | GET | `/admin/ops/tools/{code}` | Una herramienta con su historial corto de comprobaciones | BAJO | 5 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN |
 | 6 | POST | `/ops/artifacts` | Publicar un artefacto inmutable | MEDIO | 4 | DEPLOY_PIPELINE, RELEASE_MANAGER, PLATFORM_ADMIN |
 | 7 | POST | `/ops/capacity-plans/{id}/measurements` | Registrar una medición de capacidad | MEDIO | 3 | CAPACITY_PLANNER, SRE, PLATFORM_ADMIN |
@@ -37,8 +37,8 @@
 
 ## 1. GET /admin/ops/runtime-pieces
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Piezas descubiertas en el código, con su estado contrastado
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -46,9 +46,9 @@
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «The operational backbone a data-center-grade deployment requires.» Dominio: Operaciones de Plataforma.
+Piezas descubiertas en el código, con su estado contrastado. Dentro del módulo (descripción del modelo, en inglés): «The operational backbone a data-center-grade deployment requires.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -73,7 +73,14 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.p
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `RuntimePiecesQueryDto` | — |
+| `page` | query | No | `number` | — |
+| `pageSize` | query | No | `number` | — |
+| `kind` | query | No | `string` | — |
+| `state` | query | No | `string` | — |
+| `host` | query | No | `string` | Proceso anfitrión exacto (`api`, `worker-messaging`…) |
+| `module` | query | No | `string` | Módulo de dominio exacto |
+| `q` | query | No | `string` | Texto en id, nombre o ruta de la evidencia |
+| `withFindings` | query | No | `boolean` | Sólo piezas que tienen algún hallazgo |
 
 ### Cuerpo
 
@@ -106,8 +113,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 2. GET /admin/ops/runtime-pieces/{id}
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Una pieza con su evidencia, su registro y sus hallazgos
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -115,9 +122,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «The operational backbone a data-center-grade deployment requires.» Dominio: Operaciones de Plataforma.
+Una pieza con su evidencia, su registro y sus hallazgos. Dentro del módulo (descripción del modelo, en inglés): «The operational backbone a data-center-grade deployment requires.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -176,8 +183,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 3. POST /admin/ops/runtime-pieces/discover
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Descubrir y registrar las piezas del código (idempotente)
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -185,9 +192,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «The operational backbone a data-center-grade deployment requires.» Dominio: Operaciones de Plataforma.
+Descubrir y registrar las piezas del código (idempotente). Dentro del módulo (descripción del modelo, en inglés): «The operational backbone a data-center-grade deployment requires.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -200,6 +207,8 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.p
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PLATFORM_ADMIN, SRE | `src/modules/platform_ops/runtime_pieces/runtime-pieces.controller.ts:73` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -212,7 +221,7 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.p
 | `platform_ops.tool_registry` | LEE | LEE | POR_SQL | RuntimePiecesController.discover → RuntimePiecesService.discover → RuntimePiecesSeedService.run → RuntimePiecesRepository.listRegistered | `src/modules/platform_ops/runtime_pieces/runtime-pieces.repository.ts:57` |
 | `terminology.catalog_concepts` | LEE | LEE | POR_SQL | RuntimePiecesController.discover → RuntimePiecesService.discover → RuntimePiecesSeedService.run → RuntimePiecesSeedService.assertPreconditions → RuntimePiecesRepository.existingConcepts | `src/modules/platform_ops/runtime_pieces/runtime-pieces.repository.ts:86` |
 
-### Cuerpo — DTO `DiscoverRuntimePiecesDto`
+### Cuerpo — DTO `DiscoverRuntimePiecesDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
@@ -228,7 +237,7 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.p
 
 ```json
 {
-  "dryRun": true
+  "dryRun": false
 }
 ```
 
@@ -243,6 +252,7 @@ _No se identificó un DTO de respuesta con campos._
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 409 | `CONFLICT` | ConflictException: {scan.reason ?? 'No hay código fuente para escanear'} |
@@ -261,10 +271,10 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 4. GET /admin/ops/tools
+## 4. GET /admin/ops/tool-registry
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Herramientas del catálogo con su salud
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -272,13 +282,13 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «The operational backbone a data-center-grade deployment requires.» Dominio: Operaciones de Plataforma.
+Herramientas del catálogo con su salud. Dentro del módulo (descripción del modelo, en inglés): «The operational backbone a data-center-grade deployment requires.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/ops/tools` la atiende `OpsToolsController.list` (src/modules/platform_ops/controllers/ops-tools.controller.ts:24). Exige sesión con alguno de los roles PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN. Delega en `OpsToolsService.list`. Lee platform_ops.component_tools, platform_ops.health_check_runs, platform_ops.health_checks, platform_ops.service_components, platform_ops.tool_registry.
+`GET /admin/ops/tool-registry` la atiende `OpsToolsController.list` (src/modules/platform_ops/controllers/ops-tools.controller.ts:24). Exige sesión con alguno de los roles PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN. Delega en `OpsToolsService.list`. Lee platform_ops.component_tools, platform_ops.health_check_runs, platform_ops.health_checks, platform_ops.service_components, platform_ops.tool_registry.
 
 ### Requerimientos
 
@@ -463,7 +473,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: DEPLOY_PIPELINE, RELEASE_MANAGER, PLATFORM_ADMIN | `src/modules/platform_ops/controllers/platform-ops.controller.ts:121` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -594,7 +604,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 | ROL | Alguno de: CAPACITY_PLANNER, SRE, PLATFORM_ADMIN | `src/modules/platform_ops/controllers/platform-ops.controller.ts:295` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/platform_ops/controllers/platform-ops.controller.ts:295` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -710,7 +720,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: RELEASE_MANAGER, PLATFORM_ADMIN | `src/modules/platform_ops/controllers/platform-ops.controller.ts:78` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -831,7 +841,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 | ROL | Alguno de: CHANGE_APPROVER, PLATFORM_ADMIN | `src/modules/platform_ops/controllers/platform-ops.controller.ts:99` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/platform_ops/controllers/platform-ops.controller.ts:99` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -941,7 +951,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: RELEASE_MANAGER, DEPLOY_PIPELINE, PLATFORM_ADMIN | `src/modules/platform_ops/controllers/platform-ops.controller.ts:142` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1058,7 +1068,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 | ROL | Alguno de: SRE, RELEASE_MANAGER, PLATFORM_ADMIN | `src/modules/platform_ops/controllers/platform-ops.controller.ts:163` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/platform_ops/controllers/platform-ops.controller.ts:163` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1163,7 +1173,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 | ROL | Alguno de: SYSTEM, SRE, PLATFORM_ADMIN | `src/modules/platform_ops/controllers/platform-ops.controller.ts:273` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: policyId | `src/modules/platform_ops/controllers/platform-ops.controller.ts:273` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1279,7 +1289,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 | ROL | Alguno de: SYSTEM, SRE, PLATFORM_ADMIN | `src/modules/platform_ops/controllers/platform-ops.controller.ts:185` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/platform_ops/controllers/platform-ops.controller.ts:185` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1404,7 +1414,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 | ROL | Alguno de: INCIDENT_COMMANDER, SRE, PLATFORM_ADMIN | `src/modules/platform_ops/controllers/platform-ops.controller.ts:207` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/platform_ops/controllers/platform-ops.controller.ts:207` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1542,7 +1552,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 | ROL | Alguno de: SRE, INCIDENT_COMMANDER, PLATFORM_ADMIN | `src/modules/platform_ops/controllers/platform-ops.controller.ts:229` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/platform_ops/controllers/platform-ops.controller.ts:229` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1688,7 +1698,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 | ROL | Alguno de: RELEASE_MANAGER, PLATFORM_ADMIN | `src/modules/platform_ops/controllers/platform-ops.controller.ts:317` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/platform_ops/controllers/platform-ops.controller.ts:317` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1809,7 +1819,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 | ROL | Alguno de: SRE, PLATFORM_ADMIN | `src/modules/platform_ops/controllers/platform-ops.controller.ts:379` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/platform_ops/controllers/platform-ops.controller.ts:379` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -1928,7 +1938,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SRE, PLATFORM_ADMIN | `src/modules/platform_ops/controllers/platform-ops.controller.ts:359` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2046,7 +2056,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 | ROL | Alguno de: SRE, PLATFORM_ADMIN | `src/modules/platform_ops/controllers/platform-ops.controller.ts:338` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/platform_ops/controllers/platform-ops.controller.ts:338` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -2151,7 +2161,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 | ROL | Alguno de: SYSTEM, SRE, PLATFORM_ADMIN | `src/modules/platform_ops/controllers/platform-ops.controller.ts:251` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/platform_ops/controllers/platform-ops.controller.ts:251` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 

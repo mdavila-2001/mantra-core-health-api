@@ -2,8 +2,8 @@
 // Plan de carga de RELACIONES enfermedad → síntoma/fenotipo (puro, sin base).
 //
 // Una arista (`concept_relationships`) por par enfermedad-fenotipo y tipo; una
-// fila de evidencia (`concept_relationship_evidence`, PROPUESTA al repo del
-// modelo) por cada línea/axioma de la fuente que la afirma, con su frecuencia,
+// registro interno de evidencia por cada línea/axioma de la fuente que la afirma,
+// adaptado al modelo canónico por evidence-contract.mjs, con su frecuencia,
 // evidencia, referencias, inicio, sexo y calificadores tal como vienen.
 //
 // La enfermedad se resuelve SIEMPRE por código contra los sistemas que carga la

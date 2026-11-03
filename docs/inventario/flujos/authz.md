@@ -45,14 +45,14 @@ _Fuente: `src/modules/authz/README.md:3`_
 | `ctrl:AuthzGovernanceController` | Operaciones de AuthzGovernanceController que el README no asigna a un caso de uso | GET /authz/access-reviews | SECURITY_ADMIN | BAJO | 2 |
 |  |  | GET /authz/access-reviews/due | SECURITY_ADMIN | BAJO | 4 |
 |  |  | GET /authz/permissions/{permissionId}/holders | SECURITY_ADMIN | BAJO | 7 |
-|  |  | POST /authz/simulations | SECURITY_ADMIN | BAJO | 12 |
+|  |  | POST /authz/simulations | SECURITY_ADMIN | BAJO | 13 |
 |  |  | GET /authz/users/{userId}/access-map | SECURITY_ADMIN | BAJO | 8 |
 |  |  | POST /authz/users/{userId}/access-reviews | SECURITY_ADMIN | MEDIO | 4 |
 |  |  | GET /authz/users/{userId}/permission-grants | SECURITY_ADMIN | BAJO | 3 |
 |  |  | GET /authz/users/{userId}/resource-scope-grants | SECURITY_ADMIN | BAJO | 3 |
 |  |  | GET /authz/users/{userId}/restricted-fields | SECURITY_ADMIN | BAJO | 4 |
 | `ctrl:AuthzGovernanceExtController` | Operaciones de AuthzGovernanceExtController que el README no asigna a un caso de uso | GET /authz/resource-scope-grants | SECURITY_ADMIN | BAJO | 1 |
-|  |  | DELETE /authz/resource-scope-grants/{grantId} | SECURITY_ADMIN | MEDIO | 2 |
+|  |  | DELETE /authz/resource-scope-grants/{grantId} | SECURITY_ADMIN | MEDIO | 3 |
 |  |  | GET /authz/roles/{roleId}/field-permissions | SECURITY_ADMIN | BAJO | 2 |
 | `ctrl:AuthzGrantsController` | Operaciones de AuthzGrantsController que el README no asigna a un caso de uso | POST /authz/resource-scope-grants | SECURITY_ADMIN | MEDIO | 3 |
 |  |  | POST /authz/users/{userId}/permission-grants | SECURITY_ADMIN | MEDIO | 3 |
@@ -61,7 +61,7 @@ _Fuente: `src/modules/authz/README.md:3`_
 |  |  | POST /authz/me/care-relationships/{id}/revoke | PATIENT | BAJO | 3 |
 |  |  | POST /authz/me/clinical-access-grants/{grantId}/revoke | PATIENT | MEDIO | 6 |
 | `ctrl:AuthzModulesCatalogController` | Operaciones de AuthzModulesCatalogController que el README no asigna a un caso de uso | GET /authz/catalog/modules | SECURITY_ADMIN | BAJO | 3 |
-| `ctrl:AuthzPdpController` | Operaciones de AuthzPdpController que el README no asigna a un caso de uso | POST /authz/decisions/evaluate | SECURITY_ADMIN | BAJO | 11 |
+| `ctrl:AuthzPdpController` | Operaciones de AuthzPdpController que el README no asigna a un caso de uso | POST /authz/decisions/evaluate | SECURITY_ADMIN | BAJO | 13 |
 |  |  | POST /authz/pdp/cache/invalidate | SECURITY_ADMIN | BAJO | 0 |
 | `ctrl:AuthzPoliciesController` | Operaciones de AuthzPoliciesController que el README no asigna a un caso de uso | POST /authz/tenants/{tenantId}/access-policies | SECURITY_ADMIN | MEDIO | 2 |
 | `ctrl:AuthzRolesController` | Operaciones de AuthzRolesController que el README no asigna a un caso de uso | GET /authz/roles | SECURITY_ADMIN | BAJO | 1 |
@@ -235,7 +235,7 @@ flowchart LR
 ```mermaid
 flowchart LR
   a2(["SECURITY_ADMIN"]):::actor
-  a36(["PATIENT"]):::actor
+  a37(["PATIENT"]):::actor
   t3[("audit.audit_log")]:::tabla
   t4[("iam.users")]:::tabla
   t6[("authz.user_role_assignments")]:::tabla
@@ -251,11 +251,12 @@ flowchart LR
   t19[("authz.field_permissions")]:::tabla
   t20[("authz.patient_legal_representations")]:::tabla
   t25[("iam.sessions")]:::tabla
-  t37[("profiles.patient_profiles")]:::tabla
-  t38[("profiles.person_account_links")]:::tabla
-  t39[("profiles.persons")]:::tabla
+  t31[("iam.security_events")]:::tabla
+  t38[("profiles.patient_profiles")]:::tabla
+  t39[("profiles.person_account_links")]:::tabla
+  t40[("profiles.persons")]:::tabla
   t14[("+1 tablas más")]
-  t21[("+6 tablas más")]
+  t21[("+7 tablas más")]
   t23[("+2 tablas más")]
   subgraph s0["ctrl:AuthzGovernanceController · Operaciones de AuthzGovernanceController que e…"]
     o1["GET /authz/access-reviews"]:::op
@@ -271,28 +272,28 @@ flowchart LR
   subgraph s1["ctrl:AuthzGovernanceExtController · Operaciones de AuthzGovernanceExtController…"]
     o29["GET /authz/resource-scope-grants"]:::op
     o30["DELETE /authz/resource-scope-grants/{grantId}"]:::op
-    o31["GET /authz/roles/{roleId}/field-permissions"]:::op
+    o32["GET /authz/roles/{roleId}/field-permissions"]:::op
   end
   subgraph s2["ctrl:AuthzGrantsController · Operaciones de AuthzGrantsController que el README…"]
-    o32["POST /authz/resource-scope-grants"]:::op
-    o33["POST /authz/users/{userId}/permission-grants"]:::op
-    o34["POST /authz/users/{userId}/role-assignments"]:::op
+    o33["POST /authz/resource-scope-grants"]:::op
+    o34["POST /authz/users/{userId}/permission-grants"]:::op
+    o35["POST /authz/users/{userId}/role-assignments"]:::op
   end
   subgraph s3["ctrl:AuthzMeController · Operaciones de AuthzMeController que el README no asig…"]
-    o35["GET /authz/me/access"]:::op
-    o40["POST /authz/me/care-relationships/{id}/revoke"]:::op
-    o41["POST /authz/me/clinical-access-grants/{grantId}/revoke"]:::op
+    o36["GET /authz/me/access"]:::op
+    o41["POST /authz/me/care-relationships/{id}/revoke"]:::op
+    o42["POST /authz/me/clinical-access-grants/{grantId}/revoke"]:::op
   end
   subgraph s4["ctrl:AuthzModulesCatalogController · Operaciones de AuthzModulesCatalogControll…"]
-    o42["GET /authz/catalog/modules"]:::op
+    o43["GET /authz/catalog/modules"]:::op
   end
-  t44[("+5 tablas más")]
+  t45[("+7 tablas más")]
   subgraph s5["ctrl:AuthzPdpController · Operaciones de AuthzPdpController que el README no as…"]
-    o43["POST /authz/decisions/evaluate"]:::op
-    o45["POST /authz/pdp/cache/invalidate"]:::op
+    o44["POST /authz/decisions/evaluate"]:::op
+    o46["POST /authz/pdp/cache/invalidate"]:::op
   end
   subgraph s6["ctrl:AuthzPoliciesController · Operaciones de AuthzPoliciesController que el RE…"]
-    o46["POST /authz/tenants/{tenantId}/access-policies"]:::op
+    o47["POST /authz/tenants/{tenantId}/access-policies"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -349,54 +350,55 @@ flowchart LR
   a2 --> o30
   o30 -->|"ACTUALIZA"| t10
   o30 -->|"LEE"| t10
-  a2 --> o31
-  o31 -->|"LEE"| t19
-  o31 -->|"LEE"| t12
+  o30 -->|"CREA"| t31
   a2 --> o32
-  o32 -->|"LEE"| t9
-  o32 -->|"CREA"| t10
-  o32 -->|"LEE"| t10
+  o32 -->|"LEE"| t19
+  o32 -->|"LEE"| t12
   a2 --> o33
   o33 -->|"LEE"| t9
-  o33 -->|"CREA"| t13
-  o33 -->|"LEE"| t13
+  o33 -->|"CREA"| t10
+  o33 -->|"LEE"| t10
   a2 --> o34
-  o34 -->|"LEE"| t12
-  o34 -->|"CREA"| t6
-  o34 -->|"LEE"| t6
-  a36 --> o35
-  o35 -->|"LEE"| t17
-  o35 -->|"LEE"| t18
-  o35 -->|"LEE"| t37
-  o35 -->|"LEE"| t38
-  o35 -->|"LEE"| t39
-  a36 --> o40
-  o40 -->|"LEE"| t17
-  o40 -->|"LEE"| t37
-  o40 -->|"LEE"| t38
-  a36 --> o41
-  o41 -->|"CREA"| t3
-  o41 -->|"LEE"| t3
-  o41 -->|"LEE"| t18
-  o41 -->|"LEE"| t25
-  o41 -->|"LEE"| t37
+  o34 -->|"LEE"| t9
+  o34 -->|"CREA"| t13
+  o34 -->|"LEE"| t13
+  a2 --> o35
+  o35 -->|"LEE"| t12
+  o35 -->|"CREA"| t6
+  o35 -->|"LEE"| t6
+  a37 --> o36
+  o36 -->|"LEE"| t17
+  o36 -->|"LEE"| t18
+  o36 -->|"LEE"| t38
+  o36 -->|"LEE"| t39
+  o36 -->|"LEE"| t40
+  a37 --> o41
+  o41 -->|"LEE"| t17
   o41 -->|"LEE"| t38
-  a2 --> o42
-  o42 -->|"LEE"| t9
-  o42 -->|"LEE"| t11
-  o42 -->|"LEE"| t12
+  o41 -->|"LEE"| t39
+  a37 --> o42
+  o42 -->|"CREA"| t3
+  o42 -->|"LEE"| t3
+  o42 -->|"LEE"| t18
+  o42 -->|"LEE"| t25
+  o42 -->|"LEE"| t38
+  o42 -->|"LEE"| t39
   a2 --> o43
-  o43 -->|"LEE"| t16
-  o43 -->|"LEE"| t17
-  o43 -->|"LEE"| t18
-  o43 -->|"LEE"| t19
-  o43 -->|"LEE"| t20
   o43 -->|"LEE"| t9
-  o43 -.-> t44
-  a2 --> o45
+  o43 -->|"LEE"| t11
+  o43 -->|"LEE"| t12
+  a2 --> o44
+  o44 -->|"LEE"| t16
+  o44 -->|"LEE"| t17
+  o44 -->|"LEE"| t18
+  o44 -->|"LEE"| t19
+  o44 -->|"LEE"| t20
+  o44 -->|"LEE"| t9
+  o44 -.-> t45
   a2 --> o46
-  o46 -->|"CREA"| t16
-  o46 -->|"LEE"| t16
+  a2 --> o47
+  o47 -->|"CREA"| t16
+  o47 -->|"LEE"| t16
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -1006,63 +1008,74 @@ flowchart TD
   n5 --> n6
   n7[("LEE authz.user_role_assignments")]:::efecto
   n6 --> n7
-  n8["Llama a AuthzPdpService.resolveRoleInheritance"]:::llamada
+  n8["Llama a IamGlobalRolesAdapter.codesForUser"]:::llamada
   n7 --> n8
-  n9["Repite: mientras queue.length › 0"]:::bucle
+  n9[("LEE iam.user_global_roles · LEE iam.users")]:::efecto
   n8 --> n9
-  n10["Llama a RolesRepository.findById"]:::llamada
-  n9 -->|"cada elemento"| n10
-  n11[("LEE authz.roles")]:::efecto
-  n10 --> n11
-  n12{"!permission"}:::decision
+  n10{"globalCodes.length"}:::decision
+  n9 --> n10
+  n11["Llama a RolesRepository.findIamPolicyRoles"]:::llamada
+  n10 -->|"sí"| n11
+  n12[("LEE authz.roles")]:::efecto
   n11 --> n12
-  n9 -->|"al terminar"| n12
-  n13["Llama a RolePermissionsRepository.findActiveForRoles"]:::llamada
-  n12 -->|"no"| n13
-  n14[("LEE authz.role_permissions")]:::efecto
+  n13["Llama a AuthzPdpService.resolveRoleInheritance"]:::llamada
+  n12 --> n13
+  n10 -->|"no"| n13
+  n14["Repite: mientras queue.length › 0"]:::bucle
   n13 --> n14
-  n15["Llama a UserPermissionGrantsRepository.findActiveForUser"]:::llamada
-  n14 --> n15
-  n16[("LEE authz.user_permission_grants")]:::efecto
+  n15["Llama a RolesRepository.findById"]:::llamada
+  n14 -->|"cada elemento"| n15
+  n16[("LEE authz.roles")]:::efecto
   n15 --> n16
-  n17{"dto.resourceId"}:::decision
+  n17{"!permission"}:::decision
   n16 --> n17
-  n18["Llama a ResourceScopeGrantsRepository.findForSubjectResource"]:::llamada
-  n17 -->|"sí"| n18
-  n19[("LEE authz.resource_scope_grants")]:::efecto
+  n14 -->|"al terminar"| n17
+  n18["Llama a RolePermissionsRepository.findActiveForRoles"]:::llamada
+  n17 -->|"no"| n18
+  n19[("LEE authz.role_permissions")]:::efecto
   n18 --> n19
-  n20["Llama a AccessPoliciesRepository.findActiveForTarget"]:::llamada
-  n12 -->|"sí"| n20
+  n20["Llama a UserPermissionGrantsRepository.findActiveForUser"]:::llamada
   n19 --> n20
-  n17 -->|"no"| n20
-  n21[("LEE authz.access_policies")]:::efecto
+  n21[("LEE authz.user_permission_grants")]:::efecto
   n20 --> n21
-  n22{"dto.patientProfileId"}:::decision
+  n22{"dto.resourceId"}:::decision
   n21 --> n22
-  n23["Llama a ClinicalAccessGrantsRepository.findActiveForUserPatient"]:::llamada
+  n23["Llama a ResourceScopeGrantsRepository.findForSubjectResource"]:::llamada
   n22 -->|"sí"| n23
-  n24[("LEE authz.clinical_access_grants")]:::efecto
+  n24[("LEE authz.resource_scope_grants")]:::efecto
   n23 --> n24
-  n25{"dto.practitionerProfileId"}:::decision
+  n25["Llama a AccessPoliciesRepository.findActiveForTarget"]:::llamada
+  n17 -->|"sí"| n25
   n24 --> n25
-  n26["Llama a CareRelationshipsRepository.findActiveForPractitionerPatient"]:::llamada
-  n25 -->|"sí"| n26
-  n27[("LEE authz.care_relationships")]:::efecto
+  n22 -->|"no"| n25
+  n26[("LEE authz.access_policies")]:::efecto
+  n25 --> n26
+  n27{"dto.patientProfileId"}:::decision
   n26 --> n27
-  n28["Llama a PatientLegalRepresentationsRepository.findActiveForRepresentativePatient"]:::llamada
-  n27 --> n28
-  n25 -->|"no"| n28
-  n29[("LEE authz.patient_legal_representations")]:::efecto
+  n28["Llama a ClinicalAccessGrantsRepository.findActiveForUserPatient"]:::llamada
+  n27 -->|"sí"| n28
+  n29[("LEE authz.clinical_access_grants")]:::efecto
   n28 --> n29
-  n30["Llama a AuthzPdpService.computeMaskedFields"]:::llamada
+  n30{"dto.practitionerProfileId"}:::decision
   n29 --> n30
-  n22 -->|"no"| n30
-  n31["Llama a FieldPermissionsRepository.findForRoles"]:::llamada
-  n30 --> n31
-  n32[("LEE authz.field_permissions")]:::efecto
+  n31["Llama a CareRelationshipsRepository.findActiveForPractitionerPatient"]:::llamada
+  n30 -->|"sí"| n31
+  n32[("LEE authz.care_relationships")]:::efecto
   n31 --> n32
-  n33(("200 Responde con éxito")):::ok
+  n33["Llama a PatientLegalRepresentationsRepository.findActiveForRepresentativePatient"]:::llamada
   n32 --> n33
+  n30 -->|"no"| n33
+  n34[("LEE authz.patient_legal_representations")]:::efecto
+  n33 --> n34
+  n35["Llama a AuthzPdpService.computeMaskedFields"]:::llamada
+  n34 --> n35
+  n27 -->|"no"| n35
+  n36["Llama a FieldPermissionsRepository.findForRoles"]:::llamada
+  n35 --> n36
+  n37[("LEE authz.field_permissions")]:::efecto
+  n36 --> n37
+  n38(("200 Responde con éxito")):::ok
+  n37 --> n38
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1904,11 +1917,12 @@ flowchart TD
 
 #### 20. DELETE /authz/resource-scope-grants/{grantId}
 
-
+Terminar la vigencia de un permiso por alcance de recurso
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: {NOT_FOUND.message} |
@@ -1919,7 +1933,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
   n1 --> n2
   n3["Llama a AuthzGovernanceExtService.endResourceScopeGrant"]:::llamada
   n2 --> n3
@@ -1941,8 +1955,10 @@ flowchart TD
   n10 --> n11
   n12(["409 CONFLICT El permiso por alcance ya terminó su vigencia"]):::error
   n11 -->|"sí"| n12
-  n13(("200 Responde con éxito")):::ok
+  n13[("CREA iam.security_events")]:::efecto
   n11 -->|"no"| n13
+  n14(("200 Responde con éxito")):::ok
+  n13 --> n14
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2013,7 +2029,7 @@ flowchart TD
 
 #### 22. GET /authz/roles/{roleId}/field-permissions
 
-
+Reglas de enmascaramiento de campos de un rol
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -2256,63 +2272,74 @@ flowchart TD
   n11 --> n12
   n13[("LEE authz.user_role_assignments")]:::efecto
   n12 --> n13
-  n14["Llama a AuthzPdpService.resolveRoleInheritance"]:::llamada
+  n14["Llama a IamGlobalRolesAdapter.codesForUser"]:::llamada
   n13 --> n14
-  n15["Repite: mientras queue.length › 0"]:::bucle
+  n15[("LEE iam.user_global_roles · LEE iam.users")]:::efecto
   n14 --> n15
-  n16["Llama a RolesRepository.findById"]:::llamada
-  n15 -->|"cada elemento"| n16
-  n17[("LEE authz.roles")]:::efecto
-  n16 --> n17
-  n18{"!permission"}:::decision
+  n16{"globalCodes.length"}:::decision
+  n15 --> n16
+  n17["Llama a RolesRepository.findIamPolicyRoles"]:::llamada
+  n16 -->|"sí"| n17
+  n18[("LEE authz.roles")]:::efecto
   n17 --> n18
-  n15 -->|"al terminar"| n18
-  n19["Llama a RolePermissionsRepository.findActiveForRoles"]:::llamada
-  n18 -->|"no"| n19
-  n20[("LEE authz.role_permissions")]:::efecto
+  n19["Llama a AuthzPdpService.resolveRoleInheritance"]:::llamada
+  n18 --> n19
+  n16 -->|"no"| n19
+  n20["Repite: mientras queue.length › 0"]:::bucle
   n19 --> n20
-  n21["Llama a UserPermissionGrantsRepository.findActiveForUser"]:::llamada
-  n20 --> n21
-  n22[("LEE authz.user_permission_grants")]:::efecto
+  n21["Llama a RolesRepository.findById"]:::llamada
+  n20 -->|"cada elemento"| n21
+  n22[("LEE authz.roles")]:::efecto
   n21 --> n22
-  n23{"dto.resourceId"}:::decision
+  n23{"!permission"}:::decision
   n22 --> n23
-  n24["Llama a ResourceScopeGrantsRepository.findForSubjectResource"]:::llamada
-  n23 -->|"sí"| n24
-  n25[("LEE authz.resource_scope_grants")]:::efecto
+  n20 -->|"al terminar"| n23
+  n24["Llama a RolePermissionsRepository.findActiveForRoles"]:::llamada
+  n23 -->|"no"| n24
+  n25[("LEE authz.role_permissions")]:::efecto
   n24 --> n25
-  n26["Llama a AccessPoliciesRepository.findActiveForTarget"]:::llamada
-  n18 -->|"sí"| n26
+  n26["Llama a UserPermissionGrantsRepository.findActiveForUser"]:::llamada
   n25 --> n26
-  n23 -->|"no"| n26
-  n27[("LEE authz.access_policies")]:::efecto
+  n27[("LEE authz.user_permission_grants")]:::efecto
   n26 --> n27
-  n28{"dto.patientProfileId"}:::decision
+  n28{"dto.resourceId"}:::decision
   n27 --> n28
-  n29["Llama a ClinicalAccessGrantsRepository.findActiveForUserPatient"]:::llamada
+  n29["Llama a ResourceScopeGrantsRepository.findForSubjectResource"]:::llamada
   n28 -->|"sí"| n29
-  n30[("LEE authz.clinical_access_grants")]:::efecto
+  n30[("LEE authz.resource_scope_grants")]:::efecto
   n29 --> n30
-  n31{"dto.practitionerProfileId"}:::decision
+  n31["Llama a AccessPoliciesRepository.findActiveForTarget"]:::llamada
+  n23 -->|"sí"| n31
   n30 --> n31
-  n32["Llama a CareRelationshipsRepository.findActiveForPractitionerPatient"]:::llamada
-  n31 -->|"sí"| n32
-  n33[("LEE authz.care_relationships")]:::efecto
+  n28 -->|"no"| n31
+  n32[("LEE authz.access_policies")]:::efecto
+  n31 --> n32
+  n33{"dto.patientProfileId"}:::decision
   n32 --> n33
-  n34["Llama a PatientLegalRepresentationsRepository.findActiveForRepresentativePatient"]:::llamada
-  n33 --> n34
-  n31 -->|"no"| n34
-  n35[("LEE authz.patient_legal_representations")]:::efecto
+  n34["Llama a ClinicalAccessGrantsRepository.findActiveForUserPatient"]:::llamada
+  n33 -->|"sí"| n34
+  n35[("LEE authz.clinical_access_grants")]:::efecto
   n34 --> n35
-  n36["Llama a AuthzPdpService.computeMaskedFields"]:::llamada
+  n36{"dto.practitionerProfileId"}:::decision
   n35 --> n36
-  n28 -->|"no"| n36
-  n37["Llama a FieldPermissionsRepository.findForRoles"]:::llamada
-  n36 --> n37
-  n38[("LEE authz.field_permissions")]:::efecto
+  n37["Llama a CareRelationshipsRepository.findActiveForPractitionerPatient"]:::llamada
+  n36 -->|"sí"| n37
+  n38[("LEE authz.care_relationships")]:::efecto
   n37 --> n38
-  n39(("200 Responde con éxito")):::ok
+  n39["Llama a PatientLegalRepresentationsRepository.findActiveForRepresentativePatient"]:::llamada
   n38 --> n39
+  n36 -->|"no"| n39
+  n40[("LEE authz.patient_legal_representations")]:::efecto
+  n39 --> n40
+  n41["Llama a AuthzPdpService.computeMaskedFields"]:::llamada
+  n40 --> n41
+  n33 -->|"no"| n41
+  n42["Llama a FieldPermissionsRepository.findForRoles"]:::llamada
+  n41 --> n42
+  n43[("LEE authz.field_permissions")]:::efecto
+  n42 --> n43
+  n44(("200 Responde con éxito")):::ok
+  n43 --> n44
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

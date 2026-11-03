@@ -21,7 +21,7 @@ import { OpsToolsService } from '../services/ops-tools.service';
 import { OpsToolsController } from './ops-tools.controller';
 
 /**
- * Contrato HTTP de `/admin/ops/tools` con los guards reales (JWT y roles).
+ * Contrato HTTP del catálogo persistido con los guards reales (JWT y roles).
  * DOBLE DECLARADO: `OpsToolsService` es un fake; la lógica de estado se prueba
  * en `ops-tools.service.spec.ts` y las consultas contra la base quedan sin
  * verificar en esta suite.
@@ -107,7 +107,7 @@ describe('OpsToolsController (HTTP)', () => {
     await app.close();
   });
 
-  const RUTAS = ['/admin/ops/tools', '/admin/ops/tools/redis'];
+  const RUTAS = ['/admin/ops/tool-registry', '/admin/ops/tools/redis'];
 
   it('todos los handlers exigen los roles de operación', () => {
     const proto = OpsToolsController.prototype as unknown as Record<
@@ -135,7 +135,7 @@ describe('OpsToolsController (HTTP)', () => {
   });
 
   it.each(OPS_READ_ROLES)('el rol %s puede leer la lista', async (rol) => {
-    const res = await get('/admin/ops/tools', [rol]).expect(200);
+    const res = await get('/admin/ops/tool-registry', [rol]).expect(200);
     expect(res.body).toEqual({
       evaluatedAt: '2026-10-31T12:00:00.000Z',
       items: [],

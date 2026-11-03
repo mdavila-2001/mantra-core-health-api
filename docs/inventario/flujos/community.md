@@ -1744,86 +1744,88 @@ flowchart TD
   n24 -->|"sí"| n25
   n26["Llama a FileUploadService.downloadPublicMedia"]:::llamada
   n24 -->|"no"| n26
-  n27["Llama a FilesRepository.findById"]:::llamada
+  n27["Transacción: transactional(…)"]:::transaccion
   n26 --> n27
-  n28[("LEE common.files")]:::efecto
+  n28["Llama a FilesRepository.findById"]:::llamada
   n27 --> n28
-  n29{"!file || file.categoryConceptId !== CONCEPTS.FILE_CATEGORY_IMAGE || file.sensitivityConceptId !== CONCEPTS.SE…"}:::decision
+  n29[("LEE common.files")]:::efecto
   n28 --> n29
-  n30(["404 NOT_FOUND Archivo no encontrado"]):::error
-  n29 -->|"sí"| n30
-  n31{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
-  n29 -->|"no"| n31
-  n32(["422 PRECONDITION_FAILED El archivo está borrado"]):::error
-  n31 -->|"sí"| n32
-  n33{"!file.currentVersionId"}:::decision
-  n31 -->|"no"| n33
-  n34(["422 PRECONDITION_FAILED El archivo no tiene una versión vigente"]):::error
-  n33 -->|"sí"| n34
-  n35["Llama a FileVersionsRepository.findById"]:::llamada
-  n33 -->|"no"| n35
-  n36[("LEE common.file_versions")]:::efecto
-  n35 --> n36
-  n37{"!version"}:::decision
+  n30{"!f || f.categoryConceptId !== CONCEPTS.FILE_CATEGORY_IMAGE || f.sensitivityConceptId !== CONCEPTS.SENSITIVITY…"}:::decision
+  n29 --> n30
+  n31(["404 NOT_FOUND Archivo no encontrado"]):::error
+  n30 -->|"sí"| n31
+  n32{"f.deletedAt || f.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
+  n30 -->|"no"| n32
+  n33(["422 PRECONDITION_FAILED El archivo está borrado"]):::error
+  n32 -->|"sí"| n33
+  n34{"!f.currentVersionId"}:::decision
+  n32 -->|"no"| n34
+  n35(["422 PRECONDITION_FAILED El archivo no tiene una versión vigente"]):::error
+  n34 -->|"sí"| n35
+  n36["Llama a FileVersionsRepository.findById"]:::llamada
+  n34 -->|"no"| n36
+  n37[("LEE common.file_versions")]:::efecto
   n36 --> n37
-  n38(["404 NOT_FOUND Versión vigente no encontrada"]):::error
-  n37 -->|"sí"| n38
-  n39{"version.malwareScanStatusConceptId !== CONCEPTS.SCAN_CLEAN"}:::decision
-  n37 -->|"no"| n39
-  n40(["422 PRECONDITION_FAILED La versión vigente todavía no está lista para servirse públicamente"]):::error
-  n39 -->|"sí"| n40
-  n41["Llama a LocalDiskFileStorageAdapter.retrieve"]:::llamada
-  n39 -->|"no"| n41
-  n42["Llama a LocalDiskFileStorageAdapter.hashFromUri"]:::llamada
-  n41 --> n42
-  n43{"!storageUri.startsWith(LOCAL_URI_PREFIX)"}:::decision
+  n38{"!v"}:::decision
+  n37 --> n38
+  n39(["404 NOT_FOUND Versión vigente no encontrada"]):::error
+  n38 -->|"sí"| n39
+  n40{"v.malwareScanStatusConceptId !== CONCEPTS.SCAN_CLEAN"}:::decision
+  n38 -->|"no"| n40
+  n41(["422 PRECONDITION_FAILED La versión vigente todavía no está lista para servirse públicamente"]):::error
+  n40 -->|"sí"| n41
+  n42["Llama a LocalDiskFileStorageAdapter.retrieve"]:::llamada
+  n40 -->|"no"| n42
+  n43["Llama a LocalDiskFileStorageAdapter.hashFromUri"]:::llamada
   n42 --> n43
-  n44(["404 NOT_FOUND La URI no pertenece al almacenamiento local"]):::error
-  n43 -->|"sí"| n44
-  n45{"!CONTENT_HASH_PATTERN.test(hash)"}:::decision
-  n43 -->|"no"| n45
-  n46(["404 NOT_FOUND La URI de almacenamiento local está mal formada"]):::error
-  n45 -->|"sí"| n46
-  n47["Intenta"]:::intento
-  n45 -->|"no"| n47
-  n48{"isMissingFile(error)"}:::decision
-  n47 -->|"si falla"| n48
-  n49(["404 NOT_FOUND El contenido no está disponible en el almacenamiento local"]):::error
-  n48 -->|"sí"| n49
-  n50(["↩ (relanza el error capturado)"]):::error
-  n48 -->|"no"| n50
-  n51["Llama a S3FileStorageAdapter.retrieve"]:::llamada
-  n47 --> n51
-  n52["Llama a S3FileStorageAdapter.assertConfigured"]:::llamada
-  n51 --> n52
-  n53{"!this.env.s3.bucket"}:::decision
+  n44{"!storageUri.startsWith(LOCAL_URI_PREFIX)"}:::decision
+  n43 --> n44
+  n45(["404 NOT_FOUND La URI no pertenece al almacenamiento local"]):::error
+  n44 -->|"sí"| n45
+  n46{"!CONTENT_HASH_PATTERN.test(hash)"}:::decision
+  n44 -->|"no"| n46
+  n47(["404 NOT_FOUND La URI de almacenamiento local está mal formada"]):::error
+  n46 -->|"sí"| n47
+  n48["Intenta"]:::intento
+  n46 -->|"no"| n48
+  n49{"isMissingFile(error)"}:::decision
+  n48 -->|"si falla"| n49
+  n50(["404 NOT_FOUND El contenido no está disponible en el almacenamiento local"]):::error
+  n49 -->|"sí"| n50
+  n51(["↩ (relanza el error capturado)"]):::error
+  n49 -->|"no"| n51
+  n52["Llama a S3FileStorageAdapter.retrieve"]:::llamada
+  n48 --> n52
+  n53["Llama a S3FileStorageAdapter.assertConfigured"]:::llamada
   n52 --> n53
-  n54(["500 INTERNAL {HttpStatus.SERVICE_UNAVAILABLE}"]):::error
-  n53 -->|"sí"| n54
-  n55["Llama a S3FileStorageAdapter.parseOwnedKey"]:::llamada
-  n53 -->|"no"| n55
-  n56{"!storageUri.startsWith(expected)"}:::decision
-  n55 --> n56
-  n57(["404 NOT_FOUND La URI no pertenece al bucket configurado"]):::error
-  n56 -->|"sí"| n57
-  n58{"!CONTENT_HASH_PATTERN.test(hash) || key !== this.objectKey(hash)"}:::decision
-  n56 -->|"no"| n58
-  n59(["404 NOT_FOUND La URI S3 está mal formada o fuera del prefijo permitido"]):::error
-  n58 -->|"sí"| n59
-  n60["Intenta"]:::intento
-  n58 -->|"no"| n60
-  n61{"!result.Body"}:::decision
-  n60 --> n61
-  n62(["500 INTERNAL S3 object body is empty"]):::error
-  n61 -->|"sí"| n62
-  n63{"isNotFound(error)"}:::decision
-  n60 -->|"si falla"| n63
-  n64(["404 NOT_FOUND El contenido no está disponible en el almacenamiento configurado"]):::error
-  n63 -->|"sí"| n64
-  n65(["↩ (relanza el error capturado)"]):::error
-  n63 -->|"no"| n65
-  n66(("200 Responde con éxito")):::ok
-  n61 -->|"no"| n66
+  n54{"!this.env.s3.bucket"}:::decision
+  n53 --> n54
+  n55(["500 INTERNAL {HttpStatus.SERVICE_UNAVAILABLE}"]):::error
+  n54 -->|"sí"| n55
+  n56["Llama a S3FileStorageAdapter.parseOwnedKey"]:::llamada
+  n54 -->|"no"| n56
+  n57{"!storageUri.startsWith(expected)"}:::decision
+  n56 --> n57
+  n58(["404 NOT_FOUND La URI no pertenece al bucket configurado"]):::error
+  n57 -->|"sí"| n58
+  n59{"!CONTENT_HASH_PATTERN.test(hash) || key !== this.objectKey(hash)"}:::decision
+  n57 -->|"no"| n59
+  n60(["404 NOT_FOUND La URI S3 está mal formada o fuera del prefijo permitido"]):::error
+  n59 -->|"sí"| n60
+  n61["Intenta"]:::intento
+  n59 -->|"no"| n61
+  n62{"!result.Body"}:::decision
+  n61 --> n62
+  n63(["500 INTERNAL S3 object body is empty"]):::error
+  n62 -->|"sí"| n63
+  n64{"isNotFound(error)"}:::decision
+  n61 -->|"si falla"| n64
+  n65(["404 NOT_FOUND El contenido no está disponible en el almacenamiento configurado"]):::error
+  n64 -->|"sí"| n65
+  n66(["↩ (relanza el error capturado)"]):::error
+  n64 -->|"no"| n66
+  n67(("200 Responde con éxito")):::ok
+  n62 -->|"no"| n67
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -7648,86 +7650,88 @@ flowchart TD
   n10 -->|"sí"| n11
   n12["Llama a FileUploadService.downloadPublicMedia"]:::llamada
   n10 -->|"no"| n12
-  n13["Llama a FilesRepository.findById"]:::llamada
+  n13["Transacción: transactional(…)"]:::transaccion
   n12 --> n13
-  n14[("LEE common.files")]:::efecto
+  n14["Llama a FilesRepository.findById"]:::llamada
   n13 --> n14
-  n15{"!file || file.categoryConceptId !== CONCEPTS.FILE_CATEGORY_IMAGE || file.sensitivityConceptId !== CONCEPTS.SE…"}:::decision
+  n15[("LEE common.files")]:::efecto
   n14 --> n15
-  n16(["404 NOT_FOUND Archivo no encontrado"]):::error
-  n15 -->|"sí"| n16
-  n17{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
-  n15 -->|"no"| n17
-  n18(["422 PRECONDITION_FAILED El archivo está borrado"]):::error
-  n17 -->|"sí"| n18
-  n19{"!file.currentVersionId"}:::decision
-  n17 -->|"no"| n19
-  n20(["422 PRECONDITION_FAILED El archivo no tiene una versión vigente"]):::error
-  n19 -->|"sí"| n20
-  n21["Llama a FileVersionsRepository.findById"]:::llamada
-  n19 -->|"no"| n21
-  n22[("LEE common.file_versions")]:::efecto
-  n21 --> n22
-  n23{"!version"}:::decision
+  n16{"!f || f.categoryConceptId !== CONCEPTS.FILE_CATEGORY_IMAGE || f.sensitivityConceptId !== CONCEPTS.SENSITIVITY…"}:::decision
+  n15 --> n16
+  n17(["404 NOT_FOUND Archivo no encontrado"]):::error
+  n16 -->|"sí"| n17
+  n18{"f.deletedAt || f.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
+  n16 -->|"no"| n18
+  n19(["422 PRECONDITION_FAILED El archivo está borrado"]):::error
+  n18 -->|"sí"| n19
+  n20{"!f.currentVersionId"}:::decision
+  n18 -->|"no"| n20
+  n21(["422 PRECONDITION_FAILED El archivo no tiene una versión vigente"]):::error
+  n20 -->|"sí"| n21
+  n22["Llama a FileVersionsRepository.findById"]:::llamada
+  n20 -->|"no"| n22
+  n23[("LEE common.file_versions")]:::efecto
   n22 --> n23
-  n24(["404 NOT_FOUND Versión vigente no encontrada"]):::error
-  n23 -->|"sí"| n24
-  n25{"version.malwareScanStatusConceptId !== CONCEPTS.SCAN_CLEAN"}:::decision
-  n23 -->|"no"| n25
-  n26(["422 PRECONDITION_FAILED La versión vigente todavía no está lista para servirse públicamente"]):::error
-  n25 -->|"sí"| n26
-  n27["Llama a LocalDiskFileStorageAdapter.retrieve"]:::llamada
-  n25 -->|"no"| n27
-  n28["Llama a LocalDiskFileStorageAdapter.hashFromUri"]:::llamada
-  n27 --> n28
-  n29{"!storageUri.startsWith(LOCAL_URI_PREFIX)"}:::decision
+  n24{"!v"}:::decision
+  n23 --> n24
+  n25(["404 NOT_FOUND Versión vigente no encontrada"]):::error
+  n24 -->|"sí"| n25
+  n26{"v.malwareScanStatusConceptId !== CONCEPTS.SCAN_CLEAN"}:::decision
+  n24 -->|"no"| n26
+  n27(["422 PRECONDITION_FAILED La versión vigente todavía no está lista para servirse públicamente"]):::error
+  n26 -->|"sí"| n27
+  n28["Llama a LocalDiskFileStorageAdapter.retrieve"]:::llamada
+  n26 -->|"no"| n28
+  n29["Llama a LocalDiskFileStorageAdapter.hashFromUri"]:::llamada
   n28 --> n29
-  n30(["404 NOT_FOUND La URI no pertenece al almacenamiento local"]):::error
-  n29 -->|"sí"| n30
-  n31{"!CONTENT_HASH_PATTERN.test(hash)"}:::decision
-  n29 -->|"no"| n31
-  n32(["404 NOT_FOUND La URI de almacenamiento local está mal formada"]):::error
-  n31 -->|"sí"| n32
-  n33["Intenta"]:::intento
-  n31 -->|"no"| n33
-  n34{"isMissingFile(error)"}:::decision
-  n33 -->|"si falla"| n34
-  n35(["404 NOT_FOUND El contenido no está disponible en el almacenamiento local"]):::error
-  n34 -->|"sí"| n35
-  n36(["↩ (relanza el error capturado)"]):::error
-  n34 -->|"no"| n36
-  n37["Llama a S3FileStorageAdapter.retrieve"]:::llamada
-  n33 --> n37
-  n38["Llama a S3FileStorageAdapter.assertConfigured"]:::llamada
-  n37 --> n38
-  n39{"!this.env.s3.bucket"}:::decision
+  n30{"!storageUri.startsWith(LOCAL_URI_PREFIX)"}:::decision
+  n29 --> n30
+  n31(["404 NOT_FOUND La URI no pertenece al almacenamiento local"]):::error
+  n30 -->|"sí"| n31
+  n32{"!CONTENT_HASH_PATTERN.test(hash)"}:::decision
+  n30 -->|"no"| n32
+  n33(["404 NOT_FOUND La URI de almacenamiento local está mal formada"]):::error
+  n32 -->|"sí"| n33
+  n34["Intenta"]:::intento
+  n32 -->|"no"| n34
+  n35{"isMissingFile(error)"}:::decision
+  n34 -->|"si falla"| n35
+  n36(["404 NOT_FOUND El contenido no está disponible en el almacenamiento local"]):::error
+  n35 -->|"sí"| n36
+  n37(["↩ (relanza el error capturado)"]):::error
+  n35 -->|"no"| n37
+  n38["Llama a S3FileStorageAdapter.retrieve"]:::llamada
+  n34 --> n38
+  n39["Llama a S3FileStorageAdapter.assertConfigured"]:::llamada
   n38 --> n39
-  n40(["500 INTERNAL {HttpStatus.SERVICE_UNAVAILABLE}"]):::error
-  n39 -->|"sí"| n40
-  n41["Llama a S3FileStorageAdapter.parseOwnedKey"]:::llamada
-  n39 -->|"no"| n41
-  n42{"!storageUri.startsWith(expected)"}:::decision
-  n41 --> n42
-  n43(["404 NOT_FOUND La URI no pertenece al bucket configurado"]):::error
-  n42 -->|"sí"| n43
-  n44{"!CONTENT_HASH_PATTERN.test(hash) || key !== this.objectKey(hash)"}:::decision
-  n42 -->|"no"| n44
-  n45(["404 NOT_FOUND La URI S3 está mal formada o fuera del prefijo permitido"]):::error
-  n44 -->|"sí"| n45
-  n46["Intenta"]:::intento
-  n44 -->|"no"| n46
-  n47{"!result.Body"}:::decision
-  n46 --> n47
-  n48(["500 INTERNAL S3 object body is empty"]):::error
-  n47 -->|"sí"| n48
-  n49{"isNotFound(error)"}:::decision
-  n46 -->|"si falla"| n49
-  n50(["404 NOT_FOUND El contenido no está disponible en el almacenamiento configurado"]):::error
-  n49 -->|"sí"| n50
-  n51(["↩ (relanza el error capturado)"]):::error
-  n49 -->|"no"| n51
-  n52(("200 Responde con éxito")):::ok
-  n47 -->|"no"| n52
+  n40{"!this.env.s3.bucket"}:::decision
+  n39 --> n40
+  n41(["500 INTERNAL {HttpStatus.SERVICE_UNAVAILABLE}"]):::error
+  n40 -->|"sí"| n41
+  n42["Llama a S3FileStorageAdapter.parseOwnedKey"]:::llamada
+  n40 -->|"no"| n42
+  n43{"!storageUri.startsWith(expected)"}:::decision
+  n42 --> n43
+  n44(["404 NOT_FOUND La URI no pertenece al bucket configurado"]):::error
+  n43 -->|"sí"| n44
+  n45{"!CONTENT_HASH_PATTERN.test(hash) || key !== this.objectKey(hash)"}:::decision
+  n43 -->|"no"| n45
+  n46(["404 NOT_FOUND La URI S3 está mal formada o fuera del prefijo permitido"]):::error
+  n45 -->|"sí"| n46
+  n47["Intenta"]:::intento
+  n45 -->|"no"| n47
+  n48{"!result.Body"}:::decision
+  n47 --> n48
+  n49(["500 INTERNAL S3 object body is empty"]):::error
+  n48 -->|"sí"| n49
+  n50{"isNotFound(error)"}:::decision
+  n47 -->|"si falla"| n50
+  n51(["404 NOT_FOUND El contenido no está disponible en el almacenamiento configurado"]):::error
+  n50 -->|"sí"| n51
+  n52(["↩ (relanza el error capturado)"]):::error
+  n50 -->|"no"| n52
+  n53(("200 Responde con éxito")):::ok
+  n48 -->|"no"| n53
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

@@ -23,7 +23,7 @@ _Fuente: `src/modules/system_ops/README.md:3`_
 
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
-| `UC-11-01` | Registrar dominio, clasificación y catalogar entidad + campos | POST /admin/governance/entity-registry | SECURITY_ADMIN | MEDIO | 7 |
+| `UC-11-01` | Registrar dominio, clasificación y catalogar entidad + campos | POST /admin/governance/entity-registry | SECURITY_ADMIN | MEDIO | 9 |
 | `UC-11-02` | Vincular política de escritura a una entidad | PATCH /admin/governance/entity-registry/{id}/write-policy | SECURITY_ADMIN | MEDIO | 4 |
 |  |  | POST /admin/governance/write-policies | SECURITY_ADMIN | MEDIO | 3 |
 | `UC-11-03` | Aplicar retención a una entidad (razón obligatoria) | PATCH /admin/governance/entity-registry/{id}/retention | SECURITY_ADMIN | MEDIO | 4 |
@@ -67,11 +67,11 @@ flowchart LR
   t3[("system_ops.data_classifications")]:::tabla
   t4[("system_ops.data_domains")]:::tabla
   t5[("system_ops.entity_registry")]:::tabla
-  t6[("system_ops.field_registry")]:::tabla
-  t9[("system_ops.governance_change_log")]:::tabla
-  t10[("system_ops.write_policies")]:::tabla
-  t13[("system_ops.retention_policies")]:::tabla
-  t16[("system_ops.anonymization_rules")]:::tabla
+  t8[("system_ops.governance_change_log")]:::tabla
+  t9[("system_ops.write_policies")]:::tabla
+  t12[("system_ops.retention_policies")]:::tabla
+  t15[("system_ops.anonymization_rules")]:::tabla
+  t17[("system_ops.field_registry")]:::tabla
   t19[("audio_assets.audio_assets")]:::tabla
   t20[("common.file_derivatives")]:::tabla
   t21[("common.file_versions")]:::tabla
@@ -92,21 +92,21 @@ flowchart LR
   t48[("system_ops.assessment_findings")]:::tabla
   t50[("system_ops.remediation_actions")]:::tabla
   t51[("system_ops.remediation_plans")]:::tabla
-  t7[("+1 tablas más")]
+  t6[("+3 tablas más")]
   subgraph s0["UC-11-01 · Registrar dominio, clasificación y catalogar entidad + campos"]
     o1["POST /admin/governance/entity-registry"]:::op
   end
   subgraph s1["UC-11-02 · Vincular política de escritura a una entidad"]
-    o8["PATCH /admin/governance/entity-registry/{id}/write-policy"]:::op
-    o11["POST /admin/governance/write-policies"]:::op
+    o7["PATCH /admin/governance/entity-registry/{id}/write-policy"]:::op
+    o10["POST /admin/governance/write-policies"]:::op
   end
   subgraph s2["UC-11-03 · Aplicar retención a una entidad (razón obligatoria)"]
-    o12["PATCH /admin/governance/entity-registry/{id}/retention"]:::op
-    o14["POST /admin/governance/retention-policies"]:::op
+    o11["PATCH /admin/governance/entity-registry/{id}/retention"]:::op
+    o13["POST /admin/governance/retention-policies"]:::op
   end
   subgraph s3["UC-11-04 · Definir regla de anonimización"]
-    o15["POST /admin/governance/anonymization-rules"]:::op
-    o17["PATCH /admin/governance/field-registry/{id}"]:::op
+    o14["POST /admin/governance/anonymization-rules"]:::op
+    o16["PATCH /admin/governance/field-registry/{id}"]:::op
   end
   t23[("+32 tablas más")]
   subgraph s4["UC-11-05 · Ejecutar barrido de retención (excluye objetivos bajo legal hold)"]
@@ -146,34 +146,34 @@ flowchart LR
   o1 -->|"CREA"| t4
   o1 -->|"LEE"| t4
   o1 -->|"CREA"| t5
-  o1 -->|"CREA"| t6
-  o1 -.-> t7
-  a2 --> o8
-  o8 -->|"ACTUALIZA"| t5
-  o8 -->|"LEE"| t5
-  o8 -->|"CREA"| t9
-  o8 -->|"LEE"| t10
+  o1 -->|"LEE"| t5
+  o1 -.-> t6
+  a2 --> o7
+  o7 -->|"ACTUALIZA"| t5
+  o7 -->|"LEE"| t5
+  o7 -->|"CREA"| t8
+  o7 -->|"LEE"| t9
+  a2 --> o10
+  o10 -->|"CREA"| t8
+  o10 -->|"CREA"| t9
+  o10 -->|"LEE"| t9
   a2 --> o11
-  o11 -->|"CREA"| t9
-  o11 -->|"CREA"| t10
-  o11 -->|"LEE"| t10
-  a2 --> o12
-  o12 -->|"ACTUALIZA"| t5
-  o12 -->|"LEE"| t5
-  o12 -->|"CREA"| t9
-  o12 -->|"LEE"| t13
+  o11 -->|"ACTUALIZA"| t5
+  o11 -->|"LEE"| t5
+  o11 -->|"CREA"| t8
+  o11 -->|"LEE"| t12
+  a2 --> o13
+  o13 -->|"CREA"| t8
+  o13 -->|"CREA"| t12
+  o13 -->|"LEE"| t12
   a2 --> o14
-  o14 -->|"CREA"| t9
-  o14 -->|"CREA"| t13
-  o14 -->|"LEE"| t13
-  a2 --> o15
-  o15 -->|"CREA"| t16
-  o15 -->|"LEE"| t16
-  o15 -->|"CREA"| t9
-  a2 --> o17
-  o17 -->|"ACTUALIZA"| t6
-  o17 -->|"LEE"| t6
-  o17 -->|"CREA"| t9
+  o14 -->|"CREA"| t15
+  o14 -->|"LEE"| t15
+  o14 -->|"CREA"| t8
+  a2 --> o16
+  o16 -->|"ACTUALIZA"| t17
+  o16 -->|"LEE"| t17
+  o16 -->|"CREA"| t8
   a2 --> o18
   o18 -->|"LEE"| t19
   o18 -->|"BORRA"| t20
@@ -185,7 +185,7 @@ flowchart LR
   a2 --> o24
   o24 -->|"CREA"| t25
   o24 -->|"LEE"| t25
-  o24 -->|"CREA"| t9
+  o24 -->|"CREA"| t8
   a2 --> o26
   o26 -->|"LEE"| t27
   o26 -->|"LEE"| t28
@@ -195,11 +195,11 @@ flowchart LR
   o31 -->|"CREA"| t32
   o31 -->|"LEE"| t32
   a2 --> o33
-  o33 -->|"CREA"| t9
+  o33 -->|"CREA"| t8
   o33 -->|"CREA"| t34
   o33 -->|"LEE"| t34
   a2 --> o35
-  o35 -->|"CREA"| t9
+  o35 -->|"CREA"| t8
   o35 -->|"ACTUALIZA"| t34
   o35 -->|"LEE"| t34
   a2 --> o36
@@ -708,24 +708,32 @@ flowchart TD
   n12 -->|"sí"| n13
   n14[("CREA system_ops.data_classifications")]:::efecto
   n13 --> n14
-  n15["Llama a GovernanceRepository.createEntity"]:::llamada
+  n15["Llama a GovernanceRepository.findEntityByTable"]:::llamada
   n14 --> n15
   n12 -->|"no"| n15
-  n16[("CREA system_ops.entity_registry")]:::efecto
+  n16[("LEE system_ops.entity_registry")]:::efecto
   n15 --> n16
-  n17["Repite: por cada const f de dto.fields"]:::bucle
+  n17["Llama a GovernanceRepository.createEntity"]:::llamada
   n16 --> n17
-  n18["Llama a GovernanceRepository.createField"]:::llamada
-  n17 -->|"cada elemento"| n18
-  n19[("CREA system_ops.field_registry")]:::efecto
+  n18[("CREA system_ops.entity_registry")]:::efecto
+  n17 --> n18
+  n19["Llama a GovernanceRepository.findFieldsByEntity"]:::llamada
   n18 --> n19
-  n20["Llama a GovernanceRepository.recordChange"]:::llamada
+  n20[("LEE system_ops.field_registry")]:::efecto
   n19 --> n20
-  n17 -->|"al terminar"| n20
-  n21[("CREA system_ops.governance_change_log")]:::efecto
+  n21["Repite: por cada const f de dto.fields"]:::bucle
   n20 --> n21
-  n22(("201 Responde con éxito")):::ok
-  n21 --> n22
+  n22["Llama a GovernanceRepository.createField"]:::llamada
+  n21 -->|"cada elemento"| n22
+  n23[("CREA system_ops.field_registry")]:::efecto
+  n22 --> n23
+  n24["Llama a GovernanceRepository.recordChange"]:::llamada
+  n23 --> n24
+  n21 -->|"al terminar"| n24
+  n25[("CREA system_ops.governance_change_log")]:::efecto
+  n24 --> n25
+  n26(("201 Responde con éxito")):::ok
+  n25 --> n26
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1109,7 +1117,7 @@ flowchart TD
 
 #### 15. GET /admin/governance/mutability
 
-
+Listar la mutabilidad por tabla (modo de escritura, disposición, legal hold y nivel de evidencia)
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -1145,7 +1153,7 @@ flowchart TD
 
 #### 16. GET /admin/governance/mutability/{schema}/{table}
 
-
+Detalle de una tabla: toda la evidencia con su fuente y las contradicciones sin resolver
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -1186,7 +1194,7 @@ flowchart TD
 
 #### 17. GET /admin/governance/mutability/summary
 
-
+Resumen de mutabilidad: tablas por modo y por nivel de evidencia (numerador/denominador) y hallazgos
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -1497,7 +1505,7 @@ flowchart TD
 
 #### 23. GET /admin/governance/retention-executions
 
-
+Ejecuciones de políticas de retención: estado, tiempos y conteos
 
 | HTTP | Código | Cuándo |
 |---|---|---|

@@ -47,7 +47,7 @@ Cada una es declarativa y pura (`checks/*.ts`): recibe `FitInputs` y devuelve `m
 | `FIT-FRE-001` | FRESHNESS | ALTA | El último escaneo exitoso no supera el umbral (`SCAN_STALE_AFTER_MS`) |
 | `FIT-FRE-002` | FRESHNESS | ALTA | La huella de lo importado = la del código desplegado |
 | `FIT-FRE-003` | FRESHNESS | ALTA | La huella del inventario generado = la del código desplegado |
-| `FIT-MUT-001` | MUTABILITY | MEDIA | Toda tabla declara su clase de mutabilidad. **Hoy: `NO_DECLARADO`** |
+| `FIT-MUT-001` | MUTABILITY | MEDIA | Toda tabla declara su clase de mutabilidad (taxonomía real de `system_ops/mutability`; `UNKNOWN` = sin declarar) |
 | `FIT-SEN-001` | SENSITIVITY | MEDIA | Toda tabla tiene sensibilidad clasificada |
 | `FIT-SEN-002` | SENSITIVITY | MEDIA | Toda columna tiene sensibilidad clasificada |
 | `FIT-SEN-003` | SENSITIVITY | ALTA | Ninguna columna que parece dato personal/clínico/credencial está por debajo de lo detectado |
@@ -69,46 +69,34 @@ Cada una es declarativa y pura (`checks/*.ts`): recibe `FitInputs` y devuelve `m
 
 - **Más comprobaciones**: inyectar `FitCheckRegistry` y llamar `register(check)` (id `FIT-XXX-000`).
   El registro lo exporta `DataCatalogModule`.
-- **Taxonomía de mutabilidad** (append-only / actualizable / soft-delete / purga / legal-hold): registrar
-  un proveedor con el token `FIT_MUTABILITY_SOURCE` (`{ declarations(): Promise<Map<'schema.tabla', clase>> }`)
-  en `DataCatalogModule`. Con él, `FIT-MUT-001` pasa de `NO_DECLARADO` a medir (declaradas con clase
-  válida / sin declarar / fuera de la taxonomía).
+- **Taxonomía de mutabilidad**: `DataCatalogModule` registra `MutabilityFitSource` con el token
+  `FIT_MUTABILITY_SOURCE`; lee `MutabilityCatalogService.all()` (sólo lectura) y declara cada tabla
+  con su `writeMode`. Las clases válidas (`MUTABILITY_CLASSES`) se derivan de `WRITE_MODES` menos
+  `UNKNOWN`. Probado contra el catálogo generado real (`mutability-source.adapter.spec.ts`).
 
-## Dónde viven los resultados (y por qué)
+## Dónde viven los resultados
 
-**En memoria del proceso, con TTL de 24 h** (`FIT_RESULT_TTL_MS`) e historial de 48 corridas. Se
-descartó lo que existe porque ninguna tabla significa lo que habría que guardar: `catalog_scan_runs`
-es de escaneos de `pg_catalog`; `catalog_change_events` exige `scan_run_id` y `object_id`;
-`platform_ops.health_check_runs` exige un `health_check` previo y puede abrir incidentes; `ops_console`
-no tiene tablas. Consecuencias: un reinicio vacía el historial y con varias réplicas de la API cada
-una ve las corridas que ella misma hizo; el tick del worker lo renueva cada 5 min y `GET` dice
-`SIN_RESULTADO`/`EXPIRADO`/`ATRASADO` en vez de servir un número viejo como si fuera de hoy.
+**En `data_catalog.catalog_fit_runs`** (parche del modelo `SQL/patches/2026-11-01_catalog_fit_runs.sql`),
+escrita y leída por `FitRunsRepository` con SQL parametrizado (sin entidad ORM mientras la tabla no
+esté en el `.puml` del modelo, para no abrir una deriva ORM ↔ modelo).
 
-### Propuesta de DDL (NO aplicada: el esquema fluye modelo → entidades, en el repo del modelo)
-
-```sql
--- data_catalog.catalog_fit_runs — append-only (REVOKE UPDATE, DELETE al rol de la aplicación)
-create table data_catalog.catalog_fit_runs (
-  id                 uuid primary key,
-  source_code        varchar     not null default 'primary',
-  trigger_kind       varchar     not null,               -- 'TICK' | 'MANUAL'
-  requested_by_user_id uuid,
-  idempotency_key    varchar,
-  status             varchar     not null,               -- 'COMPLETADA' | 'FALLIDA'
-  model_version      varchar     not null,
-  verdict            varchar,                            -- 'AJUSTADA' | 'CON_AVISOS' | 'DESAJUSTADA' | 'SIN_DATOS'
-  code_fingerprint   varchar,
-  deployed_commit    varchar,
-  report_json        jsonb,                              -- el FitReport completo
-  error_code         varchar,
-  requested_at       timestamptz not null,
-  finished_at        timestamptz not null,
-  created_at         timestamptz not null default now()
-);
-create unique index ux_data_catalog_fit_runs_idempotency
-  on data_catalog.catalog_fit_runs (requested_by_user_id, idempotency_key) where idempotency_key is not null;
-create index ix_data_catalog_fit_runs_finished on data_catalog.catalog_fit_runs (source_code, finished_at desc);
-```
+- **Qué se guarda**: el desenlace de cada corrida (`COMPLETADA` con el `FitReport` completo en
+  `report_json`, o `FALLIDA` con la clase del error). Las corridas `EN_CURSO` no se escriben: viven
+  en la memoria del proceso que las corre (`running`).
+- **Mutabilidad**: `APPEND_ONLY_PURGEABLE`. `UPDATE` prohibido por trigger (`integrity.forbid_mutation`);
+  la API purga lo más viejo que `FIT_RUN_RETENTION_MS` (30 días) después de cada escritura.
+- **Lectura** (`GET /admin/catalog/fit`): último completado, última falla e historial (`FIT_HISTORY_SIZE`
+  dentro de `FIT_RESULT_TTL_MS`) salen de la base: sobreviven a un reinicio y los ven todas las réplicas.
+  `retention.kind = BASE_DE_DATOS`.
+- **Fallback declarado**: si la base no responde, se sirve la memoria del proceso con
+  `retention.kind = MEMORIA_DEL_PROCESO` y `retention.fallbackReason = BD_NO_DISPONIBLE:<clase>`.
+  Si la escritura falla, la corrida NO falla (la sonda no mide la base que la guarda):
+  `retention.lastWrite.state = NO_GUARDADA` y el internal endpoint devuelve `persisted: false`.
+- **Idempotencia**: única por `(trigger_kind, idempotency_key)`. Reusar una clave pasada la hora de
+  memoria crea otra corrida que no se guarda (`CLAVE_REPETIDA`).
+- **Contrato**: `retention.kind` ganó el valor `BASE_DE_DATOS` y los campos `fallbackReason`,
+  `storedForSeconds` y `lastWrite`; el front (`catalog-fit.types.ts`) tipa `kind` como el literal
+  `MEMORIA_DEL_PROCESO` y debe ampliarse.
 
 ## Qué no verifica
 

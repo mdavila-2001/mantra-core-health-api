@@ -3,7 +3,7 @@
 # Endpoints del módulo `governance_admin`
 
 - **Bloque:** —
-- **Operaciones:** 5 (0 en el contrato, 5 sólo en el código)
+- **Operaciones:** 5 (5 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 0 · MEDIO 1 · BAJO 4
 - **Tablas distintas que tocan:** 5
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/governance-admin.md` (generado aparte por `yarn docs:endpoints:generate`)
@@ -12,18 +12,18 @@
 
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
-| 1 | GET | `/admin/governance/data-quality/issues` | — | BAJO | 3 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
-| 2 | GET | `/admin/governance/data-quality/issues/{id}` | — | BAJO | 3 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
-| 3 | POST | `/admin/governance/data-quality/issues/{id}/resolution` | — | MEDIO | 4 | GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD, PLATFORM_ADMIN |
-| 4 | GET | `/admin/governance/data-quality/rules` | — | BAJO | 3 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
-| 5 | GET | `/admin/governance/data-quality/rules/{id}` | — | BAJO | 5 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
+| 1 | GET | `/admin/governance/data-quality/issues` | Incidencias de calidad de datos clínicos, paginadas por cursor | BAJO | 3 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
+| 2 | GET | `/admin/governance/data-quality/issues/{id}` | Una incidencia de calidad de datos clínicos | BAJO | 3 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
+| 3 | POST | `/admin/governance/data-quality/issues/{id}/resolution` | Resolver o descartar una incidencia abierta | MEDIO | 4 | GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD, PLATFORM_ADMIN |
+| 4 | GET | `/admin/governance/data-quality/rules` | Reglas de calidad de datos clínicos, paginadas por cursor | BAJO | 3 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
+| 5 | GET | `/admin/governance/data-quality/rules/{id}` | Una regla de calidad con su expresión, sus incidencias por estado y sus últimas corridas | BAJO | 5 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
 
 ---
 
 ## 1. GET /admin/governance/data-quality/issues
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Incidencias de calidad de datos clínicos, paginadas por cursor
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -31,9 +31,9 @@
 
 ### Qué es y para qué sirve (negocio)
 
-_Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen._
+Incidencias de calidad de datos clínicos, paginadas por cursor.
 
-
+_Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
@@ -60,7 +60,12 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `IssuesQueryDto` | — |
+| `cursor` | query | No | `string` | Cursor opaco (`nextCursor`) |
+| `limit` | query | No | `number` | — |
+| `status` | query | No | `string` | — |
+| `severity` | query | No | `string` | — |
+| `ruleId` | query | No | `string` | — |
+| `q` | query | No | `string` | Busca en la ruta del campo, el código y el nombre de la regla |
 
 ### Cuerpo
 
@@ -93,8 +98,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 2. GET /admin/governance/data-quality/issues/{id}
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Una incidencia de calidad de datos clínicos
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -102,9 +107,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-_Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen._
+Una incidencia de calidad de datos clínicos.
 
-
+_Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
@@ -131,7 +136,7 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | path | Sí | `IdParamDto` | — |
+| `id` | path | Sí | `string` | — |
 
 ### Cuerpo
 
@@ -165,30 +170,32 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 3. POST /admin/governance/data-quality/issues/{id}/resolution
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Resolver o descartar una incidencia abierta
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminDataQualityController.resolve` — `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:78`
+- **Implementación:** `AdminDataQualityController.resolve` — `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:79`
 
 ### Qué es y para qué sirve (negocio)
 
-_Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen._
+Resolver o descartar una incidencia abierta.
 
-
+_Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/governance/data-quality/issues/{id}/resolution` la atiende `AdminDataQualityController.resolve` (src/modules/governance_admin/controllers/admin-data-quality.controller.ts:78). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD, PLATFORM_ADMIN. Valida el cuerpo como `ResolveIssueDto` (2 campos, 2 obligatorios). Delega en `DataQualityService.resolve`. Actualiza health_data.health_data_quality_issues. Lee health_data.health_data_quality_issues, health_data.health_data_quality_rules, health_data.health_data_quality_runs.
+`POST /admin/governance/data-quality/issues/{id}/resolution` la atiende `AdminDataQualityController.resolve` (src/modules/governance_admin/controllers/admin-data-quality.controller.ts:79). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD, PLATFORM_ADMIN. Valida el cuerpo como `ResolveIssueDto` (2 campos, 2 obligatorios). Delega en `DataQualityService.resolve`. Actualiza health_data.health_data_quality_issues. Lee health_data.health_data_quality_issues, health_data.health_data_quality_rules, health_data.health_data_quality_runs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD, PLATFORM_ADMIN | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:78` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:78` |
+| ROL | Alguno de: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD, PLATFORM_ADMIN | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:79` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:79` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -204,20 +211,20 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | path | Sí | `IdParamDto` | — |
+| `id` | path | Sí | `string` | — |
 
-### Cuerpo — DTO `ResolveIssueDto`
+### Cuerpo — DTO `ResolveIssueDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `action` | `object` | Sí | — | `@IsIn(RESOLUTION_ACTIONS)` | Tipo TypeScript no expandido: (typeof RESOLUTION_ACTIONS)[number] | `src/modules/governance_admin/dto/resolve-issue.dto.ts:11` |
+| `action` | `string` | Sí | valores: RESOLVE, DISMISS | `@IsIn(RESOLUTION_ACTIONS)` | — | `src/modules/governance_admin/dto/resolve-issue.dto.ts:11` |
 | `note` | `string` | Sí | longitud mínima 10; longitud máxima 2000 | `@Transform(({ value }: { value: unknown }) => typeof value === 'string' ? value.trim() : value, )` `@IsString()` `@MinLength(10)` `@MaxLength(2000)` | Motivo de la resolución o del descarte. Es obligatorio y queda en la incidencia. | `src/modules/governance_admin/dto/resolve-issue.dto.ts:25` |
 
 **Payload mínimo** (sólo los obligatorios):
 
 ```json
 {
-  "action": {},
+  "action": "RESOLVE",
   "note": "valor-ejemplo"
 }
 ```
@@ -226,7 +233,7 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 
 ```json
 {
-  "action": {},
+  "action": "RESOLVE",
   "note": "valor-ejemplo"
 }
 ```
@@ -242,6 +249,7 @@ _No se identificó un DTO de respuesta con campos._
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Incidencia no encontrada |
@@ -262,30 +270,30 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 4. GET /admin/governance/data-quality/rules
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Reglas de calidad de datos clínicos, paginadas por cursor
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminDataQualityController.rules` — `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:99`
+- **Implementación:** `AdminDataQualityController.rules` — `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:105`
 
 ### Qué es y para qué sirve (negocio)
 
-_Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen._
+Reglas de calidad de datos clínicos, paginadas por cursor.
 
-
+_Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/governance/data-quality/rules` la atiende `AdminDataQualityController.rules` (src/modules/governance_admin/controllers/admin-data-quality.controller.ts:99). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `DataQualityService.listRules`. Lee health_data.health_data_quality_rule_sets, health_data.health_data_quality_rules, terminology.catalog_concepts.
+`GET /admin/governance/data-quality/rules` la atiende `AdminDataQualityController.rules` (src/modules/governance_admin/controllers/admin-data-quality.controller.ts:105). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `DataQualityService.listRules`. Lee health_data.health_data_quality_rule_sets, health_data.health_data_quality_rules, terminology.catalog_concepts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:99` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:99` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:105` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:105` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -300,7 +308,11 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `RulesQueryDto` | — |
+| `cursor` | query | No | `string` | Cursor opaco (`nextCursor`) |
+| `limit` | query | No | `number` | — |
+| `severity` | query | No | `string` | — |
+| `dimension` | query | No | `string` | Código de la dimensión de calidad (concepto) |
+| `q` | query | No | `string` | Busca en código y nombre |
 
 ### Cuerpo
 
@@ -333,30 +345,30 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 5. GET /admin/governance/data-quality/rules/{id}
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Una regla de calidad con su expresión, sus incidencias por estado y sus últimas corridas
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminDataQualityController.rule` — `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:108`
+- **Implementación:** `AdminDataQualityController.rule` — `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:114`
 
 ### Qué es y para qué sirve (negocio)
 
-_Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen._
+Una regla de calidad con su expresión, sus incidencias por estado y sus últimas corridas.
 
-
+_Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/governance/data-quality/rules/{id}` la atiende `AdminDataQualityController.rule` (src/modules/governance_admin/controllers/admin-data-quality.controller.ts:108). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `DataQualityService.getRule`. Lee health_data.health_data_quality_issues, health_data.health_data_quality_rule_sets, health_data.health_data_quality_rules, health_data.health_data_quality_runs, terminology.catalog_concepts.
+`GET /admin/governance/data-quality/rules/{id}` la atiende `AdminDataQualityController.rule` (src/modules/governance_admin/controllers/admin-data-quality.controller.ts:114). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `DataQualityService.getRule`. Lee health_data.health_data_quality_issues, health_data.health_data_quality_rule_sets, health_data.health_data_quality_rules, health_data.health_data_quality_runs, terminology.catalog_concepts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:108` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:108` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:114` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:114` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -373,7 +385,7 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | path | Sí | `IdParamDto` | — |
+| `id` | path | Sí | `string` | — |
 
 ### Cuerpo
 

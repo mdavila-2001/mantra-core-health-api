@@ -2,7 +2,7 @@
 
 # Catálogo del schema `audio_assets`
 
-- **Tablas:** 4 · **Columnas:** 69 (2 con descripción: 2.9 %) · **Índices:** 10
+- **Tablas:** 4 · **Columnas:** 69 (13 con descripción: 18.8 %) · **Índices:** 10
 - **Dominio:** sin dato
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -36,9 +36,9 @@ Cataloga audios sintetizados y cacheados a partir de plantillas aprobadas para r
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/audio_assets/entities/audio_assets.entity.ts:12`)_ | coincide |
 | 2 | `asset_key` | `char(64)` | Obligatoria | _sin dato_ | coincide |
-| 3 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Opcional | Tenant propietario, o `NULL` cuando el audio es compartido por la plataforma. Sólo lo llevan los assets cuyo texto renderizado incluye un valor dinámico que puede identificar a una persona (`PERSON_NAME`, `SAFE_TEXT`). Los `STATIC`, los `FALLBACK` y los `ENUMERATED` —conjunto cerrado— siguen siendo compartidos, que es lo que permite pre-generarlos una sola vez para todos. Entra además en `asset_key` y en la búsqueda de binario reutilizable: sin eso, dos tenants compartirían la fila del audio del nombre de un paciente y un acierto de caché delataría que ese nombre existe en el otro tenant. _(JSDOC_ENTIDAD, `src/modules/audio_assets/entities/audio_assets.entity.ts:24`)_ | coincide |
+| 3 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Opcional | Tenant propietario, o `NULL` cuando el audio es compartido por la plataforma. Sólo lo llevan los assets cuyo texto renderizado incluye un valor dinámico que puede identificar a una persona (`PERSON_NAME`, `SAFE_TEXT`). Los `STATIC`, los `FALLBACK` y los `ENUMERATED` —conjunto cerrado— siguen siendo compartidos, que es lo que permite pre-generarlos una sola vez para todos. Entra además en `asset_key` y en la búsqueda de binario reutilizable: sin eso, dos tenants compartirían la fila del audio del nombre de un paciente y un acierto de caché delataría que ese nombre existe en el otro tenant. _(JSDOC_ENTIDAD, `src/modules/audio_assets/entities/audio_assets.entity.ts:33`)_ | coincide |
 | 4 | `template_key` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 5 | `template_version` | `integer` | Obligatoria | _sin dato_ | coincide |
 | 6 | `strategy` | `varchar` | Obligatoria | _sin dato_ | coincide |
@@ -62,13 +62,13 @@ Cataloga audios sintetizados y cacheados a partir de plantillas aprobadas para r
 | 24 | `generation_status` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 25 | `failure_code` | `varchar` | Opcional | _sin dato_ | coincide |
 | 26 | `budget_reserved_units` | `integer` | Opcional | _sin dato_ | coincide |
-| 27 | `budget_period_key` | `varchar(7)` | Opcional | Ventana mensual (`YYYY-MM`) contra la que se apartó la reserva. Se persiste porque la liquidación y la devolución ocurren **después**, y pueden caer en otro mes: un asset que reserva el día 31 y se genera el 1 imputaría su consumo a una ventana sin fila de reserva —el `UPDATE` no afectaría ninguna fila, el consumo se perdería y el mes anterior se quedaría con crédito apartado para siempre—. _(JSDOC_ENTIDAD, `src/modules/audio_assets/entities/audio_assets.entity.ts:129`)_ | coincide |
+| 27 | `budget_period_key` | `varchar(7)` | Opcional | Ventana mensual (`YYYY-MM`) contra la que se apartó la reserva. Se persiste porque la liquidación y la devolución ocurren **después**, y pueden caer en otro mes: un asset que reserva el día 31 y se genera el 1 imputaría su consumo a una ventana sin fila de reserva —el `UPDATE` no afectaría ninguna fila, el consumo se perdería y el mes anterior se quedaría con crédito apartado para siempre—. _(JSDOC_ENTIDAD, `src/modules/audio_assets/entities/audio_assets.entity.ts:207`)_ | coincide |
 | 28 | `generated_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
 | 29 | `last_used_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
 | 30 | `use_count` | `integer` | Obligatoria | _sin dato_ | coincide |
 | 31 | `metadata` | `jsonb` | Obligatoria | _sin dato_ | coincide |
-| 32 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 33 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 32 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/audio_assets/entities/audio_assets.entity.ts:249`)_ | coincide |
+| 33 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/audio_assets/entities/audio_assets.entity.ts:255`)_ | coincide |
 
 #### Relaciones
 
@@ -151,7 +151,7 @@ Traza generación de audio, su costo y resultado para gobernar consumo de provee
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/audio_assets/entities/audio_generation_events.entity.ts:12`)_ | coincide |
 | 2 | `asset_key` | `char(64)` | Opcional | _sin dato_ | coincide |
 | 3 | `event_type` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 4 | `provider` | `varchar` | Opcional | _sin dato_ | coincide |
@@ -163,7 +163,7 @@ Traza generación de audio, su costo y resultado para gobernar consumo de provee
 | 10 | `correlation_id` | `varchar` | Opcional | _sin dato_ | coincide |
 | 11 | `trace_id` | `varchar` | Opcional | _sin dato_ | coincide |
 | 12 | `metadata` | `jsonb` | Obligatoria | _sin dato_ | coincide |
-| 13 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 13 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/audio_assets/entities/audio_generation_events.entity.ts:96`)_ | coincide |
 
 #### Índices
 
@@ -218,7 +218,7 @@ Acumula uso de síntesis de audio por período para controlar presupuesto y fact
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/audio_assets/entities/audio_generation_usage.entity.ts:12`)_ | coincide |
 | 2 | `period_key` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 3 | `provider` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 4 | `estimated_credits` | `integer` | Obligatoria | _sin dato_ | coincide |
@@ -226,8 +226,8 @@ Acumula uso de síntesis de audio por período para controlar presupuesto y fact
 | 6 | `request_count` | `integer` | Obligatoria | _sin dato_ | coincide |
 | 7 | `success_count` | `integer` | Obligatoria | _sin dato_ | coincide |
 | 8 | `failure_count` | `integer` | Obligatoria | _sin dato_ | coincide |
-| 9 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 10 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 9 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/audio_assets/entities/audio_generation_usage.entity.ts:64`)_ | coincide |
+| 10 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/audio_assets/entities/audio_generation_usage.entity.ts:70`)_ | coincide |
 
 #### Índices
 
@@ -278,7 +278,7 @@ Define textos registrados que pueden convertirse a voz en experiencias acotadas 
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/audio_assets/entities/audio_templates.entity.ts:12`)_ | coincide |
 | 2 | `template_key` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 3 | `version` | `integer` | Obligatoria | _sin dato_ | coincide |
 | 4 | `strategy` | `varchar` | Obligatoria | _sin dato_ | coincide |
@@ -289,8 +289,8 @@ Define textos registrados que pueden convertirse a voz en experiencias acotadas 
 | 9 | `voice_profile` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 10 | `enabled` | `boolean` | Obligatoria | _sin dato_ | coincide |
 | 11 | `metadata` | `jsonb` | Obligatoria | _sin dato_ | coincide |
-| 12 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 13 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 12 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/audio_assets/entities/audio_templates.entity.ts:82`)_ | coincide |
+| 13 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/audio_assets/entities/audio_templates.entity.ts:88`)_ | coincide |
 
 #### Índices
 

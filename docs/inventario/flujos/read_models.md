@@ -27,14 +27,14 @@ _Fuente: `src/modules/read_models/README.md:3`_
 | `UC-30-02` | Publicar contrato de vista (upsert portal/route + view + hijos) | POST /portals/{portalCode}/routes/{routeCode}/views | SECURITY_ADMIN | MEDIO | 12 |
 | `UC-30-03` | Refresh manual de la MV (REFRESH CONCURRENTLY) | POST /read-models/{definitionId}/refresh | SECURITY_ADMIN | MEDIO | 2 |
 | `UC-30-04` | Backfill inicial (FULL) de la MV | POST /read-models/{definitionId}/backfill | SECURITY_ADMIN | MEDIO | 2 |
-| `UC-30-05` | Devuelve contrato, masking y staleness; actualmente data queda vacío | GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | Cualquier sesión válida | BAJO | 30 |
+| `UC-30-05` | Devuelve contrato, masking y staleness; actualmente data queda vacío | GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | Cualquier sesión válida | BAJO | 32 |
 | `UC-30-06` | Invalidar y recomputar tras cambio upstream | POST /read-models/{definitionId}/invalidate | SECURITY_ADMIN | MEDIO | 2 |
 | `UC-30-07` | Reconciliar la MV divergente (result REPAIRED) | POST /read-models/{definitionId}/reconcile | SYSTEM · SECURITY_ADMIN | MEDIO | 2 |
 | `UC-30-08` | Nueva versión N+1 en DRAFT (anterior sigue ACTIVE) | POST /read-models/definitions/{schema}/{object}/versions | SECURITY_ADMIN | MEDIO | 3 |
 | `UC-30-09` | Preferencias de vista (validadas contra el allow-list) | PUT /views/{frontendPageViewId}/preferences | Cualquier sesión válida | ALTO | 5 |
 | `UC-30-10` | Proyecciones públicas (sin PHI, sin sesión) | GET /public/{slug} | Público (sin sesión) | BAJO | 1 |
 |  |  | GET /public/directory | Público (sin sesión) | BAJO | 1 |
-| `UC-30-11` | Derivar available_actions_json (estado + permiso) | GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions | Cualquier sesión válida | BAJO | 25 |
+| `UC-30-11` | Derivar available_actions_json (estado + permiso) | GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions | Cualquier sesión válida | BAJO | 27 |
 | `UC-30-12` | Detectar staleness/degradación de las MV | GET /read-models/health | SYSTEM · SECURITY_ADMIN | BAJO | 2 |
 | `UC-30-13` | Deprecar (ACTIVE→DEPRECATED) y retirar (guarda de FK) | DELETE /read-models/definitions/{id} | SECURITY_ADMIN | MEDIO | 3 |
 |  |  | POST /read-models/definitions/{id}/deprecate | SECURITY_ADMIN | MEDIO | 2 |
@@ -75,7 +75,7 @@ flowchart LR
   subgraph s3["UC-30-04 · Backfill inicial (FULL) de la MV"]
     o13["POST /read-models/{definitionId}/backfill"]:::op
   end
-  t22[("+24 tablas más")]
+  t22[("+26 tablas más")]
   subgraph s4["UC-30-05 · Devuelve contrato, masking y staleness; actualmente data queda vacío"]
     o14["GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data"]:::op
   end
@@ -95,7 +95,7 @@ flowchart LR
     o29["GET /public/{slug}"]:::op
     o32["GET /public/directory"]:::op
   end
-  t34[("+19 tablas más")]
+  t34[("+21 tablas más")]
   subgraph s10["UC-30-11 · Derivar available_actions_json (estado + permiso)"]
     o33["GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions"]:::op
   end

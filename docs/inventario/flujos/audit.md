@@ -319,7 +319,7 @@ flowchart TD
 
 #### 3. GET /audit/data-access/summary
 
-
+Resumen agregado de las lecturas de datos sensibles: por propósito, recurso y operación
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -864,7 +864,7 @@ flowchart TD
 
 #### 12. GET /privacy/dsar
 
-Lectura de las solicitudes DSAR. `@PlatformScopeOptional()` va por método (no en la clase: el `POST`/`PATCH` sí exigen una organización). `dsar_requests` no tiene tenant: es del titular. Cada lectura queda sellada en `data_access_log` (identifica a titulares).
+Solicitudes DSAR, la más reciente primero
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -959,7 +959,7 @@ flowchart TD
 
 #### 14. GET /privacy/dsar/{id}
 
-
+Una solicitud DSAR (sin el archivo resultante)
 
 | HTTP | Código | Cuándo |
 |---|---|---|

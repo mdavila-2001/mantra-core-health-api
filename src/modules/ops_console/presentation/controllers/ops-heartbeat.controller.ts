@@ -12,8 +12,8 @@ import { HeartbeatAcceptedDto, HeartbeatDto } from '../dto/ops-heartbeat.dto';
 /**
  * Ingesta de latidos de los workers. Sólo el rol `SYSTEM` (el que firma
  * `SystemApiClient`): un administrador no puede fabricar la vida de un
- * proceso. Sin `@Audited` a propósito: 27 workers × 4/min serían 108 filas de
- * auditoría por minuto sin valor. La ruta está excluida de la medición HTTP
+ * proceso. `@NotAudited` a propósito (como el resto de la plomería de workers):
+ * 27 workers × 4/min serían 108 filas de auditoría por minuto sin valor. La ruta está excluida de la medición HTTP
  * (`EXCLUDED_HTTP_PATHS`).
  */
 @ApiTags('ops-console')
@@ -22,6 +22,9 @@ import { HeartbeatAcceptedDto, HeartbeatDto } from '../dto/ops-heartbeat.dto';
 export class OpsHeartbeatController {
   constructor(private readonly liveness: InstanceLivenessService) {}
 
+  @NotAudited(
+    'Plomería del worker: latido técnico de alto volumen (27 workers × 4/min); el rastro es la propia entrada de vida en Redis, que se sobrescribe por instancia.',
+  )
   @Post('heartbeats')
   @NotAudited(
     'Latido de 27 workers × 4/min: sobrescribe el estado de la instancia; auditarlo serían ~108 filas/min sin valor.',

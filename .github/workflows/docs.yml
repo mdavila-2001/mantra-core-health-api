@@ -274,7 +274,7 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           repository: mantra-core-technologies/mantra-core-health-model
-          ref: 9feb64abc688b96092801b5acbd91b8dcdf8d9c0
+          ref: 53feef076a62bf04c8303448044f366dc546e639
           path: _modelo
           persist-credentials: false
 

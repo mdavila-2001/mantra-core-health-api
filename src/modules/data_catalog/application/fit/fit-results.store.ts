@@ -41,11 +41,9 @@ export interface FitHistoryEntry {
 /**
  * Resultados de la sonda de ajuste **en memoria del proceso**, con TTL declarado.
  *
- * No hay una tabla donde guardarlos sin falsear su significado (`catalog_scan_runs` es de
- * escaneos, `catalog_change_events` exige objeto y escaneo, `platform_ops.health_check_runs`
- * exige un chequeo previo): ver `README.md` de esta carpeta, que propone el DDL. Consecuencias,
- * declaradas y no escondidas: un reinicio vacía el historial, y con varias réplicas de la API cada
- * una ve lo que ella misma corrió. El tick del worker renueva el resultado cada pocos minutos.
+ * Es la corrida en curso, la idempotencia de este proceso y el **respaldo** de lectura: lo que se
+ * sirve se lee de `data_catalog.catalog_fit_runs` (`FitRunsRepository`) y sólo si la base no
+ * responde se cae a esta memoria (un reinicio la vacía; cada réplica ve lo suyo).
  */
 @Injectable()
 export class FitResultsStore {
@@ -122,6 +120,11 @@ export class FitResultsStore {
   /** `true` si hubo un informe pero ya venció su TTL. */
   expired(now: Date): boolean {
     return this.lastCompleted !== null && this.current(now) === null;
+  }
+
+  /** El último informe completo, vigente o no (la vigencia la decide quien lee). */
+  lastCompletedRun(): FitRun | null {
+    return this.lastCompleted;
   }
 
   failure(): FitRun | null {

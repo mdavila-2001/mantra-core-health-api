@@ -2,7 +2,7 @@
 
 # Catálogo del schema `iam`
 
-- **Tablas:** 15 · **Columnas:** 201 (64 con descripción: 31.8 %) · **Índices:** 72
+- **Tablas:** 15 · **Columnas:** 201 (68 con descripción: 33.8 %) · **Índices:** 72
 - **Dominio:** Identidad y Seguridad
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -14,17 +14,17 @@
 | [account_lockouts](#account_lockouts) | Registra bloqueos de cuentas para aplicar controles ante intentos de acceso fallidos o riesgos de seguridad. | 16 | 3 | 13 | COINCIDE |
 | [api_key_scopes](#api_key_scopes) | Delimita permisos y ámbitos de claves API para restringir integraciones a operaciones autorizadas. | 7 | 2 | 0 | COINCIDE |
 | [api_keys](#api_keys) | Administra credenciales de integración por API para autenticar sistemas que intercambian datos con la plataforma médica. | 21 | 5 | 0 | COINCIDE |
-| [authentication_credentials](#authentication_credentials) | Almacena referencias y estados de credenciales usados para autenticar usuarios sin mezclar identidad personal y acceso. | 16 | 7 | 57 | COINCIDE |
-| [devices](#devices) | Identifica dispositivos asociados a usuarios para gestionar sesiones y controles de acceso. | 13 | 5 | 120 | COINCIDE |
-| [email_verifications](#email_verifications) | Registra verificaciones de correo asociadas a cuentas para confirmar canales de identidad y comunicación. | 12 | 2 | 28 | COINCIDE |
+| [authentication_credentials](#authentication_credentials) | Almacena referencias y estados de credenciales usados para autenticar usuarios sin mezclar identidad personal y acceso. | 16 | 7 | 63 | COINCIDE |
+| [devices](#devices) | Identifica dispositivos asociados a usuarios para gestionar sesiones y controles de acceso. | 13 | 5 | 123 | COINCIDE |
+| [email_verifications](#email_verifications) | Registra verificaciones de correo asociadas a cuentas para confirmar canales de identidad y comunicación. | 12 | 2 | 32 | COINCIDE |
 | [mfa_factors](#mfa_factors) | Registra factores de autenticación adicional para reforzar la protección de cuentas que acceden a datos médicos. | 12 | 5 | 5 | COINCIDE |
 | [password_resets](#password_resets) | Gestiona solicitudes de restablecimiento de credenciales para recuperar acceso de forma controlada. | 13 | 2 | 4 | COINCIDE |
 | [refresh_tokens](#refresh_tokens) | Gestiona tokens de renovación de sesión para mantener autenticación continua con trazabilidad y revocación. | 11 | 7 | 18 | COINCIDE |
-| [security_events](#security_events) | Conserva eventos de seguridad de identidad para investigar autenticaciones y cambios relevantes de cuenta. | 8 | 5 | 33 | COINCIDE |
-| [session_policies](#session_policies) | Fija por organización la duración de la sesión inactiva, la alerta de dispositivo nuevo, el horario permitido y el uso de reglas de IP y MFA, para todas las cuentas, su personal o un rol. | 15 | 7 | 0 | SIN_ENTIDAD |
+| [security_events](#security_events) | Conserva eventos de seguridad de identidad para investigar autenticaciones y cambios relevantes de cuenta. | 8 | 5 | 36 | COINCIDE |
+| [session_policies](#session_policies) | Fija por organización la duración de la sesión inactiva, la alerta de dispositivo nuevo, el horario permitido y el uso de reglas de IP y MFA, para todas las cuentas, su personal o un rol. | 15 | 7 | 0 | COINCIDE |
 | [sessions](#sessions) | Mantiene sesiones autenticadas para controlar su vigencia y vínculo con usuario y dispositivo. | 13 | 7 | 143 | COINCIDE |
-| [user_global_roles](#user_global_roles) | Asocia roles de alcance global a usuarios para resolver privilegios transversales de la plataforma. | 9 | 5 | 25 | COINCIDE |
-| [users](#users) | Representa cuentas de usuario autenticadas que operan en la plataforma médica. | 21 | 8 | 112 | COINCIDE |
+| [user_global_roles](#user_global_roles) | Asocia roles de alcance global a usuarios para resolver privilegios transversales de la plataforma. | 9 | 5 | 99 | COINCIDE |
+| [users](#users) | Representa cuentas de usuario autenticadas que operan en la plataforma médica. | 21 | 8 | 185 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -522,7 +522,7 @@ Almacena referencias y estados de credenciales usados para autenticar usuarios s
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_01_iam.puml: authentication_credentials`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_01_iam.puml` · **DDL:** `SQL/01_iam/02_tables.sql`
 - **Entidad del ORM:** `AuthenticationCredentials` — `src/modules/iam/entities/authentication_credentials.entity.ts`
-- **Resumen:** 16 columnas · 7 índices · 6 FK salientes · 0 entrantes · 57 operaciones
+- **Resumen:** 16 columnas · 7 índices · 6 FK salientes · 0 entrantes · 63 operaciones
 
 #### Columnas
 
@@ -581,6 +581,10 @@ Almacena referencias y estados de credenciales usados para autenticar usuarios s
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
 | POST /me/practitioner/support-invitations | LEE | POR_SQL |
+| POST /me/practitioner/support-staff | CREA | DIRECTA |
+| POST /me/practitioner/support-staff | LEE | DIRECTA |
+| POST /org/support-staff | CREA | DIRECTA |
+| POST /org/support-staff | LEE | DIRECTA |
 | POST /org/team/invitations | LEE | POR_SQL |
 | POST /iam/auth/activate | ACTUALIZA | POR_TIPO |
 | POST /iam/auth/activate | LEE | DIRECTA |
@@ -633,7 +637,9 @@ Almacena referencias y estados de credenciales usados para autenticar usuarios s
 | POST /scheduling/holds/{holdToken}/request | LEE | DIRECTA |
 | POST /scheduling/internal/dispatch-reminders | LEE | DIRECTA |
 | POST /scheduling/internal/promote-waitlist/{slotId} | LEE | DIRECTA |
+| POST /scheduling/resources/{id}/close-slots | LEE | DIRECTA |
 | POST /scheduling/resources/{id}/delay | LEE | DIRECTA |
+| POST /scheduling/resources/{id}/exceptions | LEE | DIRECTA |
 | POST /scheduling/resources/{id}/shift-slots | LEE | DIRECTA |
 
 #### Gobierno
@@ -659,7 +665,7 @@ Identifica dispositivos asociados a usuarios para gestionar sesiones y controles
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_01_iam.puml: devices`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_01_iam.puml` · **DDL:** `SQL/01_iam/02_tables.sql`
 - **Entidad del ORM:** `Devices` — `src/modules/iam/entities/devices.entity.ts`
-- **Resumen:** 13 columnas · 5 índices · 4 FK salientes · 13 entrantes · 120 operaciones
+- **Resumen:** 13 columnas · 5 índices · 4 FK salientes · 13 entrantes · 123 operaciones
 
 #### Columnas
 
@@ -743,8 +749,12 @@ Identifica dispositivos asociados a usuarios para gestionar sesiones y controles
 | POST /consent/practitioner-access-requests | LEE | DIRECTA |
 | POST /consent/practitioner-access-requests/{id}/decision | ACTUALIZA | POR_TIPO |
 | POST /consent/practitioner-access-requests/{id}/decision | LEE | DIRECTA |
+| POST /iam/auth/register-practitioner | ACTUALIZA | POR_TIPO |
+| POST /iam/auth/register-practitioner | LEE | DIRECTA |
 | GET /iam/users/{id}/devices | LEE | DIRECTA |
 | POST /iam/users/{id}/devices | CREA | DIRECTA |
+| POST /iam/users/assisted-practitioner-registration | ACTUALIZA | POR_TIPO |
+| POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /insurance-claims/{id}/patient-invoice | ACTUALIZA | POR_TIPO |
 | POST /insurance-claims/{id}/patient-invoice | LEE | DIRECTA |
 | POST /internal/notifications/{requestId}/deliver | ACTUALIZA | POR_TIPO |
@@ -754,7 +764,6 @@ Identifica dispositivos asociados a usuarios para gestionar sesiones y controles
 | PUT /notifications/web-push/subscription | ACTUALIZA | POR_TIPO |
 | PUT /notifications/web-push/subscription | CREA | DIRECTA |
 | PUT /notifications/web-push/subscription | LEE | DIRECTA |
-| POST /internal/reservations/expire | ACTUALIZA | POR_TIPO |
 | POST /internal/reservations/expire | LEE | DIRECTA |
 | GET /pharmacy/orders | ACTUALIZA | POR_TIPO |
 | GET /pharmacy/orders | LEE | DIRECTA |
@@ -865,7 +874,7 @@ Registra verificaciones de correo asociadas a cuentas para confirmar canales de 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_01_iam.puml: email_verifications`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_01_iam.puml` · **DDL:** `SQL/01_iam/02_tables.sql`
 - **Entidad del ORM:** `EmailVerifications` — `src/modules/iam/entities/email_verifications.entity.ts`
-- **Resumen:** 12 columnas · 2 índices · 4 FK salientes · 0 entrantes · 28 operaciones
+- **Resumen:** 12 columnas · 2 índices · 4 FK salientes · 0 entrantes · 32 operaciones
 
 #### Columnas
 
@@ -910,6 +919,8 @@ Registra verificaciones de correo asociadas a cuentas para confirmar canales de 
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /me/practitioner/support-staff | CREA | DIRECTA |
+| POST /org/support-staff | CREA | DIRECTA |
 | POST /iam/auth/forgot-password | LEE | DIRECTA |
 | POST /iam/auth/register-organization | CREA | DIRECTA |
 | POST /iam/auth/register-patient | CREA | DIRECTA |
@@ -936,7 +947,9 @@ Registra verificaciones de correo asociadas a cuentas para confirmar canales de 
 | POST /scheduling/holds/{holdToken}/request | LEE | DIRECTA |
 | POST /scheduling/internal/dispatch-reminders | LEE | DIRECTA |
 | POST /scheduling/internal/promote-waitlist/{slotId} | LEE | DIRECTA |
+| POST /scheduling/resources/{id}/close-slots | LEE | DIRECTA |
 | POST /scheduling/resources/{id}/delay | LEE | DIRECTA |
+| POST /scheduling/resources/{id}/exceptions | LEE | DIRECTA |
 | POST /scheduling/resources/{id}/shift-slots | LEE | DIRECTA |
 
 #### Gobierno
@@ -1201,7 +1214,7 @@ Conserva eventos de seguridad de identidad para investigar autenticaciones y cam
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_01_iam.puml: security_events`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_01_iam.puml` · **DDL:** `SQL/01_iam/02_tables.sql`
 - **Entidad del ORM:** `SecurityEvents` — `src/modules/iam/entities/security_events.entity.ts`
-- **Resumen:** 8 columnas · 5 índices · 4 FK salientes · 1 entrantes · 33 operaciones
+- **Resumen:** 8 columnas · 5 índices · 4 FK salientes · 1 entrantes · 36 operaciones
 
 #### Columnas
 
@@ -1240,7 +1253,10 @@ Conserva eventos de seguridad de identidad para investigar autenticaciones y cam
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| DELETE /authz/resource-scope-grants/{grantId} | CREA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
+| POST /me/practitioner/support-staff | CREA | DIRECTA |
+| POST /org/support-staff | CREA | DIRECTA |
 | POST /iam/auth/activate | CREA | DIRECTA |
 | POST /iam/auth/change-password | CREA | DIRECTA |
 | POST /iam/auth/forgot-password | CREA | DIRECTA |
@@ -1296,28 +1312,28 @@ Fija por organización la duración de la sesión inactiva, la alerta de disposi
 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_01_iam.puml: session_policies`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_01_iam.puml` · **DDL:** `SQL/01_iam/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `SessionPolicies` — `src/modules/iam/entities/session_policies.entity.ts`
 - **Resumen:** 15 columnas · 7 índices · 5 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `scope_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `role_code` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `idle_timeout_minutes` | `integer` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `new_device_alert` | `boolean` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `allowed_hours_json` | `jsonb` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `enforce_ip_rules` | `boolean` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `require_mfa` | `boolean` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/iam/entities/session_policies.entity.ts:12`)_ | coincide |
+| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `scope_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `role_code` | `varchar` | Opcional | _sin dato_ | coincide |
+| 5 | `idle_timeout_minutes` | `integer` | Obligatoria | _sin dato_ | coincide |
+| 6 | `new_device_alert` | `boolean` | Obligatoria | _sin dato_ | coincide |
+| 7 | `allowed_hours_json` | `jsonb` | Opcional | _sin dato_ | coincide |
+| 8 | `enforce_ip_rules` | `boolean` | Obligatoria | _sin dato_ | coincide |
+| 9 | `require_mfa` | `boolean` | Obligatoria | _sin dato_ | coincide |
+| 10 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 11 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/iam/entities/session_policies.entity.ts:77`)_ | coincide |
+| 12 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/iam/entities/session_policies.entity.ts:83`)_ | coincide |
+| 13 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 14 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 15 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/iam/entities/session_policies.entity.ts:101`)_ | coincide |
 
 #### Relaciones
 
@@ -1378,7 +1394,7 @@ Mantiene sesiones autenticadas para controlar su vigencia y vínculo con usuario
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_01_iam.puml: sessions`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_01_iam.puml` · **DDL:** `SQL/01_iam/02_tables.sql`
 - **Entidad del ORM:** `Sessions` — `src/modules/iam/entities/sessions.entity.ts`
-- **Resumen:** 13 columnas · 7 índices · 5 FK salientes · 6 entrantes · 143 operaciones
+- **Resumen:** 13 columnas · 7 índices · 5 FK salientes · 7 entrantes · 143 operaciones
 
 #### Columnas
 
@@ -1413,6 +1429,7 @@ Mantiene sesiones autenticadas para controlar su vigencia y vínculo con usuario
 | desde | id | telemetry.user_activity_events (session_id) | fk_user_activity_events_session_id |
 | desde | id | telemetry.session_journeys (session_id) | fk_session_journeys_session_id |
 | desde | id | telemetry.client_contexts (session_id) | fk_client_contexts_session_id |
+| desde | id | telemetry.client_error_events (session_id) | fk_client_error_events_session_id |
 
 #### Índices
 
@@ -1603,7 +1620,7 @@ Asocia roles de alcance global a usuarios para resolver privilegios transversale
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_01_iam.puml: user_global_roles`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_01_iam.puml` · **DDL:** `SQL/01_iam/02_tables.sql`
 - **Entidad del ORM:** `UserGlobalRoles` — `src/modules/iam/entities/user_global_roles.entity.ts`
-- **Resumen:** 9 columnas · 5 índices · 5 FK salientes · 0 entrantes · 25 operaciones
+- **Resumen:** 9 columnas · 5 índices · 5 FK salientes · 0 entrantes · 99 operaciones
 
 #### Columnas
 
@@ -1635,7 +1652,7 @@ Asocia roles de alcance global a usuarios para resolver privilegios transversale
 |---|---|---|---|
 | `ix_user_global_roles_user_id` | no | user_id | Soporta la clave foránea fk_user_global_roles_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 6 consulta(s) de repositorio filtran u ordenan por «user_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_user_global_roles_role_concept_id` | no | role_concept_id | Soporta la clave foránea fk_user_global_roles_role_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «role_concept_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_user_global_roles_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_user_global_roles_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «state_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_user_global_roles_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_user_global_roles_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 5 consulta(s) de repositorio filtran u ordenan por «state_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_user_global_roles_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_user_global_roles_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_user_global_roles_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_user_global_roles_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 
@@ -1644,9 +1661,74 @@ Asocia roles de alcance global a usuarios para resolver privilegios transversale
 | Operación | Efecto | Confianza |
 |---|---|---|
 | GET /authz/access-reviews/due | LEE | POR_SQL |
+| POST /authz/decisions/evaluate | LEE | POR_SQL |
 | GET /authz/internal-users | LEE | POR_SQL |
+| POST /authz/simulations | LEE | POR_SQL |
 | GET /authz/users/{userId}/access-map | LEE | POR_SQL |
+| GET /admin/bulk-imports | LEE | POR_SQL |
+| POST /admin/bulk-imports | LEE | POR_SQL |
+| GET /admin/bulk-imports/{id} | LEE | POR_SQL |
+| POST /admin/bulk-imports/{id}/confirm | LEE | POR_SQL |
+| GET /admin/bulk-imports/{id}/report | LEE | POR_SQL |
+| PATCH /charts/care-plans/{planId}/activities/{activityId} | LEE | POR_SQL |
+| GET /charts/documents/{documentId}/files/{fileId}/content | LEE | POR_SQL |
+| GET /charts/encounters/{id}/pdf | LEE | POR_SQL |
+| POST /charts/notes/{noteId}/amendments | LEE | POR_SQL |
+| PUT /charts/notes/{noteId}/versions | LEE | POR_SQL |
+| POST /charts/notes/{noteId}/versions/{versionId}/cosign | LEE | POR_SQL |
+| POST /charts/notes/{noteId}/versions/{versionId}/sign | LEE | POR_SQL |
+| POST /charts/notes/versions/{versionId}/exam-findings | LEE | POR_SQL |
+| POST /charts/notes/versions/{versionId}/release | LEE | POR_SQL |
+| POST /charts/notes/versions/{versionId}/withhold | LEE | POR_SQL |
+| GET /clinical/allergy-intolerances/{id}/attachments | LEE | POR_SQL |
+| POST /clinical/allergy-intolerances/{id}/attachments | LEE | POR_SQL |
+| POST /clinical/conditions/{id}/attachments | LEE | POR_SQL |
+| POST /clinical/conditions/{id}/change-status | LEE | POR_SQL |
+| POST /clinical/conditions/{id}/verification | LEE | POR_SQL |
+| POST /clinical/diagnostic-reports/{id}/release | LEE | POR_SQL |
+| GET /clinical/encounters/{id}/attachments | LEE | POR_SQL |
+| POST /clinical/encounters/{id}/attachments | LEE | POR_SQL |
+| POST /clinical/encounters/{id}/close | LEE | POR_SQL |
+| GET /clinical/encounters/{id}/stay | LEE | POR_SQL |
+| GET /clinical/medication-requests/{id}/attachments | LEE | POR_SQL |
+| POST /clinical/medication-requests/{id}/attachments | LEE | POR_SQL |
+| POST /clinical/medication-requests/{id}/edit | LEE | POR_SQL |
+| POST /clinical/medication-requests/{id}/invalidate | LEE | POR_SQL |
+| POST /clinical/medication-requests/{id}/issue | LEE | POR_SQL |
+| POST /clinical/medication-requests/{id}/renew | LEE | POR_SQL |
+| POST /clinical/medication-requests/{id}/replace | LEE | POR_SQL |
+| POST /clinical/medication-requests/{id}/sign | LEE | POR_SQL |
+| PATCH /clinical/observations/{id}/amend | LEE | POR_SQL |
+| GET /clinical/patients/{id}/inpatient-stay | LEE | POR_SQL |
+| GET /clinical/prescriptions/{id}/pdf | LEE | POR_SQL |
+| POST /clinical/procedures/{id}/attachments | LEE | POR_SQL |
+| GET /clinical/service-requests/{id} | LEE | POR_SQL |
+| POST /clinical/service-requests/duplicate-check | LEE | POR_SQL |
+| POST /care-gaps/recompute | LEE | POR_SQL |
+| GET /care-teams | LEE | POR_SQL |
+| POST /care-teams | LEE | POR_SQL |
+| POST /order-sets/{id}/apply | LEE | POR_SQL |
+| POST /patients/{id}/immunization-plan/project | LEE | POR_SQL |
+| GET /referrals | LEE | POR_SQL |
+| POST /referrals | LEE | POR_SQL |
+| GET /referrals/{id} | LEE | POR_SQL |
+| PATCH /referrals/{id}/arrival | LEE | POR_SQL |
+| PATCH /referrals/{id}/cancel | LEE | POR_SQL |
+| PATCH /referrals/{id}/counter-referral | LEE | POR_SQL |
+| PATCH /referrals/{id}/transfer | LEE | POR_SQL |
+| GET /consent/encounters/{encounterId}/informed-consent | LEE | POR_SQL |
+| POST /consent/encounters/{encounterId}/informed-consent | LEE | POR_SQL |
+| GET /consent/treatment-informed-consents | LEE | POR_SQL |
+| POST /consent/treatment-informed-consents | LEE | POR_SQL |
+| GET /consent/treatment-informed-consents/{id} | LEE | POR_SQL |
+| POST /consent/treatment-informed-consents/{id}/evidence | LEE | POR_SQL |
+| PATCH /consent/treatment-informed-consents/{id}/post-emergency-information | LEE | POR_SQL |
+| PATCH /consent/treatment-informed-consents/{id}/withdraw | LEE | POR_SQL |
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
+| POST /me/practitioner/support-staff | CREA | DIRECTA |
+| POST /org/support-staff | CREA | DIRECTA |
+| GET /forms/instances | LEE | POR_SQL |
+| GET /forms/instances/{id} | LEE | POR_SQL |
 | POST /iam/auth/login | LEE | DIRECTA |
 | POST /iam/auth/register-organization | CREA | DIRECTA |
 | POST /iam/auth/register-patient | CREA | DIRECTA |
@@ -1667,6 +1749,15 @@ Asocia roles de alcance global a usuarios para resolver privilegios transversale
 | POST /iam/users/{id}/suspend | LEE | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
 | POST /iam/users/assisted-registration | CREA | DIRECTA |
+| POST /medical-groups | LEE | POR_SQL |
+| GET /medical-groups/patients/{patientProfileId}/conditions | LEE | POR_SQL |
+| GET /dental-procedures | LEE | POR_SQL |
+| POST /dental-procedures | LEE | POR_SQL |
+| GET /procedure-cases/{id} | LEE | POR_SQL |
+| GET /quotations | LEE | POR_SQL |
+| POST /quotations | LEE | POR_SQL |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions | LEE | POR_SQL |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | LEE | POR_SQL |
 | GET /admin/ui-visibility/preview | LEE | DIRECTA |
 
 #### Gobierno
@@ -1692,7 +1783,7 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_01_iam.puml: users`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_01_iam.puml` · **DDL:** `SQL/01_iam/02_tables.sql`
 - **Entidad del ORM:** `Users` — `src/modules/iam/entities/users.entity.ts`
-- **Resumen:** 21 columnas · 8 índices · 8 FK salientes · 2097 entrantes · 112 operaciones
+- **Resumen:** 21 columnas · 8 índices · 8 FK salientes · 2186 entrantes · 185 operaciones
 
 #### Columnas
 
@@ -1836,7 +1927,11 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | desde | id | directory.tenant_web_configs (updated_by_user_id) | fk_tenant_web_configs_updated_by_user_id |
 | desde | id | directory.affiliation_invitations (created_by_user_id) | fk_affiliation_invitations_created_by_user_id |
 | desde | id | directory.affiliation_invitations (updated_by_user_id) | fk_affiliation_invitations_updated_by_user_id |
+| desde | id | directory.tenant_medical_facilities (created_by_user_id) | fk_tenant_medical_facilities_created_by_user_id |
+| desde | id | directory.tenant_medical_facilities (updated_by_user_id) | fk_tenant_medical_facilities_updated_by_user_id |
 | desde | id | directory.affiliation_invitation_uses (used_by_user_id) | fk_affiliation_invitation_uses_used_by_user_id |
+| desde | id | directory.tenant_medical_facility_sites (created_by_user_id) | fk_tenant_medical_facility_sites_created_by_user_id |
+| desde | id | directory.tenant_medical_facility_sites (updated_by_user_id) | fk_tenant_medical_facility_sites_updated_by_user_id |
 | desde | id | profiles.persons (created_by_user_id) | fk_persons_created_by_user_id |
 | desde | id | profiles.persons (updated_by_user_id) | fk_persons_updated_by_user_id |
 | desde | id | profiles.person_account_links (user_id) | fk_person_account_links_user_id |
@@ -1860,6 +1955,7 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | desde | id | profiles.practitioner_specialties (updated_by_user_id) | fk_practitioner_specialties_updated_by_user_id |
 | desde | id | profiles.practitioner_languages (created_by_user_id) | fk_practitioner_languages_created_by_user_id |
 | desde | id | profiles.practitioner_languages (updated_by_user_id) | fk_practitioner_languages_updated_by_user_id |
+| desde | id | profiles.jurisdiction_authorizations (verified_by_user_id) | fk_jurisdiction_authorizations_verified_by_user_id |
 | desde | id | profiles.jurisdiction_authorizations (created_by_user_id) | fk_jurisdiction_authorizations_created_by_user_id |
 | desde | id | profiles.jurisdiction_authorizations (updated_by_user_id) | fk_jurisdiction_authorizations_updated_by_user_id |
 | desde | id | profiles.practitioner_affiliations (created_by_user_id) | fk_practitioner_affiliations_created_by_user_id |
@@ -1871,6 +1967,16 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | desde | id | profiles.patient_portal_proxies (updated_by_user_id) | fk_patient_portal_proxies_updated_by_user_id |
 | desde | id | profiles.patient_primary_practitioners (created_by_user_id) | fk_patient_primary_practitioners_created_by_user_id |
 | desde | id | profiles.patient_primary_practitioners (updated_by_user_id) | fk_patient_primary_practitioners_updated_by_user_id |
+| desde | id | profiles.admission_requirements (created_by_user_id) | fk_admission_requirements_created_by_user_id |
+| desde | id | profiles.admission_requirements (updated_by_user_id) | fk_admission_requirements_updated_by_user_id |
+| desde | id | profiles.practitioner_admissions (assigned_to_user_id) | fk_practitioner_admissions_assigned_to_user_id |
+| desde | id | profiles.practitioner_admissions (decided_by_user_id) | fk_practitioner_admissions_decided_by_user_id |
+| desde | id | profiles.practitioner_admissions (created_by_user_id) | fk_practitioner_admissions_created_by_user_id |
+| desde | id | profiles.practitioner_admissions (updated_by_user_id) | fk_practitioner_admissions_updated_by_user_id |
+| desde | id | profiles.practitioner_admission_reviews (reviewed_by_user_id) | fk_practitioner_admission_reviews_reviewed_by_user_id |
+| desde | id | profiles.practitioner_admission_reviews (created_by_user_id) | fk_practitioner_admission_reviews_created_by_user_id |
+| desde | id | profiles.practitioner_admission_reviews (updated_by_user_id) | fk_practitioner_admission_reviews_updated_by_user_id |
+| desde | id | profiles.practitioner_admission_events (actor_user_id) | fk_practitioner_admission_events_actor_user_id |
 | desde | id | profiles.insurance_representative_profiles (created_by_user_id) | fk_insurance_representative_profiles_created_by_user_id |
 | desde | id | profiles.insurance_representative_profiles (updated_by_user_id) | fk_insurance_representative_profiles_updated_by_user_id |
 | desde | id | profiles.provider_operator_profiles (created_by_user_id) | fk_provider_operator_profiles_created_by_user_id |
@@ -1967,6 +2073,7 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | desde | id | clinical.diagnostic_reports (created_by_user_id) | fk_diagnostic_reports_created_by_user_id |
 | desde | id | clinical.diagnostic_reports (updated_by_user_id) | fk_diagnostic_reports_updated_by_user_id |
 | desde | id | clinical.service_request_notes (created_by_user_id) | fk_service_request_notes_created_by_user_id |
+| desde | id | clinical.service_request_components (created_by_user_id) | fk_service_request_components_created_by_user_id |
 | desde | id | clinical.medication_requests (created_by_user_id) | fk_medication_requests_created_by_user_id |
 | desde | id | clinical.medication_requests (updated_by_user_id) | fk_medication_requests_updated_by_user_id |
 | desde | id | clinical.medication_requests (signed_by_user_id) | fk_medication_requests_signed_by_user_id |
@@ -1987,6 +2094,15 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | desde | id | clinical.encounter_participants (updated_by_user_id) | fk_encounter_participants_updated_by_user_id |
 | desde | id | clinical.encounter_locations (created_by_user_id) | fk_encounter_locations_created_by_user_id |
 | desde | id | clinical.encounter_locations (updated_by_user_id) | fk_encounter_locations_updated_by_user_id |
+| desde | id | clinical.placement_incidents (authorized_by_user_id) | fk_placement_incidents_authorized_by_user_id |
+| desde | id | clinical.placement_incidents (reviewed_by_user_id) | fk_placement_incidents_reviewed_by_user_id |
+| desde | id | clinical.placement_incidents (created_by_user_id) | fk_placement_incidents_created_by_user_id |
+| desde | id | clinical.placement_incidents (updated_by_user_id) | fk_placement_incidents_updated_by_user_id |
+| desde | id | clinical.inpatient_census_days (closed_by_user_id) | fk_inpatient_census_days_closed_by_user_id |
+| desde | id | clinical.inpatient_census_days (created_by_user_id) | fk_inpatient_census_days_created_by_user_id |
+| desde | id | clinical.inpatient_census_days (updated_by_user_id) | fk_inpatient_census_days_updated_by_user_id |
+| desde | id | clinical.patient_admission_footprints (recorded_by_user_id) | fk_patient_admission_footprints_recorded_by_user_id |
+| desde | id | clinical.inpatient_census_adjustments (adjusted_by_user_id) | fk_inpatient_census_adjustments_adjusted_by_user_id |
 | desde | id | clinical.observation_performers (created_by_user_id) | fk_observation_performers_created_by_user_id |
 | desde | id | clinical.observation_reference_ranges (created_by_user_id) | fk_observation_reference_ranges_created_by_user_id |
 | desde | id | clinical.observation_notes (author_user_id) | fk_observation_notes_author_user_id |
@@ -2040,6 +2156,15 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | desde | id | audit.practice_sites_history (changed_by_user_id) | fk_practice_sites_history_changed_by_user_id |
 | desde | id | audit.clinical_units_history (changed_by_user_id) | fk_clinical_units_history_changed_by_user_id |
 | desde | id | audit.care_spaces_history (changed_by_user_id) | fk_care_spaces_history_changed_by_user_id |
+| desde | id | audit.operating_room_block_series_history (changed_by_user_id) | fk_operating_room_block_series_history_changed_by_user_id |
+| desde | id | audit.operating_room_blocks_history (changed_by_user_id) | fk_operating_room_blocks_history_changed_by_user_id |
+| desde | id | audit.encounter_locations_history (changed_by_user_id) | fk_encounter_locations_history_changed_by_user_id |
+| desde | id | audit.placement_incidents_history (changed_by_user_id) | fk_placement_incidents_history_changed_by_user_id |
+| desde | id | audit.care_space_blocks_history (changed_by_user_id) | fk_care_space_blocks_history_changed_by_user_id |
+| desde | id | audit.cleaning_orders_history (changed_by_user_id) | fk_cleaning_orders_history_changed_by_user_id |
+| desde | id | audit.care_space_category_periods_history (changed_by_user_id) | fk_care_space_category_periods_history_changed_by_user_id |
+| desde | id | audit.space_tariffs_history (changed_by_user_id) | fk_space_tariffs_history_changed_by_user_id |
+| desde | id | audit.charge_captures_history (changed_by_user_id) | fk_charge_captures_history_changed_by_user_id |
 | desde | id | audit.diagnostic_reports_history (changed_by_user_id) | fk_diagnostic_reports_history_changed_by_user_id |
 | desde | id | audit.imaging_studies_history (changed_by_user_id) | fk_imaging_studies_history_changed_by_user_id |
 | desde | id | audit.public_profiles_history (changed_by_user_id) | fk_public_profiles_history_changed_by_user_id |
@@ -2221,6 +2346,11 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | desde | id | system_ops.security_incidents (updated_by_user_id) | fk_security_incidents_updated_by_user_id |
 | desde | id | system_ops.breach_notifications (created_by_user_id) | fk_breach_notifications_created_by_user_id |
 | desde | id | system_ops.breach_notifications (updated_by_user_id) | fk_breach_notifications_updated_by_user_id |
+| desde | id | system_ops.governance_policy_revisions (submitted_by_user_id) | fk_governance_policy_revisions_submitted_by_user_id |
+| desde | id | system_ops.governance_policy_revisions (decided_by_user_id) | fk_governance_policy_revisions_decided_by_user_id |
+| desde | id | system_ops.bulk_import_batches (confirmed_by_user_id) | fk_bulk_import_batches_confirmed_by_user_id |
+| desde | id | system_ops.bulk_import_batches (created_by_user_id) | fk_bulk_import_batches_created_by_user_id |
+| desde | id | system_ops.bulk_import_batches (updated_by_user_id) | fk_bulk_import_batches_updated_by_user_id |
 | desde | id | integrations.external_providers (created_by_user_id) | fk_external_providers_created_by_user_id |
 | desde | id | integrations.external_providers (updated_by_user_id) | fk_external_providers_updated_by_user_id |
 | desde | id | integrations.provider_connections (created_by_user_id) | fk_provider_connections_created_by_user_id |
@@ -2265,6 +2395,18 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | desde | id | practice.clinical_units (responsible_user_id) | fk_clinical_units_responsible_user_id |
 | desde | id | practice.care_spaces (created_by_user_id) | fk_care_spaces_created_by_user_id |
 | desde | id | practice.care_spaces (updated_by_user_id) | fk_care_spaces_updated_by_user_id |
+| desde | id | practice.care_space_status_events (recorded_by_user_id) | fk_care_space_status_events_recorded_by_user_id |
+| desde | id | practice.care_space_blocks (ended_by_user_id) | fk_care_space_blocks_ended_by_user_id |
+| desde | id | practice.care_space_blocks (created_by_user_id) | fk_care_space_blocks_created_by_user_id |
+| desde | id | practice.care_space_blocks (updated_by_user_id) | fk_care_space_blocks_updated_by_user_id |
+| desde | id | practice.cleaning_orders (assigned_user_id) | fk_cleaning_orders_assigned_user_id |
+| desde | id | practice.cleaning_orders (started_by_user_id) | fk_cleaning_orders_started_by_user_id |
+| desde | id | practice.cleaning_orders (finished_by_user_id) | fk_cleaning_orders_finished_by_user_id |
+| desde | id | practice.cleaning_orders (inspected_by_user_id) | fk_cleaning_orders_inspected_by_user_id |
+| desde | id | practice.cleaning_orders (created_by_user_id) | fk_cleaning_orders_created_by_user_id |
+| desde | id | practice.cleaning_orders (updated_by_user_id) | fk_cleaning_orders_updated_by_user_id |
+| desde | id | practice.care_space_category_periods (created_by_user_id) | fk_care_space_category_periods_created_by_user_id |
+| desde | id | practice.care_space_category_periods (updated_by_user_id) | fk_care_space_category_periods_updated_by_user_id |
 | desde | id | practice.space_unit_assignments (created_by_user_id) | fk_space_unit_assignments_created_by_user_id |
 | desde | id | practice.space_unit_assignments (updated_by_user_id) | fk_space_unit_assignments_updated_by_user_id |
 | desde | id | practice.site_declared_capacities (created_by_user_id) | fk_site_declared_capacities_created_by_user_id |
@@ -2388,6 +2530,10 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | desde | id | accounting.practitioner_simple_transactions (updated_by_user_id) | fk_practitioner_simple_transactions_updated_by_user_id |
 | desde | id | billing.service_catalog (created_by_user_id) | fk_service_catalog_created_by_user_id |
 | desde | id | billing.service_catalog (updated_by_user_id) | fk_service_catalog_updated_by_user_id |
+| desde | id | billing.space_tariffs (created_by_user_id) | fk_space_tariffs_created_by_user_id |
+| desde | id | billing.space_tariffs (updated_by_user_id) | fk_space_tariffs_updated_by_user_id |
+| desde | id | billing.charge_captures (created_by_user_id) | fk_charge_captures_created_by_user_id |
+| desde | id | billing.charge_captures (updated_by_user_id) | fk_charge_captures_updated_by_user_id |
 | desde | id | billing.invoices (created_by_user_id) | fk_invoices_created_by_user_id |
 | desde | id | billing.invoices (updated_by_user_id) | fk_invoices_updated_by_user_id |
 | desde | id | billing.invoice_lines (created_by_user_id) | fk_invoice_lines_created_by_user_id |
@@ -2751,6 +2897,7 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | desde | id | telemetry.user_activity_events (user_id) | fk_user_activity_events_user_id |
 | desde | id | telemetry.funnel_definitions (created_by_user_id) | fk_funnel_definitions_created_by_user_id |
 | desde | id | telemetry.funnel_definitions (updated_by_user_id) | fk_funnel_definitions_updated_by_user_id |
+| desde | id | telemetry.client_error_events (user_id) | fk_client_error_events_user_id |
 | desde | id | delegated_access.organization_user_assignments (supervisor_user_id) | fk_organization_user_assignments_supervisor_user_id |
 | desde | id | delegated_access.organization_user_assignments (created_by_user_id) | fk_organization_user_assignments_created_by_user_id |
 | desde | id | delegated_access.organization_user_assignments (updated_by_user_id) | fk_organization_user_assignments_updated_by_user_id |
@@ -3717,6 +3864,11 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | desde | id | procedures_perioperative.procedure_charge_items (created_by_user_id) | fk_procedure_charge_items_created_by_user_id |
 | desde | id | procedures_perioperative.procedure_charge_items (updated_by_user_id) | fk_procedure_charge_items_updated_by_user_id |
 | desde | id | procedures_perioperative.operating_room_utilization_events (recorded_by_user_id) | fk_operating_room_utilization_events_recorded_by_user_id |
+| desde | id | procedures_perioperative.operating_room_block_series (created_by_user_id) | fk_operating_room_block_series_created_by_user_id |
+| desde | id | procedures_perioperative.operating_room_block_series (updated_by_user_id) | fk_operating_room_block_series_updated_by_user_id |
+| desde | id | procedures_perioperative.operating_room_blocks (released_by_user_id) | fk_operating_room_blocks_released_by_user_id |
+| desde | id | procedures_perioperative.operating_room_blocks (created_by_user_id) | fk_operating_room_blocks_created_by_user_id |
+| desde | id | procedures_perioperative.operating_room_blocks (updated_by_user_id) | fk_operating_room_blocks_updated_by_user_id |
 | desde | id | surveys.survey_templates (created_by_user_id) | fk_survey_templates_created_by_user_id |
 | desde | id | surveys.survey_templates (updated_by_user_id) | fk_survey_templates_updated_by_user_id |
 | desde | id | surveys.survey_versions (created_by_user_id) | fk_survey_versions_created_by_user_id |
@@ -3759,6 +3911,28 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | desde | id | data_catalog.catalog_process_steps (updated_by_user_id) | fk_catalog_process_steps_updated_by_user_id |
 | desde | id | data_catalog.catalog_process_step_operations (created_by_user_id) | fk_catalog_process_step_operations_created_by_user_id |
 | desde | id | data_catalog.catalog_process_step_operations (updated_by_user_id) | fk_catalog_process_step_operations_updated_by_user_id |
+| desde | id | data_catalog.catalog_stewardships (user_id) | fk_catalog_stewardships_user_id |
+| desde | id | data_catalog.catalog_stewardships (created_by_user_id) | fk_catalog_stewardships_created_by_user_id |
+| desde | id | data_catalog.catalog_stewardships (updated_by_user_id) | fk_catalog_stewardships_updated_by_user_id |
+| desde | id | data_catalog.catalog_glossary_terms (approved_by_user_id) | fk_catalog_glossary_terms_approved_by_user_id |
+| desde | id | data_catalog.catalog_glossary_terms (created_by_user_id) | fk_catalog_glossary_terms_created_by_user_id |
+| desde | id | data_catalog.catalog_glossary_terms (updated_by_user_id) | fk_catalog_glossary_terms_updated_by_user_id |
+| desde | id | data_catalog.catalog_glossary_term_revisions (author_user_id) | fk_catalog_glossary_term_revisions_author_user_id |
+| desde | id | data_catalog.catalog_glossary_term_links (created_by_user_id) | fk_catalog_glossary_term_links_created_by_user_id |
+| desde | id | data_catalog.quality_rules (owner_user_id) | fk_quality_rules_owner_user_id |
+| desde | id | data_catalog.quality_rules (created_by_user_id) | fk_quality_rules_created_by_user_id |
+| desde | id | data_catalog.quality_rules (updated_by_user_id) | fk_quality_rules_updated_by_user_id |
+| desde | id | data_catalog.quality_rule_runs (requested_by_user_id) | fk_quality_rule_runs_requested_by_user_id |
+| desde | id | data_catalog.quality_issues (acknowledged_by_user_id) | fk_quality_issues_acknowledged_by_user_id |
+| desde | id | data_catalog.quality_issues (resolved_by_user_id) | fk_quality_issues_resolved_by_user_id |
+| desde | id | data_catalog.quality_issue_events (actor_user_id) | fk_quality_issue_events_actor_user_id |
+| desde | id | data_catalog.catalog_lineage_edges (approved_by_user_id) | fk_catalog_lineage_edges_approved_by_user_id |
+| desde | id | data_catalog.catalog_lineage_edges (created_by_user_id) | fk_catalog_lineage_edges_created_by_user_id |
+| desde | id | data_catalog.catalog_lineage_edges (updated_by_user_id) | fk_catalog_lineage_edges_updated_by_user_id |
+| desde | id | data_catalog.catalog_certifications (requested_by_user_id) | fk_catalog_certifications_requested_by_user_id |
+| desde | id | data_catalog.catalog_certifications (certified_by_user_id) | fk_catalog_certifications_certified_by_user_id |
+| desde | id | data_catalog.catalog_certifications (revoked_by_user_id) | fk_catalog_certifications_revoked_by_user_id |
+| desde | id | data_catalog.catalog_change_acknowledgements (user_id) | fk_catalog_change_acknowledgements_user_id |
 | desde | id | qa_execution.execution_targets (created_by_user_id) | fk_execution_targets_created_by_user_id |
 | desde | id | qa_execution.execution_targets (updated_by_user_id) | fk_execution_targets_updated_by_user_id |
 | desde | id | qa_execution.execution_plans (requested_by_user_id) | fk_execution_plans_requested_by_user_id |
@@ -3829,6 +4003,12 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | desde | id | pharma_lab.visitor_post_submissions (decided_by_user_id) | fk_visitor_post_submissions_decided_by_user_id |
 | desde | id | pharma_lab.visitor_post_submissions (created_by_user_id) | fk_visitor_post_submissions_created_by_user_id |
 | desde | id | pharma_lab.visitor_post_submissions (updated_by_user_id) | fk_visitor_post_submissions_updated_by_user_id |
+| desde | id | observability.error_groups (assigned_to_user_id) | fk_error_groups_assigned_to_user_id |
+| desde | id | observability.error_groups (resolved_by_user_id) | fk_error_groups_resolved_by_user_id |
+| desde | id | observability.error_groups (created_by_user_id) | fk_error_groups_created_by_user_id |
+| desde | id | observability.error_groups (updated_by_user_id) | fk_error_groups_updated_by_user_id |
+| desde | id | observability.alert_rules (created_by_user_id) | fk_alert_rules_created_by_user_id |
+| desde | id | observability.alert_rules (updated_by_user_id) | fk_alert_rules_updated_by_user_id |
 
 #### Índices
 
@@ -3849,6 +4029,7 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 |---|---|---|
 | GET /authz/access-reviews | LEE | POR_SQL |
 | GET /authz/access-reviews/due | LEE | POR_SQL |
+| POST /authz/decisions/evaluate | LEE | POR_SQL |
 | GET /authz/internal-users | LEE | POR_SQL |
 | GET /authz/permissions/{permissionId}/holders | LEE | POR_SQL |
 | POST /authz/simulations | LEE | POR_SQL |
@@ -3858,8 +4039,71 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | GET /authz/users/{userId}/resource-scope-grants | LEE | POR_SQL |
 | GET /authz/users/{userId}/restricted-fields | LEE | POR_SQL |
 | GET /authz/users/{userId}/role-assignments | LEE | POR_SQL |
+| GET /admin/bulk-imports | LEE | POR_SQL |
+| POST /admin/bulk-imports | LEE | POR_SQL |
+| GET /admin/bulk-imports/{id} | LEE | POR_SQL |
+| POST /admin/bulk-imports/{id}/confirm | LEE | POR_SQL |
+| GET /admin/bulk-imports/{id}/report | LEE | POR_SQL |
+| PATCH /charts/care-plans/{planId}/activities/{activityId} | LEE | POR_SQL |
+| GET /charts/documents/{documentId}/files/{fileId}/content | LEE | POR_SQL |
+| GET /charts/encounters/{id}/pdf | LEE | POR_SQL |
+| POST /charts/notes/{noteId}/amendments | LEE | POR_SQL |
+| PUT /charts/notes/{noteId}/versions | LEE | POR_SQL |
+| POST /charts/notes/{noteId}/versions/{versionId}/cosign | LEE | POR_SQL |
+| POST /charts/notes/{noteId}/versions/{versionId}/sign | LEE | POR_SQL |
+| POST /charts/notes/versions/{versionId}/exam-findings | LEE | POR_SQL |
+| POST /charts/notes/versions/{versionId}/release | LEE | POR_SQL |
+| POST /charts/notes/versions/{versionId}/withhold | LEE | POR_SQL |
+| GET /clinical/allergy-intolerances/{id}/attachments | LEE | POR_SQL |
+| POST /clinical/allergy-intolerances/{id}/attachments | LEE | POR_SQL |
+| POST /clinical/conditions/{id}/attachments | LEE | POR_SQL |
+| POST /clinical/conditions/{id}/change-status | LEE | POR_SQL |
+| POST /clinical/conditions/{id}/verification | LEE | POR_SQL |
+| POST /clinical/diagnostic-reports/{id}/release | LEE | POR_SQL |
+| GET /clinical/encounters/{id}/attachments | LEE | POR_SQL |
+| POST /clinical/encounters/{id}/attachments | LEE | POR_SQL |
+| POST /clinical/encounters/{id}/close | LEE | POR_SQL |
+| GET /clinical/encounters/{id}/stay | LEE | POR_SQL |
+| GET /clinical/medication-requests/{id}/attachments | LEE | POR_SQL |
+| POST /clinical/medication-requests/{id}/attachments | LEE | POR_SQL |
+| POST /clinical/medication-requests/{id}/edit | LEE | POR_SQL |
+| POST /clinical/medication-requests/{id}/invalidate | LEE | POR_SQL |
+| POST /clinical/medication-requests/{id}/issue | LEE | POR_SQL |
+| POST /clinical/medication-requests/{id}/renew | LEE | POR_SQL |
+| POST /clinical/medication-requests/{id}/replace | LEE | POR_SQL |
+| POST /clinical/medication-requests/{id}/sign | LEE | POR_SQL |
+| PATCH /clinical/observations/{id}/amend | LEE | POR_SQL |
+| GET /clinical/patients/{id}/inpatient-stay | LEE | POR_SQL |
+| GET /clinical/prescriptions/{id}/pdf | LEE | POR_SQL |
+| POST /clinical/procedures/{id}/attachments | LEE | POR_SQL |
+| GET /clinical/service-requests/{id} | LEE | POR_SQL |
+| POST /clinical/service-requests/duplicate-check | LEE | POR_SQL |
+| POST /care-gaps/recompute | LEE | POR_SQL |
+| GET /care-teams | LEE | POR_SQL |
+| POST /care-teams | LEE | POR_SQL |
+| POST /order-sets/{id}/apply | LEE | POR_SQL |
+| POST /patients/{id}/immunization-plan/project | LEE | POR_SQL |
+| GET /referrals | LEE | POR_SQL |
+| POST /referrals | LEE | POR_SQL |
+| GET /referrals/{id} | LEE | POR_SQL |
+| PATCH /referrals/{id}/arrival | LEE | POR_SQL |
+| PATCH /referrals/{id}/cancel | LEE | POR_SQL |
+| PATCH /referrals/{id}/counter-referral | LEE | POR_SQL |
+| PATCH /referrals/{id}/transfer | LEE | POR_SQL |
+| GET /consent/encounters/{encounterId}/informed-consent | LEE | POR_SQL |
+| POST /consent/encounters/{encounterId}/informed-consent | LEE | POR_SQL |
+| GET /consent/treatment-informed-consents | LEE | POR_SQL |
+| POST /consent/treatment-informed-consents | LEE | POR_SQL |
+| GET /consent/treatment-informed-consents/{id} | LEE | POR_SQL |
+| POST /consent/treatment-informed-consents/{id}/evidence | LEE | POR_SQL |
+| PATCH /consent/treatment-informed-consents/{id}/post-emergency-information | LEE | POR_SQL |
+| PATCH /consent/treatment-informed-consents/{id}/withdraw | LEE | POR_SQL |
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
+| GET /approvals/pending | LEE | POR_SQL |
+| GET /me/practitioner/governance-panel | LEE | POR_SQL |
 | POST /me/practitioner/support-invitations | LEE | POR_SQL |
+| POST /me/practitioner/support-staff | CREA | DIRECTA |
+| POST /me/practitioner/support-staff | LEE | POR_SQL |
 | GET /me/practitioner/support-team | LEE | POR_SQL |
 | POST /me/practitioner/support-team/{id}/end | LEE | POR_SQL |
 | GET /me/support-access | LEE | POR_SQL |
@@ -3872,10 +4116,13 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | POST /org/support-engagement-requests/{id}/decision | LEE | POR_SQL |
 | GET /org/support-engagements | LEE | POR_SQL |
 | POST /org/support-engagements/{id}/end | LEE | POR_SQL |
+| POST /org/support-staff | CREA | DIRECTA |
 | POST /org/team/invitations | LEE | POR_SQL |
 | POST /practitioner-delegates/{id}/accept | LEE | POR_SQL |
 | POST /practitioner-delegates/{id}/reject | LEE | POR_SQL |
 | POST /support-engagement-requests | LEE | POR_SQL |
+| GET /forms/instances | LEE | POR_SQL |
+| GET /forms/instances/{id} | LEE | POR_SQL |
 | POST /iam/auth/activate | ACTUALIZA | POR_TIPO |
 | POST /iam/auth/activate | LEE | DIRECTA |
 | POST /iam/auth/forgot-password | LEE | DIRECTA |
@@ -3922,12 +4169,17 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | POST /insurance/patients/search | LEE | POR_SQL |
 | GET /insurance/received-claims | LEE | DIRECTA |
 | POST /insurance/received-claims/{id}/decision | LEE | DIRECTA |
+| POST /medical-groups | LEE | POR_SQL |
+| GET /medical-groups/patients/{patientProfileId}/conditions | LEE | POR_SQL |
 | POST /pharma-labs/{pharmaLabId}/medical-visitors | LEE | DIRECTA |
 | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/relink | ACTUALIZA | POR_TIPO |
 | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/relink | LEE | DIRECTA |
 | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/unlink | ACTUALIZA | POR_TIPO |
 | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/unlink | LEE | DIRECTA |
 | GET /care-spaces/{id}/history | LEE | POR_SQL |
+| GET /dental-procedures | LEE | POR_SQL |
+| POST /dental-procedures | LEE | POR_SQL |
+| GET /procedure-cases/{id} | LEE | POR_SQL |
 | GET /admissions | LEE | DIRECTA |
 | GET /admissions/{id} | LEE | DIRECTA |
 | POST /admissions/{id}/claim | LEE | DIRECTA |
@@ -3939,16 +4191,17 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | POST /admissions/{id}/request-info | LEE | DIRECTA |
 | POST /admissions/{id}/suspend | LEE | DIRECTA |
 | POST /admissions/search | LEE | DIRECTA |
+| GET /quotations | LEE | POR_SQL |
+| POST /quotations | LEE | POR_SQL |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions | LEE | POR_SQL |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | LEE | POR_SQL |
 | POST /scheduling/appointments/direct | LEE | DIRECTA |
-| POST /scheduling/bookings/{id}/accept | LEE | DIRECTA |
-| POST /scheduling/bookings/{id}/cancel | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/delay | LEE | DIRECTA |
 | GET /scheduling/bookings/{id}/payment-receipts | LEE | POR_SQL |
 | POST /scheduling/bookings/{id}/payment-receipts | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/reschedule | LEE | DIRECTA |
-| POST /scheduling/holds/{holdToken}/request | LEE | DIRECTA |
 | POST /scheduling/internal/dispatch-reminders | LEE | DIRECTA |
 | POST /scheduling/internal/promote-waitlist/{slotId} | LEE | DIRECTA |
 | POST /scheduling/resources/{id}/delay | LEE | DIRECTA |
