@@ -12,6 +12,7 @@ import {
   PractitionerGovernanceRepository,
   type ApprovalsCursor,
   type PendingApprovalRow,
+  type TeamMemberKey,
 } from '../repositories/practitioner-governance.repository';
 import { SupportLinksRepository } from '../repositories/support-links.repository';
 
@@ -86,16 +87,14 @@ export class PractitionerGovernanceService {
    * @param actor - El doctor.
    * @returns El panel; vacío si no tiene perfil profesional o equipo.
    */
-  async panel(actor: AuthenticatedUser): Promise<PractitionerGovernancePanelDto> {
+  async panel(
+    actor: AuthenticatedUser,
+  ): Promise<PractitionerGovernancePanelDto> {
     const em = this.em.fork();
     const team = await this.teamOf(actor);
     const [pendingReviews, anomalies] = await Promise.all([
       this.repo.countPendingReviews(em, actor.id),
-      this.repo.findOpenAnomalies(
-        em,
-        [...team.keys()],
-        PANEL_ANOMALIES,
-      ),
+      this.repo.findOpenAnomalies(em, team.keys, PANEL_ANOMALIES),
     ]);
     return {
       generatedAt: new Date().toISOString(),
@@ -127,13 +126,13 @@ export class PractitionerGovernanceService {
     const team = await this.teamOf(actor);
     const rows = await this.repo.findPendingForDoctor(this.em.fork(), {
       doctorUserId: actor.id,
-      teamUserIds: [...team.keys()],
+      team: team.keys,
       limit: limit + 1,
       after: q.cursor ? decodeApprovalsCursor(q.cursor) : undefined,
     });
     const page = rows.slice(0, limit);
     const items = page.map((row): PendingApprovalDto => {
-      const who = team.get(row.requesterUserId) ?? SOMEONE;
+      const who = team.names.get(row.requesterUserId) ?? SOMEONE;
       const kind = governanceShortName(row.kindCode);
       return {
         id: row.id,
@@ -154,19 +153,52 @@ export class PractitionerGovernanceService {
       items,
       count: items.length,
       nextCursor:
-        rows.length > limit ? encodeApprovalsCursor(page[page.length - 1]!) : null,
+        rows.length > limit
+          ? encodeApprovalsCursor(page[page.length - 1])
+          : null,
     };
   }
 
-  /** Las personas de apoyo con vínculo activo con el doctor: `userId` → nombre. */
-  private async teamOf(
-    actor: AuthenticatedUser,
-  ): Promise<Map<string, string>> {
-    if (!actor.practitionerProfileId) return new Map();
-    const rows = await this.links.findLinks(this.em.fork(), {
+  /**
+   * Las personas de apoyo del doctor, cada una en su organización, y su nombre.
+   *
+   * Las aprobaciones y alertas hablan de una **persona**, no de una agenda: si
+   * la misma persona apoya a dos doctores, no se puede decir de cuál es lo que
+   * pasó, y mostrarlo a ambos filtraría la actividad de uno al otro. Por eso
+   * solo entran las personas sin vínculo activo con **otro** doctor (falla
+   * cerrado: una persona compartida no aparece, en vez de aparecer de más).
+   */
+  private async teamOf(actor: AuthenticatedUser): Promise<Team> {
+    if (!actor.practitionerProfileId) return { keys: [], names: new Map() };
+    const mine = await this.links.findLinks(this.em.fork(), {
       practitionerProfileId: actor.practitionerProfileId,
       statuses: ['ACTIVE'],
     });
-    return new Map(rows.map((r) => [r.supportUserId, r.supportName ?? SOMEONE]));
+    const shared = new Set<string>();
+    for (const userId of new Set(mine.map((r) => r.supportUserId))) {
+      const all = await this.links.findLinks(this.em.fork(), {
+        supportUserId: userId,
+        statuses: ['ACTIVE'],
+      });
+      const ofAnotherDoctor = all.some(
+        (r) =>
+          r.kind === 'PRACTITIONER' &&
+          r.practitionerProfileId !== actor.practitionerProfileId,
+      );
+      if (ofAnotherDoctor) shared.add(userId);
+    }
+    const own = mine.filter((r) => !shared.has(r.supportUserId));
+    return {
+      keys: own.map((r) => ({ userId: r.supportUserId, tenantId: r.tenantId })),
+      names: new Map(
+        own.map((r) => [r.supportUserId, r.supportName ?? SOMEONE]),
+      ),
+    };
   }
+}
+
+/** El equipo del doctor: a quién se acota la consulta y cómo se llama cada quien. */
+interface Team {
+  readonly keys: readonly TeamMemberKey[];
+  readonly names: ReadonlyMap<string, string>;
 }

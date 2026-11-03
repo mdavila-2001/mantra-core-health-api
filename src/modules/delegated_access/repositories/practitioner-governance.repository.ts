@@ -48,6 +48,12 @@ interface RawApprovalRow {
   expires_at: Date | string;
 }
 
+/** Una persona de apoyo en una organización: la unidad con la que se acota todo lo del doctor. */
+export interface TeamMemberKey {
+  readonly userId: string;
+  readonly tenantId: string;
+}
+
 /** Hasta dónde llegó la página anterior: el orden es (creada, id) descendente. */
 export interface ApprovalsCursor {
   readonly createdAt: Date;
@@ -57,8 +63,18 @@ export interface ApprovalsCursor {
 const asDate = (value: Date | string): Date =>
   value instanceof Date ? value : new Date(value);
 
-const placeholders = (n: number): string =>
-  Array.from({ length: n }, () => '?').join(', ');
+/**
+ * `((<userCol> = ? AND <tenantCol> = ?) OR …)`: la persona **en esa organización**.
+ * Filtrar solo por persona mostraría lo de una organización donde el doctor no la tiene.
+ */
+const teamClause = (
+  userCol: string,
+  tenantCol: string,
+  team: readonly TeamMemberKey[],
+): { sql: string; params: string[] } => ({
+  sql: `(${team.map(() => `(${userCol} = ? AND ${tenantCol} = ?)`).join(' OR ')})`,
+  params: team.flatMap((m) => [m.userId, m.tenantId]),
+});
 
 /**
  * Lecturas del gobierno de accesos que necesita «Mi equipo» del doctor. SQL
@@ -89,29 +105,31 @@ export class PractitionerGovernanceRepository {
   }
 
   /**
-   * Alertas abiertas sobre la actividad de esas personas, las más recientes primero.
+   * Alertas abiertas sobre la actividad de esas personas en esas organizaciones,
+   * las más recientes primero.
    *
    * @param em - Contexto de persistencia.
-   * @param userIds - Las personas de su equipo.
+   * @param team - Las personas de su equipo, cada una en su organización.
    * @param limit - Tope de filas.
    * @returns Las alertas.
    */
   async findOpenAnomalies(
     em: EntityManager,
-    userIds: readonly string[],
+    team: readonly TeamMemberKey[],
     limit: number,
   ): Promise<OpenAnomalyRow[]> {
-    if (userIds.length === 0) return [];
+    if (team.length === 0) return [];
+    const scope = teamClause('a.user_id', 'a.tenant_id', team);
     const rows = await em.execute<RawAnomalyRow[]>(
       `SELECT a.id, a.user_id, k.code AS kind_code, a.window_start,
               a.observed_value, a.threshold_value
          FROM delegated_access.access_anomalies a
          JOIN terminology.catalog_concepts k ON k.id = a.kind_concept_id
         WHERE a.status_concept_id = ?
-          AND a.user_id IN (${placeholders(userIds.length)})
+          AND ${scope.sql}
         ORDER BY a.window_start DESC, a.id DESC
         LIMIT ?`,
-      [GOVERNANCE.ANOMALY_OPEN, ...userIds, limit],
+      [GOVERNANCE.ANOMALY_OPEN, ...scope.params, limit],
     );
     return rows.map((r) => ({
       id: r.id,
@@ -125,7 +143,9 @@ export class PractitionerGovernanceRepository {
 
   /**
    * Aprobaciones vigentes que el doctor decide: las que pide su equipo y le
-   * tocan por ser el doctor responsable. Nunca una que pidió él mismo.
+   * tocan por ser el doctor responsable. Nunca una que pidió él mismo. La
+   * tabla no dice de qué doctor es la agenda: el servicio solo pasa personas
+   * que son **solo** de este doctor (`PractitionerGovernanceService.teamOf`).
    *
    * @param em - Contexto de persistencia.
    * @param filter - El doctor, su equipo, la página.
@@ -135,17 +155,18 @@ export class PractitionerGovernanceRepository {
     em: EntityManager,
     filter: {
       readonly doctorUserId: string;
-      readonly teamUserIds: readonly string[];
+      readonly team: readonly TeamMemberKey[];
       readonly limit: number;
       readonly after?: ApprovalsCursor;
     },
   ): Promise<PendingApprovalRow[]> {
-    if (filter.teamUserIds.length === 0) return [];
+    if (filter.team.length === 0) return [];
+    const scope = teamClause('f.subject_user_id', 'f.tenant_id', filter.team);
     const params: unknown[] = [
       GOVERNANCE.FOUR_EYES_PENDING,
       GOVERNANCE.REVIEWER_KIND_DOCTOR_OWNER,
       filter.doctorUserId,
-      ...filter.teamUserIds,
+      ...scope.params,
     ];
     let after = '';
     if (filter.after) {
@@ -163,7 +184,7 @@ export class PractitionerGovernanceRepository {
           AND f.expires_at > now()
           AND f.approver_kind_concept_id = ?
           AND f.requester_user_id <> ?
-          AND f.subject_user_id IN (${placeholders(filter.teamUserIds.length)})
+          AND ${scope.sql}
           ${after}
         ORDER BY f.created_at DESC, f.id DESC
         LIMIT ?`,

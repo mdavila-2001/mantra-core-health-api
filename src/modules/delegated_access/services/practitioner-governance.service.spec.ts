@@ -23,7 +23,14 @@ const DOCTOR = {
   practitionerProfileId: 'pp-1',
 } as unknown as AuthenticatedUser;
 
-const ANA = { supportUserId: 'u-ana', supportName: 'Ana Gutiérrez' };
+const ANA = {
+  supportUserId: 'u-ana',
+  supportName: 'Ana Gutiérrez',
+  tenantId: 't-1',
+  kind: 'PRACTITIONER',
+  practitionerProfileId: 'pp-1',
+};
+const KEY_ANA = { userId: 'u-ana', tenantId: 't-1' };
 
 function row(over: Partial<PendingApprovalRow> = {}): PendingApprovalRow {
   return {
@@ -80,13 +87,17 @@ describe('PractitionerGovernanceService', () => {
         practitionerProfileId: 'pp-1',
         statuses: ['ACTIVE'],
       });
+      expect(links.findLinks).toHaveBeenCalledWith(expect.anything(), {
+        supportUserId: 'u-ana',
+        statuses: ['ACTIVE'],
+      });
       expect(repo.countPendingReviews).toHaveBeenCalledWith(
         expect.anything(),
         'u-doctor',
       );
       expect(repo.findOpenAnomalies).toHaveBeenCalledWith(
         expect.anything(),
-        ['u-ana'],
+        [KEY_ANA],
         expect.any(Number),
       );
       expect(panel).toMatchObject({
@@ -127,7 +138,7 @@ describe('PractitionerGovernanceService', () => {
         expect.anything(),
         expect.objectContaining({
           doctorUserId: 'u-doctor',
-          teamUserIds: ['u-ana'],
+          team: [KEY_ANA],
           limit: 51,
         }),
       );
@@ -165,7 +176,39 @@ describe('PractitionerGovernanceService', () => {
       await service.pendingApprovals(DOCTOR, {});
       expect(repo.findPendingForDoctor).toHaveBeenCalledWith(
         expect.anything(),
-        expect.objectContaining({ teamUserIds: [] }),
+        expect.objectContaining({ team: [] }),
+      );
+    });
+
+    it('una persona que también apoya a otro doctor no entra: no se sabe de cuál agenda es lo que pasó', async () => {
+      links.findLinks.mockImplementation(async (_em: unknown, f: any) =>
+        f.supportUserId
+          ? [ANA, { ...ANA, practitionerProfileId: 'pp-otro' }]
+          : [ANA],
+      );
+      await service.pendingApprovals(DOCTOR, {});
+      expect(repo.findPendingForDoctor).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ team: [] }),
+      );
+      await service.panel(DOCTOR);
+      expect(repo.findOpenAnomalies).toHaveBeenCalledWith(
+        expect.anything(),
+        [],
+        expect.any(Number),
+      );
+    });
+
+    it('un vínculo de lugar de la misma persona no la deja fuera', async () => {
+      links.findLinks.mockImplementation(async (_em: unknown, f: any) =>
+        f.supportUserId
+          ? [ANA, { ...ANA, kind: 'LOCATION', practitionerProfileId: null }]
+          : [ANA],
+      );
+      await service.pendingApprovals(DOCTOR, {});
+      expect(repo.findPendingForDoctor).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ team: [KEY_ANA] }),
       );
     });
 
