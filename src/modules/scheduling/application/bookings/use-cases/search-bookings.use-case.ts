@@ -121,6 +121,23 @@ export class SearchBookingsUseCase {
     // El tenant sale del contexto que verificó el guard, nunca del cuerpo: es
     // parte del `where` de la lectura, no un filtro posterior.
     const tenantId = requireTenantId();
+
+    // La cuenta de paciente ve sus citas de **todas** las organizaciones: pide
+    // cita con la que tiene a su profesional (`@PatientAnyTenant`), y una lista
+    // acotada a la organización de la sesión escondería las demás. Sólo cuando
+    // lista por paciente —nunca por agenda— y sólo después de que
+    // `assertMayActForPatient` confirmó que el perfil es suyo o de alguien a
+    // quien representa; el filtro por esos perfiles sigue siendo parte del
+    // `where`. RLS se levanta para esta lectura y para ninguna otra.
+    const acrossOrganizations =
+      isPatientActor(actor) &&
+      Boolean(filters.patientProfileId) &&
+      !filters.resourceId;
+    if (acrossOrganizations) {
+      await this.em.execute(
+        "select set_config('app.system_context', 'true', true)",
+      );
+    }
     const em = this.em.fork();
 
     // A quiénes representa el actor, una vez para toda la lectura (B.1). Decide
@@ -179,7 +196,7 @@ export class SearchBookingsUseCase {
     const { rows, fetchCapReached } = await this.bookingsRepo.findBookings(
       em,
       {
-        tenantId,
+        tenantId: acrossOrganizations ? undefined : tenantId,
         patientProfileId: filters.patientProfileId,
         patientProfileIds,
         resourceId: filters.resourceId,

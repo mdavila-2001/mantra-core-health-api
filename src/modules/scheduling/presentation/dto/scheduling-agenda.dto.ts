@@ -398,3 +398,45 @@ export class ListSlotsResponseDto {
   })
   truncated!: boolean;
 }
+
+/** Una organización con la que el paciente puede pedir cita hoy. */
+export class BookableOrganizationDto {
+  /**
+   * La organización: es el `X-Tenant-Id` con el que se piden sus agendas.
+   */
+  @ApiProperty({ format: 'uuid' })
+  tenantId!: string;
+
+  /**
+   * Nombre comercial, o razón social si no tiene.
+   */
+  @ApiProperty()
+  name!: string;
+
+  /**
+   * Cuántos profesionales tienen cupos abiertos en ella.
+   */
+  @ApiProperty()
+  practitionerCount!: number;
+
+  /**
+   * Cuántos laboratorios o salas tienen cupos abiertos en ella.
+   */
+  @ApiProperty()
+  roomCount!: number;
+}
+
+/** Respuesta de `GET /scheduling/bookable-organizations`. */
+export class BookableOrganizationsResponseDto {
+  /**
+   * Las organizaciones con al menos un cupo abierto, por nombre.
+   */
+  @ApiProperty({ type: [BookableOrganizationDto] })
+  items!: BookableOrganizationDto[];
+
+  /**
+   * Cantidad devuelta.
+   */
+  @ApiProperty()
+  count!: number;
+}

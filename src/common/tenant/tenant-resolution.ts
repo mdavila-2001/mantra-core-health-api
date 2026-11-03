@@ -30,6 +30,25 @@ export function hasPrivilegedTenantRole(user: AuthenticatedUser): boolean {
   );
 }
 
+/** Qué admite la ruta al resolver el tenant del request. */
+export interface ResolveTenantOptions {
+  /** La ruta lleva `@PatientAnyTenant()`: un paciente puede declarar cualquier organización. */
+  readonly patientAnyTenant?: boolean;
+}
+
+/**
+ * Si el actor puede declarar una organización de la que no es miembro: sólo un
+ * paciente, y sólo en una ruta marcada con `@PatientAnyTenant()`.
+ */
+function patientMayDeclare(
+  user: AuthenticatedUser,
+  options: ResolveTenantOptions,
+): boolean {
+  return (
+    options.patientAnyTenant === true && (user.roles ?? []).includes('PATIENT')
+  );
+}
+
 /**
  * Resuelve el tenant activo del request para un actor ordinario.
  *
@@ -44,13 +63,14 @@ export function hasPrivilegedTenantRole(user: AuthenticatedUser): boolean {
 export function resolveOrdinaryTenantId(
   request: Request,
   user: AuthenticatedUser,
+  options: ResolveTenantOptions = {},
 ): string {
   const header = request.headers['x-tenant-id'];
   const declared = Array.isArray(header) ? header[0] : header;
   const memberships = user.tenantIds ?? [];
 
   if (declared) {
-    if (!memberships.includes(declared)) {
+    if (!memberships.includes(declared) && !patientMayDeclare(user, options)) {
       throw forbiddenWithReason(
         'El actor no pertenece al tenant indicado en X-Tenant-Id',
         SystemErrorReason.TENANT_MEMBERSHIP_REQUIRED,
@@ -118,9 +138,10 @@ export function resolvePrivilegedTenantId(
 export function resolveRequestTenantId(
   request: Request,
   user: AuthenticatedUser,
+  options: ResolveTenantOptions = {},
 ): string | undefined {
   if (hasPrivilegedTenantRole(user)) {
     return resolvePrivilegedTenantId(request);
   }
-  return resolveOrdinaryTenantId(request, user);
+  return resolveOrdinaryTenantId(request, user, options);
 }

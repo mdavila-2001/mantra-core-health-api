@@ -546,10 +546,12 @@ export class SchedulingBookingsRepository {
     em: EntityManager,
     filters: {
       /**
-       * Tenant activo. Obligatorio y parte del `where`: filtrar después de
-       * cargar las filas ya habría leído citas de otra organización.
+       * Tenant activo, parte del `where`: filtrar después de cargar las filas
+       * ya habría leído citas de otra organización. Sólo se omite cuando la
+       * lectura es de una cuenta de paciente sobre **sus** perfiles, que ve sus
+       * citas de todas las organizaciones.
        */
-      tenantId: string;
+      tenantId?: string;
       /** Paciente titular de la cita. */
       patientProfileId?: string;
       /**
@@ -573,7 +575,8 @@ export class SchedulingBookingsRepository {
     /** `true` si la lectura previa al filtro por ventana agotó su tope. */
     fetchCapReached: boolean;
   }> {
-    const where: Record<string, unknown> = { tenantId: filters.tenantId };
+    const where: Record<string, unknown> = {};
+    if (filters.tenantId) where.tenantId = filters.tenantId;
     if (filters.patientProfileId) {
       where.patientProfileId = filters.patientProfileId;
     } else if (filters.patientProfileIds) {

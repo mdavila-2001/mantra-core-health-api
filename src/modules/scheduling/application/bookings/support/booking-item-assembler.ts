@@ -212,6 +212,7 @@ export class BookingItemAssembler {
   ): BookingItemDto {
     return {
       id: booking.id,
+      tenantId: booking.tenantId,
       patientProfileId: booking.patientProfileId,
       resourceId: booking.resourceId,
       bookableSlotId: booking.bookableSlotId,

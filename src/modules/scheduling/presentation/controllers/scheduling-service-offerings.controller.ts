@@ -16,6 +16,7 @@ import {
   CurrentUser,
   Roles,
   type AuthenticatedUser,
+  PatientAnyTenant,
 } from '../../../../common';
 import {
   SchedulingServiceBookingService,
@@ -51,6 +52,7 @@ export class SchedulingServiceOfferingsController {
   ) {}
 
   @Get('service-offerings')
+  @PatientAnyTenant()
   @Roles(
     'PATIENT',
     'PRACTITIONER',
@@ -107,6 +109,7 @@ export class SchedulingServiceOfferingsController {
   }
 
   @Get('service-availability')
+  @PatientAnyTenant()
   @Roles(
     'PATIENT',
     'PRACTITIONER',
@@ -132,6 +135,7 @@ export class SchedulingServiceOfferingsController {
     entityId: 'result.id',
   })
   @Post('service-offerings/:id/holds')
+  @PatientAnyTenant()
   @Roles('PATIENT', 'SCHEDULING_ADMIN', 'SCHEDULING_AGENT')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
