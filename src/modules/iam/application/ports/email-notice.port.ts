@@ -4,6 +4,8 @@ export interface EmailNoticeInput {
   readonly recipientAddress: string;
   readonly subject: string;
   readonly bodyText: string;
+  /** Versión con diseño; el texto plano viaja siempre como alternativa. */
+  readonly bodyHtml?: string;
 }
 
 /**

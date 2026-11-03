@@ -81,6 +81,7 @@ import {
 import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
 import { BO_PROFESSION_CONCEPT_IDS } from '../../../../common/seed/bo-professions.catalog';
 import { enterAuthBoundaryContext } from './auth-boundary-context';
+import { verificationEmail } from '../emails/access-email.templates';
 
 /**
  * Los cinco tipos que el modelo admite para una credencial académica.
@@ -1247,11 +1248,7 @@ export class IamPractitionerSelfRegistrationService {
       await this.emailNotice.enqueueEmail({
         recipientUserId: userId,
         recipientAddress: email,
-        subject: 'Verifique su correo profesional',
-        bodyText:
-          'Para verificar su correo, use este código: ' +
-          `${token}\n\nTu matrícula quedó registrada y está pendiente de ` +
-          'verificación por parte de la plataforma.',
+        ...verificationEmail({ token, variant: 'practitioner' }),
       });
       return true;
     } catch (error) {
