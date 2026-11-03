@@ -9,3 +9,5 @@ export * from './prescription-share-token';
 export * from './prescription-share-expiry';
 export * from './support-staff.service';
 export * from './support-staff-provisioning.service';
+export * from './affiliation-invitations.service';
+export * from './redeem-affiliation-invitation.service';

@@ -4,6 +4,7 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
 import { ClinicalModule } from '../clinical/clinical.module';
 import { IamModule } from '../iam/iam.module';
+import { ProfilesModule } from '../profiles/profiles.module';
 import {
   OrgUserAssignmentsController,
   DelegatedPermissionSetsController,
@@ -15,6 +16,7 @@ import {
   SupportStaffController,
   PractitionerSupportController,
   OrgSupportStaffProvisioningController,
+  AffiliationInvitationsController,
 } from './controllers';
 import {
   OrgUserAssignmentsService,
@@ -26,6 +28,8 @@ import {
   PrescriptionSharesService,
   SupportStaffService,
   SupportStaffProvisioningService,
+  AffiliationInvitationsService,
+  RedeemAffiliationInvitationService,
 } from './services';
 import {
   OrganizationUserAssignmentsRepository,
@@ -39,6 +43,7 @@ import {
   SharedAccessLinksRepository,
   SupportLinksRepository,
   SupportStaffProvisioningRepository,
+  AffiliationInvitationsRepository,
 } from './repositories';
 
 /**
@@ -55,6 +60,8 @@ import {
     ClinicalModule,
     MessagingModule,
     IamModule,
+    // Practitioner affiliation requests left by redeeming an affiliation code.
+    ProfilesModule,
   ],
   controllers: [
     OrgUserAssignmentsController,
@@ -67,6 +74,7 @@ import {
     SupportStaffController,
     PractitionerSupportController,
     OrgSupportStaffProvisioningController,
+    AffiliationInvitationsController,
   ],
   providers: [
     // Repositorios
@@ -81,6 +89,7 @@ import {
     SharedAccessLinksRepository,
     SupportLinksRepository,
     SupportStaffProvisioningRepository,
+    AffiliationInvitationsRepository,
     // Servicios
     DelegationScopeService,
     OrgUserAssignmentsService,
@@ -91,6 +100,8 @@ import {
     PrescriptionSharesService,
     SupportStaffService,
     SupportStaffProvisioningService,
+    AffiliationInvitationsService,
+    RedeemAffiliationInvitationService,
   ],
   // La farmacia abre el enlace con `openForPharmacy` (FAR-02).
   exports: [PrescriptionSharesService, SupportStaffProvisioningService],
