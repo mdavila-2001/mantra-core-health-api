@@ -162,6 +162,19 @@ de tipo `OFFICE` con él como administrador). Un médico que atiende en una prá
 recibe 403 (`FISCAL_YEAR_OPEN_NOT_ALLOWED`); una práctica de otra organización sigue respondiendo
 404, antes de mirar el rol.
 
+## Piloto de permisos y catálogos globales
+
+El piloto conserva el modo `shadow`. El PDP vincula concesiones IAM globales
+activas de `SECURITY_ADMIN` y `PRACTITIONER` con roles de sistema conocidos;
+un claim del token por sí solo no concede permisos. Los DENY prevalecen.
+Los once códigos se materializan mediante semillas idempotentes. El alcance,
+el contexto de tenant y la medición se describen en la
+[política del piloto](../operations/permission-pilot-policy.md).
+
+El catálogo global de visibilidad requiere administración global para registrar
+o sincronizar elementos. Las plantillas de presentación contable sólo admiten
+escritura por un `SUPERADMIN` global y no conceden acceso a datos financieros.
+
 ## Convención de mutaciones sin política explícita
 
 El analizador `tools/alovida/coverage-report.mjs` (regla `ORPHAN_ENDPOINT`) exige que todo endpoint
