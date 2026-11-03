@@ -164,6 +164,42 @@ farmacia** en vez del que configura el servidor (`PHARMACY_ERP_BASE_URL`, FAR-07
   `apiKeyConfigured`) a cada conexión, y `providerConfigured` pasa a ser por
   conexión: el sistema propio o, si no tiene, el del servidor.
 
+## Pedidos entre organizaciones (FAR-C9 · H-01)
+
+Un paciente de la organización A puede pedir a una farmacia de la organización B.
+Con `RLS_ENFORCE=true` el pedido respondía 404: la sesión del paciente corre con
+`app.current_tenant_id = A` y `pharmacy.pharmacies` —la única tabla del contexto
+de farmacia con `tenant_id`— le ocultaba la farmacia.
+
+- **Acceso acotado.** `database/SQL/patches/2026-11-03_v4286_farmacias_mercado_lectura_paciente.sql`
+  agrega la política `pharmacies_marketplace_read` en `pharmacy.pharmacies`:
+  solo `SELECT`, solo farmacias **activas y verificadas**, y solo si la
+  transacción declara `app.marketplace_viewer = 'true'`. `TenantContextInterceptor`
+  lo declara únicamente para un sujeto con rol PATIENT y sin rol de farmacia ni
+  de plataforma (el mismo criterio de `marketplaceTenantScope()`); el cliente no
+  puede enviarlo. UPDATE, DELETE e INSERT siguen bajo `tenant_isolation`, y no se
+  abre ninguna otra tabla: sedes, productos, precios, reservas y libro no tienen
+  `tenant_id`; integraciones y mensajería siguen cerradas. No hay bypass global
+  ni `app.system_context`.
+- **Evento del pedido.** El outbox está bajo RLS y se escribe con el tenant de la
+  sesión. `PharmacyOrderSubmitted` se registra en el tenant del paciente cuando
+  la farmacia es de otra organización, y el de la farmacia viaja en
+  `payload.pharmacyTenantId`. Hoy el evento no tiene consumidores en el código;
+  quien lo consuma para avisar al personal de la farmacia debe leerlo en contexto
+  de sistema y enrutar por `pharmacyTenantId`.
+- **Lo que no cambia.** Si la farmacia deja de estar publicada, un pedido anterior
+  del paciente conserva sus líneas pero su cabecera deja de resolver el nombre de
+  la farmacia (la política solo muestra publicadas). Con la farmacia de otra
+  organización, la configuración del sistema externo en vivo (`integrations.*`,
+  con RLS) no es visible para el paciente; por lectura del código
+  (`ExternalOrderStock`) el pedido cae al stock manual del libro. Esto último no
+  se ejercitó de punta a punta.
+- **Pruebas.** `test/integration/rls-farmacias-mercado.int-spec.ts` (opt-in,
+  `RLS_TEST=1`, base real con el modelo aplicado) cubre: sin el GUC no cambia
+  nada; con el GUC se ven las publicadas de otras organizaciones y no borradores
+  ni sin verificar; solo lectura; INSERT ajeno rechazado; el outbox de otro tenant
+  sigue invisible.
+
 ## Criterios de mantenimiento
 
 - Mantener las reglas de negocio fuera de los adaptadores de transporte.

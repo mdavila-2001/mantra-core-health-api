@@ -327,6 +327,48 @@ describe('PharmacyOrdersService', () => {
       expect(res.lines[0].reservedQuantity).toBe(3);
     });
 
+    describe('H-01 · el evento del pedido respeta el tenant de la sesión', () => {
+      async function submit(sessionTenant: string, pharmacyTenant: string) {
+        const d = build();
+        d.pharmacyRepo.findVisibleById.mockResolvedValue({
+          ...PHARMACY,
+          tenantId: pharmacyTenant,
+        });
+        d.inventoryReadRepo.findStockPositions.mockResolvedValue([position()]);
+        d.stockRepo.findByKeyForUpdate.mockResolvedValue(position());
+        withReading(d, order(), [
+          {
+            inventoryReservationId: 'order-1',
+            pharmacyProductId: 'prod-1',
+            requestedQuantity: '3',
+            reservedQuantity: '3',
+            statusConceptId: PINV.RES_LINE_CONFIRMED,
+          },
+        ]);
+        await runWithTenant(sessionTenant, () =>
+          d.service.create(
+            { siteId: 'site-1', lines: [{ productId: 'prod-1', quantity: 3 }] },
+            patient,
+          ),
+        );
+        return d.outbox.publish.mock.calls.find(
+          (call: any[]) => call[1].eventType === 'PharmacyOrderSubmitted',
+        )![1] as { tenantId: string; payloadJson: Record<string, unknown> };
+      }
+
+      it('misma organización: el evento queda en el tenant de la farmacia, como siempre', async () => {
+        const event = await submit('tenant-a', 'tenant-a');
+        expect(event.tenantId).toBe('tenant-a');
+        expect(event.payloadJson.pharmacyTenantId).toBe('tenant-a');
+      });
+
+      it('otra organización: el evento queda en el tenant del paciente (RLS del outbox) y el de la farmacia viaja en el payload', async () => {
+        const event = await submit('tenant-paciente', 'tenant-farmacia');
+        expect(event.tenantId).toBe('tenant-paciente');
+        expect(event.payloadJson.pharmacyTenantId).toBe('tenant-farmacia');
+      });
+    });
+
     it('a line without stock stays SIN_STOCK and does NOT sink the order', async () => {
       const d = build();
       // prod-2 no tiene posición en la sede y el catálogo dice 0: no hay.
