@@ -4,6 +4,7 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
 import { ClinicalModule } from '../clinical/clinical.module';
 import { IamModule } from '../iam/iam.module';
+import { ProfilesModule } from '../profiles/profiles.module';
 import {
   OrgUserAssignmentsController,
   DelegatedPermissionSetsController,
@@ -16,6 +17,7 @@ import {
   PractitionerSupportController,
   PractitionerGovernanceController,
   OrgSupportStaffProvisioningController,
+  AffiliationInvitationsController,
 } from './controllers';
 import {
   OrgUserAssignmentsService,
@@ -28,6 +30,8 @@ import {
   SupportStaffService,
   SupportStaffProvisioningService,
   PractitionerGovernanceService,
+  AffiliationInvitationsService,
+  RedeemAffiliationInvitationService,
 } from './services';
 import {
   OrganizationUserAssignmentsRepository,
@@ -42,6 +46,7 @@ import {
   SupportLinksRepository,
   SupportStaffProvisioningRepository,
   PractitionerGovernanceRepository,
+  AffiliationInvitationsRepository,
 } from './repositories';
 
 /**
@@ -58,6 +63,8 @@ import {
     ClinicalModule,
     MessagingModule,
     IamModule,
+    // Practitioner affiliation requests left by redeeming an affiliation code.
+    ProfilesModule,
   ],
   controllers: [
     OrgUserAssignmentsController,
@@ -71,6 +78,7 @@ import {
     PractitionerSupportController,
     PractitionerGovernanceController,
     OrgSupportStaffProvisioningController,
+    AffiliationInvitationsController,
   ],
   providers: [
     // Repositorios
@@ -86,6 +94,7 @@ import {
     SupportLinksRepository,
     SupportStaffProvisioningRepository,
     PractitionerGovernanceRepository,
+    AffiliationInvitationsRepository,
     // Servicios
     DelegationScopeService,
     OrgUserAssignmentsService,
@@ -97,6 +106,8 @@ import {
     SupportStaffService,
     SupportStaffProvisioningService,
     PractitionerGovernanceService,
+    AffiliationInvitationsService,
+    RedeemAffiliationInvitationService,
   ],
   // La farmacia abre el enlace con `openForPharmacy` (FAR-02).
   exports: [PrescriptionSharesService, SupportStaffProvisioningService],

@@ -9,3 +9,4 @@ export * from './support-staff.controller';
 export * from './practitioner-support.controller';
 export * from './org-support-staff-provisioning.controller';
 export * from './practitioner-governance.controller';
+export * from './affiliation-invitations.controller';

@@ -52,4 +52,10 @@ export enum DelegatedAccessErrorReason {
   SUPPORT_SCOPE_DENIED = 'SUPPORT_SCOPE_DENIED',
   /** El rango de agenda pedido es inválido o demasiado largo. */
   SUPPORT_AGENDA_RANGE_INVALID = 'SUPPORT_AGENDA_RANGE_INVALID',
+  /** The affiliation code does not exist, expired, was spent or revoked (same opaque answer for all). */
+  SUPPORT_INVITATION_INVALID = 'SUPPORT_INVITATION_INVALID',
+  /** A practitioner code was redeemed by an account without a practitioner profile. */
+  SUPPORT_PRACTITIONER_PROFILE_REQUIRED = 'SUPPORT_PRACTITIONER_PROFILE_REQUIRED',
+  /** The organization has no active site where a practitioner request can land. */
+  SUPPORT_AFFILIATION_PRACTICE_MISSING = 'SUPPORT_AFFILIATION_PRACTICE_MISSING',
 }
