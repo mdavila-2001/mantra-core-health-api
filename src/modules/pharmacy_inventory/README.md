@@ -128,6 +128,23 @@ farmacia** en vez del que configura el servidor (`PHARMACY_ERP_BASE_URL`, FAR-07
   páginas y 20.000 filas en total. Pasado eso cuenta como sistema caído.
 - **Sin sistema propio** la conexión usa el del servidor, como en FAR-07; si
   tampoco hay, 422 `PHARMACY_INTEGRATION_NOT_CONFIGURED`.
+- **Reglas de inventario (H-05).**
+  - **Qué es `quantity`.** La cantidad *disponible* del libro de existencias
+    (`available_quantity`), no la física: la sincronización escribe
+    `availableQuantity` con `MV_SYNC_ADJUSTMENT`.
+  - **Precedencia.** Dentro de una conexión, su sistema propio gana y, si no
+    tiene, se usa el del servidor. Si a las sedes de una conexión les aplica
+    además otra conexión activa que consulta stock (la de toda la farmacia
+    contra una de sede, o dos de la misma sede), la sincronización responde 409
+    `PHARMACY_INTEGRATION_CONNECTION_AMBIGUOUS` con los ids en conflicto y no
+    llama ni escribe nada: no se elige una en silencio.
+  - **Lotes.** Un producto que la sede lleva por lotes no se pisa con una
+    existencia agregada (`SITE_PRODUCT_KEPT_BY_LOTS`) hasta que haya una
+    política (por ejemplo FEFO).
+  - **Sin `MFA_ENCRYPTION_KEY`** (en blanco, ausente, o la de desarrollo en
+    producción) guardar el sistema falla en cerrado, antes de probar nada:
+    503 `PHARMACY_INTEGRATION_ENCRYPTION_NOT_CONFIGURED`. La clave nunca se
+    guarda en claro ni cifrada con la clave pública de desarrollo.
 - `GET …/integration-connections` agrega `system` (formato, dirección, código,
   `apiKeyConfigured`) a cada conexión, y `providerConfigured` pasa a ser por
   conexión: el sistema propio o, si no tiene, el del servidor.

@@ -128,7 +128,11 @@ export { createdBy, touch } from './persistence/audit-fields';
 export type { AuditableCreate } from './persistence/audit-fields';
 
 // Criptografía
-export { encryptSecret, decryptSecret } from './crypto/secret-cipher';
+export {
+  encryptSecret,
+  decryptSecret,
+  isSecretCipherConfigured,
+} from './crypto/secret-cipher';
 export {
   signPayload,
   verifySignature,

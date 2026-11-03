@@ -64,6 +64,8 @@ describe('PharmacyExternalSystemAdapter (FAR-C9 · C9-3)', () => {
   const env = { ...process.env };
   beforeEach(() => {
     process.env.PHARMACY_EXTERNAL_ALLOWED_HOSTS = 'sim';
+    process.env.MFA_ENCRYPTION_KEY =
+      'una-clave-de-prueba-de-al-menos-32-caracteres';
   });
   afterEach(() => {
     process.env = { ...env };
@@ -177,6 +179,28 @@ describe('PharmacyExternalSystemAdapter (FAR-C9 · C9-3)', () => {
     );
   });
 
+  it('H-05: without MFA_ENCRYPTION_KEY it stores nothing, not even in the clear', async () => {
+    delete process.env.MFA_ENCRYPTION_KEY;
+    const repo = fakeRepo();
+    const adapter = new PharmacyExternalSystemAdapter(
+      repo as any,
+      { isConfigured: () => false } as any,
+    );
+    expect(adapter.canStoreCredentials()).toBe(false);
+    await expect(
+      adapter.save(em, {
+        tenantId: 't',
+        connectionId: null,
+        config: CONFIG,
+        apiKey: 'secret-key',
+        actorUserId: 'u',
+      }),
+    ).rejects.toThrow(/MFA_ENCRYPTION_KEY/);
+    expect(repo.createConnection).not.toHaveBeenCalled();
+    expect(repo.createCredential).not.toHaveBeenCalled();
+    expect(repo.credentials).toHaveLength(0);
+  });
+
   it('the host policy applies again at call time', async () => {
     const repo = fakeRepo();
     const adapter = new PharmacyExternalSystemAdapter(
@@ -225,6 +249,8 @@ describe('external-system state safety', () => {
   const env = { ...process.env };
   beforeEach(() => {
     process.env.PHARMACY_EXTERNAL_ALLOWED_HOSTS = 'sim';
+    process.env.MFA_ENCRYPTION_KEY =
+      'una-clave-de-prueba-de-al-menos-32-caracteres';
   });
   afterEach(() => {
     process.env = { ...env };

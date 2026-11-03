@@ -17,6 +17,7 @@ function build(
     health?: 'ok' | 'down';
     urlProblem?: any;
     linked?: string | null;
+    canStore?: boolean;
   } = {},
 ) {
   const connection: any = {
@@ -49,6 +50,7 @@ function build(
     }),
   };
   const systems = {
+    canStoreCredentials: jest.fn(() => options.canStore ?? true),
     urlProblem: jest.fn(() => options.urlProblem ?? null),
     clientFor: jest.fn(() => client),
     save: jest.fn(async () => 'provider-conn-1'),
@@ -85,6 +87,24 @@ function build(
 }
 
 describe('ConfigureExternalSystemUseCase (FAR-C9 · C9-3)', () => {
+  it('H-05: without an encryption key it fails closed before probing or saving anything', async () => {
+    const d = build({ canStore: false });
+    let thrown: any;
+    try {
+      await d.useCase.save(REF, DTO, ACTOR);
+    } catch (error) {
+      thrown = error;
+    }
+    expect(thrown?.reason).toBe(
+      PharmacyInventoryErrorReason.PHARMACY_INTEGRATION_ENCRYPTION_NOT_CONFIGURED,
+    );
+    expect(thrown.getStatus()).toBe(503);
+    expect(JSON.stringify(thrown.getResponse())).not.toContain('k-1');
+    expect(d.systems.clientFor).not.toHaveBeenCalled();
+    expect(d.client.checkHealth).not.toHaveBeenCalled();
+    expect(d.systems.save).not.toHaveBeenCalled();
+  });
+
   it('probes with the given key first, then saves and links the connection', async () => {
     const d = build();
     const result = await d.useCase.save(REF, DTO, ACTOR);
