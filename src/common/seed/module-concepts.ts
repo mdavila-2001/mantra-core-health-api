@@ -1,5 +1,6 @@
 import type { ConceptSeed } from './concept-seed';
 import { DIRECTORY_CONCEPT_SEEDS } from '../../modules/directory/directory.concepts';
+import { AFFILIATION_INVITATION_CONCEPT_SEEDS } from '../../modules/directory/affiliation-invitation.concepts';
 import { PROFILES_CONCEPT_SEEDS } from '../../modules/profiles/profiles.concepts';
 import { SURVEYS_CONCEPT_SEEDS } from '../../modules/surveys/surveys.concepts';
 import { AUTHZ_GOVERNANCE_CONCEPT_SEEDS } from '../../modules/authz/authz-governance.concepts';
@@ -50,6 +51,7 @@ import { STUDY_CATALOG_CONCEPT_SEEDS } from '../../modules/study_catalog/study_c
 
 export const MODULE_CONCEPT_SEEDS: ConceptSeed[] = [
   ...DIRECTORY_CONCEPT_SEEDS,
+  ...AFFILIATION_INVITATION_CONCEPT_SEEDS,
   ...PROFILES_CONCEPT_SEEDS,
   ...AUTHZ_CONCEPT_SEEDS,
   ...AUTHZ_GOVERNANCE_CONCEPT_SEEDS,
