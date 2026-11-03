@@ -15,6 +15,7 @@ import type {
   ResendVerificationDto,
   ResendVerificationResponseDto,
 } from '../../presentation/dto';
+import { verificationEmail } from '../emails/access-email.templates';
 
 /** Vida útil del token de verificación de correo (24 h), igual que en el alta. */
 const EMAIL_VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000;
@@ -169,10 +170,7 @@ export class IamEmailVerificationService {
       await this.emailNotice.enqueueEmail({
         recipientUserId: userId,
         recipientAddress: email,
-        subject: 'Verifique su correo',
-        bodyText:
-          'Para verificar su correo, use este código: ' +
-          `${token}\n\nEl enlace caduca en 24 horas.`,
+        ...verificationEmail({ token, variant: 'resend' }),
       });
     } catch (error) {
       this.logger.warn(

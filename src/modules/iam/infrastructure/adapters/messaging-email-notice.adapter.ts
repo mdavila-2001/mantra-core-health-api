@@ -17,7 +17,11 @@ export class MessagingEmailNoticeAdapter implements EmailNoticePort {
         channelId: MESSAGING_SEED.emailChannelId,
         recipientUserId: input.recipientUserId,
         recipientAddress: input.recipientAddress,
-        payloadJson: { subject: input.subject, bodyText: input.bodyText },
+        payloadJson: {
+          subject: input.subject,
+          bodyText: input.bodyText,
+          ...(input.bodyHtml ? { bodyHtml: input.bodyHtml } : {}),
+        },
       },
       { id: input.recipientUserId, roles: [] },
     );

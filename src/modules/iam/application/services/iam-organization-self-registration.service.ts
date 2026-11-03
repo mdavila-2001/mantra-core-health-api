@@ -51,6 +51,7 @@ import {
 import { IamOrganizationRepresentativesService } from './iam-organization-representatives.service';
 import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
 import { enterAuthBoundaryContext } from './auth-boundary-context';
+import { verificationEmail } from '../emails/access-email.templates';
 
 /** Nombre con el que nace la sede central de una farmacia (P50). */
 const PHARMACY_HEADQUARTERS_NAME = 'Casa central';
@@ -644,11 +645,7 @@ export class IamOrganizationSelfRegistrationService {
       await this.emailNotice.enqueueEmail({
         recipientUserId: userId,
         recipientAddress: email,
-        subject: 'Verifique el correo de su organización',
-        bodyText:
-          'Para verificar su correo, use este código: ' +
-          `${token}\n\nTu organización quedó registrada y está pendiente ` +
-          'de verificación por parte de la plataforma.',
+        ...verificationEmail({ token, variant: 'organization' }),
       });
       return true;
     } catch (error) {

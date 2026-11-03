@@ -28,6 +28,7 @@ import type {
   ResetPasswordDto,
   ResetPasswordResponseDto,
 } from '../../presentation/dto';
+import { passwordResetEmail } from '../emails/access-email.templates';
 
 /**
  * Ventana de validez del enlace de restablecimiento.
@@ -341,11 +342,7 @@ export class IamPasswordResetService {
       await this.emailNotice.enqueueEmail({
         recipientUserId: userId,
         recipientAddress: email,
-        subject: 'Restablezca su contraseña',
-        bodyText:
-          'Para elegir una contraseña nueva, use este código: ' +
-          `${token}\n\nVence en una hora. Si no pidió este cambio, ` +
-          'ignore este mensaje: su contraseña actual sigue funcionando.',
+        ...passwordResetEmail({ token }),
       });
     } catch (error) {
       this.logger.warn(
