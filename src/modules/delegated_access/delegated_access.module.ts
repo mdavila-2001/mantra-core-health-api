@@ -14,6 +14,7 @@ import {
   PrescriptionSharesPublicController,
   SupportStaffController,
   PractitionerSupportController,
+  PractitionerGovernanceController,
   OrgSupportStaffProvisioningController,
 } from './controllers';
 import {
@@ -26,6 +27,7 @@ import {
   PrescriptionSharesService,
   SupportStaffService,
   SupportStaffProvisioningService,
+  PractitionerGovernanceService,
 } from './services';
 import {
   OrganizationUserAssignmentsRepository,
@@ -39,6 +41,7 @@ import {
   SharedAccessLinksRepository,
   SupportLinksRepository,
   SupportStaffProvisioningRepository,
+  PractitionerGovernanceRepository,
 } from './repositories';
 
 /**
@@ -66,6 +69,7 @@ import {
     PrescriptionSharesPublicController,
     SupportStaffController,
     PractitionerSupportController,
+    PractitionerGovernanceController,
     OrgSupportStaffProvisioningController,
   ],
   providers: [
@@ -81,6 +85,7 @@ import {
     SharedAccessLinksRepository,
     SupportLinksRepository,
     SupportStaffProvisioningRepository,
+    PractitionerGovernanceRepository,
     // Servicios
     DelegationScopeService,
     OrgUserAssignmentsService,
@@ -91,6 +96,7 @@ import {
     PrescriptionSharesService,
     SupportStaffService,
     SupportStaffProvisioningService,
+    PractitionerGovernanceService,
   ],
   // La farmacia abre el enlace con `openForPharmacy` (FAR-02).
   exports: [PrescriptionSharesService, SupportStaffProvisioningService],
