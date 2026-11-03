@@ -27,7 +27,8 @@ import type { BaseRole, RoleScope } from './dto';
  *
  * - `PHARMACY_STAFF` lo deriva el login de una membresía en un tenant de farmacia
  *   (`withPharmacyStaffRole`); sembrarlo permitiría asignarlo a mano.
- * - `SYSTEM` y los seis globales de `iam` existen aparte (`PLATFORM_ROLE_CODES`).
+ * - `SYSTEM` y los globales de `iam` existen aparte (`PLATFORM_ROLE_CODES`).
+ *   SECURITY_ADMIN tiene además un descriptor no asignable en IAM_POLICY_ROLE_SEED para el PDP.
  */
 function role(
   code: string,

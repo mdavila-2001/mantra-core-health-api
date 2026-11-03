@@ -4,6 +4,7 @@
  * (CONTRATO.md §Endpoints); los demás los añade este módulo y están en la entrega.
  */
 export enum UiVisibilityErrorReason {
+  UI_CATALOG_GLOBAL_ADMIN_REQUIRED = 'UI_CATALOG_GLOBAL_ADMIN_REQUIRED',
   /** El elemento no existe (o la regla/sujeto se pidió sobre uno inexistente). 404. */
   UI_ELEMENT_NOT_FOUND = 'UI_ELEMENT_NOT_FOUND',
 

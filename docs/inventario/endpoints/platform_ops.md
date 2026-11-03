@@ -3,7 +3,7 @@
 # Endpoints del módulo `platform_ops`
 
 - **Bloque:** Operaciones de Plataforma (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
-- **Operaciones:** 20 (19 en el contrato, 1 sólo en el código)
+- **Operaciones:** 20 (20 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 0 · MEDIO 16 · BAJO 4
 - **Tablas distintas que tocan:** 33
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/platform-ops.md` (generado aparte por `yarn docs:endpoints:generate`)
@@ -15,7 +15,7 @@
 | 1 | GET | `/admin/ops/runtime-pieces` | Piezas descubiertas en el código, con su estado contrastado | BAJO | 1 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN |
 | 2 | GET | `/admin/ops/runtime-pieces/{id}` | Una pieza con su evidencia, su registro y sus hallazgos | BAJO | 1 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN |
 | 3 | POST | `/admin/ops/runtime-pieces/discover` | Descubrir y registrar las piezas del código (idempotente) | MEDIO | 5 | PLATFORM_ADMIN, SRE |
-| 4 | GET | `/admin/ops/tools` | — | BAJO | 5 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN |
+| 4 | GET | `/admin/ops/tool-registry` | Herramientas del catálogo con su salud | BAJO | 5 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN |
 | 5 | GET | `/admin/ops/tools/{code}` | Una herramienta con su historial corto de comprobaciones | BAJO | 5 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN |
 | 6 | POST | `/ops/artifacts` | Publicar un artefacto inmutable | MEDIO | 4 | DEPLOY_PIPELINE, RELEASE_MANAGER, PLATFORM_ADMIN |
 | 7 | POST | `/ops/capacity-plans/{id}/measurements` | Registrar una medición de capacidad | MEDIO | 3 | CAPACITY_PLANNER, SRE, PLATFORM_ADMIN |
@@ -271,10 +271,10 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 4. GET /admin/ops/tools
+## 4. GET /admin/ops/tool-registry
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Herramientas del catálogo con su salud
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -282,13 +282,13 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «The operational backbone a data-center-grade deployment requires.» Dominio: Operaciones de Plataforma.
+Herramientas del catálogo con su salud. Dentro del módulo (descripción del modelo, en inglés): «The operational backbone a data-center-grade deployment requires.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/ops/tools` la atiende `OpsToolsController.list` (src/modules/platform_ops/controllers/ops-tools.controller.ts:24). Exige sesión con alguno de los roles PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN. Delega en `OpsToolsService.list`. Lee platform_ops.component_tools, platform_ops.health_check_runs, platform_ops.health_checks, platform_ops.service_components, platform_ops.tool_registry.
+`GET /admin/ops/tool-registry` la atiende `OpsToolsController.list` (src/modules/platform_ops/controllers/ops-tools.controller.ts:24). Exige sesión con alguno de los roles PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN. Delega en `OpsToolsService.list`. Lee platform_ops.component_tools, platform_ops.health_check_runs, platform_ops.health_checks, platform_ops.service_components, platform_ops.tool_registry.
 
 ### Requerimientos
 

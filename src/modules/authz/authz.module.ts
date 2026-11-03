@@ -4,6 +4,8 @@ import { AuthzModulesRouteInventory } from './services/authz-modules-route-inven
 import { AuthzPermissionDecisionPoint } from './services/authz-permission-decision-point';
 import { PERMISSION_DECISION_POINT } from '../../common/auth/permission-decision.port';
 import { Module } from '@nestjs/common';
+import { IAM_PDP_ROLES } from './ports/iam-global-roles.port';
+import { IamGlobalRolesAdapter } from './infrastructure/iam-global-roles.adapter';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
 import {
@@ -98,6 +100,8 @@ import {
     AuthzModulesCatalogController,
   ],
   providers: [
+    IamGlobalRolesAdapter,
+    { provide: IAM_PDP_ROLES, useExisting: IamGlobalRolesAdapter },
     AuthzModulesCatalogService,
     AuthzModulesRouteInventory,
     // Repositorios

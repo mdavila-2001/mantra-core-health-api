@@ -61,6 +61,11 @@ function build() {
     eventsRepo as any,
     commonRecords({ contactPoints: contactPointsRepo }),
     logger as any,
+    {
+      revokeAllForUser: mockFn().mockResolvedValue(0),
+      scopedAssignmentsForUser: mockFn().mockResolvedValue([]),
+      ensureRoleByCode: mockFn().mockResolvedValue(true),
+    },
   );
   return {
     contactPointsRepo,

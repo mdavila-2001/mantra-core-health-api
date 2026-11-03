@@ -1,4 +1,4 @@
--- SALUD v4.2.68 · módulo 18 · schema clinical_ext
+-- SALUD v4.2.85 · módulo 18 · schema clinical_ext
 -- Generado de diagram_18_clinical_ext.puml — NO editar a mano.
 
 
@@ -163,6 +163,20 @@ DO $$ BEGIN
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "clinical_ext"."referrals"
+        ADD CONSTRAINT "fk_referrals_referral_type_concept_id" FOREIGN KEY ("referral_type_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: billing.service_catalog (requiere schema billing)
+DO $$ BEGIN
+    ALTER TABLE "clinical_ext"."referrals"
+        ADD CONSTRAINT "fk_referrals_target_service_catalog_id" FOREIGN KEY ("target_service_catalog_id")
+        REFERENCES "billing"."service_catalog" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: directory.branches (requiere schema directory)
 DO $$ BEGIN
     ALTER TABLE "clinical_ext"."referrals"
@@ -175,27 +189,13 @@ DO $$ BEGIN
     ALTER TABLE "clinical_ext"."referrals"
         ADD CONSTRAINT "fk_referrals_requested_service_concept_id" FOREIGN KEY ("requested_service_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: consent.treatment_informed_consents (requiere schema consent)
 DO $$ BEGIN
     ALTER TABLE "clinical_ext"."referrals"
         ADD CONSTRAINT "fk_referrals_informed_consent_id" FOREIGN KEY ("informed_consent_id")
         REFERENCES "consent"."treatment_informed_consents" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;
-
--- destino: terminology.catalog_concepts (requiere schema terminology)
-DO $$ BEGIN
-    ALTER TABLE "clinical_ext"."referrals"
-        ADD CONSTRAINT "fk_referrals_referral_type_concept_id" FOREIGN KEY ("referral_type_concept_id")
-        REFERENCES "terminology"."catalog_concepts" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
-
--- destino: billing.service_catalog (requiere schema billing)
-DO $$ BEGIN
-    ALTER TABLE "clinical_ext"."referrals"
-        ADD CONSTRAINT "fk_referrals_target_service_catalog_id" FOREIGN KEY ("target_service_catalog_id")
-        REFERENCES "billing"."service_catalog" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: iam.users (requiere schema iam)
@@ -364,21 +364,21 @@ DO $$ BEGIN
     ALTER TABLE "clinical_ext"."cds_rule_versions"
         ADD CONSTRAINT "fk_cds_rule_versions_severity_concept_id" FOREIGN KEY ("severity_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: iam.users (requiere schema iam)
 DO $$ BEGIN
     ALTER TABLE "clinical_ext"."cds_rule_versions"
         ADD CONSTRAINT "fk_cds_rule_versions_approved_by_user_id" FOREIGN KEY ("approved_by_user_id")
         REFERENCES "iam"."users" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: iam.users (requiere schema iam)
 DO $$ BEGIN
     ALTER TABLE "clinical_ext"."cds_rule_versions"
         ADD CONSTRAINT "fk_cds_rule_versions_created_by_user_id" FOREIGN KEY ("created_by_user_id")
         REFERENCES "iam"."users" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN

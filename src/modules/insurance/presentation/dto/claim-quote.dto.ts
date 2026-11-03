@@ -80,13 +80,14 @@ export class ClaimQuoteLineResultDto {
   })
   covered!: boolean;
 
-  @ApiPropertyOptional({ example: '80', nullable: true })
+  @ApiPropertyOptional({ type: String, example: '80', nullable: true })
   coveragePercent!: string | null;
 
-  @ApiPropertyOptional({ example: '50.00', nullable: true })
+  @ApiPropertyOptional({ type: String, example: '50.00', nullable: true })
   copayAmount!: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     example: '25.00',
     nullable: true,
     description:
@@ -104,10 +105,10 @@ export class ClaimQuoteLineResultDto {
   })
   priorAuthorizationStatus!: string | null;
 
-  @ApiPropertyOptional({ example: '140.00', nullable: true })
+  @ApiPropertyOptional({ type: String, example: '140.00', nullable: true })
   patientAmount!: string | null;
 
-  @ApiPropertyOptional({ example: '360.00', nullable: true })
+  @ApiPropertyOptional({ type: String, example: '360.00', nullable: true })
   insurerAmount!: string | null;
 
   @ApiPropertyOptional({
@@ -133,6 +134,7 @@ export class ClaimQuoteResultDto {
   currencyConceptId!: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     example: '500.00',
     nullable: true,
     description: '`null` si algún monto no es un decimal válido.',
@@ -140,13 +142,14 @@ export class ClaimQuoteResultDto {
   totalBilledAmount!: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     example: '140.00',
     nullable: true,
     description: '`null` mientras alguna línea no tenga reparto calculable.',
   })
   totalPatientAmount!: string | null;
 
-  @ApiPropertyOptional({ example: '360.00', nullable: true })
+  @ApiPropertyOptional({ type: String, example: '360.00', nullable: true })
   totalInsurerAmount!: string | null;
 
   @ApiProperty({ type: [ClaimQuoteLineResultDto] })

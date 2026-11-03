@@ -14,6 +14,7 @@ import type {
 } from '../dto/ui-visibility.dto';
 import {
   elementNotFound,
+  catalogGlobalAdminRequired,
   elementRetired,
   emptyUpdate,
   hierarchyCycle,
@@ -132,6 +133,8 @@ export class UiVisibilityAdminService {
     dto: CreateElementDto,
     actor: UiAdminActor,
   ): Promise<UiElementView> {
+    if (!actor.isPlatform && !actor.canManageCatalog)
+      throw catalogGlobalAdminRequired();
     const view = await this.store.transaction(async (tx) => {
       const [existing] = await tx.findElementsByKeys([dto.key]);
       if (existing) throw keyExists();
@@ -177,6 +180,8 @@ export class UiVisibilityAdminService {
     dto: SyncElementsDto,
     actor: UiAdminActor,
   ): Promise<UiElementSyncResultView> {
+    if (!actor.isPlatform && !actor.canManageCatalog)
+      throw catalogGlobalAdminRequired();
     const drafts = this.dedupeDrafts(dto.elements);
     const result = await this.store.transaction((tx) =>
       this.applySync(tx, drafts, actor.userId),

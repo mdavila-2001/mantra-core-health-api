@@ -63,7 +63,7 @@ export class ToolNotMeasuredDto {
   reason!: string;
 }
 
-/** `GET /admin/ops/tools`. */
+/** `GET /admin/ops/tool-registry`. */
 export class ToolListResponseDto {
   @ApiProperty({ format: 'date-time' })
   evaluatedAt!: string;

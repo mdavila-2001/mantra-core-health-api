@@ -5,7 +5,7 @@
 - **Bloque:** —
 - **Operaciones:** 14 (14 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 2 · MEDIO 9 · BAJO 3
-- **Tablas distintas que tocan:** 27
+- **Tablas distintas que tocan:** 29
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/medical-groups.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -13,7 +13,7 @@
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
 | 1 | GET | `/medical-groups` | Listar grupos médicos (histórico/enviadas/recibidas) | BAJO | 5 | PRACTITIONER, CLINICIAN |
-| 2 | POST | `/medical-groups` | Crear grupo médico | MEDIO | 27 | PRACTITIONER, CLINICIAN |
+| 2 | POST | `/medical-groups` | Crear grupo médico | MEDIO | 29 | PRACTITIONER, CLINICIAN |
 | 3 | DELETE | `/medical-groups/{id}` | Eliminar un grupo médico no realizado | ALTO | 6 | PRACTITIONER, CLINICIAN |
 | 4 | GET | `/medical-groups/{id}` | Consultar un grupo médico (formulario de sólo lectura) | MEDIO | 6 | PRACTITIONER, CLINICIAN |
 | 5 | PATCH | `/medical-groups/{id}` | Corregir el lugar o las notas del grupo médico | MEDIO | 7 | PRACTITIONER, CLINICIAN |
@@ -25,7 +25,7 @@
 | 11 | POST | `/medical-groups/{id}/reschedule-requests` | Solicitar cambio de horario | MEDIO | 6 | PRACTITIONER, CLINICIAN |
 | 12 | POST | `/medical-groups/{id}/reschedule-requests/respond` | Resolver la solicitud de cambio de horario | MEDIO | 6 | PRACTITIONER, CLINICIAN |
 | 13 | GET | `/medical-groups/eligible-members` | Colegas que se pueden invitar a un grupo de este servicio | BAJO | 5 | PRACTITIONER, CLINICIAN |
-| 14 | GET | `/medical-groups/patients/{patientProfileId}/conditions` | Diagnósticos del paciente para el selector del formulario | BAJO | 20 | PRACTITIONER, CLINICIAN |
+| 14 | GET | `/medical-groups/patients/{patientProfileId}/conditions` | Diagnósticos del paciente para el selector del formulario | BAJO | 22 | PRACTITIONER, CLINICIAN |
 
 ---
 
@@ -135,7 +135,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /medical-groups` la atiende `MedicalGroupsController.create` (src/modules/medical_groups/controllers/medical-groups.controller.ts:123). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `CreateMedicalGroupDto` (13 campos, 7 obligatorios). Delega en `MedicalGroupsService.create`. Crea filas en medical_groups.group_members, medical_groups.groups. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 17 más.
+`POST /medical-groups` la atiende `MedicalGroupsController.create` (src/modules/medical_groups/controllers/medical-groups.controller.ts:123). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `CreateMedicalGroupDto` (13 campos, 7 obligatorios). Delega en `MedicalGroupsService.create`. Crea filas en medical_groups.group_members, medical_groups.groups. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 19 más.
 
 ### Requerimientos
 
@@ -160,11 +160,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `authz.permissions` | LEE | LEE | DIRECTA | MedicalGroupsController.create → MedicalGroupsService.create → MedicalGroupsService.assertCanReadPatientHistory → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | MedicalGroupsController.create → MedicalGroupsService.create → MedicalGroupsService.assertCanReadPatientHistory → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | MedicalGroupsController.create → MedicalGroupsService.create → MedicalGroupsService.assertCanReadPatientHistory → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | MedicalGroupsController.create → MedicalGroupsService.create → MedicalGroupsService.assertCanReadPatientHistory → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | MedicalGroupsController.create → MedicalGroupsService.create → MedicalGroupsService.assertCanReadPatientHistory → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | MedicalGroupsController.create → MedicalGroupsService.create → MedicalGroupsService.assertCanReadPatientHistory → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | MedicalGroupsController.create → MedicalGroupsService.create → MedicalGroupsService.assertCanReadPatientHistory → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | MedicalGroupsController.create → MedicalGroupsService.create → MedicalGroupsService.assertCanReadPatientHistory → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `billing.service_catalog` | LEE | LEE | DIRECTA | MedicalGroupsController.create → MedicalGroupsService.create → ServiceCatalogRepository.findById | `src/modules/billing/repositories/service-catalog.repository.ts:101` |
 | `clinical.conditions` | LEE | LEE | DIRECTA | MedicalGroupsController.create → MedicalGroupsService.create → ConditionsRepository.findById | `src/modules/clinical/repositories/conditions.repository.ts:107` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | MedicalGroupsController.create → MedicalGroupsService.create → MedicalGroupsService.assertCanReadPatientHistory → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | MedicalGroupsController.create → MedicalGroupsService.create → MedicalGroupsService.assertCanReadPatientHistory → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `medical_groups.group_members` | ESCRIBE | CREA | DIRECTA | MedicalGroupsController.create → MedicalGroupsService.create → MedicalGroupMembersRepository.create | `src/modules/medical_groups/repositories/medical-group-members.repository.ts:112` |
 | `medical_groups.group_members` | LEE | LEE | DIRECTA | MedicalGroupsController.create → MedicalGroupsService.create → MedicalGroupMembersRepository.findByGroup | `src/modules/medical_groups/repositories/medical-group-members.repository.ts:34` |
 | `medical_groups.groups` | ESCRIBE | CREA | DIRECTA | MedicalGroupsController.create → MedicalGroupsService.create → MedicalGroupsRepository.create | `src/modules/medical_groups/repositories/medical-groups.repository.ts:30` |
@@ -1645,7 +1647,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /medical-groups/patients/{patientProfileId}/conditions` la atiende `MedicalGroupsController.listPatientConditions` (src/modules/medical_groups/controllers/medical-groups.controller.ts:100). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Delega en `MedicalGroupsService.listPatientConditions`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 12 más.
+`GET /medical-groups/patients/{patientProfileId}/conditions` la atiende `MedicalGroupsController.listPatientConditions` (src/modules/medical_groups/controllers/medical-groups.controller.ts:100). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Delega en `MedicalGroupsService.listPatientConditions`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 14 más.
 
 ### Requerimientos
 
@@ -1669,10 +1671,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `authz.permissions` | LEE | LEE | DIRECTA | MedicalGroupsController.listPatientConditions → MedicalGroupsService.listPatientConditions → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | MedicalGroupsController.listPatientConditions → MedicalGroupsService.listPatientConditions → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | MedicalGroupsController.listPatientConditions → MedicalGroupsService.listPatientConditions → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | MedicalGroupsController.listPatientConditions → MedicalGroupsService.listPatientConditions → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | MedicalGroupsController.listPatientConditions → MedicalGroupsService.listPatientConditions → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | MedicalGroupsController.listPatientConditions → MedicalGroupsService.listPatientConditions → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | MedicalGroupsController.listPatientConditions → MedicalGroupsService.listPatientConditions → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | MedicalGroupsController.listPatientConditions → MedicalGroupsService.listPatientConditions → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `clinical.conditions` | LEE | LEE | DIRECTA | MedicalGroupsController.listPatientConditions → MedicalGroupsService.listPatientConditions → ConditionsRepository.findByPatient | `src/modules/clinical/repositories/conditions.repository.ts:92` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | MedicalGroupsController.listPatientConditions → MedicalGroupsService.listPatientConditions → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | MedicalGroupsController.listPatientConditions → MedicalGroupsService.listPatientConditions → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | MedicalGroupsController.listPatientConditions → MedicalGroupsService.listPatientConditions → ClinicalReadService.assertCanReadHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | MedicalGroupsController.listPatientConditions → MedicalGroupsService.listPatientConditions → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
 | `profiles.patient_profiles` | LEE | LEE | DIRECTA | MedicalGroupsController.listPatientConditions → MedicalGroupsService.listPatientConditions → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |

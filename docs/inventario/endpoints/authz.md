@@ -22,7 +22,7 @@
 | 8 | GET | `/authz/care-relationships/requests/mine` | Mis solicitudes de relación asistencial pendientes de decidir | BAJO | 1 | PATIENT |
 | 9 | GET | `/authz/catalog/modules` | Catálogo RBAC por módulo, con sus huecos | BAJO | 3 | SECURITY_ADMIN |
 | 10 | DELETE | `/authz/clinical-access-grants/{grantId}` | Revocar o expirar una concesión de acceso clínico | MEDIO | 4 | CLINICAL_APPROVER, SECURITY_ADMIN |
-| 11 | POST | `/authz/decisions/evaluate` | Recalcular la decisión de autorización efectiva (PDP) | BAJO | 11 | SECURITY_ADMIN |
+| 11 | POST | `/authz/decisions/evaluate` | Recalcular la decisión de autorización efectiva (PDP) | BAJO | 13 | SECURITY_ADMIN |
 | 12 | GET | `/authz/internal-users` | Usuarios internos con sus roles | BAJO | 4 | SECURITY_ADMIN |
 | 13 | GET | `/authz/legal-representations` | Listar representaciones legales de un paciente | BAJO | 1 | SECURITY_ADMIN |
 | 14 | POST | `/authz/legal-representations` | Registrar una representación legal del paciente | MEDIO | 7 | SECURITY_ADMIN |
@@ -46,7 +46,7 @@
 | 32 | PUT | `/authz/roles/{roleId}/field-permissions` | Configurar el enmascaramiento de campos del rol | MEDIO | 4 | SECURITY_ADMIN |
 | 33 | GET | `/authz/roles/{roleId}/permissions` | Permisos activos de un rol, con su efecto y ámbito | BAJO | 3 | SECURITY_ADMIN |
 | 34 | PUT | `/authz/roles/{roleId}/permissions` | Asignar permisos al rol (reemplaza los activos) | MEDIO | 4 | SECURITY_ADMIN |
-| 35 | POST | `/authz/simulations` | Simular una decisión de acceso con el PDP real | BAJO | 12 | SECURITY_ADMIN |
+| 35 | POST | `/authz/simulations` | Simular una decisión de acceso con el PDP real | BAJO | 13 | SECURITY_ADMIN |
 | 36 | POST | `/authz/tenants/{tenantId}/access-policies` | Definir una política de acceso ABAC con enmascaramiento | MEDIO | 2 | SECURITY_ADMIN |
 | 37 | GET | `/authz/users/{userId}/access-map` | «Quién puede qué» de un usuario: roles, conteos y última revisión | BAJO | 8 | SECURITY_ADMIN |
 | 38 | POST | `/authz/users/{userId}/access-reviews` | Registrar que revisaste los accesos de una cuenta | MEDIO | 4 | SECURITY_ADMIN |
@@ -1068,7 +1068,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /authz/decisions/evaluate` la atiende `AuthzPdpController.evaluate` (src/modules/authz/controllers/authz-pdp.controller.ts:53). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `EvaluateDecisionDto` (9 campos, 4 obligatorios). Delega en `AuthzPdpService.evaluate`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 3 más.
+`POST /authz/decisions/evaluate` la atiende `AuthzPdpController.evaluate` (src/modules/authz/controllers/authz-pdp.controller.ts:53). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `EvaluateDecisionDto` (9 campos, 4 obligatorios). Delega en `AuthzPdpService.evaluate`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 5 más.
 
 ### Requerimientos
 
@@ -1093,9 +1093,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.permissions` | LEE | LEE | DIRECTA | AuthzPdpController.evaluate → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | AuthzPdpController.evaluate → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | AuthzPdpController.evaluate → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | AuthzPdpController.evaluate → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | AuthzPdpController.evaluate → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | AuthzPdpController.evaluate → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | AuthzPdpController.evaluate → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | AuthzPdpController.evaluate → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | AuthzPdpController.evaluate → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | AuthzPdpController.evaluate → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 
 ### Cuerpo — DTO `EvaluateDecisionDto` · `application/json`
 
@@ -2839,7 +2841,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `authz.roles` | LEE | LEE | DIRECTA | AuthzRolesController.listAssignable → AuthzRolesService.listAssignable → RolesRepository.listAssignable | `src/modules/authz/repositories/roles.repository.ts:87` |
+| `authz.roles` | LEE | LEE | DIRECTA | AuthzRolesController.listAssignable → AuthzRolesService.listAssignable → RolesRepository.listAssignable | `src/modules/authz/repositories/roles.repository.ts:98` |
 
 ### Cuerpo
 
@@ -2910,8 +2912,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `authz.roles` | ESCRIBE | CREA | DIRECTA | AuthzRolesController.createRole → AuthzRolesService.createRole → RolesRepository.create | `src/modules/authz/repositories/roles.repository.ts:103` |
-| `authz.roles` | LEE | LEE | DIRECTA | AuthzRolesController.createRole → AuthzRolesService.createRole → RolesRepository.findByCode | `src/modules/authz/repositories/roles.repository.ts:72` |
+| `authz.roles` | ESCRIBE | CREA | DIRECTA | AuthzRolesController.createRole → AuthzRolesService.createRole → RolesRepository.create | `src/modules/authz/repositories/roles.repository.ts:114` |
+| `authz.roles` | LEE | LEE | DIRECTA | AuthzRolesController.createRole → AuthzRolesService.createRole → RolesRepository.findByCode | `src/modules/authz/repositories/roles.repository.ts:83` |
 
 ### Cuerpo — DTO `CreateRoleDto` · `application/json`
 
@@ -3101,7 +3103,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.field_permissions` | ESCRIBE | ACTUALIZA | POR_TIPO | AuthzRolesController.setFieldPermissions → AuthzRolesService.setFieldPermissions | `src/modules/authz/services/authz-roles.service.ts:284` |
 | `authz.field_permissions` | ESCRIBE | CREA | DIRECTA | AuthzRolesController.setFieldPermissions → AuthzRolesService.setFieldPermissions → FieldPermissionsRepository.create | `src/modules/authz/repositories/field-permissions.repository.ts:72` |
 | `authz.field_permissions` | LEE | LEE | DIRECTA | AuthzRolesController.setFieldPermissions → AuthzRolesService.setFieldPermissions → FieldPermissionsRepository.findOneByKey | `src/modules/authz/repositories/field-permissions.repository.ts:52` |
-| `authz.roles` | LEE | LEE | DIRECTA | AuthzRolesController.setFieldPermissions → AuthzRolesService.setFieldPermissions → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | AuthzRolesController.setFieldPermissions → AuthzRolesService.setFieldPermissions → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:72` |
 
 ### Parámetros
 
@@ -3298,7 +3300,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.permissions` | LEE | LEE | DIRECTA | AuthzRolesController.setPermissions → AuthzRolesService.setPermissions → PermissionsRepository.findById | `src/modules/authz/repositories/permissions.repository.ts:80` |
 | `authz.role_permissions` | ESCRIBE | ACTUALIZA | DIRECTA | AuthzRolesController.setPermissions → AuthzRolesService.setPermissions → RolePermissionsRepository.revokeAllForRole | `src/modules/authz/repositories/role-permissions.repository.ts:92` |
 | `authz.role_permissions` | ESCRIBE | CREA | DIRECTA | AuthzRolesController.setPermissions → AuthzRolesService.setPermissions → RolePermissionsRepository.create | `src/modules/authz/repositories/role-permissions.repository.ts:74` |
-| `authz.roles` | LEE | LEE | DIRECTA | AuthzRolesController.setPermissions → AuthzRolesService.setPermissions → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | AuthzRolesController.setPermissions → AuthzRolesService.setPermissions → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:72` |
 
 ### Parámetros
 
@@ -3400,7 +3402,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /authz/simulations` la atiende `AuthzGovernanceController.simulate` (src/modules/authz/controllers/authz-governance.controller.ts:201). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `SimulateDecisionDto` (9 campos, 4 obligatorios). Delega en `AuthzGovernanceService.simulate`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 4 más.
+`POST /authz/simulations` la atiende `AuthzGovernanceController.simulate` (src/modules/authz/controllers/authz-governance.controller.ts:201). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `SimulateDecisionDto` (9 campos, 4 obligatorios). Delega en `AuthzGovernanceService.simulate`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 5 más.
 
 ### Requerimientos
 
@@ -3425,9 +3427,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.permissions` | LEE | LEE | DIRECTA | AuthzGovernanceController.simulate → AuthzGovernanceService.simulate → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | AuthzGovernanceController.simulate → AuthzGovernanceService.simulate → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | AuthzGovernanceController.simulate → AuthzGovernanceService.simulate → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | AuthzGovernanceController.simulate → AuthzGovernanceService.simulate → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | AuthzGovernanceController.simulate → AuthzGovernanceService.simulate → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | AuthzGovernanceController.simulate → AuthzGovernanceService.simulate → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | AuthzGovernanceController.simulate → AuthzGovernanceService.simulate → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | AuthzGovernanceController.simulate → AuthzGovernanceService.simulate → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | AuthzGovernanceController.simulate → AuthzGovernanceService.simulate → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `iam.users` | LEE | LEE | POR_SQL | AuthzGovernanceController.simulate → AuthzGovernanceService.simulate → AuthzGovernanceService.requireUser → AuthzGovernanceReadRepository.userById | `src/modules/authz/repositories/authz-governance-read.repository.ts:137` |
 
 ### Cuerpo — DTO `SimulateDecisionDto` · `application/json`
@@ -4303,9 +4306,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `authz.roles` | LEE | LEE | DIRECTA | AuthzGrantsController.assignRole → AuthzGrantsService.assignRole → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
-| `authz.user_role_assignments` | ESCRIBE | CREA | DIRECTA | AuthzGrantsController.assignRole → AuthzGrantsService.assignRole → UserRoleAssignmentsRepository.create | `src/modules/authz/repositories/user-role-assignments.repository.ts:123` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | AuthzGrantsController.assignRole → AuthzGrantsService.assignRole → UserRoleAssignmentsRepository.findActive | `src/modules/authz/repositories/user-role-assignments.repository.ts:73` |
+| `authz.roles` | LEE | LEE | DIRECTA | AuthzGrantsController.assignRole → AuthzGrantsService.assignRole → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:72` |
+| `authz.user_role_assignments` | ESCRIBE | CREA | DIRECTA | AuthzGrantsController.assignRole → AuthzGrantsService.assignRole → UserRoleAssignmentsRepository.create | `src/modules/authz/repositories/user-role-assignments.repository.ts:140` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | AuthzGrantsController.assignRole → AuthzGrantsService.assignRole → UserRoleAssignmentsRepository.findActive | `src/modules/authz/repositories/user-role-assignments.repository.ts:90` |
 
 ### Parámetros
 

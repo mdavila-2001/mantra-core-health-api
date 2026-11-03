@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import {
   ConflictException,
   PreconditionFailedException,
@@ -13,6 +13,14 @@ import { SystemErrorReason } from '../../common/errors/system-error-reasons';
 import { decodeKeysetCursor } from '../../common/pagination/keyset-cursor';
 import { UiVisibilityErrorReason as R } from './ui-visibility.error-reasons';
 import type { KeysetPosition } from './repositories/ui-visibility.store';
+
+export const catalogGlobalAdminRequired = (): ForbiddenException =>
+  new ForbiddenException({
+    code: ErrorCode.FORBIDDEN,
+    reason: R.UI_CATALOG_GLOBAL_ADMIN_REQUIRED,
+    message:
+      'El catálogo global requiere un administrador de seguridad de plataforma',
+  });
 
 /**
  * Fábricas de los errores estables del módulo. Los mensajes no interpolan identificadores

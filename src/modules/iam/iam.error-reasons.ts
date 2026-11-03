@@ -98,4 +98,6 @@ export enum IamErrorReason {
   USER_SELF_LIFECYCLE_FORBIDDEN = 'USER_SELF_LIFECYCLE_FORBIDDEN',
   /** La cuenta es la última con capacidad de administrar accesos: quitarla dejaría la plataforma sin administración. */
   USER_LAST_SECURITY_ADMIN = 'USER_LAST_SECURITY_ADMIN',
+  /** Sólo un SUPERADMIN global puede cambiar el ciclo de vida de otro SUPERADMIN. */
+  USER_SUPERADMIN_LIFECYCLE_FORBIDDEN = 'USER_SUPERADMIN_LIFECYCLE_FORBIDDEN',
 }

@@ -343,7 +343,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `authz.roles` | LEE | LEE | DIRECTA | AdminUiVisibilityController.preview → UiVisibilityAdminService.preview → MikroOrmUiVisibilityStore.roleNames | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:435` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | AdminUiVisibilityController.preview → UiVisibilityAdminService.preview → MikroOrmUiVisibilityStore.effectiveRoleCodes → AuthzEffectiveRolesService.scopedAssignmentsForUser → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | AdminUiVisibilityController.preview → UiVisibilityAdminService.preview → MikroOrmUiVisibilityStore.effectiveRoleCodes → AuthzEffectiveRolesService.scopedAssignmentsForUser → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | AdminUiVisibilityController.preview → UiVisibilityAdminService.preview → MikroOrmUiVisibilityStore.userInTenant | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:445` |
 | `directory.tenants` | LEE | LEE | DIRECTA | AdminUiVisibilityController.preview → UiVisibilityAdminService.preview → MikroOrmUiVisibilityStore.orgTypeOfTenant | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:456` |
 | `iam.user_global_roles` | LEE | LEE | DIRECTA | AdminUiVisibilityController.preview → UiVisibilityAdminService.preview → MikroOrmUiVisibilityStore.effectiveRoleCodes | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:468` |
@@ -611,6 +611,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
 | `If-Match` | header | Sí | `string` | Versión de la regla que se leyó |
 
 ### Cuerpo — DTO `UpdateRuleDto` · `application/json`
@@ -703,6 +704,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `authz.ui_visibility_elements` | LEE | LEE | DIRECTA | AdminUiVisibilityController.endRule → UiVisibilityAdminService.endRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.findElementsByIds | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:193` |
 | `directory.tenants` | LEE | LEE | DIRECTA | AdminUiVisibilityController.endRule → UiVisibilityAdminService.endRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.tenantLabels | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:427` |
 | `iam.users` | LEE | LEE | DIRECTA | AdminUiVisibilityController.endRule → UiVisibilityAdminService.endRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.userLabels | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:417` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
 
 ### Cuerpo
 

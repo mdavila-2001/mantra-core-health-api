@@ -19,6 +19,8 @@ import { OpsToolsService } from '../../application/ops-tools.service';
 import { TOOL_CATALOG } from '../../domain/tool-catalog';
 import { OPS_READ_ROLES } from './ops-console.controller';
 import { OpsToolsController } from './ops-tools.controller';
+import { OpsToolsController as RegistryController } from '../../../platform_ops/controllers/ops-tools.controller';
+import { OpsToolsService as RegistryService } from '../../../platform_ops/services/ops-tools.service';
 
 /**
  * `GET /admin/ops/tools` con los guards reales (JWT y roles) y el servicio
@@ -43,8 +45,16 @@ describe('GET /admin/ops/tools (HTTP)', () => {
   beforeAll(async () => {
     const modulo = await Test.createTestingModule({
       imports: [PassportModule, AuthTokenModule],
-      controllers: [OpsToolsController],
+      // Mismo orden que AppModule: el catálogo persistido se registra primero.
+      controllers: [RegistryController, OpsToolsController],
       providers: [
+        {
+          provide: RegistryService,
+          useValue: {
+            list: jest.fn(async () => ({ items: [], notMeasured: [] })),
+            get: jest.fn(async () => ({ code: 'redis', history: [] })),
+          },
+        },
         OpsToolsService,
         {
           provide: AppReadinessService,
@@ -106,6 +116,14 @@ describe('GET /admin/ops/tools (HTTP)', () => {
     expect(Reflect.getMetadata(ROLES_KEY, proto.tools)).toEqual([
       ...OPS_READ_ROLES,
     ]);
+  });
+
+  it('el catálogo persistido conserva una ruta propia sin ocultar ops-tools/v1', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/admin/ops/tool-registry')
+      .set('Authorization', `Bearer ${token(['SRE'])}`)
+      .expect(200);
+    expect(res.body).toEqual({ items: [], notMeasured: [] });
   });
 
   it('sin token → 401', async () => {

@@ -3,9 +3,9 @@
 # Endpoints del módulo `accounting`
 
 - **Bloque:** Financiero y ERP (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
-- **Operaciones:** 63 (63 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 5 · MEDIO 34 · BAJO 24
-- **Tablas distintas que tocan:** 61
+- **Operaciones:** 68 (68 en el contrato, 0 sólo en el código)
+- **Riesgo:** ALTO 5 · MEDIO 37 · BAJO 26
+- **Tablas distintas que tocan:** 62
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/accounting.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -75,6 +75,11 @@
 | 61 | DELETE | `/accounting/practitioner/simple/transactions/{id}` | Borrar una transacción debe/haber | ALTO | 4 | PRACTITIONER |
 | 62 | PUT | `/accounting/practitioner/simple/transactions/{id}` | Editar una transacción debe/haber | MEDIO | 5 | PRACTITIONER |
 | 63 | GET | `/accounting/trial-balance` | Balance de sumas y saldos | BAJO | 5 | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER |
+| 64 | GET | `/admin/accounting/report-templates` | Plantillas de presentación contable por tipo de usuario | BAJO | 1 | SUPERADMIN, SECURITY_ADMIN, PLATFORM_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER |
+| 65 | POST | `/admin/accounting/report-templates` | Crear una plantilla global sin modificar cuentas ni asientos | MEDIO | 1 | SUPERADMIN |
+| 66 | GET | `/admin/accounting/report-templates/{id}` | Leer una plantilla de presentación contable | BAJO | 1 | SUPERADMIN, SECURITY_ADMIN, PLATFORM_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER |
+| 67 | PUT | `/admin/accounting/report-templates/{id}` | Editar presentación con control de versión (409 si cambió) | MEDIO | 2 | SUPERADMIN |
+| 68 | POST | `/admin/accounting/report-templates/{id}/end` | Desactivar una plantilla sin borrarla (idempotente) | MEDIO | 2 | SUPERADMIN |
 
 ---
 
@@ -6873,6 +6878,476 @@ _Ninguna prueba existente menciona esta operación._
 ### Flujos
 
 - Módulo 16 — Accounting (Libro Mayor y Subledgers) — etapa `ctrl:AccountingLedgerController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 64. GET /admin/accounting/report-templates
+
+- **Origen:** CONTRATO
+- **Nombre:** Plantillas de presentación contable por tipo de usuario
+- **Bloque:** Financiero y ERP
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `ReportTemplatesController.list` — `src/modules/accounting/report-templates/report-templates.controller.ts:44`
+
+### Qué es y para qué sirve (negocio)
+
+Plantillas de presentación contable por tipo de usuario. Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`GET /admin/accounting/report-templates` la atiende `ReportTemplatesController.list` (src/modules/accounting/report-templates/report-templates.controller.ts:44). Exige sesión con alguno de los roles SUPERADMIN, SECURITY_ADMIN, PLATFORM_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER. Delega en `ReportTemplatesService.list`. Lee accounting.report_presentation_templates.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SUPERADMIN, SECURITY_ADMIN, PLATFORM_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER | `src/modules/accounting/report-templates/report-templates.controller.ts:44` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `accounting.report_presentation_templates (vista u objeto no catalogado)` | LEE | LEE | POR_SQL | ReportTemplatesController.list → ReportTemplatesService.list → ReportTemplatesRepository.list | `src/modules/accounting/report-templates/report-templates.repository.ts:52` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `userType` | query | No | `string` | — |
+| `after` | query | No | `string` | — |
+| `limit` | query | No | `number` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/accounting.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 16 — Accounting (Libro Mayor y Subledgers) — etapa `ctrl:ReportTemplatesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 65. POST /admin/accounting/report-templates
+
+- **Origen:** CONTRATO
+- **Nombre:** Crear una plantilla global sin modificar cuentas ni asientos
+- **Bloque:** Financiero y ERP
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `ReportTemplatesController.create` — `src/modules/accounting/report-templates/report-templates.controller.ts:80`
+
+### Qué es y para qué sirve (negocio)
+
+Crear una plantilla global sin modificar cuentas ni asientos. Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`POST /admin/accounting/report-templates` la atiende `ReportTemplatesController.create` (src/modules/accounting/report-templates/report-templates.controller.ts:80). Exige sesión con alguno de los roles SUPERADMIN. Valida el cuerpo como `CreateReportTemplateDto` (7 campos, 7 obligatorios). Delega en `ReportTemplatesService.create`. Crea filas en accounting.report_presentation_templates.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SUPERADMIN | `src/modules/accounting/report-templates/report-templates.controller.ts:80` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `accounting.report_presentation_templates (vista u objeto no catalogado)` | ESCRIBE | CREA | POR_SQL | ReportTemplatesController.create → ReportTemplatesService.create → ReportTemplatesRepository.create | `src/modules/accounting/report-templates/report-templates.repository.ts:87` |
+
+### Cuerpo — DTO `CreateReportTemplateDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `name` | `string` | Sí | longitud mínima 1; longitud máxima 160 | `@Transform(trim)` `@IsString()` `@MinLength(1)` `@MaxLength(160)` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:61` |
+| `reportKind` | `string` | Sí | valores: TRIAL_BALANCE, GENERAL_LEDGER, INCOME_STATEMENT | `@IsIn(Object.keys(REPORT_COLUMNS))` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:64` |
+| `columns` | `array<ReportTemplateColumnDto>` | Sí | mínimo 1 elemento(s); máximo 20 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ArrayMaxSize(20)` `@ValidateNested({ each: true })` `@Type(() => ReportTemplateColumnDto)` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:71` |
+| `columns[].key` | `string` | Sí | longitud máxima 64 | `@IsString()` `@MaxLength(64)` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:46` |
+| `columns[].label` | `string` | Sí | longitud mínima 1; longitud máxima 80 | `@Transform(trim)` `@IsString()` `@MinLength(1)` `@MaxLength(80)` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:52` |
+| `userType` | `string` | Sí | valores: PATIENT, PRACTITIONER, HEALTH_FACILITY, LABORATORY, PHARMACY, INSURER | `@IsIn(TEMPLATE_AUDIENCES)` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:77` |
+| `code` | `string` | Sí | patrón ^[A-Z][A-Z0-9_]{1,79}$; patrón runtime /^[A-Z][A-Z0-9_]{1,79}$/ | `@Matches(/^[A-Z][A-Z0-9_]{1,79}$/)` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:80` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "name": "Nombre de ejemplo",
+  "reportKind": "TRIAL_BALANCE",
+  "columns": [
+    {
+      "key": "valor-ejemplo",
+      "label": "valor-ejemplo"
+    }
+  ],
+  "userType": "PATIENT",
+  "code": "CODIGO_EJEMPLO"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "name": "Nombre de ejemplo",
+  "reportKind": "TRIAL_BALANCE",
+  "columns": [
+    {
+      "key": "valor-ejemplo",
+      "label": "valor-ejemplo"
+    }
+  ],
+  "userType": "PATIENT",
+  "code": "CODIGO_EJEMPLO"
+}
+```
+
+</details>
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra); BadRequestException: {{ code: 'VALIDATION_FAILED', reason: AccountingErrorReason.…} |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {{ code: 'FORBIDDEN', reason: AccountingErrorReason.REPORT_T…} |
+| 409 | `CONFLICT` | ConflictException: Ya existe ese código para el tipo de usuario |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/accounting.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 16 — Accounting (Libro Mayor y Subledgers) — etapa `ctrl:ReportTemplatesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 66. GET /admin/accounting/report-templates/{id}
+
+- **Origen:** CONTRATO
+- **Nombre:** Leer una plantilla de presentación contable
+- **Bloque:** Financiero y ERP
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `ReportTemplatesController.get` — `src/modules/accounting/report-templates/report-templates.controller.ts:62`
+
+### Qué es y para qué sirve (negocio)
+
+Leer una plantilla de presentación contable. Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`GET /admin/accounting/report-templates/{id}` la atiende `ReportTemplatesController.get` (src/modules/accounting/report-templates/report-templates.controller.ts:62). Exige sesión con alguno de los roles SUPERADMIN, SECURITY_ADMIN, PLATFORM_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER. Delega en `ReportTemplatesService.get`. Lee accounting.report_presentation_templates.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SUPERADMIN, SECURITY_ADMIN, PLATFORM_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER | `src/modules/accounting/report-templates/report-templates.controller.ts:62` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/accounting/report-templates/report-templates.controller.ts:62` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `accounting.report_presentation_templates (vista u objeto no catalogado)` | LEE | LEE | POR_SQL | ReportTemplatesController.get → ReportTemplatesService.get → ReportTemplatesRepository.get | `src/modules/accounting/report-templates/report-templates.repository.ts:71` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La plantilla no existe |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/accounting.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 16 — Accounting (Libro Mayor y Subledgers) — etapa `ctrl:ReportTemplatesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 67. PUT /admin/accounting/report-templates/{id}
+
+- **Origen:** CONTRATO
+- **Nombre:** Editar presentación con control de versión (409 si cambió)
+- **Bloque:** Financiero y ERP
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `ReportTemplatesController.update` — `src/modules/accounting/report-templates/report-templates.controller.ts:100`
+
+### Qué es y para qué sirve (negocio)
+
+Editar presentación con control de versión (409 si cambió). Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`PUT /admin/accounting/report-templates/{id}` la atiende `ReportTemplatesController.update` (src/modules/accounting/report-templates/report-templates.controller.ts:100). Exige sesión con alguno de los roles SUPERADMIN. Valida el cuerpo como `UpdateReportTemplateDto` (7 campos, 7 obligatorios). Delega en `ReportTemplatesService.update`. Actualiza accounting.report_presentation_templates. Lee accounting.report_presentation_templates.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SUPERADMIN | `src/modules/accounting/report-templates/report-templates.controller.ts:100` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/accounting/report-templates/report-templates.controller.ts:100` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `accounting.report_presentation_templates (vista u objeto no catalogado)` | ESCRIBE | ACTUALIZA | POR_SQL | ReportTemplatesController.update → ReportTemplatesService.update → ReportTemplatesRepository.update | `src/modules/accounting/report-templates/report-templates.repository.ts:113` |
+| `accounting.report_presentation_templates (vista u objeto no catalogado)` | LEE | LEE | POR_SQL | ReportTemplatesController.update → ReportTemplatesService.update → ReportTemplatesService.get → ReportTemplatesRepository.get | `src/modules/accounting/report-templates/report-templates.repository.ts:71` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `UpdateReportTemplateDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `name` | `string` | Sí | longitud mínima 1; longitud máxima 160 | `@Transform(trim)` `@IsString()` `@MinLength(1)` `@MaxLength(160)` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:61` |
+| `reportKind` | `string` | Sí | valores: TRIAL_BALANCE, GENERAL_LEDGER, INCOME_STATEMENT | `@IsIn(Object.keys(REPORT_COLUMNS))` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:64` |
+| `columns` | `array<ReportTemplateColumnDto>` | Sí | mínimo 1 elemento(s); máximo 20 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ArrayMaxSize(20)` `@ValidateNested({ each: true })` `@Type(() => ReportTemplateColumnDto)` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:71` |
+| `columns[].key` | `string` | Sí | longitud máxima 64 | `@IsString()` `@MaxLength(64)` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:46` |
+| `columns[].label` | `string` | Sí | longitud mínima 1; longitud máxima 80 | `@Transform(trim)` `@IsString()` `@MinLength(1)` `@MaxLength(80)` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:52` |
+| `expectedRowVersion` | `number` | Sí | mínimo 1 | `@IsInt()` `@Min(1)` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:84` |
+| `isActive` | `boolean` | Sí | — | `@IsBoolean()` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:85` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "name": "Nombre de ejemplo",
+  "reportKind": "TRIAL_BALANCE",
+  "columns": [
+    {
+      "key": "valor-ejemplo",
+      "label": "valor-ejemplo"
+    }
+  ],
+  "expectedRowVersion": 1,
+  "isActive": true
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "name": "Nombre de ejemplo",
+  "reportKind": "TRIAL_BALANCE",
+  "columns": [
+    {
+      "key": "valor-ejemplo",
+      "label": "valor-ejemplo"
+    }
+  ],
+  "expectedRowVersion": 1,
+  "isActive": true
+}
+```
+
+</details>
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra); BadRequestException: {{ code: 'VALIDATION_FAILED', reason: AccountingErrorReason.…} |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {{ code: 'FORBIDDEN', reason: AccountingErrorReason.REPORT_T…} |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La plantilla no existe |
+| 409 | `CONFLICT` | ConflictException: La plantilla cambió: vuelva a leerla antes de editar |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/accounting.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 16 — Accounting (Libro Mayor y Subledgers) — etapa `ctrl:ReportTemplatesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 68. POST /admin/accounting/report-templates/{id}/end
+
+- **Origen:** CONTRATO
+- **Nombre:** Desactivar una plantilla sin borrarla (idempotente)
+- **Bloque:** Financiero y ERP
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `ReportTemplatesController.end` — `src/modules/accounting/report-templates/report-templates.controller.ts:121`
+
+### Qué es y para qué sirve (negocio)
+
+Desactivar una plantilla sin borrarla (idempotente). Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`POST /admin/accounting/report-templates/{id}/end` la atiende `ReportTemplatesController.end` (src/modules/accounting/report-templates/report-templates.controller.ts:121). Exige sesión con alguno de los roles SUPERADMIN. Valida el cuerpo como `EndReportTemplateDto` (1 campo, 1 obligatorio). Delega en `ReportTemplatesService.end`. Actualiza accounting.report_presentation_templates. Lee accounting.report_presentation_templates.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SUPERADMIN | `src/modules/accounting/report-templates/report-templates.controller.ts:121` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/accounting/report-templates/report-templates.controller.ts:121` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `accounting.report_presentation_templates (vista u objeto no catalogado)` | ESCRIBE | ACTUALIZA | POR_SQL | ReportTemplatesController.end → ReportTemplatesService.end → ReportTemplatesRepository.end | `src/modules/accounting/report-templates/report-templates.repository.ts:138` |
+| `accounting.report_presentation_templates (vista u objeto no catalogado)` | LEE | LEE | POR_SQL | ReportTemplatesController.end → ReportTemplatesService.end → ReportTemplatesService.get → ReportTemplatesRepository.get | `src/modules/accounting/report-templates/report-templates.repository.ts:71` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `EndReportTemplateDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `expectedRowVersion` | `number` | Sí | mínimo 1 | `@IsInt()` `@Min(1)` | — | `src/modules/accounting/report-templates/report-templates.dto.ts:89` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "expectedRowVersion": 1
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "expectedRowVersion": 1
+}
+```
+
+</details>
+
+### Respuesta — `no declarado` · HTTP `200`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {{ code: 'FORBIDDEN', reason: AccountingErrorReason.REPORT_T…} |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La plantilla no existe |
+| 409 | `CONFLICT` | ConflictException: La plantilla cambió: vuelva a leerla antes de desactivar |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/accounting.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 16 — Accounting (Libro Mayor y Subledgers) — etapa `ctrl:ReportTemplatesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 

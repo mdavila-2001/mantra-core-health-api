@@ -1,4 +1,9 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import * as argon2 from 'argon2';
@@ -10,6 +15,7 @@ import {
   decodeKeysetCursor,
   encodeKeysetCursor,
   touch,
+  roleAuthorizesInTenant,
   type AuthenticatedUser,
 } from '../../../../common';
 import { IamErrorReason } from '../../iam.error-reasons';
@@ -43,6 +49,10 @@ import {
   type UserLifecycleState,
 } from '../../domain/user-lifecycle';
 import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
+import {
+  BUSINESS_ROLES_PORT,
+  type BusinessRolesPort,
+} from '../ports/business-roles.port';
 
 /** Estado de la cuenta (concepto) al que lleva cada estado de ciclo de vida. */
 const STATUS_CONCEPT_OF_STATE: Readonly<
@@ -96,6 +106,8 @@ export class IamUsersService {
     @Inject(COMMON_RECORDS_PORT)
     private readonly commonRecords: CommonRecordsPort,
     private readonly logger: PinoLogger,
+    @Inject(BUSINESS_ROLES_PORT)
+    private readonly businessRoles: BusinessRolesPort,
   ) {
     this.logger.setContext(IamUsersService.name);
   }
@@ -371,6 +383,17 @@ export class IamUsersService {
           { userId },
           IamErrorReason.USER_NOT_FOUND,
         );
+      const grants = await this.rolesRepo.findActiveForUser(tx, userId);
+      if (
+        grants.some((g) => g.roleConceptId === CONCEPTS.ROLE_SUPERADMIN) &&
+        !roleAuthorizesInTenant(actor, 'SUPERADMIN', undefined)
+      )
+        throw new ForbiddenException({
+          code: 'FORBIDDEN',
+          reason: IamErrorReason.USER_SUPERADMIN_LIFECYCLE_FORBIDDEN,
+          message:
+            'Sólo un SUPERADMIN de plataforma puede modificar esta cuenta',
+        });
       const from = await this.lifecycleStateOf(
         tx,
         userId,
@@ -388,7 +411,6 @@ export class IamUsersService {
         );
 
       if (action !== 'REACTIVATE') {
-        const grants = await this.rolesRepo.findActiveForUser(tx, userId);
         const isAccessAdmin = grants.some((g) =>
           (ACCESS_ADMIN_ROLE_CONCEPTS as readonly string[]).includes(
             g.roleConceptId,
@@ -448,6 +470,7 @@ export class IamUsersService {
         if (action === 'DEACTIVATE') {
           await this.credentialsRepo.revokeAllForUser(tx, userId);
           await this.rolesRepo.revokeAllForUser(tx, userId);
+          await this.businessRoles.revokeAllForUser(tx, userId, actor.id);
         }
       }
 

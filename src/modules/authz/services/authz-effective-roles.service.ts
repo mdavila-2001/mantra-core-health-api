@@ -21,6 +21,15 @@ import { UserRoleAssignmentsRepository } from '../repositories';
  */
 @Injectable()
 export class AuthzEffectiveRolesService {
+  /** Baja de cuenta: conserva las filas y revoca asignaciones en cualquier ámbito. */
+  revokeAllForUser(
+    em: EntityManager,
+    userId: string,
+    actorUserId: string,
+  ): Promise<number> {
+    return this.assignmentsRepo.revokeAllForUser(em, userId, actorUserId);
+  }
+
   /**
    * Inicializa la instancia y sus dependencias.
    *

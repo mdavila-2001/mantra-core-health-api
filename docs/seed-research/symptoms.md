@@ -47,40 +47,35 @@ Estado de la carga:
 - No hay en este repo un catálogo de motivos de consulta del triage: el AI
   Service vive en otro repositorio (no está en el alcance de la sesión).
 - No hay `CLAUDE.md` ni `.claude/rules/` en el repo.
-- **`concept_relationships` sólo tiene origen, destino, tipo y ordinal.** No
-  puede guardar la fuente, la frecuencia ni la evidencia de cada relación. Según
-  la orden, se paró la carga de relaciones y se redactó la propuesta.
+- `concept_relationships` tiene columnas derivadas de fuerza y cantidad de evidencia.
+  La evidencia 1:N vive en `terminology.concept_relationship_evidence` del modelo
+  v4.2.50+ (`SQL/03_terminology`), con versión de fuente, nivel de evidencia,
+  frecuencia, cita y vigencia.
 
-## Modelo: qué tiene que cambiar el repo del modelo
+## Modelo y carga de evidencia
 
-Propuesta completa en
-`tools/terminology-import/symptoms/proposal/concept_relationship_evidence.sql`
-(no es una migración; la API no escribe DDL, ADR-0021).
+`load-disease-phenotypes.mjs` adapta el plan interno de síntomas al contrato
+canónico mediante `lib/evidence-contract.mjs` y utiliza `bulkLoadRelationships`.
+El mismo cargador resuelve la clave natural de las aristas, los value sets de
+nivel/frecuencia, el upsert idempotente y el cálculo de fuerza.
 
-1. **Tabla nueva `terminology.concept_relationship_evidence`**, 1:N con
-   `concept_relationships`: `relationship_id`, `source_id`
-   (→ `terminology_sources`), `source_record_key` (id estable de la línea o
-   axioma), `source_version`, `source_uri`, `retrieved_at`, `negated`,
-   `frequency_text` (tal como viene), `frequency_concept_id` (término HPO de
-   frecuencia), `frequency_numerator`/`frequency_denominator`,
-   `frequency_percent`, `evidence_code` (PCS/TAS/IEA/ITM…),
-   `onset_concept_id`, `sex`, `source_references` (jsonb), `qualifiers` (jsonb:
-   código y nombre tal como se publicaron, aspecto, modificadores, biocuración).
-   Único por `(relationship_id, source_id, source_record_key)`.
-   *Por qué 1:N y no columnas:* una misma arista la afirman varias líneas
-   (Marfan → aracnodactilia: OMIM con 124/197 y PCS; Orphanet con «Muy
-   frecuente» y TAS). Con columnas se perdería una de las dos.
-2. **Concepto nuevo `REL_SYMPTOM_EXCLUDED`**
-   (`terminology:relationship:symptom-excluded`) en `concepts.ts`: es dato que
-   siembra la API, no DDL. HPOA trae 733 anotaciones `NOT` (la enfermedad
-   **no** presenta el rasgo); nunca pueden cargarse como `REL_SYMPTOM`. Sin
-   el concepto, el cargador las omite y lo cuenta.
+Cada lote pertenece a una fuente y su versión. `valid_from` procede de la fecha
+de release declarada; una versión sin fecha válida se rechaza. No se sustituye
+por la fecha de descarga. La cita (`citation_text`) conserva un JSON textual del
+registro publicado: evidencia PCS/TAS/IEA/ITM, referencias, negación, frecuencia
+original, inicio, sexo, modificadores y procedencia. Las columnas estructuradas
+usan las mismas reglas HPO del cargador F3; no se inventa un concepto de sexo.
+La extracción de texto `ITM` se clasifica como literatura estadística, no como
+referencia curada por tener un PMID.
 
-Validación de la propuesta en la base desechable (con Mondo como sustituto): 345 258 aristas
-enfermedad → síntoma (344 258 `REL_SYMPTOM` + 723 `REL_SYMPTOM_EXCLUDED`) y
-372 928 filas de evidencia en 52 s; segunda corrida 0/0 en 31 s. Con el catálogo real de `seed-diseases`: 402 633 aristas y 403 959 evidencias (§ Dependencia). Muestra (Marfan, `MONDO:0007947`): «Aracnodactilia» con `124/197` PCS
-desde `OMIM:154700` y con «Muy frecuente» TAS desde `ORPHA:558`, en la misma
-arista.
+Si una fuente sólo declara el año (caso del corpus de enfermedades comunes),
+`--source-release-dates archivo.json` admite un mapa `{ "hpo-common-disease": "AAAA-MM-DD" }`
+con la fecha de publicación documentada. No se inventa un día del año.
+
+La relación negada utiliza `REL_SYMPTOM_EXCLUDED` cuando ese concepto existe.
+En caso contrario se omite y se cuenta; nunca se transforma en afirmación.
+`--check` comprueba resolución y contrato sin insertar fuentes ni lotes.
+La API no declara una tabla alternativa ni aplica DDL desde este importador.
 
 ## Protocolo de saturación
 

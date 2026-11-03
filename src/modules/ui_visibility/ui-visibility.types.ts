@@ -78,6 +78,8 @@ export interface UiAdminActor {
   readonly userId: string;
   /** `SUPERADMIN` de plataforma: ve y toca todo. */
   readonly isPlatform: boolean;
+  /** Facultad global de editar el catálogo, distinta del alcance de reglas de organizaciones. */
+  readonly canManageCatalog?: boolean;
   /** Organización activa del request; `null` si no hay (sólo un SUPERADMIN sin cabecera). */
   readonly tenantId: string | null;
 }

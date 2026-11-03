@@ -88,7 +88,8 @@ const DEFAULT_USERS_PAGE_SIZE = 50;
  * la cuenta que ya está en ese estado responde 200 con `changed: false` y no escribe. Errores:
  * 400 (`reason` ausente o vacío, clave no declarada), 404 `USER_NOT_FOUND`, 409
  * `USER_LIFECYCLE_TRANSITION_INVALID`, 412 `USER_SELF_LIFECYCLE_FORBIDDEN` /
- * `USER_LAST_SECURITY_ADMIN`, 401 sin token, 403 `ROLE_INSUFFICIENT`.
+ * `USER_LAST_SECURITY_ADMIN`, 401 sin token, 403 `ROLE_INSUFFICIENT` /
+ * `USER_SUPERADMIN_LIFECYCLE_FORBIDDEN` (sólo SUPERADMIN global modifica otro SUPERADMIN).
  * Contrato completo: `docs/trabajo/2026-10-30-perfil-admin-medicion-gobierno/contratos/H5-permisos-y-usuarios.md`.
  */
 @ApiTags('iam-users')

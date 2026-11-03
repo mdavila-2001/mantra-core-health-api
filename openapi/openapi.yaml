@@ -3430,6 +3430,7 @@ paths:
       description: >-
         Registrarse como secretaria (personal de apoyo hospitalario). Requiere JWT y los roles o alcances declarados por
         el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+      security: []
   /iam/auth/register-organization:
     post:
       operationId: IamAuthController_registerOrganization
@@ -37029,8 +37030,16 @@ paths:
   /admin/governance/data-quality/issues/{id}:
     get:
       operationId: AdminDataQualityController_issue
-      parameters: []
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            format: uuid
+            type: string
       responses:
+        '200':
+          description: Incidencia de calidad de datos clínicos
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -37059,7 +37068,13 @@ paths:
         Idempotente: repetir la misma acción devuelve 200 con `alreadyApplied: true`. Pedir la contraria sobre una
         incidencia ya cerrada responde 409.
       operationId: AdminDataQualityController_resolve
-      parameters: []
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            format: uuid
+            type: string
       requestBody:
         required: true
         content:
@@ -37067,6 +37082,8 @@ paths:
             schema:
               $ref: '#/components/schemas/ResolveIssueDto'
       responses:
+        '200':
+          description: Incidencia resuelta o acción ya aplicada
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -37161,8 +37178,16 @@ paths:
   /admin/governance/data-quality/rules/{id}:
     get:
       operationId: AdminDataQualityController_rule
-      parameters: []
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            format: uuid
+            type: string
       responses:
+        '200':
+          description: Regla de calidad con incidencias y corridas
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -37452,6 +37477,12 @@ paths:
     patch:
       operationId: AdminUiVisibilityController_updateRule
       parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            format: uuid
+            type: string
         - name: If-Match
           in: header
           description: Versión de la regla que se leyó
@@ -37498,7 +37529,13 @@ paths:
   /admin/ui-visibility/rules/{id}/end:
     post:
       operationId: AdminUiVisibilityController_endRule
-      parameters: []
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            format: uuid
+            type: string
       responses:
         '200':
           description: ''
@@ -79072,6 +79109,7 @@ paths:
       description: >-
         Registra un lote de errores del cliente (saneados en el servidor). Requiere JWT y los roles o alcances
         declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+      security: []
   /telemetry/retention/purge:
     post:
       operationId: TelemetryRetentionController_purge
@@ -82005,6 +82043,266 @@ paths:
       summary: Detalle de un estudio del catálogo
       tags:
         - study-catalog
+  /admin/ops/tool-registry:
+    get:
+      description: >-
+        Lista completa (no paginada). `health.state` es NOT_PROBED cuando nadie lo midió; CONFIGURATION solo verifica
+        que existan las variables requeridas y devuelve sus nombres, nunca valores; LIVE solo con una comprobación real
+        y reciente en health_check_runs.
+      operationId: OpsToolsController_list
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ToolListResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Herramientas del catálogo con su salud
+      tags:
+        - ops-tools
+  /admin/accounting/report-templates:
+    get:
+      description: Catálogo global paginado por UUID. La audiencia clasifica la presentación y no concede acceso a datos contables.
+      operationId: ReportTemplatesController_list
+      parameters:
+        - name: userType
+          required: false
+          in: query
+          schema:
+            type: string
+            enum:
+              - PATIENT
+              - PRACTITIONER
+              - HEALTH_FACILITY
+              - LABORATORY
+              - PHARMACY
+              - INSURER
+        - name: after
+          required: false
+          in: query
+          schema:
+            format: uuid
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 100
+            default: 25
+            type: number
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportTemplateListDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Plantillas de presentación contable por tipo de usuario
+      tags:
+        - accounting-report-templates
+    post:
+      description: Sólo SUPERADMIN global. Código único por audiencia y columnas limitadas al contrato del reporte.
+      operationId: ReportTemplatesController_create
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReportTemplateDto'
+      responses:
+        '201':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportTemplateResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Crear una plantilla global sin modificar cuentas ni asientos
+      tags:
+        - accounting-report-templates
+  /admin/accounting/report-templates/{id}:
+    get:
+      description: Devuelve columnas, rótulos, estado y versión. No devuelve saldos ni ejecuta el reporte.
+      operationId: ReportTemplatesController_get
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportTemplateResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Leer una plantilla de presentación contable
+      tags:
+        - accounting-report-templates
+    put:
+      description: Compara expectedRowVersion en la escritura. Conserva código y audiencia; permite reactivar con isActive.
+      operationId: ReportTemplatesController_update
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateReportTemplateDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportTemplateResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Editar presentación con control de versión (409 si cambió)
+      tags:
+        - accounting-report-templates
+  /admin/accounting/report-templates/{id}/end:
+    post:
+      description: Conserva el registro y su auditoría. Repetir la desactivación no incrementa la versión.
+      operationId: ReportTemplatesController_end
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EndReportTemplateDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportTemplateResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Desactivar una plantilla sin borrarla (idempotente)
+      tags:
+        - accounting-report-templates
 info:
   title: ALOVIDA Health API
   description: >-
@@ -82050,6 +82348,8 @@ tags:
     description: >-
       Operaciones del dominio funcional accounting practitioner. Consulte el catálogo Markdown de endpoints para
       payloads mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: accounting-report-templates
+    description: Plantillas de presentación contable por audiencia
   - name: accounting-subledger
     description: >-
       Operaciones del dominio funcional accounting subledger. Consulte el catálogo Markdown de endpoints para payloads
@@ -82602,6 +82902,10 @@ tags:
     description: >-
       Operaciones del dominio funcional iam users. Consulte el catálogo Markdown de endpoints para payloads mínimos,
       restricciones, ejemplos completos y semántica de negocio.
+  - name: identity_assurance
+    description: >-
+      Operaciones del dominio funcional identity_assurance. Consulte el catálogo Markdown de endpoints para payloads
+      mínimos, restricciones, ejemplos completos y semántica de negocio.
   - name: identity-assertions
     description: >-
       Operaciones del dominio funcional identity assertions. Consulte el catálogo Markdown de endpoints para payloads
@@ -82630,10 +82934,6 @@ tags:
     description: >-
       Operaciones del dominio funcional identity verification cases. Consulte el catálogo Markdown de endpoints para
       payloads mínimos, restricciones, ejemplos completos y semántica de negocio.
-  - name: identity_assurance
-    description: >-
-      Operaciones del dominio funcional identity_assurance. Consulte el catálogo Markdown de endpoints para payloads
-      mínimos, restricciones, ejemplos completos y semántica de negocio.
   - name: insurance
     description: >-
       Operaciones del dominio funcional insurance. Consulte el catálogo Markdown de endpoints para payloads mínimos,
@@ -99530,15 +99830,15 @@ components:
             El plan cubre el servicio y el reparto se pudo calcular. No implica que el cobro se pueda enviar: mire
             `reason`.
         coveragePercent:
-          type: object
+          type: string
           example: '80'
           nullable: true
         copayAmount:
-          type: object
+          type: string
           example: '50.00'
           nullable: true
         deductibleAmount:
-          type: object
+          type: string
           example: '25.00'
           nullable: true
           description: 'Informativo: el deducible todavía no se aplica al reparto (decisión del propietario).'
@@ -99558,11 +99858,11 @@ components:
           nullable: true
           description: '`null` si el servicio no tiene beneficio vigente.'
         patientAmount:
-          type: object
+          type: string
           example: '140.00'
           nullable: true
         insurerAmount:
-          type: object
+          type: string
           example: '360.00'
           nullable: true
         reason:
@@ -99590,17 +99890,17 @@ components:
           format: uuid
           nullable: true
         totalBilledAmount:
-          type: object
+          type: string
           example: '500.00'
           nullable: true
           description: '`null` si algún monto no es un decimal válido.'
         totalPatientAmount:
-          type: object
+          type: string
           example: '140.00'
           nullable: true
           description: '`null` mientras alguna línea no tenga reparto calculable.'
         totalInsurerAmount:
-          type: object
+          type: string
           example: '360.00'
           nullable: true
         lines:
@@ -99722,11 +100022,11 @@ components:
           type: string
           example: '500.00'
         coveragePercent:
-          type: object
+          type: string
           example: '80'
           nullable: true
         copayAmount:
-          type: object
+          type: string
           example: '50.00'
           nullable: true
         patientAmount:
@@ -108283,7 +108583,6 @@ components:
       required:
         - action
         - note
-      additionalProperties: false
     CreateElementDto:
       type: object
       properties:
@@ -108323,7 +108622,6 @@ components:
         - kind
         - moduleCode
         - label
-      additionalProperties: false
     UiElementDraftDto:
       type: object
       properties:
@@ -108363,7 +108661,6 @@ components:
         - moduleCode
         - label
         - defaultVisible
-      additionalProperties: false
     SyncElementsDto:
       type: object
       properties:
@@ -108374,7 +108671,6 @@ components:
             $ref: '#/components/schemas/UiElementDraftDto'
       required:
         - elements
-      additionalProperties: false
     CreateRuleDto:
       type: object
       properties:
@@ -108418,7 +108714,6 @@ components:
         - effect
         - subjectType
         - reason
-      additionalProperties: false
     UpdateRuleDto:
       type: object
       properties:
@@ -108439,7 +108734,6 @@ components:
           type: string
           minLength: 10
           maxLength: 500
-      additionalProperties: false
     RuntimePieceItemDto:
       type: object
       properties:
@@ -120670,11 +120964,11 @@ components:
           minimum: 0
           maximum: 23
         quietFrom:
-          type: object
+          type: string
           example: '22:00'
           nullable: true
         quietTo:
-          type: object
+          type: string
           example: '07:00'
           nullable: true
         quietExemptCritical:
@@ -120742,7 +121036,7 @@ components:
         navCollapsed:
           type: boolean
         timezone:
-          type: object
+          type: string
           example: America/La_Paz
           nullable: true
       required:
@@ -137701,6 +137995,150 @@ components:
           format: date-time
         path:
           type: string
+    ReportTemplateColumnDto:
+      type: object
+      properties:
+        key:
+          type: string
+          maxLength: 64
+        label:
+          type: string
+          maxLength: 80
+      required:
+        - key
+        - label
+      additionalProperties: false
+    ReportTemplateResponseDto:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 160
+        reportKind:
+          type: string
+          enum:
+            - TRIAL_BALANCE
+            - GENERAL_LEDGER
+            - INCOME_STATEMENT
+        columns:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReportTemplateColumnDto'
+        id:
+          type: string
+          format: uuid
+        userType:
+          type: string
+          enum:
+            - PATIENT
+            - PRACTITIONER
+            - HEALTH_FACILITY
+            - LABORATORY
+            - PHARMACY
+            - INSURER
+        code:
+          type: string
+        isActive:
+          type: boolean
+        rowVersion:
+          type: number
+      required:
+        - name
+        - reportKind
+        - columns
+        - id
+        - userType
+        - code
+        - isActive
+        - rowVersion
+    ReportTemplateListDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReportTemplateResponseDto'
+        nextCursor:
+          type: string
+          nullable: true
+        limit:
+          type: number
+      required:
+        - items
+        - nextCursor
+        - limit
+    CreateReportTemplateDto:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 160
+        reportKind:
+          type: string
+          enum:
+            - TRIAL_BALANCE
+            - GENERAL_LEDGER
+            - INCOME_STATEMENT
+        columns:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReportTemplateColumnDto'
+        userType:
+          type: string
+          enum:
+            - PATIENT
+            - PRACTITIONER
+            - HEALTH_FACILITY
+            - LABORATORY
+            - PHARMACY
+            - INSURER
+        code:
+          type: string
+          pattern: ^[A-Z][A-Z0-9_]{1,79}$
+      required:
+        - name
+        - reportKind
+        - columns
+        - userType
+        - code
+      additionalProperties: false
+    UpdateReportTemplateDto:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 160
+        reportKind:
+          type: string
+          enum:
+            - TRIAL_BALANCE
+            - GENERAL_LEDGER
+            - INCOME_STATEMENT
+        columns:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReportTemplateColumnDto'
+        expectedRowVersion:
+          type: number
+          minimum: 1
+        isActive:
+          type: boolean
+      required:
+        - name
+        - reportKind
+        - columns
+        - expectedRowVersion
+        - isActive
+      additionalProperties: false
+    EndReportTemplateDto:
+      type: object
+      properties:
+        expectedRowVersion:
+          type: number
+          minimum: 1
+      required:
+        - expectedRowVersion
+      additionalProperties: false
   responses:
     BadRequest:
       description: La solicitud no cumple el contrato de entrada.

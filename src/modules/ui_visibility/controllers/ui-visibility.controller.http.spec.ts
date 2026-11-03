@@ -193,6 +193,22 @@ describe('/admin/ui-visibility y /me/ui-visibility (transporte)', () => {
       await call('get', `${BASE}/rules`, sa1).expect(200);
     });
 
+    it('un SECURITY_ADMIN acotado conserva lectura pero no escribe ni sincroniza el catálogo global', async () => {
+      const scoped = JSON.stringify({ [T1]: ['SECURITY_ADMIN'] });
+      await call('get', `${BASE}/elements`, sa1)
+        .set('x-test-scoped', scoped)
+        .expect(200);
+      const created = await call('post', `${BASE}/elements`, sa1)
+        .set('x-test-scoped', scoped)
+        .send(draft('manual.thing'))
+        .expect(403);
+      expect(created.body.reason).toBe('UI_CATALOG_GLOBAL_ADMIN_REQUIRED');
+      await sync([draft('manual.thing')], sa1)
+        .set('x-test-scoped', scoped)
+        .expect(403);
+      expect(store.writes).toBe(0);
+    });
+
     it('SUPERADMIN entra por el comodín', async () => {
       await call('get', `${BASE}/elements`, sup).expect(200);
     });

@@ -224,12 +224,12 @@ export class PutNotificationPreferencesDto {
   @Max(23)
   digestHour!: number;
 
-  @ApiProperty({ example: '22:00', nullable: true })
+  @ApiProperty({ type: String, example: '22:00', nullable: true })
   @ValidateIf((_, value) => value !== null)
   @Matches(HOUR_MINUTE)
   quietFrom!: string | null;
 
-  @ApiProperty({ example: '07:00', nullable: true })
+  @ApiProperty({ type: String, example: '07:00', nullable: true })
   @ValidateIf((_, value) => value !== null)
   @Matches(HOUR_MINUTE)
   quietTo!: string | null;
@@ -254,7 +254,7 @@ export class PutUserPreferencesDto {
   @IsBoolean()
   navCollapsed!: boolean;
 
-  @ApiProperty({ example: 'America/La_Paz', nullable: true })
+  @ApiProperty({ type: String, example: 'America/La_Paz', nullable: true })
   @ValidateIf((_, value) => value !== null)
   @IsString()
   @MaxLength(64)

@@ -1,6 +1,20 @@
--- SALUD v4.2.68 · módulo 16 · schema accounting
+-- SALUD v4.2.85 · módulo 16 · schema accounting
 -- Generado de diagram_16_accounting.puml — NO editar a mano.
 
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "accounting"."report_presentation_templates"
+        ADD CONSTRAINT "fk_report_presentation_templates_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "accounting"."report_presentation_templates"
+        ADD CONSTRAINT "fk_report_presentation_templates_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
@@ -203,7 +217,7 @@ DO $$ BEGIN
     ALTER TABLE "accounting"."cost_centers"
         ADD CONSTRAINT "fk_cost_centers_tenant_id" FOREIGN KEY ("tenant_id")
         REFERENCES "directory"."tenants" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: practice.clinical_units (requiere schema practice)
 DO $$ BEGIN
@@ -294,7 +308,7 @@ DO $$ BEGIN
     ALTER TABLE "accounting"."journal_transactions"
         ADD CONSTRAINT "fk_journal_transactions_approved_by_user_id" FOREIGN KEY ("approved_by_user_id")
         REFERENCES "iam"."users" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
@@ -588,7 +602,7 @@ DO $$ BEGIN
     ALTER TABLE "accounting"."infrastructure_items"
         ADD CONSTRAINT "fk_infrastructure_items_tenant_id" FOREIGN KEY ("tenant_id")
         REFERENCES "directory"."tenants" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: practice.care_spaces (requiere schema practice)
 DO $$ BEGIN

@@ -9,10 +9,29 @@ export const FIT_MODEL_VERSION = 'catalog-fit/v1';
 /**
  * Un escaneo deja de ser fresco pasados dos intervalos de la sonda de escaneo más un lease: el
  * primero se perdió, el segundo está en vuelo y el lease es lo que tarda en cerrarse uno abandonado.
- * Propuesta a confirmar con el equipo de datos; viaja en cada resultado para que nadie la suponga.
+ * Política operativa predeterminada; viaja en cada resultado y se puede configurar por entorno.
  */
-export const SCAN_STALE_AFTER_MS =
-  2 * PROBE_INTERVAL_MS + SCAN_LEASE_SECONDS * 1000;
+export function scanFreshnessThresholdMs(override?: string): number {
+  const derived = 2 * PROBE_INTERVAL_MS + SCAN_LEASE_SECONDS * 1000;
+  if (override === undefined) return derived;
+  const seconds = Number(override);
+  const minimumSeconds = PROBE_INTERVAL_MS / 1000 + SCAN_LEASE_SECONDS;
+  if (
+    !override.trim() ||
+    !Number.isSafeInteger(seconds) ||
+    seconds < minimumSeconds ||
+    seconds > 86_400
+  ) {
+    throw new Error(
+      `CATALOG_SCAN_STALE_AFTER_SECONDS debe estar entre ${minimumSeconds} y 86400 segundos`,
+    );
+  }
+  return seconds * 1000;
+}
+
+export const SCAN_STALE_AFTER_MS = scanFreshnessThresholdMs(
+  process.env.CATALOG_SCAN_STALE_AFTER_SECONDS,
+);
 
 /** Cada cuánto corre la sonda de ajuste desde el worker. */
 export const FIT_TICK_INTERVAL_MS = 5 * 60 * 1000;

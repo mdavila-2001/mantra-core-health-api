@@ -3686,8 +3686,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `claimLineId` | `string` | Sí | formato uuid | — | — | `src/modules/insurance/presentation/dto/claim-patient-invoice.dto.ts:70` |
 | `chargeKind` | `string` | Sí | valores: INSURED_SHARE, PRIVATE_FULL | — | — | `src/modules/insurance/presentation/dto/claim-patient-invoice.dto.ts:73` |
 | `billedAmount` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/claim-patient-invoice.dto.ts:76` |
-| `coveragePercent` | `object` | No | admite null | — | — | `src/modules/insurance/presentation/dto/claim-patient-invoice.dto.ts:79` |
-| `copayAmount` | `object` | No | admite null | — | — | `src/modules/insurance/presentation/dto/claim-patient-invoice.dto.ts:82` |
+| `coveragePercent` | `string` | No | admite null | — | — | `src/modules/insurance/presentation/dto/claim-patient-invoice.dto.ts:79` |
+| `copayAmount` | `string` | No | admite null | — | — | `src/modules/insurance/presentation/dto/claim-patient-invoice.dto.ts:82` |
 | `patientAmount` | `string` | Sí | — | — | Lo que paga el paciente | `src/modules/insurance/presentation/dto/claim-patient-invoice.dto.ts:85` |
 | `insurerAmount` | `string` | Sí | — | — | Lo que paga la aseguradora | `src/modules/insurance/presentation/dto/claim-patient-invoice.dto.ts:88` |
 | `currencyConceptId` | `object` | No | formato uuid; admite null | — | — | `src/modules/insurance/presentation/dto/claim-patient-invoice.dto.ts:91` |
@@ -3936,25 +3936,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `canSubmit` | `boolean` | Sí | — | — | Todas las líneas se podrían enviar hoy. Si es `false`, el botón «Enviar a la aseguradora» debe quedar deshabilitado y explicar el motivo. | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:130` |
-| `currencyConceptId` | `object` | No | formato uuid; admite null | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:133` |
-| `totalBilledAmount` | `object` | No | admite null | — | `null` si algún monto no es un decimal válido. | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:140` |
-| `totalPatientAmount` | `object` | No | admite null | — | `null` mientras alguna línea no tenga reparto calculable. | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:147` |
-| `totalInsurerAmount` | `object` | No | admite null | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:150` |
-| `lines` | `array<ClaimQuoteLineResultDto>` | Sí | — | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:153` |
+| `canSubmit` | `boolean` | Sí | — | — | Todas las líneas se podrían enviar hoy. Si es `false`, el botón «Enviar a la aseguradora» debe quedar deshabilitado y explicar el motivo. | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:131` |
+| `currencyConceptId` | `object` | No | formato uuid; admite null | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:134` |
+| `totalBilledAmount` | `string` | No | admite null | — | `null` si algún monto no es un decimal válido. | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:142` |
+| `totalPatientAmount` | `string` | No | admite null | — | `null` mientras alguna línea no tenga reparto calculable. | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:150` |
+| `totalInsurerAmount` | `string` | No | admite null | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:153` |
+| `lines` | `array<ClaimQuoteLineResultDto>` | Sí | — | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:156` |
 | `lines[].lineSequence` | `number` | Sí | — | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:69` |
 | `lines[].serviceConceptId` | `object` | No | formato uuid; admite null | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:72` |
 | `lines[].billedAmount` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:75` |
 | `lines[].covered` | `boolean` | Sí | — | — | El plan cubre el servicio y el reparto se pudo calcular. No implica que el cobro se pueda enviar: mire `reason`. | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:81` |
-| `lines[].coveragePercent` | `object` | No | admite null | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:84` |
-| `lines[].copayAmount` | `object` | No | admite null | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:87` |
-| `lines[].deductibleAmount` | `object` | No | admite null | — | Informativo: el deducible todavía no se aplica al reparto (decisión del propietario). | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:95` |
-| `lines[].requiresPriorAuthorization` | `boolean` | Sí | — | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:98` |
-| `lines[].priorAuthorizationStatus` | `string` | No | valores: NOT_REQUIRED, APPROVED, MISSING, PENDING, DENIED, EXPIRED, MISMATCH, AMOUNT_EXCEEDED; admite null | — | `null` si el servicio no tiene beneficio vigente. | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:105` |
-| `lines[].patientAmount` | `object` | No | admite null | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:108` |
-| `lines[].insurerAmount` | `object` | No | admite null | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:111` |
-| `lines[].reason` | `object` | No | admite null | — | Motivo tipificado por el que esta línea no se podría cobrar (por ejemplo `PRIOR_AUTHORIZATION_REQUIRED`). | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:118` |
-| `lines[].message` | `object` | No | admite null | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:121` |
+| `lines[].coveragePercent` | `string` | No | admite null | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:84` |
+| `lines[].copayAmount` | `string` | No | admite null | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:87` |
+| `lines[].deductibleAmount` | `string` | No | admite null | — | Informativo: el deducible todavía no se aplica al reparto (decisión del propietario). | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:96` |
+| `lines[].requiresPriorAuthorization` | `boolean` | Sí | — | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:99` |
+| `lines[].priorAuthorizationStatus` | `string` | No | valores: NOT_REQUIRED, APPROVED, MISSING, PENDING, DENIED, EXPIRED, MISMATCH, AMOUNT_EXCEEDED; admite null | — | `null` si el servicio no tiene beneficio vigente. | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:106` |
+| `lines[].patientAmount` | `string` | No | admite null | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:109` |
+| `lines[].insurerAmount` | `string` | No | admite null | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:112` |
+| `lines[].reason` | `object` | No | admite null | — | Motivo tipificado por el que esta línea no se podría cobrar (por ejemplo `PRIOR_AUTHORIZATION_REQUIRED`). | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:119` |
+| `lines[].message` | `object` | No | admite null | — | — | `src/modules/insurance/presentation/dto/claim-quote.dto.ts:122` |
 
 ### Respuestas posibles
 

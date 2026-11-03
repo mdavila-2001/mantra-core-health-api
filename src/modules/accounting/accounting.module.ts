@@ -54,6 +54,9 @@ import {
 import { AccountingSpaceController } from './controllers/accounting-space.controller';
 import { SpaceAccountingService } from './services/space-accounting.service';
 import { InfraF5fPolicyRegistrar } from './policies/infra-f5f.policy';
+import { ReportTemplatesController } from './report-templates/report-templates.controller';
+import { ReportTemplatesService } from './report-templates/report-templates.service';
+import { ReportTemplatesRepository } from './report-templates/report-templates.repository';
 
 @Module({
   imports: [
@@ -68,6 +71,7 @@ import { InfraF5fPolicyRegistrar } from './policies/infra-f5f.policy';
     MessagingModule,
   ],
   controllers: [
+    ReportTemplatesController,
     AccountingSpaceController,
     AccountingLedgerController,
     AccountingFiscalController,
@@ -81,6 +85,8 @@ import { InfraF5fPolicyRegistrar } from './policies/infra-f5f.policy';
     AccountingCockpitController,
   ],
   providers: [
+    ReportTemplatesRepository,
+    ReportTemplatesService,
     SpaceAccountingService,
     InfraF5fPolicyRegistrar,
     // Repositorios

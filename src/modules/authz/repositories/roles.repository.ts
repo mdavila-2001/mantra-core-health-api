@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { Roles } from '../entities';
 import { CONCEPTS, createdBy } from '../../../common';
+import { clinicalRoleId } from '../authz.seed';
 
 /** Datos de alta de un rol (de tenant o de sistema). */
 export interface CreateRoleData {
@@ -50,6 +51,16 @@ export interface CreateRoleData {
 /** Acceso a datos de `authz.roles`. */
 @Injectable()
 export class RolesRepository {
+  /** Sólo descriptores de sistema conocidos: no adopta un rol homónimo de un tenant. */
+  findIamPolicyRoles(em: EntityManager, codes: string[]): Promise<Roles[]> {
+    return em.find(Roles, {
+      id: { $in: codes.map(clinicalRoleId) },
+      code: { $in: codes },
+      tenantId: null,
+      isSystem: true,
+      stateConceptId: CONCEPTS.STATE_ACTIVE,
+    });
+  }
   /**
    * Obtiene find by id.
    *

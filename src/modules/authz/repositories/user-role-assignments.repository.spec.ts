@@ -2,6 +2,26 @@ import { jest } from '@jest/globals';
 const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
 import { UserRoleAssignmentsRepository } from './user-role-assignments.repository';
 import { CONCEPTS } from '../../../common';
+import { UserRoleAssignments } from '../entities';
+
+describe('UserRoleAssignmentsRepository.revokeAllForUser', () => {
+  it('revoca por estado en todos los ámbitos, sin excluir asignaciones futuras ni borrar historia', async () => {
+    const nativeUpdate = fn(async () => 3);
+    const repo = new UserRoleAssignmentsRepository();
+    await expect(
+      repo.revokeAllForUser({ nativeUpdate } as never, 'u1', 'admin1'),
+    ).resolves.toBe(3);
+    expect(nativeUpdate).toHaveBeenCalledWith(
+      UserRoleAssignments,
+      { userId: 'u1', statusConceptId: CONCEPTS.STATE_ACTIVE },
+      {
+        statusConceptId: CONCEPTS.STATE_REVOKED,
+        updatedAt: expect.any(Date),
+        updatedByUserId: 'admin1',
+      },
+    );
+  });
+});
 
 function build() {
   const findOne = fn(() => Promise.resolve(null));

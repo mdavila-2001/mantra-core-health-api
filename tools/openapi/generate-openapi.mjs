@@ -87,6 +87,7 @@ const KNOWN_PUBLIC_OPERATIONS = [
   ['post', '/iam/auth/register-patient'],
   ['post', '/iam/auth/register-organization'],
   ['post', '/iam/auth/register-practitioner'],
+  ['post', '/iam/auth/register-support-staff'],
   ['post', '/iam/auth/resend-verification'],
   ['post', '/iam/auth/forgot-password'],
   ['post', '/iam/auth/reset-password'],
@@ -159,6 +160,7 @@ const KNOWN_PUBLIC_OPERATIONS = [
   ['put', '/iam/onboarding-drafts/{formType}/{draftId}'],
   ['delete', '/iam/onboarding-drafts/{formType}/{draftId}'],
   ['post', '/telemetry/onboarding-events'],
+  ['post', '/telemetry/client-errors'],
   // Calle desde el punto del mapa en el alta (`reverse-geocoding.controller.ts`,
   // `@Public()`, 2026-10-26).
   ['post', '/public/geo/reverse'],

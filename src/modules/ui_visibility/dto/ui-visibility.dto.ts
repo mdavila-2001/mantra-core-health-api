@@ -341,6 +341,7 @@ export class PreviewQueryDto {
 }
 
 export class UuidParamDto {
+  @ApiProperty({ format: 'uuid' })
   @IsUUID()
   id!: string;
 }
