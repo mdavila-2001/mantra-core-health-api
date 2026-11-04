@@ -27,6 +27,7 @@ import {
   toStudy,
 } from './center-context.service';
 import { OrderBookingAccessService } from './order-booking-access.service';
+import { canWork } from './get-booking-options.use-case';
 
 /**
  * `POST /diagnostic-results/me/orders/:orderId/booking`: books the start and
@@ -66,7 +67,7 @@ export class BookOrderUseCase {
         );
       }
       const unit = await this.scheduleRepo.findUnit(tx, dto.unitId);
-      if (!unit || !isPublished(unit)) {
+      if (!unit || !isPublished(unit) || !canWork(order, unit.tenant_id)) {
         throw new ResourceNotFoundException(
           'Centro no encontrado',
           undefined,

@@ -71,6 +71,8 @@ export class GetBookingOptionsUseCase {
       seen.add(offering.unit_id);
       const unit = await this.scheduleRepo.findUnit(em, offering.unit_id);
       if (!unit) continue;
+      // A routed order can only be worked by the center it was sent to.
+      if (!canWork(order, unit.tenant_id)) continue;
       const ctx = await this.context.load(em, unit);
       const unitModality = studyModality(offering, ctx.kind);
       if (unitModality === null) continue;
@@ -122,4 +124,14 @@ export class GetBookingOptionsUseCase {
       options,
     };
   }
+}
+
+/** Whether a center (by tenant) may take the order: any, or only its performer. */
+export function canWork(
+  order: { performer_tenant_id: string | null },
+  tenantId: string,
+): boolean {
+  return (
+    order.performer_tenant_id === null || order.performer_tenant_id === tenantId
+  );
 }

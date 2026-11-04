@@ -16,6 +16,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  AccessLogged,
   Audited,
   CurrentUser,
   requireTenantId,
@@ -56,6 +57,7 @@ export class DiagnosticsLabPortalController {
   }
 
   @Get('orders')
+  @AccessLogged({ resourceType: 'DIAGNOSTIC_ORDERS' })
   @ApiOperation({
     summary: 'Órdenes derivadas al laboratorio, con su estado derivado',
     description:
@@ -87,6 +89,7 @@ export class DiagnosticsLabPortalController {
   }
 
   @Get('result-targets')
+  @AccessLogged({ resourceType: 'DIAGNOSTIC_ORDERS' })
   @ApiOperation({
     summary: 'Órdenes procesadas a las que se puede adjuntar un resultado',
   })

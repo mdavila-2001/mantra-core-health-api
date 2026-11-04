@@ -1,6 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
 import { runWithTenant } from '../../../../common';
 import { DUNIT } from '../../diagnostic_units.concepts';
+import { CLIN } from '../../../clinical/clinical.concepts';
 import {
   actor,
   build,
@@ -108,6 +109,18 @@ describe('GetBookingOptionsUseCase', () => {
     });
   });
 
+  it('an order routed to another center offers no option here', async () => {
+    const d = build();
+    const order = await d.patients.findDiagnosticOrder(d.em as never, ORDER_ID);
+    d.patients.findDiagnosticOrder.mockResolvedValue({
+      ...order!,
+      category_concept_id: CLIN.SERVICE_REQUEST_CATEGORY_LAB,
+      performer_tenant_id: OTHER_TENANT,
+    });
+    const res = await d.options.execute(actor, ORDER_ID);
+    expect(res.options).toEqual([]);
+  });
+
   it("another person's order answers like a missing one", async () => {
     const d = build();
     d.patients.ownPatientProfileId.mockResolvedValue('someone-else');
@@ -202,6 +215,21 @@ describe('BookOrderUseCase', () => {
       .catch((e: unknown) => e);
     expect(error).toMatchObject({ status: 409 });
     expect(error.details?.slotTaken).toBeUndefined();
+  });
+
+  it('a center the order was not routed to cannot be booked', async () => {
+    const d = setup();
+    const order = await d.patients.findDiagnosticOrder(d.em as never, ORDER_ID);
+    d.patients.findDiagnosticOrder.mockResolvedValue({
+      ...order!,
+      performer_tenant_id: OTHER_TENANT,
+    });
+    await expect(
+      d.booker.execute(actor, ORDER_ID, {
+        unitId: UNIT_ID,
+        startAt: nextTuesdaySlot().toISOString(),
+      }),
+    ).rejects.toMatchObject({ status: 404 });
   });
 
   it('an unpublished center cannot be booked', async () => {

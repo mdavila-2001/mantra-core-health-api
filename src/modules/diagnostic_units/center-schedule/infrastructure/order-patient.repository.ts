@@ -6,6 +6,7 @@ import {
   PersonAccountLinks,
 } from '../../../profiles/entities';
 import { PROF } from '../../../profiles/profiles.concepts';
+import { CLIN } from '../../../clinical/clinical.concepts';
 import {
   DIAG,
   DIAGNOSTIC_CATEGORIES,
@@ -17,6 +18,8 @@ export interface OrderRow {
   code_concept_id: string;
   category_concept_id: string | null;
   modality_concept_id: string | null;
+  /** Center the order was routed to; only that center can work it. */
+  performer_tenant_id: string | null;
   code_display: string | null;
   code_code: string | null;
 }
@@ -47,18 +50,26 @@ export class OrderPatientRepository {
     return patient?.profileId ?? null;
   }
 
-  /** A laboratory or imaging order, with its study's terminology. */
+  /**
+   * An active laboratory or imaging order, with its study's terminology.
+   * Revoked, completed or on-hold orders cannot be booked.
+   */
   async findDiagnosticOrder(
     em: EntityManager,
     orderId: string,
   ): Promise<OrderRow | null> {
     const [row] = await em.execute<OrderRow[]>(
       `SELECT sr.id, sr.patient_profile_id, sr.code_concept_id, sr.category_concept_id,
-              sr.modality_concept_id, c.display AS code_display, c.code AS code_code
+              sr.modality_concept_id, sr.performer_tenant_id, c.display AS code_display, c.code AS code_code
          FROM clinical.service_requests sr
          LEFT JOIN terminology.catalog_concepts c ON c.id = sr.code_concept_id
-        WHERE sr.id = ? AND sr.category_concept_id = ANY(?::uuid[])`,
-      [orderId, `{${DIAGNOSTIC_CATEGORIES.join(',')}}`],
+        WHERE sr.id = ? AND sr.category_concept_id = ANY(?::uuid[])
+          AND sr.status_concept_id = ?`,
+      [
+        orderId,
+        `{${DIAGNOSTIC_CATEGORIES.join(',')}}`,
+        CLIN.SERVICE_REQUEST_ACTIVE,
+      ],
       'all',
     );
     return row ?? null;

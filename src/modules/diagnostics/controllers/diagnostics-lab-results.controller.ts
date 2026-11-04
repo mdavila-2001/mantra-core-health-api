@@ -20,6 +20,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  AccessLogged,
   Audited,
   NotAudited,
   CurrentUser,
@@ -49,6 +50,7 @@ export class DiagnosticsLabResultsController {
   ) {}
 
   @Get('result-files')
+  @AccessLogged({ resourceType: 'DIAGNOSTIC_RESULTS' })
   @ApiOperation({
     summary: 'Resultados subidos por el laboratorio',
     description:
@@ -65,6 +67,7 @@ export class DiagnosticsLabResultsController {
     'Read-only search sent as POST so patient names stay out of the URL.',
   )
   @Post('result-files/search')
+  @AccessLogged({ resourceType: 'DIAGNOSTIC_RESULTS' })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Buscar entre los resultados subidos (filtros en el cuerpo)',
@@ -76,6 +79,7 @@ export class DiagnosticsLabResultsController {
   }
 
   @Get('result-files/:id/content')
+  @AccessLogged({ resourceType: 'DIAGNOSTIC_RESULTS', resourceId: 'param:id' })
   @Header('Cache-Control', 'private, no-store')
   @ApiOperation({ summary: 'Descargar un resultado subido' })
   @ApiOkResponse({ description: 'Bytes del archivo' })

@@ -111,6 +111,7 @@ export function build() {
       code_concept_id: STUDY_CONCEPT,
       category_concept_id: null,
       modality_concept_id: null,
+      performer_tenant_id: null as string | null,
       code_display: 'Abdominal ultrasound',
       code_code: 'DU_STUDY_ABDOMINAL_ULTRASOUND',
     })),
