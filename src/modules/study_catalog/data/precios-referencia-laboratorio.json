@@ -2234,6 +2234,12 @@
       "nombre_fuente": "RECUENTO DE BASÓFILOS (ABSOLUTO)",
       "precio_bs": "13.33"
     },
+    "BMP.GLUCOSA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-025",
+      "nombre_fuente": "GLUCOSA EN SANGRE",
+      "precio_bs": "40.00"
+    },
     "BRUCELLA": {
       "fuente": "FONASA",
       "codigo": "03-06-033",
@@ -2300,6 +2306,114 @@
       "nombre_fuente": "ELISA CHAGAS",
       "precio_bs": "125.00"
     },
+    "CITOQUIMICO_ASCITICO.ADA": {
+      "fuente": "FONASA",
+      "codigo": "03-02-050",
+      "nombre_fuente": "ADENOSINDEAMINASA EN SANGRE U OTRO FLUIDO BIOLÓGICO (ADA)",
+      "precio_bs": "67.24"
+    },
+    "CITOQUIMICO_ASCITICO.ALBUMINA": {
+      "fuente": "FONASA",
+      "codigo": "03-08-051",
+      "nombre_fuente": "ALBÚMINAS EN EXUDADOS, SECRECIONES Y OTROS LÍQUIDOS",
+      "precio_bs": "19.37"
+    },
+    "CITOQUIMICO_ASCITICO.AMILASA": {
+      "fuente": "FONASA",
+      "codigo": "03-08-045",
+      "nombre_fuente": "AMILASA EN LÍQUIDOS BIOLÓGICOS",
+      "precio_bs": "59.47"
+    },
+    "CITOQUIMICO_ASCITICO.GLUCOSA": {
+      "fuente": "FONASA",
+      "codigo": "03-08-015",
+      "nombre_fuente": "GLUCOSA EN EXUDADOS, SECRECIONES Y OTROS LÍQUIDOS",
+      "precio_bs": "9.25"
+    },
+    "CITOQUIMICO_ASCITICO.PROTEINAS": {
+      "fuente": "FONASA",
+      "codigo": "03-08-050",
+      "nombre_fuente": "PROTEÍNAS TOTALES EN EXUDADOS, SECRECIONES Y OTROS LÍQUIDOS",
+      "precio_bs": "19.37"
+    },
+    "CITOQUIMICO_LCR.ADA": {
+      "fuente": "FONASA",
+      "codigo": "03-02-050",
+      "nombre_fuente": "ADENOSINDEAMINASA EN SANGRE U OTRO FLUIDO BIOLÓGICO (ADA)",
+      "precio_bs": "67.24"
+    },
+    "CITOQUIMICO_LCR.GLUCOSA": {
+      "fuente": "FONASA",
+      "codigo": "03-08-015",
+      "nombre_fuente": "GLUCOSA EN EXUDADOS, SECRECIONES Y OTROS LÍQUIDOS",
+      "precio_bs": "9.25"
+    },
+    "CITOQUIMICO_LCR.GRAM": {
+      "fuente": "INLASA",
+      "codigo": "LBC-044",
+      "nombre_fuente": "TINCIÓN GRAM",
+      "precio_bs": "40.00"
+    },
+    "CITOQUIMICO_LCR.PROTEINAS": {
+      "fuente": "FONASA",
+      "codigo": "03-08-050",
+      "nombre_fuente": "PROTEÍNAS TOTALES EN EXUDADOS, SECRECIONES Y OTROS LÍQUIDOS",
+      "precio_bs": "19.37"
+    },
+    "CITOQUIMICO_PERICARDICO.GLUCOSA": {
+      "fuente": "FONASA",
+      "codigo": "03-08-015",
+      "nombre_fuente": "GLUCOSA EN EXUDADOS, SECRECIONES Y OTROS LÍQUIDOS",
+      "precio_bs": "9.25"
+    },
+    "CITOQUIMICO_PERICARDICO.PROTEINAS": {
+      "fuente": "FONASA",
+      "codigo": "03-08-050",
+      "nombre_fuente": "PROTEÍNAS TOTALES EN EXUDADOS, SECRECIONES Y OTROS LÍQUIDOS",
+      "precio_bs": "19.37"
+    },
+    "CITOQUIMICO_PLEURAL.ADA": {
+      "fuente": "FONASA",
+      "codigo": "03-02-050",
+      "nombre_fuente": "ADENOSINDEAMINASA EN SANGRE U OTRO FLUIDO BIOLÓGICO (ADA)",
+      "precio_bs": "67.24"
+    },
+    "CITOQUIMICO_PLEURAL.GLUCOSA": {
+      "fuente": "FONASA",
+      "codigo": "03-08-015",
+      "nombre_fuente": "GLUCOSA EN EXUDADOS, SECRECIONES Y OTROS LÍQUIDOS",
+      "precio_bs": "9.25"
+    },
+    "CITOQUIMICO_PLEURAL.PH": {
+      "fuente": "FONASA",
+      "codigo": "03-08-017",
+      "nombre_fuente": "PH EN EXUDADOS, SECRECIONES Y OTROS LÍQUIDOS (PROC. AUT.)",
+      "precio_bs": "8.88"
+    },
+    "CITOQUIMICO_PLEURAL.PROTEINAS": {
+      "fuente": "FONASA",
+      "codigo": "03-08-050",
+      "nombre_fuente": "PROTEÍNAS TOTALES EN EXUDADOS, SECRECIONES Y OTROS LÍQUIDOS",
+      "precio_bs": "19.37"
+    },
+    "CITOQUIMICO_SINOVIAL.GLUCOSA": {
+      "fuente": "FONASA",
+      "codigo": "03-08-015",
+      "nombre_fuente": "GLUCOSA EN EXUDADOS, SECRECIONES Y OTROS LÍQUIDOS",
+      "precio_bs": "9.25"
+    },
+    "CITOQUIMICO_SINOVIAL.GRAM": {
+      "fuente": "INLASA",
+      "codigo": "LBC-044",
+      "nombre_fuente": "TINCIÓN GRAM",
+      "precio_bs": "40.00"
+    },
+    "CITOQUIMICO_SINOVIAL.PROTEINAS": {
+      "fuente": "FONASA",
+      "codigo": "03-08-050",
+      "nombre_fuente": "PROTEÍNAS TOTALES EN EXUDADOS, SECRECIONES Y OTROS LÍQUIDOS",
+      "precio_bs": "19.37"
+    },
     "CK": {
       "fuente": "INLASA",
       "codigo": "LAC-011",
@@ -2323,6 +2437,24 @@
       "codigo": "03-09-012",
       "nombre_fuente": "ELECTRÓLITOS (SODIO, POTASIO, CLORO) C/U, EN ORINA",
       "precio_bs": "19.99"
+    },
+    "CMP.ALBUMINA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-003",
+      "nombre_fuente": "ALBÚMINA",
+      "precio_bs": "34.00"
+    },
+    "CMP.GLUCOSA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-025",
+      "nombre_fuente": "GLUCOSA EN SANGRE",
+      "precio_bs": "40.00"
+    },
+    "CMP.PROTEINAS": {
+      "fuente": "INLASA",
+      "codigo": "LAC-040",
+      "nombre_fuente": "PROTEINAS TOTALES",
+      "precio_bs": "27.00"
     },
     "CMV_IGG": {
       "fuente": "FONASA",
@@ -2371,6 +2503,12 @@
       "codigo": "LEP-015",
       "nombre_fuente": "COPROPARASITOLÓGICO SIMPLE",
       "precio_bs": "50.00"
+    },
+    "COPROLOGICO_FUNCIONAL.LEUCOCITOS": {
+      "fuente": "INLASA",
+      "codigo": "LEP-013",
+      "nombre_fuente": "CITOLOGÍA DE MOCO FECAL",
+      "precio_bs": "70.00"
     },
     "CREATININA": {
       "fuente": "INLASA",
@@ -2630,6 +2768,18 @@
       "nombre_fuente": "HEMOGRAMA COMPLETO",
       "precio_bs": "60.00"
     },
+    "HEMOGRAMA.LEUCOCITOS": {
+      "fuente": "FONASA",
+      "codigo": "03-01-065",
+      "nombre_fuente": "RECUENTO DE LEUCOCITOS, ABSOLUTO (PROC. AUT.)",
+      "precio_bs": "9.25"
+    },
+    "HEMOGRAMA_SIN_FORMULA.LEUCOCITOS": {
+      "fuente": "FONASA",
+      "codigo": "03-01-065",
+      "nombre_fuente": "RECUENTO DE LEUCOCITOS, ABSOLUTO (PROC. AUT.)",
+      "precio_bs": "9.25"
+    },
     "HERPES_IGG": {
       "fuente": "FONASA",
       "codigo": "03-06-069",
@@ -2678,6 +2828,18 @@
       "nombre_fuente": "ELISA PARA Ig E",
       "precio_bs": "86.00"
     },
+    "INMUNOGLOBULINAS.IGG": {
+      "fuente": "INLASA",
+      "codigo": "LINM-023",
+      "nombre_fuente": "INMUNOGLOBULINA G IgG",
+      "precio_bs": "90.00"
+    },
+    "INMUNOGLOBULINAS.IGM": {
+      "fuente": "INLASA",
+      "codigo": "LINM-022",
+      "nombre_fuente": "INMUNOGLOBULINA M IgM",
+      "precio_bs": "90.00"
+    },
     "INSULINA_BASAL": {
       "fuente": "INLASA",
       "codigo": "LAC-033",
@@ -2695,6 +2857,12 @@
       "codigo": "03-09-012",
       "nombre_fuente": "ELECTRÓLITOS (SODIO, POTASIO, CLORO) C/U, EN ORINA",
       "precio_bs": "19.99"
+    },
+    "LDH_HEMOLISIS.LDH": {
+      "fuente": "INLASA",
+      "codigo": "LAC-034",
+      "nombre_fuente": "LACTATO DESHIDROGENASA (LDH)",
+      "precio_bs": "37.00"
     },
     "LDH_SUERO": {
       "fuente": "INLASA",
@@ -2792,11 +2960,137 @@
       "nombre_fuente": "PROTEÍNA C REACTIVA POR TÉCNICAS AUTOMATIZADAS",
       "precio_bs": "76.99"
     },
+    "PERFIL_CARDIACO.LDH": {
+      "fuente": "INLASA",
+      "codigo": "LAC-034",
+      "nombre_fuente": "LACTATO DESHIDROGENASA (LDH)",
+      "precio_bs": "37.00"
+    },
+    "PERFIL_DENGUE.IGG": {
+      "fuente": "INLASA",
+      "codigo": "LVIR-037",
+      "nombre_fuente": "ELISA PARA DENGUE IgG",
+      "precio_bs": "125.00"
+    },
+    "PERFIL_DENGUE.IGM": {
+      "fuente": "INLASA",
+      "codigo": "LVIR-030",
+      "nombre_fuente": "ELISA PARA DENGUE IgM",
+      "precio_bs": "125.00"
+    },
+    "PERFIL_GERIATRICO.ALBUMINA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-003",
+      "nombre_fuente": "ALBÚMINA",
+      "precio_bs": "34.00"
+    },
+    "PERFIL_GERIATRICO.GLUCOSA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-025",
+      "nombre_fuente": "GLUCOSA EN SANGRE",
+      "precio_bs": "40.00"
+    },
+    "PERFIL_HEPATICO.ALBUMINA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-003",
+      "nombre_fuente": "ALBÚMINA",
+      "precio_bs": "34.00"
+    },
+    "PERFIL_HEPATICO.LDH": {
+      "fuente": "INLASA",
+      "codigo": "LAC-034",
+      "nombre_fuente": "LACTATO DESHIDROGENASA (LDH)",
+      "precio_bs": "37.00"
+    },
+    "PERFIL_HEPATICO.PROTEINAS": {
+      "fuente": "INLASA",
+      "codigo": "LAC-040",
+      "nombre_fuente": "PROTEINAS TOTALES",
+      "precio_bs": "27.00"
+    },
     "PERFIL_LIPIDICO": {
       "fuente": "INLASA",
       "codigo": "LAC-039",
       "nombre_fuente": "PERFIL LIPIDICO",
       "precio_bs": "138.00"
+    },
+    "PERFIL_LIPIDICO.TRIGLICERIDOS": {
+      "fuente": "INLASA",
+      "codigo": "LAC-055",
+      "nombre_fuente": "TRIGLICÉRIDOS",
+      "precio_bs": "41.00"
+    },
+    "PERFIL_PANCREATICO.AMILASA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-004",
+      "nombre_fuente": "AMILASA EN SANGRE",
+      "precio_bs": "39.00"
+    },
+    "PERFIL_PANCREATICO.GLUCOSA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-025",
+      "nombre_fuente": "GLUCOSA EN SANGRE",
+      "precio_bs": "40.00"
+    },
+    "PERFIL_PANCREATICO.TRIGLICERIDOS": {
+      "fuente": "INLASA",
+      "codigo": "LAC-055",
+      "nombre_fuente": "TRIGLICÉRIDOS",
+      "precio_bs": "41.00"
+    },
+    "PERFIL_PEDIATRICO.GLUCOSA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-025",
+      "nombre_fuente": "GLUCOSA EN SANGRE",
+      "precio_bs": "40.00"
+    },
+    "PERFIL_PRENATAL.UROCULTIVO": {
+      "fuente": "INLASA",
+      "codigo": "LBC-045",
+      "nombre_fuente": "UROCULTIVO RECUENTO DE COLONIA Y ANTIBIOGRAMA",
+      "precio_bs": "100.00"
+    },
+    "PERFIL_PREQUIRURGICO.ELECTROLITOS": {
+      "fuente": "INLASA",
+      "codigo": "LAC-018",
+      "nombre_fuente": "ELECTROLITOS EN SANGRE (SODIO,POTASIO Y CLORO)",
+      "precio_bs": "203.00"
+    },
+    "PERFIL_PREQUIRURGICO.GLUCOSA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-025",
+      "nombre_fuente": "GLUCOSA EN SANGRE",
+      "precio_bs": "40.00"
+    },
+    "PERFIL_PROSTATICO.PSA_LIBRE": {
+      "fuente": "INLASA",
+      "codigo": "LINM-017",
+      "nombre_fuente": "ELISA PARA PSA LIBRE",
+      "precio_bs": "115.00"
+    },
+    "PERFIL_RENAL.ALBUMINA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-003",
+      "nombre_fuente": "ALBÚMINA",
+      "precio_bs": "34.00"
+    },
+    "PERFIL_RENAL.GLUCOSA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-025",
+      "nombre_fuente": "GLUCOSA EN SANGRE",
+      "precio_bs": "40.00"
+    },
+    "PERFIL_RIESGO_CARDIOVASCULAR.GLUCOSA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-025",
+      "nombre_fuente": "GLUCOSA EN SANGRE",
+      "precio_bs": "40.00"
+    },
+    "PERFIL_RIESGO_CARDIOVASCULAR.TRIGLICERIDOS": {
+      "fuente": "INLASA",
+      "codigo": "LAC-055",
+      "nombre_fuente": "TRIGLICÉRIDOS",
+      "precio_bs": "41.00"
     },
     "PERRO": {
       "fuente": "FONASA",
@@ -2840,6 +3134,18 @@
       "nombre_fuente": "PROTEINAS TOTALES",
       "precio_bs": "27.00"
     },
+    "PROTEINAS_TOTALES.ALBUMINA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-003",
+      "nombre_fuente": "ALBÚMINA",
+      "precio_bs": "34.00"
+    },
+    "PROTEINAS_TOTALES.PROTEINAS": {
+      "fuente": "INLASA",
+      "codigo": "LAC-040",
+      "nombre_fuente": "PROTEINAS TOTALES",
+      "precio_bs": "27.00"
+    },
     "PROTEINA_C": {
       "fuente": "FONASA",
       "codigo": "03-01-091",
@@ -2851,6 +3157,12 @@
       "codigo": "03-01-092",
       "nombre_fuente": "PROTEÍNA S",
       "precio_bs": "466.75"
+    },
+    "PROTEINOGRAMA.PROTEINAS": {
+      "fuente": "INLASA",
+      "codigo": "LAC-040",
+      "nombre_fuente": "PROTEINAS TOTALES",
+      "precio_bs": "27.00"
     },
     "PROT_24H": {
       "fuente": "INLASA",
@@ -2864,6 +3176,12 @@
       "nombre_fuente": "ELISA PARA PSA TOTAL",
       "precio_bs": "96.00"
     },
+    "PSA_LIBRE.PSA_LIBRE": {
+      "fuente": "INLASA",
+      "codigo": "LINM-017",
+      "nombre_fuente": "ELISA PARA PSA LIBRE",
+      "precio_bs": "115.00"
+    },
     "PSA_TOTAL": {
       "fuente": "INLASA",
       "codigo": "LINM-018",
@@ -2875,6 +3193,18 @@
       "codigo": "LAC-066",
       "nombre_fuente": "PARATOHORMONA INTACTA (PTH) POR QUIMIOLUMINISCENCIA",
       "precio_bs": "180.00"
+    },
+    "QUIMICA_SANGUINEA_BASICA.GLUCOSA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-025",
+      "nombre_fuente": "GLUCOSA EN SANGRE",
+      "precio_bs": "40.00"
+    },
+    "QUIMICA_SANGUINEA_BASICA.TRIGLICERIDOS": {
+      "fuente": "INLASA",
+      "codigo": "LAC-055",
+      "nombre_fuente": "TRIGLICÉRIDOS",
+      "precio_bs": "41.00"
     },
     "RENINA": {
       "fuente": "FONASA",

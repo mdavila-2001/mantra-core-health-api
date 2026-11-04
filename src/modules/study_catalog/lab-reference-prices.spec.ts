@@ -17,10 +17,22 @@ describe('labReferencePrice', () => {
     });
   });
 
+  it('prefers a panel-qualified entry: LEUCOCITOS is a blood count only in the hemogram', () => {
+    expect(labReferencePrice('HEMOGRAMA.LEUCOCITOS')).toMatchObject({
+      source: 'FONASA',
+      sourceCode: '03-01-065',
+      priceBs: '9.25',
+    });
+    expect(labReferencePrice('CITOQUIMICO_LCR.LEUCOCITOS')).toBeNull();
+  });
+
   it('never prices a component like the análisis of the same code', () => {
-    // GLUCOSA inside a CSF panel is not the blood test.
-    expect(labReferencePrice('GLUCOSA')).not.toBeNull();
-    expect(labReferencePrice('CITOQUIMICO_LCR.GLUCOSA')).toBeNull();
+    // GLUCOSA in a CSF panel is the fluid test, not the serum one (LAC-025).
+    expect(labReferencePrice('GLUCOSA')?.sourceCode).toBe('LAC-025');
+    expect(labReferencePrice('CITOQUIMICO_LCR.GLUCOSA')?.sourceCode).not.toBe(
+      'LAC-025',
+    );
+    expect(labReferencePrice('CITOQUIMICO_LCR.LACTATO')).toBeNull();
   });
 
   it('gives no suggestion when no tariff has the test', () => {

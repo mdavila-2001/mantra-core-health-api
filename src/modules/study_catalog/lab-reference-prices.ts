@@ -58,5 +58,9 @@ export function labReferencePrice(code: string): LabReferencePrice | null {
   if (dot < 0) return null;
   // Never the análisis of the same code: inside a CSF or pleural panel,
   // GLUCOSA or LDH is not the blood test and is not priced like it.
-  return BY_COMPONENT.get(code.slice(dot + 1)) ?? null;
+  // A panel-qualified entry wins: LEUCOCITOS is a blood count in HEMOGRAMA but
+  // a CSF cell count elsewhere, so only the panel says which test it is.
+  return (
+    BY_COMPONENT.get(code) ?? BY_COMPONENT.get(code.slice(dot + 1)) ?? null
+  );
 }
