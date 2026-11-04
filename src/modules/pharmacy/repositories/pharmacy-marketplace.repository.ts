@@ -80,8 +80,9 @@ export interface PublishedOffer {
 @Injectable()
 export class PharmacyMarketplaceRepository {
   /**
-   * Todas las ofertas publicadas, opcionalmente acotadas por texto o por
-   * medicamento.
+   * Todas las ofertas publicadas, opcionalmente acotadas por medicamento.
+   * El texto ya no se filtra acá: lo resuelve `search/` en memoria, con
+   * tildes, usos terapéuticos y errores de tipeo que `ILIKE` no ve.
    *
    * Es una sola consulta y no una por vertical: el catálogo publicado de todo
    * el país cabe holgadamente en memoria —son productos, no eventos—, y
@@ -89,14 +90,13 @@ export class PharmacyMarketplaceRepository {
    * marcas y las presentaciones de cada tarjeta.
    *
    * @param em - Contexto de persistencia.
-   * @param filter - Texto libre y/o concepto del vademécum.
+   * @param filter - Concepto del vademécum, opcional.
    * @returns Las ofertas crudas, sin agrupar y sin distancias.
    */
   async findPublishedOffers(
     em: EntityManager,
-    filter: { texto?: string; conceptId?: string },
+    filter: { conceptId?: string },
   ): Promise<PublishedOffer[]> {
-    const text = filter.texto?.trim();
     const availability = siteProductAvailabilitySql();
     const rows = await em.getConnection().execute<
       Array<{
@@ -192,14 +192,6 @@ export class PharmacyMarketplaceRepository {
           AND av.product_id = prod.id
         WHERE prod.status_concept_id = ?
           AND (CAST(? AS uuid) IS NULL OR prod.medication_concept_id = CAST(? AS uuid))
-          AND (
-                CAST(? AS text) IS NULL
-             OR med.display   ILIKE '%' || CAST(? AS text) || '%'
-             OR es.value      ILIKE '%' || CAST(? AS text) || '%'
-             OR med.code      ILIKE '%' || CAST(? AS text) || '%'
-             OR prod.brand_name   ILIKE '%' || CAST(? AS text) || '%'
-             OR prod.generic_name ILIKE '%' || CAST(? AS text) || '%'
-          )
         ORDER BY prod.id, (av.product_id IS NOT NULL) DESC,
                  av.available_quantity DESC NULLS LAST`,
       [
@@ -214,12 +206,6 @@ export class PharmacyMarketplaceRepository {
         PHARM.PRODUCT_ACTIVE,
         filter.conceptId ?? null,
         filter.conceptId ?? null,
-        text || null,
-        text || null,
-        text || null,
-        text || null,
-        text || null,
-        text || null,
       ],
       'all',
     );

@@ -11,6 +11,7 @@ import type {
   PublicMedicationOfferDto,
   PublicMedicationPageDto,
 } from '../dto';
+import { decorateCards, groupOf, searchOffers, usesOf } from '../search';
 
 /** Radio de la Tierra en km, para la distancia en línea recta. */
 const EARTH_RADIUS_KM = 6371;
@@ -18,31 +19,6 @@ const EARTH_RADIUS_KM = 6371;
 /** Tope por defecto de la vitrina, y el techo que ningún `limit` supera. */
 const DEFAULT_CAP = 24;
 const MAX_CAP = 60;
-
-/**
- * Grupos terapéuticos por la primera letra del ATC.
- *
- * Es la clasificación anatómica del primer nivel del ATC, que es la única que
- * se puede derivar del código sin una tabla que hoy no existe. Sirve para que
- * la vitrina tenga filtros con sentido clínico —«antiinfecciosos», «aparato
- * cardiovascular»— en vez de una lista alfabética de diecisiete nombres.
- */
-const GROUPS_ATC: Readonly<Record<string, string>> = {
-  A: 'Aparato digestivo y metabolismo',
-  B: 'Sangre y órganos hematopoyéticos',
-  C: 'Aparato cardiovascular',
-  D: 'Dermatológicos',
-  G: 'Aparato genitourinario',
-  H: 'Terapia hormonal',
-  J: 'Antiinfecciosos',
-  L: 'Antineoplásicos',
-  M: 'Aparato locomotor',
-  N: 'Sistema nervioso',
-  P: 'Antiparasitarios',
-  R: 'Aparato respiratorio',
-  S: 'Órganos de los sentidos',
-  V: 'Varios',
-};
 
 /** Un punto desde donde medir. */
 interface Origin {
@@ -101,18 +77,24 @@ export class PharmacyMarketplaceService {
     origin?: Origin;
     radiusKm?: number;
     limit?: number;
+    exact?: boolean;
   }): Promise<PublicMedicationPageDto> {
-    const em = this.em.fork();
-    const offers = await this.repo.findPublishedOffers(em, {
-      texto: consultation.q,
-    });
+    // Text is matched in memory (accents, uses, typos): see `search/`.
+    const { offers, outcome } = searchOffers(
+      await this.repo.findPublishedOffers(this.em.fork(), {}),
+      consultation.q,
+      consultation.exact === true,
+    );
 
     const inScope = this.narrowByRadius(
       offers,
       consultation.origin,
       consultation.radiusKm,
     );
-    const cards = this.group(inScope, consultation.origin);
+    const cards = decorateCards(
+      this.group(inScope, consultation.origin),
+      outcome,
+    );
 
     // Los grupos salen de lo que trajo la búsqueda de texto, **antes** de
     // aplicar el grupo elegido. Calcularlos después dejaría en pie sólo el
@@ -137,6 +119,7 @@ export class PharmacyMarketplaceService {
       items: filtered.slice(0, tope),
       total: filtered.length,
       groups: groups,
+      correctedQuery: outcome.correctedQuery,
       generatedAt: new Date().toISOString(),
     };
   }
@@ -267,6 +250,7 @@ export class PharmacyMarketplaceService {
         atcCode: group[0].atcCode,
         genericName: group[0].genericName,
         therapeuticGroup: groupOf(group[0].atcCode),
+        uses: usesOf(group[0].atcCode),
         brands: unique(group.map((offer) => offer.brandName)),
         presentations: unique(group.map((offer) => presentation(offer))),
         requiresPrescription: group.some((offer) => offer.requiresPrescription),
@@ -322,11 +306,6 @@ export class PharmacyMarketplaceService {
 }
 
 /* ---- funciones puras ------------------------------------------------------ */
-
-/** El grupo terapéutico de un código ATC, o «Varios» si la letra no está. */
-function groupOf(atcCode: string): string {
-  return GROUPS_ATC[atcCode.charAt(0).toUpperCase()] ?? 'Varios';
-}
 
 /** «500 mg · Caja x 20 tabletas», con lo que la farmacia publique. */
 function presentation(offer: PublishedOffer): string | null {

@@ -204,15 +204,14 @@ export class PharmacyReadController {
     return this.catalogSearch.search(query);
   }
 
-  /** E2: búsqueda de productos por texto, por medicamento o por farmacia. */
-  @Get('products')
+  @Get('products') // E2; text search lives in `search/product-search.ts`
   @ApiOperation({
     summary: 'Buscar productos publicados por texto, medicamento o farmacia',
   })
   @ApiQuery({
     name: 'search',
     required: false,
-    description: 'Texto a buscar en marca, genérico o código de producto',
+    description: 'Marca, genérico, código o uso; `exact=true` no corrige',
   })
   @ApiQuery({
     name: 'conceptId',
@@ -248,6 +247,7 @@ export class PharmacyReadController {
     pharmacyId?: string,
     @Query('managed') managed?: string,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+    @Query('exact') exact?: string,
   ): Promise<PharmacyProductSearchResponseDto> {
     if (managed !== undefined && managed !== 'true' && managed !== 'false') {
       throw new BadRequestException('managed es true o false');
@@ -266,7 +266,7 @@ export class PharmacyReadController {
       );
     }
     return this.readService.searchProducts(
-      { search, conceptId, pharmacyId },
+      { search, conceptId, pharmacyId, exact: exact === 'true' },
       limit ?? 50,
     );
   }

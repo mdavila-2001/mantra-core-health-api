@@ -477,9 +477,6 @@ export class PharmacyProductReadDto {
 
 /** Resultado de la búsqueda de productos, acotado y con el recorte declarado. */
 export class PharmacyProductSearchResponseDto {
-  /**
-   * Valor de items mantenido por la instancia.
-   */
   @ApiProperty({ type: [PharmacyProductReadDto] })
   items!: PharmacyProductReadDto[];
 
@@ -489,14 +486,17 @@ export class PharmacyProductSearchResponseDto {
   @ApiProperty({ description: 'Tope aplicado al listado' })
   limit!: number;
 
-  /**
-   * Valor de truncated mantenido por la instancia.
-   */
   @ApiProperty({
     description:
       'true si quedaron productos fuera del tope. Se declara, no se calla',
   })
   truncated!: boolean;
+
+  @ApiPropertyOptional({
+    nullable: true,
+    description: 'Texto corregido que se buscó («ibopofeno» → «ibuprofeno»)',
+  })
+  correctedQuery?: string | null;
 }
 
 /** Un precio vigente de un producto en una sede. */

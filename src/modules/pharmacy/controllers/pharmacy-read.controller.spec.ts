@@ -149,7 +149,12 @@ describe('PharmacyReadController', () => {
         undefined,
       );
       expect(d.readService.searchProducts).toHaveBeenCalledWith(
-        { search: undefined, conceptId: undefined, pharmacyId: 'ph-1' },
+        {
+          search: undefined,
+          conceptId: undefined,
+          pharmacyId: 'ph-1',
+          exact: false,
+        },
         50,
       );
     });
@@ -165,7 +170,12 @@ describe('PharmacyReadController', () => {
         undefined,
       );
       expect(d.readService.searchProducts).toHaveBeenCalledWith(
-        { search: 'amox', conceptId: undefined, pharmacyId: undefined },
+        {
+          search: 'amox',
+          conceptId: undefined,
+          pharmacyId: undefined,
+          exact: false,
+        },
         50,
       );
     });

@@ -94,6 +94,27 @@ export class PublicMedicationCardDto {
    */
   @ApiPropertyOptional({ nullable: true })
   nearestKm!: number | null;
+
+  /**
+   * Para qué se usa, según su grupo ATC (OMS), del grupo más específico al
+   * más general. Es una clasificación, no una indicación médica.
+   */
+  @ApiProperty({ type: [String], example: ['Dolor abdominal y cólicos'] })
+  uses!: string[];
+
+  /**
+   * Por qué salió en la búsqueda: nombre, marca, código o uso. Ausente sin
+   * texto de búsqueda.
+   */
+  @ApiPropertyOptional({
+    enum: ['name', 'brand', 'code', 'use'],
+    nullable: true,
+  })
+  matchedBy?: 'name' | 'brand' | 'code' | 'use' | null;
+
+  /** El uso que lo encontró, cuando `matchedBy` es `use`. */
+  @ApiPropertyOptional({ nullable: true, example: 'Dolor abdominal y cólicos' })
+  matchedUse?: string | null;
 }
 
 /** La página de la vitrina. */
@@ -115,6 +136,13 @@ export class PublicMedicationPageDto {
    */
   @ApiProperty({ type: [String] })
   groups!: string[];
+
+  /**
+   * El texto corregido que de verdad se buscó cuando lo escrito no daba nada
+   * («ibopofeno» → «ibuprofeno»); `null` si no hizo falta o se pidió `exact`.
+   */
+  @ApiPropertyOptional({ nullable: true, example: 'ibuprofeno' })
+  correctedQuery!: string | null;
 
   /**
    * Instante en que se resolvió la consulta.

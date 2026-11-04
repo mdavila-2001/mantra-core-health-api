@@ -338,6 +338,13 @@ describe('PharmacyReadService', () => {
         productCode: 'IBU-400',
         genericName: 'Ibuprofeno',
       },
+      {
+        id: 'prod-3',
+        pharmacyId: '1',
+        productCode: 'TRX-250',
+        brandName: 'Trimoxal',
+        genericName: 'Amoxicilina',
+      },
     ]);
     d.repo.findConcepts.mockResolvedValue([MEDICATION]);
 
@@ -345,20 +352,62 @@ describe('PharmacyReadService', () => {
       d.service.searchProducts({ search: 'amox' }, 1),
     );
 
-    // Se pide una fila de más para declarar el recorte.
+    // The text is matched in memory (accents, uses, typos), not in SQL: the
+    // repository is asked for candidates without it.
     expect(d.repo.findActiveProducts).toHaveBeenCalledWith(
       d.fork,
       ['1'],
-      { search: 'amox' },
-      2,
+      { conceptId: undefined },
+      5000,
     );
+    // Two amoxicillins match and the limit is 1: the cut is declared, and the
+    // ibuprofen never makes it in.
     expect(result.items).toHaveLength(1);
     expect(result.truncated).toBe(true);
+    expect(result.correctedQuery).toBeNull();
     expect(result.items[0].pharmacyName).toBe('Farmacia 1');
     expect(result.items[0].medication).toEqual({
       code: 'J01CA04',
       display: 'Amoxicilina',
     });
+  });
+
+  it('corrects a typo and finds by what the medication is for', async () => {
+    const d = build();
+    d.repo.findVisibleByTenant.mockResolvedValue([pharmacy('1')]);
+    d.repo.findActiveProducts.mockResolvedValue([
+      {
+        id: 'p-ibu',
+        pharmacyId: '1',
+        productCode: 'IBU',
+        genericName: 'Ibuprofeno',
+      },
+      {
+        id: 'p-amox',
+        pharmacyId: '1',
+        productCode: 'AMX',
+        genericName: 'Amoxicilina',
+        medicationConceptId: MEDICATION.id,
+      },
+    ]);
+    d.repo.findConcepts.mockResolvedValue([MEDICATION]);
+
+    const typo = await runWithTenant('tenant-a', () =>
+      d.service.searchProducts({ search: 'ibopofeno' }, 10),
+    );
+    expect(typo.correctedQuery).toBe('ibuprofeno');
+    expect(typo.items.map((item) => item.id)).toEqual(['p-ibu']);
+
+    // J01CA04 (the concept's ATC) is in the «Infecciones bacterianas» group.
+    const byUse = await runWithTenant('tenant-a', () =>
+      d.service.searchProducts({ search: 'antibiotico' }, 10),
+    );
+    expect(byUse.items.map((item) => item.id)).toEqual(['p-amox']);
+
+    const literal = await runWithTenant('tenant-a', () =>
+      d.service.searchProducts({ search: 'ibopofeno', exact: true }, 10),
+    );
+    expect(literal.items).toEqual([]);
   });
 
   it('search over a tenant without published pharmacies returns empty', async () => {
