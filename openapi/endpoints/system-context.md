@@ -903,7 +903,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 400 | `VALIDATION_FAILED` | Indique el campo destino (`target`) o el código de la enumeración (`code`) | Excepción explícita en src/modules/system_context/services/dynamic-enums.service.ts |
-| 400 | `VALIDATION_FAILED` | El campo destino se escribe como `esquema.tabla.columna` | Excepción explícita en src/modules/system_context/services/dynamic-enums.service.ts |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Enumeración no encontrada | Excepción explícita en src/modules/system_context/services/dynamic-enums.service.ts |

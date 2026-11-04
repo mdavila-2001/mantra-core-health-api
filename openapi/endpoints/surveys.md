@@ -2,33 +2,34 @@
 
 # Endpoints del módulo `surveys`
 
-Referencia exhaustiva de 18 operación(es) del módulo `surveys`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 19 operación(es) del módulo `surveys`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `surveys-assignments`, `surveys-insights`, `surveys-patient`, `surveys-templates`
-- **Controladores:** `SurveysAssignmentsController`, `SurveysInsightsController`, `SurveysPatientController`, `SurveysTemplatesController`
+- **Etiquetas OpenAPI:** `surveys-assignments`, `surveys-catalog`, `surveys-insights`, `surveys-patient`, `surveys-templates`
+- **Controladores:** `SurveysAssignmentsController`, `SurveysCatalogController`, `SurveysInsightsController`, `SurveysPatientController`, `SurveysTemplatesController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
 ## Índice del módulo
 
 1. [POST /surveys/assignments](#1-post-surveys-assignments) — Asociar una encuesta a una consulta o servicio
-2. [GET /surveys/insights](#2-get-surveys-insights) — Resumen general de mis encuestas (agregado, sin pacientes)
-3. [POST /surveys/invitations](#3-post-surveys-invitations) — Emitir los cuestionarios de una atención completada
-4. [GET /surveys/me/invitations](#4-get-surveys-me-invitations) — Ver mis cuestionarios
-5. [GET /surveys/me/invitations/{id}](#5-get-surveys-me-invitations-id) — Abrir un cuestionario para responderlo
-6. [POST /surveys/me/invitations/{id}/responses](#6-post-surveys-me-invitations-id-responses) — Responder el cuestionario
-7. [GET /surveys/templates](#7-get-surveys-templates) — Listar mis encuestas
-8. [POST /surveys/templates](#8-post-surveys-templates) — Crear una encuesta para pacientes
-9. [GET /surveys/templates/{id}](#9-get-surveys-templates-id) — Ver una encuesta y su cuestionario
-10. [PATCH /surveys/templates/{id}](#10-patch-surveys-templates-id) — Corregir título, consigna y plazo del borrador
-11. [POST /surveys/templates/{id}/deactivate](#11-post-surveys-templates-id-deactivate) — Desactivar la encuesta
-12. [POST /surveys/templates/{id}/questions](#12-post-surveys-templates-id-questions) — Configurar una pregunta y su tipo de respuesta
-13. [DELETE /surveys/templates/{id}/questions/{questionId}](#13-delete-surveys-templates-id-questions-questionid) — Quitar una pregunta del borrador
-14. [PATCH /surveys/templates/{id}/questions/{questionId}](#14-patch-surveys-templates-id-questions-questionid) — Corregir una pregunta del borrador
-15. [PUT /surveys/templates/{id}/questions/order](#15-put-surveys-templates-id-questions-order) — Reordenar el cuestionario del borrador
-16. [GET /surveys/templates/{id}/responses](#16-get-surveys-templates-id-responses) — Revisar las respuestas de los pacientes
-17. [POST /surveys/templates/{id}/versions](#17-post-surveys-templates-id-versions) — Abrir una versión nueva del cuestionario
-18. [POST /surveys/templates/{id}/versions/{versionNumber}/publish](#18-post-surveys-templates-id-versions-versionnumber-publish) — Publicar la encuesta y configurar su vigencia
+2. [GET /surveys/catalog](#2-get-surveys-catalog) — Catálogo de encuestas con sus servicios
+3. [GET /surveys/insights](#3-get-surveys-insights) — Resumen general de mis encuestas (agregado, sin pacientes)
+4. [POST /surveys/invitations](#4-post-surveys-invitations) — Emitir los cuestionarios de una atención completada
+5. [GET /surveys/me/invitations](#5-get-surveys-me-invitations) — Ver mis cuestionarios
+6. [GET /surveys/me/invitations/{id}](#6-get-surveys-me-invitations-id) — Abrir un cuestionario para responderlo
+7. [POST /surveys/me/invitations/{id}/responses](#7-post-surveys-me-invitations-id-responses) — Responder el cuestionario
+8. [GET /surveys/templates](#8-get-surveys-templates) — Listar mis encuestas
+9. [POST /surveys/templates](#9-post-surveys-templates) — Crear una encuesta para pacientes
+10. [GET /surveys/templates/{id}](#10-get-surveys-templates-id) — Ver una encuesta y su cuestionario
+11. [PATCH /surveys/templates/{id}](#11-patch-surveys-templates-id) — Corregir título, consigna y plazo del borrador
+12. [POST /surveys/templates/{id}/deactivate](#12-post-surveys-templates-id-deactivate) — Desactivar la encuesta
+13. [POST /surveys/templates/{id}/questions](#13-post-surveys-templates-id-questions) — Configurar una pregunta y su tipo de respuesta
+14. [DELETE /surveys/templates/{id}/questions/{questionId}](#14-delete-surveys-templates-id-questions-questionid) — Quitar una pregunta del borrador
+15. [PATCH /surveys/templates/{id}/questions/{questionId}](#15-patch-surveys-templates-id-questions-questionid) — Corregir una pregunta del borrador
+16. [PUT /surveys/templates/{id}/questions/order](#16-put-surveys-templates-id-questions-order) — Reordenar el cuestionario del borrador
+17. [GET /surveys/templates/{id}/responses](#17-get-surveys-templates-id-responses) — Revisar las respuestas de los pacientes
+18. [POST /surveys/templates/{id}/versions](#18-post-surveys-templates-id-versions) — Abrir una versión nueva del cuestionario
+19. [POST /surveys/templates/{id}/versions/{versionNumber}/publish](#19-post-surveys-templates-id-versions-versionnumber-publish) — Publicar la encuesta y configurar su vigencia
 
 ---
 
@@ -163,7 +164,121 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. GET /surveys/insights
+## 2. GET /surveys/catalog
+
+- **Módulo:** `surveys`
+- **Etiqueta OpenAPI:** `surveys-catalog`
+- **Nombre:** Catálogo de encuestas con sus servicios
+- **Operation ID:** `SurveysCatalogController_list`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SurveysCatalogController.list](../../src/modules/surveys/controllers/surveys-catalog.controller.ts)
+
+### Descripción de negocio
+
+Catálogo de encuestas con sus servicios. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Base surveys plus the practitioner's own, with their services.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /surveys/catalog` en `SurveysCatalogController_list`. El controlador delega en `SurveysCatalogService.list`. No recibe body. El tipo de retorno estático es `Promise<SurveyCatalogEntryDto[]>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /surveys/catalog HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /surveys/catalog HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SurveyCatalogEntryDto[]>` | No |
+| 400 | Consulta completada correctamente. | `Promise<SurveyCatalogEntryDto[]>` | No |
+| 401 | Consulta completada correctamente. | `Promise<SurveyCatalogEntryDto[]>` | No |
+| 403 | Consulta completada correctamente. | `Promise<SurveyCatalogEntryDto[]>` | No |
+| 429 | Consulta completada correctamente. | `Promise<SurveyCatalogEntryDto[]>` | No |
+| 500 | Consulta completada correctamente. | `Promise<SurveyCatalogEntryDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<SurveyCatalogEntryDto[]>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SurveyCatalogEntryDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "origin": {},
+    "scope": {},
+    "assignments": [
+      {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "targetType": "APPOINTMENT",
+        "targetId": "00000000-0000-4000-8000-000000000001",
+        "targetName": "Nombre de ejemplo",
+        "active": true
+      }
+    ]
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 422 | `PRECONDITION_FAILED` | La sesión no tiene perfil profesional asociado | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/surveys/catalog"
+}
+```
+
+---
+
+## 3. GET /surveys/insights
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-insights`
@@ -368,7 +483,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. POST /surveys/invitations
+## 4. POST /surveys/invitations
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-assignments`
@@ -495,7 +610,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. GET /surveys/me/invitations
+## 5. GET /surveys/me/invitations
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-patient`
@@ -609,7 +724,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. GET /surveys/me/invitations/{id}
+## 6. GET /surveys/me/invitations/{id}
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-patient`
@@ -741,7 +856,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /surveys/me/invitations/{id}/responses
+## 7. POST /surveys/me/invitations/{id}/responses
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-patient`
@@ -900,7 +1015,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. GET /surveys/templates
+## 8. GET /surveys/templates
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`
@@ -1010,7 +1125,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /surveys/templates
+## 9. POST /surveys/templates
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`
@@ -1142,7 +1257,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. GET /surveys/templates/{id}
+## 10. GET /surveys/templates/{id}
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`
@@ -1299,7 +1414,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. PATCH /surveys/templates/{id}
+## 11. PATCH /surveys/templates/{id}
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`
@@ -1430,7 +1545,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /surveys/templates/{id}/deactivate
+## 12. POST /surveys/templates/{id}/deactivate
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`
@@ -1543,7 +1658,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /surveys/templates/{id}/questions
+## 13. POST /surveys/templates/{id}/questions
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`
@@ -1708,7 +1823,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. DELETE /surveys/templates/{id}/questions/{questionId}
+## 14. DELETE /surveys/templates/{id}/questions/{questionId}
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`
@@ -1824,7 +1939,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. PATCH /surveys/templates/{id}/questions/{questionId}
+## 15. PATCH /surveys/templates/{id}/questions/{questionId}
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`
@@ -1970,7 +2085,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. PUT /surveys/templates/{id}/questions/order
+## 16. PUT /surveys/templates/{id}/questions/order
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`
@@ -2104,7 +2219,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. GET /surveys/templates/{id}/responses
+## 17. GET /surveys/templates/{id}/responses
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`
@@ -2228,7 +2343,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /surveys/templates/{id}/versions
+## 18. POST /surveys/templates/{id}/versions
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`
@@ -2347,7 +2462,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /surveys/templates/{id}/versions/{versionNumber}/publish
+## 19. POST /surveys/templates/{id}/versions/{versionNumber}/publish
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`

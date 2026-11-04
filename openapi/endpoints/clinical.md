@@ -2,61 +2,404 @@
 
 # Endpoints del módulo `clinical`
 
-Referencia exhaustiva de 42 operación(es) del módulo `clinical`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 62 operación(es) del módulo `clinical`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `clinical-encounters`, `clinical-me`, `clinical-observations`, `clinical-orders`, `clinical-prescription-expiry`, `clinical-prescription-policies`, `clinical-prescriptions`, `clinical-prescriptions-public`, `clinical-read`, `clinical-records`
-- **Controladores:** `ClinicalEncountersController`, `ClinicalMedicalAspectsController`, `ClinicalObservationsController`, `ClinicalOrdersController`, `ClinicalPrescriptionExpiryController`, `ClinicalPrescriptionPoliciesController`, `ClinicalPrescriptionsController`, `ClinicalPrescriptionsPublicController`, `ClinicalProcedureCentersController`, `ClinicalReadController`, `ClinicalRecordsController`
+- **Etiquetas OpenAPI:** `clinical-adt`, `clinical-census`, `clinical-encounters`, `clinical-me`, `clinical-observations`, `clinical-orders`, `clinical-prescription-expiry`, `clinical-prescription-policies`, `clinical-prescriptions`, `clinical-prescriptions-public`, `clinical-read`, `clinical-records`
+- **Controladores:** `ClinicalAdtController`, `ClinicalCensusController`, `ClinicalEncountersController`, `ClinicalMedicalAspectsController`, `ClinicalObservationsController`, `ClinicalOrdersController`, `ClinicalPrescriptionExpiryController`, `ClinicalPrescriptionPoliciesController`, `ClinicalPrescriptionsController`, `ClinicalPrescriptionsPublicController`, `ClinicalProcedureCentersController`, `ClinicalReadController`, `ClinicalRecordsController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
 ## Índice del módulo
 
-1. [POST /clinical/allergy-intolerances](#1-post-clinical-allergy-intolerances) — Registrar una alergia con reacciones
-2. [GET /clinical/allergy-intolerances/{id}/attachments](#2-get-clinical-allergy-intolerances-id-attachments) — Listar los adjuntos de una alergia
-3. [POST /clinical/allergy-intolerances/{id}/attachments](#3-post-clinical-allergy-intolerances-id-attachments) — Adjuntar un archivo ya subido a una alergia
-4. [POST /clinical/care-episodes](#4-post-clinical-care-episodes) — Abrir un episodio de cuidado
-5. [POST /clinical/conditions](#5-post-clinical-conditions) — Registrar una condición/diagnóstico
-6. [POST /clinical/conditions/{id}/attachments](#6-post-clinical-conditions-id-attachments) — Adjuntar un archivo ya subido a una condición
-7. [POST /clinical/conditions/{id}/change-status](#7-post-clinical-conditions-id-change-status) — Cambiar el estado clínico de una condición
-8. [POST /clinical/conditions/{id}/verification](#8-post-clinical-conditions-id-verification) — Confirmar o refutar un diagnóstico presuntivo
-9. [POST /clinical/diagnostic-reports](#9-post-clinical-diagnostic-reports) — Emitir un reporte diagnóstico desde la orden
-10. [POST /clinical/diagnostic-reports/{id}/release](#10-post-clinical-diagnostic-reports-id-release) — Liberar los resultados de un reporte diagnóstico
-11. [GET /clinical/encounters/{id}/attachments](#11-get-clinical-encounters-id-attachments) — Listar los adjuntos de un encuentro
-12. [POST /clinical/encounters/{id}/attachments](#12-post-clinical-encounters-id-attachments) — Adjuntar un archivo ya subido a un encuentro
-13. [POST /clinical/encounters/{id}/close](#13-post-clinical-encounters-id-close) — Cerrar un encuentro en curso (gatilla facturación)
-14. [POST /clinical/encounters/check-in](#14-post-clinical-encounters-check-in) — Check-in de un encuentro con participantes y ubicación
-15. [POST /clinical/immunizations](#15-post-clinical-immunizations) — Registrar una inmunización
-16. [POST /clinical/internal/prescription-expiry-notices](#16-post-clinical-internal-prescription-expiry-notices) — Avisar al paciente de las recetas por vencer (barrido)
-17. [GET /clinical/me/medical-aspects](#17-get-clinical-me-medical-aspects) — Ver mis aspectos médicos declarados
-18. [PUT /clinical/me/medical-aspects](#18-put-clinical-me-medical-aspects) — Guardar mis aspectos médicos declarados
-19. [GET /clinical/me/procedure-centers](#19-get-clinical-me-procedure-centers) — Dónde hacerme los procedimientos que me pidieron
-20. [POST /clinical/medication-records](#20-post-clinical-medication-records) — Administrar/registrar medicación
-21. [POST /clinical/medication-requests](#21-post-clinical-medication-requests) — Prescribir medicación
-22. [GET /clinical/medication-requests/{id}/attachments](#22-get-clinical-medication-requests-id-attachments) — Listar los adjuntos de una receta
-23. [POST /clinical/medication-requests/{id}/attachments](#23-post-clinical-medication-requests-id-attachments) — Adjuntar un archivo ya subido a una receta
-24. [POST /clinical/medication-requests/{id}/edit](#24-post-clinical-medication-requests-id-edit) — Editar ítems de una receta en borrador (DRAFT)
-25. [POST /clinical/medication-requests/{id}/invalidate](#25-post-clinical-medication-requests-id-invalidate) — Invalidar una receta emitida
-26. [POST /clinical/medication-requests/{id}/issue](#26-post-clinical-medication-requests-id-issue) — Emitir una receta (la vuelve inmutable)
-27. [POST /clinical/medication-requests/{id}/renew](#27-post-clinical-medication-requests-id-renew) — Renovar una receta (crea una nueva copiando datos)
-28. [POST /clinical/medication-requests/{id}/replace](#28-post-clinical-medication-requests-id-replace) — Reemplazar una receta emitida (crea la corrección)
-29. [POST /clinical/medication-requests/{id}/sign](#29-post-clinical-medication-requests-id-sign) — Firmar una receta en borrador (DRAFT)
-30. [POST /clinical/observations](#30-post-clinical-observations) — Registrar una observación con componentes y ejecutantes
-31. [PATCH /clinical/observations/{id}/amend](#31-patch-clinical-observations-id-amend) — Corregir/enmendar una observación (value contract)
-32. [GET /clinical/patients/{patientProfileId}/received-services](#32-get-clinical-patients-patientprofileid-received-services) — Servicios recibidos del paciente: intervenciones médicas realizadas y vacunas
-33. [GET /clinical/patients/{patientProfileId}/summary](#33-get-clinical-patients-patientprofileid-summary) — UC-39-20: historial clínico del paciente (condiciones, alergias, medicación, observaciones, encuentros)
-34. [GET /clinical/prescription-signature-policies](#34-get-clinical-prescription-signature-policies) — Listar las políticas de firma de un tenant
-35. [POST /clinical/prescription-signature-policies](#35-post-clinical-prescription-signature-policies) — Crear una política de firma de receta
-36. [POST /clinical/prescription-signature-policies/{id}/deactivate](#36-post-clinical-prescription-signature-policies-id-deactivate) — Desactivar una política (cierra vigencia, sin borrado duro)
-37. [GET /clinical/prescriptions/{id}/pdf](#37-get-clinical-prescriptions-id-pdf) — Descargar el PDF oficial de una receta
-38. [POST /clinical/procedures](#38-post-clinical-procedures) — Registrar un procedimiento
-39. [POST /clinical/procedures/{id}/attachments](#39-post-clinical-procedures-id-attachments) — Adjuntar un archivo ya subido a un procedimiento
-40. [POST /clinical/service-requests](#40-post-clinical-service-requests) — Crear una orden de servicio
-41. [POST /clinical/service-requests/duplicate-check](#41-post-clinical-service-requests-duplicate-check) — Pre-validar si el paciente ya se hizo este estudio en la ventana (antiduplicación · T-26)
-42. [GET /public/prescriptions/{id}/verify](#42-get-public-prescriptions-id-verify) — Verificar la autenticidad de una receta por su sello
+1. [POST /census-days/{id}/adjustments](#1-post-census-days-id-adjustments) — Ajustar un día de censo cerrado
+2. [POST /clinical/admissions](#2-post-clinical-admissions) — Internar a un paciente
+3. [POST /clinical/allergy-intolerances](#3-post-clinical-allergy-intolerances) — Registrar una alergia con reacciones
+4. [GET /clinical/allergy-intolerances/{id}/attachments](#4-get-clinical-allergy-intolerances-id-attachments) — Listar los adjuntos de una alergia
+5. [POST /clinical/allergy-intolerances/{id}/attachments](#5-post-clinical-allergy-intolerances-id-attachments) — Adjuntar un archivo ya subido a una alergia
+6. [POST /clinical/bed-compatibility](#6-post-clinical-bed-compatibility) — Compatibilidad prospectiva de una cama con un paciente
+7. [POST /clinical/bed-swaps](#7-post-clinical-bed-swaps) — Intercambiar camas entre dos pacientes
+8. [POST /clinical/care-episodes](#8-post-clinical-care-episodes) — Abrir un episodio de cuidado
+9. [POST /clinical/conditions](#9-post-clinical-conditions) — Registrar una condición/diagnóstico
+10. [POST /clinical/conditions/{id}/attachments](#10-post-clinical-conditions-id-attachments) — Adjuntar un archivo ya subido a una condición
+11. [POST /clinical/conditions/{id}/change-status](#11-post-clinical-conditions-id-change-status) — Cambiar el estado clínico de una condición
+12. [POST /clinical/conditions/{id}/verification](#12-post-clinical-conditions-id-verification) — Confirmar o refutar un diagnóstico presuntivo
+13. [POST /clinical/diagnostic-reports](#13-post-clinical-diagnostic-reports) — Emitir un reporte diagnóstico desde la orden
+14. [POST /clinical/diagnostic-reports/{id}/release](#14-post-clinical-diagnostic-reports-id-release) — Liberar los resultados de un reporte diagnóstico
+15. [POST /clinical/encounter-locations/{id}/cancel](#15-post-clinical-encounter-locations-id-cancel) — Anular una reserva o un traslado
+16. [GET /clinical/encounters/{id}/attachments](#16-get-clinical-encounters-id-attachments) — Listar los adjuntos de un encuentro
+17. [POST /clinical/encounters/{id}/attachments](#17-post-clinical-encounters-id-attachments) — Adjuntar un archivo ya subido a un encuentro
+18. [POST /clinical/encounters/{id}/bed-assignment](#18-post-clinical-encounters-id-bed-assignment) — Asignar o reservar cama
+19. [POST /clinical/encounters/{id}/bed-compatibility](#19-post-clinical-encounters-id-bed-compatibility) — Compatibilidad de una cama con el encuentro
+20. [POST /clinical/encounters/{id}/close](#20-post-clinical-encounters-id-close) — Cerrar un encuentro en curso (gatilla facturación)
+21. [POST /clinical/encounters/{id}/discharge](#21-post-clinical-encounters-id-discharge) — Dar de alta (egreso)
+22. [GET /clinical/encounters/{id}/stay](#22-get-clinical-encounters-id-stay) — Ficha de internación
+23. [POST /clinical/encounters/{id}/transfer](#23-post-clinical-encounters-id-transfer) — Trasladar de cama
+24. [POST /clinical/encounters/check-in](#24-post-clinical-encounters-check-in) — Check-in de un encuentro con participantes y ubicación
+25. [POST /clinical/immunizations](#25-post-clinical-immunizations) — Registrar una inmunización
+26. [POST /clinical/internal/prescription-expiry-notices](#26-post-clinical-internal-prescription-expiry-notices) — Avisar al paciente de las recetas por vencer (barrido)
+27. [GET /clinical/me/medical-aspects](#27-get-clinical-me-medical-aspects) — Ver mis aspectos médicos declarados
+28. [PUT /clinical/me/medical-aspects](#28-put-clinical-me-medical-aspects) — Guardar mis aspectos médicos declarados
+29. [GET /clinical/me/procedure-centers](#29-get-clinical-me-procedure-centers) — Dónde hacerme los procedimientos que me pidieron
+30. [POST /clinical/medication-records](#30-post-clinical-medication-records) — Administrar/registrar medicación
+31. [POST /clinical/medication-requests](#31-post-clinical-medication-requests) — Prescribir medicación
+32. [GET /clinical/medication-requests/{id}/attachments](#32-get-clinical-medication-requests-id-attachments) — Listar los adjuntos de una receta
+33. [POST /clinical/medication-requests/{id}/attachments](#33-post-clinical-medication-requests-id-attachments) — Adjuntar un archivo ya subido a una receta
+34. [POST /clinical/medication-requests/{id}/edit](#34-post-clinical-medication-requests-id-edit) — Editar ítems de una receta en borrador (DRAFT)
+35. [POST /clinical/medication-requests/{id}/invalidate](#35-post-clinical-medication-requests-id-invalidate) — Invalidar una receta emitida
+36. [POST /clinical/medication-requests/{id}/issue](#36-post-clinical-medication-requests-id-issue) — Emitir una receta (la vuelve inmutable)
+37. [POST /clinical/medication-requests/{id}/renew](#37-post-clinical-medication-requests-id-renew) — Renovar una receta (crea una nueva copiando datos)
+38. [POST /clinical/medication-requests/{id}/replace](#38-post-clinical-medication-requests-id-replace) — Reemplazar una receta emitida (crea la corrección)
+39. [POST /clinical/medication-requests/{id}/sign](#39-post-clinical-medication-requests-id-sign) — Firmar una receta en borrador (DRAFT)
+40. [POST /clinical/observations](#40-post-clinical-observations) — Registrar una observación con componentes y ejecutantes
+41. [PATCH /clinical/observations/{id}/amend](#41-patch-clinical-observations-id-amend) — Corregir/enmendar una observación (value contract)
+42. [GET /clinical/patients/{id}/inpatient-stay](#42-get-clinical-patients-id-inpatient-stay) — Estancia de internación vigente del paciente
+43. [GET /clinical/patients/{patientProfileId}/received-services](#43-get-clinical-patients-patientprofileid-received-services) — Servicios recibidos del paciente: intervenciones médicas realizadas y vacunas
+44. [GET /clinical/patients/{patientProfileId}/summary](#44-get-clinical-patients-patientprofileid-summary) — UC-39-20: historial clínico del paciente (condiciones, alergias, medicación, observaciones, encuentros)
+45. [PATCH /clinical/placement-incidents/{id}](#45-patch-clinical-placement-incidents-id) — Revisar un incidente de ubicación
+46. [GET /clinical/prescription-signature-policies](#46-get-clinical-prescription-signature-policies) — Listar las políticas de firma de un tenant
+47. [POST /clinical/prescription-signature-policies](#47-post-clinical-prescription-signature-policies) — Crear una política de firma de receta
+48. [POST /clinical/prescription-signature-policies/{id}/deactivate](#48-post-clinical-prescription-signature-policies-id-deactivate) — Desactivar una política (cierra vigencia, sin borrado duro)
+49. [GET /clinical/prescriptions/{id}/pdf](#49-get-clinical-prescriptions-id-pdf) — Descargar el PDF oficial de una receta
+50. [POST /clinical/procedures](#50-post-clinical-procedures) — Registrar un procedimiento
+51. [POST /clinical/procedures/{id}/attachments](#51-post-clinical-procedures-id-attachments) — Adjuntar un archivo ya subido a un procedimiento
+52. [POST /clinical/requisitions](#52-post-clinical-requisitions) — Crear una requisición: varios estudios con su detalle, atómicos
+53. [POST /clinical/service-requests](#53-post-clinical-service-requests) — Crear una orden de servicio
+54. [GET /clinical/service-requests/{id}](#54-get-clinical-service-requests-id) — Leer una orden de servicio con su detalle
+55. [POST /clinical/service-requests/duplicate-check](#55-post-clinical-service-requests-duplicate-check) — Pre-validar si el paciente ya se hizo este estudio en la ventana (antiduplicación · T-26)
+56. [POST /internal/clinical/census-close-tick](#56-post-internal-clinical-census-close-tick) — Cerrar los censos vencidos (worker)
+57. [GET /public/prescriptions/{id}/verify](#57-get-public-prescriptions-id-verify) — Verificar la autenticidad de una receta por su sello
+58. [GET /sites/{siteId}/attending-practitioners](#58-get-sites-siteid-attending-practitioners) — Profesionales a cargo posibles en la sede
+59. [GET /sites/{siteId}/census](#59-get-sites-siteid-census) — Censo de un día
+60. [POST /sites/{siteId}/census/{date}/close](#60-post-sites-siteid-census-date-close) — Cerrar el censo de un día
+61. [GET /sites/{siteId}/inpatient-indicators](#61-get-sites-siteid-inpatient-indicators) — Indicadores hospitalarios (OPS)
+62. [GET /sites/{siteId}/inpatients](#62-get-sites-siteid-inpatients) — Pacientes internados de una sede
 
 ---
 
-## 1. POST /clinical/allergy-intolerances
+## 1. POST /census-days/{id}/adjustments
+
+- **Módulo:** `clinical`
+- **Etiqueta OpenAPI:** `clinical-census`
+- **Nombre:** Ajustar un día de censo cerrado
+- **Operation ID:** `ClinicalCensusController_adjust`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ClinicalCensusController.adjust](../../src/modules/clinical/controllers/clinical-adt.controller.ts)
+
+### Descripción de negocio
+
+Ajustar un día de censo cerrado. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Ajuste de un día cerrado (el snapshot no cambia).
+
+### Descripción del sistema
+
+NestJS resuelve `POST /census-days/{id}/adjustments` en `ClinicalCensusController_adjust`. El controlador delega en `InpatientCensusService.adjust`. Valida el body como `CensusAdjustmentDto` y consume `application/json`. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CensusAdjustmentDto`; los campos opcionales se omiten.
+
+```http
+POST /census-days/00000000-0000-4000-8000-000000000001/adjustments HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "fieldCode": "CODIGO_EJEMPLO",
+  "newValue": 1,
+  "reasonText": "Texto descriptivo de ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `fieldCode` | Sí | `string` | Sin restricción adicional declarada | Columna numérica (camelCase o snake_case) | `CODIGO_EJEMPLO` |
+| `newValue` | Sí | `number` | mínimo 0 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `reasonText` | Sí | `string` | longitud máxima 2000 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `entryRefId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /census-days/00000000-0000-4000-8000-000000000001/adjustments HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "fieldCode": "CODIGO_EJEMPLO",
+  "newValue": 1,
+  "reasonText": "Texto descriptivo de ejemplo",
+  "entryRefId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `no declarado` | No |
+| 400 | Operación completada correctamente. | `no declarado` | No |
+| 401 | Operación completada correctamente. | `no declarado` | No |
+| 403 | Operación completada correctamente. | `no declarado` | No |
+| 404 | Operación completada correctamente. | `no declarado` | No |
+| 409 | Operación completada correctamente. | `no declarado` | No |
+| 413 | Operación completada correctamente. | `no declarado` | No |
+| 422 | Operación completada correctamente. | `no declarado` | No |
+| 429 | Operación completada correctamente. | `no declarado` | No |
+| 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Día de censo no encontrado | Excepción explícita en src/modules/clinical/services/inpatient/census.use-cases.ts |
+| 404 | `NOT_FOUND` | Espacio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Unidad clínica no encontrada | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Sitio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/census-days/{id}/adjustments"
+}
+```
+
+---
+
+## 2. POST /clinical/admissions
+
+- **Módulo:** `clinical`
+- **Etiqueta OpenAPI:** `clinical-adt`
+- **Nombre:** Internar a un paciente
+- **Operation ID:** `ClinicalAdtController_admit`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ClinicalAdtController.admit](../../src/modules/clinical/controllers/clinical-adt.controller.ts)
+
+### Descripción de negocio
+
+Internar a un paciente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Ingreso (A01).
+
+### Descripción del sistema
+
+NestJS resuelve `POST /clinical/admissions` en `ClinicalAdtController_admit`. El controlador delega en `InpatientAdtService.admit`. Valida el body como `CreateAdmissionDto` y consume `application/json`. El tipo de retorno estático es `Promise<AdtResultDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreateAdmissionDto`; los campos opcionales se omiten.
+
+```http
+POST /clinical/admissions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "practiceSiteId": "00000000-0000-4000-8000-000000000001",
+  "levelOfCareCode": "LOC_CARE_GENERAL",
+  "admissionSourceCode": "ADM_SRC_EMERGENCY",
+  "reasonText": "Texto descriptivo de ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `patientProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practiceSiteId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `episodeId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `openEpisode` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `attendingPractitionerId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `levelOfCareCode` | Sí | `string` | valores: `LOC_CARE_GENERAL`, `LOC_CARE_INTERMEDIATE`, `LOC_CARE_ICU`, `LOC_CARE_NEONATAL_ICU` | Sin descripción específica en el contrato OpenAPI. | `LOC_CARE_GENERAL` |
+| `admissionSourceCode` | Sí | `string` | valores: `ADM_SRC_EMERGENCY`, `ADM_SRC_OUTPATIENT`, `ADM_SRC_REFERRAL`, `ADM_SRC_BIRTH`, `ADM_SRC_TRANSFER_IN` | Sin descripción específica en el contrato OpenAPI. | `ADM_SRC_EMERGENCY` |
+| `isolationPrecautionCode` | No | `string` | valores: `ISO_NONE`, `ISO_CONTACT`, `ISO_DROPLET`, `ISO_AIRBORNE`, `ISO_PROTECTIVE` | Sin descripción específica en el contrato OpenAPI. | `ISO_NONE` |
+| `isolationOrganismText` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `reasonText` | Sí | `string` | longitud máxima 2000 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `expectedDischargeAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `bed` | No | `AdmissionBedDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"careSpaceId":"00000000-0000-4000-8000-000000000001","mode":"ASSIGN"}` |
+| `bed.careSpaceId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `bed.mode` | No | `string` | valores: `ASSIGN`, `RESERVE` | Sin descripción específica en el contrato OpenAPI. | `ASSIGN` |
+| `override` | No | `PlacementOverrideDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"justification":"valor-ejemploxxxxxxx","ruleCodes":["CODIGO_EJEMPLO"]}` |
+| `override.justification` | No | `string` | longitud mínima 20; longitud máxima 2000 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemploxxxxxxx` |
+| `override.ruleCodes` | No | `array<string>` | longitud máxima 40; máximo 10 elemento(s) | Reglas forzadas (SEX, AGE, ISOLATION_COHORT, LEVEL_OF_CARE) | `["CODIGO_EJEMPLO"]` |
+| `admissionOriginCode` | No | `string` | valores: `EMERGENCY`, `REFERRAL`, `SCHEDULED`, `TRANSFER_IN` | Sin descripción específica en el contrato OpenAPI. | `EMERGENCY` |
+| `identityVerification` | No | `IdentityVerificationDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"methodCode":"IDV_CI","documentReference":"valor-ejemplo"}` |
+| `identityVerification.methodCode` | No | `string` | valores: `IDV_CI`, `IDV_PASSPORT`, `IDV_FOREIGN_ID`, `IDV_BIRTH_CERT`, `IDV_OTHER` | Sin descripción específica en el contrato OpenAPI. | `IDV_CI` |
+| `identityVerification.documentReference` | No | `string` | longitud mínima 3; longitud máxima 64 | Número o referencia del documento | `valor-ejemplo` |
+| `referralId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /clinical/admissions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "practiceSiteId": "00000000-0000-4000-8000-000000000001",
+  "episodeId": "00000000-0000-4000-8000-000000000001",
+  "openEpisode": true,
+  "attendingPractitionerId": "00000000-0000-4000-8000-000000000001",
+  "levelOfCareCode": "LOC_CARE_GENERAL",
+  "admissionSourceCode": "ADM_SRC_EMERGENCY",
+  "isolationPrecautionCode": "ISO_NONE",
+  "isolationOrganismText": "valor-ejemplo",
+  "reasonText": "Texto descriptivo de ejemplo",
+  "expectedDischargeAt": "2026-07-31T12:00:00.000Z",
+  "bed": {
+    "careSpaceId": "00000000-0000-4000-8000-000000000001",
+    "mode": "ASSIGN"
+  },
+  "override": {
+    "justification": "valor-ejemploxxxxxxx",
+    "ruleCodes": [
+      "CODIGO_EJEMPLO"
+    ]
+  },
+  "admissionOriginCode": "EMERGENCY",
+  "identityVerification": {
+    "methodCode": "IDV_CI",
+    "documentReference": "valor-ejemplo"
+  },
+  "referralId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<AdtResultDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AdtResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "episodeId": "00000000-0000-4000-8000-000000000001",
+  "encounterId": "00000000-0000-4000-8000-000000000001",
+  "encounterLocationId": "00000000-0000-4000-8000-000000000001",
+  "fromLocationId": "00000000-0000-4000-8000-000000000001",
+  "toLocationId": "00000000-0000-4000-8000-000000000001",
+  "cleaningOrderId": "00000000-0000-4000-8000-000000000001",
+  "incidentId": "00000000-0000-4000-8000-000000000001",
+  "cell": {},
+  "locations": [
+    {}
+  ],
+  "requestId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `episodeId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `encounterId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `encounterLocationId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `fromLocationId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `toLocationId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `cleaningOrderId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `incidentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `cell` | No | `object` | Sin restricción adicional declarada | Estado operativo de la cama (CareSpaceOpsPort) | `{}` |
+| `locations` | No | `array<object>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{}]` |
+| `requestId` | No | `string` | Sin restricción adicional declarada | Id de la petición (también en la cabecera X-Request-Id); sólo en respuestas de mutación | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Episodio de cuidado no encontrado | Excepción explícita en src/modules/clinical/services/inpatient/adt.use-cases.ts |
+| 404 | `NOT_FOUND` | Derivación no encontrada | Excepción explícita en src/modules/clinical/services/inpatient/adt.use-cases.ts |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/clinical/services/inpatient/adt.use-cases.ts |
+| 404 | `NOT_FOUND` | Espacio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Unidad clínica no encontrada | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Sitio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Cama no encontrada en la sede | Excepción explícita en src/modules/clinical/services/inpatient/adt-support.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El ingreso de un paciente sin vínculo previo exige origen e identidad verificada | Excepción explícita en src/modules/clinical/services/inpatient/adt.use-cases.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/clinical/admissions"
+}
+```
+
+---
+
+## 3. POST /clinical/allergy-intolerances
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -215,7 +558,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. GET /clinical/allergy-intolerances/{id}/attachments
+## 4. GET /clinical/allergy-intolerances/{id}/attachments
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -360,7 +703,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. POST /clinical/allergy-intolerances/{id}/attachments
+## 5. POST /clinical/allergy-intolerances/{id}/attachments
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -496,7 +839,291 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /clinical/care-episodes
+## 6. POST /clinical/bed-compatibility
+
+- **Módulo:** `clinical`
+- **Etiqueta OpenAPI:** `clinical-adt`
+- **Nombre:** Compatibilidad prospectiva de una cama con un paciente
+- **Operation ID:** `ClinicalAdtController_prospectiveCompatibility`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ClinicalAdtController.prospectiveCompatibility](../../src/modules/clinical/controllers/clinical-adt.controller.ts)
+
+### Descripción de negocio
+
+Compatibilidad prospectiva de una cama con un paciente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Compatibilidad prospectiva de una cama, sin encuentro (paso «Cama» del ingreso).
+
+### Descripción del sistema
+
+NestJS resuelve `POST /clinical/bed-compatibility` en `ClinicalAdtController_prospectiveCompatibility`. El controlador delega en `InpatientAdtService.prospectiveCompatibility`. Valida el body como `ProspectiveCompatibilityDto` y consume `application/json`. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ProspectiveCompatibilityDto`; los campos opcionales se omiten.
+
+```http
+POST /clinical/bed-compatibility HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "careSpaceId": "00000000-0000-4000-8000-000000000001",
+  "patientProfileId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `careSpaceId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `patientProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `levelOfCareCode` | No | `string` | valores: `LOC_CARE_GENERAL`, `LOC_CARE_INTERMEDIATE`, `LOC_CARE_ICU`, `LOC_CARE_NEONATAL_ICU` | Sin descripción específica en el contrato OpenAPI. | `LOC_CARE_GENERAL` |
+| `isolationPrecautionCode` | No | `string` | valores: `ISO_NONE`, `ISO_CONTACT`, `ISO_DROPLET`, `ISO_AIRBORNE`, `ISO_PROTECTIVE` | Sin descripción específica en el contrato OpenAPI. | `ISO_NONE` |
+| `isolationOrganismText` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /clinical/bed-compatibility HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "careSpaceId": "00000000-0000-4000-8000-000000000001",
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "levelOfCareCode": "LOC_CARE_GENERAL",
+  "isolationPrecautionCode": "ISO_NONE",
+  "isolationOrganismText": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | Sí |
+| 400 | Operación completada correctamente. | `no declarado` | No |
+| 401 | Operación completada correctamente. | `no declarado` | No |
+| 403 | Operación completada correctamente. | `no declarado` | No |
+| 409 | Operación completada correctamente. | `no declarado` | No |
+| 413 | Operación completada correctamente. | `no declarado` | No |
+| 422 | Operación completada correctamente. | `no declarado` | No |
+| 429 | Operación completada correctamente. | `no declarado` | No |
+| 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/clinical/services/inpatient/inpatient-read.use-cases.ts |
+| 404 | `NOT_FOUND` | Espacio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Unidad clínica no encontrada | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Sitio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Cama no encontrada en la sede | Excepción explícita en src/modules/clinical/services/inpatient/adt-support.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/clinical/bed-compatibility"
+}
+```
+
+---
+
+## 7. POST /clinical/bed-swaps
+
+- **Módulo:** `clinical`
+- **Etiqueta OpenAPI:** `clinical-adt`
+- **Nombre:** Intercambiar camas entre dos pacientes
+- **Operation ID:** `ClinicalAdtController_swap`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ClinicalAdtController.swap](../../src/modules/clinical/controllers/clinical-adt.controller.ts)
+
+### Descripción de negocio
+
+Intercambiar camas entre dos pacientes. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Intercambio (A17).
+
+### Descripción del sistema
+
+NestJS resuelve `POST /clinical/bed-swaps` en `ClinicalAdtController_swap`. El controlador delega en `InpatientAdtService.swap`. Valida el body como `BedSwapDto` y consume `application/json`. El tipo de retorno estático es `Promise<AdtResultDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `BedSwapDto`; los campos opcionales se omiten.
+
+```http
+POST /clinical/bed-swaps HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "encounterAId": "00000000-0000-4000-8000-000000000001",
+  "encounterBId": "00000000-0000-4000-8000-000000000001",
+  "reasonText": "Texto descriptivo de ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `encounterAId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `encounterBId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `occurredAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `reasonText` | Sí | `string` | longitud máxima 2000 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `override` | No | `PlacementOverrideDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"justification":"valor-ejemploxxxxxxx","ruleCodes":["CODIGO_EJEMPLO"]}` |
+| `override.justification` | No | `string` | longitud mínima 20; longitud máxima 2000 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemploxxxxxxx` |
+| `override.ruleCodes` | No | `array<string>` | longitud máxima 40; máximo 10 elemento(s) | Reglas forzadas (SEX, AGE, ISOLATION_COHORT, LEVEL_OF_CARE) | `["CODIGO_EJEMPLO"]` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /clinical/bed-swaps HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "encounterAId": "00000000-0000-4000-8000-000000000001",
+  "encounterBId": "00000000-0000-4000-8000-000000000001",
+  "occurredAt": "2026-07-31T12:00:00.000Z",
+  "reasonText": "Texto descriptivo de ejemplo",
+  "override": {
+    "justification": "valor-ejemploxxxxxxx",
+    "ruleCodes": [
+      "CODIGO_EJEMPLO"
+    ]
+  }
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AdtResultDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AdtResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "episodeId": "00000000-0000-4000-8000-000000000001",
+  "encounterId": "00000000-0000-4000-8000-000000000001",
+  "encounterLocationId": "00000000-0000-4000-8000-000000000001",
+  "fromLocationId": "00000000-0000-4000-8000-000000000001",
+  "toLocationId": "00000000-0000-4000-8000-000000000001",
+  "cleaningOrderId": "00000000-0000-4000-8000-000000000001",
+  "incidentId": "00000000-0000-4000-8000-000000000001",
+  "cell": {},
+  "locations": [
+    {}
+  ],
+  "requestId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `episodeId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `encounterId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `encounterLocationId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `fromLocationId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `toLocationId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `cleaningOrderId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `incidentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `cell` | No | `object` | Sin restricción adicional declarada | Estado operativo de la cama (CareSpaceOpsPort) | `{}` |
+| `locations` | No | `array<object>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{}]` |
+| `requestId` | No | `string` | Sin restricción adicional declarada | Id de la petición (también en la cabecera X-Request-Id); sólo en respuestas de mutación | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Encuentro no encontrado | Excepción explícita en src/modules/clinical/services/inpatient/adt-support.ts |
+| 404 | `NOT_FOUND` | Espacio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Unidad clínica no encontrada | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Sitio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Cama no encontrada en la sede | Excepción explícita en src/modules/clinical/services/inpatient/adt-support.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/clinical/bed-swaps"
+}
+```
+
+---
+
+## 8. POST /clinical/care-episodes
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-encounters`
@@ -636,7 +1263,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /clinical/conditions
+## 9. POST /clinical/conditions
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -794,7 +1421,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /clinical/conditions/{id}/attachments
+## 10. POST /clinical/conditions/{id}/attachments
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -930,7 +1557,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /clinical/conditions/{id}/change-status
+## 11. POST /clinical/conditions/{id}/change-status
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -1072,7 +1699,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /clinical/conditions/{id}/verification
+## 12. POST /clinical/conditions/{id}/verification
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -1280,7 +1907,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /clinical/diagnostic-reports
+## 13. POST /clinical/diagnostic-reports
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-orders`
@@ -1425,7 +2052,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /clinical/diagnostic-reports/{id}/release
+## 14. POST /clinical/diagnostic-reports/{id}/release
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-orders`
@@ -1561,7 +2188,156 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. GET /clinical/encounters/{id}/attachments
+## 15. POST /clinical/encounter-locations/{id}/cancel
+
+- **Módulo:** `clinical`
+- **Etiqueta OpenAPI:** `clinical-adt`
+- **Nombre:** Anular una reserva o un traslado
+- **Operation ID:** `ClinicalAdtController_cancelLocation`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ClinicalAdtController.cancelLocation](../../src/modules/clinical/controllers/clinical-adt.controller.ts)
+
+### Descripción de negocio
+
+Anular una reserva o un traslado. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Anular una reserva o un traslado (A12).
+
+### Descripción del sistema
+
+NestJS resuelve `POST /clinical/encounter-locations/{id}/cancel` en `ClinicalAdtController_cancelLocation`. El controlador delega en `InpatientAdtService.cancelLocation`. Valida el body como `CancelLocationDto` y consume `application/json`. El tipo de retorno estático es `Promise<AdtResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CancelLocationDto`; los campos opcionales se omiten.
+
+```http
+POST /clinical/encounter-locations/00000000-0000-4000-8000-000000000001/cancel HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reasonText": "Texto descriptivo de ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `reasonText` | Sí | `string` | longitud máxima 2000 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /clinical/encounter-locations/00000000-0000-4000-8000-000000000001/cancel HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reasonText": "Texto descriptivo de ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AdtResultDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AdtResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "episodeId": "00000000-0000-4000-8000-000000000001",
+  "encounterId": "00000000-0000-4000-8000-000000000001",
+  "encounterLocationId": "00000000-0000-4000-8000-000000000001",
+  "fromLocationId": "00000000-0000-4000-8000-000000000001",
+  "toLocationId": "00000000-0000-4000-8000-000000000001",
+  "cleaningOrderId": "00000000-0000-4000-8000-000000000001",
+  "incidentId": "00000000-0000-4000-8000-000000000001",
+  "cell": {},
+  "locations": [
+    {}
+  ],
+  "requestId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `episodeId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `encounterId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `encounterLocationId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `fromLocationId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `toLocationId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `cleaningOrderId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `incidentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `cell` | No | `object` | Sin restricción adicional declarada | Estado operativo de la cama (CareSpaceOpsPort) | `{}` |
+| `locations` | No | `array<object>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{}]` |
+| `requestId` | No | `string` | Sin restricción adicional declarada | Id de la petición (también en la cabecera X-Request-Id); sólo en respuestas de mutación | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Ubicación no encontrada | Excepción explícita en src/modules/clinical/services/inpatient/adt.use-cases.ts |
+| 404 | `NOT_FOUND` | Espacio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Unidad clínica no encontrada | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Sitio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Encuentro no encontrado | Excepción explícita en src/modules/clinical/services/inpatient/adt-support.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/clinical/encounter-locations/{id}/cancel"
+}
+```
+
+---
+
+## 16. GET /clinical/encounters/{id}/attachments
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-encounters`
@@ -1706,7 +2482,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /clinical/encounters/{id}/attachments
+## 17. POST /clinical/encounters/{id}/attachments
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-encounters`
@@ -1842,7 +2618,287 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /clinical/encounters/{id}/close
+## 18. POST /clinical/encounters/{id}/bed-assignment
+
+- **Módulo:** `clinical`
+- **Etiqueta OpenAPI:** `clinical-adt`
+- **Nombre:** Asignar o reservar cama
+- **Operation ID:** `ClinicalAdtController_assignBed`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ClinicalAdtController.assignBed](../../src/modules/clinical/controllers/clinical-adt.controller.ts)
+
+### Descripción de negocio
+
+Asignar o reservar cama. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Asignar o reservar cama (convierte la reserva propia).
+
+### Descripción del sistema
+
+NestJS resuelve `POST /clinical/encounters/{id}/bed-assignment` en `ClinicalAdtController_assignBed`. El controlador delega en `InpatientAdtService.assignBed`. Valida el body como `BedAssignmentDto` y consume `application/json`. El tipo de retorno estático es `Promise<AdtResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `If-Match` | header | No | `string` | Sin restricción adicional declarada | rowVersion del encuentro; distinta: 412 | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `BedAssignmentDto`; los campos opcionales se omiten.
+
+```http
+POST /clinical/encounters/00000000-0000-4000-8000-000000000001/bed-assignment HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "careSpaceId": "00000000-0000-4000-8000-000000000001",
+  "mode": "ASSIGN"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `careSpaceId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `mode` | Sí | `string` | valores: `ASSIGN`, `RESERVE` | Sin descripción específica en el contrato OpenAPI. | `ASSIGN` |
+| `override` | No | `PlacementOverrideDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"justification":"valor-ejemploxxxxxxx","ruleCodes":["CODIGO_EJEMPLO"]}` |
+| `override.justification` | No | `string` | longitud mínima 20; longitud máxima 2000 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemploxxxxxxx` |
+| `override.ruleCodes` | No | `array<string>` | longitud máxima 40; máximo 10 elemento(s) | Reglas forzadas (SEX, AGE, ISOLATION_COHORT, LEVEL_OF_CARE) | `["CODIGO_EJEMPLO"]` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /clinical/encounters/00000000-0000-4000-8000-000000000001/bed-assignment HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+If-Match: valor-ejemplo
+Content-Type: application/json
+
+{
+  "careSpaceId": "00000000-0000-4000-8000-000000000001",
+  "mode": "ASSIGN",
+  "override": {
+    "justification": "valor-ejemploxxxxxxx",
+    "ruleCodes": [
+      "CODIGO_EJEMPLO"
+    ]
+  }
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AdtResultDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AdtResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "episodeId": "00000000-0000-4000-8000-000000000001",
+  "encounterId": "00000000-0000-4000-8000-000000000001",
+  "encounterLocationId": "00000000-0000-4000-8000-000000000001",
+  "fromLocationId": "00000000-0000-4000-8000-000000000001",
+  "toLocationId": "00000000-0000-4000-8000-000000000001",
+  "cleaningOrderId": "00000000-0000-4000-8000-000000000001",
+  "incidentId": "00000000-0000-4000-8000-000000000001",
+  "cell": {},
+  "locations": [
+    {}
+  ],
+  "requestId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `episodeId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `encounterId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `encounterLocationId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `fromLocationId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `toLocationId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `cleaningOrderId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `incidentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `cell` | No | `object` | Sin restricción adicional declarada | Estado operativo de la cama (CareSpaceOpsPort) | `{}` |
+| `locations` | No | `array<object>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{}]` |
+| `requestId` | No | `string` | Sin restricción adicional declarada | Id de la petición (también en la cabecera X-Request-Id); sólo en respuestas de mutación | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Encuentro no encontrado | Excepción explícita en src/modules/clinical/services/inpatient/adt-support.ts |
+| 404 | `NOT_FOUND` | Espacio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Unidad clínica no encontrada | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Sitio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Cama no encontrada en la sede | Excepción explícita en src/modules/clinical/services/inpatient/adt-support.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/clinical/encounters/{id}/bed-assignment"
+}
+```
+
+---
+
+## 19. POST /clinical/encounters/{id}/bed-compatibility
+
+- **Módulo:** `clinical`
+- **Etiqueta OpenAPI:** `clinical-adt`
+- **Nombre:** Compatibilidad de una cama con el encuentro
+- **Operation ID:** `ClinicalAdtController_compatibility`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ClinicalAdtController.compatibility](../../src/modules/clinical/controllers/clinical-adt.controller.ts)
+
+### Descripción de negocio
+
+Compatibilidad de una cama con el encuentro. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Compatibilidad en vivo de una cama con el encuentro.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /clinical/encounters/{id}/bed-compatibility` en `ClinicalAdtController_compatibility`. El controlador delega en `InpatientAdtService.compatibility`. Valida el body como `BedCompatibilityQueryDto` y consume `application/json`. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `BedCompatibilityQueryDto`; los campos opcionales se omiten.
+
+```http
+POST /clinical/encounters/00000000-0000-4000-8000-000000000001/bed-compatibility HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "careSpaceId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `careSpaceId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /clinical/encounters/00000000-0000-4000-8000-000000000001/bed-compatibility HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "careSpaceId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Operación completada correctamente. | `no declarado` | No |
+| 401 | Operación completada correctamente. | `no declarado` | No |
+| 403 | Operación completada correctamente. | `no declarado` | No |
+| 404 | Operación completada correctamente. | `no declarado` | No |
+| 409 | Operación completada correctamente. | `no declarado` | No |
+| 413 | Operación completada correctamente. | `no declarado` | No |
+| 422 | Operación completada correctamente. | `no declarado` | No |
+| 429 | Operación completada correctamente. | `no declarado` | No |
+| 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Encuentro no encontrado | Excepción explícita en src/modules/clinical/services/inpatient/adt-support.ts |
+| 404 | `NOT_FOUND` | Espacio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Unidad clínica no encontrada | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Sitio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Cama no encontrada en la sede | Excepción explícita en src/modules/clinical/services/inpatient/adt-support.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/clinical/encounters/{id}/bed-compatibility"
+}
+```
+
+---
+
+## 20. POST /clinical/encounters/{id}/close
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-encounters`
@@ -1995,7 +3051,425 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /clinical/encounters/check-in
+## 21. POST /clinical/encounters/{id}/discharge
+
+- **Módulo:** `clinical`
+- **Etiqueta OpenAPI:** `clinical-adt`
+- **Nombre:** Dar de alta (egreso)
+- **Operation ID:** `ClinicalAdtController_discharge`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ClinicalAdtController.discharge](../../src/modules/clinical/controllers/clinical-adt.controller.ts)
+
+### Descripción de negocio
+
+Dar de alta (egreso). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Egreso (A03).
+
+### Descripción del sistema
+
+NestJS resuelve `POST /clinical/encounters/{id}/discharge` en `ClinicalAdtController_discharge`. El controlador delega en `InpatientAdtService.discharge`. Valida el body como `DischargeDto` y consume `application/json`. El tipo de retorno estático es `Promise<AdtResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `If-Match` | header | No | `string` | Sin restricción adicional declarada | rowVersion del encuentro; distinta: 412 | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `DischargeDto`; los campos opcionales se omiten.
+
+```http
+POST /clinical/encounters/00000000-0000-4000-8000-000000000001/discharge HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `dischargeDispositionCode` | No | `string` | valores: `DISP_HOME`, `DISP_TRANSFER`, `DISP_DEATH`, `DISP_AGAINST_ADVICE`, `DISP_OTHER` | Sin descripción específica en el contrato OpenAPI. | `DISP_HOME` |
+| `occurredAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `reasonText` | No | `string` | longitud máxima 2000 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `closeEpisode` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /clinical/encounters/00000000-0000-4000-8000-000000000001/discharge HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+If-Match: valor-ejemplo
+Content-Type: application/json
+
+{
+  "dischargeDispositionCode": "DISP_HOME",
+  "occurredAt": "2026-07-31T12:00:00.000Z",
+  "reasonText": "Texto descriptivo de ejemplo",
+  "closeEpisode": true
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AdtResultDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AdtResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "episodeId": "00000000-0000-4000-8000-000000000001",
+  "encounterId": "00000000-0000-4000-8000-000000000001",
+  "encounterLocationId": "00000000-0000-4000-8000-000000000001",
+  "fromLocationId": "00000000-0000-4000-8000-000000000001",
+  "toLocationId": "00000000-0000-4000-8000-000000000001",
+  "cleaningOrderId": "00000000-0000-4000-8000-000000000001",
+  "incidentId": "00000000-0000-4000-8000-000000000001",
+  "cell": {},
+  "locations": [
+    {}
+  ],
+  "requestId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `episodeId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `encounterId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `encounterLocationId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `fromLocationId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `toLocationId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `cleaningOrderId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `incidentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `cell` | No | `object` | Sin restricción adicional declarada | Estado operativo de la cama (CareSpaceOpsPort) | `{}` |
+| `locations` | No | `array<object>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{}]` |
+| `requestId` | No | `string` | Sin restricción adicional declarada | Id de la petición (también en la cabecera X-Request-Id); sólo en respuestas de mutación | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Encuentro no encontrado | Excepción explícita en src/modules/clinical/services/inpatient/adt-support.ts |
+| 404 | `NOT_FOUND` | Espacio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Unidad clínica no encontrada | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Sitio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/clinical/encounters/{id}/discharge"
+}
+```
+
+---
+
+## 22. GET /clinical/encounters/{id}/stay
+
+- **Módulo:** `clinical`
+- **Etiqueta OpenAPI:** `clinical-adt`
+- **Nombre:** Ficha de internación
+- **Operation ID:** `ClinicalAdtController_stay`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ClinicalAdtController.stay](../../src/modules/clinical/controllers/clinical-adt.controller.ts)
+
+### Descripción de negocio
+
+Ficha de internación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Ficha de internación: encuentro, movimientos e incidentes.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /clinical/encounters/{id}/stay` en `ClinicalAdtController_stay`. El controlador delega en `InpatientAdtService.stay`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /clinical/encounters/00000000-0000-4000-8000-000000000001/stay HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /clinical/encounters/00000000-0000-4000-8000-000000000001/stay HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 404 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
+| 404 | `NOT_FOUND` | Encuentro no encontrado | Excepción explícita en src/modules/clinical/services/inpatient/adt-support.ts |
+| 404 | `NOT_FOUND` | Espacio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Unidad clínica no encontrada | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Sitio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/clinical/encounters/{id}/stay"
+}
+```
+
+---
+
+## 23. POST /clinical/encounters/{id}/transfer
+
+- **Módulo:** `clinical`
+- **Etiqueta OpenAPI:** `clinical-adt`
+- **Nombre:** Trasladar de cama
+- **Operation ID:** `ClinicalAdtController_transfer`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ClinicalAdtController.transfer](../../src/modules/clinical/controllers/clinical-adt.controller.ts)
+
+### Descripción de negocio
+
+Trasladar de cama. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Traslado (A02).
+
+### Descripción del sistema
+
+NestJS resuelve `POST /clinical/encounters/{id}/transfer` en `ClinicalAdtController_transfer`. El controlador delega en `InpatientAdtService.transfer`. Valida el body como `TransferDto` y consume `application/json`. El tipo de retorno estático es `Promise<AdtResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `If-Match` | header | No | `string` | Sin restricción adicional declarada | rowVersion del encuentro; distinta: 412 | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `TransferDto`; los campos opcionales se omiten.
+
+```http
+POST /clinical/encounters/00000000-0000-4000-8000-000000000001/transfer HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "toCareSpaceId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `toCareSpaceId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `occurredAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `reasonCode` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `override` | No | `PlacementOverrideDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"justification":"valor-ejemploxxxxxxx","ruleCodes":["CODIGO_EJEMPLO"]}` |
+| `override.justification` | No | `string` | longitud mínima 20; longitud máxima 2000 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemploxxxxxxx` |
+| `override.ruleCodes` | No | `array<string>` | longitud máxima 40; máximo 10 elemento(s) | Reglas forzadas (SEX, AGE, ISOLATION_COHORT, LEVEL_OF_CARE) | `["CODIGO_EJEMPLO"]` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /clinical/encounters/00000000-0000-4000-8000-000000000001/transfer HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+If-Match: valor-ejemplo
+Content-Type: application/json
+
+{
+  "toCareSpaceId": "00000000-0000-4000-8000-000000000001",
+  "occurredAt": "2026-07-31T12:00:00.000Z",
+  "reasonCode": "CODIGO_EJEMPLO",
+  "override": {
+    "justification": "valor-ejemploxxxxxxx",
+    "ruleCodes": [
+      "CODIGO_EJEMPLO"
+    ]
+  }
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AdtResultDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AdtResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AdtResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "episodeId": "00000000-0000-4000-8000-000000000001",
+  "encounterId": "00000000-0000-4000-8000-000000000001",
+  "encounterLocationId": "00000000-0000-4000-8000-000000000001",
+  "fromLocationId": "00000000-0000-4000-8000-000000000001",
+  "toLocationId": "00000000-0000-4000-8000-000000000001",
+  "cleaningOrderId": "00000000-0000-4000-8000-000000000001",
+  "incidentId": "00000000-0000-4000-8000-000000000001",
+  "cell": {},
+  "locations": [
+    {}
+  ],
+  "requestId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `episodeId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `encounterId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `encounterLocationId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `fromLocationId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `toLocationId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `cleaningOrderId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `incidentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `cell` | No | `object` | Sin restricción adicional declarada | Estado operativo de la cama (CareSpaceOpsPort) | `{}` |
+| `locations` | No | `array<object>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{}]` |
+| `requestId` | No | `string` | Sin restricción adicional declarada | Id de la petición (también en la cabecera X-Request-Id); sólo en respuestas de mutación | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Encuentro no encontrado | Excepción explícita en src/modules/clinical/services/inpatient/adt-support.ts |
+| 404 | `NOT_FOUND` | Espacio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Unidad clínica no encontrada | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Sitio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Cama no encontrada en la sede | Excepción explícita en src/modules/clinical/services/inpatient/adt-support.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/clinical/encounters/{id}/transfer"
+}
+```
+
+---
+
+## 24. POST /clinical/encounters/check-in
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-encounters`
@@ -2162,6 +3636,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 409 | `CONFLICT` | La cita ya cuenta con un encuentro clínico finalizado. | Excepción explícita en src/modules/clinical/services/encounters.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Las camas se ocupan por internación (ADT), no por check-in | Excepción explícita en src/modules/clinical/services/encounters.service.ts |
 | 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -2181,7 +3656,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /clinical/immunizations
+## 25. POST /clinical/immunizations
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -2326,7 +3801,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /clinical/internal/prescription-expiry-notices
+## 26. POST /clinical/internal/prescription-expiry-notices
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-prescription-expiry`
@@ -2456,7 +3931,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. GET /clinical/me/medical-aspects
+## 27. GET /clinical/me/medical-aspects
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-me`
@@ -2573,7 +4048,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. PUT /clinical/me/medical-aspects
+## 28. PUT /clinical/me/medical-aspects
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-me`
@@ -2718,7 +4193,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. GET /clinical/me/procedure-centers
+## 29. GET /clinical/me/procedure-centers
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-me`
@@ -2869,7 +4344,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /clinical/medication-records
+## 30. POST /clinical/medication-records
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -3015,7 +4490,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /clinical/medication-requests
+## 31. POST /clinical/medication-requests
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -3189,7 +4664,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. GET /clinical/medication-requests/{id}/attachments
+## 32. GET /clinical/medication-requests/{id}/attachments
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -3334,7 +4809,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. POST /clinical/medication-requests/{id}/attachments
+## 33. POST /clinical/medication-requests/{id}/attachments
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -3470,7 +4945,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /clinical/medication-requests/{id}/edit
+## 34. POST /clinical/medication-requests/{id}/edit
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -3642,7 +5117,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. POST /clinical/medication-requests/{id}/invalidate
+## 35. POST /clinical/medication-requests/{id}/invalidate
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -3786,7 +5261,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. POST /clinical/medication-requests/{id}/issue
+## 36. POST /clinical/medication-requests/{id}/issue
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -3923,7 +5398,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. POST /clinical/medication-requests/{id}/renew
+## 37. POST /clinical/medication-requests/{id}/renew
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -4073,7 +5548,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. POST /clinical/medication-requests/{id}/replace
+## 38. POST /clinical/medication-requests/{id}/replace
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -4235,7 +5710,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. POST /clinical/medication-requests/{id}/sign
+## 39. POST /clinical/medication-requests/{id}/sign
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -4365,7 +5840,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. POST /clinical/observations
+## 40. POST /clinical/observations
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-observations`
@@ -4582,7 +6057,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. PATCH /clinical/observations/{id}/amend
+## 41. PATCH /clinical/observations/{id}/amend
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-observations`
@@ -4732,7 +6207,107 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. GET /clinical/patients/{patientProfileId}/received-services
+## 42. GET /clinical/patients/{id}/inpatient-stay
+
+- **Módulo:** `clinical`
+- **Etiqueta OpenAPI:** `clinical-adt`
+- **Nombre:** Estancia de internación vigente del paciente
+- **Operation ID:** `ClinicalAdtController_currentStay`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ClinicalAdtController.currentStay](../../src/modules/clinical/controllers/clinical-adt.controller.ts)
+
+### Descripción de negocio
+
+Estancia de internación vigente del paciente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Estancia vigente del paciente (404 si no está internado).
+
+### Descripción del sistema
+
+NestJS resuelve `GET /clinical/patients/{id}/inpatient-stay` en `ClinicalAdtController_currentStay`. El controlador delega en `InpatientAdtService.currentStayOfPatient`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /clinical/patients/00000000-0000-4000-8000-000000000001/inpatient-stay HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /clinical/patients/00000000-0000-4000-8000-000000000001/inpatient-stay HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 404 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
+| 404 | `NOT_FOUND` | Encuentro no encontrado | Excepción explícita en src/modules/clinical/services/inpatient/adt-support.ts |
+| 404 | `NOT_FOUND` | Espacio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Unidad clínica no encontrada | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Sitio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/clinical/patients/{id}/inpatient-stay"
+}
+```
+
+---
+
+## 43. GET /clinical/patients/{patientProfileId}/received-services
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-read`
@@ -4887,7 +6462,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 33. GET /clinical/patients/{patientProfileId}/summary
+## 44. GET /clinical/patients/{patientProfileId}/summary
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-read`
@@ -5023,6 +6598,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "formInstanceId": "00000000-0000-4000-8000-000000000001",
       "doseText": "valor-ejemplo",
       "frequencyText": "valor-ejemplo",
+      "quantityDecimal": 1,
       "validFrom": "2026-07-31T12:00:00.000Z",
       "validTo": "2026-07-31T12:00:00.000Z",
       "patientInstructionsText": "valor-ejemplo",
@@ -5127,7 +6703,7 @@ Campos de la respuesta:
 | `allergies[].reactions[].severityConceptId` | No | `string` | formato `uuid` | Identificador asociado a severity concept. | `00000000-0000-4000-8000-000000000001` |
 | `allergies[].reactions[].description` | No | `string` | Sin restricción adicional declarada | Descripción libre de la reacción. | `Texto descriptivo de ejemplo` |
 | `allergies[].createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
-| `medicationRequests` | Sí | `array<MedicationRequestItemDto>` | Sin restricción adicional declarada | Valor de medication requests mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","medicationConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","prescriberProfileId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","formInstanceId":"00000000-0000-4000-8000-000000000001","doseText":"valor-ejemplo","frequencyText":"valor-ejemplo","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","patientInstructionsText":"valor-ejemplo","indicationConditionId":"00000000-0000-4000-8000-000000000001","indicationText":"valor-ejemplo","signedAt":"2026-07-31T12:00:00.000Z","issuedAt":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `medicationRequests` | Sí | `array<MedicationRequestItemDto>` | Sin restricción adicional declarada | Valor de medication requests mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","medicationConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","prescriberProfileId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","formInstanceId":"00000000-0000-4000-8000-000000000001","doseText":"valor-ejemplo","frequencyText":"valor-ejemplo","quantityDecimal":1,"validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","patientInstructionsText":"valor-ejemplo","indicationConditionId":"00000000-0000-4000-8000-000000000001","indicationText":"valor-ejemplo","signedAt":"2026-07-31T12:00:00.000Z","issuedAt":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z"}]` |
 | `medicationRequests[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `medicationRequests[].medicationConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a medication concept. | `00000000-0000-4000-8000-000000000001` |
 | `medicationRequests[].statusConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a status concept. | `00000000-0000-4000-8000-000000000001` |
@@ -5136,6 +6712,7 @@ Campos de la respuesta:
 | `medicationRequests[].formInstanceId` | No | `string` | formato `uuid` | P43: instancia del formulario médico de la que salió la receta, si salió de uno. | `00000000-0000-4000-8000-000000000001` |
 | `medicationRequests[].doseText` | No | `string` | Sin restricción adicional declarada | Valor de dose text mantenido por la instancia. | `valor-ejemplo` |
 | `medicationRequests[].frequencyText` | No | `string` | Sin restricción adicional declarada | Valor de frequency text mantenido por la instancia. | `valor-ejemplo` |
+| `medicationRequests[].quantityDecimal` | No | `number` | Sin restricción adicional declarada | Cantidad recetada, si la receta la declara. Ausente si no fija cantidad. | `1` |
 | `medicationRequests[].validFrom` | No | `string` | formato `date-time` | Valor de valid from mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
 | `medicationRequests[].validTo` | No | `string` | formato `date-time` | Valor de valid to mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
 | `medicationRequests[].patientInstructionsText` | No | `string` | Sin restricción adicional declarada | Indicaciones al paciente impresas en la receta (Patch v4.1.3). | `valor-ejemplo` |
@@ -5205,7 +6782,126 @@ Ejemplo de error normalizado:
 
 ---
 
-## 34. GET /clinical/prescription-signature-policies
+## 45. PATCH /clinical/placement-incidents/{id}
+
+- **Módulo:** `clinical`
+- **Etiqueta OpenAPI:** `clinical-adt`
+- **Nombre:** Revisar un incidente de ubicación
+- **Operation ID:** `ClinicalAdtController_reviewIncident`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ClinicalAdtController.reviewIncident](../../src/modules/clinical/controllers/clinical-adt.controller.ts)
+
+### Descripción de negocio
+
+Revisar un incidente de ubicación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Revisar un incidente de ubicación forzada.
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /clinical/placement-incidents/{id}` en `ClinicalAdtController_reviewIncident`. El controlador delega en `InpatientAdtService.reviewIncident`. Valida el body como `ReviewIncidentDto` y consume `application/json`. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ReviewIncidentDto`; los campos opcionales se omiten.
+
+```http
+PATCH /clinical/placement-incidents/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "status": "REVIEWED",
+  "reviewNote": "valor-ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `status` | Sí | `string` | valores: `REVIEWED`, `CLOSED` | Sin descripción específica en el contrato OpenAPI. | `REVIEWED` |
+| `reviewNote` | Sí | `string` | longitud máxima 2000 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /clinical/placement-incidents/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "status": "REVIEWED",
+  "reviewNote": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Operación completada correctamente. | `no declarado` | No |
+| 401 | Operación completada correctamente. | `no declarado` | No |
+| 403 | Operación completada correctamente. | `no declarado` | No |
+| 404 | Operación completada correctamente. | `no declarado` | No |
+| 409 | Operación completada correctamente. | `no declarado` | No |
+| 413 | Operación completada correctamente. | `no declarado` | No |
+| 422 | Operación completada correctamente. | `no declarado` | No |
+| 429 | Operación completada correctamente. | `no declarado` | No |
+| 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Incidente no encontrado | Excepción explícita en src/modules/clinical/services/inpatient/adt.use-cases.ts |
+| 404 | `NOT_FOUND` | Espacio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Unidad clínica no encontrada | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Sitio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/clinical/placement-incidents/{id}"
+}
+```
+
+---
+
+## 46. GET /clinical/prescription-signature-policies
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-prescription-policies`
@@ -5318,7 +7014,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 35. POST /clinical/prescription-signature-policies
+## 47. POST /clinical/prescription-signature-policies
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-prescription-policies`
@@ -5466,7 +7162,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 36. POST /clinical/prescription-signature-policies/{id}/deactivate
+## 48. POST /clinical/prescription-signature-policies/{id}/deactivate
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-prescription-policies`
@@ -5591,7 +7287,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 37. GET /clinical/prescriptions/{id}/pdf
+## 49. GET /clinical/prescriptions/{id}/pdf
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-prescriptions`
@@ -5689,7 +7385,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 38. POST /clinical/procedures
+## 50. POST /clinical/procedures
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -5849,7 +7545,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 39. POST /clinical/procedures/{id}/attachments
+## 51. POST /clinical/procedures/{id}/attachments
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -5985,7 +7681,305 @@ Ejemplo de error normalizado:
 
 ---
 
-## 40. POST /clinical/service-requests
+## 52. POST /clinical/requisitions
+
+- **Módulo:** `clinical`
+- **Etiqueta OpenAPI:** `clinical-orders`
+- **Nombre:** Crear una requisición: varios estudios con su detalle, atómicos
+- **Operation ID:** `ClinicalOrdersController_createRequisition`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ClinicalOrdersController.createRequisition](../../src/modules/clinical/controllers/clinical-orders.controller.ts)
+
+### Descripción de negocio
+
+Crear una requisición: varios estudios con su detalle, atómicos. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: C4 (v4.2.82): N estudios pedidos juntos, un renglón de `service_requests` por estudio, todo o nada. `Idempotency-Key` opcional: repetirla devuelve la misma requisición (`replayed: true`); con otro contenido, 409.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /clinical/requisitions` en `ClinicalOrdersController_createRequisition`. El controlador delega en `RequisitionsService.create`. Valida el body como `CreateRequisitionDto` y consume `application/json`. El tipo de retorno estático es `Promise<RequisitionResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `idempotency-key` | header | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreateRequisitionDto`; los campos opcionales se omiten.
+
+```http
+POST /clinical/requisitions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+idempotency-key: valor-ejemplo
+Content-Type: application/json
+
+{
+  "custodianTenantId": "00000000-0000-4000-8000-000000000001",
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "items": [
+    {
+      "codeConceptId": "00000000-0000-4000-8000-000000000001"
+    }
+  ]
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `custodianTenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `patientProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `encounterId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `formInstanceId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `requesterProfileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `priorityConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `basedOnNoteIds` | No | `array<string>` | formato `uuid`; máximo 20 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["00000000-0000-4000-8000-000000000001"]` |
+| `performerSelectionConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `performerTenantId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `performerPractitionerProfileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `suggestedPracticeSiteId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items` | Sí | `array<RequisitionItemDto>` | mínimo 1 elemento(s); máximo 30 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"codeConceptId":"00000000-0000-4000-8000-000000000001","category":"LAB","categoryConceptId":"00000000-0000-4000-8000-000000000001","specimenTypeConceptId":"00000000-0000-4000-8000-000000000001","componentConceptIds":["00000000-0000-4000-8000-000000000001"],"imaging":{"modalityConceptId":"00000000-0000-4000-8000-000000000001","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","lateralityConceptId":"00000000-0000-4000-8000-000000000001","contrastConceptId":"00000000-0000-4000-8000-000000000001"},"duplicateDecision":{"previousDiagnosticReportId":"00000000-0000-4000-8000-000000000001","reusePreviousReport":true,"duplicateOverrideReason":"Texto descriptivo de ejemplo"}}]` |
+| `items[].codeConceptId` | Sí | `string` | formato `uuid` | Estudio pedido (concept id de service-request-code) | `00000000-0000-4000-8000-000000000001` |
+| `items[].category` | No | `string` | valores: `LAB`, `IMAGING`, `OTHER` | Sin descripción específica en el contrato OpenAPI. | `LAB` |
+| `items[].categoryConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].specimenTypeConceptId` | No | `string` | formato `uuid` | Muestra (specimen-type); sólo laboratorio/patología | `00000000-0000-4000-8000-000000000001` |
+| `items[].componentConceptIds` | No | `array<string>` | máximo 500 elemento(s) | Componentes MARCADOS del panel. Obligatorio y no vacío si el estudio es un panel desplegable | `["00000000-0000-4000-8000-000000000001"]` |
+| `items[].imaging` | No | `ImagingDetailDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"modalityConceptId":"00000000-0000-4000-8000-000000000001","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","lateralityConceptId":"00000000-0000-4000-8000-000000000001","contrastConceptId":"00000000-0000-4000-8000-000000000001"}` |
+| `items[].imaging.modalityConceptId` | No | `string` | formato `uuid` | Modalidad (value set `service-request-imaging-modality`). Si el estudio del catálogo ya fija una y no se envía, se toma la del estudio; si se envía otra: 422 MODALITY_STUDY_MISMATCH | `00000000-0000-4000-8000-000000000001` |
+| `items[].imaging.bodySiteConceptId` | No | `string` | formato `uuid` | Región corporal (value set `imaging-body-structure`). Obligatoria en estudios de imagen del catálogo (422 BODY_SITE_REQUIRED) | `00000000-0000-4000-8000-000000000001` |
+| `items[].imaging.lateralityConceptId` | No | `string` | formato `uuid` | Lateralidad (value set `condition-laterality`: izquierda, derecha, bilateral). Exige región; prohibida si la región no es par (422 LATERALITY_NOT_APPLICABLE) | `00000000-0000-4000-8000-000000000001` |
+| `items[].imaging.contrastConceptId` | No | `string` | formato `uuid` | Contraste (value set `imaging-contrast`). Exige modalidad (422 CONTRAST_REQUIRES_MODALITY) | `00000000-0000-4000-8000-000000000001` |
+| `items[].duplicateDecision` | No | `RequisitionDuplicateDecisionDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"previousDiagnosticReportId":"00000000-0000-4000-8000-000000000001","reusePreviousReport":true,"duplicateOverrideReason":"Texto descriptivo de ejemplo"}` |
+| `items[].duplicateDecision.previousDiagnosticReportId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].duplicateDecision.reusePreviousReport` | No | `boolean` | Sin restricción adicional declarada | Reutilizar el informe previo | `true` |
+| `items[].duplicateDecision.duplicateOverrideReason` | No | `string` | longitud mínima 20; longitud máxima 1000 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /clinical/requisitions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+idempotency-key: valor-ejemplo
+Content-Type: application/json
+
+{
+  "custodianTenantId": "00000000-0000-4000-8000-000000000001",
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "encounterId": "00000000-0000-4000-8000-000000000001",
+  "formInstanceId": "00000000-0000-4000-8000-000000000001",
+  "requesterProfileId": "00000000-0000-4000-8000-000000000001",
+  "priorityConceptId": "00000000-0000-4000-8000-000000000001",
+  "basedOnNoteIds": [
+    "00000000-0000-4000-8000-000000000001"
+  ],
+  "performerSelectionConceptId": "00000000-0000-4000-8000-000000000001",
+  "performerTenantId": "00000000-0000-4000-8000-000000000001",
+  "performerPractitionerProfileId": "00000000-0000-4000-8000-000000000001",
+  "suggestedPracticeSiteId": "00000000-0000-4000-8000-000000000001",
+  "items": [
+    {
+      "codeConceptId": "00000000-0000-4000-8000-000000000001",
+      "category": "LAB",
+      "categoryConceptId": "00000000-0000-4000-8000-000000000001",
+      "specimenTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "componentConceptIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "imaging": {
+        "modalityConceptId": "00000000-0000-4000-8000-000000000001",
+        "bodySiteConceptId": "00000000-0000-4000-8000-000000000001",
+        "lateralityConceptId": "00000000-0000-4000-8000-000000000001",
+        "contrastConceptId": "00000000-0000-4000-8000-000000000001"
+      },
+      "duplicateDecision": {
+        "previousDiagnosticReportId": "00000000-0000-4000-8000-000000000001",
+        "reusePreviousReport": true,
+        "duplicateOverrideReason": "Texto descriptivo de ejemplo"
+      }
+    }
+  ]
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<RequisitionResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<RequisitionResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<RequisitionResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<RequisitionResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<RequisitionResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<RequisitionResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<RequisitionResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<RequisitionResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<RequisitionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RequisitionResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RequisitionResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "requisitionId": "00000000-0000-4000-8000-000000000001",
+  "replayed": true,
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "patientProfileId": "00000000-0000-4000-8000-000000000001",
+      "formInstanceId": "00000000-0000-4000-8000-000000000001",
+      "category": {},
+      "basedOnNoteIds": [
+        "valor-ejemplo"
+      ],
+      "status": "00000000-0000-4000-8000-000000000001",
+      "intent": "00000000-0000-4000-8000-000000000001",
+      "performerSelectionConceptId": "00000000-0000-4000-8000-000000000001",
+      "performerPractitionerProfileId": "00000000-0000-4000-8000-000000000001",
+      "suggestedPracticeSiteId": "00000000-0000-4000-8000-000000000001",
+      "suggestedPracticeSiteName": "Nombre de ejemplo",
+      "suggestedCareSpace": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "code": "CODIGO_EJEMPLO",
+        "name": "Nombre de ejemplo"
+      },
+      "requisitionId": "00000000-0000-4000-8000-000000000001",
+      "codeConceptId": "00000000-0000-4000-8000-000000000001",
+      "codeDisplay": "CODIGO_EJEMPLO",
+      "specimenTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "specimenTypeDisplay": "valor-ejemplo",
+      "components": [
+        {
+          "conceptId": "00000000-0000-4000-8000-000000000001",
+          "display": "valor-ejemplo",
+          "ordinal": 1
+        }
+      ],
+      "componentsSpecified": true,
+      "imaging": {
+        "modalityConceptId": "00000000-0000-4000-8000-000000000001",
+        "modalityDisplay": "valor-ejemplo",
+        "bodySiteConceptId": "00000000-0000-4000-8000-000000000001",
+        "bodySiteDisplay": "valor-ejemplo",
+        "lateralityConceptId": "00000000-0000-4000-8000-000000000001",
+        "lateralityDisplay": "valor-ejemplo",
+        "contrastConceptId": "00000000-0000-4000-8000-000000000001",
+        "contrastDisplay": "valor-ejemplo"
+      },
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `requisitionId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `replayed` | Sí | `boolean` | Sin restricción adicional declarada | true si la Idempotency-Key ya había creado esta requisición: se devuelve la existente sin escribir nada | `true` |
+| `items` | Sí | `array<ServiceRequestResponseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","formInstanceId":"00000000-0000-4000-8000-000000000001","category":{},"basedOnNoteIds":["valor-ejemplo"],"status":"00000000-0000-4000-8000-000000000001","intent":"00000000-0000-4000-8000-000000000001","performerSelectionConceptId":"00000000-0000-4000-8000-000000000001","performerPractitionerProfileId":"00000000-0000-4000-8000-000000000001","suggestedPracticeSiteId":"00000000-0000-4000-8000-000000000001","suggestedPracticeSiteName":"Nombre de ejemplo","suggestedCareSpace":{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo"},"requisitionId":"00000000-0000-4000-8000-000000000001","codeConceptId":"00000000-0000-4000-8000-000000000001","codeDisplay":"CODIGO_EJEMPLO","specimenTypeConceptId":"00000000-0000-4000-8000-000000000001","specimenTypeDisplay":"valor-ejemplo","components":[{"conceptId":"00000000-0000-4000-8000-000000000001","display":"valor-ejemplo","ordinal":1}],"componentsSpecified":true,"imaging":{"modalityConceptId":"00000000-0000-4000-8000-000000000001","modalityDisplay":"valor-ejemplo","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","bodySiteDisplay":"valor-ejemplo","lateralityConceptId":"00000000-0000-4000-8000-000000000001","lateralityDisplay":"valor-ejemplo","contrastConceptId":"00000000-0000-4000-8000-000000000001","contrastDisplay":"valor-ejemplo"},"createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `items[].patientProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a patient profile. | `00000000-0000-4000-8000-000000000001` |
+| `items[].formInstanceId` | No | `string` | formato `uuid`; admite null | Instancia del formulario médico de la que salió la orden (nulo = sin formulario) | `00000000-0000-4000-8000-000000000001` |
+| `items[].category` | No | `object` | Sin restricción adicional declarada | Categoría de análisis derivada de categoryConceptId. Ausente = la orden no declara categoría | `{}` |
+| `items[].basedOnNoteIds` | Sí | `array<string>` | formato `uuid` | Notas médicas que motivan la orden (vacío = ninguna) | `["valor-ejemplo"]` |
+| `items[].status` | Sí | `string` | formato `uuid` | Estado (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `items[].intent` | Sí | `string` | formato `uuid` | Intención (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `items[].performerSelectionConceptId` | Sí | `string` | formato `uuid` | Modo de ejecutor recomendado (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `items[].performerPractitionerProfileId` | Sí | `string` | formato `uuid`; admite null | Médico ejecutor, o `null`. | `00000000-0000-4000-8000-000000000001` |
+| `items[].suggestedPracticeSiteId` | Sí | `string` | formato `uuid`; admite null | Sede sugerida, o `null`. | `00000000-0000-4000-8000-000000000001` |
+| `items[].suggestedPracticeSiteName` | Sí | `string` | admite null | Nombre de la sede sugerida: el paciente ve un nombre y nunca un uuid. | `Nombre de ejemplo` |
+| `items[].suggestedCareSpace` | Sí | `object` | admite null | Punto de toma sugerido {id, code, name} (F5b) | `{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo"}` |
+| `items[].suggestedCareSpace.id` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].suggestedCareSpace.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `items[].suggestedCareSpace.name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].requisitionId` | No | `string` | formato `uuid`; admite null | v4.2.82: requisición que agrupa los renglones pedidos juntos (nulo = alta individual). | `00000000-0000-4000-8000-000000000001` |
+| `items[].codeConceptId` | No | `string` | formato `uuid` | v4.2.82: el estudio pedido. | `00000000-0000-4000-8000-000000000001` |
+| `items[].codeDisplay` | No | `string` | Sin restricción adicional declarada | v4.2.82: nombre legible del estudio. | `CODIGO_EJEMPLO` |
+| `items[].specimenTypeConceptId` | No | `string` | formato `uuid`; admite null | v4.2.82: muestra pedida (nulo = no se indicó). | `00000000-0000-4000-8000-000000000001` |
+| `items[].specimenTypeDisplay` | No | `string` | admite null | v4.2.82: nombre legible de la muestra. | `valor-ejemplo` |
+| `items[].components` | No | `array<ServiceRequestComponentDto>` | Sin restricción adicional declarada | v4.2.82: componentes marcados. Con `componentsSpecified: false` el arreglo va vacío y significa «estudio completo, sin detalle» (órdenes anteriores). | `[{"conceptId":"00000000-0000-4000-8000-000000000001","display":"valor-ejemplo","ordinal":1}]` |
+| `items[].components[].conceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].components[].display` | No | `string` | Sin restricción adicional declarada | Nombre legible (castellano si existe) | `valor-ejemplo` |
+| `items[].components[].ordinal` | No | `number` | Sin restricción adicional declarada | Posición, desde 1, en el orden en que se marcó | `1` |
+| `items[].componentsSpecified` | No | `boolean` | Sin restricción adicional declarada | v4.2.82: `false` = orden sin detalle de componentes (anterior o estudio sin desglose). | `true` |
+| `items[].imaging` | No | `ServiceRequestImagingDto` | Sin restricción adicional declarada | v4.2.82: detalle de imagen; `null` si la orden no lo trae. | `{"modalityConceptId":"00000000-0000-4000-8000-000000000001","modalityDisplay":"valor-ejemplo","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","bodySiteDisplay":"valor-ejemplo","lateralityConceptId":"00000000-0000-4000-8000-000000000001","lateralityDisplay":"valor-ejemplo","contrastConceptId":"00000000-0000-4000-8000-000000000001","contrastDisplay":"valor-ejemplo"}` |
+| `items[].imaging.modalityConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].imaging.modalityDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].imaging.bodySiteConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].imaging.bodySiteDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].imaging.lateralityConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].imaging.lateralityDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].imaging.contrastConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].imaging.contrastDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Encuentro no encontrado | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
+| 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 409 | `CONFLICT` | La Idempotency-Key ya se usó con un contenido distinto | Excepción explícita en src/modules/clinical/services/requisitions.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | error.message | Excepción explícita en src/modules/clinical/services/requisitions.service.ts |
+| 422 | `PRECONDITION_FAILED` | El mismo estudio se pide dos veces en la requisición | Excepción explícita en src/modules/clinical/services/requisitions.service.ts |
+| 422 | `PRECONDITION_FAILED` | La categoría indicada no corresponde al concepto de categoría | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
+| 422 | `PRECONDITION_FAILED` | El paciente ya tiene este estudio dentro de la ventana; hace falta reutilizar el informe o justificar la repetición | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
+| 422 | `PRECONDITION_FAILED` | El informe previo indicado no coincide con el duplicado detectado | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
+| 422 | `PRECONDITION_FAILED` | El paciente ya tiene una orden activa de este estudio, sin informe; hace falta justificar la repetición | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
+| 422 | `PRECONDITION_FAILED` | No se detectó ningún estudio duplicado para justificar | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
+| 422 | `PRECONDITION_FAILED` | El punto de toma no es un punto disponible de la sede sugerida | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
+| 422 | `PRECONDITION_FAILED` | message | Excepción explícita en src/modules/clinical/services/service-request-detail.service.ts |
+| 422 | `PRECONDITION_FAILED` | La nota médica citada no está disponible como motivo de esta orden | Excepción explícita en src/modules/clinical/services/service-request-notes.service.ts |
+| 422 | `PRECONDITION_FAILED` | La nota médica citada pertenece a otra consulta | Excepción explícita en src/modules/clinical/services/service-request-notes.service.ts |
+| 422 | `PRECONDITION_FAILED` | El modo de ejecutor no es válido | Excepción explícita en src/modules/clinical/services/performer-selection.validator.ts |
+| 422 | `PRECONDITION_FAILED` | Si elige el paciente, la orden no lleva médico ni sede sugeridos | Excepción explícita en src/modules/clinical/services/performer-selection.validator.ts |
+| 422 | `PRECONDITION_FAILED` | La orden necesita la sede sugerida | Excepción explícita en src/modules/clinical/services/performer-selection.validator.ts |
+| 422 | `PRECONDITION_FAILED` | Si se recomienda un centro, la orden no lleva médico ejecutor | Excepción explícita en src/modules/clinical/services/performer-selection.validator.ts |
+| 422 | `PRECONDITION_FAILED` | Si lo hace el médico, la orden necesita el médico ejecutor | Excepción explícita en src/modules/clinical/services/performer-selection.validator.ts |
+| 422 | `PRECONDITION_FAILED` | El médico ejecutor debe ser quien pide la orden | Excepción explícita en src/modules/clinical/services/performer-selection.validator.ts |
+| 422 | `PRECONDITION_FAILED` | La sede sugerida no ofrece ese procedimiento con precio | Excepción explícita en src/modules/clinical/services/performer-selection.validator.ts |
+| 422 | `PRECONDITION_FAILED` | El médico no tiene una afiliación activa para ese procedimiento en la sede sugerida | Excepción explícita en src/modules/clinical/services/performer-selection.validator.ts |
+| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/clinical/requisitions"
+}
+```
+
+---
+
+## 53. POST /clinical/service-requests
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-orders`
@@ -6048,6 +8042,14 @@ Content-Type: application/json
 | `performerSelectionConceptId` | No | `string` | formato `uuid` | Quién ejecuta la orden (concept id del conjunto `service-request-performer-selection`: SR_PERF_SELF, SR_PERF_ORGANIZATION, SR_PERF_PATIENT_CHOICE). Es una recomendación, no un candado; omitido = que elija el paciente | `00000000-0000-4000-8000-000000000001` |
 | `performerPractitionerProfileId` | No | `string` | formato `uuid` | Médico ejecutor. Obligatorio con SR_PERF_SELF (debe ser quien pide la orden); prohibido con los otros modos | `00000000-0000-4000-8000-000000000001` |
 | `suggestedPracticeSiteId` | No | `string` | formato `uuid` | Sede sugerida (practice.practice_sites). Obligatoria con SR_PERF_SELF y SR_PERF_ORGANIZATION; prohibida con SR_PERF_PATIENT_CHOICE. Debe ofrecer el procedimiento con precio. No concede acceso a la orden | `00000000-0000-4000-8000-000000000001` |
+| `specimenTypeConceptId` | No | `string` | formato `uuid` | Muestra pedida (value set `specimen-type`). Sólo con laboratorio o anatomía patológica (422 SPECIMEN_NOT_ALLOWED_FOR_CATEGORY / SPECIMEN_TYPE_NOT_IN_CATALOG, con details.reason) | `00000000-0000-4000-8000-000000000001` |
+| `componentConceptIds` | No | `array<string>` | máximo 500 elemento(s) | Componentes MARCADOS del panel (conceptos `part-of` del estudio). Un panel desplegable exige la lista y no vacía (422 COMPONENTS_EMPTY); un estudio que no es panel la prohíbe (COMPONENTS_NOT_SELECTABLE); uno ajeno al panel: COMPONENT_NOT_IN_PANEL | `["00000000-0000-4000-8000-000000000001"]` |
+| `imaging` | No | `ImagingDetailDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"modalityConceptId":"00000000-0000-4000-8000-000000000001","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","lateralityConceptId":"00000000-0000-4000-8000-000000000001","contrastConceptId":"00000000-0000-4000-8000-000000000001"}` |
+| `imaging.modalityConceptId` | No | `string` | formato `uuid` | Modalidad (value set `service-request-imaging-modality`). Si el estudio del catálogo ya fija una y no se envía, se toma la del estudio; si se envía otra: 422 MODALITY_STUDY_MISMATCH | `00000000-0000-4000-8000-000000000001` |
+| `imaging.bodySiteConceptId` | No | `string` | formato `uuid` | Región corporal (value set `imaging-body-structure`). Obligatoria en estudios de imagen del catálogo (422 BODY_SITE_REQUIRED) | `00000000-0000-4000-8000-000000000001` |
+| `imaging.lateralityConceptId` | No | `string` | formato `uuid` | Lateralidad (value set `condition-laterality`: izquierda, derecha, bilateral). Exige región; prohibida si la región no es par (422 LATERALITY_NOT_APPLICABLE) | `00000000-0000-4000-8000-000000000001` |
+| `imaging.contrastConceptId` | No | `string` | formato `uuid` | Contraste (value set `imaging-contrast`). Exige modalidad (422 CONTRAST_REQUIRES_MODALITY) | `00000000-0000-4000-8000-000000000001` |
+| `suggestedCareSpaceId` | No | `string` | formato `uuid` | Punto de toma sugerido (F5b) | `00000000-0000-4000-8000-000000000001` |
 | `previousDiagnosticReportId` | No | `string` | formato `uuid` | Informe previo que satisface el pedido (antiduplicación). Va con reusePreviousReport o duplicateOverrideReason. | `00000000-0000-4000-8000-000000000001` |
 | `reusePreviousReport` | No | `boolean` | Sin restricción adicional declarada | Reutilizar el informe previo detectado en vez de repetir el estudio | `true` |
 | `duplicateOverrideReason` | No | `string` | longitud mínima 20; longitud máxima 1000 | Justificación clínica formal para repetir un estudio duplicado (mínimo 20 caracteres) | `Texto descriptivo de ejemplo` |
@@ -6079,6 +8081,17 @@ Content-Type: application/json
   "performerSelectionConceptId": "00000000-0000-4000-8000-000000000001",
   "performerPractitionerProfileId": "00000000-0000-4000-8000-000000000001",
   "suggestedPracticeSiteId": "00000000-0000-4000-8000-000000000001",
+  "specimenTypeConceptId": "00000000-0000-4000-8000-000000000001",
+  "componentConceptIds": [
+    "00000000-0000-4000-8000-000000000001"
+  ],
+  "imaging": {
+    "modalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "bodySiteConceptId": "00000000-0000-4000-8000-000000000001",
+    "lateralityConceptId": "00000000-0000-4000-8000-000000000001",
+    "contrastConceptId": "00000000-0000-4000-8000-000000000001"
+  },
+  "suggestedCareSpaceId": "00000000-0000-4000-8000-000000000001",
   "previousDiagnosticReportId": "00000000-0000-4000-8000-000000000001",
   "reusePreviousReport": true,
   "duplicateOverrideReason": "Texto descriptivo de ejemplo"
@@ -6117,6 +8130,34 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "performerPractitionerProfileId": "00000000-0000-4000-8000-000000000001",
   "suggestedPracticeSiteId": "00000000-0000-4000-8000-000000000001",
   "suggestedPracticeSiteName": "Nombre de ejemplo",
+  "suggestedCareSpace": {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "code": "CODIGO_EJEMPLO",
+    "name": "Nombre de ejemplo"
+  },
+  "requisitionId": "00000000-0000-4000-8000-000000000001",
+  "codeConceptId": "00000000-0000-4000-8000-000000000001",
+  "codeDisplay": "CODIGO_EJEMPLO",
+  "specimenTypeConceptId": "00000000-0000-4000-8000-000000000001",
+  "specimenTypeDisplay": "valor-ejemplo",
+  "components": [
+    {
+      "conceptId": "00000000-0000-4000-8000-000000000001",
+      "display": "valor-ejemplo",
+      "ordinal": 1
+    }
+  ],
+  "componentsSpecified": true,
+  "imaging": {
+    "modalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "modalityDisplay": "valor-ejemplo",
+    "bodySiteConceptId": "00000000-0000-4000-8000-000000000001",
+    "bodySiteDisplay": "valor-ejemplo",
+    "lateralityConceptId": "00000000-0000-4000-8000-000000000001",
+    "lateralityDisplay": "valor-ejemplo",
+    "contrastConceptId": "00000000-0000-4000-8000-000000000001",
+    "contrastDisplay": "valor-ejemplo"
+  },
   "createdAt": "2026-07-31T12:00:00.000Z"
 }
 ```
@@ -6136,6 +8177,29 @@ Campos de la respuesta:
 | `performerPractitionerProfileId` | Sí | `string` | formato `uuid`; admite null | Médico ejecutor, o `null`. | `00000000-0000-4000-8000-000000000001` |
 | `suggestedPracticeSiteId` | Sí | `string` | formato `uuid`; admite null | Sede sugerida, o `null`. | `00000000-0000-4000-8000-000000000001` |
 | `suggestedPracticeSiteName` | Sí | `string` | admite null | Nombre de la sede sugerida: el paciente ve un nombre y nunca un uuid. | `Nombre de ejemplo` |
+| `suggestedCareSpace` | Sí | `object` | admite null | Punto de toma sugerido {id, code, name} (F5b) | `{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo"}` |
+| `suggestedCareSpace.id` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `suggestedCareSpace.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `suggestedCareSpace.name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `requisitionId` | No | `string` | formato `uuid`; admite null | v4.2.82: requisición que agrupa los renglones pedidos juntos (nulo = alta individual). | `00000000-0000-4000-8000-000000000001` |
+| `codeConceptId` | No | `string` | formato `uuid` | v4.2.82: el estudio pedido. | `00000000-0000-4000-8000-000000000001` |
+| `codeDisplay` | No | `string` | Sin restricción adicional declarada | v4.2.82: nombre legible del estudio. | `CODIGO_EJEMPLO` |
+| `specimenTypeConceptId` | No | `string` | formato `uuid`; admite null | v4.2.82: muestra pedida (nulo = no se indicó). | `00000000-0000-4000-8000-000000000001` |
+| `specimenTypeDisplay` | No | `string` | admite null | v4.2.82: nombre legible de la muestra. | `valor-ejemplo` |
+| `components` | No | `array<ServiceRequestComponentDto>` | Sin restricción adicional declarada | v4.2.82: componentes marcados. Con `componentsSpecified: false` el arreglo va vacío y significa «estudio completo, sin detalle» (órdenes anteriores). | `[{"conceptId":"00000000-0000-4000-8000-000000000001","display":"valor-ejemplo","ordinal":1}]` |
+| `components[].conceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `components[].display` | No | `string` | Sin restricción adicional declarada | Nombre legible (castellano si existe) | `valor-ejemplo` |
+| `components[].ordinal` | No | `number` | Sin restricción adicional declarada | Posición, desde 1, en el orden en que se marcó | `1` |
+| `componentsSpecified` | No | `boolean` | Sin restricción adicional declarada | v4.2.82: `false` = orden sin detalle de componentes (anterior o estudio sin desglose). | `true` |
+| `imaging` | No | `ServiceRequestImagingDto` | Sin restricción adicional declarada | v4.2.82: detalle de imagen; `null` si la orden no lo trae. | `{"modalityConceptId":"00000000-0000-4000-8000-000000000001","modalityDisplay":"valor-ejemplo","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","bodySiteDisplay":"valor-ejemplo","lateralityConceptId":"00000000-0000-4000-8000-000000000001","lateralityDisplay":"valor-ejemplo","contrastConceptId":"00000000-0000-4000-8000-000000000001","contrastDisplay":"valor-ejemplo"}` |
+| `imaging.modalityConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `imaging.modalityDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `imaging.bodySiteConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `imaging.bodySiteDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `imaging.lateralityConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `imaging.lateralityDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `imaging.contrastConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `imaging.contrastDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
@@ -6155,6 +8219,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | El informe previo indicado no coincide con el duplicado detectado | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
 | 422 | `PRECONDITION_FAILED` | El paciente ya tiene una orden activa de este estudio, sin informe; hace falta justificar la repetición | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
 | 422 | `PRECONDITION_FAILED` | No se detectó ningún estudio duplicado para justificar | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
+| 422 | `PRECONDITION_FAILED` | El punto de toma no es un punto disponible de la sede sugerida | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
+| 422 | `PRECONDITION_FAILED` | message | Excepción explícita en src/modules/clinical/services/service-request-detail.service.ts |
 | 422 | `PRECONDITION_FAILED` | La nota médica citada no está disponible como motivo de esta orden | Excepción explícita en src/modules/clinical/services/service-request-notes.service.ts |
 | 422 | `PRECONDITION_FAILED` | La nota médica citada pertenece a otra consulta | Excepción explícita en src/modules/clinical/services/service-request-notes.service.ts |
 | 422 | `PRECONDITION_FAILED` | El modo de ejecutor no es válido | Excepción explícita en src/modules/clinical/services/performer-selection.validator.ts |
@@ -6184,7 +8250,191 @@ Ejemplo de error normalizado:
 
 ---
 
-## 41. POST /clinical/service-requests/duplicate-check
+## 54. GET /clinical/service-requests/{id}
+
+- **Módulo:** `clinical`
+- **Etiqueta OpenAPI:** `clinical-orders`
+- **Nombre:** Leer una orden de servicio con su detalle
+- **Operation ID:** `ClinicalOrdersController_getServiceRequest`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ClinicalOrdersController.getServiceRequest](../../src/modules/clinical/controllers/clinical-orders.controller.ts)
+
+### Descripción de negocio
+
+Leer una orden de servicio con su detalle. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: C5 (v4.2.82): una orden de servicio con su detalle. El paciente sale de la orden, así que la autorización de expediente la hace el servicio (el guard sólo mira `params.patientProfileId`).
+
+### Descripción del sistema
+
+NestJS resuelve `GET /clinical/service-requests/{id}` en `ClinicalOrdersController_getServiceRequest`. El controlador delega en `ServiceRequestReadService.getById`. No recibe body. El tipo de retorno estático es `Promise<ServiceRequestResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /clinical/service-requests/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /clinical/service-requests/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ServiceRequestResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ServiceRequestResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ServiceRequestResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ServiceRequestResponseDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<ServiceRequestResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ServiceRequestResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ServiceRequestResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ServiceRequestResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ServiceRequestResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "formInstanceId": "00000000-0000-4000-8000-000000000001",
+  "category": {},
+  "basedOnNoteIds": [
+    "valor-ejemplo"
+  ],
+  "status": "00000000-0000-4000-8000-000000000001",
+  "intent": "00000000-0000-4000-8000-000000000001",
+  "performerSelectionConceptId": "00000000-0000-4000-8000-000000000001",
+  "performerPractitionerProfileId": "00000000-0000-4000-8000-000000000001",
+  "suggestedPracticeSiteId": "00000000-0000-4000-8000-000000000001",
+  "suggestedPracticeSiteName": "Nombre de ejemplo",
+  "suggestedCareSpace": {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "code": "CODIGO_EJEMPLO",
+    "name": "Nombre de ejemplo"
+  },
+  "requisitionId": "00000000-0000-4000-8000-000000000001",
+  "codeConceptId": "00000000-0000-4000-8000-000000000001",
+  "codeDisplay": "CODIGO_EJEMPLO",
+  "specimenTypeConceptId": "00000000-0000-4000-8000-000000000001",
+  "specimenTypeDisplay": "valor-ejemplo",
+  "components": [
+    {
+      "conceptId": "00000000-0000-4000-8000-000000000001",
+      "display": "valor-ejemplo",
+      "ordinal": 1
+    }
+  ],
+  "componentsSpecified": true,
+  "imaging": {
+    "modalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "modalityDisplay": "valor-ejemplo",
+    "bodySiteConceptId": "00000000-0000-4000-8000-000000000001",
+    "bodySiteDisplay": "valor-ejemplo",
+    "lateralityConceptId": "00000000-0000-4000-8000-000000000001",
+    "lateralityDisplay": "valor-ejemplo",
+    "contrastConceptId": "00000000-0000-4000-8000-000000000001",
+    "contrastDisplay": "valor-ejemplo"
+  },
+  "createdAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `patientProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a patient profile. | `00000000-0000-4000-8000-000000000001` |
+| `formInstanceId` | No | `string` | formato `uuid`; admite null | Instancia del formulario médico de la que salió la orden (nulo = sin formulario) | `00000000-0000-4000-8000-000000000001` |
+| `category` | No | `object` | Sin restricción adicional declarada | Categoría de análisis derivada de categoryConceptId. Ausente = la orden no declara categoría | `{}` |
+| `basedOnNoteIds` | Sí | `array<string>` | formato `uuid` | Notas médicas que motivan la orden (vacío = ninguna) | `["valor-ejemplo"]` |
+| `status` | Sí | `string` | formato `uuid` | Estado (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `intent` | Sí | `string` | formato `uuid` | Intención (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `performerSelectionConceptId` | Sí | `string` | formato `uuid` | Modo de ejecutor recomendado (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `performerPractitionerProfileId` | Sí | `string` | formato `uuid`; admite null | Médico ejecutor, o `null`. | `00000000-0000-4000-8000-000000000001` |
+| `suggestedPracticeSiteId` | Sí | `string` | formato `uuid`; admite null | Sede sugerida, o `null`. | `00000000-0000-4000-8000-000000000001` |
+| `suggestedPracticeSiteName` | Sí | `string` | admite null | Nombre de la sede sugerida: el paciente ve un nombre y nunca un uuid. | `Nombre de ejemplo` |
+| `suggestedCareSpace` | Sí | `object` | admite null | Punto de toma sugerido {id, code, name} (F5b) | `{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo"}` |
+| `suggestedCareSpace.id` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `suggestedCareSpace.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `suggestedCareSpace.name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `requisitionId` | No | `string` | formato `uuid`; admite null | v4.2.82: requisición que agrupa los renglones pedidos juntos (nulo = alta individual). | `00000000-0000-4000-8000-000000000001` |
+| `codeConceptId` | No | `string` | formato `uuid` | v4.2.82: el estudio pedido. | `00000000-0000-4000-8000-000000000001` |
+| `codeDisplay` | No | `string` | Sin restricción adicional declarada | v4.2.82: nombre legible del estudio. | `CODIGO_EJEMPLO` |
+| `specimenTypeConceptId` | No | `string` | formato `uuid`; admite null | v4.2.82: muestra pedida (nulo = no se indicó). | `00000000-0000-4000-8000-000000000001` |
+| `specimenTypeDisplay` | No | `string` | admite null | v4.2.82: nombre legible de la muestra. | `valor-ejemplo` |
+| `components` | No | `array<ServiceRequestComponentDto>` | Sin restricción adicional declarada | v4.2.82: componentes marcados. Con `componentsSpecified: false` el arreglo va vacío y significa «estudio completo, sin detalle» (órdenes anteriores). | `[{"conceptId":"00000000-0000-4000-8000-000000000001","display":"valor-ejemplo","ordinal":1}]` |
+| `components[].conceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `components[].display` | No | `string` | Sin restricción adicional declarada | Nombre legible (castellano si existe) | `valor-ejemplo` |
+| `components[].ordinal` | No | `number` | Sin restricción adicional declarada | Posición, desde 1, en el orden en que se marcó | `1` |
+| `componentsSpecified` | No | `boolean` | Sin restricción adicional declarada | v4.2.82: `false` = orden sin detalle de componentes (anterior o estudio sin desglose). | `true` |
+| `imaging` | No | `ServiceRequestImagingDto` | Sin restricción adicional declarada | v4.2.82: detalle de imagen; `null` si la orden no lo trae. | `{"modalityConceptId":"00000000-0000-4000-8000-000000000001","modalityDisplay":"valor-ejemplo","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","bodySiteDisplay":"valor-ejemplo","lateralityConceptId":"00000000-0000-4000-8000-000000000001","lateralityDisplay":"valor-ejemplo","contrastConceptId":"00000000-0000-4000-8000-000000000001","contrastDisplay":"valor-ejemplo"}` |
+| `imaging.modalityConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `imaging.modalityDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `imaging.bodySiteConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `imaging.bodySiteDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `imaging.lateralityConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `imaging.lateralityDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `imaging.contrastConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `imaging.contrastDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/clinical/service-requests/{id}"
+}
+```
+
+---
+
+## 55. POST /clinical/service-requests/duplicate-check
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-orders`
@@ -6238,6 +8488,9 @@ Content-Type: application/json
 | `diagnosticStudyOfferingId` | No | `string` | formato `uuid` | Oferta de estudio del centro; se resuelve a su study_concept_id (diagnostic_units.diagnostic_study_offerings) | `00000000-0000-4000-8000-000000000001` |
 | `encounterId` | Sí | `string` | formato `uuid` | Encuentro en curso | `00000000-0000-4000-8000-000000000001` |
 | `windowDays` | No | `number` | mínimo 1; máximo 365 | Ventana de días hacia atrás para buscar duplicados | `30` |
+| `bodySiteConceptId` | No | `string` | formato `uuid` | V10: región del estudio de imagen. Con ella (y la lateralidad) «mano izquierda» y «mano derecha» no se confunden | `00000000-0000-4000-8000-000000000001` |
+| `lateralityConceptId` | No | `string` | formato `uuid` | V10: lateralidad del estudio de imagen | `00000000-0000-4000-8000-000000000001` |
+| `componentConceptIds` | No | `array<string>` | máximo 500 elemento(s) | V10: componentes marcados; los que el informe previo no cubre no son duplicado | `["00000000-0000-4000-8000-000000000001"]` |
 
 ### Payload completo de ejemplo
 
@@ -6254,7 +8507,12 @@ Content-Type: application/json
   "codeConceptId": "00000000-0000-4000-8000-000000000001",
   "diagnosticStudyOfferingId": "00000000-0000-4000-8000-000000000001",
   "encounterId": "00000000-0000-4000-8000-000000000001",
-  "windowDays": 30
+  "windowDays": 30,
+  "bodySiteConceptId": "00000000-0000-4000-8000-000000000001",
+  "lateralityConceptId": "00000000-0000-4000-8000-000000000001",
+  "componentConceptIds": [
+    "00000000-0000-4000-8000-000000000001"
+  ]
 }
 ```
 
@@ -6348,7 +8606,103 @@ Ejemplo de error normalizado:
 
 ---
 
-## 42. GET /public/prescriptions/{id}/verify
+## 56. POST /internal/clinical/census-close-tick
+
+- **Módulo:** `clinical`
+- **Etiqueta OpenAPI:** `clinical-census`
+- **Nombre:** Cerrar los censos vencidos (worker)
+- **Operation ID:** `ClinicalCensusController_tick`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ClinicalCensusController.tick](../../src/modules/clinical/controllers/clinical-adt.controller.ts)
+
+### Descripción de negocio
+
+Cerrar los censos vencidos (worker). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Tick del worker: cierra los días vencidos.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /internal/clinical/census-close-tick` en `ClinicalCensusController_tick`. El controlador delega en `InpatientCensusService.tick`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /internal/clinical/census-close-tick HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`, `SYSTEM_WORKER`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /internal/clinical/census-close-tick HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Operación completada correctamente. | `no declarado` | No |
+| 401 | Operación completada correctamente. | `no declarado` | No |
+| 403 | Operación completada correctamente. | `no declarado` | No |
+| 409 | Operación completada correctamente. | `no declarado` | No |
+| 422 | Operación completada correctamente. | `no declarado` | No |
+| 429 | Operación completada correctamente. | `no declarado` | No |
+| 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, SYSTEM_WORKER. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Sitio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Espacio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Unidad clínica no encontrada | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/internal/clinical/census-close-tick"
+}
+```
+
+---
+
+## 57. GET /public/prescriptions/{id}/verify
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-prescriptions-public`
@@ -6459,6 +8813,520 @@ Ejemplo de error normalizado:
   "correlationId": "req-01J00000000000000000000000",
   "timestamp": "2026-07-31T12:00:00.000Z",
   "path": "/public/prescriptions/{id}/verify"
+}
+```
+
+---
+
+## 58. GET /sites/{siteId}/attending-practitioners
+
+- **Módulo:** `clinical`
+- **Etiqueta OpenAPI:** `clinical-adt`
+- **Nombre:** Profesionales a cargo posibles en la sede
+- **Operation ID:** `ClinicalAdtController_attendingPractitioners`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ClinicalAdtController.attendingPractitioners](../../src/modules/clinical/controllers/clinical-adt.controller.ts)
+
+### Descripción de negocio
+
+Profesionales a cargo posibles en la sede. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Profesionales que pueden quedar a cargo de un ingreso en la sede.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /sites/{siteId}/attending-practitioners` en `ClinicalAdtController_attendingPractitioners`. El controlador delega en `InpatientAdtService.attendingPractitioners`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `siteId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /sites/00000000-0000-4000-8000-000000000001/attending-practitioners HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `siteId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /sites/00000000-0000-4000-8000-000000000001/attending-practitioners HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | Sí |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 404 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Espacio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Unidad clínica no encontrada | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Sitio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/sites/{siteId}/attending-practitioners"
+}
+```
+
+---
+
+## 59. GET /sites/{siteId}/census
+
+- **Módulo:** `clinical`
+- **Etiqueta OpenAPI:** `clinical-census`
+- **Nombre:** Censo de un día
+- **Operation ID:** `ClinicalCensusController_view`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ClinicalCensusController.view](../../src/modules/clinical/controllers/clinical-adt.controller.ts)
+
+### Descripción de negocio
+
+Censo de un día. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Día cerrado (snapshot + ajustes) o vista previa del día abierto.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /sites/{siteId}/census` en `ClinicalCensusController_view`. El controlador delega en `InpatientCensusService.view`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `siteId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `date` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `unitId` | query | No | `desconocido` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /sites/00000000-0000-4000-8000-000000000001/census?date=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `siteId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /sites/00000000-0000-4000-8000-000000000001/census?date=valor-ejemplo&unitId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 404 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Espacio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Unidad clínica no encontrada | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Sitio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/sites/{siteId}/census"
+}
+```
+
+---
+
+## 60. POST /sites/{siteId}/census/{date}/close
+
+- **Módulo:** `clinical`
+- **Etiqueta OpenAPI:** `clinical-census`
+- **Nombre:** Cerrar el censo de un día
+- **Operation ID:** `ClinicalCensusController_close`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ClinicalCensusController.close](../../src/modules/clinical/controllers/clinical-adt.controller.ts)
+
+### Descripción de negocio
+
+Cerrar el censo de un día. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Cerrar el censo de un día (idempotente por unidad).
+
+### Descripción del sistema
+
+NestJS resuelve `POST /sites/{siteId}/census/{date}/close` en `ClinicalCensusController_close`. El controlador delega en `InpatientCensusService.close`. Valida el body como `CloseCensusDto` y consume `application/json`. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `siteId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `date` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CloseCensusDto`; los campos opcionales se omiten.
+
+```http
+POST /sites/00000000-0000-4000-8000-000000000001/census/valor-ejemplo/close HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `siteId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `unitIds` | No | `array<string>` | formato `uuid`; máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /sites/00000000-0000-4000-8000-000000000001/census/valor-ejemplo/close HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "unitIds": [
+    "valor-ejemplo"
+  ]
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Operación completada correctamente. | `no declarado` | No |
+| 401 | Operación completada correctamente. | `no declarado` | No |
+| 403 | Operación completada correctamente. | `no declarado` | No |
+| 404 | Operación completada correctamente. | `no declarado` | No |
+| 409 | Operación completada correctamente. | `no declarado` | No |
+| 413 | Operación completada correctamente. | `no declarado` | No |
+| 422 | Operación completada correctamente. | `no declarado` | No |
+| 429 | Operación completada correctamente. | `no declarado` | No |
+| 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Sitio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Espacio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Unidad clínica no encontrada | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/sites/{siteId}/census/{date}/close"
+}
+```
+
+---
+
+## 61. GET /sites/{siteId}/inpatient-indicators
+
+- **Módulo:** `clinical`
+- **Etiqueta OpenAPI:** `clinical-census`
+- **Nombre:** Indicadores hospitalarios (OPS)
+- **Operation ID:** `ClinicalCensusController_indicators`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ClinicalCensusController.indicators](../../src/modules/clinical/controllers/clinical-adt.controller.ts)
+
+### Descripción de negocio
+
+Indicadores hospitalarios (OPS). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Indicadores OPS sobre días cerrados.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /sites/{siteId}/inpatient-indicators` en `ClinicalCensusController_indicators`. El controlador delega en `InpatientIndicatorsService.indicators`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `siteId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `from` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `to` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `unitId` | query | No | `desconocido` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /sites/00000000-0000-4000-8000-000000000001/inpatient-indicators?from=valor-ejemplo&to=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `siteId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /sites/00000000-0000-4000-8000-000000000001/inpatient-indicators?from=valor-ejemplo&to=valor-ejemplo&unitId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 404 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Espacio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Unidad clínica no encontrada | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Sitio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/sites/{siteId}/inpatient-indicators"
+}
+```
+
+---
+
+## 62. GET /sites/{siteId}/inpatients
+
+- **Módulo:** `clinical`
+- **Etiqueta OpenAPI:** `clinical-adt`
+- **Nombre:** Pacientes internados de una sede
+- **Operation ID:** `ClinicalAdtController_inpatients`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ClinicalAdtController.inpatients](../../src/modules/clinical/controllers/clinical-adt.controller.ts)
+
+### Descripción de negocio
+
+Pacientes internados de una sede. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Censo vivo de la sede.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /sites/{siteId}/inpatients` en `ClinicalAdtController_inpatients`. El controlador delega en `InpatientAdtService.inpatients`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `siteId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `unitId` | query | No | `desconocido` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /sites/00000000-0000-4000-8000-000000000001/inpatients HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `siteId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /sites/00000000-0000-4000-8000-000000000001/inpatients?unitId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 404 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Espacio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Unidad clínica no encontrada | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Sitio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/sites/{siteId}/inpatients"
 }
 ```
 

@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `diagnostic_units`
 
-Referencia exhaustiva de 21 operación(es) del módulo `diagnostic_units`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 24 operación(es) del módulo `diagnostic_units`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `diagnostic-equipment`, `diagnostic-pricing`, `diagnostic-unit-accreditations`, `diagnostic-unit-sites`, `diagnostic-units`
 - **Controladores:** `DiagnosticEquipmentController`, `DiagnosticPricingController`, `DiagnosticUnitAccreditationsController`, `DiagnosticUnitSitesController`, `DiagnosticUnitsController`
@@ -11,31 +11,133 @@ Referencia exhaustiva de 21 operación(es) del módulo `diagnostic_units`, deriv
 
 ## Índice del módulo
 
-1. [PATCH /diagnostic-equipment/{id}](#1-patch-diagnostic-equipment-id) — Actualizar estado/calibración de un equipo
-2. [DELETE /diagnostic-study-offerings/{id}](#2-delete-diagnostic-study-offerings-id) — Retirar (soft-delete) una oferta de estudio
-3. [POST /diagnostic-unit-accreditations/{id}/renew](#3-post-diagnostic-unit-accreditations-id-renew) — Renovar/registrar acreditación con evidencia
-4. [PATCH /diagnostic-unit-sites/{siteId}](#4-patch-diagnostic-unit-sites-siteid) — Actualizar un sitio operativo de la unidad
-5. [POST /diagnostic-unit-sites/{siteId}/equipment](#5-post-diagnostic-unit-sites-siteid-equipment) — Registrar equipamiento y calibración del sitio
-6. [GET /diagnostic-units](#6-get-diagnostic-units) — Listar unidades diagnósticas publicadas
-7. [POST /diagnostic-units](#7-post-diagnostic-units) — Alta de unidad diagnóstica con sitios y acreditaciones
-8. [GET /diagnostic-units/{id}](#8-get-diagnostic-units-id) — Consultar el perfil de una unidad diagnóstica
-9. [POST /diagnostic-units/{id}/accreditations](#9-post-diagnostic-units-id-accreditations) — Registrar una acreditación con evidencia
-10. [GET /diagnostic-units/{id}/administration](#10-get-diagnostic-units-id-administration) — Consola de administración de una unidad diagnóstica
-11. [POST /diagnostic-units/{id}/practitioner-assignments](#11-post-diagnostic-units-id-practitioner-assignments) — Asignar un especialista a la unidad/sitio
-12. [POST /diagnostic-units/{id}/price-schedules](#12-post-diagnostic-units-id-price-schedules) — Crear un cronograma de precios
-13. [POST /diagnostic-units/{id}/reproject](#13-post-diagnostic-units-id-reproject) — Reconstruir la proyección del perfil público
-14. [POST /diagnostic-units/{id}/sites](#14-post-diagnostic-units-id-sites) — Registrar un sitio operativo de la unidad
-15. [PUT /diagnostic-units/{id}/specialties](#15-put-diagnostic-units-id-specialties) — Declarar las especialidades de la unidad
-16. [POST /diagnostic-units/{id}/study-offerings](#16-post-diagnostic-units-id-study-offerings) — Publicar oferta de estudio con componentes (panel)
-17. [POST /diagnostic-units/{id}/verify-and-publish](#17-post-diagnostic-units-id-verify-and-publish) — Verificar la unidad y publicar su perfil público
-18. [GET /diagnostic-units/administration](#18-get-diagnostic-units-administration) — Listar las unidades del tenant, publicadas o no
-19. [GET /diagnostic-units/search](#19-get-diagnostic-units-search) — Buscar centros de diagnóstico, laboratorio e imagen
-20. [POST /price-schedules/{scheduleId}/study-prices](#20-post-price-schedules-scheduleid-study-prices) — Fijar/versionar el precio de un estudio (append-only)
-21. [POST /study-prices/{priceId}/close](#21-post-study-prices-priceid-close) — Cerrar una versión de precio vigente
+1. [GET /diagnostic-equipment/{id}](#1-get-diagnostic-equipment-id) — Detalle de un equipo con su sala (F5a)
+2. [PATCH /diagnostic-equipment/{id}](#2-patch-diagnostic-equipment-id) — Actualizar estado/calibración de un equipo
+3. [GET /diagnostic-equipment/{id}/mwl-station](#3-get-diagnostic-equipment-id-mwl-station) — Estación MWL del equipo (F5a)
+4. [POST /diagnostic-equipment/{id}/resource](#4-post-diagnostic-equipment-id-resource) — Crear el recurso agendable del equipo (F5a)
+5. [DELETE /diagnostic-study-offerings/{id}](#5-delete-diagnostic-study-offerings-id) — Retirar (soft-delete) una oferta de estudio
+6. [POST /diagnostic-unit-accreditations/{id}/renew](#6-post-diagnostic-unit-accreditations-id-renew) — Renovar/registrar acreditación con evidencia
+7. [PATCH /diagnostic-unit-sites/{siteId}](#7-patch-diagnostic-unit-sites-siteid) — Actualizar un sitio operativo de la unidad
+8. [POST /diagnostic-unit-sites/{siteId}/equipment](#8-post-diagnostic-unit-sites-siteid-equipment) — Registrar equipamiento y calibración del sitio
+9. [GET /diagnostic-units](#9-get-diagnostic-units) — Listar unidades diagnósticas publicadas
+10. [POST /diagnostic-units](#10-post-diagnostic-units) — Alta de unidad diagnóstica con sitios y acreditaciones
+11. [GET /diagnostic-units/{id}](#11-get-diagnostic-units-id) — Consultar el perfil de una unidad diagnóstica
+12. [POST /diagnostic-units/{id}/accreditations](#12-post-diagnostic-units-id-accreditations) — Registrar una acreditación con evidencia
+13. [GET /diagnostic-units/{id}/administration](#13-get-diagnostic-units-id-administration) — Consola de administración de una unidad diagnóstica
+14. [POST /diagnostic-units/{id}/practitioner-assignments](#14-post-diagnostic-units-id-practitioner-assignments) — Asignar un especialista a la unidad/sitio
+15. [POST /diagnostic-units/{id}/price-schedules](#15-post-diagnostic-units-id-price-schedules) — Crear un cronograma de precios
+16. [POST /diagnostic-units/{id}/reproject](#16-post-diagnostic-units-id-reproject) — Reconstruir la proyección del perfil público
+17. [POST /diagnostic-units/{id}/sites](#17-post-diagnostic-units-id-sites) — Registrar un sitio operativo de la unidad
+18. [PUT /diagnostic-units/{id}/specialties](#18-put-diagnostic-units-id-specialties) — Declarar las especialidades de la unidad
+19. [POST /diagnostic-units/{id}/study-offerings](#19-post-diagnostic-units-id-study-offerings) — Publicar oferta de estudio con componentes (panel)
+20. [POST /diagnostic-units/{id}/verify-and-publish](#20-post-diagnostic-units-id-verify-and-publish) — Verificar la unidad y publicar su perfil público
+21. [GET /diagnostic-units/administration](#21-get-diagnostic-units-administration) — Listar las unidades del tenant, publicadas o no
+22. [GET /diagnostic-units/search](#22-get-diagnostic-units-search) — Buscar centros de diagnóstico, laboratorio e imagen
+23. [POST /price-schedules/{scheduleId}/study-prices](#23-post-price-schedules-scheduleid-study-prices) — Fijar/versionar el precio de un estudio (append-only)
+24. [POST /study-prices/{priceId}/close](#24-post-study-prices-priceid-close) — Cerrar una versión de precio vigente
 
 ---
 
-## 1. PATCH /diagnostic-equipment/{id}
+## 1. GET /diagnostic-equipment/{id}
+
+- **Módulo:** `diagnostic_units`
+- **Etiqueta OpenAPI:** `diagnostic-equipment`
+- **Nombre:** Detalle de un equipo con su sala (F5a)
+- **Operation ID:** `DiagnosticEquipmentController_detail`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticEquipmentController.detail](../../src/modules/diagnostic_units/controllers/diagnostic-equipment.controller.ts)
+
+### Descripción de negocio
+
+Detalle de un equipo con su sala (F5a). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: F5a: detalle del equipo con su sala, AE Title y recurso.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /diagnostic-equipment/{id}` en `DiagnosticEquipmentController_detail`. El controlador delega en `EquipmentF5aService.detail`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /diagnostic-equipment/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /diagnostic-equipment/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 404 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | message | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-unit-scope.service.ts |
+| 404 | `NOT_FOUND` | Espacio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Unidad clínica no encontrada | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Sitio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostic-equipment/{id}"
+}
+```
+
+---
+
+## 2. PATCH /diagnostic-equipment/{id}
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-equipment`
@@ -75,7 +177,6 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
 - Deben ser UUID válidos: `id`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
@@ -83,6 +184,9 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
+| `careSpaceId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `aeTitle` | No | `string` | longitud máxima 16; admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `stationName` | No | `string` | longitud máxima 16; admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `manufacturer` | No | `string` | longitud máxima 200 | Fabricante | `valor-ejemplo` |
 | `model` | No | `string` | longitud máxima 200 | Modelo | `valor-ejemplo` |
 | `lastCalibrationAt` | No | `string` | formato `date-time` | Última calibración | `2026-07-31T12:00:00.000Z` |
@@ -100,6 +204,9 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
+  "careSpaceId": "00000000-0000-4000-8000-000000000001",
+  "aeTitle": "valor-ejemplo",
+  "stationName": "Nombre de ejemplo",
   "manufacturer": "valor-ejemplo",
   "model": "valor-ejemplo",
   "lastCalibrationAt": "2026-07-31T12:00:00.000Z",
@@ -130,7 +237,10 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 {
   "id": "00000000-0000-4000-8000-000000000001",
   "diagnosticUnitSiteId": "00000000-0000-4000-8000-000000000001",
-  "operationalStatus": "00000000-0000-4000-8000-000000000001"
+  "operationalStatus": "00000000-0000-4000-8000-000000000001",
+  "careSpaceId": "00000000-0000-4000-8000-000000000001",
+  "aeTitle": "valor-ejemplo",
+  "stationName": "Nombre de ejemplo"
 }
 ```
 
@@ -141,6 +251,9 @@ Campos de la respuesta:
 | `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `diagnosticUnitSiteId` | Sí | `string` | formato `uuid` | Identificador asociado a diagnostic unit site. | `00000000-0000-4000-8000-000000000001` |
 | `operationalStatus` | Sí | `string` | formato `uuid` | Concept id de estado operativo | `00000000-0000-4000-8000-000000000001` |
+| `careSpaceId` | No | `string` | formato `uuid`; admite null | F5a: sala del equipo. | `00000000-0000-4000-8000-000000000001` |
+| `aeTitle` | No | `string` | admite null | F5a: DICOM AE Title. | `valor-ejemplo` |
+| `stationName` | No | `string` | admite null | F5a: DICOM Station Name. | `Nombre de ejemplo` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -150,9 +263,16 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Espacio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
 | 404 | `NOT_FOUND` | message | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-unit-scope.service.ts |
+| 404 | `NOT_FOUND` | Unidad clínica no encontrada | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Sitio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 409 | `CONFLICT` | El AE Title ya está en uso en la sede | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-equipment.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La sala es de otra sede | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-equipment.service.ts |
+| 422 | `PRECONDITION_FAILED` | El espacio no aloja equipos | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-equipment.service.ts |
+| 422 | `PRECONDITION_FAILED` | AE Title inválido (≤ 16 caracteres ASCII, sin barra invertida) | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-equipment.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -170,7 +290,208 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. DELETE /diagnostic-study-offerings/{id}
+## 3. GET /diagnostic-equipment/{id}/mwl-station
+
+- **Módulo:** `diagnostic_units`
+- **Etiqueta OpenAPI:** `diagnostic-equipment`
+- **Nombre:** Estación MWL del equipo (F5a)
+- **Operation ID:** `DiagnosticEquipmentController_mwlStation`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticEquipmentController.mwlStation](../../src/modules/diagnostic_units/controllers/diagnostic-equipment.controller.ts)
+
+### Descripción de negocio
+
+Estación MWL del equipo (F5a). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: F5a: estación de la Worklist DICOM (Scheduled Station AE Title/Name, SPS Location).
+
+### Descripción del sistema
+
+NestJS resuelve `GET /diagnostic-equipment/{id}/mwl-station` en `DiagnosticEquipmentController_mwlStation`. El controlador delega en `EquipmentF5aService.mwlStation`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /diagnostic-equipment/00000000-0000-4000-8000-000000000001/mwl-station HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /diagnostic-equipment/00000000-0000-4000-8000-000000000001/mwl-station HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 404 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | message | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-unit-scope.service.ts |
+| 404 | `NOT_FOUND` | Espacio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Unidad clínica no encontrada | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Sitio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostic-equipment/{id}/mwl-station"
+}
+```
+
+---
+
+## 4. POST /diagnostic-equipment/{id}/resource
+
+- **Módulo:** `diagnostic_units`
+- **Etiqueta OpenAPI:** `diagnostic-equipment`
+- **Nombre:** Crear el recurso agendable del equipo (F5a)
+- **Operation ID:** `DiagnosticEquipmentController_createResource`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticEquipmentController.createResource](../../src/modules/diagnostic_units/controllers/diagnostic-equipment.controller.ts)
+
+### Descripción de negocio
+
+Crear el recurso agendable del equipo (F5a). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: F5a: recurso agendable `RES_EQUIPMENT` del equipo (409 si ya existe).
+
+### Descripción del sistema
+
+NestJS resuelve `POST /diagnostic-equipment/{id}/resource` en `DiagnosticEquipmentController_createResource`. El controlador delega en `EquipmentF5aService.createResource`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /diagnostic-equipment/00000000-0000-4000-8000-000000000001/resource HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /diagnostic-equipment/00000000-0000-4000-8000-000000000001/resource HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `no declarado` | No |
+| 400 | Operación completada correctamente. | `no declarado` | No |
+| 401 | Operación completada correctamente. | `no declarado` | No |
+| 403 | Operación completada correctamente. | `no declarado` | No |
+| 404 | Operación completada correctamente. | `no declarado` | No |
+| 409 | Operación completada correctamente. | `no declarado` | No |
+| 422 | Operación completada correctamente. | `no declarado` | No |
+| 429 | Operación completada correctamente. | `no declarado` | No |
+| 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | message | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-unit-scope.service.ts |
+| 404 | `NOT_FOUND` | Espacio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Unidad clínica no encontrada | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Sitio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 409 | `CONFLICT` | El equipo ya tiene un recurso agendable | Excepción explícita en src/modules/diagnostic_units/services/equipment-f5a.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostic-equipment/{id}/resource"
+}
+```
+
+---
+
+## 5. DELETE /diagnostic-study-offerings/{id}
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-pricing`
@@ -280,7 +601,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. POST /diagnostic-unit-accreditations/{id}/renew
+## 6. POST /diagnostic-unit-accreditations/{id}/renew
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-unit-accreditations`
@@ -414,7 +735,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. PATCH /diagnostic-unit-sites/{siteId}
+## 7. PATCH /diagnostic-unit-sites/{siteId}
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-unit-sites`
@@ -552,7 +873,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /diagnostic-unit-sites/{siteId}/equipment
+## 8. POST /diagnostic-unit-sites/{siteId}/equipment
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-unit-sites`
@@ -655,7 +976,10 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 {
   "id": "00000000-0000-4000-8000-000000000001",
   "diagnosticUnitSiteId": "00000000-0000-4000-8000-000000000001",
-  "operationalStatus": "00000000-0000-4000-8000-000000000001"
+  "operationalStatus": "00000000-0000-4000-8000-000000000001",
+  "careSpaceId": "00000000-0000-4000-8000-000000000001",
+  "aeTitle": "valor-ejemplo",
+  "stationName": "Nombre de ejemplo"
 }
 ```
 
@@ -666,6 +990,9 @@ Campos de la respuesta:
 | `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `diagnosticUnitSiteId` | Sí | `string` | formato `uuid` | Identificador asociado a diagnostic unit site. | `00000000-0000-4000-8000-000000000001` |
 | `operationalStatus` | Sí | `string` | formato `uuid` | Concept id de estado operativo | `00000000-0000-4000-8000-000000000001` |
+| `careSpaceId` | No | `string` | formato `uuid`; admite null | F5a: sala del equipo. | `00000000-0000-4000-8000-000000000001` |
+| `aeTitle` | No | `string` | admite null | F5a: DICOM AE Title. | `valor-ejemplo` |
+| `stationName` | No | `string` | admite null | F5a: DICOM Station Name. | `Nombre de ejemplo` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -696,7 +1023,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. GET /diagnostic-units
+## 9. GET /diagnostic-units
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-units`
@@ -828,7 +1155,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /diagnostic-units
+## 10. POST /diagnostic-units
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-units`
@@ -1007,7 +1334,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. GET /diagnostic-units/{id}
+## 11. GET /diagnostic-units/{id}
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-units`
@@ -1272,7 +1599,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /diagnostic-units/{id}/accreditations
+## 12. POST /diagnostic-units/{id}/accreditations
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-units`
@@ -1416,7 +1743,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. GET /diagnostic-units/{id}/administration
+## 13. GET /diagnostic-units/{id}/administration
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-units`
@@ -1803,7 +2130,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /diagnostic-units/{id}/practitioner-assignments
+## 14. POST /diagnostic-units/{id}/practitioner-assignments
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-units`
@@ -1946,7 +2273,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /diagnostic-units/{id}/price-schedules
+## 15. POST /diagnostic-units/{id}/price-schedules
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-units`
@@ -2093,7 +2420,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /diagnostic-units/{id}/reproject
+## 16. POST /diagnostic-units/{id}/reproject
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-units`
@@ -2204,7 +2531,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /diagnostic-units/{id}/sites
+## 17. POST /diagnostic-units/{id}/sites
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-units`
@@ -2347,7 +2674,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. PUT /diagnostic-units/{id}/specialties
+## 18. PUT /diagnostic-units/{id}/specialties
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-units`
@@ -2486,7 +2813,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /diagnostic-units/{id}/study-offerings
+## 19. POST /diagnostic-units/{id}/study-offerings
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-units`
@@ -2556,7 +2883,7 @@ Content-Type: application/json
 | `components[].componentOfferingId` | No | `string` | formato `uuid` | Oferta que actúa como componente | `00000000-0000-4000-8000-000000000001` |
 | `components[].componentRoleConceptId` | No | `string` | formato `uuid` | Rol del componente (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `components[].quantity` | No | `string` | Sin restricción adicional declarada | Cantidad | `1` |
-| `components[].ordinal` | No | `number` | mínimo 0 | Orden en el panel | `1` |
+| `components[].ordinal` | No | `number` | Sin restricción adicional declarada | Orden en el panel | `1` |
 
 ### Payload completo de ejemplo
 
@@ -2661,7 +2988,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /diagnostic-units/{id}/verify-and-publish
+## 20. POST /diagnostic-units/{id}/verify-and-publish
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-units`
@@ -2787,7 +3114,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. GET /diagnostic-units/administration
+## 21. GET /diagnostic-units/administration
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-units`
@@ -2936,7 +3263,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. GET /diagnostic-units/search
+## 22. GET /diagnostic-units/search
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-units`
@@ -3117,7 +3444,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /price-schedules/{scheduleId}/study-prices
+## 23. POST /price-schedules/{scheduleId}/study-prices
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-pricing`
@@ -3264,7 +3591,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /study-prices/{priceId}/close
+## 24. POST /study-prices/{priceId}/close
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-pricing`
