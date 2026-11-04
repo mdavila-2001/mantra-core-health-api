@@ -82182,6 +82182,110 @@ paths:
       summary: Detalle de un estudio del catálogo
       tags:
         - study-catalog
+  /org/affiliation-invitations:
+    post:
+      operationId: AffiliationInvitationsController_create
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAffiliationInvitationDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Crear un código o QR de afiliación
+      tags:
+        - delegated-access-affiliation-invitations
+      description: >-
+        Crear un código o QR de afiliación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
+    get:
+      operationId: AffiliationInvitationsController_list
+      parameters: []
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Listar los códigos de afiliación de la organización
+      tags:
+        - delegated-access-affiliation-invitations
+      description: >-
+        Listar los códigos de afiliación de la organización. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /affiliation-invitations/redeem:
+    post:
+      operationId: AffiliationInvitationsController_redeem
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RedeemAffiliationInvitationDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Canjear un código o QR de afiliación
+      tags:
+        - delegated-access-affiliation-invitations
+      description: >-
+        Canjear un código o QR de afiliación. Requiere JWT y los roles o alcances declarados por el controlador. Todas
+        las respuestas de error usan el envelope ErrorResponse.
 info:
   title: ALOVIDA Health API
   description: >-
@@ -82607,6 +82711,10 @@ tags:
     description: >-
       Operaciones del dominio funcional data catalog internal. Consulte el catálogo Markdown de endpoints para payloads
       mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: delegated-access-affiliation-invitations
+    description: >-
+      Operaciones del dominio funcional delegated access affiliation invitations. Consulte el catálogo Markdown de
+      endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio.
   - name: delegated-access-authz
     description: >-
       Operaciones del dominio funcional delegated access authz. Consulte el catálogo Markdown de endpoints para payloads
@@ -138033,6 +138141,42 @@ components:
       required:
         - status
         - source
+    CreateAffiliationInvitationDto:
+      type: object
+      properties:
+        kind:
+          type: string
+          enum:
+            - PRACTITIONER
+            - SUPPORT_STAFF
+        targetPersonId:
+          type: string
+          format: uuid
+        maxUses:
+          type: number
+          minimum: 1
+          maximum: 500
+        expiresInDays:
+          type: number
+          minimum: 1
+          maximum: 90
+        roleTemplateCode:
+          type: string
+      required:
+        - kind
+        - maxUses
+        - expiresInDays
+      additionalProperties: false
+    RedeemAffiliationInvitationDto:
+      type: object
+      properties:
+        code:
+          type: string
+          minLength: 8
+          maxLength: 200
+      required:
+        - code
+      additionalProperties: false
   responses:
     BadRequest:
       description: La solicitud no cumple el contrato de entrada.
