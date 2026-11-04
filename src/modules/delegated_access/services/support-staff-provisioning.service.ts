@@ -8,7 +8,11 @@ import {
   ResourceNotFoundException,
   type AuthenticatedUser,
 } from '../../../common';
-import { readWithSystemRls } from '../../../common/tenant/rls-transaction';
+import {
+  applyTenantRls,
+  isRlsEnforced,
+  readWithSystemRls,
+} from '../../../common/tenant/rls-transaction';
 import { DIR } from '../../directory/directory.concepts';
 import { IamErrorReason } from '../../iam/iam.error-reasons';
 import { IamSupportStaffSelfRegistrationService } from '../../iam/application/services';
@@ -79,6 +83,9 @@ export class SupportStaffProvisioningService {
     const secretary = await this.obtainSecretary(dto, ip);
 
     const { linkId } = await this.em.transactional(async (tx) => {
+      // `@TenantAgnostic` route: no request transaction to inherit. The membership
+      // lands in the tenant of the practitioner's own assignment, read above.
+      if (isRlsEnforced()) await applyTenantRls(tx, role.tenantId);
       await this.provisioningRepo.ensureActiveTenantMembership(tx, {
         userId: secretary.userId,
         tenantId: role.tenantId,
