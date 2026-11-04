@@ -39,6 +39,7 @@ function build() {
     findActiveByUserTenant: mockFn(
       (_em: unknown, userId: string, tenantId: string, status: string) => {
         const m = memberships[userId];
+        calls.push('membership');
         return Promise.resolve(
           m && m.tenantId === tenantId && status === DIR.MEMBERSHIP_ACTIVE
             ? { userId, tenantId, tenantRoleConceptId: m.role }
@@ -47,13 +48,24 @@ function build() {
       },
     ),
   };
-  const fork = {
-    findOne: mockFn((_entity: unknown, where: { id: string }) =>
-      Promise.resolve(
+  // Order of DB calls inside the guard's transaction, to prove the tenant
+  // context is set BEFORE the RLS-protected membership read.
+  const calls: string[] = [];
+  const fork: any = {
+    execute: mockFn((_sql: string, params: unknown[]) => {
+      calls.push(`set_config:${String(params[0])}`);
+      return Promise.resolve([]);
+    }),
+    findOne: mockFn((_entity: unknown, where: { id: string }) => {
+      calls.push('tenant');
+      return Promise.resolve(
         TENANT_TYPES[where.id]
           ? { id: where.id, tenantTypeConceptId: TENANT_TYPES[where.id] }
           : null,
-      ),
+      );
+    }),
+    transactional: mockFn((work: (tx: unknown) => Promise<unknown>) =>
+      work(fork),
     ),
   };
   const em = { fork: () => fork };
@@ -64,7 +76,7 @@ function build() {
         getRequest: () => ({ user, resolvedTenantId }),
       }),
     }) as any;
-  return { guard, ctx, repo, fork };
+  return { guard, ctx, repo, fork, calls };
 }
 
 describe('LabStaffGuard', () => {
@@ -74,6 +86,12 @@ describe('LabStaffGuard', () => {
       await expect(
         guard.canActivate(ctx({ id: 'lab-owner', roles: ['USER'] }, LAB)),
       ).resolves.toBe(true);
+    });
+
+    it('fija el tenant en la transacción ANTES de leer la membresía (RLS cerrado por defecto)', async () => {
+      const { guard, ctx, calls } = build();
+      await guard.canActivate(ctx({ id: 'lab-owner', roles: ['USER'] }, LAB));
+      expect(calls).toEqual([`set_config:${LAB}`, 'tenant', 'membership']);
     });
 
     it('el STAFF invitado al laboratorio', async () => {
