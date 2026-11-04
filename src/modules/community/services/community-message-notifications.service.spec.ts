@@ -26,6 +26,8 @@ const ACCOUNT = 'dddddddd-dddd-dddd-dddd-dddddddddddd';
 function build() {
   const em: any = {};
   em.fork = mockFn(() => em);
+  // Savepoint: the callback runs on the same double.
+  em.transactional = mockFn((cb: any) => cb(em));
   // `directory.tenants`: por defecto el target de una vitrina de organización
   // es un tenant; el caso SupportAdmin lo apaga.
   em.count = mockFn(async () => 1);

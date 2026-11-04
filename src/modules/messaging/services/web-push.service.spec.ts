@@ -63,9 +63,11 @@ function build(devices: any[] = []) {
       ),
     ),
   };
+  // `forget` opens its own transaction on a fork, so the fork has to offer it.
+  const forked = { ...tx, transactional: (cb: any) => cb(tx) };
   const em: any = {
     transactional: (cb: any) => cb(tx),
-    fork: () => tx,
+    fork: () => forked,
   };
   const logger: any = { setContext: jest.fn(), warn: jest.fn() };
   return { service: new WebPushService(em, logger), devices, created, logger };

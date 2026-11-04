@@ -169,10 +169,14 @@ export class WebPushService {
   async pushToUser(message: WebPushMessage): Promise<void> {
     if (!this.vapid) return;
     try {
-      const devices = await this.em.fork().find(Devices, {
-        userId: message.recipientUserId,
-        pushTokenEncrypted: { $ne: null },
-      });
+      // Runs fire-and-forget: the request transaction may already be finished
+      // (an inherited, committed context would fail). Not an RLS table.
+      const devices = await this.em
+        .fork({ keepTransactionContext: false })
+        .find(Devices, {
+          userId: message.recipientUserId,
+          pushTokenEncrypted: { $ne: null },
+        });
       const body = JSON.stringify({
         title: PUSH_TITLE,
         // Genérico a propósito: el push viaja por el servicio del navegador y
@@ -230,10 +234,13 @@ export class WebPushService {
 
   /** El navegador ya no existe (404/410): se borra la suscripción muerta. */
   private async forget(deviceId: string): Promise<void> {
-    await this.em.transactional(async (tx) => {
-      const device = await tx.findOne(Devices, { id: deviceId });
-      if (device) device.pushTokenEncrypted = undefined;
-    });
+    // Same fire-and-forget path as above: do not join the caller transaction.
+    await this.em
+      .fork({ keepTransactionContext: false })
+      .transactional(async (tx) => {
+        const device = await tx.findOne(Devices, { id: deviceId });
+        if (device) device.pushTokenEncrypted = undefined;
+      });
   }
 }
 

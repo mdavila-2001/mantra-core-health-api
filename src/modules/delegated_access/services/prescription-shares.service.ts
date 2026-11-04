@@ -535,17 +535,21 @@ export class PrescriptionSharesService {
     const userAgent = context.userAgent
       ? context.userAgent.slice(0, USER_AGENT_MAX_LENGTH)
       : undefined;
-    await this.em.fork().transactional(async (tx) => {
-      this.links.appendUse(tx, {
-        sharedAccessLinkId: linkId,
-        actionConceptId,
-        outcomeConceptId,
-        sourceIp,
-        userAgent,
-        occurredAt: now,
+    // Must persist even when the request fails (DENIED uses are recorded before
+    // throwing): commit on its own connection.
+    await this.em
+      .fork({ keepTransactionContext: false })
+      .transactional(async (tx) => {
+        this.links.appendUse(tx, {
+          sharedAccessLinkId: linkId,
+          actionConceptId,
+          outcomeConceptId,
+          sourceIp,
+          userAgent,
+          occurredAt: now,
+        });
+        await tx.flush();
       });
-      await tx.flush();
-    });
   }
 
   private async prescriberOf(

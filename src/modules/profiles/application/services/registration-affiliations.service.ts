@@ -150,17 +150,20 @@ export class RegistrationAffiliationsService {
         continue;
       }
       try {
-        const site = await this.organizations.findSite(
-          this.em.fork(),
-          affiliation.practiceSiteId,
-        );
-        const tenantId = site?.managingTenantId;
-        if (!tenantId) continue;
-        await this.affiliations.orderNotify(
-          tenantId,
-          affiliation.id,
-          practitionerProfileId,
-        );
+        const practiceSiteId = affiliation.practiceSiteId;
+        // Savepoint: a swallowed failure must not abort the request transaction.
+        await this.em
+          .fork({ keepTransactionContext: true })
+          .transactional(async (tx) => {
+            const site = await this.organizations.findSite(tx, practiceSiteId);
+            const tenantId = site?.managingTenantId;
+            if (!tenantId) return;
+            await this.affiliations.orderNotify(
+              tenantId,
+              affiliation.id,
+              practitionerProfileId,
+            );
+          });
       } catch (error: unknown) {
         this.logger.warn(
           {

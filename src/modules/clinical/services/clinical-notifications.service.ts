@@ -159,7 +159,9 @@ export class ClinicalNotificationsService {
     },
   ): Promise<EmitInAppResult> {
     try {
-      const em = this.em.fork();
+      // Reads tables without RLS and swallows errors: stay on its own connection
+      // so a failed query cannot abort the request transaction.
+      const em = this.em.fork({ keepTransactionContext: false });
       // `patient_profiles.profile_id` ES el id de la persona: los subtipos de
       // `profiles` se identifican por ella. Es la misma regla que usa
       // `ClinicalReadService.assertOwnRecord`.

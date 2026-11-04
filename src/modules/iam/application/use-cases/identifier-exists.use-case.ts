@@ -39,7 +39,9 @@ export class IdentifierExistsUseCase {
   ): Promise<IdentifierExistsResponseDto> {
     const value = rawValue.trim();
     if (value === '') return { exists: false };
-    const exists = await this.em.fork().transactional(async (tx) => {
+    // Own connection: a joined transaction would keep this set_config alive.
+    const ownFork = this.em.fork({ keepTransactionContext: false });
+    const exists = await ownFork.transactional(async (tx) => {
       // No tenant is selected before login: same RLS escape as registration.
       await enterAuthBoundaryContext(tx);
       if (kind === 'NATIONAL_ID') {

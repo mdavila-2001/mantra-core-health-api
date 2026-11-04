@@ -84,7 +84,9 @@ export class OpsTrafficRepository {
   constructor(private readonly em: EntityManager) {}
 
   private async scoped<T>(fn: (tx: EntityManager) => Promise<T>): Promise<T> {
-    return this.em.fork().transactional(async (tx) => {
+    // Own connection: a joined transaction would keep this set_config alive.
+    const ownFork = this.em.fork({ keepTransactionContext: false });
+    return ownFork.transactional(async (tx) => {
       if (this.enforceRls) {
         await tx.execute(
           "select set_config('app.system_context', 'false', true)",
