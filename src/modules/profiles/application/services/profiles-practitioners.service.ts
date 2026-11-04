@@ -81,7 +81,6 @@ import type { PractitionerVerificationView } from '../../domain/admissions/admis
 import { ProfilesErrorReason } from '../../profiles.error-reasons';
 import { PractitionerAdmissionsService } from './practitioner-admissions.service';
 import { PractitionerAdmissionsReadService } from './practitioner-admissions-read.service';
-import { BO_PROFESSION_CONCEPT_IDS } from '../../../../common/seed/bo-professions.catalog';
 import {
   PRACTITIONER_CONTEXT_PORT,
   type PractitionerContextPort,
@@ -195,7 +194,6 @@ const PUBLISHABLE_STATES = [
   PROF.AFFILIATION_DECLARED,
   PROF.AFFILIATION_APPROVED,
 ] as const;
-
 
 @Injectable()
 export class ProfilesPractitionersService {
@@ -2981,7 +2979,8 @@ export class ProfilesPractitionersService {
    * estado de cita. Quién decide cuáles son tipos de credencial es la
    * enumeración `professional-credential-type`, la misma que siembra la app.
    */
-  public static readonly CREDENTIAL_TYPES = ManagePractitionerCredentialsUseCase.CREDENTIAL_TYPES;
+  public static readonly CREDENTIAL_TYPES =
+    ManagePractitionerCredentialsUseCase.CREDENTIAL_TYPES;
 
   async addOwnCredential(
     dto: AddOwnCredentialDto,
@@ -2995,7 +2994,11 @@ export class ProfilesPractitionersService {
     dto: UpdateOwnCredentialDto,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    return this.credentialsUseCase.updateOwnCredential(credentialId, dto, actor);
+    return this.credentialsUseCase.updateOwnCredential(
+      credentialId,
+      dto,
+      actor,
+    );
   }
 
   async removeOwnCredential(
