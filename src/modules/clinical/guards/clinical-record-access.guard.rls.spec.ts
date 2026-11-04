@@ -39,7 +39,7 @@ describe('ClinicalRecordAccessGuard under RLS', () => {
 
   it('a clinician is evaluated inside a read-only tenant transaction and the manager reaches the service', async () => {
     const f = rlsFixture();
-    const readService = { assertCanReadHistory: mockFn() };
+    const readService = { resolveReadScope: mockFn() };
     const guard = new ClinicalRecordAccessGuard(readService as any, f.em);
     await expect(guard.canActivate(ctx(clinician, TENANT))).resolves.toBe(true);
     expect(f.transactional.mock.calls[0][1]).toEqual({ readOnly: true });
@@ -47,7 +47,7 @@ describe('ClinicalRecordAccessGuard under RLS', () => {
       "select set_config('app.system_context', 'false', true)",
       `select set_config('app.current_tenant_id', ?, true) <- ${TENANT}`,
     ]);
-    expect(readService.assertCanReadHistory).toHaveBeenCalledWith(
+    expect(readService.resolveReadScope).toHaveBeenCalledWith(
       'patient-1',
       clinician,
       f.tx,
@@ -62,14 +62,58 @@ describe('ClinicalRecordAccessGuard under RLS', () => {
     expect(readService.assertCanWriteHistory).toHaveBeenCalledWith(
       'patient-1',
       clinician,
+      { scoped: f.tx },
+    );
+  });
+
+  it('the read scope is resolved inside the transaction and left on the request', async () => {
+    const f = rlsFixture();
+    const scope = { kind: 'SPECIALTIES' };
+    const readService = { resolveReadScope: mockFn().mockResolvedValue(scope) };
+    const guard = new ClinicalRecordAccessGuard(readService as any, f.em);
+    const request: any = {
+      user: clinician,
+      params: { patientProfileId: 'patient-1' },
+      method: 'GET',
+      resolvedTenantId: TENANT,
+    };
+    await guard.canActivate({
+      switchToHttp: () => ({ getRequest: () => request }),
+    } as any);
+    expect(readService.resolveReadScope).toHaveBeenCalledWith(
+      'patient-1',
+      clinician,
       f.tx,
+    );
+    expect(request.clinicalReadScope).toBe(scope);
+  });
+
+  it('a write with an encounter passes it together with the same manager', async () => {
+    const f = rlsFixture();
+    const readService = { assertCanWriteHistory: mockFn() };
+    const guard = new ClinicalRecordAccessGuard(readService as any, f.em);
+    await guard.canActivate({
+      switchToHttp: () => ({
+        getRequest: () => ({
+          user: clinician,
+          params: { patientProfileId: 'patient-1' },
+          method: 'POST',
+          body: { patientProfileId: 'patient-1', encounterId: 'enc-1' },
+          resolvedTenantId: TENANT,
+        }),
+      }),
+    } as any);
+    expect(readService.assertCanWriteHistory).toHaveBeenCalledWith(
+      'patient-1',
+      clinician,
+      { encounterId: 'enc-1', scoped: f.tx },
     );
   });
 
   it('a denial inside the transaction still reaches the caller as 403', async () => {
     const f = rlsFixture();
     const readService = {
-      assertCanReadHistory: mockFn().mockRejectedValue(
+      resolveReadScope: mockFn().mockRejectedValue(
         new ForbiddenException('no autorizado'),
       ),
     };
@@ -81,12 +125,12 @@ describe('ClinicalRecordAccessGuard under RLS', () => {
 
   it('a patient does not open a transaction: the service reads its own tables', async () => {
     const f = rlsFixture();
-    const readService = { assertCanReadHistory: mockFn() };
+    const readService = { resolveReadScope: mockFn() };
     const guard = new ClinicalRecordAccessGuard(readService as any, f.em);
     const patient = { id: 'p', roles: ['PATIENT'] };
     await guard.canActivate(ctx(patient, TENANT));
     expect(f.fork).not.toHaveBeenCalled();
-    expect(readService.assertCanReadHistory).toHaveBeenCalledWith(
+    expect(readService.resolveReadScope).toHaveBeenCalledWith(
       'patient-1',
       patient,
     );
@@ -94,11 +138,11 @@ describe('ClinicalRecordAccessGuard under RLS', () => {
 
   it('without a resolved tenant the clinician is evaluated as before, with no transaction', async () => {
     const f = rlsFixture();
-    const readService = { assertCanReadHistory: mockFn() };
+    const readService = { resolveReadScope: mockFn() };
     const guard = new ClinicalRecordAccessGuard(readService as any, f.em);
     await guard.canActivate(ctx(clinician, undefined));
     expect(f.fork).not.toHaveBeenCalled();
-    expect(readService.assertCanReadHistory).toHaveBeenCalledWith(
+    expect(readService.resolveReadScope).toHaveBeenCalledWith(
       'patient-1',
       clinician,
     );

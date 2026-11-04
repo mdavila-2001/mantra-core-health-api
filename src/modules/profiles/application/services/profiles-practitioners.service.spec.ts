@@ -87,6 +87,7 @@ function build() {
     findByPractitioners: mockFn().mockResolvedValue([]),
     findProfileIdsBySpecialty: mockFn().mockResolvedValue([]),
     findCurrentSpecialtyPairs: mockFn().mockResolvedValue([]),
+    findProfileIdsBySpecialties: mockFn().mockResolvedValue([]),
     demotePrimary: mockFn().mockResolvedValue(0),
     findById: mockFn(),
     findByIdForUpdate: mockFn(),

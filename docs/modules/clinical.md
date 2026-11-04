@@ -187,6 +187,25 @@ check-in).
   ubicaciones activos.
 - **VALUE CONTRACT**: la observación (y cada componente) lleva un único tipo de
   valor; el `value_type_concept_id` se infiere del campo presente si no se indica.
+- **Alcance de lectura de la historia**: `ClinicalReadService.resolveReadScope` devuelve
+  `FULL` o `SPECIALTIES`.
+  - **FULL**: lo da el titular, su representante, la cabecera (`CARE_REL_PRIMARY` activa),
+    una atención en curso (turno de hoy, consulta o relación de atención) o un grant sin
+    consent.
+  - **SPECIALTIES**: lo da solo el acceso por especialidad, un grant ligado a un consent
+    `ACTIVE` de acceso profesional.
+  - **Qué filtra**: con `SPECIALTIES`, `summary`, `chart`, `received-services` y
+    `diagnostics/.../orders` devuelven siempre las tres secciones obligatorias del IPS
+    (problemas activos, alergias y medicación activa). Del resto, solo traen los registros
+    cuyo responsable tiene una especialidad autorizada; si nada aporta especialidad, el
+    registro se oculta.
+  - **`hiddenByScope`**: la respuesta suma `hiddenByScope` con la cantidad oculta por
+    bloque. No viene cuando la lectura es completa.
+  - **Escritura**: una atención escribe solo dentro de un encuentro propio abierto, y un
+    grant de solo lectura no escribe.
+  - **Registros de otro profesional**: no se modifican. Las notas, recetas y órdenes exigen
+    ser el autor, el prescriptor o el solicitante. Cambiar el estado de una condición
+    ajena exige `FULL`.
 
 ## Permisos y auth
 

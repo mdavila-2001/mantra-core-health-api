@@ -32,6 +32,7 @@ import {
   type PractitionerAccessNoticePort,
 } from '../ports/practitioner-access-notice.port';
 import type { Consents } from '../entities';
+import { MedicalSpecialtyCatalogService } from '../../profiles/application/services/medical-specialty-catalog.service';
 import { findRequestInCourse } from './practitioner-access-in-course';
 
 const DEFAULT_VALIDITY_MONTHS = 12;
@@ -40,12 +41,10 @@ const DEFAULT_VALIDITY_MONTHS = 12;
  * FT-07-R05/R06/R07/R08 — el vínculo médico-paciente que faltaba después de
  * la búsqueda (TAREA-07 S1+S3, ya en `dev`).
  *
- * `clinical-read.service.ts` documenta la brecha explícitamente: hoy el
- * acceso nace del turno confirmado del día "mientras el grupo define el
- * modelo de consentimiento". Este servicio ES ese modelo — reutiliza
- * `consent.consents`/`consent_provisions` (ya migradas) en vez de agregar
- * tablas nuevas, y al aceptar crea el `authz.clinical_access_grants` que
- * `assertPuedeLeerHistoria` ya sabe consultar.
+ * Reutiliza `consent.consents`/`consent_provisions` (ya migradas) en vez de
+ * agregar tablas nuevas, y al aceptar crea el `authz.clinical_access_grants`
+ * que `ClinicalReadService.resolveReadScope` consulta. Cada especialidad
+ * pedida o autorizada debe ser miembro de `VS_MEDICAL_SPECIALTY`.
  *
  * Ciclo: `request` (profesional, tras buscar) → aviso in-app al paciente →
  * `decide` (paciente, elige QUÉ especialidades autoriza — no todo o nada) →
@@ -66,6 +65,7 @@ export class PractitionerAccessRequestsService {
     @Inject(PRACTITIONER_ACCESS_NOTICE_PORT)
     private readonly notices: PractitionerAccessNoticePort,
     private readonly logger: PinoLogger,
+    private readonly specialtyCatalog: MedicalSpecialtyCatalogService,
   ) {
     this.logger.setContext(PractitionerAccessRequestsService.name);
   }
@@ -83,6 +83,10 @@ export class PractitionerAccessRequestsService {
       'Practitioner requesting record access',
     );
     const consent = await this.em.transactional(async (tx) => {
+      await this.specialtyCatalog.assertAllAreSpecialties(
+        tx,
+        dto.specialtyConceptIds,
+      );
       const existing = await this.consentsRepo.findByPatientCreatorCategory(
         tx,
         dto.patientProfileId,
@@ -229,8 +233,7 @@ export class PractitionerAccessRequestsService {
         throw new ResourceNotFoundException('Solicitud no encontrada', { id });
       }
 
-      // Titularidad: sólo el paciente titular decide. Mismo criterio que
-      // `assertOwnRecord` — el 404 de arriba ya cubre "no es tuya".
+      // Titularidad: sólo el paciente titular decide (como `assertOwnRecord`).
       const link = await this.accountLinksRepo.findActiveByUser(tx, actor.id);
       const profile = link
         ? await this.patientProfilesRepo.findById(tx, link.personId)
@@ -298,9 +301,8 @@ export class PractitionerAccessRequestsService {
         return this.toResponse(consent, [...requestedSpecialties], []);
       }
 
-      // ACCEPTED. El DTO exige `authorizedSpecialtyConceptIds` (@ValidateIf) —
-      // acá se comprueba además que sea subconjunto de lo pedido: el paciente
-      // no puede "autorizar" una especialidad que nadie le pidió.
+      // ACCEPTED. Además de lo que exige el DTO, lo autorizado es subconjunto
+      // de lo pedido: no se "autoriza" una especialidad que nadie pidió.
       const authorized = dto.authorizedSpecialtyConceptIds ?? [];
       const invalid = authorized.filter((id) => !requestedSpecialties.has(id));
       if (invalid.length > 0) {
@@ -315,6 +317,7 @@ export class PractitionerAccessRequestsService {
           {},
         );
       }
+      await this.specialtyCatalog.assertAllAreSpecialties(tx, authorized);
 
       const months = dto.validityMonths ?? DEFAULT_VALIDITY_MONTHS;
       const validTo = new Date(now);

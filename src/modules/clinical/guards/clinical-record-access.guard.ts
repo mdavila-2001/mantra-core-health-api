@@ -1,10 +1,10 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import type { AuthenticatedUser } from '../../../common';
-import type { AuthenticatedRequest } from '../../../common/auth/authenticated-user.interface';
 import { withTenantRls } from '../../../common/tenant/rls-transaction';
 import { ClinicalReadService } from '../services';
 import { ROLES_THAT_ATTEND } from '../services/clinical-read.service';
+import type { ClinicalScopedRequest } from './clinical-read-scope.decorator';
 
 /**
  * Métodos que escriben en el expediente y traen al paciente en el cuerpo.
@@ -35,8 +35,13 @@ const MUTATING_METHODS: ReadonlySet<string> = new Set(['POST', 'PUT', 'PATCH']);
  * que el guard lo haya ignorado.
  */
 function bodyPatient(body: unknown): string | undefined {
+  return bodyString(body, 'patientProfileId');
+}
+
+/** Same rule for the encounter the write goes into: only a non-empty string counts. */
+function bodyString(body: unknown, key: string): string | undefined {
   if (typeof body !== 'object' || body === null) return undefined;
-  const value = (body as Record<string, unknown>).patientProfileId;
+  const value = (body as Record<string, unknown>)[key];
   return typeof value === 'string' && value.length > 0 ? value : undefined;
 }
 
@@ -90,6 +95,15 @@ function bodyPatient(body: unknown): string | undefined {
  * de la organización activa: es más estricto que antes de RLS, nunca más
  * amplio. Sin tenant resuelto se evalúa como siempre, sin ampliar nada.
  *
+ * ## Alcance de lectura
+ *
+ * En `GET` deja en `request.clinicalReadScope` lo que
+ * {@link ClinicalReadService.resolveReadScope} resolvió (historia completa o
+ * sólo las especialidades que el paciente autorizó), para que
+ * `@ClinicalReadScopeParam()` se lo pase al controlador sin recalcularlo. En
+ * escritura pasa además el `encounterId` del cuerpo, si lo hay, para que una
+ * base que sólo es de atención escriba dentro de un encuentro propio.
+ *
  * ## Qué NO hace, y por qué
  *
  * No carga recursos. Las rutas de comando cuyo paciente sólo se conoce cargando
@@ -116,7 +130,7 @@ export class ClinicalRecordAccessGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
+    const request = context.switchToHttp().getRequest<ClinicalScopedRequest>();
     const actor = request.user;
     const param = request.params?.patientProfileId;
     const ofRoute = Array.isArray(param) ? param[0] : param;
@@ -125,6 +139,9 @@ export class ClinicalRecordAccessGuard implements CanActivate {
     // decidiendo con la ruta y nada más.
     const writes = MUTATING_METHODS.has(request.method);
     const ofBody = writes ? bodyPatient(request.body) : undefined;
+    const encounterOfBody = writes
+      ? bodyString(request.body, 'encounterId')
+      : undefined;
 
     // Ruta primero, cuerpo después, y sin repetir: cuando los dos traen el
     // mismo paciente se pregunta una sola vez —preguntar dos veces por la misma
@@ -154,7 +171,11 @@ export class ClinicalRecordAccessGuard implements CanActivate {
       ROLES_THAT_ATTEND.includes(role),
     );
     const evaluate = (scoped?: EntityManager) =>
-      this.evaluateAll(toEvaluate, writes, actor, scoped);
+      this.evaluateAll(toEvaluate, ofBody, encounterOfBody, writes, {
+        actor,
+        request,
+        scoped,
+      });
     if (tenantId && attends) {
       await withTenantRls(this.em, tenantId, evaluate, { readOnly: true });
     } else {
@@ -168,29 +189,43 @@ export class ClinicalRecordAccessGuard implements CanActivate {
    * que el actor no puede tocar. Secuencial y no en paralelo: ese primero corta
    * la petición sin lanzar la consulta del segundo. MCH-007: una escritura se
    * decide con la política de escritura —un grant de sólo lectura no alcanza—,
-   * también para el paciente de la ruta.
+   * también para el paciente de la ruta. En lectura deja el alcance resuelto en
+   * `request.clinicalReadScope`, con el mismo `scoped` que el resto de la
+   * evaluación.
    */
   private async evaluateAll(
     patientProfileIds: readonly string[],
+    patientOfBody: string | undefined,
+    encounterOfBody: string | undefined,
     writes: boolean,
-    actor: AuthenticatedUser,
-    scoped?: EntityManager,
+    context: {
+      actor: AuthenticatedUser;
+      request: ClinicalScopedRequest;
+      scoped?: EntityManager;
+    },
   ): Promise<void> {
-    // Without a scoped manager the service is called exactly as before.
-    const scope: [EntityManager?] = scoped ? [scoped] : [];
+    const { actor, request, scoped } = context;
     for (const patientProfileId of patientProfileIds) {
       if (writes) {
-        await this.readService.assertCanWriteHistory(
-          patientProfileId,
-          actor,
-          ...scope,
-        );
+        // The encounter of the body belongs to the patient of the body only.
+        const encounterId =
+          patientProfileId === patientOfBody ? encounterOfBody : undefined;
+        // Without encounter or scoped manager the service is called as before.
+        const options = {
+          ...(encounterId ? { encounterId } : {}),
+          ...(scoped ? { scoped } : {}),
+        };
+        await (encounterId || scoped
+          ? this.readService.assertCanWriteHistory(
+              patientProfileId,
+              actor,
+              options,
+            )
+          : this.readService.assertCanWriteHistory(patientProfileId, actor));
       } else {
-        await this.readService.assertCanReadHistory(
-          patientProfileId,
-          actor,
-          ...scope,
-        );
+        request.clinicalReadScope = await (scoped
+          ? this.readService.resolveReadScope(patientProfileId, actor, scoped)
+          : this.readService.resolveReadScope(patientProfileId, actor));
       }
     }
   }

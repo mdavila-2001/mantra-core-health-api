@@ -3,9 +3,15 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   CarePlansRepository,
+  ChartScopeRepository,
   ClinicalNotesRepository,
   DocumentsRepository,
 } from '../repositories';
+import { CarePlans, ClinicalNoteHeaders, DocumentRecords } from '../entities';
+import type { ClinicalReadScope } from '../../clinical/domain/clinical-read-scope';
+import type { ScopeFilter } from '../../clinical/domain/clinical-scope-visibility';
+import { ClinicalScopeRepository } from '../../clinical/repositories/clinical-scope.repository';
+import { ClinicalScopeFilterService } from '../../clinical/services/clinical-scope-filter.service';
 import type { ChartDocumentFileItemDto, PatientChartResponseDto } from '../dto';
 import { toChartNoteItem } from './chart-note-item.mapper';
 import { CHART } from '../chart.concepts';
@@ -44,6 +50,9 @@ export class ChartReadService {
     private readonly carePlansRepo: CarePlansRepository,
     private readonly documentsRepo: DocumentsRepository,
     private readonly logger: PinoLogger,
+    private readonly scopeFilter: ClinicalScopeFilterService,
+    private readonly scopeRepo: ClinicalScopeRepository,
+    private readonly chartScopeRepo: ChartScopeRepository,
   ) {
     this.logger.setContext(ChartReadService.name);
   }
@@ -53,11 +62,15 @@ export class ChartReadService {
    *
    * @param patientProfileId - Paciente cuyo expediente se lee.
    * @param limit - Tope por bloque.
+   * @param scope - Alcance de lectura. Con especialidades sólo se ven las notas,
+   *   planes y documentos cuyo responsable ejerce una especialidad autorizada
+   *   (sin responsable propio, el del encuentro); `hiddenByScope` cuenta el resto.
    * @returns Expediente con los tres bloques y qué quedó recortado.
    */
   async getPatientChart(
     patientProfileId: string,
     limit: number,
+    scope: ClinicalReadScope,
   ): Promise<PatientChartResponseDto> {
     this.logger.info(
       { operation: 'chart.patient.read', patientProfileId, limit },
@@ -68,11 +81,13 @@ export class ChartReadService {
 
     // Se pide una fila de más por bloque para poder declarar el recorte en vez
     // de dejar que el cliente crea que el expediente cabía entero.
-    const [noteHeaders, plans, documents] = await Promise.all([
-      this.notesRepo.findHeadersByPatient(em, patientProfileId, limit + 1),
-      this.carePlansRepo.findPlansByPatient(em, patientProfileId, limit + 1),
-      this.documentsRepo.findRecordsByPatient(em, patientProfileId, limit + 1),
-    ]);
+    const filter = await this.scopeFilter.build(em, patientProfileId, scope);
+    const { noteHeaders, plans, documents, hiddenByScope } = filter
+      ? await this.loadScoped(em, patientProfileId, limit + 1, filter)
+      : {
+          hiddenByScope: undefined,
+          ...(await this.loadAll(em, patientProfileId, limit + 1)),
+        };
 
     const truncated: string[] = [];
     const notesPage = this.cut(noteHeaders, limit, 'notes', truncated);
@@ -155,6 +170,72 @@ export class ChartReadService {
       })),
       limit,
       truncated,
+      hiddenByScope,
+    };
+  }
+
+  private async loadAll(
+    em: EntityManager,
+    patientProfileId: string,
+    over: number,
+  ) {
+    const [noteHeaders, plans, documents] = await Promise.all([
+      this.notesRepo.findHeadersByPatient(em, patientProfileId, over),
+      this.carePlansRepo.findPlansByPatient(em, patientProfileId, over),
+      this.documentsRepo.findRecordsByPatient(em, patientProfileId, over),
+    ]);
+    return { noteHeaders, plans, documents };
+  }
+
+  /** The three blocks under a SPECIALTIES scope, filtered in SQL. */
+  private async loadScoped(
+    em: EntityManager,
+    patientProfileId: string,
+    over: number,
+    filter: ScopeFilter,
+  ) {
+    const base = { patientProfileId };
+    const noteIds = await this.chartScopeRepo.findNoteIdsAuthoredBy(
+      em,
+      patientProfileId,
+      filter.profileIds,
+    );
+    const [notes, carePlans, documents] = await Promise.all([
+      this.scopeRepo.page(em, {
+        entity: ClinicalNoteHeaders,
+        base,
+        filter,
+        columns: {},
+        always: noteIds.length > 0 ? [{ id: { $in: noteIds } }] : [],
+        orderBy: { createdAt: 'DESC' },
+        limit: over,
+      }),
+      this.scopeRepo.page(em, {
+        entity: CarePlans,
+        base,
+        filter,
+        columns: { profile: 'authorProfileId', encounter: 'encounterId' },
+        orderBy: { createdAt: 'DESC' },
+        limit: over,
+      }),
+      this.scopeRepo.page(em, {
+        entity: DocumentRecords,
+        base,
+        filter,
+        columns: { user: 'createdByUserId', encounter: 'encounterId' },
+        orderBy: { createdAt: 'DESC' },
+        limit: over,
+      }),
+    ]);
+    return {
+      noteHeaders: notes.rows,
+      plans: carePlans.rows,
+      documents: documents.rows,
+      hiddenByScope: {
+        notes: notes.hidden,
+        carePlans: carePlans.hidden,
+        documents: documents.hidden,
+      },
     };
   }
 

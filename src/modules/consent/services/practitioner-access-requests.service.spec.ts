@@ -66,6 +66,9 @@ function build() {
   const auditTrail = { record: mockFn().mockResolvedValue(undefined) };
   const notices = { emit: mockFn().mockResolvedValue(undefined) };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const specialtyCatalog = {
+    assertAllAreSpecialties: mockFn().mockResolvedValue(undefined),
+  };
 
   const service = new PractitionerAccessRequestsService(
     em as any,
@@ -78,6 +81,7 @@ function build() {
     auditTrail as any,
     notices as any,
     logger as any,
+    specialtyCatalog as any,
   );
   return {
     service,
@@ -91,6 +95,7 @@ function build() {
     patientProfilesRepo,
     auditTrail,
     notices,
+    specialtyCatalog,
   };
 }
 
@@ -108,6 +113,25 @@ describe('PractitionerAccessRequestsService', () => {
           actorProfessional,
         ),
       ).rejects.toBeInstanceOf(ConflictException);
+      expect(d.consentsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('rechaza pedir una especialidad que no es del catálogo y no crea nada', async () => {
+      const d = build();
+      d.specialtyCatalog.assertAllAreSpecialties.mockRejectedValue(
+        new PreconditionFailedException('fuera del catálogo'),
+      );
+
+      await expect(
+        d.service.request(
+          { patientProfileId: 'pac-1', specialtyConceptIds: ['no-esp'] } as any,
+          actorProfessional,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.specialtyCatalog.assertAllAreSpecialties).toHaveBeenCalledWith(
+        d.tx,
+        ['no-esp'],
+      );
       expect(d.consentsRepo.create).not.toHaveBeenCalled();
     });
 
@@ -368,6 +392,30 @@ describe('PractitionerAccessRequestsService', () => {
           actorPatient,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('rechaza autorizar una especialidad pedida que ya no es del catálogo', async () => {
+      const d = build();
+      asHolder(d);
+      d.specialtyCatalog.assertAllAreSpecialties.mockRejectedValue(
+        new PreconditionFailedException('fuera del catálogo'),
+      );
+
+      await expect(
+        d.service.decide(
+          'c-1',
+          {
+            decision: 'ACCEPTED',
+            authorizedSpecialtyConceptIds: ['esp-1'],
+          } as any,
+          actorPatient,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.specialtyCatalog.assertAllAreSpecialties).toHaveBeenCalledWith(
+        d.tx,
+        ['esp-1'],
+      );
+      expect(d.clinicalGrantsRepo.create).not.toHaveBeenCalled();
     });
 
     it('rechaza aceptar sin autorizar ninguna especialidad', async () => {
