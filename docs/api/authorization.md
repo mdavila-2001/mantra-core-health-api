@@ -59,6 +59,14 @@ el concedido sin ámbito vale en cualquier organización; el acotado al tenant A
 administra, lee y cambia los dueños de A, pero en el tenant B solo cuenta su membresía en B (sin ella,
 `403`). Cada operación del servicio recibe el tenant objetivo, así que no existe un atajo «sin tenant».
 
+**Lecturas de membresías y tenant dentro de un guard.** Los guards corren antes que el interceptor de tenant,
+así que no están dentro de la transacción de la petición y, con RLS forzado, una lectura directa de una tabla
+con política vuelve vacía. Los guards que consultan membresías, perfiles o el alcance del actor
+(`LabStaffGuard`, `StudyCatalogReaderGuard`, `PharmaLabScopeGuard`, `ClinicalRecordAccessGuard`) leen con el
+helper de `src/common/tenant/rls-transaction.ts`: `withTenantRls` cuando el tenant ya está resuelto y
+verificado, y `readWithSystemRls` cuando la consulta ya se acota al actor en su propio predicado (esta última
+es siempre de solo lectura). Ninguna de las dos escribe ni amplía lo que el actor puede ver.
+
 La misma regla rige en los demás atajos de plataforma que deciden sobre un recurso. Cuando el recurso
 tiene tenant, el rol se mide **en ese tenant**; cuando no lo tiene, solo pasa el rol **global**
 (`roleAuthorizesInTenant(actor, rol, undefined)` es verdadero solo si el código no figura en
