@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import type { FilterQuery } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { DiagnosticReports, ServiceRequests } from '../../clinical/entities';
 import { CLIN } from '../../clinical/clinical.concepts';
@@ -23,8 +24,16 @@ export const LAB_PORTAL_CATEGORIES: readonly string[] = [
   DIAG.SERVICE_REQUEST_CATEGORY_IMAGING,
 ];
 
-/** Upper bound of orders the portal lists in one read (newest first). */
-export const LAB_PORTAL_MAX_ORDERS = 500;
+/** Orders per page of the portal list unless the caller asks for another size. */
+export const LAB_PORTAL_PAGE_DEFAULT = 100;
+/** Hard cap of one page; also the batch size of the full scans (summary, files). */
+export const LAB_PORTAL_PAGE_MAX = 500;
+
+/** Position of an order in the newest-first listing: the keyset of a page. */
+export interface LabOrderKey {
+  readonly createdAt: Date;
+  readonly id: string;
+}
 
 /** Metadata of a stored result file: name from `files`, type/size from its version. */
 export interface LabFileMeta {
@@ -40,19 +49,42 @@ export interface LabFileMeta {
  */
 @Injectable()
 export class LabPortalRepository {
-  /** Orders routed to the tenant (`performer_tenant_id`), newest first, no drafts. */
-  findOrders(em: EntityManager, tenantId: string): Promise<ServiceRequests[]> {
+  /** Orders routed to the tenant (`performer_tenant_id`), no drafts. */
+  private ordersWhere(tenantId: string): FilterQuery<ServiceRequests> {
+    return {
+      performerTenantId: tenantId,
+      categoryConceptId: { $in: [...LAB_PORTAL_CATEGORIES] },
+      statusConceptId: { $ne: CLIN.SERVICE_REQUEST_DRAFT },
+    };
+  }
+
+  /** How many orders the tenant has, whatever the page being read. */
+  countOrders(em: EntityManager, tenantId: string): Promise<number> {
+    return em.count(ServiceRequests, this.ordersWhere(tenantId));
+  }
+
+  /**
+   * One keyset page of the tenant's orders, newest first (`created_at`, `id`
+   * descending), starting right after `after` when given.
+   */
+  findOrders(
+    em: EntityManager,
+    tenantId: string,
+    page: { limit: number; after?: LabOrderKey },
+  ): Promise<ServiceRequests[]> {
+    const { after } = page;
+    const older: FilterQuery<ServiceRequests> = after
+      ? {
+          $or: [
+            { createdAt: { $lt: after.createdAt } },
+            { createdAt: after.createdAt, id: { $lt: after.id } },
+          ],
+        }
+      : {};
     return em.find(
       ServiceRequests,
-      {
-        performerTenantId: tenantId,
-        categoryConceptId: { $in: [...LAB_PORTAL_CATEGORIES] },
-        statusConceptId: { $ne: CLIN.SERVICE_REQUEST_DRAFT },
-      },
-      {
-        orderBy: { createdAt: 'DESC', id: 'DESC' },
-        limit: LAB_PORTAL_MAX_ORDERS,
-      },
+      { $and: [this.ordersWhere(tenantId), older] },
+      { orderBy: { createdAt: 'DESC', id: 'DESC' }, limit: page.limit },
     );
   }
 

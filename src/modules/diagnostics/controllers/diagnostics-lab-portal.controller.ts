@@ -7,6 +7,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -28,6 +29,7 @@ import { LabPortalResultsService } from '../services/lab-portal-results.service'
 import { LabPortalSummaryService } from '../services/lab-portal-summary.service';
 import {
   LabOrderDto,
+  LabOrderListQueryDto,
   LabOrderPageDto,
   LabOrderTransitionDto,
   LabResultTargetPageDto,
@@ -62,10 +64,12 @@ export class DiagnosticsLabPortalController {
     summary: 'Órdenes derivadas al laboratorio, con su estado derivado',
     description:
       'Órdenes con `performer_tenant_id` = tenant activo (laboratorio, ' +
-      'anatomía patológica e imagen), de la más nueva a la más vieja, hasta 500.',
+      'anatomía patológica e imagen), de la más nueva a la más vieja, por ' +
+      'páginas (`limit` 100 por defecto, hasta 500). `count` es el total del ' +
+      'laboratorio; si quedan órdenes más viejas viene `nextCursor`.',
   })
-  listOrders(): Promise<LabOrderPageDto> {
-    return this.orders.list(requireTenantId());
+  listOrders(@Query() query: LabOrderListQueryDto): Promise<LabOrderPageDto> {
+    return this.orders.list(requireTenantId(), query);
   }
 
   @Audited({

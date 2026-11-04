@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  type OnModuleDestroy,
+  type OnModuleInit,
+} from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { randomUUID } from 'node:crypto';
@@ -11,6 +16,7 @@ import {
 } from '../../../common';
 import { FileCategory, FileSensitivity } from '../../common/dto';
 import { FileUploadService } from '../../common/services/file-upload.service';
+import { FilesService } from '../../common/services/files.service';
 import type { LabResultFileDto } from '../dto/lab-portal-results.dto';
 import type {
   LabResultUploadSessionDto,
@@ -25,6 +31,8 @@ export const LAB_UPLOAD_CHUNK_BYTES = 8 * 1024 * 1024;
 const SESSION_TTL_MS = 60 * 60 * 1000;
 /** Open sessions per tenant: each one may hold up to the max file size in memory. */
 const MAX_SESSIONS_PER_TENANT = 10;
+/** Expired sessions are also swept on this period, so idle buffers leave RAM. */
+const SWEEP_INTERVAL_MS = 5 * 60 * 1000;
 
 interface UploadSession {
   readonly tenantId: string;
@@ -37,6 +45,8 @@ interface UploadSession {
   readonly totalParts: number;
   readonly parts: Map<number, Buffer>;
   readonly expiresAt: number;
+  /** Set while `complete` runs: a second `complete` is refused with 409. */
+  completing: boolean;
 }
 
 /**
@@ -50,17 +60,31 @@ interface UploadSession {
  * `FILE_STORAGE_MAX_SIZE_BYTES` bounds both the file and the memory it takes.
  */
 @Injectable()
-export class LabPortalUploadsService {
+export class LabPortalUploadsService implements OnModuleInit, OnModuleDestroy {
   private readonly sessions = new Map<string, UploadSession>();
+  private sweepTimer?: NodeJS.Timeout;
 
   constructor(
     private readonly em: EntityManager,
     private readonly reads: LabPortalResultsService,
     private readonly writes: LabPortalResultWritesService,
     private readonly files: FileUploadService,
+    private readonly fileRecords: FilesService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(LabPortalUploadsService.name);
+  }
+
+  onModuleInit(): void {
+    this.sweepTimer = setInterval(() => this.sweep(), SWEEP_INTERVAL_MS);
+    // Never keeps the process alive on shutdown.
+    this.sweepTimer.unref();
+  }
+
+  onModuleDestroy(): void {
+    clearInterval(this.sweepTimer);
+    this.sweepTimer = undefined;
+    this.sessions.clear();
   }
 
   async start(
@@ -98,6 +122,7 @@ export class LabPortalUploadsService {
       totalParts,
       parts: new Map(),
       expiresAt: Date.now() + SESSION_TTL_MS,
+      completing: false,
     });
     this.logger.info(
       {
@@ -138,7 +163,11 @@ export class LabPortalUploadsService {
         `La parte ${index} trae ${part.byteLength} bytes y se esperaban ${expected}.`,
       );
     }
-    this.session(tenantId, uploadId).parts.set(index, part);
+    const session = this.session(tenantId, uploadId);
+    if (session.completing) {
+      throw new ConflictException('La subida se está cerrando.');
+    }
+    session.parts.set(index, part);
   }
 
   async complete(
@@ -159,48 +188,83 @@ export class LabPortalUploadsService {
         },
       );
     }
-    // Re-checked here: the order may have changed while the parts travelled.
-    await this.reads.assertUploadable(
-      this.em.fork(),
-      tenantId,
-      session.orderId,
-    );
-    const buffer = Buffer.concat(
-      Array.from({ length: session.totalParts }, (_, i) =>
-        session.parts.get(i)!,
-      ),
-    );
-    this.sessions.delete(uploadId);
-    const stored = await this.files.upload(
-      {
-        originalname: session.fileName,
-        mimetype: session.contentType || 'application/octet-stream',
-        buffer,
-      },
-      { category: FileCategory.DOCUMENT, sensitivity: FileSensitivity.PHI },
-      actor,
-    );
-    this.logger.info(
-      {
-        operation: 'diagnostics.lab-portal.upload.complete',
-        uploadId,
-        fileId: stored.id,
-      },
-      'Result upload stored',
-    );
-    return this.writes.attach(
-      tenantId,
-      session.orderId,
-      stored.id,
-      session.note,
-      actor,
-    );
+    if (session.completing) {
+      throw new ConflictException('La subida ya se está cerrando.');
+    }
+    // Claimed synchronously (no await before it): a concurrent call sees it.
+    session.completing = true;
+    try {
+      // Re-checked here: the order may have changed while the parts travelled.
+      await this.reads.assertUploadable(
+        this.em.fork(),
+        tenantId,
+        session.orderId,
+      );
+      const buffer = Buffer.concat(
+        Array.from({ length: session.totalParts }, (_, i) =>
+          session.parts.get(i)!,
+        ),
+      );
+      const stored = await this.files.upload(
+        {
+          originalname: session.fileName,
+          mimetype: session.contentType || 'application/octet-stream',
+          buffer,
+        },
+        { category: FileCategory.DOCUMENT, sensitivity: FileSensitivity.PHI },
+        actor,
+      );
+      let result: LabResultFileDto;
+      try {
+        result = await this.writes.attach(
+          tenantId,
+          session.orderId,
+          stored.id,
+          session.note,
+          actor,
+        );
+      } catch (error) {
+        await this.discardStored(stored.id, actor);
+        throw error;
+      }
+      // Closed only after the file is stored and attached.
+      this.sessions.delete(uploadId);
+      this.logger.info(
+        {
+          operation: 'diagnostics.lab-portal.upload.complete',
+          uploadId,
+          fileId: stored.id,
+        },
+        'Result upload stored',
+      );
+      return result;
+    } finally {
+      session.completing = false;
+    }
+  }
+
+  /** Compensation: a stored file that could not be attached must not linger. */
+  private async discardStored(
+    fileId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    try {
+      await this.fileRecords.softDelete(fileId, actor);
+    } catch {
+      this.logger.error(
+        { operation: 'diagnostics.lab-portal.upload.compensate', fileId },
+        'Could not discard an unattached result file',
+      );
+    }
   }
 
   abort(tenantId: string, uploadId: string): void {
-    if (this.sessions.get(uploadId)?.tenantId === tenantId) {
-      this.sessions.delete(uploadId);
+    const session = this.sessions.get(uploadId);
+    if (session?.tenantId !== tenantId) return;
+    if (session.completing) {
+      throw new ConflictException('La subida se está cerrando.');
     }
+    this.sessions.delete(uploadId);
   }
 
   /** Another tenant's session answers like a missing one. */

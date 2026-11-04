@@ -52,21 +52,25 @@ export class OrderPatientRepository {
 
   /**
    * An active laboratory or imaging order, with its study's terminology.
-   * Revoked, completed or on-hold orders cannot be booked.
+   * Revoked, completed or on-hold orders cannot be booked; only the given
+   * patient's own order is read.
    */
   async findDiagnosticOrder(
     em: EntityManager,
     orderId: string,
+    patientProfileId: string,
   ): Promise<OrderRow | null> {
     const [row] = await em.execute<OrderRow[]>(
       `SELECT sr.id, sr.patient_profile_id, sr.code_concept_id, sr.category_concept_id,
               sr.modality_concept_id, sr.performer_tenant_id, c.display AS code_display, c.code AS code_code
          FROM clinical.service_requests sr
          LEFT JOIN terminology.catalog_concepts c ON c.id = sr.code_concept_id
-        WHERE sr.id = ? AND sr.category_concept_id = ANY(?::uuid[])
+        WHERE sr.id = ? AND sr.patient_profile_id = ?
+          AND sr.category_concept_id = ANY(?::uuid[])
           AND sr.status_concept_id = ?`,
       [
         orderId,
+        patientProfileId,
         `{${DIAGNOSTIC_CATEGORIES.join(',')}}`,
         CLIN.SERVICE_REQUEST_ACTIVE,
       ],

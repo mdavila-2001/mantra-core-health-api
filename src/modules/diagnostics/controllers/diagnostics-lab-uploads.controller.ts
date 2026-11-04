@@ -11,6 +11,7 @@ import {
   Post,
   Put,
   Req,
+  UnsupportedMediaTypeException,
   UseGuards,
 } from '@nestjs/common';
 import type { Request } from 'express';
@@ -35,12 +36,34 @@ import {
   LabResultUploadStartDto,
 } from '../dto/lab-portal-uploads.dto';
 
+/** A part travels only as `application/octet-stream`; anything else is 415. */
+export function assertOctetStream(req: Request): void {
+  const type = (req.headers['content-type'] ?? '')
+    .split(';')[0]
+    .trim()
+    .toLowerCase();
+  if (type !== 'application/octet-stream') {
+    throw new UnsupportedMediaTypeException(
+      'La parte debe enviarse como application/octet-stream.',
+    );
+  }
+}
+
 /**
  * Reads the raw `application/octet-stream` body, refusing more than `limit`
- * bytes. The global JSON parser leaves this content type untouched.
+ * bytes. The global JSON parser leaves this content type untouched; if some
+ * parser already drained the stream without leaving a Buffer, it fails fast
+ * instead of waiting for an `end` event that never comes.
  */
 export function readRawBody(req: Request, limit: number): Promise<Buffer> {
   if (Buffer.isBuffer(req.body)) return Promise.resolve(req.body);
+  if (req.readableEnded || req.destroyed) {
+    return Promise.reject(
+      new UnsupportedMediaTypeException(
+        'El cuerpo de la parte ya se consumió.',
+      ),
+    );
+  }
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
     let size = 0;
@@ -55,6 +78,13 @@ export function readRawBody(req: Request, limit: number): Promise<Buffer> {
     });
     req.on('end', () => resolve(Buffer.concat(chunks)));
     req.on('error', reject);
+    req.on('close', () =>
+      reject(
+        new BadRequestException(
+          'La conexión se cerró antes de completar la parte.',
+        ),
+      ),
+    );
   });
 }
 
@@ -88,12 +118,16 @@ export class DiagnosticsLabUploadsController {
   @Put(':uploadId/parts/:index')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiConsumes('application/octet-stream')
-  @ApiOperation({ summary: 'Mandar una parte (bytes crudos)' })
+  @ApiOperation({
+    summary: 'Mandar una parte (bytes crudos)',
+    description: 'Otro Content-Type distinto de octet-stream es 415.',
+  })
   async putPart(
     @Param('uploadId', ParseUUIDPipe) uploadId: string,
     @Param('index', ParseIntPipe) index: number,
     @Req() req: Request,
   ): Promise<void> {
+    assertOctetStream(req);
     const tenantId = requireTenantId();
     const expected = this.uploads.expectedPartSize(tenantId, uploadId, index);
     const part = await readRawBody(req, expected);

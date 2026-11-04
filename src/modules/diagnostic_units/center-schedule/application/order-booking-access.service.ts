@@ -38,7 +38,13 @@ export class OrderBookingAccessService {
         'La cuenta no tiene perfil de paciente',
       );
     }
-    const order = await this.repo.findDiagnosticOrder(em, orderId);
+    // The patient id goes into the query too: even under the system RLS
+    // context, only this patient's own order is read.
+    const order = await this.repo.findDiagnosticOrder(
+      em,
+      orderId,
+      patientProfileId,
+    );
     if (!order || order.patient_profile_id !== patientProfileId) {
       throw new ResourceNotFoundException('Orden no encontrada');
     }

@@ -16,7 +16,6 @@ describe('LabPortalSummaryService', () => {
       updatedAt: updated,
     });
     const repo = {
-      findOrders: mockFn(async () => []),
       findOfferings: mockFn(async () => [
         offering('o1', DUNIT.OFFERING_ACTIVE),
         offering('o2', DUNIT.OFFERING_ACTIVE, day(3)),
@@ -32,32 +31,35 @@ describe('LabPortalSummaryService', () => {
       contentType: 'application/pdf',
       sizeBytes: 2048,
     };
+    const batch = {
+      orders: [
+        { status: 'DRAFT' },
+        { status: 'PROCESSED' },
+        { status: 'UPLOADED' },
+        { status: 'CANCELLED' },
+      ],
+      files: [
+        {
+          fileId: 'f1',
+          status: 'AVAILABLE',
+          uploadedAt: day(4),
+          meta,
+          withdrawnAt: null,
+        },
+        {
+          fileId: 'f2',
+          status: 'WITHDRAWN',
+          uploadedAt: day(2),
+          meta,
+          withdrawnAt: day(5),
+          withdrawnReason: 'error',
+        },
+      ],
+    };
     const snapshot = {
-      load: mockFn(async () => ({
-        orders: [
-          { status: 'DRAFT' },
-          { status: 'PROCESSED' },
-          { status: 'UPLOADED' },
-          { status: 'CANCELLED' },
-        ],
-        files: [
-          {
-            fileId: 'f1',
-            status: 'AVAILABLE',
-            uploadedAt: day(4),
-            meta,
-            withdrawnAt: null,
-          },
-          {
-            fileId: 'f2',
-            status: 'WITHDRAWN',
-            uploadedAt: day(2),
-            meta,
-            withdrawnAt: day(5),
-            withdrawnReason: 'error',
-          },
-        ],
-      })),
+      loadAll: mockFn(async function* () {
+        yield batch;
+      }),
     };
     const service = new LabPortalSummaryService(
       { fork: () => ({}) } as any,
@@ -66,7 +68,7 @@ describe('LabPortalSummaryService', () => {
       snapshot as any,
     );
     const summary = await service.summary(LAB);
-    expect(repo.findOrders).toHaveBeenCalledWith(expect.anything(), LAB);
+    expect(snapshot.loadAll).toHaveBeenCalledWith(expect.anything(), LAB);
     expect(repo.findOfferings).toHaveBeenCalledWith(expect.anything(), LAB);
     expect(summary).toMatchObject({
       labName: 'Lab Central',
@@ -85,5 +87,37 @@ describe('LabPortalSummaryService', () => {
       'SERVICE_UPDATED',
     ]);
     expect(summary.recentActivity[1].text).toBe('Se subió h.pdf (2 KB).');
+  });
+
+  it('adds up every batch of orders, not just the first one', async () => {
+    const file = (id: string, bytes: number) => ({
+      fileId: id,
+      status: 'AVAILABLE',
+      uploadedAt: day(2),
+      meta: { fileName: `${id}.pdf`, contentType: '', sizeBytes: bytes },
+      withdrawnAt: null,
+    });
+    const snapshot = {
+      loadAll: mockFn(async function* () {
+        yield { orders: [{ status: 'RECEIVED' }], files: [file('a', 10)] };
+        yield {
+          orders: [{ status: 'PROCESSED' }, { status: 'REJECTED' }],
+          files: [file('b', 20)],
+        };
+        yield { orders: [{ status: 'DRAFT' }], files: [file('c', 30)] };
+      }),
+    };
+    const service = new LabPortalSummaryService(
+      { fork: () => ({}) } as any,
+      { findOfferings: mockFn(async () => []) } as any,
+      { findTenantNames: mockFn(async () => new Map()) } as any,
+      snapshot as any,
+    );
+    const summary = await service.summary(LAB);
+    expect(summary).toMatchObject({
+      ordersWithoutResults: 3,
+      resultFiles: 3,
+      resultBytes: 60,
+    });
   });
 });

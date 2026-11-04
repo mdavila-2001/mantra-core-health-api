@@ -28,6 +28,7 @@ import {
 } from './center-context.service';
 import { OrderBookingAccessService } from './order-booking-access.service';
 import { canWork } from './get-booking-options.use-case';
+import { inPatientCustodyContext } from './patient-custody-context';
 
 /**
  * `POST /diagnostic-results/me/orders/:orderId/booking`: books the start and
@@ -52,7 +53,7 @@ export class BookOrderUseCase {
     orderId: string,
     dto: BookOrderDto,
   ): Promise<OrderAppointmentDto> {
-    return this.em.transactional(async (tx) => {
+    return inPatientCustodyContext(this.em, async (tx) => {
       const { patientProfileId, order } = await this.access.ownOrder(
         tx,
         actor,

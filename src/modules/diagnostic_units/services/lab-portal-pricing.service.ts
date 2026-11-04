@@ -21,7 +21,8 @@ import { discountFactorOf, money, percentOf } from './lab-portal.mapping';
  * It does not call `DiagnosticPricingService.addStudyPrice`: that numbers
  * versions per (schedule, offering), while the table's unique index is
  * (price_schedule_id, version_number), so a second offering on the same list
- * would collide. Here the number is the schedule-wide max + 1.
+ * would collide. Here the number is the schedule-wide max + 1, taken under a
+ * row lock on the schedule.
  */
 @Injectable()
 export class LabPortalPricingService {
@@ -123,16 +124,10 @@ export class LabPortalPricingService {
     scheduleId: string,
   ): Promise<number> {
     if (ctx.nextVersion === undefined) {
-      const top = await tx.find(
-        DiagnosticStudyPrices,
-        { priceScheduleId: scheduleId },
-        {
-          fields: ['versionNumber'],
-          orderBy: { versionNumber: 'DESC' },
-          limit: 1,
-        },
-      );
-      ctx.nextVersion = (top[0]?.versionNumber ?? 0) + 1;
+      // Locked until commit: a concurrent writer waits here and then reads the
+      // number we took, instead of colliding on the unique index.
+      await this.pricesRepo.lockSchedule(tx, scheduleId);
+      ctx.nextVersion = (await this.pricesRepo.maxVersion(tx, scheduleId)) + 1;
     }
     return ctx.nextVersion++;
   }

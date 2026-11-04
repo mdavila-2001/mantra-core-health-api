@@ -42,7 +42,12 @@ function build(snap: { orders: any[]; files: any[] }, em: any = {}) {
       { id: 'r1', serviceRequestId: 'sr-1' },
     ]),
   };
-  const snapshot = { load: mockFn(async () => snap) };
+  const snapshot = {
+    load: mockFn(async () => snap),
+    loadAll: mockFn(async function* () {
+      yield snap;
+    }),
+  };
   const logger = { setContext: mockFn(), info: mockFn() };
   const fileUpload = {
     downloadForAuthorizedContext: mockFn(async () => ({
@@ -56,7 +61,7 @@ function build(snap: { orders: any[]; files: any[] }, em: any = {}) {
     logger as any,
     fileUpload as any,
   );
-  return { service, repo, fileUpload };
+  return { service, repo, fileUpload, snapshot };
 }
 
 describe('LabPortalResultsService', () => {
@@ -72,7 +77,7 @@ describe('LabPortalResultsService', () => {
   it('lists the available files, newest first, with the total bytes', async () => {
     const t = build({ orders: [], files });
     const page = await t.service.list(LAB, {});
-    expect(t.repo.findOrders).toHaveBeenCalledWith(expect.anything(), LAB);
+    expect(t.snapshot.loadAll).toHaveBeenCalledWith(expect.anything(), LAB);
     expect(page.items.map((i) => i.id)).toEqual(['b', 'a']);
     expect(page.totalBytes).toBe(15);
     expect(page.items[0]).toMatchObject({ notified: false, orderId: 'sr-1' });
@@ -141,5 +146,19 @@ describe('LabPortalResultsService', () => {
     expect(
       foreign.fileUpload.downloadForAuthorizedContext,
     ).not.toHaveBeenCalled();
+  });
+
+  it('lists the files and targets of every batch of orders', async () => {
+    const t = build({ orders: [], files: [] });
+    t.snapshot.loadAll.mockImplementation(async function* () {
+      yield { orders: [view('PROCESSED')], files: [file('new')] };
+      yield {
+        orders: [view('UPLOADED', [file('old')])],
+        files: [file('old', { uploadedAt: new Date('2025-01-01T00:00:00Z') })],
+      };
+    });
+    const page = await t.service.list(LAB, {});
+    expect(page.items.map((i) => i.id)).toEqual(['new', 'old']);
+    expect((await t.service.targets(LAB)).count).toBe(2);
   });
 });

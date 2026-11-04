@@ -7,10 +7,12 @@ import type {
 import { CLIN } from '../../clinical/clinical.concepts';
 import type { LaboratoryAccessions } from '../entities';
 import {
+  LAB_PORTAL_PAGE_MAX,
   LabPortalRepository,
   LabReceptionRepository,
   ReportsRepository,
   type LabFileMeta,
+  type LabOrderKey,
 } from '../repositories';
 import {
   deriveLabOrderStatus,
@@ -70,6 +72,31 @@ export class LabPortalSnapshotService {
     private readonly reports: ReportsRepository,
     private readonly labels: LabReceptionRepository,
   ) {}
+
+  /**
+   * Every order of the tenant, newest first, as snapshots of at most
+   * `LAB_PORTAL_PAGE_MAX` orders: totals and file lists never depend on a cap.
+   * The entity manager is cleared between batches, so hand over a fork whose
+   * entities nobody else holds.
+   */
+  async *loadAll(
+    em: EntityManager,
+    tenantId: string,
+  ): AsyncGenerator<LabPortalSnapshot> {
+    let after: LabOrderKey | undefined;
+    for (;;) {
+      const orders = await this.repo.findOrders(em, tenantId, {
+        limit: LAB_PORTAL_PAGE_MAX,
+        after,
+      });
+      if (orders.length === 0) return;
+      yield await this.load(em, tenantId, orders);
+      if (orders.length < LAB_PORTAL_PAGE_MAX) return;
+      const last = orders[orders.length - 1];
+      after = { createdAt: last.createdAt, id: last.id };
+      em.clear();
+    }
+  }
 
   async load(
     em: EntityManager,

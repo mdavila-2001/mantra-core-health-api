@@ -29,15 +29,17 @@ function build() {
     })),
   };
   const files = { upload: mockFn(async () => ({ id: 'file-1' })) };
-  const logger = { setContext: mockFn(), info: mockFn() };
+  const fileRecords = { softDelete: mockFn(async () => ({})) };
+  const logger = { setContext: mockFn(), info: mockFn(), error: mockFn() };
   const service = new LabPortalUploadsService(
     { fork: () => ({}) } as any,
     reads as any,
     writes as any,
     files as any,
+    fileRecords as any,
     logger as any,
   );
-  return { service, reads, writes, files };
+  return { service, reads, writes, files, fileRecords };
 }
 
 const start = (size: number) => ({
@@ -162,5 +164,80 @@ describe('LabPortalUploadsService', () => {
     expect(() => t.service.putPart(LAB, uploadId, 0, Buffer.alloc(5))).toThrow(
       ResourceNotFoundException,
     );
+  });
+
+  it('complete: a second concurrent call is 409 and the file is stored once', async () => {
+    const t = build();
+    const { uploadId } = await t.service.start(LAB, start(5));
+    t.service.putPart(LAB, uploadId, 0, Buffer.from('%PDF-'));
+    const [first, second] = await Promise.allSettled([
+      t.service.complete(LAB, uploadId, actor),
+      t.service.complete(LAB, uploadId, actor),
+    ]);
+    expect(first.status).toBe('fulfilled');
+    expect(second).toMatchObject({ status: 'rejected' });
+    expect((second as PromiseRejectedResult).reason).toBeInstanceOf(
+      ConflictException,
+    );
+    expect(t.files.upload).toHaveBeenCalledTimes(1);
+    expect(t.writes.attach).toHaveBeenCalledTimes(1);
+  });
+
+  it('complete: while completing, parts and abort are refused', async () => {
+    const t = build();
+    const { uploadId } = await t.service.start(LAB, start(5));
+    t.service.putPart(LAB, uploadId, 0, Buffer.from('%PDF-'));
+    const pending = t.service.complete(LAB, uploadId, actor);
+    expect(() => t.service.putPart(LAB, uploadId, 0, Buffer.alloc(5))).toThrow(
+      ConflictException,
+    );
+    expect(() => t.service.abort(LAB, uploadId)).toThrow(ConflictException);
+    await pending;
+  });
+
+  it('complete: if attach fails the stored file is discarded and the session stays retryable', async () => {
+    const t = build();
+    const { uploadId } = await t.service.start(LAB, start(5));
+    t.service.putPart(LAB, uploadId, 0, Buffer.from('%PDF-'));
+    t.writes.attach.mockRejectedValueOnce(new Error('db down'));
+    await expect(t.service.complete(LAB, uploadId, actor)).rejects.toThrow(
+      'db down',
+    );
+    expect(t.fileRecords.softDelete).toHaveBeenCalledWith('file-1', actor);
+    // The parts survived: the retry succeeds without re-sending them.
+    await expect(t.service.complete(LAB, uploadId, actor)).resolves.toEqual({
+      id: 'file-1',
+    });
+  });
+
+  it('complete: a failed compensation does not mask the attach error', async () => {
+    const t = build();
+    const { uploadId } = await t.service.start(LAB, start(5));
+    t.service.putPart(LAB, uploadId, 0, Buffer.from('%PDF-'));
+    t.writes.attach.mockRejectedValueOnce(new Error('db down'));
+    t.fileRecords.softDelete.mockRejectedValueOnce(new Error('gone'));
+    await expect(t.service.complete(LAB, uploadId, actor)).rejects.toThrow(
+      'db down',
+    );
+  });
+
+  describe('expired sessions sweep', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('drops expired sessions on a timer and clears it on destroy', async () => {
+      const t = build();
+      t.service.onModuleInit();
+      const { uploadId } = await t.service.start(LAB, start(5));
+      t.service.putPart(LAB, uploadId, 0, Buffer.from('%PDF-'));
+      jest.advanceTimersByTime(66 * 60 * 1000);
+      expect((t.service as any).sessions.size).toBe(0);
+      t.service.onModuleDestroy();
+      expect(jest.getTimerCount()).toBe(0);
+    });
   });
 });

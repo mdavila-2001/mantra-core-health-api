@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
+import { LockMode } from '@mikro-orm/core';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { createHash } from 'node:crypto';
 import { ConflictException, type AuthenticatedUser } from '../../../common';
-import type { DiagnosticReports } from '../../clinical/entities';
+import { DiagnosticReports } from '../../clinical/entities';
 import { CLIN } from '../../clinical/clinical.concepts';
 import { DiagnosticReportsRepository } from '../../clinical/repositories/diagnostic-reports.repository';
 import { DIAG } from '../diagnostics.concepts';
@@ -54,7 +55,10 @@ export class LabPortalResultWritesService {
       { operation: 'diagnostics.lab-portal.result.withdraw', fileId },
       'Withdrawing a result file',
     );
+    const known = await this.reads.locate(this.em.fork(), tenantId, fileId);
     await this.em.transactional(async (tx) => {
+      // Locked first, read after: the new version number and file list are fresh.
+      await this.lockReport(tx, known.file.reportId);
       const { view, file } = await this.reads.locate(tx, tenantId, fileId);
       if (file.status === 'WITHDRAWN') {
         throw new ConflictException('El archivo ya estaba retirado.', {
@@ -80,7 +84,13 @@ export class LabPortalResultWritesService {
     note: string | null,
     actor: AuthenticatedUser,
   ): Promise<LabResultFileDto> {
+    const known = await this.reads.assertUploadable(
+      this.em.fork(),
+      tenantId,
+      orderId,
+    );
     await this.em.transactional(async (tx) => {
+      if (known.reports[0]) await this.lockReport(tx, known.reports[0].id);
       const view = await this.reads.assertUploadable(tx, tenantId, orderId);
       let report = view.reports[0];
       if (!report) {
@@ -126,7 +136,19 @@ export class LabPortalResultWritesService {
     return toResultFileDto(file);
   }
 
-  /** New immutable version carrying `fileIds`, released visible to the patient. */
+  /**
+   * `SELECT ... FOR UPDATE` on the report: concurrent writers of the same
+   * report queue here, so each one computes its `version_number` from the
+   * committed state of the previous one instead of colliding on the unique key.
+   */
+  private async lockReport(tx: EntityManager, reportId: string): Promise<void> {
+    await tx.lock(
+      tx.getReference(DiagnosticReports, reportId),
+      LockMode.PESSIMISTIC_WRITE,
+    );
+  }
+
+  /** New immutable version carrying `fileIds`, released visible to the patient; the caller holds the report lock. */
   private async publish(
     tx: EntityManager,
     tenantId: string,

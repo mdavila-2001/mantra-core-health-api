@@ -1,4 +1,5 @@
 import { describe, expect, it, jest } from '@jest/globals';
+import { LockMode } from '@mikro-orm/core';
 import { ConflictException } from '../../../common';
 import { CLIN } from '../../clinical/clinical.concepts';
 import { DIAG } from '../diagnostics.concepts';
@@ -31,6 +32,8 @@ function build(view: any) {
   const tx = {
     flush: mockFn(async () => undefined),
     nativeUpdate: mockFn(async () => 1),
+    getReference: mockFn((_cls: unknown, id: string) => ({ ref: id })),
+    lock: mockFn(async () => undefined),
   };
   const em = {
     transactional: mockFn(async (cb: any) => cb(tx)),
@@ -198,5 +201,37 @@ describe('LabPortalResultWritesService', () => {
       t.service.withdraw(LAB, 'f1', 'otra vez', actor),
     ).rejects.toBeInstanceOf(ConflictException);
     expect(t.reports.createVersion).not.toHaveBeenCalled();
+  });
+
+  it('attach: locks the report FOR UPDATE before computing the next version number', async () => {
+    const t = build(
+      baseView({ reports: [{ id: 'r1', currentVersionId: 'v1' }] }),
+    );
+    await t.service.attach(LAB, 'sr-1', 'f2', null, actor);
+    expect(t.tx.getReference).toHaveBeenCalledWith(expect.anything(), 'r1');
+    expect(t.tx.lock).toHaveBeenCalledWith(
+      { ref: 'r1' },
+      LockMode.PESSIMISTIC_WRITE,
+    );
+    expect(t.tx.lock.mock.invocationCallOrder[0]).toBeLessThan(
+      t.reports.maxVersionNumber.mock.invocationCallOrder[0],
+    );
+  });
+
+  it('withdraw: locks the report before re-reading the file and numbering the version', async () => {
+    const t = build(
+      baseView({ reports: [{ id: 'r1' }], files: [file('f1', 'r1')] }),
+    );
+    await t.service.withdraw(LAB, 'f1', 'error', actor);
+    expect(t.tx.lock).toHaveBeenCalledWith(
+      { ref: 'r1' },
+      LockMode.PESSIMISTIC_WRITE,
+    );
+    const lockAt = t.tx.lock.mock.invocationCallOrder[0];
+    expect(lockAt).toBeLessThan(
+      t.reports.maxVersionNumber.mock.invocationCallOrder[0],
+    );
+    // The locked re-read is the second `locate`, the first one found the report.
+    expect(t.reads.locate.mock.invocationCallOrder[1]).toBeGreaterThan(lockAt);
   });
 });
