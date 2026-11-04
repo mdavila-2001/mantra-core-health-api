@@ -30,7 +30,12 @@ import {
   LabPortalWriterService,
   type LabServiceProblem,
 } from './lab-portal-writer.service';
-import { statusOf, toLabService } from './lab-portal.mapping';
+import {
+  isModalityMarker,
+  parentOf,
+  statusOf,
+  toLabService,
+} from './lab-portal.mapping';
 
 const REASON = DiagnosticUnitsErrorReason.DIAGNOSTIC_UNIT_RESOURCE_OUT_OF_SCOPE;
 
@@ -61,12 +66,23 @@ export class LabPortalCatalogService {
   async list(query: LabServiceQueryDto): Promise<LabServicePageDto> {
     const ctx = await this.context.load(this.em.fork());
     const q = query.q ? normalizeSearchText(query.q) : '';
+    const shown = (o: DiagnosticStudyOfferings) =>
+      query.status
+        ? statusOf(o.statusConceptId) === query.status
+        : statusOf(o.statusConceptId) !== 'WITHDRAWN';
+    const withdrawn = new Set(
+      query.status === 'WITHDRAWN'
+        ? []
+        : ctx.offerings
+            .filter((o) => statusOf(o.statusConceptId) === 'WITHDRAWN')
+            .map((o) => o.id),
+    );
     const items = ctx.offerings
-      .filter((o) =>
-        query.status
-          ? statusOf(o.statusConceptId) === query.status
-          : statusOf(o.statusConceptId) !== 'WITHDRAWN',
-      )
+      // The per-modality marker of the unit's sign-up is not a priced service.
+      .filter((o) => !isModalityMarker(o))
+      // A component follows its panel: a withdrawn panel takes its parts along.
+      .filter((o) => !withdrawn.has(parentOf(ctx, o.id) ?? ''))
+      .filter(shown)
       .filter(
         (o) =>
           q === '' ||
@@ -172,7 +188,12 @@ export class LabPortalCatalogService {
     const sample = offering.specimenTypeConceptId
       ? (ctx.specimens.get(offering.specimenTypeConceptId) ?? null)
       : null;
-    return toLabService(offering, ctx.prices.get(offering.id), sample);
+    return toLabService(
+      offering,
+      ctx.prices.get(offering.id),
+      sample,
+      parentOf(ctx, offering.id),
+    );
   }
 
   /** Throws the HTTP form of a business problem. */

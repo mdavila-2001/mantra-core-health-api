@@ -26,6 +26,9 @@ import { LabPortalContextService } from './lab-portal-context.service';
 import { LabPortalImportService } from './lab-portal-import.service';
 import { LabPortalPricingService } from './lab-portal-pricing.service';
 import { LabPortalWriterService } from './lab-portal-writer.service';
+import { LabPortalStudyCatalogService } from './lab-portal-study-catalog.service';
+import { labReferencePrice } from '../../study_catalog/lab-reference-prices';
+import { DiagnosticStudyComponents } from '../entities';
 
 const T1 = '11111111-1111-4111-8111-111111111111';
 const T2 = '22222222-2222-4222-8222-222222222222';
@@ -133,6 +136,17 @@ function build() {
     writer,
     logger as any,
   );
+  const studyCatalog = new LabPortalStudyCatalogService(
+    em as any,
+    { findPage: jest.fn(async () => STUDY_ROWS) } as any,
+    { findDirectComponents: jest.fn(async () => PART_ROWS) } as any,
+    context,
+    writer,
+    offeringsRepo,
+    new DiagnosticStudyComponentsRepository(),
+    pricing,
+    logger as any,
+  );
   for (const [tenantId, code] of [
     [T1, 'LAB1'],
     [T2, 'LAB2'],
@@ -144,8 +158,43 @@ function build() {
       createdAt: new Date(),
     });
   }
-  return { em, catalog, importer };
+  return { em, catalog, importer, studyCatalog };
 }
+
+const HEMO = 'aaaaaaaa-0000-4000-8000-000000000001';
+const HB = 'aaaaaaaa-0000-4000-8000-000000000002';
+const ODD = 'aaaaaaaa-0000-4000-8000-000000000003';
+const STUDY_ROWS = [
+  {
+    id: HEMO,
+    code: 'HEMOGRAMA',
+    name: 'Hemograma completo',
+    family: 'LAB',
+    props: {
+      study_catalog_code: 'HEMOGRAMA',
+      loinc_code: '57021-8',
+      section: { codigo: 'HEMATO', nombre: 'Hematología' },
+    },
+  },
+];
+const PART_ROWS = [
+  {
+    id: HB,
+    parent_id: HEMO,
+    ordinal: 1,
+    code: 'HEMOGRAMA.HB',
+    name: 'Hemoglobina',
+    props: { unit_ucum: 'g/dL' },
+  },
+  {
+    id: ODD,
+    parent_id: HEMO,
+    ordinal: 2,
+    code: 'HEMOGRAMA.SIN_ARANCEL',
+    name: 'Sin arancel',
+    props: null,
+  },
+];
 
 const inT = <T>(tenantId: string, fn: () => Promise<T>) =>
   runWithTenant(tenantId, fn);
@@ -388,5 +437,100 @@ describe('LabPortalImportService', () => {
     );
     expect(result.rejected).toBe(1);
     expect(em.rows(DiagnosticStudyPrices)[0].baseAmount).toBe('45.00');
+  });
+});
+
+describe('LabPortalStudyCatalogService (proceso 4.2)', () => {
+  it('lists catalog análisis by section with components and suggested prices', async () => {
+    const { studyCatalog } = build();
+    const res = await inT(T1, () => studyCatalog.catalog());
+    expect(res.count).toBe(1);
+    const [section] = res.sections;
+    expect(section).toMatchObject({ code: 'HEMATO', name: 'Hematología' });
+    expect(section.items[0]).toMatchObject({
+      conceptId: HEMO,
+      code: 'HEMOGRAMA',
+      offeredServiceId: null,
+      suggestedPrice: labReferencePrice('HEMOGRAMA'),
+    });
+    expect(section.items[0].components.map((c) => c.code)).toEqual([
+      'HEMOGRAMA.HB',
+      'HEMOGRAMA.SIN_ARANCEL',
+    ]);
+    // A component is priced only from an equivalence reviewed for it.
+    expect(section.items[0].components[0].suggestedPrice).toEqual(
+      labReferencePrice('HEMOGRAMA.HB'),
+    );
+    expect(section.items[0].components[1].suggestedPrice).toBeNull();
+  });
+
+  it('imports a panel with one offering per component, linked and priced', async () => {
+    const { em, catalog, studyCatalog } = build();
+    const res = await inT(T1, () =>
+      studyCatalog.importCatalog({ conceptIds: [HEMO, HEMO] }, actor),
+    );
+    expect(res).toMatchObject({ created: 1, skipped: 0, rejected: 0 });
+    const offerings = em.rows(DiagnosticStudyOfferings);
+    expect(offerings.map((o) => [o.studyCode, o.studyConceptId])).toEqual([
+      ['HEMOGRAMA', HEMO],
+      ['HEMOGRAMA.HB', HB],
+      ['HEMOGRAMA.SIN_ARANCEL', ODD],
+    ]);
+    const links = em.rows(DiagnosticStudyComponents);
+    expect(links.map((l) => l.ordinal)).toEqual([1, 2]);
+    expect(links.every((l) => l.parentOfferingId === offerings[0].id)).toBe(
+      true,
+    );
+    // Without a suggestion the component waits as DRAFT, with no price row.
+    const odd = offerings[2];
+    expect(odd.statusConceptId).toBe(DUNIT.OFFERING_DRAFT);
+    const list = await inT(T1, () => catalog.list({}));
+    const oddView = list.items.find((i) => i.id === odd.id)!;
+    expect(oddView).toMatchObject({
+      parentId: offerings[0].id,
+      hasPrice: false,
+      status: 'DRAFT',
+    });
+    // Its first price publishes it.
+    const priced = await inT(T1, () =>
+      catalog.update(odd.id, { price: '12' } as any, actor),
+    );
+    expect(priced).toMatchObject({
+      price: '12.00',
+      hasPrice: true,
+      status: 'PUBLISHED',
+    });
+    // A second import of the same análisis is a no-op.
+    const again = await inT(T1, () =>
+      studyCatalog.importCatalog({ conceptIds: [HEMO] }, actor),
+    );
+    expect(again.rows[0]).toMatchObject({
+      outcome: 'SKIPPED',
+      serviceId: offerings[0].id,
+    });
+  });
+
+  it('rejects an id outside the lab catalog and a code the lab already uses', async () => {
+    const { catalog, studyCatalog } = build();
+    await inT(T1, () => catalog.create(draft('HEMOGRAMA'), actor));
+    const res = await inT(T1, () =>
+      studyCatalog.importCatalog({ conceptIds: [HEMO, T3] }, actor),
+    );
+    expect(res.rows.map((r) => r.outcome)).toEqual(['REJECTED', 'REJECTED']);
+  });
+
+  it('hides the sign-up modality marker from the price list', async () => {
+    const { em, catalog } = build();
+    const unit = em.rows(DiagnosticUnits)[0];
+    em.create(DiagnosticStudyOfferings as any, {
+      diagnosticUnitId: unit.id,
+      studyCode: 'MODALITY_LABORATORY',
+      studyConceptId: DUNIT.STUDY_GENERIC,
+      displayName: 'Laboratorio',
+      statusConceptId: DUNIT.OFFERING_ACTIVE,
+      updatedAt: new Date(),
+    });
+    const list = await inT(T1, () => catalog.list({}));
+    expect(list.items).toHaveLength(0);
   });
 });

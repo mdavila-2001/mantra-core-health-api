@@ -19,12 +19,7 @@ export interface StudyRow {
  * The public price of an offering: active version of a public, active and
  * current schedule — the same rules the directory applies — newest first.
  */
-const STUDY_SELECT = `
-  SELECT o.id, o.diagnostic_unit_id AS unit_id, o.study_code, o.study_concept_id,
-         o.modality_concept_id, o.display_name, o.preparation_instructions,
-         pr.amount, pr.currency_code
-    FROM diagnostic_units.diagnostic_study_offerings o
-    JOIN diagnostic_units.diagnostic_units u ON u.id = o.diagnostic_unit_id
+const PRICE_LATERAL = `
     LEFT JOIN LATERAL (
       SELECT coalesce(p.patient_amount, p.base_amount)::text AS amount, cc.code AS currency_code
         FROM diagnostic_units.diagnostic_study_prices p
@@ -37,8 +32,33 @@ const STUDY_SELECT = `
          AND (ps.valid_from IS NULL OR ps.valid_from <= now())
          AND (ps.valid_to IS NULL OR ps.valid_to >= now())
        ORDER BY p.effective_from DESC
-       LIMIT 1) pr ON true
+       LIMIT 1) pr ON true`;
+
+const STUDY_SELECT = `
+  SELECT o.id, o.diagnostic_unit_id AS unit_id, o.study_code, o.study_concept_id,
+         o.modality_concept_id, o.display_name, o.preparation_instructions,
+         pr.amount, pr.currency_code
+    FROM diagnostic_units.diagnostic_study_offerings o
+    JOIN diagnostic_units.diagnostic_units u ON u.id = o.diagnostic_unit_id
+    ${PRICE_LATERAL}
    WHERE o.status_concept_id = ?`;
+
+/** One component of a panel offering; `amount` is null unless it is published and priced. */
+export interface PartRow {
+  study_concept_id: string;
+  amount: string | null;
+}
+
+/** A part row as the quote rule reads it. */
+export function toQuotedPart(row: PartRow): {
+  conceptId: string;
+  amount: number | null;
+} {
+  return {
+    conceptId: row.study_concept_id,
+    amount: row.amount === null ? null : Number(row.amount),
+  };
+}
 
 const PRICE_PARAMS = [
   DUNIT.PRICE_ACTIVE,
@@ -58,6 +78,20 @@ export class CenterStudiesRepository {
     return em.execute<StudyRow[]>(
       `${STUDY_SELECT} AND o.diagnostic_unit_id = ? ORDER BY o.display_name, o.id`,
       [...PRICE_PARAMS, unitId],
+      'all',
+    );
+  }
+
+  /** Every component of a panel offering, published or not, with its price. */
+  findParts(em: EntityManager, panelOfferingId: string): Promise<PartRow[]> {
+    return em.execute<PartRow[]>(
+      `SELECT o.study_concept_id,
+              CASE WHEN o.status_concept_id = ? THEN pr.amount END AS amount
+         FROM diagnostic_units.diagnostic_study_components c
+         JOIN diagnostic_units.diagnostic_study_offerings o ON o.id = c.component_offering_id
+         ${PRICE_LATERAL}
+        WHERE c.parent_offering_id = ?`,
+      [DUNIT.OFFERING_ACTIVE, ...PRICE_PARAMS.slice(0, 2), panelOfferingId],
       'all',
     );
   }

@@ -109,6 +109,19 @@ describe('GetBookingOptionsUseCase', () => {
     });
   });
 
+  it('prices only the panel components the order asks for (4.2.d)', async () => {
+    const d = build();
+    d.patients.orderedComponents.mockResolvedValue(['HB', 'HTO']);
+    d.studiesRepo.findParts.mockResolvedValue([
+      { study_concept_id: 'HB', amount: '20.00' },
+      { study_concept_id: 'HTO', amount: '15.50' },
+      { study_concept_id: 'PLT', amount: '18.00' },
+    ]);
+    const res = await d.options.execute(actor, ORDER_ID);
+    expect(d.studiesRepo.findParts).toHaveBeenCalledWith(d.em, 'offering-1');
+    expect(res.options[0]).toMatchObject({ unitId: UNIT_ID, price: 35.5 });
+  });
+
   it('an order routed to another center offers no option here', async () => {
     const d = build();
     const order = await d.patients.findDiagnosticOrder(d.em as never, ORDER_ID);

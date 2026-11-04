@@ -26,9 +26,14 @@ describe('LabPortalServicesController', () => {
       listCategories: jest.fn(async () => ({ items: [], count: 0 })),
     };
     const importer = { import: jest.fn(async () => ({ created: 0 })) };
+    const studyCatalog = {
+      catalog: jest.fn(async () => ({ sections: [], count: 0 })),
+      importCatalog: jest.fn(async () => ({ created: 1 })),
+    };
     const controller = new LabPortalServicesController(
       catalog as any,
       importer as any,
+      studyCatalog as any,
     );
     const actor = { id: 'u1' } as any;
 
@@ -41,6 +46,8 @@ describe('LabPortalServicesController', () => {
       actor,
     );
     await controller.listCategories();
+    await controller.studyCatalogItems();
+    await controller.importCatalog({ conceptIds: ['c1'] }, actor);
 
     expect(catalog.list).toHaveBeenCalledWith({ q: 'x' });
     expect(catalog.create).toHaveBeenCalledWith({ code: 'A' }, actor);
@@ -51,5 +58,10 @@ describe('LabPortalServicesController', () => {
       actor,
     );
     expect(catalog.listCategories).toHaveBeenCalled();
+    expect(studyCatalog.catalog).toHaveBeenCalled();
+    expect(studyCatalog.importCatalog).toHaveBeenCalledWith(
+      { conceptIds: ['c1'] },
+      actor,
+    );
   });
 });

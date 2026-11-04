@@ -4,6 +4,7 @@ import { requireTenantId, ResourceNotFoundException } from '../../../common';
 import { DUNIT } from '../diagnostic_units.concepts';
 import { DiagnosticUnitsErrorReason } from '../diagnostic_units.error-reasons';
 import {
+  DiagnosticStudyComponents,
   DiagnosticStudyOfferings,
   DiagnosticUnits,
   type DiagnosticPriceSchedules,
@@ -21,6 +22,8 @@ export interface LabPortalContext {
   readonly offerings: DiagnosticStudyOfferings[];
   /** Current price of each offering in `schedule`, by offering id. */
   readonly prices: Map<string, DiagnosticStudyPrices>;
+  /** Panel links (`diagnostic_study_components`) of the unit's offerings. */
+  readonly links: DiagnosticStudyComponents[];
   /** Specimen concept id -> display. */
   readonly specimens: Map<string, string>;
   /** Next free `version_number` of `schedule` (UK is per schedule), lazily read. */
@@ -87,17 +90,25 @@ export class LabPortalContextService {
           .filter((id): id is string => Boolean(id)),
       ),
     ];
-    const [prices, concepts] = await Promise.all([
+    const [prices, concepts, links] = await Promise.all([
       schedule
         ? this.readRepo.findCurrentPrices(em, [schedule.id], offeringIds, now)
         : Promise.resolve([]),
       this.readRepo.findConcepts(em, specimenIds),
+      offeringIds.length === 0
+        ? Promise.resolve([])
+        : em.find(
+            DiagnosticStudyComponents,
+            { parentOfferingId: { $in: offeringIds } },
+            { orderBy: { ordinal: 'ASC' } },
+          ),
     ]);
     return {
       unit,
       schedule,
       offerings,
       prices: new Map(prices.map((p) => [p.diagnosticStudyOfferingId, p])),
+      links,
       specimens: new Map(concepts.map((c) => [c.id, c.display])),
     };
   }

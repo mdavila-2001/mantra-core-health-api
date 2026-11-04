@@ -87,6 +87,20 @@ export class OrderPatientRepository {
     );
   }
 
+  /** Panel components the doctor picked for the order; empty means the whole panel. */
+  async orderedComponents(
+    em: EntityManager,
+    orderId: string,
+  ): Promise<string[]> {
+    const rows = await em.execute<{ component_concept_id: string }[]>(
+      `SELECT component_concept_id FROM clinical.service_request_components
+        WHERE service_request_id = ?`,
+      [orderId],
+      'all',
+    );
+    return rows.map((r) => r.component_concept_id);
+  }
+
   /** Whether the order already has a result released to the patient. */
   async hasReleasedResult(
     em: EntityManager,

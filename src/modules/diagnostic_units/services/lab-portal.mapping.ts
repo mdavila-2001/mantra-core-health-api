@@ -5,6 +5,11 @@ import type {
   DiagnosticStudyPrices,
 } from '../entities';
 import type { LabServiceDto } from '../dto/lab-portal-responses.dto';
+import { DIAGNOSTIC_UNIT_MODALITIES } from '../diagnostic-unit-modalities';
+
+const MODALITY_CODES = new Set(
+  DIAGNOSTIC_UNIT_MODALITIES.map((m) => m.studyCode),
+);
 
 /**
  * Pure translation between the lab portal contract (`/diagnostics/lab/*`) and
@@ -35,6 +40,30 @@ export function statusOf(conceptId: string): LabServiceStatus {
   if (conceptId === DUNIT.OFFERING_ACTIVE) return 'PUBLISHED';
   if (conceptId === DUNIT.OFFERING_RETIRED) return 'WITHDRAWN';
   return 'DRAFT';
+}
+
+/**
+ * The generic offering the sign-up creates per declared modality, so the
+ * public directory can tell which modalities a unit offers. It carries no price.
+ */
+export function isModalityMarker(offering: DiagnosticStudyOfferings): boolean {
+  return (
+    offering.studyConceptId === DUNIT.STUDY_GENERIC &&
+    MODALITY_CODES.has(offering.studyCode)
+  );
+}
+
+/** Panel offering that `offeringId` is a component of, if any. */
+export function parentOf(
+  ctx: {
+    links: readonly { parentOfferingId: string; componentOfferingId: string }[];
+  },
+  offeringId: string,
+): string | null {
+  return (
+    ctx.links.find((l) => l.componentOfferingId === offeringId)
+      ?.parentOfferingId ?? null
+  );
 }
 
 /** A decimal amount with exactly two decimals ('45' -> '45.00'). */
@@ -95,11 +124,14 @@ export function cleanText(
  * `categoryId`/`categoryName` are always null and `available` always true: the
  * model has no column for lab categories nor for same-day availability of an
  * offering. `sampleType` is the display of `specimen_type_concept_id`.
+ * `parentId` is the panel a component belongs to; `hasPrice` is false until a
+ * price version exists (a catalog item imported without suggestion).
  */
 export function toLabService(
   offering: DiagnosticStudyOfferings,
   price: DiagnosticStudyPrices | undefined,
   sampleType: string | null,
+  parentId: string | null = null,
 ): LabServiceDto {
   const listPrice = money(price?.baseAmount ?? '0');
   const percent = percentOf(price?.discountFactor);
@@ -107,6 +139,12 @@ export function toLabService(
     id: offering.id,
     code: offering.studyCode,
     name: offering.displayName,
+    parentId,
+    catalogConceptId:
+      offering.studyConceptId && offering.studyConceptId !== DUNIT.STUDY_GENERIC
+        ? offering.studyConceptId
+        : null,
+    hasPrice: price !== undefined,
     categoryId: null,
     categoryName: null,
     sampleType,

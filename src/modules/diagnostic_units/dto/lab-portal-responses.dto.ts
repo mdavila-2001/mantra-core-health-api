@@ -8,6 +8,22 @@ export class LabServiceDto {
   @ApiProperty({
     type: String,
     nullable: true,
+    format: 'uuid',
+    description: 'Panel this service is a component of',
+  })
+  parentId!: string | null;
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    format: 'uuid',
+    description: 'Study catalog concept; null for free-form services',
+  })
+  catalogConceptId!: string | null;
+  @ApiProperty({ description: 'False until a price version exists' })
+  hasPrice!: boolean;
+  @ApiProperty({
+    type: String,
+    nullable: true,
     description: 'Always null: the model has no lab categories',
   })
   categoryId!: string | null;
