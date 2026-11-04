@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { CONCEPTS } from '../../../../common';
+import { CONCEPTS, SEED } from '../../../../common';
 import { SCHED } from '../../domain/scheduling.concepts';
 import { findBookableOrganizations } from './bookable-organizations.query';
 
@@ -61,5 +61,18 @@ describe('findBookableOrganizations', () => {
       ]),
     );
     expect(params).toHaveLength((sql.match(/\?/g) ?? []).length);
+  });
+
+  // A bare `GROUP BY name` binds to r.name (the practitioner), not the alias:
+  // the same tenant came back once per practitioner.
+  it('groups by tenant only and leaves out the seed default tenant', async () => {
+    const { em, execute } = emReturning([]);
+
+    await findBookableOrganizations(em);
+
+    const [sql, params] = execute.mock.calls[1] as [string, unknown[]];
+    expect(sql).toMatch(/GROUP BY t\.id, t\.trade_name, t\.legal_name\s/);
+    expect(sql).toContain('t.id <> ?');
+    expect(params).toContain(SEED.tenantId);
   });
 });

@@ -9,7 +9,7 @@
 # Módulo `authz`
 
 **Fuente:** [`src/modules/authz/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/authz/README.md)
-· 9 controllers · 12 services · 16 repositories · 15 entidades · 21 DTO
+· 13 controllers · 18 services · 18 repositories · 15 entidades · 27 DTO
 
 ---
 
@@ -59,6 +59,10 @@ Entidades (`tableName`, 15 de 15 archivos `*.entity.ts`): `access_policies`, `br
 | `GET /authz/me/access` | PATIENT | `authz-me` |
 | `POST /authz/me/care-relationships/:id/revoke` | PATIENT | `authz-me` |
 | `POST /authz/me/clinical-access-grants/:grantId/revoke` | PATIENT | `authz-me` |
+| `GET /authz/me/access-requests` | PATIENT | `authz-me` |
+| `POST /authz/me/primary-practitioner-requests` | PATIENT | `authz-me` |
+| `GET /authz/practitioners/me/access-requests` | CLINICIAN, PRACTITIONER | `authz-practitioner-requests` |
+| `POST /authz/practitioners/me/care-relationships/:id/respond` | CLINICIAN, PRACTITIONER | `authz-practitioner-requests` |
 | `POST /authz/pdp/cache/invalidate` | SECURITY_ADMIN | `authz-pdp` |
 | `POST /authz/decisions/evaluate` | SECURITY_ADMIN | `authz-pdp` |
 | `POST /authz/tenants/:tenantId/access-policies` | SECURITY_ADMIN | `authz-policies` |
@@ -101,7 +105,7 @@ ambigüedad de parseo del path).
 `resource_scope_grants` (esquema `authz`). Todas con `row_version` optimista y
 FKs como columnas `uuid` planas.
 
-## Reglas de negocio
+## Business rules
 
 - **Deny-overrides**: en la evaluación del PDP y en `role_permissions`, `deny`
   prevalece sobre `allow`; las excepciones de usuario `deny` prevalecen sobre el
@@ -144,6 +148,21 @@ FKs como columnas `uuid` planas.
   `PENDING` y no concede nada hasta que el paciente la acepte. Revocar por id queda
   acotado al tenant activo; el paciente titular revoca lo suyo en cualquier
   organización y un actor de plataforma (`SUPERADMIN`/`SYSTEM`) sin tenant revoca por id.
+- **Cabecera (médico de cabecera)**: es una relación asistencial de tipo `PRIMARY`
+  (`CARE_REL_PRIMARY`). La pide el profesional con `POST /authz/care-relationships/request`
+  (`relationshipType: PRIMARY`) o el paciente con `POST /authz/me/primary-practitioner-requests`
+  (tenant en `X-Tenant-Id`; mismas validaciones que elegirlo directo). La acepta la otra parte:
+  quien la inició no la puede aceptar. Al aceptarla, en una sola transacción, se revoca la
+  `PRIMARY` activa anterior del paciente en el tenant, se activa la nueva, se cierra el médico
+  de cabecera vigente de `profiles` y, tras un `flush` (su índice único no es diferible), se abre
+  el nuevo. Revocar una `PRIMARY` cierra además el vigente si era ese profesional. Rechazar deja
+  el estado `CARE_REL_STATUS_DECLINED`, que no figura en «quién ve mi historia». El alta directa
+  (`POST /authz/care-relationships`) no admite `PRIMARY`.
+- **Buzón de solicitudes** (`GET /authz/me/access-requests` y
+  `GET /authz/practitioners/me/access-requests`): une las relaciones asistenciales y las
+  solicitudes granulares de `consent` bajo una sola forma (`kind` `CABECERA`/`GRANULAR`/`ATENCION`,
+  `direction`, `status`). Muestra sólo el tenant activo; las relaciones acotadas a un propósito
+  distinto de tratamiento no se muestran.
 - **Masking**: `field_permissions` con check `canWrite ⇒ canRead` (412 si no).
 - **Vigencia**: `valid_from < valid_to`; la revocación distingue `revoked` de
   `expired` según `valid_to`.

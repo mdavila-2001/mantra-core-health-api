@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `diagnostics`
 
-Referencia exhaustiva de 31 operación(es) del módulo `diagnostics`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 33 operación(es) del módulo `diagnostics`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `diagnostics-imaging`, `diagnostics-laboratory`, `diagnostics-orders`, `diagnostics-patient-results`, `diagnostics-reception`, `diagnostics-reports`, `diagnostics-specimens`
 - **Controladores:** `DiagnosticsImagingController`, `DiagnosticsLabController`, `DiagnosticsOrdersController`, `DiagnosticsPatientResultsController`, `DiagnosticsReceptionController`, `DiagnosticsReportsController`, `DiagnosticsSpecimensController`
@@ -34,14 +34,16 @@ Referencia exhaustiva de 31 operación(es) del módulo `diagnostics`, derivada d
 21. [POST /diagnostics/reports/{reportId}/versions](#21-post-diagnostics-reports-reportid-versions) — Crear/enmendar versión de informe diagnóstico
 22. [POST /diagnostics/reports/{reportId}/versions/{versionId}/release](#22-post-diagnostics-reports-reportid-versions-versionid-release) — Validar y liberar una versión del informe
 23. [POST /diagnostics/results/{observationId}/verifications](#23-post-diagnostics-results-observationid-verifications) — Verificar (técnica/facultativa) un resultado
-24. [POST /diagnostics/service-requests/inbox](#24-post-diagnostics-service-requests-inbox) — Bandeja de órdenes de laboratorio por recibir
-25. [POST /diagnostics/specimens](#25-post-diagnostics-specimens) — Registrar un espécimen (soporte para acesión)
-26. [GET /diagnostics/specimens/{id}](#26-get-diagnostics-specimens-id) — Detalle de un espécimen (con su cadena de custodia)
-27. [POST /diagnostics/specimens/{id}/containers](#27-post-diagnostics-specimens-id-containers) — Registrar un contenedor de espécimen (soporte para custodia)
-28. [POST /diagnostics/specimens/{id}/rejection](#28-post-diagnostics-specimens-id-rejection) — Rechazar espécimen y solicitar recolección
-29. [GET /diagnostics/work-orders](#29-get-diagnostics-work-orders) — Listar las órdenes de trabajo del laboratorio
-30. [POST /diagnostics/work-orders](#30-post-diagnostics-work-orders) — Abrir orden de trabajo y desglosar pruebas
-31. [POST /dicomweb/studies](#31-post-dicomweb-studies) — Ingestar estudio DICOM (STOW-RS) y ubicaciones de objeto
+24. [GET /diagnostics/service-requests/{id}](#24-get-diagnostics-service-requests-id) — Detalle de una orden dirigida al tenant activo
+25. [POST /diagnostics/service-requests/inbox](#25-post-diagnostics-service-requests-inbox) — Bandeja de órdenes de laboratorio por recibir
+26. [POST /diagnostics/service-requests/worklist](#26-post-diagnostics-service-requests-worklist) — Bandeja del ejecutor: órdenes de laboratorio o imagen con estado derivado
+27. [POST /diagnostics/specimens](#27-post-diagnostics-specimens) — Registrar un espécimen (soporte para acesión)
+28. [GET /diagnostics/specimens/{id}](#28-get-diagnostics-specimens-id) — Detalle de un espécimen (con su cadena de custodia)
+29. [POST /diagnostics/specimens/{id}/containers](#29-post-diagnostics-specimens-id-containers) — Registrar un contenedor de espécimen (soporte para custodia)
+30. [POST /diagnostics/specimens/{id}/rejection](#30-post-diagnostics-specimens-id-rejection) — Rechazar espécimen y solicitar recolección
+31. [GET /diagnostics/work-orders](#31-get-diagnostics-work-orders) — Listar las órdenes de trabajo del laboratorio
+32. [POST /diagnostics/work-orders](#32-post-diagnostics-work-orders) — Abrir orden de trabajo y desglosar pruebas
+33. [POST /dicomweb/studies](#33-post-dicomweb-studies) — Ingestar estudio DICOM (STOW-RS) y ubicaciones de objeto
 
 ---
 
@@ -970,6 +972,29 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       },
       "insuranceSettlementAvailability": "AVAILABLE",
       "id": "00000000-0000-4000-8000-000000000001",
+      "requisitionId": "00000000-0000-4000-8000-000000000001",
+      "codeDisplay": "CODIGO_EJEMPLO",
+      "specimenTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "specimenTypeDisplay": "valor-ejemplo",
+      "components": [
+        {
+          "conceptId": "00000000-0000-4000-8000-000000000001",
+          "display": "valor-ejemplo",
+          "ordinal": 1
+        }
+      ],
+      "componentsSpecified": true,
+      "imaging": {
+        "modalityConceptId": "00000000-0000-4000-8000-000000000001",
+        "modalityDisplay": "valor-ejemplo",
+        "bodySiteConceptId": "00000000-0000-4000-8000-000000000001",
+        "bodySiteDisplay": "valor-ejemplo",
+        "lateralityConceptId": "00000000-0000-4000-8000-000000000001",
+        "lateralityDisplay": "valor-ejemplo",
+        "contrastConceptId": "00000000-0000-4000-8000-000000000001",
+        "contrastDisplay": "valor-ejemplo"
+      },
+      "summary": "valor-ejemplo",
       "encounterId": "00000000-0000-4000-8000-000000000001",
       "codeConceptId": "00000000-0000-4000-8000-000000000001",
       "categoryConceptId": "00000000-0000-4000-8000-000000000001",
@@ -996,7 +1021,7 @@ Campos de la respuesta:
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `patientProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `items` | Sí | `array<PatientOrderSummaryDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"insuranceSettlement":{"claimId":"00000000-0000-4000-8000-000000000001","claimIdentifier":"valor-ejemplo","adjudicationVersionId":"00000000-0000-4000-8000-000000000001","adjudicationVersion":1,"eobId":"00000000-0000-4000-8000-000000000001","carrierName":"Nombre de ejemplo","policyIdentifier":"valor-ejemplo","totalBilledAmount":"valor-ejemplo","totalApprovedAmount":"valor-ejemplo","totalPatientAmount":"valor-ejemplo","totalDeniedAmount":"valor-ejemplo","currencyCode":"BOB","result":"APPROVED","exclusions":[{"claimLineId":"00000000-0000-4000-8000-000000000001","itemId":"00000000-0000-4000-8000-000000000001","itemName":"Nombre de ejemplo","amount":"valor-ejemplo","policyClauseReference":"valor-ejemplo","denialRationale":"valor-ejemplo"}]},"insuranceSettlementAvailability":"AVAILABLE","id":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","codeConceptId":"00000000-0000-4000-8000-000000000001","categoryConceptId":"00000000-0000-4000-8000-000000000001","category":"LAB","statusConceptId":"00000000-0000-4000-8000-000000000001","priorityConceptId":"00000000-0000-4000-8000-000000000001","performerSelectionConceptId":"00000000-0000-4000-8000-000000000001","performerPractitionerProfileId":"00000000-0000-4000-8000-000000000001","suggestedPracticeSiteId":"00000000-0000-4000-8000-000000000001","suggestedPracticeSiteName":"Nombre de ejemplo","createdAt":"2026-07-31T12:00:00.000Z","preparationInstructions":"valor-ejemplo","hasReleasedResult":true,"reportId":"00000000-0000-4000-8000-000000000001"}]` |
+| `items` | Sí | `array<PatientOrderSummaryDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"insuranceSettlement":{"claimId":"00000000-0000-4000-8000-000000000001","claimIdentifier":"valor-ejemplo","adjudicationVersionId":"00000000-0000-4000-8000-000000000001","adjudicationVersion":1,"eobId":"00000000-0000-4000-8000-000000000001","carrierName":"Nombre de ejemplo","policyIdentifier":"valor-ejemplo","totalBilledAmount":"valor-ejemplo","totalApprovedAmount":"valor-ejemplo","totalPatientAmount":"valor-ejemplo","totalDeniedAmount":"valor-ejemplo","currencyCode":"BOB","result":"APPROVED","exclusions":[{"claimLineId":"00000000-0000-4000-8000-000000000001","itemId":"00000000-0000-4000-8000-000000000001","itemName":"Nombre de ejemplo","amount":"valor-ejemplo","policyClauseReference":"valor-ejemplo","denialRationale":"valor-ejemplo"}]},"insuranceSettlementAvailability":"AVAILABLE","id":"00000000-0000-4000-8000-000000000001","requisitionId":"00000000-0000-4000-8000-000000000001","codeDisplay":"CODIGO_EJEMPLO","specimenTypeConceptId":"00000000-0000-4000-8000-000000000001","specimenTypeDisplay":"valor-ejemplo","components":[{"conceptId":"00000000-0000-4000-8000-000000000001","display":"valor-ejemplo","ordinal":1}],"componentsSpecified":true,"imaging":{"modalityConceptId":"00000000-0000-4000-8000-000000000001","modalityDisplay":"valor-ejemplo","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","bodySiteDisplay":"valor-ejemplo","lateralityConceptId":"00000000-0000-4000-8000-000000000001","lateralityDisplay":"valor-ejemplo","contrastConceptId":"00000000-0000-4000-8000-000000000001","contrastDisplay":"valor-ejemplo"},"summary":"valor-ejemplo","encounterId":"00000000-0000-4000-8000-000000000001","codeConceptId":"00000000-0000-4000-8000-000000000001","categoryConceptId":"00000000-0000-4000-8000-000000000001","category":"LAB","statusConceptId":"00000000-0000-4000-8000-000000000001","priorityConceptId":"00000000-0000-4000-8000-000000000001","performerSelectionConceptId":"00000000-0000-4000-8000-000000000001","performerPractitionerProfileId":"00000000-0000-4000-8000-000000000001","suggestedPracticeSiteId":"00000000-0000-4000-8000-000000000001","suggestedPracticeSiteName":"Nombre de ejemplo","createdAt":"2026-07-31T12:00:00.000Z","preparationInstructions":"valor-ejemplo","hasReleasedResult":true,"reportId":"00000000-0000-4000-8000-000000000001"}]` |
 | `items[].insuranceSettlement` | Sí | `PatientInsuranceSettlementDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"claimId":"00000000-0000-4000-8000-000000000001","claimIdentifier":"valor-ejemplo","adjudicationVersionId":"00000000-0000-4000-8000-000000000001","adjudicationVersion":1,"eobId":"00000000-0000-4000-8000-000000000001","carrierName":"Nombre de ejemplo","policyIdentifier":"valor-ejemplo","totalBilledAmount":"valor-ejemplo","totalApprovedAmount":"valor-ejemplo","totalPatientAmount":"valor-ejemplo","totalDeniedAmount":"valor-ejemplo","currencyCode":"BOB","result":"APPROVED","exclusions":[{"claimLineId":"00000000-0000-4000-8000-000000000001","itemId":"00000000-0000-4000-8000-000000000001","itemName":"Nombre de ejemplo","amount":"valor-ejemplo","policyClauseReference":"valor-ejemplo","denialRationale":"valor-ejemplo"}]}` |
 | `items[].insuranceSettlement.claimId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].insuranceSettlement.claimIdentifier` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -1020,6 +1045,25 @@ Campos de la respuesta:
 | `items[].insuranceSettlement.exclusions[].denialRationale` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `items[].insuranceSettlementAvailability` | Sí | `string` | valores: `AVAILABLE`, `PENDING_PUBLICATION`, `UNDER_REVIEW`, `NOT_AVAILABLE` | Sin descripción específica en el contrato OpenAPI. | `AVAILABLE` |
 | `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].requisitionId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].codeDisplay` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `items[].specimenTypeConceptId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].specimenTypeDisplay` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].components` | Sí | `array<ServiceRequestComponentDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"conceptId":"00000000-0000-4000-8000-000000000001","display":"valor-ejemplo","ordinal":1}]` |
+| `items[].components[].conceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].components[].display` | Sí | `string` | Sin restricción adicional declarada | Nombre legible (castellano si existe) | `valor-ejemplo` |
+| `items[].components[].ordinal` | Sí | `number` | Sin restricción adicional declarada | Posición, desde 1, en el orden en que se marcó | `1` |
+| `items[].componentsSpecified` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `items[].imaging` | Sí | `ServiceRequestImagingDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"modalityConceptId":"00000000-0000-4000-8000-000000000001","modalityDisplay":"valor-ejemplo","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","bodySiteDisplay":"valor-ejemplo","lateralityConceptId":"00000000-0000-4000-8000-000000000001","lateralityDisplay":"valor-ejemplo","contrastConceptId":"00000000-0000-4000-8000-000000000001","contrastDisplay":"valor-ejemplo"}` |
+| `items[].imaging.modalityConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].imaging.modalityDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].imaging.bodySiteConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].imaging.bodySiteDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].imaging.lateralityConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].imaging.lateralityDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].imaging.contrastConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].imaging.contrastDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].summary` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `items[].encounterId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].codeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].categoryConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
@@ -2838,6 +2882,11 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "performerPractitionerProfileId": "00000000-0000-4000-8000-000000000001",
       "suggestedPracticeSiteId": "00000000-0000-4000-8000-000000000001",
       "suggestedPracticeSiteName": "Nombre de ejemplo",
+      "suggestedCareSpace": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "code": "CODIGO_EJEMPLO",
+        "name": "Nombre de ejemplo"
+      },
       "createdAt": "2026-07-31T12:00:00.000Z",
       "previousDiagnosticReportId": "00000000-0000-4000-8000-000000000001",
       "duplicateOverrideReason": "Texto descriptivo de ejemplo"
@@ -2870,7 +2919,7 @@ Campos de la respuesta:
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `patientProfileId` | Sí | `string` | formato `uuid` | Paciente leído. | `00000000-0000-4000-8000-000000000001` |
-| `orders` | Sí | `array<DiagnosticOrderSummaryDto>` | Sin restricción adicional declarada | Órdenes de laboratorio e imagenología, de la más nueva a la más vieja. | `[{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","formInstanceId":"00000000-0000-4000-8000-000000000001","codeConceptId":"00000000-0000-4000-8000-000000000001","categoryConceptId":"00000000-0000-4000-8000-000000000001","category":{},"basedOnNoteIds":["valor-ejemplo"],"statusConceptId":"00000000-0000-4000-8000-000000000001","priorityConceptId":"00000000-0000-4000-8000-000000000001","requesterProfileId":"00000000-0000-4000-8000-000000000001","performerSelectionConceptId":"00000000-0000-4000-8000-000000000001","performerPractitionerProfileId":"00000000-0000-4000-8000-000000000001","suggestedPracticeSiteId":"00000000-0000-4000-8000-000000000001","suggestedPracticeSiteName":"Nombre de ejemplo","createdAt":"2026-07-31T12:00:00.000Z","previousDiagnosticReportId":"00000000-0000-4000-8000-000000000001","duplicateOverrideReason":"Texto descriptivo de ejemplo"}]` |
+| `orders` | Sí | `array<DiagnosticOrderSummaryDto>` | Sin restricción adicional declarada | Órdenes de laboratorio e imagenología, de la más nueva a la más vieja. | `[{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","formInstanceId":"00000000-0000-4000-8000-000000000001","codeConceptId":"00000000-0000-4000-8000-000000000001","categoryConceptId":"00000000-0000-4000-8000-000000000001","category":{},"basedOnNoteIds":["valor-ejemplo"],"statusConceptId":"00000000-0000-4000-8000-000000000001","priorityConceptId":"00000000-0000-4000-8000-000000000001","requesterProfileId":"00000000-0000-4000-8000-000000000001","performerSelectionConceptId":"00000000-0000-4000-8000-000000000001","performerPractitionerProfileId":"00000000-0000-4000-8000-000000000001","suggestedPracticeSiteId":"00000000-0000-4000-8000-000000000001","suggestedPracticeSiteName":"Nombre de ejemplo","suggestedCareSpace":{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo"},"createdAt":"2026-07-31T12:00:00.000Z","previousDiagnosticReportId":"00000000-0000-4000-8000-000000000001","duplicateOverrideReason":"Texto descriptivo de ejemplo"}]` |
 | `orders[].id` | Sí | `string` | formato `uuid` | Identificador de la orden. | `00000000-0000-4000-8000-000000000001` |
 | `orders[].patientProfileId` | Sí | `string` | formato `uuid` | Paciente al que pertenece. | `00000000-0000-4000-8000-000000000001` |
 | `orders[].encounterId` | No | `string` | formato `uuid` | Encuentro en el que se pidió, si se pidió durante uno. | `00000000-0000-4000-8000-000000000001` |
@@ -2886,6 +2935,10 @@ Campos de la respuesta:
 | `orders[].performerPractitionerProfileId` | Sí | `string` | formato `uuid`; admite null | Médico ejecutor («lo hago yo»), o `null`. | `00000000-0000-4000-8000-000000000001` |
 | `orders[].suggestedPracticeSiteId` | Sí | `string` | formato `uuid`; admite null | Sede sugerida, o `null`. | `00000000-0000-4000-8000-000000000001` |
 | `orders[].suggestedPracticeSiteName` | Sí | `string` | admite null | Nombre de la sede sugerida, o `null`. | `Nombre de ejemplo` |
+| `orders[].suggestedCareSpace` | No | `object` | admite null | Punto de toma sugerido (F5b) | `{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo"}` |
+| `orders[].suggestedCareSpace.id` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `orders[].suggestedCareSpace.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `orders[].suggestedCareSpace.name` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `orders[].createdAt` | Sí | `string` | formato `date-time` | Cuándo se pidió. | `2026-07-31T12:00:00.000Z` |
 | `orders[].previousDiagnosticReportId` | No | `string` | formato `uuid` | El informe previo que satisface este pedido (antiduplicación, v4.2.17). Presente cuando el médico eligió reutilizar o repetir un estudio duplicado; `undefined` en cualquier otro caso. | `00000000-0000-4000-8000-000000000001` |
 | `orders[].duplicateOverrideReason` | No | `string` | Sin restricción adicional declarada | Justificación del médico si repitió un estudio duplicado (antiduplicación). | `Texto descriptivo de ejemplo` |
@@ -3358,7 +3411,117 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /diagnostics/service-requests/inbox
+## 24. GET /diagnostics/service-requests/{id}
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-reception`
+- **Nombre:** Detalle de una orden dirigida al tenant activo
+- **Operation ID:** `DiagnosticsReceptionController_getServiceRequest`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsReceptionController.getServiceRequest](../../src/modules/diagnostics/controllers/diagnostics-reception.controller.ts)
+
+### Descripción de negocio
+
+Detalle de una orden dirigida al tenant activo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Una orden del ejecutor con su detalle. Una orden de otro ejecutor o inexistente: 404 (no se distinguen).
+
+### Descripción del sistema
+
+NestJS resuelve `GET /diagnostics/service-requests/{id}` en `DiagnosticsReceptionController_getServiceRequest`. El controlador delega en `DiagnosticsWorklistService.getById`. No recibe body. El tipo de retorno estático es `Promise<WorklistItemDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /diagnostics/service-requests/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /diagnostics/service-requests/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<WorklistItemDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<WorklistItemDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<WorklistItemDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<WorklistItemDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<WorklistItemDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<WorklistItemDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<WorklistItemDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<WorklistItemDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `WorklistItemDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "state": {},
+  "scope": {}
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `state` | Sí | `object` | Sin restricción adicional declarada | Derivado, no guardado: PENDING (sin acesión ni estudio), RECEIVED (acesión, muestra recibida o estudio de imagen), IN_PROCESS (orden de trabajo abierta; en imagen, informe en curso), REPORTED (informe liberado), CANCELLED (revocada o satisfecha por informe previo) | `{}` |
+| `scope` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof WORKLIST_SCOPES)[number] | `{}` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Orden no encontrada | Excepción explícita en src/modules/diagnostics/services/diagnostics-worklist.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/service-requests/{id}"
+}
+```
+
+---
+
+## 25. POST /diagnostics/service-requests/inbox
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-reception`
@@ -3458,6 +3621,28 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "requestingTenantId": "00000000-0000-4000-8000-000000000001",
       "requestingTenantName": "Nombre de ejemplo",
       "requestedAt": "2026-07-31T12:00:00.000Z",
+      "requisitionId": "00000000-0000-4000-8000-000000000001",
+      "specimenTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "specimenTypeDisplay": "valor-ejemplo",
+      "components": [
+        {
+          "conceptId": "00000000-0000-4000-8000-000000000001",
+          "display": "valor-ejemplo",
+          "ordinal": 1
+        }
+      ],
+      "componentsSpecified": true,
+      "imaging": {
+        "modalityConceptId": "00000000-0000-4000-8000-000000000001",
+        "modalityDisplay": "valor-ejemplo",
+        "bodySiteConceptId": "00000000-0000-4000-8000-000000000001",
+        "bodySiteDisplay": "valor-ejemplo",
+        "lateralityConceptId": "00000000-0000-4000-8000-000000000001",
+        "lateralityDisplay": "valor-ejemplo",
+        "contrastConceptId": "00000000-0000-4000-8000-000000000001",
+        "contrastDisplay": "valor-ejemplo"
+      },
+      "summary": "valor-ejemplo",
       "specimens": [
         {
           "id": "00000000-0000-4000-8000-000000000001",
@@ -3500,7 +3685,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<LabInboxItemDto>` | Sin restricción adicional declarada | Las órdenes de la página, de la más vieja a la más nueva. | `[{"serviceRequestId":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","patientDisplayName":"Nombre de ejemplo","patientCode":"CODIGO_EJEMPLO","codeConceptId":"00000000-0000-4000-8000-000000000001","codeDisplay":"CODIGO_EJEMPLO","categoryConceptId":"00000000-0000-4000-8000-000000000001","priorityConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","requesterProfileId":"00000000-0000-4000-8000-000000000001","requestingTenantId":"00000000-0000-4000-8000-000000000001","requestingTenantName":"Nombre de ejemplo","requestedAt":"2026-07-31T12:00:00.000Z","specimens":[{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","specimenTypeConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","collectedAt":"2026-07-31T12:00:00.000Z","receivedAt":"2026-07-31T12:00:00.000Z","containers":[{"id":"00000000-0000-4000-8000-000000000001","containerIdentifier":"valor-ejemplo","containerTypeConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001"}],"custodyEvents":[{"id":"00000000-0000-4000-8000-000000000001","specimenContainerId":"00000000-0000-4000-8000-000000000001","custodyEventTypeConceptId":"00000000-0000-4000-8000-000000000001","occurredAt":"2026-07-31T12:00:00.000Z","fromPartyTypeConceptId":"00000000-0000-4000-8000-000000000001","toPartyTypeConceptId":"00000000-0000-4000-8000-000000000001","sealIdentifier":"valor-ejemplo","signedByUserId":"00000000-0000-4000-8000-000000000001"}]}]}]` |
+| `items` | Sí | `array<LabInboxItemDto>` | Sin restricción adicional declarada | Las órdenes de la página, de la más vieja a la más nueva. | `[{"serviceRequestId":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","patientDisplayName":"Nombre de ejemplo","patientCode":"CODIGO_EJEMPLO","codeConceptId":"00000000-0000-4000-8000-000000000001","codeDisplay":"CODIGO_EJEMPLO","categoryConceptId":"00000000-0000-4000-8000-000000000001","priorityConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","requesterProfileId":"00000000-0000-4000-8000-000000000001","requestingTenantId":"00000000-0000-4000-8000-000000000001","requestingTenantName":"Nombre de ejemplo","requestedAt":"2026-07-31T12:00:00.000Z","requisitionId":"00000000-0000-4000-8000-000000000001","specimenTypeConceptId":"00000000-0000-4000-8000-000000000001","specimenTypeDisplay":"valor-ejemplo","components":[{"conceptId":"00000000-0000-4000-8000-000000000001","display":"valor-ejemplo","ordinal":1}],"componentsSpecified":true,"imaging":{"modalityConceptId":"00000000-0000-4000-8000-000000000001","modalityDisplay":"valor-ejemplo","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","bodySiteDisplay":"valor-ejemplo","lateralityConceptId":"00000000-0000-4000-8000-000000000001","lateralityDisplay":"valor-ejemplo","contrastConceptId":"00000000-0000-4000-8000-000000000001","contrastDisplay":"valor-ejemplo"},"summary":"valor-ejemplo","specimens":[{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","specimenTypeConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","collectedAt":"2026-07-31T12:00:00.000Z","receivedAt":"2026-07-31T12:00:00.000Z","containers":[{"id":"00000000-0000-4000-8000-000000000001","containerIdentifier":"valor-ejemplo","containerTypeConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001"}],"custodyEvents":[{"id":"00000000-0000-4000-8000-000000000001","specimenContainerId":"00000000-0000-4000-8000-000000000001","custodyEventTypeConceptId":"00000000-0000-4000-8000-000000000001","occurredAt":"2026-07-31T12:00:00.000Z","fromPartyTypeConceptId":"00000000-0000-4000-8000-000000000001","toPartyTypeConceptId":"00000000-0000-4000-8000-000000000001","sealIdentifier":"valor-ejemplo","signedByUserId":"00000000-0000-4000-8000-000000000001"}]}]}]` |
 | `items[].serviceRequestId` | Sí | `string` | formato `uuid` | La orden de servicio (`clinical.service_requests`). | `00000000-0000-4000-8000-000000000001` |
 | `items[].patientProfileId` | Sí | `string` | formato `uuid` | Paciente de la orden. | `00000000-0000-4000-8000-000000000001` |
 | `items[].patientDisplayName` | Sí | `string` | admite null | Nombre pintable del paciente, si se conoce. | `Nombre de ejemplo` |
@@ -3514,6 +3699,24 @@ Campos de la respuesta:
 | `items[].requestingTenantId` | Sí | `string` | formato `uuid` | Organización que emitió la orden (su custodio). | `00000000-0000-4000-8000-000000000001` |
 | `items[].requestingTenantName` | Sí | `string` | admite null | Nombre de la organización que emitió la orden. | `Nombre de ejemplo` |
 | `items[].requestedAt` | Sí | `string` | formato `date-time` | Cuándo se emitió la orden. | `2026-07-31T12:00:00.000Z` |
+| `items[].requisitionId` | No | `string` | formato `uuid`; admite null | v4.2.82: requisición que agrupa los estudios pedidos juntos; `null` = alta individual. | `00000000-0000-4000-8000-000000000001` |
+| `items[].specimenTypeConceptId` | No | `string` | formato `uuid`; admite null | v4.2.82: muestra pedida por el médico; `null` = no se indicó. | `00000000-0000-4000-8000-000000000001` |
+| `items[].specimenTypeDisplay` | No | `string` | admite null | v4.2.82: nombre legible de la muestra pedida. | `valor-ejemplo` |
+| `items[].components` | No | `array<ServiceRequestComponentDto>` | Sin restricción adicional declarada | v4.2.82: componentes marcados del panel, en el orden en que se marcaron. | `[{"conceptId":"00000000-0000-4000-8000-000000000001","display":"valor-ejemplo","ordinal":1}]` |
+| `items[].components[].conceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].components[].display` | No | `string` | Sin restricción adicional declarada | Nombre legible (castellano si existe) | `valor-ejemplo` |
+| `items[].components[].ordinal` | No | `number` | Sin restricción adicional declarada | Posición, desde 1, en el orden en que se marcó | `1` |
+| `items[].componentsSpecified` | No | `boolean` | Sin restricción adicional declarada | v4.2.82: `false` = orden sin detalle de componentes («estudio completo»). | `true` |
+| `items[].imaging` | No | `ServiceRequestImagingDto` | Sin restricción adicional declarada | v4.2.82: modalidad, región, lateralidad y contraste; `null` si no es imagen o no los trae. | `{"modalityConceptId":"00000000-0000-4000-8000-000000000001","modalityDisplay":"valor-ejemplo","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","bodySiteDisplay":"valor-ejemplo","lateralityConceptId":"00000000-0000-4000-8000-000000000001","lateralityDisplay":"valor-ejemplo","contrastConceptId":"00000000-0000-4000-8000-000000000001","contrastDisplay":"valor-ejemplo"}` |
+| `items[].imaging.modalityConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].imaging.modalityDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].imaging.bodySiteConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].imaging.bodySiteDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].imaging.lateralityConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].imaging.lateralityDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].imaging.contrastConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].imaging.contrastDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].summary` | No | `string` | Sin restricción adicional declarada | v4.2.82: resumen legible armado por el servidor, p. ej. «Hemograma · 3 componentes» o «Radiografía de mano · Mano · Izquierda · sin contraste». | `valor-ejemplo` |
 | `items[].specimens` | Sí | `array<SpecimenDetailDto>` | Sin restricción adicional declarada | Muestras que este laboratorio ya recibió para la orden y todavía no acesionó, con sus contenedores y su cadena de custodia. Vacío mientras nadie recibió nada; un espécimen rechazado sigue acá con su estado, para que se vea por qué hace falta otra muestra. | `[{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","specimenTypeConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","collectedAt":"2026-07-31T12:00:00.000Z","receivedAt":"2026-07-31T12:00:00.000Z","containers":[{"id":"00000000-0000-4000-8000-000000000001","containerIdentifier":"valor-ejemplo","containerTypeConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001"}],"custodyEvents":[{"id":"00000000-0000-4000-8000-000000000001","specimenContainerId":"00000000-0000-4000-8000-000000000001","custodyEventTypeConceptId":"00000000-0000-4000-8000-000000000001","occurredAt":"2026-07-31T12:00:00.000Z","fromPartyTypeConceptId":"00000000-0000-4000-8000-000000000001","toPartyTypeConceptId":"00000000-0000-4000-8000-000000000001","sealIdentifier":"valor-ejemplo","signedByUserId":"00000000-0000-4000-8000-000000000001"}]}]` |
 | `items[].specimens[].id` | Sí | `string` | formato `uuid` | Identificador del espécimen. | `00000000-0000-4000-8000-000000000001` |
 | `items[].specimens[].patientProfileId` | Sí | `string` | formato `uuid` | Paciente dueño del espécimen. | `00000000-0000-4000-8000-000000000001` |
@@ -3566,7 +3769,150 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. POST /diagnostics/specimens
+## 26. POST /diagnostics/service-requests/worklist
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-reception`
+- **Nombre:** Bandeja del ejecutor: órdenes de laboratorio o imagen con estado derivado
+- **Operation ID:** `DiagnosticsReceptionController_listWorklist`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsReceptionController.listWorklist](../../src/modules/diagnostics/controllers/diagnostics-reception.controller.ts)
+
+### Descripción de negocio
+
+Órdenes derivadas al tenant activo (`performer_tenant_id`), de la más nueva a la más vieja, con `state` derivado (PENDING, RECEIVED, IN_PROCESS, REPORTED, CANCELLED) y el detalle pedido (muestra, componentes, modalidad/región/lateralidad/contraste y un `summary` legible). `scope` LAB incluye anatomía patológica.
+
+Contexto declarado en el controlador: Bandeja del ejecutor (laboratorio o imagenología) con el estado derivado de datos reales y el detalle pedido. `POST` de lectura por la búsqueda de paciente (PHI).
+
+### Descripción del sistema
+
+NestJS resuelve `POST /diagnostics/service-requests/worklist` en `DiagnosticsReceptionController_listWorklist`. El controlador delega en `DiagnosticsWorklistService.list`. Valida el body como `WorklistQueryDto` y consume `application/json`. El tipo de retorno estático es `Promise<WorklistPageDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `WorklistQueryDto`; los campos opcionales se omiten.
+
+```http
+POST /diagnostics/service-requests/worklist HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "scope": "LAB"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `scope` | Sí | `string` | valores: `LAB`, `IMAGING` | Sin descripción específica en el contrato OpenAPI. | `LAB` |
+| `states` | No | `array<string>` | máximo 5 elemento(s) | Estados derivados a incluir. Omitido = todos (PENDING, RECEIVED, IN_PROCESS, REPORTED, CANCELLED) | `["PENDING"]` |
+| `cursor` | No | `string` | longitud máxima 512 | Cursor opaco (`nextCursor`) | `valor-ejemplo` |
+| `limit` | No | `number` | mínimo 1; máximo 100 | Sin descripción específica en el contrato OpenAPI. | `25` |
+| `patientQuery` | No | `string` | longitud mínima 2; longitud máxima 80 | Nombre o código del paciente (sin tildes ni mayúsculas) | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /diagnostics/service-requests/worklist HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "scope": "LAB",
+  "states": [
+    "PENDING"
+  ],
+  "cursor": "valor-ejemplo",
+  "limit": 25,
+  "patientQuery": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<WorklistPageDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<WorklistPageDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<WorklistPageDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<WorklistPageDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<WorklistPageDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<WorklistPageDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<WorklistPageDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<WorklistPageDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<WorklistPageDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<WorklistPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `WorklistPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "state": {},
+      "scope": {}
+    }
+  ],
+  "count": 1,
+  "limit": 1,
+  "nextCursor": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<WorklistItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"state":{},"scope":{}}]` |
+| `items[].state` | Sí | `object` | Sin restricción adicional declarada | Derivado, no guardado: PENDING (sin acesión ni estudio), RECEIVED (acesión, muestra recibida o estudio de imagen), IN_PROCESS (orden de trabajo abierta; en imagen, informe en curso), REPORTED (informe liberado), CANCELLED (revocada o satisfecha por informe previo) | `{}` |
+| `items[].scope` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof WORKLIST_SCOPES)[number] | `{}` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `nextCursor` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/service-requests/worklist"
+}
+```
+
+---
+
+## 27. POST /diagnostics/specimens
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-specimens`
@@ -3622,6 +3968,7 @@ Content-Type: application/json
 | `bodySiteConceptId` | No | `string` | formato `uuid` | Sitio anatómico (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `collectionMethodConceptId` | No | `string` | formato `uuid` | Método de recolección (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `collectorProfileId` | No | `string` | formato `uuid` | Profesional que recolecta | `00000000-0000-4000-8000-000000000001` |
+| `collectionCareSpaceId` | No | `string` | formato `uuid` | Punto de toma (F5b) | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload completo de ejemplo
 
@@ -3641,7 +3988,8 @@ Content-Type: application/json
   "encounterId": "00000000-0000-4000-8000-000000000001",
   "bodySiteConceptId": "00000000-0000-4000-8000-000000000001",
   "collectionMethodConceptId": "00000000-0000-4000-8000-000000000001",
-  "collectorProfileId": "00000000-0000-4000-8000-000000000001"
+  "collectorProfileId": "00000000-0000-4000-8000-000000000001",
+  "collectionCareSpaceId": "00000000-0000-4000-8000-000000000001"
 }
 ```
 
@@ -3685,8 +4033,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Espacio no encontrado | Excepción explícita en src/modules/diagnostics/services/diagnostics-specimens.service.ts |
 | 404 | `NOT_FOUND` | message | Excepción explícita en src/modules/diagnostics/services/diagnostics-scope.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El espacio no es un punto de toma disponible | Excepción explícita en src/modules/diagnostics/services/diagnostics-specimens.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3704,7 +4054,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. GET /diagnostics/specimens/{id}
+## 28. GET /diagnostics/specimens/{id}
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-specimens`
@@ -3856,7 +4206,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. POST /diagnostics/specimens/{id}/containers
+## 29. POST /diagnostics/specimens/{id}/containers
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-specimens`
@@ -3990,7 +4340,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. POST /diagnostics/specimens/{id}/rejection
+## 30. POST /diagnostics/specimens/{id}/rejection
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-specimens`
@@ -4125,7 +4475,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. GET /diagnostics/work-orders
+## 31. GET /diagnostics/work-orders
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-laboratory`
@@ -4151,6 +4501,7 @@ NestJS resuelve `GET /diagnostics/work-orders` en `DiagnosticsLabController_list
 | `laboratoryAccessionId` | query | No | `string` | formato `uuid` | Accesión de laboratorio | `00000000-0000-4000-8000-000000000001` |
 | `statusConceptId` | query | No | `string` | formato `uuid` | Estado de la orden | `00000000-0000-4000-8000-000000000001` |
 | `assignedProfileId` | query | No | `string` | formato `uuid` | Profesional asignado | `00000000-0000-4000-8000-000000000001` |
+| `collectionCareSpaceId` | query | No | `string` | formato `uuid` | Punto de toma (F5b) | `00000000-0000-4000-8000-000000000001` |
 | `limit` | query | No | `number` | mínimo 1; máximo 200 | Sin descripción específica en OpenAPI. | `50` |
 | `offset` | query | No | `number` | mínimo 0 | Sin descripción específica en OpenAPI. | `0` |
 
@@ -4177,7 +4528,7 @@ Authorization: Bearer <access_token_jwt>
 No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
 
 ```http
-GET /diagnostics/work-orders?laboratoryAccessionId=00000000-0000-4000-8000-000000000001&statusConceptId=00000000-0000-4000-8000-000000000001&assignedProfileId=00000000-0000-4000-8000-000000000001&limit=50&offset=0 HTTP/1.1
+GET /diagnostics/work-orders?laboratoryAccessionId=00000000-0000-4000-8000-000000000001&statusConceptId=00000000-0000-4000-8000-000000000001&assignedProfileId=00000000-0000-4000-8000-000000000001&collectionCareSpaceId=00000000-0000-4000-8000-000000000001&limit=50&offset=0 HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -4206,7 +4557,12 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "priorityConceptId": "00000000-0000-4000-8000-000000000001",
     "assignedProfileId": "00000000-0000-4000-8000-000000000001",
     "scheduledAt": "2026-07-31T12:00:00.000Z",
-    "completedAt": "2026-07-31T12:00:00.000Z"
+    "completedAt": "2026-07-31T12:00:00.000Z",
+    "collectionPoint": {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo"
+    }
   }
 ]
 ```
@@ -4241,7 +4597,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. POST /diagnostics/work-orders
+## 32. POST /diagnostics/work-orders
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-laboratory`
@@ -4396,7 +4752,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. POST /dicomweb/studies
+## 33. POST /dicomweb/studies
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-imaging`

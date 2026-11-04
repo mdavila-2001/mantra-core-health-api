@@ -25,6 +25,7 @@ import {
   IamAuthController,
   IamAccountSecurityController,
   IamOnboardingDraftsController,
+  IamMyDevicesController,
 } from './presentation/controllers';
 import { IamIdentifierExistsController } from './presentation/controllers/iam-identifier-exists.controller';
 import { IdentifierExistsUseCase } from './application/use-cases/identifier-exists.use-case';
@@ -46,6 +47,8 @@ import {
   IamEmailVerificationService,
   IamAccountSecurityService,
   IamOnboardingDraftsService,
+  IamMyDevicesService,
+  IamLoginDevicesService,
 } from './application/services';
 import {
   UsersRepository,
@@ -119,6 +122,7 @@ import { TENANT_CLAIMS_PORT } from './application/ports/tenant-claims.port';
     IamAccountSecurityController,
     IamOnboardingDraftsController,
     IamIdentifierExistsController,
+    IamMyDevicesController,
   ],
   providers: [
     // Repositorios
@@ -200,6 +204,8 @@ import { TENANT_CLAIMS_PORT } from './application/ports/tenant-claims.port';
     IamAccountSecurityService,
     IamOnboardingDraftsService,
     IdentifierExistsUseCase,
+    IamMyDevicesService,
+    IamLoginDevicesService,
   ],
   // `IamUsersService` se exporta para el seed de arranque (`SeedModule`), que
   // necesita crear el primer `SECURITY_ADMIN` con el mismo hasheo que la API.
@@ -212,6 +218,8 @@ import { TENANT_CLAIMS_PORT } from './application/ports/tenant-claims.port';
     IamPatientSelfRegistrationService,
     IamSupportStaffSelfRegistrationService,
     IamOnboardingDraftsService,
+    IamMyDevicesService,
+    IamLoginDevicesService,
   ],
 })
 export class IamModule {}

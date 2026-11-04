@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `procedures_perioperative`
 
-Referencia exhaustiva de 32 operación(es) del módulo `procedures_perioperative`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 42 operación(es) del módulo `procedures_perioperative`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `dental-procedures`, `procedure-cases`
-- **Controladores:** `DentalController`, `PeriopController`
+- **Etiquetas OpenAPI:** `dental-procedures`, `procedure-cases`, `procedures-perioperative-or`
+- **Controladores:** `DentalController`, `PeriopController`, `PeriopOrController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -14,35 +14,45 @@ Referencia exhaustiva de 32 operación(es) del módulo `procedures_perioperative
 1. [GET /dental-procedures](#1-get-dental-procedures) — Histórico odontológico del paciente
 2. [POST /dental-procedures](#2-post-dental-procedures) — Registrar un procedimiento odontológico
 3. [GET /dental-procedures/catalog](#3-get-dental-procedures-catalog) — Catálogo odontológico: códigos, piezas (FDI) y cuadrantes
-4. [POST /pacu-stays/{stayId}/assessments](#4-post-pacu-stays-stayid-assessments) — Registrar una valoración de recuperación
-5. [POST /pacu-stays/{stayId}/discharge](#5-post-pacu-stays-stayid-discharge) — Dar el alta de recuperación
-6. [GET /procedure-cases](#6-get-procedure-cases) — Listar casos quirúrgicos (agenda)
-7. [POST /procedure-cases](#7-post-procedure-cases) — Programar un caso quirúrgico y reservar el quirófano
-8. [GET /procedure-cases/{id}](#8-get-procedure-cases-id) — Detalle completo del caso quirúrgico
-9. [PATCH /procedure-cases/{id}](#9-patch-procedure-cases-id) — Modificar el caso quirúrgico
-10. [POST /procedure-cases/{id}/anesthesia-events](#10-post-procedure-cases-id-anesthesia-events) — Anotar un evento intraoperatorio de anestesia
-11. [POST /procedure-cases/{id}/anesthesia-plans](#11-post-procedure-cases-id-anesthesia-plans) — Registrar el plan de anestesia y la valoración de vía aérea
-12. [POST /procedure-cases/{id}/anesthesia-plans/{planId}/approve](#12-post-procedure-cases-id-anesthesia-plans-planid-approve) — Aprobar el plan de anestesia
-13. [POST /procedure-cases/{id}/cancel](#13-post-procedure-cases-id-cancel) — Cancelar el caso quirúrgico
-14. [POST /procedure-cases/{id}/charge-items/post](#14-post-procedure-cases-id-charge-items-post) — Generar los cargos y consolidar el uso del quirófano
-15. [POST /procedure-cases/{id}/confirm](#15-post-procedure-cases-id-confirm) — Confirmar la intervención verificando las credenciales del equipo
-16. [POST /procedure-cases/{id}/diagnoses](#16-post-procedure-cases-id-diagnoses) — Registrar los diagnósticos del caso
-17. [POST /procedure-cases/{id}/findings](#17-post-procedure-cases-id-findings) — Registrar un hallazgo operatorio
-18. [POST /procedure-cases/{id}/implants](#18-post-procedure-cases-id-implants) — Registrar un implante con su trazabilidad UDI, lote o serie
-19. [POST /procedure-cases/{id}/medication-uses](#19-post-procedure-cases-id-medication-uses) — Registrar el uso de un medicamento en la intervención
-20. [POST /procedure-cases/{id}/operative-reports](#20-post-procedure-cases-id-operative-reports) — Redactar el reporte operatorio
-21. [POST /procedure-cases/{id}/operative-reports/{reportId}/sign](#21-post-procedure-cases-id-operative-reports-reportid-sign) — Firmar el reporte operatorio
-22. [POST /procedure-cases/{id}/operative-steps](#22-post-procedure-cases-id-operative-steps) — Registrar un paso operatorio
-23. [POST /procedure-cases/{id}/pacu-stays](#23-post-procedure-cases-id-pacu-stays) — Admitir al paciente en recuperación
-24. [POST /procedure-cases/{id}/preoperative-assessments](#24-post-procedure-cases-id-preoperative-assessments) — Registrar la valoración preoperatoria y sus puntuaciones de riesgo
-25. [POST /procedure-cases/{id}/preoperative-orders](#25-post-procedure-cases-id-preoperative-orders) — Indicar una orden preoperatoria para el caso
-26. [POST /procedure-cases/{id}/preoperative-orders/verify](#26-post-procedure-cases-id-preoperative-orders-verify) — Verificar las órdenes preoperatorias
-27. [POST /procedure-cases/{id}/safety-checklists/{checklistId}/responses](#27-post-procedure-cases-id-safety-checklists-checklistid-responses) — Responder una fase del checklist quirúrgico
-28. [POST /procedure-cases/{id}/specimens](#28-post-procedure-cases-id-specimens) — Registrar una muestra tomada en la intervención
-29. [GET /procedure-cases/{id}/team-members](#29-get-procedure-cases-id-team-members) — Listar el equipo del caso quirúrgico
-30. [POST /procedure-cases/{id}/team-members](#30-post-procedure-cases-id-team-members) — Asignar un miembro al equipo quirúrgico
-31. [POST /procedure-cases/{id}/team-members/{memberId}/accept](#31-post-procedure-cases-id-team-members-memberid-accept) — Aceptar la participación en el equipo quirúrgico
-32. [POST /procedure-cases/{id}/team-members/{memberId}/respond](#32-post-procedure-cases-id-team-members-memberid-respond) — Rechazar, pedir cambios o informar indisponibilidad
+4. [POST /internal/periop/or-blocks-release-tick](#4-post-internal-periop-or-blocks-release-tick) — Liberar bloques vencidos (worker)
+5. [POST /or-blocks/{id}/cancel](#5-post-or-blocks-id-cancel) — Cancelar un bloque
+6. [POST /or-blocks/{id}/release](#6-post-or-blocks-id-release) — Liberar un bloque
+7. [POST /pacu-stays/{stayId}/assessments](#7-post-pacu-stays-stayid-assessments) — Registrar una valoración de recuperación
+8. [POST /pacu-stays/{stayId}/discharge](#8-post-pacu-stays-stayid-discharge) — Dar el alta de recuperación
+9. [GET /procedure-cases](#9-get-procedure-cases) — Listar casos quirúrgicos (agenda)
+10. [POST /procedure-cases](#10-post-procedure-cases) — Programar un caso quirúrgico y reservar el quirófano
+11. [GET /procedure-cases/{id}](#11-get-procedure-cases-id) — Detalle completo del caso quirúrgico
+12. [PATCH /procedure-cases/{id}](#12-patch-procedure-cases-id) — Modificar el caso quirúrgico
+13. [POST /procedure-cases/{id}/anesthesia-events](#13-post-procedure-cases-id-anesthesia-events) — Anotar un evento intraoperatorio de anestesia
+14. [POST /procedure-cases/{id}/anesthesia-plans](#14-post-procedure-cases-id-anesthesia-plans) — Registrar el plan de anestesia y la valoración de vía aérea
+15. [POST /procedure-cases/{id}/anesthesia-plans/{planId}/approve](#15-post-procedure-cases-id-anesthesia-plans-planid-approve) — Aprobar el plan de anestesia
+16. [POST /procedure-cases/{id}/cancel](#16-post-procedure-cases-id-cancel) — Cancelar el caso quirúrgico
+17. [POST /procedure-cases/{id}/charge-items/post](#17-post-procedure-cases-id-charge-items-post) — Generar los cargos y consolidar el uso del quirófano
+18. [POST /procedure-cases/{id}/confirm](#18-post-procedure-cases-id-confirm) — Confirmar la intervención verificando las credenciales del equipo
+19. [POST /procedure-cases/{id}/diagnoses](#19-post-procedure-cases-id-diagnoses) — Registrar los diagnósticos del caso
+20. [POST /procedure-cases/{id}/findings](#20-post-procedure-cases-id-findings) — Registrar un hallazgo operatorio
+21. [POST /procedure-cases/{id}/implants](#21-post-procedure-cases-id-implants) — Registrar un implante con su trazabilidad UDI, lote o serie
+22. [POST /procedure-cases/{id}/medication-uses](#22-post-procedure-cases-id-medication-uses) — Registrar el uso de un medicamento en la intervención
+23. [POST /procedure-cases/{id}/operative-reports](#23-post-procedure-cases-id-operative-reports) — Redactar el reporte operatorio
+24. [POST /procedure-cases/{id}/operative-reports/{reportId}/sign](#24-post-procedure-cases-id-operative-reports-reportid-sign) — Firmar el reporte operatorio
+25. [POST /procedure-cases/{id}/operative-steps](#25-post-procedure-cases-id-operative-steps) — Registrar un paso operatorio
+26. [POST /procedure-cases/{id}/pacu-stays](#26-post-procedure-cases-id-pacu-stays) — Admitir al paciente en recuperación
+27. [POST /procedure-cases/{id}/preoperative-assessments](#27-post-procedure-cases-id-preoperative-assessments) — Registrar la valoración preoperatoria y sus puntuaciones de riesgo
+28. [POST /procedure-cases/{id}/preoperative-orders](#28-post-procedure-cases-id-preoperative-orders) — Indicar una orden preoperatoria para el caso
+29. [POST /procedure-cases/{id}/preoperative-orders/verify](#29-post-procedure-cases-id-preoperative-orders-verify) — Verificar las órdenes preoperatorias
+30. [POST /procedure-cases/{id}/room-events](#30-post-procedure-cases-id-room-events) — Registrar un evento de sala
+31. [POST /procedure-cases/{id}/safety-checklists](#31-post-procedure-cases-id-safety-checklists) — Crear el check-list OMS del caso (201; 200 si ya existe)
+32. [GET /procedure-cases/{id}/safety-checklists/{checklistId}](#32-get-procedure-cases-id-safety-checklists-checklistid) — Check-list OMS por fases
+33. [POST /procedure-cases/{id}/safety-checklists/{checklistId}/responses](#33-post-procedure-cases-id-safety-checklists-checklistid-responses) — Responder una fase del checklist quirúrgico
+34. [POST /procedure-cases/{id}/specimens](#34-post-procedure-cases-id-specimens) — Registrar una muestra tomada en la intervención
+35. [GET /procedure-cases/{id}/team-members](#35-get-procedure-cases-id-team-members) — Listar el equipo del caso quirúrgico
+36. [POST /procedure-cases/{id}/team-members](#36-post-procedure-cases-id-team-members) — Asignar un miembro al equipo quirúrgico
+37. [POST /procedure-cases/{id}/team-members/{memberId}/accept](#37-post-procedure-cases-id-team-members-memberid-accept) — Aceptar la participación en el equipo quirúrgico
+38. [POST /procedure-cases/{id}/team-members/{memberId}/respond](#38-post-procedure-cases-id-team-members-memberid-respond) — Rechazar, pedir cambios o informar indisponibilidad
+39. [GET /sites/{siteId}/operating-rooms](#39-get-sites-siteid-operating-rooms) — Quirófanos de una sede
+40. [GET /sites/{siteId}/or-blocks](#40-get-sites-siteid-or-blocks) — Bloques de quirófano
+41. [POST /sites/{siteId}/or-blocks](#41-post-sites-siteid-or-blocks) — Crear un bloque de quirófano
+42. [GET /sites/{siteId}/or-utilization](#42-get-sites-siteid-or-utilization) — Utilización de quirófanos
 
 ---
 
@@ -467,7 +477,338 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /pacu-stays/{stayId}/assessments
+## 4. POST /internal/periop/or-blocks-release-tick
+
+- **Módulo:** `procedures_perioperative`
+- **Etiqueta OpenAPI:** `procedures-perioperative-or`
+- **Nombre:** Liberar bloques vencidos (worker)
+- **Operation ID:** `PeriopOrController_tick`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PeriopOrController.tick](../../src/modules/procedures_perioperative/controllers/periop-or.controller.ts)
+
+### Descripción de negocio
+
+Liberar bloques vencidos (worker). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Tick del worker: libera los bloques vencidos sin casos.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /internal/periop/or-blocks-release-tick` en `PeriopOrController_tick`. El controlador delega en `OrBlocksUseCases.tick`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /internal/periop/or-blocks-release-tick HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`, `SYSTEM_WORKER`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /internal/periop/or-blocks-release-tick HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Operación completada correctamente. | `no declarado` | No |
+| 401 | Operación completada correctamente. | `no declarado` | No |
+| 403 | Operación completada correctamente. | `no declarado` | No |
+| 409 | Operación completada correctamente. | `no declarado` | No |
+| 422 | Operación completada correctamente. | `no declarado` | No |
+| 429 | Operación completada correctamente. | `no declarado` | No |
+| 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, SYSTEM_WORKER. | Roles/tenant/guards de autorización |
+| 409 | `CONFLICT` | El bloque no está activo | Excepción explícita en src/modules/procedures_perioperative/services/or/or.use-cases.ts |
+| 422 | `PRECONDITION_FAILED` | El bloque tiene casos ligados: reubicarlos primero | Excepción explícita en src/modules/procedures_perioperative/services/or/or.use-cases.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/internal/periop/or-blocks-release-tick"
+}
+```
+
+---
+
+## 5. POST /or-blocks/{id}/cancel
+
+- **Módulo:** `procedures_perioperative`
+- **Etiqueta OpenAPI:** `procedures-perioperative-or`
+- **Nombre:** Cancelar un bloque
+- **Operation ID:** `PeriopOrController_cancel`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PeriopOrController.cancel](../../src/modules/procedures_perioperative/controllers/periop-or.controller.ts)
+
+### Descripción de negocio
+
+Cancelar un bloque. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Cancelar un bloque.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /or-blocks/{id}/cancel` en `PeriopOrController_cancel`. El controlador delega en `OrBlocksUseCases.close`. Valida el body como `OrBlockReasonDto` y consume `application/json`. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `If-Match` | header | No | `string` | Sin restricción adicional declarada | rowVersion del bloque (412 si no coincide) | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `OrBlockReasonDto`; los campos opcionales se omiten.
+
+```http
+POST /or-blocks/00000000-0000-4000-8000-000000000001/cancel HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `reasonText` | No | `string` | longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /or-blocks/00000000-0000-4000-8000-000000000001/cancel HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+If-Match: valor-ejemplo
+Content-Type: application/json
+
+{
+  "reasonText": "Texto descriptivo de ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Operación completada correctamente. | `no declarado` | No |
+| 401 | Operación completada correctamente. | `no declarado` | No |
+| 403 | Operación completada correctamente. | `no declarado` | No |
+| 404 | Operación completada correctamente. | `no declarado` | No |
+| 409 | Operación completada correctamente. | `no declarado` | No |
+| 413 | Operación completada correctamente. | `no declarado` | No |
+| 422 | Operación completada correctamente. | `no declarado` | No |
+| 429 | Operación completada correctamente. | `no declarado` | No |
+| 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Bloque no encontrado | Excepción explícita en src/modules/procedures_perioperative/services/or/or.use-cases.ts |
+| 404 | `NOT_FOUND` | Espacio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Unidad clínica no encontrada | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Sitio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 409 | `CONFLICT` | El bloque no está activo | Excepción explícita en src/modules/procedures_perioperative/services/or/or.use-cases.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El bloque tiene casos ligados: reubicarlos primero | Excepción explícita en src/modules/procedures_perioperative/services/or/or.use-cases.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/or-blocks/{id}/cancel"
+}
+```
+
+---
+
+## 6. POST /or-blocks/{id}/release
+
+- **Módulo:** `procedures_perioperative`
+- **Etiqueta OpenAPI:** `procedures-perioperative-or`
+- **Nombre:** Liberar un bloque
+- **Operation ID:** `PeriopOrController_release`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PeriopOrController.release](../../src/modules/procedures_perioperative/controllers/periop-or.controller.ts)
+
+### Descripción de negocio
+
+Liberar un bloque. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Liberar un bloque.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /or-blocks/{id}/release` en `PeriopOrController_release`. El controlador delega en `OrBlocksUseCases.close`. Valida el body como `OrBlockReasonDto` y consume `application/json`. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `If-Match` | header | No | `string` | Sin restricción adicional declarada | rowVersion del bloque (412 si no coincide) | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `OrBlockReasonDto`; los campos opcionales se omiten.
+
+```http
+POST /or-blocks/00000000-0000-4000-8000-000000000001/release HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `reasonText` | No | `string` | longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /or-blocks/00000000-0000-4000-8000-000000000001/release HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+If-Match: valor-ejemplo
+Content-Type: application/json
+
+{
+  "reasonText": "Texto descriptivo de ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Operación completada correctamente. | `no declarado` | No |
+| 401 | Operación completada correctamente. | `no declarado` | No |
+| 403 | Operación completada correctamente. | `no declarado` | No |
+| 404 | Operación completada correctamente. | `no declarado` | No |
+| 409 | Operación completada correctamente. | `no declarado` | No |
+| 413 | Operación completada correctamente. | `no declarado` | No |
+| 422 | Operación completada correctamente. | `no declarado` | No |
+| 429 | Operación completada correctamente. | `no declarado` | No |
+| 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Bloque no encontrado | Excepción explícita en src/modules/procedures_perioperative/services/or/or.use-cases.ts |
+| 404 | `NOT_FOUND` | Espacio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Unidad clínica no encontrada | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Sitio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 409 | `CONFLICT` | El bloque no está activo | Excepción explícita en src/modules/procedures_perioperative/services/or/or.use-cases.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El bloque tiene casos ligados: reubicarlos primero | Excepción explícita en src/modules/procedures_perioperative/services/or/or.use-cases.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/or-blocks/{id}/release"
+}
+```
+
+---
+
+## 7. POST /pacu-stays/{stayId}/assessments
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -608,7 +949,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /pacu-stays/{stayId}/discharge
+## 8. POST /pacu-stays/{stayId}/discharge
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -765,7 +1106,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. GET /procedure-cases
+## 9. GET /procedure-cases
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -851,7 +1192,25 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "operatingRoomId": "00000000-0000-4000-8000-000000000001",
       "statusConceptId": "00000000-0000-4000-8000-000000000001",
       "scheduledStartAt": "2026-07-31T12:00:00.000Z",
-      "scheduledEndAt": "2026-07-31T12:00:00.000Z"
+      "scheduledEndAt": "2026-07-31T12:00:00.000Z",
+      "operatingRoom": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "code": "CODIGO_EJEMPLO",
+        "name": "Nombre de ejemplo"
+      },
+      "block": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "label": "valor-ejemplo"
+      },
+      "caseType": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "encounterId": "00000000-0000-4000-8000-000000000001",
+      "reservedStartAt": "2026-07-31T12:00:00.000Z",
+      "reservedEndAt": "2026-07-31T12:00:00.000Z",
+      "prepMinutes": 1,
+      "cleanupMinutes": 1
     }
   ],
   "total": 1
@@ -862,7 +1221,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<CaseSummaryDto>` | Sin restricción adicional declarada | Valor de items mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","caseNumber":"valor-ejemplo","patientProfileId":"00000000-0000-4000-8000-000000000001","primarySurgeonProfileId":"00000000-0000-4000-8000-000000000001","operatingRoomId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","scheduledStartAt":"2026-07-31T12:00:00.000Z","scheduledEndAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items` | Sí | `array<CaseSummaryDto>` | Sin restricción adicional declarada | Valor de items mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","caseNumber":"valor-ejemplo","patientProfileId":"00000000-0000-4000-8000-000000000001","primarySurgeonProfileId":"00000000-0000-4000-8000-000000000001","operatingRoomId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","scheduledStartAt":"2026-07-31T12:00:00.000Z","scheduledEndAt":"2026-07-31T12:00:00.000Z","operatingRoom":{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo"},"block":{"id":"00000000-0000-4000-8000-000000000001","label":"valor-ejemplo"},"caseType":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"encounterId":"00000000-0000-4000-8000-000000000001","reservedStartAt":"2026-07-31T12:00:00.000Z","reservedEndAt":"2026-07-31T12:00:00.000Z","prepMinutes":1,"cleanupMinutes":1}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `items[].caseNumber` | Sí | `string` | Sin restricción adicional declarada | Valor de case number mantenido por la instancia. | `valor-ejemplo` |
 | `items[].patientProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a patient profile. | `00000000-0000-4000-8000-000000000001` |
@@ -871,6 +1230,21 @@ Campos de la respuesta:
 | `items[].statusConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a status concept. | `00000000-0000-4000-8000-000000000001` |
 | `items[].scheduledStartAt` | No | `string` | formato `date-time` | Valor de scheduled start at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
 | `items[].scheduledEndAt` | No | `string` | formato `date-time` | Valor de scheduled end at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
+| `items[].operatingRoom` | No | `CaseOperatingRoomDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo"}` |
+| `items[].operatingRoom.id` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].operatingRoom.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `items[].operatingRoom.name` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].block` | No | `CaseBlockRefDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","label":"valor-ejemplo"}` |
+| `items[].block.id` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].block.label` | No | `string` | Sin restricción adicional declarada | Servicio (unidad) o cirujano dueño del bloque | `valor-ejemplo` |
+| `items[].caseType` | No | `CaseConceptRefDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `items[].caseType.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `items[].caseType.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].encounterId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].reservedStartAt` | No | `string` | formato `date-time`; admite null | Inicio reservado (programado − preparación) | `2026-07-31T12:00:00.000Z` |
+| `items[].reservedEndAt` | No | `string` | formato `date-time`; admite null | Fin reservado (programado + limpieza) | `2026-07-31T12:00:00.000Z` |
+| `items[].prepMinutes` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].cleanupMinutes` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `total` | Sí | `number` | Sin restricción adicional declarada | Casos que cumplen el filtro, sin paginar | `1` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
@@ -899,7 +1273,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /procedure-cases
+## 10. POST /procedure-cases
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -1044,11 +1418,16 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN. | Roles/tenant/guards de autorización |
-| 409 | `CONFLICT` | El quirófano ya está reservado en esa franja | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
 | 409 | `CONFLICT` | No se pudo asignar número de caso | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
+| 409 | `CONFLICT` | La ventana cae en un bloque de otro dueño | Excepción explícita en src/modules/procedures_perioperative/services/or/operating-room.validator.ts |
+| 409 | `CONFLICT` | El quirófano ya está reservado en esa ventana | Excepción explícita en src/modules/procedures_perioperative/services/or/operating-room.validator.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El caso debe terminar después de empezar | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
 | 422 | `PRECONDITION_FAILED` | Un caso urgente o de emergencia necesita justificar su urgencia | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
+| 422 | `PRECONDITION_FAILED` | El quirófano es de otra sede | Excepción explícita en src/modules/procedures_perioperative/services/or/operating-room.validator.ts |
+| 422 | `PRECONDITION_FAILED` | El espacio no es un quirófano | Excepción explícita en src/modules/procedures_perioperative/services/or/operating-room.validator.ts |
+| 422 | `PRECONDITION_FAILED` | El quirófano no está disponible en esa ventana | Excepción explícita en src/modules/procedures_perioperative/services/or/operating-room.validator.ts |
+| 422 | `PRECONDITION_FAILED` | El quirófano no tiene recurso agendable activo | Excepción explícita en src/modules/procedures_perioperative/services/or/operating-room.validator.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1066,7 +1445,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. GET /procedure-cases/{id}
+## 11. GET /procedure-cases/{id}
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -1146,7 +1525,53 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "operatingRoomId": "00000000-0000-4000-8000-000000000001",
     "statusConceptId": "00000000-0000-4000-8000-000000000001",
     "scheduledStartAt": "2026-07-31T12:00:00.000Z",
-    "scheduledEndAt": "2026-07-31T12:00:00.000Z"
+    "scheduledEndAt": "2026-07-31T12:00:00.000Z",
+    "operatingRoom": {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo"
+    },
+    "block": {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "label": "valor-ejemplo"
+    },
+    "caseType": {
+      "code": "CODIGO_EJEMPLO",
+      "display": "valor-ejemplo"
+    },
+    "encounterId": "00000000-0000-4000-8000-000000000001",
+    "reservedStartAt": "2026-07-31T12:00:00.000Z",
+    "reservedEndAt": "2026-07-31T12:00:00.000Z",
+    "prepMinutes": 1,
+    "cleanupMinutes": 1
+  },
+  "checklist": {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "signIn": {
+      "completedAt": "2026-07-31T12:00:00.000Z"
+    },
+    "timeOut": {
+      "completedAt": "2026-07-31T12:00:00.000Z"
+    },
+    "signOut": {
+      "completedAt": "2026-07-31T12:00:00.000Z"
+    }
+  },
+  "roomEvents": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "eventCode": "CODIGO_EJEMPLO",
+      "occurredAt": "2026-07-31T12:00:00.000Z",
+      "recordedByUserId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "turnoverCleaning": {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "status": "ok",
+    "rowVersion": 1,
+    "allowedTransitions": [
+      "valor-ejemplo"
+    ]
   },
   "diagnoses": [
     {
@@ -1201,16 +1626,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   ],
   "operativeSteps": [
     {
-      "id": "00000000-0000-4000-8000-000000000001",
-      "stepNumber": 1,
-      "stepCodeConceptId": "00000000-0000-4000-8000-000000000001",
-      "description": "Texto descriptivo de ejemplo",
-      "performedByProfileId": "00000000-0000-4000-8000-000000000001",
-      "bodySiteConceptId": "00000000-0000-4000-8000-000000000001",
-      "lateralityConceptId": "00000000-0000-4000-8000-000000000001",
-      "statusConceptId": "00000000-0000-4000-8000-000000000001",
-      "startedAt": "2026-07-31T12:00:00.000Z",
-      "endedAt": "2026-07-31T12:00:00.000Z"
+      "clave": "valor"
     }
   ],
   "findings": [
@@ -1257,7 +1673,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `case` | Sí | `CaseSummaryDto` | Sin restricción adicional declarada | Datos de cabecera del caso. | `{"id":"00000000-0000-4000-8000-000000000001","caseNumber":"valor-ejemplo","patientProfileId":"00000000-0000-4000-8000-000000000001","primarySurgeonProfileId":"00000000-0000-4000-8000-000000000001","operatingRoomId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","scheduledStartAt":"2026-07-31T12:00:00.000Z","scheduledEndAt":"2026-07-31T12:00:00.000Z"}` |
+| `case` | Sí | `CaseSummaryDto` | Sin restricción adicional declarada | Datos de cabecera del caso. | `{"id":"00000000-0000-4000-8000-000000000001","caseNumber":"valor-ejemplo","patientProfileId":"00000000-0000-4000-8000-000000000001","primarySurgeonProfileId":"00000000-0000-4000-8000-000000000001","operatingRoomId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","scheduledStartAt":"2026-07-31T12:00:00.000Z","scheduledEndAt":"2026-07-31T12:00:00.000Z","operatingRoom":{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo"},"block":{"id":"00000000-0000-4000-8000-000000000001","label":"valor-ejemplo"},"caseType":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"encounterId":"00000000-0000-4000-8000-000000000001","reservedStartAt":"2026-07-31T12:00:00.000Z","reservedEndAt":"2026-07-31T12:00:00.000Z","prepMinutes":1,"cleanupMinutes":1}` |
 | `case.id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `case.caseNumber` | Sí | `string` | Sin restricción adicional declarada | Valor de case number mantenido por la instancia. | `valor-ejemplo` |
 | `case.patientProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a patient profile. | `00000000-0000-4000-8000-000000000001` |
@@ -1266,6 +1682,39 @@ Campos de la respuesta:
 | `case.statusConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a status concept. | `00000000-0000-4000-8000-000000000001` |
 | `case.scheduledStartAt` | No | `string` | formato `date-time` | Valor de scheduled start at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
 | `case.scheduledEndAt` | No | `string` | formato `date-time` | Valor de scheduled end at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
+| `case.operatingRoom` | No | `CaseOperatingRoomDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo"}` |
+| `case.operatingRoom.id` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `case.operatingRoom.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `case.operatingRoom.name` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `case.block` | No | `CaseBlockRefDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","label":"valor-ejemplo"}` |
+| `case.block.id` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `case.block.label` | No | `string` | Sin restricción adicional declarada | Servicio (unidad) o cirujano dueño del bloque | `valor-ejemplo` |
+| `case.caseType` | No | `CaseConceptRefDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `case.caseType.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `case.caseType.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `case.encounterId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `case.reservedStartAt` | No | `string` | formato `date-time`; admite null | Inicio reservado (programado − preparación) | `2026-07-31T12:00:00.000Z` |
+| `case.reservedEndAt` | No | `string` | formato `date-time`; admite null | Fin reservado (programado + limpieza) | `2026-07-31T12:00:00.000Z` |
+| `case.prepMinutes` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `case.cleanupMinutes` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `checklist` | Sí | `CaseChecklistDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","signIn":{"completedAt":"2026-07-31T12:00:00.000Z"},"timeOut":{"completedAt":"2026-07-31T12:00:00.000Z"},"signOut":{"completedAt":"2026-07-31T12:00:00.000Z"}}` |
+| `checklist.id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `checklist.signIn` | Sí | `ChecklistPhaseDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"completedAt":"2026-07-31T12:00:00.000Z"}` |
+| `checklist.signIn.completedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `checklist.timeOut` | Sí | `ChecklistPhaseDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"completedAt":"2026-07-31T12:00:00.000Z"}` |
+| `checklist.timeOut.completedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `checklist.signOut` | Sí | `ChecklistPhaseDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"completedAt":"2026-07-31T12:00:00.000Z"}` |
+| `checklist.signOut.completedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `roomEvents` | Sí | `array<CaseRoomEventDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","eventCode":"CODIGO_EJEMPLO","occurredAt":"2026-07-31T12:00:00.000Z","recordedByUserId":"00000000-0000-4000-8000-000000000001"}]` |
+| `roomEvents[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `roomEvents[].eventCode` | Sí | `string` | Sin restricción adicional declarada | PATIENT_IN_ROOM, ANESTHESIA_START, INCISION, CLOSURE, PATIENT_OUT_OF_ROOM, CLEANUP_START, CLEANUP_END, ROOM_READY | `CODIGO_EJEMPLO` |
+| `roomEvents[].occurredAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `roomEvents[].recordedByUserId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `turnoverCleaning` | Sí | `CaseTurnoverCleaningDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","status":"ok","rowVersion":1,"allowedTransitions":["valor-ejemplo"]}` |
+| `turnoverCleaning.id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `turnoverCleaning.status` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `ok` |
+| `turnoverCleaning.rowVersion` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `turnoverCleaning.allowedTransitions` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
 | `diagnoses` | Sí | `array<object>` | Sin restricción adicional declarada | Diagnósticos del caso con su papel y orden | `[{"id":"00000000-0000-4000-8000-000000000001","conditionId":"00000000-0000-4000-8000-000000000001","diagnosisRoleConceptId":"00000000-0000-4000-8000-000000000001","sequenceNumber":1}]` |
 | `diagnoses[].id` | Sí | `string` | Sin restricción adicional declarada | Identificador del diagnóstico del caso. | `00000000-0000-4000-8000-000000000001` |
 | `diagnoses[].conditionId` | Sí | `string` | Sin restricción adicional declarada | Condición clínica a la que apunta. | `00000000-0000-4000-8000-000000000001` |
@@ -1300,17 +1749,7 @@ Campos de la respuesta:
 | `operativeReports[].reportVersion` | Sí | `number` | Sin restricción adicional declarada | Número de versión. | `1` |
 | `operativeReports[].statusConceptId` | Sí | `string` | Sin restricción adicional declarada | Estado: borrador o firmado. | `00000000-0000-4000-8000-000000000001` |
 | `operativeReports[].signedAt` | No | `string` | formato `date-time` | Cuándo se firmó, si ya ocurrió. | `2026-07-31T12:00:00.000Z` |
-| `operativeSteps` | Sí | `array<OperativeStepItemDto>` | Sin restricción adicional declarada | Pasos de la intervención, en orden | `[{"id":"00000000-0000-4000-8000-000000000001","stepNumber":1,"stepCodeConceptId":"00000000-0000-4000-8000-000000000001","description":"Texto descriptivo de ejemplo","performedByProfileId":"00000000-0000-4000-8000-000000000001","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","lateralityConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","startedAt":"2026-07-31T12:00:00.000Z","endedAt":"2026-07-31T12:00:00.000Z"}]` |
-| `operativeSteps[].id` | Sí | `string` | formato `uuid` | Identificador del paso. | `00000000-0000-4000-8000-000000000001` |
-| `operativeSteps[].stepNumber` | Sí | `number` | Sin restricción adicional declarada | Orden dentro de la intervención. | `1` |
-| `operativeSteps[].stepCodeConceptId` | Sí | `string` | formato `uuid` | Código del paso. | `00000000-0000-4000-8000-000000000001` |
-| `operativeSteps[].description` | Sí | `string` | Sin restricción adicional declarada | Descripción escrita por quien lo registró. | `Texto descriptivo de ejemplo` |
-| `operativeSteps[].performedByProfileId` | No | `string` | formato `uuid` | Profesional que lo ejecutó, si se registró. | `00000000-0000-4000-8000-000000000001` |
-| `operativeSteps[].bodySiteConceptId` | No | `string` | formato `uuid` | Sitio anatómico, si se registró. | `00000000-0000-4000-8000-000000000001` |
-| `operativeSteps[].lateralityConceptId` | No | `string` | formato `uuid` | Lateralidad, si aplica. | `00000000-0000-4000-8000-000000000001` |
-| `operativeSteps[].statusConceptId` | Sí | `string` | formato `uuid` | Estado del paso. | `00000000-0000-4000-8000-000000000001` |
-| `operativeSteps[].startedAt` | No | `string` | formato `date-time` | Cuándo empezó, si se cronometró. | `2026-07-31T12:00:00.000Z` |
-| `operativeSteps[].endedAt` | No | `string` | formato `date-time` | Cuándo terminó, si se cronometró. | `2026-07-31T12:00:00.000Z` |
+| `operativeSteps` | Sí | `array<object>` | Sin restricción adicional declarada | Pasos de la intervención, en orden | `[{"clave":"valor"}]` |
 | `findings` | Sí | `array<object>` | Sin restricción adicional declarada | Hallazgos registrados durante la intervención | `[{"id":"00000000-0000-4000-8000-000000000001","operativeStepId":"00000000-0000-4000-8000-000000000001","findingCodeConceptId":"00000000-0000-4000-8000-000000000001","findingText":"valor-ejemplo","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","lateralityConceptId":"00000000-0000-4000-8000-000000000001","severityConceptId":"00000000-0000-4000-8000-000000000001","recordedByProfileId":"00000000-0000-4000-8000-000000000001","recordedAt":"2026-07-31T12:00:00.000Z"}]` |
 | `findings[].id` | Sí | `string` | Sin restricción adicional declarada | Identificador del hallazgo. | `00000000-0000-4000-8000-000000000001` |
 | `findings[].operativeStepId` | No | `string` | Sin restricción adicional declarada | Paso en el que se halló, si se ató a uno. | `00000000-0000-4000-8000-000000000001` |
@@ -1350,6 +1789,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
+| 404 | `NOT_FOUND` | Espacio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Unidad clínica no encontrada | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Sitio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1367,7 +1809,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. PATCH /procedure-cases/{id}
+## 12. PATCH /procedure-cases/{id}
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -1490,11 +1932,17 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN. | Roles/tenant/guards de autorización |
+| 409 | `CONFLICT` | La ventana cae en un bloque de otro dueño | Excepción explícita en src/modules/procedures_perioperative/services/or/operating-room.validator.ts |
+| 409 | `CONFLICT` | El quirófano ya está reservado en esa ventana | Excepción explícita en src/modules/procedures_perioperative/services/or/operating-room.validator.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El caso está cancelado | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
 | 422 | `PRECONDITION_FAILED` | CAN-INT-001: el paciente de la intervención no puede cambiarse una vez confirmada; cancele el caso y cree uno nuevo | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
 | 422 | `PRECONDITION_FAILED` | CAN-INT-001: el paciente no puede cambiarse: el caso ya tiene asignaciones o evidencias asociadas | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
 | 422 | `PRECONDITION_FAILED` | El caso debe terminar después de empezar | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
+| 422 | `PRECONDITION_FAILED` | El quirófano es de otra sede | Excepción explícita en src/modules/procedures_perioperative/services/or/operating-room.validator.ts |
+| 422 | `PRECONDITION_FAILED` | El espacio no es un quirófano | Excepción explícita en src/modules/procedures_perioperative/services/or/operating-room.validator.ts |
+| 422 | `PRECONDITION_FAILED` | El quirófano no está disponible en esa ventana | Excepción explícita en src/modules/procedures_perioperative/services/or/operating-room.validator.ts |
+| 422 | `PRECONDITION_FAILED` | El quirófano no tiene recurso agendable activo | Excepción explícita en src/modules/procedures_perioperative/services/or/operating-room.validator.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1512,7 +1960,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /procedure-cases/{id}/anesthesia-events
+## 13. POST /procedure-cases/{id}/anesthesia-events
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -1657,7 +2105,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /procedure-cases/{id}/anesthesia-plans
+## 14. POST /procedure-cases/{id}/anesthesia-plans
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -1820,7 +2268,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /procedure-cases/{id}/anesthesia-plans/{planId}/approve
+## 15. POST /procedure-cases/{id}/anesthesia-plans/{planId}/approve
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -1937,7 +2385,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /procedure-cases/{id}/cancel
+## 16. POST /procedure-cases/{id}/cancel
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -2079,7 +2527,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /procedure-cases/{id}/charge-items/post
+## 17. POST /procedure-cases/{id}/charge-items/post
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -2218,6 +2666,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PERIOP_ADMIN, BILLING. | Roles/tenant/guards de autorización |
 | 409 | `CONFLICT` | El caso ya tiene cargos emitidos | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El cargo de sala se genera automáticamente al completar el caso | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
 | 422 | `PRECONDITION_FAILED` | Sólo se factura un caso completado | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -2236,7 +2685,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /procedure-cases/{id}/confirm
+## 18. POST /procedure-cases/{id}/confirm
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -2353,7 +2802,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /procedure-cases/{id}/diagnoses
+## 19. POST /procedure-cases/{id}/diagnoses
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -2505,7 +2954,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /procedure-cases/{id}/findings
+## 20. POST /procedure-cases/{id}/findings
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -2649,7 +3098,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /procedure-cases/{id}/implants
+## 21. POST /procedure-cases/{id}/implants
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -2817,7 +3266,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /procedure-cases/{id}/medication-uses
+## 22. POST /procedure-cases/{id}/medication-uses
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -2952,7 +3401,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /procedure-cases/{id}/operative-reports
+## 23. POST /procedure-cases/{id}/operative-reports
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -3125,7 +3574,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /procedure-cases/{id}/operative-reports/{reportId}/sign
+## 24. POST /procedure-cases/{id}/operative-reports/{reportId}/sign
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -3259,7 +3708,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /procedure-cases/{id}/operative-steps
+## 25. POST /procedure-cases/{id}/operative-steps
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -3399,7 +3848,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. POST /procedure-cases/{id}/pacu-stays
+## 26. POST /procedure-cases/{id}/pacu-stays
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -3531,7 +3980,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /procedure-cases/{id}/preoperative-assessments
+## 27. POST /procedure-cases/{id}/preoperative-assessments
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -3701,7 +4150,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. POST /procedure-cases/{id}/preoperative-orders
+## 28. POST /procedure-cases/{id}/preoperative-orders
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -3828,6 +4277,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | El informe previo indicado no coincide con el duplicado detectado | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
 | 422 | `PRECONDITION_FAILED` | El paciente ya tiene una orden activa de este estudio, sin informe; hace falta justificar la repetición | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
 | 422 | `PRECONDITION_FAILED` | No se detectó ningún estudio duplicado para justificar | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
+| 422 | `PRECONDITION_FAILED` | El punto de toma no es un punto disponible de la sede sugerida | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
+| 422 | `PRECONDITION_FAILED` | message | Excepción explícita en src/modules/clinical/services/service-request-detail.service.ts |
 | 422 | `PRECONDITION_FAILED` | La nota médica citada no está disponible como motivo de esta orden | Excepción explícita en src/modules/clinical/services/service-request-notes.service.ts |
 | 422 | `PRECONDITION_FAILED` | La nota médica citada pertenece a otra consulta | Excepción explícita en src/modules/clinical/services/service-request-notes.service.ts |
 | 422 | `PRECONDITION_FAILED` | El modo de ejecutor no es válido | Excepción explícita en src/modules/clinical/services/performer-selection.validator.ts |
@@ -3857,7 +4308,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. POST /procedure-cases/{id}/preoperative-orders/verify
+## 29. POST /procedure-cases/{id}/preoperative-orders/verify
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -3996,7 +4447,321 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. POST /procedure-cases/{id}/safety-checklists/{checklistId}/responses
+## 30. POST /procedure-cases/{id}/room-events
+
+- **Módulo:** `procedures_perioperative`
+- **Etiqueta OpenAPI:** `procedures-perioperative-or`
+- **Nombre:** Registrar un evento de sala
+- **Operation ID:** `PeriopOrController_roomEvent`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PeriopOrController.roomEvent](../../src/modules/procedures_perioperative/controllers/periop-or.controller.ts)
+
+### Descripción de negocio
+
+Registrar un evento de sala. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Evento de sala en orden, con las fases OMS bloqueantes.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /procedure-cases/{id}/room-events` en `PeriopOrController_roomEvent`. El controlador delega en `RecordRoomEventUseCase.execute`. Valida el body como `RoomEventDto` y consume `application/json`. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `RoomEventDto`; los campos opcionales se omiten.
+
+```http
+POST /procedure-cases/00000000-0000-4000-8000-000000000001/room-events HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "eventCode": "PATIENT_IN_ROOM"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PERIOP_ADMIN`, `PERIOP_NURSE`, `SURGEON`, `ANESTHESIOLOGIST`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `eventCode` | Sí | `string` | valores: `PATIENT_IN_ROOM`, `ANESTHESIA_START`, `INCISION`, `CLOSURE`, `PATIENT_OUT_OF_ROOM` | Sin descripción específica en el contrato OpenAPI. | `PATIENT_IN_ROOM` |
+| `occurredAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /procedure-cases/00000000-0000-4000-8000-000000000001/room-events HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "eventCode": "PATIENT_IN_ROOM",
+  "occurredAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `no declarado` | No |
+| 400 | Operación completada correctamente. | `no declarado` | No |
+| 401 | Operación completada correctamente. | `no declarado` | No |
+| 403 | Operación completada correctamente. | `no declarado` | No |
+| 404 | Operación completada correctamente. | `no declarado` | No |
+| 409 | Operación completada correctamente. | `no declarado` | No |
+| 413 | Operación completada correctamente. | `no declarado` | No |
+| 422 | Operación completada correctamente. | `no declarado` | No |
+| 429 | Operación completada correctamente. | `no declarado` | No |
+| 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PERIOP_ADMIN, PERIOP_NURSE, SURGEON, ANESTHESIOLOGIST. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El caso no tiene quirófano | Excepción explícita en src/modules/procedures_perioperative/services/or/or.use-cases.ts |
+| 422 | `PRECONDITION_FAILED` | La fecha no puede ser futura | Excepción explícita en src/modules/procedures_perioperative/services/or/or.use-cases.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/procedure-cases/{id}/room-events"
+}
+```
+
+---
+
+## 31. POST /procedure-cases/{id}/safety-checklists
+
+- **Módulo:** `procedures_perioperative`
+- **Etiqueta OpenAPI:** `procedures-perioperative-or`
+- **Nombre:** Crear el check-list OMS del caso (201; 200 si ya existe)
+- **Operation ID:** `PeriopOrController_createChecklist`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PeriopOrController.createChecklist](../../src/modules/procedures_perioperative/controllers/periop-or.controller.ts)
+
+### Descripción de negocio
+
+Crear el check-list OMS del caso (201; 200 si ya existe). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Crear (idempotente) el check-list OMS del caso.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /procedure-cases/{id}/safety-checklists` en `PeriopOrController_createChecklist`. El controlador delega en `SafetyChecklistUseCases.create`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /procedure-cases/00000000-0000-4000-8000-000000000001/safety-checklists HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PERIOP_ADMIN`, `PERIOP_NURSE`, `SURGEON`, `ANESTHESIOLOGIST`, `SURGERY_SCHEDULER`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /procedure-cases/00000000-0000-4000-8000-000000000001/safety-checklists HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `no declarado` | No |
+| 400 | Operación completada correctamente. | `no declarado` | No |
+| 401 | Operación completada correctamente. | `no declarado` | No |
+| 403 | Operación completada correctamente. | `no declarado` | No |
+| 404 | Operación completada correctamente. | `no declarado` | No |
+| 409 | Operación completada correctamente. | `no declarado` | No |
+| 422 | Operación completada correctamente. | `no declarado` | No |
+| 429 | Operación completada correctamente. | `no declarado` | No |
+| 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PERIOP_ADMIN, PERIOP_NURSE, SURGEON, ANESTHESIOLOGIST, SURGERY_SCHEDULER. | Roles/tenant/guards de autorización |
+| 409 | `CONFLICT` | El caso está cancelado | Excepción explícita en src/modules/procedures_perioperative/services/or/or.use-cases.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/procedure-cases/{id}/safety-checklists"
+}
+```
+
+---
+
+## 32. GET /procedure-cases/{id}/safety-checklists/{checklistId}
+
+- **Módulo:** `procedures_perioperative`
+- **Etiqueta OpenAPI:** `procedures-perioperative-or`
+- **Nombre:** Check-list OMS por fases
+- **Operation ID:** `PeriopOrController_getChecklist`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PeriopOrController.getChecklist](../../src/modules/procedures_perioperative/controllers/periop-or.controller.ts)
+
+### Descripción de negocio
+
+Check-list OMS por fases. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Check-list por fases.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /procedure-cases/{id}/safety-checklists/{checklistId}` en `PeriopOrController_getChecklist`. El controlador delega en `SafetyChecklistUseCases.get`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `checklistId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /procedure-cases/00000000-0000-4000-8000-000000000001/safety-checklists/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PERIOP_ADMIN`, `PERIOP_NURSE`, `SURGEON`, `ANESTHESIOLOGIST`, `SURGERY_SCHEDULER`.
+- Deben ser UUID válidos: `id`, `checklistId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /procedure-cases/00000000-0000-4000-8000-000000000001/safety-checklists/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 404 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PERIOP_ADMIN, PERIOP_NURSE, SURGEON, ANESTHESIOLOGIST, SURGERY_SCHEDULER. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Check-list no encontrado | Excepción explícita en src/modules/procedures_perioperative/services/or/or.use-cases.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/procedure-cases/{id}/safety-checklists/{checklistId}"
+}
+```
+
+---
+
+## 33. POST /procedure-cases/{id}/safety-checklists/{checklistId}/responses
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -4160,7 +4925,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. POST /procedure-cases/{id}/specimens
+## 34. POST /procedure-cases/{id}/specimens
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -4302,7 +5067,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. GET /procedure-cases/{id}/team-members
+## 35. GET /procedure-cases/{id}/team-members
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -4413,7 +5178,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. POST /procedure-cases/{id}/team-members
+## 36. POST /procedure-cases/{id}/team-members
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -4548,7 +5313,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. POST /procedure-cases/{id}/team-members/{memberId}/accept
+## 37. POST /procedure-cases/{id}/team-members/{memberId}/accept
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -4669,7 +5434,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. POST /procedure-cases/{id}/team-members/{memberId}/respond
+## 38. POST /procedure-cases/{id}/team-members/{memberId}/respond
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -4802,6 +5567,454 @@ Ejemplo de error normalizado:
   "correlationId": "req-01J00000000000000000000000",
   "timestamp": "2026-07-31T12:00:00.000Z",
   "path": "/procedure-cases/{id}/team-members/{memberId}/respond"
+}
+```
+
+---
+
+## 39. GET /sites/{siteId}/operating-rooms
+
+- **Módulo:** `procedures_perioperative`
+- **Etiqueta OpenAPI:** `procedures-perioperative-or`
+- **Nombre:** Quirófanos de una sede
+- **Operation ID:** `PeriopOrController_operatingRooms`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PeriopOrController.operatingRooms](../../src/modules/procedures_perioperative/controllers/periop-or.controller.ts)
+
+### Descripción de negocio
+
+Quirófanos de una sede. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Salas de la sede.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /sites/{siteId}/operating-rooms` en `PeriopOrController_operatingRooms`. El controlador delega en `OperatingRoomsReadUseCases.list`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `siteId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /sites/00000000-0000-4000-8000-000000000001/operating-rooms HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `siteId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /sites/00000000-0000-4000-8000-000000000001/operating-rooms HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 404 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Espacio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Unidad clínica no encontrada | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Sitio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/sites/{siteId}/operating-rooms"
+}
+```
+
+---
+
+## 40. GET /sites/{siteId}/or-blocks
+
+- **Módulo:** `procedures_perioperative`
+- **Etiqueta OpenAPI:** `procedures-perioperative-or`
+- **Nombre:** Bloques de quirófano
+- **Operation ID:** `PeriopOrController_listBlocks`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PeriopOrController.listBlocks](../../src/modules/procedures_perioperative/controllers/periop-or.controller.ts)
+
+### Descripción de negocio
+
+Bloques de quirófano. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Bloques de la sede.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /sites/{siteId}/or-blocks` en `PeriopOrController_listBlocks`. El controlador delega en `OrBlocksUseCases.list`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `siteId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /sites/00000000-0000-4000-8000-000000000001/or-blocks HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `siteId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /sites/00000000-0000-4000-8000-000000000001/or-blocks HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 404 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Quirófano no encontrado | Excepción explícita en src/modules/procedures_perioperative/services/or/or.use-cases.ts |
+| 404 | `NOT_FOUND` | Espacio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Unidad clínica no encontrada | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Sitio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/sites/{siteId}/or-blocks"
+}
+```
+
+---
+
+## 41. POST /sites/{siteId}/or-blocks
+
+- **Módulo:** `procedures_perioperative`
+- **Etiqueta OpenAPI:** `procedures-perioperative-or`
+- **Nombre:** Crear un bloque de quirófano
+- **Operation ID:** `PeriopOrController_createBlocks`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PeriopOrController.createBlocks](../../src/modules/procedures_perioperative/controllers/periop-or.controller.ts)
+
+### Descripción de negocio
+
+Crear un bloque de quirófano. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Crear un bloque o una serie.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /sites/{siteId}/or-blocks` en `PeriopOrController_createBlocks`. El controlador delega en `OrBlocksUseCases.create`. Valida el body como `CreateOrBlocksDto` y consume `application/json`. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `siteId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreateOrBlocksDto`; los campos opcionales se omiten.
+
+```http
+POST /sites/00000000-0000-4000-8000-000000000001/or-blocks HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "operatingRoomId": "00000000-0000-4000-8000-000000000001",
+  "ownerKind": "SERVICE",
+  "startsAt": "2026-07-31T12:00:00.000Z",
+  "endsAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `siteId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `operatingRoomId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `ownerKind` | Sí | `string` | valores: `SERVICE`, `SURGEON` | Sin descripción específica en el contrato OpenAPI. | `SERVICE` |
+| `clinicalUnitId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `specialtyConceptId` | No | `string` | formato `uuid` | Concepto de especialidad | `00000000-0000-4000-8000-000000000001` |
+| `surgeonProfileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `startsAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `endsAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `releaseHours` | No | `number` | mínimo 0; máximo 720 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `recurrence` | No | `OrBlockRecurrenceDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"weekdays":[1],"until":"valor-ejemplo"}` |
+| `recurrence.weekdays` | No | `array<number>` | mínimo 1; máximo 7; máximo 7 elemento(s) | Días ISO 1–7, sin repetir | `[1]` |
+| `recurrence.until` | No | `string` | patrón runtime `/^\d{4}-\d{2}-\d{2}$/` | yyyy-mm-dd, como mucho un año después del inicio | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /sites/00000000-0000-4000-8000-000000000001/or-blocks HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "operatingRoomId": "00000000-0000-4000-8000-000000000001",
+  "ownerKind": "SERVICE",
+  "clinicalUnitId": "00000000-0000-4000-8000-000000000001",
+  "specialtyConceptId": "00000000-0000-4000-8000-000000000001",
+  "surgeonProfileId": "00000000-0000-4000-8000-000000000001",
+  "startsAt": "2026-07-31T12:00:00.000Z",
+  "endsAt": "2026-07-31T12:00:00.000Z",
+  "releaseHours": 1,
+  "recurrence": {
+    "weekdays": [
+      1
+    ],
+    "until": "valor-ejemplo"
+  }
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `no declarado` | No |
+| 400 | Operación completada correctamente. | `no declarado` | No |
+| 401 | Operación completada correctamente. | `no declarado` | No |
+| 403 | Operación completada correctamente. | `no declarado` | No |
+| 404 | Operación completada correctamente. | `no declarado` | No |
+| 409 | Operación completada correctamente. | `no declarado` | No |
+| 413 | Operación completada correctamente. | `no declarado` | No |
+| 422 | Operación completada correctamente. | `no declarado` | No |
+| 429 | Operación completada correctamente. | `no declarado` | No |
+| 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Unidad clínica no encontrada | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Espacio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Sitio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El espacio no es un quirófano de la sede | Excepción explícita en src/modules/procedures_perioperative/services/or/or.use-cases.ts |
+| 422 | `PRECONDITION_FAILED` | El bloque necesita dueño | Excepción explícita en src/modules/procedures_perioperative/services/or/or.use-cases.ts |
+| 422 | `PRECONDITION_FAILED` | El bloque no puede empezar en el pasado | Excepción explícita en src/modules/procedures_perioperative/services/or/or.use-cases.ts |
+| 422 | `PRECONDITION_FAILED` | El bloque debe terminar después de empezar y durar como mucho 24 h | Excepción explícita en src/modules/procedures_perioperative/services/or/or.use-cases.ts |
+| 422 | `PRECONDITION_FAILED` | La serie necesita días ISO 1–7 sin repetir y un fin dentro del año siguiente | Excepción explícita en src/modules/procedures_perioperative/services/or/or.use-cases.ts |
+| 422 | `PRECONDITION_FAILED` | Máximo 400 instancias | Excepción explícita en src/modules/procedures_perioperative/services/or/or.use-cases.ts |
+| 422 | `PRECONDITION_FAILED` | El quirófano no está disponible | Excepción explícita en src/modules/procedures_perioperative/services/or/or.use-cases.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/sites/{siteId}/or-blocks"
+}
+```
+
+---
+
+## 42. GET /sites/{siteId}/or-utilization
+
+- **Módulo:** `procedures_perioperative`
+- **Etiqueta OpenAPI:** `procedures-perioperative-or`
+- **Nombre:** Utilización de quirófanos
+- **Operation ID:** `PeriopOrController_utilization`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PeriopOrController.utilization](../../src/modules/procedures_perioperative/controllers/periop-or.controller.ts)
+
+### Descripción de negocio
+
+Utilización de quirófanos. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Utilización de quirófanos.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /sites/{siteId}/or-utilization` en `PeriopOrController_utilization`. El controlador delega en `OperatingRoomsReadUseCases.utilization`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `siteId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `from` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `to` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /sites/00000000-0000-4000-8000-000000000001/or-utilization?from=valor-ejemplo&to=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `siteId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /sites/00000000-0000-4000-8000-000000000001/or-utilization?from=valor-ejemplo&to=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 404 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Quirófano no encontrado | Excepción explícita en src/modules/procedures_perioperative/services/or/or-read.use-cases.ts |
+| 404 | `NOT_FOUND` | Espacio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Unidad clínica no encontrada | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 404 | `NOT_FOUND` | Sitio no encontrado | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 422 | `PRECONDITION_FAILED` | Rango de fechas inválido | Excepción explícita en src/modules/procedures_perioperative/services/or/or-read.use-cases.ts |
+| 422 | `PRECONDITION_FAILED` | El rango no puede superar 366 días | Excepción explícita en src/modules/procedures_perioperative/services/or/or-read.use-cases.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/sites/{siteId}/or-utilization"
 }
 ```
 
