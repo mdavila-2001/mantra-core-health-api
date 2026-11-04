@@ -209,6 +209,8 @@ describe('IamAssistedRegistrationService', () => {
 
     it('rejects a homonym of a live patient unless the operator confirms it', async () => {
       const d = build();
+      d.credentialsRepo.findLivePasswordByEmail.mockResolvedValue(null);
+      d.usersRepo.create.mockReturnValue({ id: 'u1' });
       d.patientProfilesRepo.findHomonyms.mockResolvedValue(['leo-1']);
       const dto = {
         name: 'leonardo',

@@ -56,9 +56,10 @@ export function toMergeEventDto(event: {
  * UC-05-08: merges a loser patient onto the survivor (IMMUTABLE event plus
  * reassignment of the loser's references).
  *
- * The loser's own portal account moves to the survivor when the survivor has
- * none: otherwise the person would keep logging into a merged, hidden profile
- * and never see what is addressed to the surviving one.
+ * Portal accounts never move: a reversed merge could not take one back, and the
+ * account would keep reading someone else's record. When only the loser has an
+ * own account the merge is refused, so the operator picks that profile as the
+ * survivor instead.
  */
 export class MergePatientsUseCase {
   constructor(
@@ -107,6 +108,21 @@ export class MergePatientsUseCase {
         );
       }
 
+      const loserHasAccount = await this.repos.accountLinks.hasSelfActiveLink(
+        tx,
+        loserId,
+      );
+      if (
+        loserHasAccount &&
+        !(await this.repos.accountLinks.hasSelfActiveLink(tx, survivorId))
+      ) {
+        throw new PreconditionFailedException(
+          'El paciente a fusionar tiene cuenta y el sobreviviente no: elija como sobreviviente el perfil con cuenta',
+          { profileId: loserId },
+          ProfilesErrorReason.MERGE_SURVIVOR_WITHOUT_ACCOUNT,
+        );
+      }
+
       const now = new Date();
       const event = this.repos.mergeEvents.create(tx, {
         survivingPatientProfileId: survivorId,
@@ -149,14 +165,6 @@ export class MergePatientsUseCase {
         survivorId,
         now,
       );
-      if (!(await this.repos.accountLinks.hasSelfActiveLink(tx, survivorId))) {
-        await this.repos.accountLinks.reassignSelfActiveLinks(
-          tx,
-          loserId,
-          survivorId,
-          now,
-        );
-      }
       await tx.flush();
 
       return toMergeEventDto(event);

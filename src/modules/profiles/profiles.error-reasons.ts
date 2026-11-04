@@ -17,6 +17,8 @@ export enum ProfilesErrorReason {
   PATIENT_CODE_ALREADY_IN_USE = 'PATIENT_CODE_ALREADY_IN_USE',
   /** A live patient with the same name (and birth date, if given) exists. */
   POSSIBLE_DUPLICATE_PATIENT = 'POSSIBLE_DUPLICATE_PATIENT',
+  /** Only the merged loser has an own account: pick it as the survivor. */
+  MERGE_SURVIVOR_WITHOUT_ACCOUNT = 'MERGE_SURVIVOR_WITHOUT_ACCOUNT',
   /** La cuenta de la sesión no tiene una persona vinculada (`person_account_links`). */
   ACCOUNT_WITHOUT_LINKED_PERSON = 'ACCOUNT_WITHOUT_LINKED_PERSON',
   /** No existe el perfil de paciente pedido (o la persona vinculada no lo tiene). */

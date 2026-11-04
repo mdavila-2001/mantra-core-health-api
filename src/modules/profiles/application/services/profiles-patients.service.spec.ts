@@ -100,7 +100,6 @@ function build() {
     findSelfActiveByUser: mockFn().mockResolvedValue([]),
     hasSelfActiveLink: mockFn().mockResolvedValue(false),
     findSelfActiveByPerson: mockFn().mockResolvedValue(null),
-    reassignSelfActiveLinks: mockFn().mockResolvedValue(0),
     supersedeActiveForUser: mockFn().mockResolvedValue(0),
     revokeActiveForPerson: mockFn().mockResolvedValue(0),
   };
@@ -547,34 +546,27 @@ describe('ProfilesPatientsService', () => {
         'a',
         expect.any(Date),
       );
-      // The survivor had no own account: the loser's moves over.
-      expect(d.accountLinksRepo.reassignSelfActiveLinks).toHaveBeenCalledWith(
-        d.tx,
-        'b',
-        'a',
-        expect.any(Date),
-      );
     });
 
-    it('keeps the survivor account and does not move the loser one', async () => {
+    it('refuses when only the loser has an account: accounts never move', async () => {
       const d = build();
       d.patientProfilesRepo.findById
         .mockResolvedValueOnce({ profileId: 'a' })
         .mockResolvedValueOnce({ profileId: 'b' });
-      d.mergeEventsRepo.create.mockReturnValue({ id: 'e1' });
-      d.personsRepo.findById.mockResolvedValue(null);
-      d.accountLinksRepo.hasSelfActiveLink.mockResolvedValue(true);
-
-      await d.service.mergePatients(
-        { survivingPatientProfileId: 'a', mergedPatientProfileId: 'b' },
-        actor,
+      d.accountLinksRepo.hasSelfActiveLink.mockImplementation(
+        async (_tx: unknown, personId: string) => personId === 'b',
       );
 
-      expect(d.accountLinksRepo.hasSelfActiveLink).toHaveBeenCalledWith(
-        d.tx,
-        'a',
-      );
-      expect(d.accountLinksRepo.reassignSelfActiveLinks).not.toHaveBeenCalled();
+      const err = await d.service
+        .mergePatients(
+          { survivingPatientProfileId: 'a', mergedPatientProfileId: 'b' },
+          actor,
+        )
+        .catch((e: unknown) => e);
+
+      expect(err).toBeInstanceOf(PreconditionFailedException);
+      expect((err as any).reason).toBe('MERGE_SURVIVOR_WITHOUT_ACCOUNT');
+      expect(d.mergeEventsRepo.create).not.toHaveBeenCalled();
     });
 
     it('rejects re-merging an already merged patient (conflict)', async () => {

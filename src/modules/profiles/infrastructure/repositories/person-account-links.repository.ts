@@ -193,24 +193,6 @@ export class PersonAccountLinksRepository {
     );
   }
 
-  /** Moves the ACTIVE own (SELF) links of a merged person to its survivor. */
-  reassignSelfActiveLinks(
-    em: EntityManager,
-    fromPersonId: string,
-    toPersonId: string,
-    now: Date,
-  ): Promise<number> {
-    return em.nativeUpdate(
-      PersonAccountLinks,
-      {
-        personId: fromPersonId,
-        statusConceptId: PROF.ACCOUNT_LINK_ACTIVE,
-        linkTypeConceptId: PROF.ACCOUNT_LINK_SELF,
-      },
-      { personId: toPersonId, updatedAt: now },
-    );
-  }
-
   /** Todas las personas con las que la cuenta tiene un vínculo ACTIVO (no sólo «la» primera). */
   async findActivePersonIdsByUser(
     em: EntityManager,
