@@ -98,7 +98,7 @@ describe('ClinicalRecordAccessGuard under RLS', () => {
           user: clinician,
           params: { patientProfileId: 'patient-1' },
           method: 'POST',
-          body: { encounterId: 'enc-1' },
+          body: { patientProfileId: 'patient-1', encounterId: 'enc-1' },
           resolvedTenantId: TENANT,
         }),
       }),

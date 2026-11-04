@@ -126,9 +126,10 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
         switchToHttp: () => ({ getRequest: () => request }),
       } as any;
 
-      await new ClinicalRecordAccessGuard(readService as any, {} as any).canActivate(
-        context,
-      );
+      await new ClinicalRecordAccessGuard(
+        readService as any,
+        {} as any,
+      ).canActivate(context);
 
       expect(request.clinicalReadScope).toBe(scope);
     });
@@ -147,7 +148,10 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
       } as any;
 
       await expect(
-        new ClinicalRecordAccessGuard(readService as any, {} as any).canActivate(context),
+        new ClinicalRecordAccessGuard(
+          readService as any,
+          {} as any,
+        ).canActivate(context),
       ).rejects.toBeInstanceOf(ForbiddenException);
       expect(request.clinicalReadScope).toBeUndefined();
     });
@@ -156,7 +160,10 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
       const readService = {
         assertCanWriteHistory: mockFn().mockResolvedValue(undefined),
       };
-      await new ClinicalRecordAccessGuard(readService as any, {} as any).canActivate(
+      await new ClinicalRecordAccessGuard(
+        readService as any,
+        {} as any,
+      ).canActivate(
         buildWriteContext(actorThatAttends, {
           body: { patientProfileId: 'patient-1', encounterId: 'enc-1' },
         }),
@@ -172,7 +179,10 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
       const readService = {
         assertCanWriteHistory: mockFn().mockResolvedValue(undefined),
       };
-      await new ClinicalRecordAccessGuard(readService as any, {} as any).canActivate(
+      await new ClinicalRecordAccessGuard(
+        readService as any,
+        {} as any,
+      ).canActivate(
         buildWriteContext(actorThatAttends, {
           paramPatientId: 'patient-ruta',
           body: { patientProfileId: 'patient-cuerpo', encounterId: 'enc-1' },
@@ -193,7 +203,10 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
       const readService = {
         assertCanWriteHistory: mockFn().mockResolvedValue(undefined),
       };
-      await new ClinicalRecordAccessGuard(readService as any, {} as any).canActivate(
+      await new ClinicalRecordAccessGuard(
+        readService as any,
+        {} as any,
+      ).canActivate(
         buildWriteContext(actorThatAttends, {
           body: { patientProfileId: 'patient-1', encounterId: ['enc-1'] },
         }),
@@ -557,7 +570,10 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
 
     it('sigue dejando pasar un GET sin paciente en la ruta, mire lo que mire el cuerpo', async () => {
       const readService = { resolveReadScope: mockFn() };
-      const guard = new ClinicalRecordAccessGuard(readService as any, {} as any);
+      const guard = new ClinicalRecordAccessGuard(
+        readService as any,
+        {} as any,
+      );
 
       await expect(
         guard.canActivate(

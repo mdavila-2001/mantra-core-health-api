@@ -357,7 +357,12 @@ export class ClinicalReadService {
       }
       if (
         actor.practitionerProfileId &&
-        (await this.hasAuthorizedAccess(em, patientProfileId, actor, 'WRITE')) &&
+        (await this.hasAuthorizedAccess(
+          em,
+          patientProfileId,
+          actor,
+          'WRITE',
+        )) &&
         (basis === null ||
           (await this.granularScope.hasWriteLevelGrant(
             em,

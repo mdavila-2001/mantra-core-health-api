@@ -1413,6 +1413,7 @@ describe('ClinicalReadService · resolveReadScope', () => {
     expect(spy).toHaveBeenCalledWith(
       PATIENT,
       expect.objectContaining({ id: 'u' }),
+      undefined,
     );
   });
 });
@@ -1568,7 +1569,9 @@ describe('ClinicalReadService · escritura por base de atención', () => {
     c.agendar(DOCTOR, PATIENT, new Date(), LA_PAZ);
 
     await expect(
-      c.service.assertCanWriteHistory(PATIENT, doctor(), 'enc-ajeno'),
+      c.service.assertCanWriteHistory(PATIENT, doctor(), {
+        encounterId: 'enc-ajeno',
+      }),
     ).resolves.toBeUndefined();
     expect(c.scopeRepo.isOwnOpenEncounter).not.toHaveBeenCalled();
   });
@@ -1602,7 +1605,9 @@ describe('ClinicalReadService · escritura por base de atención', () => {
     relation(c, AUTHZ.CARE_REL_TREATING);
 
     await expect(
-      c.service.assertCanWriteHistory(PATIENT, doctor(), 'enc-1'),
+      c.service.assertCanWriteHistory(PATIENT, doctor(), {
+        encounterId: 'enc-1',
+      }),
     ).rejects.toBeInstanceOf(ForbiddenException);
     expect(c.scopeRepo.isOwnOpenEncounter).toHaveBeenCalledWith(
       c.em,
@@ -1613,7 +1618,9 @@ describe('ClinicalReadService · escritura por base de atención', () => {
 
     c.scopeRepo.isOwnOpenEncounter.mockResolvedValue(true);
     await expect(
-      c.service.assertCanWriteHistory(PATIENT, doctor(), 'enc-1'),
+      c.service.assertCanWriteHistory(PATIENT, doctor(), {
+        encounterId: 'enc-1',
+      }),
     ).resolves.toBeUndefined();
   });
 
@@ -1655,12 +1662,16 @@ describe('ClinicalReadService · escritura por base de atención', () => {
     c.agendar(DOCTOR, PATIENT, new Date(), LA_PAZ);
 
     await expect(
-      c.service.assertCanWriteHistory(PATIENT, doctor(), 'enc-ajeno'),
+      c.service.assertCanWriteHistory(PATIENT, doctor(), {
+        encounterId: 'enc-ajeno',
+      }),
     ).rejects.toBeInstanceOf(ForbiddenException);
 
     c.scopeRepo.isOwnOpenEncounter.mockResolvedValue(true);
     await expect(
-      c.service.assertCanWriteHistory(PATIENT, doctor(), 'enc-1'),
+      c.service.assertCanWriteHistory(PATIENT, doctor(), {
+        encounterId: 'enc-1',
+      }),
     ).resolves.toBeUndefined();
     expect(c.scopeRepo.isOwnOpenEncounter).toHaveBeenLastCalledWith(
       c.em,
