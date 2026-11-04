@@ -137,6 +137,49 @@ describe('SupportStaffProvisioningService', () => {
       );
     });
 
+    it('con RLS, fija el tenant de la vinculación antes de crear la membresía', async () => {
+      const previous = process.env.RLS_ENFORCE;
+      process.env.RLS_ENFORCE = 'true';
+      try {
+        const calls: string[] = [];
+        mockEm.execute = fn().mockImplementation(
+          async (sql: string, params?: unknown[]) => {
+            calls.push(params ? `${sql} <- ${String(params)}` : sql);
+            return [];
+          },
+        );
+        mockEm.getTransactionContext = () => undefined;
+        mockEm.isInTransaction = () => false;
+        mockProvisioningRepo.findActiveRoleAssignmentOfPractitioner.mockResolvedValue(
+          { id: 'role-assign-1', tenantId: 'tenant-hospital-1' },
+        );
+        mockIamSupportStaff.register.mockResolvedValue({
+          userId: 'sec-user-1',
+          personId: 'sec-person-1',
+          supportProfileId: 'sec-person-1',
+        });
+        mockProvisioningRepo.ensureActiveTenantMembership.mockImplementation(
+          async () => {
+            calls.push('membership');
+          },
+        );
+        mockProvisioningRepo.createActivePractitionerLink.mockResolvedValue({
+          id: 'link-uuid-1',
+        });
+
+        await service.provisionForPractitioner(dto, actor);
+
+        const membership = calls.indexOf('membership');
+        expect(calls.slice(membership - 2, membership)).toEqual([
+          "select set_config('app.system_context', 'false', true)",
+          "select set_config('app.current_tenant_id', ?, true) <- tenant-hospital-1",
+        ]);
+      } finally {
+        if (previous === undefined) delete process.env.RLS_ENFORCE;
+        else process.env.RLS_ENFORCE = previous;
+      }
+    });
+
     it('rechaza con 409 si la secretaria ya estaba vinculada a esa vinculación', async () => {
       mockProvisioningRepo.findActiveRoleAssignmentOfPractitioner.mockResolvedValue(
         {

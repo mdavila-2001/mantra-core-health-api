@@ -7,6 +7,27 @@ export function isRlsEnforced(): boolean {
 }
 
 /**
+ * Sets the RLS session variables of `tenantId` on a transaction the caller already opened.
+ *
+ * Same `set_config` order as `TenantContextInterceptor`. For writes outside the request
+ * transaction that must stay atomic when `RLS_ENFORCE` is off too (where `withTenantRls`
+ * runs without a transaction): open `em.transactional` and call this first when
+ * `isRlsEnforced()`. The tenant must already be verified by the caller.
+ *
+ * @param tx - Transactional entity manager (the variables are `SET LOCAL`).
+ * @param tenantId - Verified tenant that scopes the rest of the transaction.
+ */
+export async function applyTenantRls(
+  tx: EntityManager,
+  tenantId: string,
+): Promise<void> {
+  await tx.execute("select set_config('app.system_context', 'false', true)");
+  await tx.execute("select set_config('app.current_tenant_id', ?, true)", [
+    tenantId,
+  ]);
+}
+
+/**
  * Runs `work` in its own short transaction with `app.current_tenant_id` set for RLS.
  *
  * Meant for code that runs outside the request transaction (guards, which precede
@@ -34,12 +55,7 @@ export function withTenantRls<T>(
   return ownedTransaction(
     scoped,
     async (tx) => {
-      await tx.execute(
-        "select set_config('app.system_context', 'false', true)",
-      );
-      await tx.execute("select set_config('app.current_tenant_id', ?, true)", [
-        tenantId,
-      ]);
+      await applyTenantRls(tx, tenantId);
       return work(tx);
     },
     options?.readOnly ? { readOnly: true } : undefined,
