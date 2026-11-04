@@ -42,7 +42,10 @@ function build() {
   const eventsRepo = { record: mockFn() };
   const personsRepo = { create: mockFn(() => ({ id: 'person-1' })) };
   const personProfilesRepo = { create: mockFn() };
-  const patientProfilesRepo = { create: mockFn() };
+  const patientProfilesRepo = {
+    create: mockFn(),
+    findHomonyms: mockFn().mockResolvedValue([]),
+  };
   const accountLinksRepo = { create: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
@@ -202,6 +205,30 @@ describe('IamAssistedRegistrationService', () => {
       ).rejects.toBeInstanceOf(ConflictException);
       expect(d.personsRepo.create).not.toHaveBeenCalled();
       expect(d.accountLinksRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('rejects a homonym of a live patient unless the operator confirms it', async () => {
+      const d = build();
+      d.patientProfilesRepo.findHomonyms.mockResolvedValue(['leo-1']);
+      const dto = {
+        name: 'leonardo',
+        lastName: 'Loayza Vargas',
+        email: 'leo@x.io',
+        reason: 'r',
+      };
+
+      const err = await d.service
+        .assistedRegistration(dto, actor)
+        .catch((e: unknown) => e);
+      expect(err).toBeInstanceOf(ConflictException);
+      expect((err as any).reason).toBe('POSSIBLE_DUPLICATE_PATIENT');
+      expect(d.personsRepo.create).not.toHaveBeenCalled();
+
+      await d.service.assistedRegistration(
+        { ...dto, allowHomonym: true },
+        actor,
+      );
+      expect(d.personsRepo.create).toHaveBeenCalled();
     });
 
     it('keeps honouring displayName for clients that still send it', async () => {

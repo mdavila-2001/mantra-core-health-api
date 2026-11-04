@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { PatientProfiles } from '../../entities';
 import { CONCEPTS, createdBy } from '../../../../common';
+import { PROF } from '../../profiles.concepts';
 
 /**
  * Hasta dónde llega una búsqueda de pacientes.
@@ -54,6 +55,10 @@ export interface PatientSearchRow {
   profileId: string;
   /** Código único de paciente; es también la clave del cursor. */
   patientCode: string;
+  /** Active national id, so homonyms can be told apart. */
+  nationalId: string | null;
+  /** Whether a portal account (own SELF link) can receive notices. */
+  hasAccount: boolean;
 }
 
 /** Datos del perfil de paciente (PK = person_profiles.id, 1:1). */
@@ -139,8 +144,11 @@ export class PatientProfilesRepository {
     criteria: PatientSearchCriteria,
     limit: number,
   ): Promise<PatientSearchRow[]> {
-    const conditions: string[] = [];
-    const params: unknown[] = [];
+    // A merged loser is no longer a patient of its own: it must not be offered.
+    const conditions: string[] = [
+      'pp.record_linkage_status_concept_id is distinct from ?',
+    ];
+    const params: unknown[] = [PROF.LINKAGE_MERGED];
 
     if (criteria.afterPatientCode !== undefined) {
       conditions.push('pp.patient_code > ?');
@@ -181,24 +189,80 @@ export class PatientProfilesRepository {
     // quedan una por línea en el SQL, que es lo que hace legible el EXPLAIN.
     const separator = `
       and `;
-    const where =
-      conditions.length > 0 ? `where ${conditions.join(separator)}` : '';
+    const where = `where ${conditions.join(separator)}`;
 
-    const rows = await em
-      .getConnection()
-      .execute<{ profile_id: string; patient_code: string }[]>(
-        `select pp.profile_id, pp.patient_code
+    const rows = await em.getConnection().execute<
+      {
+        profile_id: string;
+        patient_code: string;
+        national_id: string | null;
+        has_account: boolean;
+      }[]
+    >(
+      `select pp.profile_id, pp.patient_code,
+              (select i.value
+                 from common.identifiers i
+                where i.owner_id = pp.profile_id
+                  and i.type_concept_id = ?
+                  and i.state_concept_id = ?
+                order by i.created_at desc
+                limit 1) as national_id,
+              exists (select 1
+                        from profiles.person_account_links l
+                       where l.person_id = pp.profile_id
+                         and l.status_concept_id = ?
+                         and l.link_type_concept_id = ?) as has_account
          from profiles.patient_profiles pp
         ${where}
         order by pp.patient_code asc
         limit ?`,
-        [...params, limit],
-      );
+      [
+        CONCEPTS.ID_TYPE_NATIONAL,
+        CONCEPTS.STATE_ACTIVE,
+        PROF.ACCOUNT_LINK_ACTIVE,
+        PROF.ACCOUNT_LINK_SELF,
+        ...params,
+        limit,
+      ],
+    );
 
     return rows.map((f) => ({
       profileId: f.profile_id,
       patientCode: f.patient_code,
+      nationalId: f.national_id,
+      hasAccount: Boolean(f.has_account),
     }));
+  }
+
+  /**
+   * Live (not merged) patients whose name has the given comparison key (see
+   * `personNameKey`) and, when given, the same birth date. Accents are folded
+   * with `translate` so no extension is needed.
+   */
+  async findHomonyms(
+    em: EntityManager,
+    nameKey: string,
+    birthDate?: Date,
+  ): Promise<string[]> {
+    const params: unknown[] = [PROF.LINKAGE_MERGED, nameKey];
+    let birth = '';
+    if (birthDate) {
+      birth = 'and p.birth_date = cast(? as date)';
+      params.push(birthDate.toISOString().slice(0, 10));
+    }
+    const rows = await em.getConnection().execute<{ profile_id: string }[]>(
+      `select pp.profile_id
+         from profiles.patient_profiles pp
+         join profiles.persons p on p.id = pp.profile_id
+        where pp.record_linkage_status_concept_id is distinct from ?
+          and btrim(regexp_replace(translate(lower(p.display_name),
+                'áàäâéèëêíìïîóòöôúùüûñç', 'aaaaeeeeiiiioooouuuunc'),
+                '\\s+', ' ', 'g')) = ?
+          ${birth}
+        limit 5`,
+      params,
+    );
+    return rows.map((row) => row.profile_id);
   }
 
   /** Verifica unicidad de patient_code (uq_patient_profiles_patient_code). */

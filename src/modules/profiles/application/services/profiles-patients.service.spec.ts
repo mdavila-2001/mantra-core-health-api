@@ -88,6 +88,7 @@ function build() {
     findById: mockFn(),
     findByPatientCode: mockFn(),
     searchPage: mockFn().mockResolvedValue([]),
+    findHomonyms: mockFn().mockResolvedValue([]),
     create: mockFn(),
   };
   const accountLinksRepo = {
@@ -97,6 +98,9 @@ function build() {
     hasActiveLink: mockFn().mockResolvedValue(false),
     findActivePersonIdsByUser: mockFn().mockResolvedValue([]),
     findSelfActiveByUser: mockFn().mockResolvedValue([]),
+    hasSelfActiveLink: mockFn().mockResolvedValue(false),
+    findSelfActiveByPerson: mockFn().mockResolvedValue(null),
+    reassignSelfActiveLinks: mockFn().mockResolvedValue(0),
     supersedeActiveForUser: mockFn().mockResolvedValue(0),
     revokeActiveForPerson: mockFn().mockResolvedValue(0),
   };
@@ -400,6 +404,48 @@ describe('ProfilesPatientsService', () => {
       ).rejects.toBeInstanceOf(ConflictException);
       expect(d.personsRepo.create).not.toHaveBeenCalled();
     });
+
+    it('rejects a homonym of a live patient (409 POSSIBLE_DUPLICATE_PATIENT)', async () => {
+      const d = build();
+      d.patientProfilesRepo.findByPatientCode.mockResolvedValue(null);
+      d.patientProfilesRepo.findHomonyms.mockResolvedValue(['leo-1']);
+      const err = await d.service
+        .registerPatient(
+          {
+            patientCode: 'PC-2',
+            displayName: 'Leonardo  Loayza Vargás',
+            birthDate: '1990-05-01',
+          } as any,
+          actor,
+        )
+        .catch((e: unknown) => e);
+      expect(err).toBeInstanceOf(ConflictException);
+      expect((err as any).reason).toBe('POSSIBLE_DUPLICATE_PATIENT');
+      expect(d.patientProfilesRepo.findHomonyms).toHaveBeenCalledWith(
+        d.tx,
+        'leonardo loayza vargas',
+        new Date('1990-05-01'),
+      );
+      expect(d.personsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('lets a confirmed homonym through without looking it up', async () => {
+      const d = build();
+      d.patientProfilesRepo.findByPatientCode.mockResolvedValue(null);
+      d.patientProfilesRepo.findHomonyms.mockResolvedValue(['leo-1']);
+      d.personsRepo.create.mockReturnValue({ id: 'p2' });
+      d.patientProfilesRepo.create.mockReturnValue({
+        profileId: 'p2',
+        patientCode: 'PC-2',
+        createdAt: new Date(),
+      });
+      await d.service.registerPatient(
+        { patientCode: 'PC-2', displayName: 'Leonardo', allowHomonym: true },
+        actor,
+      );
+      expect(d.patientProfilesRepo.findHomonyms).not.toHaveBeenCalled();
+      expect(d.personsRepo.create).toHaveBeenCalled();
+    });
   });
 
   describe('linkAccount (UC-05-02)', () => {
@@ -501,6 +547,34 @@ describe('ProfilesPatientsService', () => {
         'a',
         expect.any(Date),
       );
+      // The survivor had no own account: the loser's moves over.
+      expect(d.accountLinksRepo.reassignSelfActiveLinks).toHaveBeenCalledWith(
+        d.tx,
+        'b',
+        'a',
+        expect.any(Date),
+      );
+    });
+
+    it('keeps the survivor account and does not move the loser one', async () => {
+      const d = build();
+      d.patientProfilesRepo.findById
+        .mockResolvedValueOnce({ profileId: 'a' })
+        .mockResolvedValueOnce({ profileId: 'b' });
+      d.mergeEventsRepo.create.mockReturnValue({ id: 'e1' });
+      d.personsRepo.findById.mockResolvedValue(null);
+      d.accountLinksRepo.hasSelfActiveLink.mockResolvedValue(true);
+
+      await d.service.mergePatients(
+        { survivingPatientProfileId: 'a', mergedPatientProfileId: 'b' },
+        actor,
+      );
+
+      expect(d.accountLinksRepo.hasSelfActiveLink).toHaveBeenCalledWith(
+        d.tx,
+        'a',
+      );
+      expect(d.accountLinksRepo.reassignSelfActiveLinks).not.toHaveBeenCalled();
     });
 
     it('rejects re-merging an already merged patient (conflict)', async () => {
@@ -705,6 +779,44 @@ describe('ProfilesPatientsService', () => {
       expect(
         d.administrativeAreas.assertIsAdministrativeArea,
       ).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('searchPatients — homonyms', () => {
+    it('says which homonym has an account and masks the document', async () => {
+      const d = build();
+      d.patientProfilesRepo.searchPage.mockResolvedValue([
+        {
+          profileId: 'a',
+          patientCode: 'P1',
+          nationalId: '7654321',
+          hasAccount: true,
+        },
+        {
+          profileId: 'b',
+          patientCode: 'P2',
+          nationalId: null,
+          hasAccount: false,
+        },
+      ]);
+
+      const res = await d.service.searchPatients({ query: 'leo', limit: 50 }, {
+        id: 'u-1',
+        roles: ['PRACTITIONER'],
+      } as any);
+
+      expect(res.items).toEqual([
+        expect.objectContaining({
+          profileId: 'a',
+          nationalIdMasked: '•••321',
+          hasAccount: true,
+        }),
+        expect.objectContaining({
+          profileId: 'b',
+          nationalIdMasked: null,
+          hasAccount: false,
+        }),
+      ]);
     });
   });
 

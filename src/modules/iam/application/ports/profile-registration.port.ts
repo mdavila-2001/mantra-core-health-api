@@ -36,6 +36,11 @@ export interface ProfileRegistrationPort {
   createPersonProfile(tx: EntityManager, data: object): unknown;
   createPatientProfile(tx: EntityManager, data: object): { profileId: string };
   createAccountLink(tx: EntityManager, data: object): unknown;
+  /** 409 `POSSIBLE_DUPLICATE_PATIENT` when a live patient has this name. */
+  assertNoHomonymPatient(
+    tx: EntityManager,
+    check: { readonly displayName?: string; readonly allowHomonym?: boolean },
+  ): Promise<void>;
   /**
    * Perfil de secretaria (`profiles.secretary_profiles`); su `profileId` es el
    * id de la persona, igual que el del paciente.
