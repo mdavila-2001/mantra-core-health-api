@@ -342,7 +342,7 @@ export class QaFlowsService {
     }
 
     const marks = suiteIds.map(() => '?').join(', ');
-    const runs = await this.em.getConnection().execute<
+    const runs = await this.em.execute<
       Array<{
         suite_id: string;
         id: string;

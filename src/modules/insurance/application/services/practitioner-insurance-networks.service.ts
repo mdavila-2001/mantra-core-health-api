@@ -41,11 +41,8 @@ export class PractitionerInsuranceNetworksService {
   async listForPractitioner(
     practitionerProfileId: string,
   ): Promise<PractitionerInsuranceNetworkDto[]> {
-    const rows = await this.em
-      .fork()
-      .getConnection()
-      .execute<NetworkRow[]>(
-        `select distinct m.id as membership_id,
+    const rows = await this.em.execute<NetworkRow[]>(
+      `select distinct m.id as membership_id,
               ca.id as carrier_id,
               ca.legal_name as carrier_name,
               n.name as network_name,
@@ -64,13 +61,13 @@ export class PractitionerInsuranceNetworksService {
           and n.status_concept_id = ?
           and (m.effective_from is null or m.effective_from <= current_date)
           and (m.effective_to is null or m.effective_to >= current_date)`,
-        [
-          practitionerProfileId,
-          PRAC.ROLE_ASSIGNMENT_ACTIVE,
-          INS.MEMBERSHIP_ACTIVE,
-          INS.NETWORK_ACTIVE,
-        ],
-      );
+      [
+        practitionerProfileId,
+        PRAC.ROLE_ASSIGNMENT_ACTIVE,
+        INS.MEMBERSHIP_ACTIVE,
+        INS.NETWORK_ACTIVE,
+      ],
+    );
     return rows.map((row) => ({
       membershipId: row.membership_id,
       carrierId: row.carrier_id,

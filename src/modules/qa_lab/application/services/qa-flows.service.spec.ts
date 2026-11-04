@@ -38,9 +38,7 @@ function build(
     find: jest.fn((entity: unknown) =>
       Promise.resolve(byEntity.get(entity) ?? []),
     ),
-    getConnection: () => ({
-      execute: jest.fn(() => Promise.resolve(data.runs ?? [])),
-    }),
+    execute: jest.fn(() => Promise.resolve(data.runs ?? [])),
   } as any;
   const routes = {
     all: () =>

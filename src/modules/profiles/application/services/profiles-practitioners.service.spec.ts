@@ -3040,6 +3040,18 @@ describe('ProfilesPractitionersService', () => {
       });
     });
 
+    /** A SQL error in the figures must not abort the request transaction. */
+    it('reads the figures in a savepoint that inherits the transaction', async () => {
+      const d = build();
+      d.practitionersRepo.listPage.mockResolvedValue([row]);
+
+      await d.service.listPractitioners({ limit: 50 });
+
+      expect(d.em.fork).toHaveBeenCalledWith({ keepTransactionContext: true });
+      expect(d.em.transactional).toHaveBeenCalled();
+      expect(d.practitionerContext.directoryStats.mock.calls[0][0]).toBe(d.tx);
+    });
+
     /** La fila de más existe sólo para saber si hay página siguiente. */
     it('recorta la fila extra y devuelve cursor de continuación', async () => {
       const d = build();

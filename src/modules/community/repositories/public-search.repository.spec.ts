@@ -291,7 +291,7 @@ describe('PublicSearchRepository.practiceSitesByPractitioner', () => {
    */
   function build(rows: SitePublicRow[] = []) {
     const execute = mockFn(async () => rows);
-    const em = { getConnection: mockFn(() => ({ execute })) };
+    const em = { execute };
     return { repo: new PublicSearchRepository(), em, execute };
   }
 
@@ -344,7 +344,7 @@ describe('PublicSearchRepository · unaccent (P-14)', () => {
     const execute = mockFn(async (sql: string) =>
       sql.includes('pg_extension') ? [{ present }] : [{ id: 'p1' }],
     );
-    const em = { getConnection: mockFn(() => ({ execute })) };
+    const em = { execute };
     return { repo: new PublicSearchRepository() as any, em, execute };
   }
 
@@ -393,7 +393,7 @@ describe('PublicSearchRepository · unaccent (P-14)', () => {
 describe('PublicSearchRepository · locationsByOwner', () => {
   function build(rows: unknown[] = []) {
     const execute = mockFn(async () => rows);
-    const em = { getConnection: mockFn(() => ({ execute })) };
+    const em = { execute };
     return { repo: new PublicSearchRepository(), em, execute };
   }
 

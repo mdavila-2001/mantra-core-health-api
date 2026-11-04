@@ -224,12 +224,10 @@ export class SchedulingNoticeRepository {
     const resource = await em.findOne(SchedulableResources, { id: resourceId });
     if (!resource?.practiceId) return {};
 
-    const rows = await em
-      .getConnection()
-      .execute<{ name: string }[]>(
-        `SELECT name FROM practice.practices WHERE id = ? LIMIT 1`,
-        [resource.practiceId],
-      );
+    const rows = await em.execute<{ name: string }[]>(
+      `SELECT name FROM practice.practices WHERE id = ? LIMIT 1`,
+      [resource.practiceId],
+    );
 
     const practiceName = rows[0]?.name;
     return practiceName === undefined || practiceName.trim() === ''

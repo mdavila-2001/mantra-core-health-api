@@ -17,7 +17,7 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
  * M4 · H2 — las dos lecturas de ficha por HTTP, con la app de Nest de verdad:
  * enrutado, inyección del módulo, `ValidationPipe` igual al global de
  * `main.ts`, filtros de excepción y serialización. Lo único doble es la base:
- * `EntityManager#getConnection().execute` devuelve filas preparadas según la
+ * `EntityManager#execute` devuelve filas preparadas según la
  * consulta que llega.
  *
  * No es la verificación de runtime (`VERIFIED`): el SQL no corre contra
@@ -104,7 +104,7 @@ function doubleBase(profiles: Record<string, Profile>) {
     }
     return [];
   });
-  const em: any = { getConnection: () => ({ execute }) };
+  const em: any = { execute };
   em.fork = () => em;
   return { em, execute };
 }

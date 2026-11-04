@@ -231,7 +231,7 @@ export class InvitationsRepository {
   ): Promise<Map<string, InvitationCardContext>> {
     const result = new Map<string, InvitationCardContext>();
     if (invitationIds.length === 0) return result;
-    const rows = await em.getConnection().execute<InvitationCardContextRow[]>(
+    const rows = await em.execute<InvitationCardContextRow[]>(
       `SELECT i.id AS "invitationId",
                 t.title AS "title",
                 t.description AS "description",
