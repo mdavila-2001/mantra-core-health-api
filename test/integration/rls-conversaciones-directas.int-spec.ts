@@ -14,6 +14,10 @@ import pg from 'pg';
  *      INSERT failed the WITH CHECK and the chat answered 500.
  *   2. A conversation of another tenant stays invisible and untouchable.
  *   3. A tenant-less conversation cannot be moved into another tenant.
+ *   4. With v4.2.84, the public profile of a recipient in another tenant (the
+ *      practitioner the patient searched for) is readable but not writable,
+ *      and a private one stays invisible. Without it, opening the chat answered
+ *      412 «La persona no está disponible».
  *
  * Opt-in (`RLS_TEST=1`), like `rls.int-spec.ts`. Needs the base model applied
  * (`database/SQL/apply_all.sql`). Inserts and deletes only its own rows.
@@ -42,6 +46,12 @@ const DIRECT = 'c0a20000-0000-4000-8000-000000004287';
 const OTHER_TENANT = 'c0a20000-0000-4000-8000-0000000042b2';
 const CONCEPT = 'c0a20000-0000-4000-8000-0000000042cc';
 const IDS = [DIRECT, OTHER_TENANT];
+// Deterministic seed concepts (`deterministicId`) used by the v4.2.84 policy.
+const PROFILE_PUBLIC = '0006f171-fd25-503d-906e-b77423a5f1d0';
+const STATE_ACTIVE = '38a1d301-f40d-5b17-a695-5e6d605f8b19';
+const PROFILE_B_PUBLIC = 'c0a20000-0000-4000-8000-0000000042d1';
+const PROFILE_B_PRIVATE = 'c0a20000-0000-4000-8000-0000000042d2';
+const PROFILES = [PROFILE_B_PUBLIC, PROFILE_B_PRIVATE];
 /** Whether this suite inserted `CONCEPT` (the seed may not have it). */
 let insertedConcept = false;
 
@@ -81,6 +91,10 @@ describeRls(
         'DELETE FROM community.conversations WHERE id = ANY($1)',
         [IDS],
       );
+      await admin.query(
+        'DELETE FROM community.public_profiles WHERE id = ANY($1)',
+        [PROFILES],
+      );
       if (insertedConcept) {
         await admin.query(
           'DELETE FROM terminology.catalog_concepts WHERE id = $1',
@@ -101,6 +115,7 @@ describeRls(
       const patches = join(process.cwd(), 'database', 'SQL', 'patches');
       for (const patch of [
         '2026-08-05_tenant_rls.sql',
+        '2026-11-02_v4284_rls_community_public_read.sql',
         '2026-11-04_v4287_conversaciones_directas_rls.sql',
       ]) {
         await admin.query(readFileSync(join(patches, patch), 'utf8'));
@@ -113,18 +128,38 @@ describeRls(
       await cleanup();
       // Superuser without FK triggers: no tenants or code systems to seed. The
       // concept must exist because `mantra_app` inserts with FK checks on.
+      // A failed seed is rolled back so `afterAll` can still clean up.
       await admin.query('BEGIN');
-      await admin.query("SET LOCAL session_replication_role = 'replica'");
-      const seeded = await admin.query(
-        `INSERT INTO terminology.catalog_concepts
-         (id, code_system_version_id, code, display, created_at, updated_at)
-       VALUES ($1, $1, 'community:V4287_PROBE', 'v4.2.87', now(), now())
-       ON CONFLICT DO NOTHING`,
-        [CONCEPT],
-      );
-      insertedConcept = seeded.rowCount === 1;
-      await admin.query(insertConversation(OTHER_TENANT, TENANT_B));
-      await admin.query('COMMIT');
+      try {
+        await admin.query("SET LOCAL session_replication_role = 'replica'");
+        const seeded = await admin.query(
+          `INSERT INTO terminology.catalog_concepts
+           (id, code_system_version_id, code, display, created_at, updated_at)
+         VALUES ($1, $1, 'community:V4287_PROBE', 'v4.2.87', now(), now())
+         ON CONFLICT DO NOTHING`,
+          [CONCEPT],
+        );
+        insertedConcept = seeded.rowCount === 1;
+        await admin.query(insertConversation(OTHER_TENANT, TENANT_B));
+        for (const [id, visibility] of [
+          [PROFILE_B_PUBLIC, PROFILE_PUBLIC],
+          [PROFILE_B_PRIVATE, CONCEPT],
+        ]) {
+          await admin.query(
+            `INSERT INTO community.public_profiles
+               (id, tenant_id, target_type_concept_id, target_id, slug,
+                display_name, visibility_concept_id, status_concept_id,
+                created_at, updated_at)
+             VALUES ($1, $2, $3, $1, $1::uuid::text, 'v4287', $4, $5, now(), now())`,
+            [id, TENANT_B, CONCEPT, visibility, STATE_ACTIVE],
+          );
+        }
+        await admin.query('COMMIT');
+      } catch (error) {
+        await admin.query('ROLLBACK');
+        insertedConcept = false;
+        throw error;
+      }
       app = new pg.Client(APP);
       await app.connect();
     });
@@ -191,6 +226,21 @@ describeRls(
             [DIRECT, TENANT_B],
           ),
         ).rejects.toThrow(/row-level security/);
+      });
+    });
+
+    it('lee la ficha pública de otro tenant, pero no la privada ni la modifica', async () => {
+      await asTenantA(async () => {
+        const visible = await app.query<{ id: string }>(
+          'SELECT id FROM community.public_profiles WHERE id = ANY($1)',
+          [PROFILES],
+        );
+        expect(visible.rows.map((row) => row.id)).toEqual([PROFILE_B_PUBLIC]);
+        const updated = await app.query(
+          'UPDATE community.public_profiles SET display_name = $2 WHERE id = $1',
+          [PROFILE_B_PUBLIC, 'x'],
+        );
+        expect(updated.rowCount).toBe(0);
       });
     });
   },
