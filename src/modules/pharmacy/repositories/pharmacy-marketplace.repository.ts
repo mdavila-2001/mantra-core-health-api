@@ -269,7 +269,15 @@ export class PharmacyMarketplaceRepository {
                  ORDER BY d.preferred DESC
                  LIMIT 1
               ) es ON true
-        WHERE s.internal_code = ?`,
+        WHERE s.internal_code = ?
+        -- Most LINAME presentations first: when a substance has two ATC codes
+        -- (ibuprofen M01AE01 ×2, C01EB16 ×1) the common one comes first.
+        ORDER BY (SELECT jsonb_array_length(p.value_json)
+                    FROM terminology.concept_properties p
+                   WHERE p.concept_id = c.id
+                     AND p.property_code = 'liname_presentations'
+                     AND jsonb_typeof(p.value_json) = 'array') DESC NULLS LAST,
+                 c.code`,
         [VADEMECUM_CODE_SYSTEM],
         'all',
       );

@@ -60,7 +60,8 @@ export function searchShowcase(
     return { offers: [...offers], catalogOnly: [], outcome };
   const matchedOffers = offers.filter((offer) => matches.has(offer.conceptId));
   // One card per medication name: the vademécum has some substances under two
-  // ATC codes (ibuprofen M01AE01 and C01EB16), which read as duplicates.
+  // ATC codes (ibuprofen M01AE01 and C01EB16). The first one wins, and
+  // `findVademecum` lists the most-prescribed (most LINAME presentations) first.
   const shown = new Set(
     matchedOffers.map((offer) => normalize(offer.genericName)),
   );
