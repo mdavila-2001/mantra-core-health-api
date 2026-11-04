@@ -107,7 +107,7 @@ export class SchedulingAgendaNoticesService {
   async notifyReminders(reminderIds: readonly string[]): Promise<number> {
     if (reminderIds.length === 0) return 0;
 
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const reminders = await this.noticeRepo.findBookingIdsForReminders(
       em,
       reminderIds,

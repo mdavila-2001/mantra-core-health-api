@@ -138,7 +138,7 @@ export class SearchBookingsUseCase {
         "select set_config('app.system_context', 'true', true)",
       );
     }
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
 
     // A quiénes representa el actor, una vez para toda la lectura (B.1). Decide
     // a qué citas puede llegar una cuenta de paciente y si el motivo de consulta

@@ -64,7 +64,7 @@ function build() {
     notices as any,
     logger as any,
   );
-  return { service, noticeRepo, notices, logger };
+  return { service, em, noticeRepo, notices, logger };
 }
 
 describe('SchedulingAgendaNoticesService (P8 · avisos del worker)', () => {
@@ -122,6 +122,8 @@ describe('SchedulingAgendaNoticesService (P8 · avisos del worker)', () => {
         { reminderId: 'rem-2', bookingId: 'borrada', offsetMinutes: 120 },
       ]);
       d.noticeRepo.describeBooking
+      expect(d.em.fork).toHaveBeenCalledWith({ keepTransactionContext: true });
+
         .mockResolvedValueOnce(booking)
         .mockResolvedValueOnce(null);
 

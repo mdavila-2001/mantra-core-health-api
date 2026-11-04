@@ -30,7 +30,7 @@ export class ListTemplateLiveBookingsUseCase {
     templateId: string,
     actor: AuthenticatedUser,
   ): Promise<TemplateLiveBookingsResponseDto> {
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const template = await this.catalogRepo.findTemplateById(em, templateId);
     if (!template) {
       throw new ResourceNotFoundException('Plantilla no encontrada', {

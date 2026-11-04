@@ -645,6 +645,9 @@ describe('SchedulingCatalogService', () => {
         await d.service.listTemplates(RESOURCE, actor);
 
         expect(d.catalogRepo.findRulesByTemplates).toHaveBeenCalledTimes(1);
+        expect(d.em.fork).toHaveBeenCalledWith({
+          keepTransactionContext: true,
+        });
         expect(d.catalogRepo.findRulesByTemplates).toHaveBeenCalledWith(
           expect.anything(),
           ['tpl-1', 'tpl-2'],
@@ -873,6 +876,9 @@ describe('SchedulingCatalogService', () => {
         await d.service.listExceptions(RESOURCE, FROM, TO, actor);
 
         expect(
+        expect(d.em.fork).toHaveBeenCalledWith({
+          keepTransactionContext: true,
+        });
           d.catalogRepo.findExceptionsByResourceInRange,
         ).toHaveBeenCalledWith(expect.anything(), RESOURCE, FROM, TO);
       });
@@ -2222,6 +2228,10 @@ describe('SchedulingCatalogService', () => {
           );
 
           expect(res).toEqual({
+          expect(d.em.fork).toHaveBeenCalledWith({
+            keepTransactionContext: true,
+          });
+
             templateId: 'tpl-1',
             total: 1,
             bookings: [
@@ -3930,6 +3940,19 @@ describe('SchedulingCatalogService', () => {
     });
 
     it('sin onlyAvailable no impone estado: el dueño de la agenda ve su día entero', async () => {
+    it('lee sobre la transacción de la petición (RLS)', async () => {
+      const d = buildCatalog();
+      d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+      d.catalogRepo.findSlotsByResourceInRange.mockResolvedValue([]);
+
+      await d.service.getResourceAgenda(RESOURCE, {
+        ...WINDOW,
+        onlyAvailable: false,
+      });
+
+      expect(d.em.fork).toHaveBeenCalledWith({ keepTransactionContext: true });
+    });
+
       // La vista del profesional necesita ver lo bloqueado —es su reunión, su
       // cirugía—. Filtrar siempre por SLOT_OPEN le escondería su propio día.
       const d = buildCatalog();

@@ -23,8 +23,10 @@ import { PinoLogger } from 'nestjs-pino';
 import { SchedulingNoticeRepository } from '../../../infrastructure/repositories';
 
 /**
- * Los avisos que siguen a un cambio de la cita (P8). Corren **después** de que
- * la transacción cerró y no lanzan: un canal caído no deshace una reserva.
+ * Notices that follow a booking change (P8). They run after the use case's own
+ * transaction (a savepoint under the request transaction when RLS is enforced,
+ * so the request transaction is still open) and do not throw: a down channel
+ * does not undo a booking.
  */
 
 @Injectable()
@@ -70,13 +72,15 @@ export class BookingChangeNotifier {
    *
    * ## Por qué no lanza
    *
-   * Igual que {@link notifyChange}: corre después de que la transacción cerró.
-   * Un fallo del canal se registra y se descarta; la reserva ya existe.
+   * Igual que {@link notifyChange}: corre después de la transacción del caso de
+   * uso, dentro de la de la petición (el fork la conserva para leer la cita
+   * recién escrita bajo RLS). Un fallo del canal se registra y se descarta; la
+   * reserva ya existe.
    *
    * @param bookingId - La cita recién solicitada.
    */
   async notifyRequest(bookingId: string): Promise<void> {
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const booking = await this.noticeRepo.describeBooking(em, bookingId);
     if (!booking) return;
 
@@ -125,8 +129,9 @@ export class BookingChangeNotifier {
    *
    * ## Por qué no lanza
    *
-   * Porque se invoca **después** de que la transacción cerró y el estado ya es
-   * el nuevo. Un fallo del canal se registra y se descarta: la regla del README
+   * Porque se invoca **después** de la transacción del caso de uso, con el
+   * estado ya nuevo y la transacción de la petición todavía abierta (el fork la
+   * conserva, por RLS). Un fallo del canal se registra y se descarta: la regla del README
    * es que emitir jamás rompa una reserva. Ver `ports/agenda-notice.port.ts`.
    */
   async notifyChange(
@@ -135,7 +140,7 @@ export class BookingChangeNotifier {
     reason: string | undefined,
     actorKind: BookingActorKind,
   ): Promise<void> {
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const booking = await this.noticeRepo.describeBooking(em, bookingId);
     if (!booking) return;
 
