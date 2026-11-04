@@ -7782,6 +7782,89 @@ paths:
       description: >-
         Definir una categoría de permiso. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
         respuestas de error usan el envelope ErrorResponse.
+  /authz/practitioners/me/access-requests:
+    get:
+      operationId: AuthzPractitionerRequestsController_listAccessRequests
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AccessRequestItemDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Solicitudes de acceso enviadas y recibidas
+      tags:
+        - authz-practitioner-requests
+      description: >-
+        Solicitudes de acceso enviadas y recibidas. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+  /authz/practitioners/me/care-relationships/{id}/respond:
+    post:
+      operationId: AuthzPractitionerRequestsController_respond
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RespondPrimaryCareRequestDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthzStatusResultDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Aceptar o rechazar una solicitud de cabecera de un paciente
+      tags:
+        - authz-practitioner-requests
+      description: >-
+        Aceptar o rechazar una solicitud de cabecera de un paciente. Requiere JWT y los roles o alcances declarados por
+        el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /authz/permissions:
     post:
       operationId: AuthzCatalogController_createPermission
@@ -9029,6 +9112,82 @@ paths:
       description: >-
         Quién ve mi historia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de
         error usan el envelope ErrorResponse.
+  /authz/me/access-requests:
+    get:
+      operationId: AuthzMeController_listAccessRequests
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AccessRequestItemDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Mis solicitudes de acceso, recibidas y enviadas
+      tags:
+        - authz-me
+      description: >-
+        Mis solicitudes de acceso, recibidas y enviadas. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /authz/me/primary-practitioner-requests:
+    post:
+      operationId: AuthzMeController_requestPrimaryPractitioner
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestPrimaryPractitionerDto'
+      responses:
+        '201':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthzIdResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Pedir a un profesional que sea mi médico de cabecera
+      tags:
+        - authz-me
+      description: >-
+        Pedir a un profesional que sea mi médico de cabecera. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /authz/me/care-relationships/{id}/revoke:
     post:
       operationId: AuthzMeController_revokeCareRelationship
@@ -32029,6 +32188,48 @@ paths:
       description: >-
         Aceptar (con las especialidades autorizadas) o rechazar la solicitud. Requiere JWT y los roles o alcances
         declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /consent/practitioner-access-requests/{id}/revoke:
+    post:
+      operationId: PractitionerAccessRequestsController_revoke
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResultDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Revocar un acceso granular que el paciente ya había aceptado
+      tags:
+        - consent-practitioner-access
+      description: >-
+        Revocar un acceso granular que el paciente ya había aceptado. Requiere JWT y los roles o alcances declarados por
+        el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /consent/me/consents:
     get:
       operationId: ConsentMeController_listConsents
@@ -83311,6 +83512,10 @@ tags:
     description: >-
       Operaciones del dominio funcional authz policies. Consulte el catálogo Markdown de endpoints para payloads
       mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: authz-practitioner-requests
+    description: >-
+      Operaciones del dominio funcional authz practitioner requests. Consulte el catálogo Markdown de endpoints para
+      payloads mínimos, restricciones, ejemplos completos y semántica de negocio.
   - name: authz-roles
     description: >-
       Operaciones del dominio funcional authz roles. Consulte el catálogo Markdown de endpoints para payloads mínimos,
@@ -90106,6 +90311,17 @@ components:
           description: Fin de vigencia
           format: date-time
       additionalProperties: false
+    AuthzStatusResultDto:
+      type: object
+      properties:
+        ok:
+          type: boolean
+          description: true si la operación se aplicó
+        affected:
+          type: number
+          description: Nº de filas afectadas cuando aplica
+      required:
+        - ok
     CreatePermissionGrantDto:
       type: object
       properties:
@@ -90345,6 +90561,7 @@ components:
             - TREATING
             - CONSULTING
             - EMERGENCY
+            - PRIMARY
         reasonText:
           type: string
           description: Motivo de la solicitud
@@ -90366,6 +90583,18 @@ components:
           type: array
           items:
             type: string
+      required:
+        - decision
+      additionalProperties: false
+    RespondPrimaryCareRequestDto:
+      type: object
+      properties:
+        decision:
+          type: string
+          description: Decisión sobre la solicitud de cabecera
+          enum:
+            - ACCEPT
+            - REJECT
       required:
         - decision
       additionalProperties: false
@@ -90426,6 +90655,23 @@ components:
           description: Rol cuya decisión se invalida
           format: uuid
       additionalProperties: false
+    AuthzIdResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          description: Concept id del estado del recurso
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - status
+        - createdAt
     EvaluateDecisionDto:
       type: object
       properties:
@@ -90816,6 +91062,66 @@ components:
         - userId
         - reviewerUserId
         - reviewedAt
+    AccessRequestCounterpartDto:
+      type: object
+      properties:
+        profileId:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+    AccessRequestItemDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        kind:
+          type: string
+          enum:
+            - CABECERA
+            - GRANULAR
+            - ATENCION
+        direction:
+          type: string
+          enum:
+            - RECEIVED
+            - SENT
+        counterpart:
+          $ref: '#/components/schemas/AccessRequestCounterpartDto'
+        requestedAt:
+          type: string
+          format: date-time
+        decidedAt:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          type: string
+          enum:
+            - PENDING
+            - ACTIVE
+            - REJECTED
+            - REVOKED
+            - EXPIRED
+        requestedSpecialtyConceptIds:
+          type: array
+          items:
+            type: string
+        authorizedSpecialtyConceptIds:
+          type: array
+          items:
+            type: string
+      required:
+        - id
+        - kind
+        - direction
+        - counterpart
+        - requestedAt
+        - decidedAt
+        - status
+        - requestedSpecialtyConceptIds
+        - authorizedSpecialtyConceptIds
     AccessMapDto:
       type: object
       properties:
@@ -99284,6 +99590,14 @@ components:
         - occurredAt
         - recordedByUserId
         - requestId
+    StatusResultDto:
+      type: object
+      properties:
+        ok:
+          type: boolean
+          description: true si la operación se aplicó
+      required:
+        - ok
     StatusEventListDto:
       type: object
       properties:
@@ -106996,6 +107310,16 @@ components:
       required:
         - patientProfileId
         - specialtyConceptIds
+      additionalProperties: false
+    RequestPrimaryPractitionerDto:
+      type: object
+      properties:
+        practitionerProfileId:
+          type: string
+          description: Perfil del profesional elegido
+          format: uuid
+      required:
+        - practitionerProfileId
       additionalProperties: false
     DecidePractitionerAccessRequestDto:
       type: object
