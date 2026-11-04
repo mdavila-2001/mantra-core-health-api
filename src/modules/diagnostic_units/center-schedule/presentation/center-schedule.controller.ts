@@ -1,10 +1,12 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseUUIDPipe,
   Patch,
+  Post,
   Put,
   Query,
   UseGuards,
@@ -25,12 +27,14 @@ import {
 import { LabStaffGuard } from '../../../diagnostics/guards';
 import { GetCenterScheduleUseCase } from '../application/get-center-schedule.use-case';
 import { ListCenterBookingsUseCase } from '../application/list-center-bookings.use-case';
+import { ManageCenterEquipmentUseCase } from '../application/manage-center-equipment.use-case';
 import { SaveCenterScheduleUseCase } from '../application/save-center-schedule.use-case';
 import { SetEquipmentStatusUseCase } from '../application/set-equipment-status.use-case';
 import {
   CenterBookingsDto,
   CenterBookingsQueryDto,
 } from './dto/center-bookings.dto';
+import { CenterEquipmentInputDto } from './dto/center-equipment.dto';
 import { SaveCenterScheduleDto } from './dto/center-schedule.dto';
 import { CenterScheduleViewDto } from './dto/center-schedule-view.dto';
 import { SetEquipmentStatusDto } from './dto/equipment-status.dto';
@@ -53,6 +57,7 @@ export class CenterScheduleController {
     private readonly saver: SaveCenterScheduleUseCase,
     private readonly equipment: SetEquipmentStatusUseCase,
     private readonly bookings: ListCenterBookingsUseCase,
+    private readonly devices: ManageCenterEquipmentUseCase,
   ) {}
 
   @Get('me/schedule')
@@ -116,5 +121,56 @@ export class CenterScheduleController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<CenterScheduleViewDto> {
     return this.equipment.execute(unitId, equipmentId, dto.status, actor);
+  }
+
+  @Post(':unitId/equipment')
+  @Audited({
+    action: 'DIAGNOSTIC_EQUIPMENT_ADDED',
+    entity: 'diagnostic_unit',
+    entityId: 'param:unitId',
+  })
+  @ApiOperation({ summary: 'Register a device (a production line)' })
+  @ApiOkResponse({ type: CenterScheduleViewDto })
+  addEquipment(
+    @Param('unitId', ParseUUIDPipe) unitId: string,
+    @Body() dto: CenterEquipmentInputDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<CenterScheduleViewDto> {
+    return this.devices.create(unitId, dto, actor);
+  }
+
+  @Put(':unitId/equipment/:equipmentId')
+  @Audited({
+    action: 'DIAGNOSTIC_EQUIPMENT_UPDATED',
+    entity: 'diagnostic_equipment',
+    entityId: 'param:equipmentId',
+  })
+  @ApiOperation({ summary: 'Edit a device: name, maker, serial, modality' })
+  @ApiOkResponse({ type: CenterScheduleViewDto })
+  editEquipment(
+    @Param('unitId', ParseUUIDPipe) unitId: string,
+    @Param('equipmentId', ParseUUIDPipe) equipmentId: string,
+    @Body() dto: CenterEquipmentInputDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<CenterScheduleViewDto> {
+    return this.devices.update(unitId, equipmentId, dto, actor);
+  }
+
+  @Delete(':unitId/equipment/:equipmentId')
+  @Audited({
+    action: 'DIAGNOSTIC_EQUIPMENT_REMOVED',
+    entity: 'diagnostic_equipment',
+    entityId: 'param:equipmentId',
+  })
+  @ApiOperation({ summary: 'Remove a device registered by mistake' })
+  @ApiOkResponse({ type: CenterScheduleViewDto })
+  @ApiConflictResponse({
+    description: 'Already referenced: mark it out of service instead.',
+  })
+  removeEquipment(
+    @Param('unitId', ParseUUIDPipe) unitId: string,
+    @Param('equipmentId', ParseUUIDPipe) equipmentId: string,
+  ): Promise<CenterScheduleViewDto> {
+    return this.devices.remove(unitId, equipmentId);
   }
 }

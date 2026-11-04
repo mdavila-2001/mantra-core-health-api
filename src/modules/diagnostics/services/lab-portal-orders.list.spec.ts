@@ -26,6 +26,7 @@ function build(rows: (page: any) => any[], total: number) {
         patientName: 'Ana',
         requesterName: 'Dra. Rojas',
         reason: null,
+        openSpecimenIds: ['specimen-1'],
         files: [],
       })),
       files: [],
@@ -51,6 +52,8 @@ describe('LabPortalOrdersService.list', () => {
       after: undefined,
     });
     expect(page.items).toHaveLength(100);
+    // A received order with its specimen open can be rejected.
+    expect(page.items[0].canReject).toBe(true);
     expect(page.count).toBe(250);
     expect(page.nextCursor).toEqual(expect.any(String));
   });

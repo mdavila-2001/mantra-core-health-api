@@ -82,6 +82,7 @@ export function validateSchedule(schedule: CenterSchedule): ScheduleProblem[] {
   check('general', schedule.general);
   for (const m of schedule.modalities) check(m.modalityCode, m.schedule);
   for (const s of schedule.studies) check(s.studyCode, s.schedule);
+  for (const e of schedule.equipment) check(e.equipmentId, e.schedule);
   return problems;
 }
 
@@ -161,19 +162,23 @@ export function defaultSchedule(kind: CenterKind): CenterSchedule {
         general: week([1, 2, 3, 4, 5, 6], '07:00', '10:00', 15),
         modalities: [],
         studies: [],
+        equipment: [],
       }
     : {
         general: week([1, 2, 3, 4, 5], '08:00', '17:00', 30),
         modalities: [],
         studies: [],
+        equipment: [],
       };
 }
 
-/** Template names carry the level of each block: `MODALITY:ECO`, `STUDY:<code>`. */
+/** Template names carry the level of each block: `MODALITY:ECO`, `STUDY:<code>`, `EQUIPMENT:<id>`. */
 export type TemplateScope =
   | { readonly level: 'GENERAL' }
-  | { readonly level: 'MODALITY'; readonly key: string }
-  | { readonly level: 'STUDY'; readonly key: string };
+  | {
+      readonly level: 'MODALITY' | 'STUDY' | 'EQUIPMENT';
+      readonly key: string;
+    };
 
 export function templateName(scope: TemplateScope): string {
   return scope.level === 'GENERAL' ? 'GENERAL' : `${scope.level}:${scope.key}`;
@@ -181,7 +186,10 @@ export function templateName(scope: TemplateScope): string {
 
 /** Any other name (e.g. the seeded «Horario de …») is a general template. */
 export function scopeOfTemplate(name: string): TemplateScope {
-  const match = /^(MODALITY|STUDY):(.+)$/.exec(name);
+  const match = /^(MODALITY|STUDY|EQUIPMENT):(.+)$/.exec(name);
   if (!match) return { level: 'GENERAL' };
-  return { level: match[1] as 'MODALITY' | 'STUDY', key: match[2] };
+  return {
+    level: match[1] as 'MODALITY' | 'STUDY' | 'EQUIPMENT',
+    key: match[2],
+  };
 }

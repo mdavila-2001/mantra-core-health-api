@@ -130,11 +130,18 @@ describe('LabPortalOrdersService.transition', () => {
           specimenTypeConceptId: undefined,
         }),
       }),
-      view('RECEIVED'),
+      view('RECEIVED', { openSpecimenIds: [] }),
     );
-    await t.service.transition(LAB, 'sr-1', { action: 'RECEIVE' }, actor);
+    const result = await t.service.transition(
+      LAB,
+      'sr-1',
+      { action: 'RECEIVE' },
+      actor,
+    );
     expect(t.specimens.createAccession).toHaveBeenCalled();
     expect(t.specimens.createSpecimen).not.toHaveBeenCalled();
+    // Without a specimen there is nothing to reject: the screen hides it.
+    expect(result.canReject).toBe(false);
   });
 
   it('PROCESS: a completed performer work order with its test line', async () => {

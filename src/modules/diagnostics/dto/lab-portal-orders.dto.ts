@@ -54,6 +54,11 @@ export class LabOrderDto {
   @ApiProperty({ format: 'date-time' }) requestedAt!: string;
   @ApiProperty({ enum: STATUSES }) status!: LabOrderStatus;
   @ApiProperty({ type: String, nullable: true }) reason!: string | null;
+  @ApiProperty({
+    description:
+      'Whether REJECT applies now: a received order with an open specimen.',
+  })
+  canReject!: boolean;
   @ApiProperty({ type: [LabOrderFileDto] }) files!: LabOrderFileDto[];
 }
 

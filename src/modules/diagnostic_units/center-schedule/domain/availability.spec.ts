@@ -46,7 +46,7 @@ describe('availableStarts', () => {
   it('subtracts overlapping bookings of the same modality from the capacity', () => {
     const items = availableStarts({
       ...base,
-      capacity: 2,
+      capacityAt: () => 2,
       occupying: [
         booking('b1', '2026-11-10T12:00:00Z'),
         booking('b2', '2026-11-10T12:00:00Z', 'RX'),
@@ -71,22 +71,22 @@ describe('availableStarts', () => {
   it('a full slot disappears, and a booking without modality takes from every modality', () => {
     const items = availableStarts({
       ...base,
-      capacity: 1,
+      capacityAt: () => 1,
       occupying: [booking('b1', '2026-11-10T12:00:00Z', null, null)],
     });
     expect(items.map((i) => i.startAt)).toEqual(['2026-11-10T12:30:00.000Z']);
   });
 
   it('no operational equipment, no starts', () => {
-    expect(availableStarts({ ...base, capacity: 0, occupying: [] })).toEqual(
-      [],
-    );
+    expect(
+      availableStarts({ ...base, capacityAt: () => 0, occupying: [] }),
+    ).toEqual([]);
   });
 
   it('never offers a start inside the booking margin', () => {
     const items = availableStarts({
       ...base,
-      capacity: 1,
+      capacityAt: () => 1,
       occupying: [],
       now: new Date('2026-11-10T11:45:00Z'),
     });
@@ -99,6 +99,7 @@ describe('bookingsOutsideSchedule', () => {
     general: TUESDAY,
     modalities: [],
     studies: [],
+    equipment: [],
   };
 
   it('counts the bookings that would not start on a slot of the new schedule', () => {
@@ -116,34 +117,58 @@ describe('bookingsOutsideSchedule', () => {
 });
 
 describe('bookingsWithoutEquipment', () => {
-  const eco = (status: CenterEquipment['status']): CenterEquipment => ({
-    id: status,
+  const eco = (
+    status: CenterEquipment['status'],
+    id: string = status,
+  ): CenterEquipment => ({
+    id,
     name: 'Ecógrafo',
     manufacturer: null,
     model: null,
+    serialNumber: null,
     modalityCode: 'ECO',
     status,
     glossaryConceptId: null,
   });
 
-  it('flags bookings that lost their device, not the ones that still have one', () => {
+  const schedule: CenterSchedule = {
+    general: TUESDAY,
+    modalities: [],
+    studies: [],
+    equipment: [],
+  };
+
+  it('flags only the bookings that no open line can take', () => {
     const future = [
       booking('a', '2026-11-10T12:00:00Z'),
       booking('b', '2026-11-10T12:00:00Z'),
     ];
     expect(
       bookingsWithoutEquipment(
+        schedule,
         future,
-        [eco('OPERATIONAL'), eco('OPERATIONAL')],
-        1,
+        [eco('OPERATIONAL', 'e1'), eco('OPERATIONAL', 'e2')],
+        ZONE,
       ),
     ).toBe(0);
     expect(
       bookingsWithoutEquipment(
+        schedule,
         future,
-        [eco('OPERATIONAL'), eco('MAINTENANCE')],
-        1,
+        [eco('OPERATIONAL', 'e1'), eco('MAINTENANCE', 'e2')],
+        ZONE,
       ),
-    ).toBe(2);
+    ).toBe(1);
+  });
+
+  it('a modality without registered devices rides on the declared capacity', () => {
+    expect(
+      bookingsWithoutEquipment(
+        schedule,
+        [booking('a', '2026-11-10T12:00:00Z', 'RX')],
+        [eco('OPERATIONAL', 'e1')],
+        ZONE,
+      ),
+    ).toBe(0);
   });
 });
