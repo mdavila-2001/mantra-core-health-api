@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `accounting`
 
-Referencia exhaustiva de 59 operación(es) del módulo `accounting`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 68 operación(es) del módulo `accounting`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `accounting-accruals`, `accounting-assets`, `accounting-cockpit`, `accounting-fiscal`, `accounting-fx`, `accounting-ledger`, `accounting-liabilities`, `accounting-practitioner`, `accounting-subledger`
-- **Controladores:** `AccountingAccrualController`, `AccountingAssetController`, `AccountingCockpitController`, `AccountingExchangeRateController`, `AccountingFiscalController`, `AccountingLedgerController`, `AccountingLiabilityController`, `AccountingPractitionerController`, `AccountingPractitionerSimpleController`, `AccountingSubledgerController`
+- **Etiquetas OpenAPI:** `accounting`, `accounting-accruals`, `accounting-assets`, `accounting-cockpit`, `accounting-fiscal`, `accounting-fx`, `accounting-ledger`, `accounting-liabilities`, `accounting-practitioner`, `accounting-report-templates`, `accounting-subledger`
+- **Controladores:** `AccountingAccrualController`, `AccountingAssetController`, `AccountingCockpitController`, `AccountingExchangeRateController`, `AccountingFiscalController`, `AccountingLedgerController`, `AccountingLiabilityController`, `AccountingPractitionerController`, `AccountingPractitionerSimpleController`, `AccountingSpaceController`, `AccountingSubledgerController`, `ReportTemplatesController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -20,56 +20,65 @@ Referencia exhaustiva de 59 operación(es) del módulo `accounting`, derivada de
 7. [POST /accounting/assets/capitalize](#7-post-accounting-assets-capitalize) — Capitalizar activo (alta y asignación)
 8. [GET /accounting/balance-sheet](#8-get-accounting-balance-sheet) — Balance general de una práctica a una fecha de corte
 9. [POST /accounting/clearing-documents](#9-post-accounting-clearing-documents) — Compensar/clearing de partidas abiertas
-10. [POST /accounting/depreciation/run](#10-post-accounting-depreciation-run) — Ejecutar depreciación de activos (batch)
-11. [GET /accounting/dimensions](#11-get-accounting-dimensions) — Dimensiones analíticas de una práctica
-12. [POST /accounting/exchange-rates](#12-post-accounting-exchange-rates) — Registrar tipo de cambio para conversión
-13. [POST /accounting/fiscal-periods/{id}/lock](#13-post-accounting-fiscal-periods-id-lock) — Cerrar/bloquear un periodo fiscal
-14. [GET /accounting/fiscal-years](#14-get-accounting-fiscal-years) — Ejercicio fiscal vigente de una práctica
-15. [POST /accounting/fiscal-years](#15-post-accounting-fiscal-years) — Abrir un ejercicio fiscal y sus periodos
-16. [GET /accounting/general-ledger](#16-get-accounting-general-ledger) — Libro mayor de una cuenta (movimientos posteados, con saldo corrido)
-17. [GET /accounting/income-statement](#17-get-accounting-income-statement) — Estado de resultados de una práctica
-18. [GET /accounting/journal-transactions](#18-get-accounting-journal-transactions) — Libro diario de una práctica
-19. [POST /accounting/journal-transactions](#19-post-accounting-journal-transactions) — Registrar y postear un asiento balanceado (partida doble)
-20. [GET /accounting/journal-transactions/{id}](#20-get-accounting-journal-transactions-id) — Un asiento con sus líneas
-21. [POST /accounting/journal-transactions/{id}/approve](#21-post-accounting-journal-transactions-id-approve) — Aprobar el asiento (rol de aprobación)
-22. [POST /accounting/journal-transactions/{id}/classify](#22-post-accounting-journal-transactions-id-classify) — Clasificar automáticamente el asiento
-23. [GET /accounting/journal-transactions/{id}/document-flow](#23-get-accounting-journal-transactions-id-document-flow) — Flujo del documento de un asiento
-24. [POST /accounting/journal-transactions/{id}/files](#24-post-accounting-journal-transactions-id-files) — Adjuntar un documento soporte al asiento
-25. [POST /accounting/journal-transactions/{id}/post](#25-post-accounting-journal-transactions-id-post) — Postear el asiento aprobado (efecto en el mayor)
-26. [POST /accounting/journal-transactions/{id}/reverse](#26-post-accounting-journal-transactions-id-reverse) — Reversar un asiento posteado (líneas espejo)
-27. [POST /accounting/journal-transactions/{id}/submit-review](#27-post-accounting-journal-transactions-id-submit-review) — Enviar el asiento a revisión
-28. [POST /accounting/journal-transactions/drafts](#28-post-accounting-journal-transactions-drafts) — Crear un asiento en borrador (DRAFT, sin postear)
-29. [POST /accounting/liabilities/{id}/payments](#29-post-accounting-liabilities-id-payments) — Liquidar cuota de pasivo (principal + interés)
-30. [GET /accounting/open-items](#30-get-accounting-open-items) — Cartera abierta de una práctica
-31. [POST /accounting/open-items](#31-post-accounting-open-items) — Generar partida abierta en subledger
-32. [POST /accounting/postings/determine-accounts](#32-post-accounting-postings-determine-accounts) — Determinar la cuenta objetivo por reglas vigentes
-33. [GET /accounting/practitioner/assets](#33-get-accounting-practitioner-assets) — Listar los activos propios de una práctica
-34. [POST /accounting/practitioner/assets](#34-post-accounting-practitioner-assets) — Dar de alta un activo propio
-35. [PATCH /accounting/practitioner/assets/{id}/automation](#35-patch-accounting-practitioner-assets-id-automation) — Prender o apagar la automatización de un activo
-36. [GET /accounting/practitioner/assets/{id}/depreciations](#36-get-accounting-practitioner-assets-id-depreciations) — Histórico de depreciación de un activo propio
-37. [POST /accounting/practitioner/assets/{id}/progress](#37-post-accounting-practitioner-assets-id-progress) — Registrar el avance (depreciación) de un activo
-38. [POST /accounting/practitioner/consultation-income](#38-post-accounting-practitioner-consultation-income) — Registrar ingreso por consulta pagada
-39. [POST /accounting/practitioner/entries](#39-post-accounting-practitioner-entries) — Registrar un gasto u otro ingreso
-40. [GET /accounting/practitioner/liabilities](#40-get-accounting-practitioner-liabilities) — Listar los pasivos propios de una práctica
-41. [POST /accounting/practitioner/liabilities](#41-post-accounting-practitioner-liabilities) — Dar de alta un pasivo propio (préstamo)
-42. [PATCH /accounting/practitioner/liabilities/{id}/automation](#42-patch-accounting-practitioner-liabilities-id-automation) — Prender o apagar la automatización de un pasivo
-43. [POST /accounting/practitioner/liabilities/{id}/progress](#43-post-accounting-practitioner-liabilities-id-progress) — Registrar el avance (pago de cuota) de un pasivo
-44. [GET /accounting/practitioner/liabilities/{id}/schedule](#44-get-accounting-practitioner-liabilities-id-schedule) — Cronograma de cuotas de un pasivo propio
-45. [GET /accounting/practitioner/paid-consultations](#45-get-accounting-practitioner-paid-consultations) — Consultas pagadas sin registrar contablemente
-46. [GET /accounting/practitioner/simple/accounts](#46-get-accounting-practitioner-simple-accounts) — Cuentas de la contabilidad simple de una práctica
-47. [POST /accounting/practitioner/simple/accounts](#47-post-accounting-practitioner-simple-accounts) — Crear una cuenta (o un tipo de gasto, activo o deuda)
-48. [DELETE /accounting/practitioner/simple/accounts/{id}](#48-delete-accounting-practitioner-simple-accounts-id) — Borrar una cuenta propia
-49. [PUT /accounting/practitioner/simple/accounts/{id}](#49-put-accounting-practitioner-simple-accounts-id) — Renombrar una cuenta
-50. [GET /accounting/practitioner/simple/records](#50-get-accounting-practitioner-simple-records) — Gastos, activos y deudas de una práctica
-51. [POST /accounting/practitioner/simple/records](#51-post-accounting-practitioner-simple-records) — Registrar un gasto, un activo o una deuda
-52. [DELETE /accounting/practitioner/simple/records/{id}](#52-delete-accounting-practitioner-simple-records-id) — Borrar un gasto, un activo o una deuda
-53. [PUT /accounting/practitioner/simple/records/{id}](#53-put-accounting-practitioner-simple-records-id) — Editar un gasto, un activo o una deuda
-54. [GET /accounting/practitioner/simple/summary](#54-get-accounting-practitioner-simple-summary) — Pacientes atendidos, cobrado y esperado de las aseguradoras
-55. [GET /accounting/practitioner/simple/transactions](#55-get-accounting-practitioner-simple-transactions) — Transacciones debe/haber de una práctica
-56. [POST /accounting/practitioner/simple/transactions](#56-post-accounting-practitioner-simple-transactions) — Registrar una transacción debe/haber
-57. [DELETE /accounting/practitioner/simple/transactions/{id}](#57-delete-accounting-practitioner-simple-transactions-id) — Borrar una transacción debe/haber
-58. [PUT /accounting/practitioner/simple/transactions/{id}](#58-put-accounting-practitioner-simple-transactions-id) — Editar una transacción debe/haber
-59. [GET /accounting/trial-balance](#59-get-accounting-trial-balance) — Balance de sumas y saldos
+10. [GET /accounting/cost-centers](#10-get-accounting-cost-centers) — Centros de costo con su unidad (F5f)
+11. [POST /accounting/cost-centers/{id}/unit-link](#11-post-accounting-cost-centers-id-unit-link) — Ligar un centro de costo a una unidad (F5f)
+12. [POST /accounting/depreciation/run](#12-post-accounting-depreciation-run) — Ejecutar depreciación de activos (batch)
+13. [GET /accounting/dimensions](#13-get-accounting-dimensions) — Dimensiones analíticas de una práctica
+14. [POST /accounting/exchange-rates](#14-post-accounting-exchange-rates) — Registrar tipo de cambio para conversión
+15. [POST /accounting/fiscal-periods/{id}/lock](#15-post-accounting-fiscal-periods-id-lock) — Cerrar/bloquear un periodo fiscal
+16. [GET /accounting/fiscal-years](#16-get-accounting-fiscal-years) — Ejercicio fiscal vigente de una práctica
+17. [POST /accounting/fiscal-years](#17-post-accounting-fiscal-years) — Abrir un ejercicio fiscal y sus periodos
+18. [GET /accounting/general-ledger](#18-get-accounting-general-ledger) — Libro mayor de una cuenta (movimientos posteados, con saldo corrido)
+19. [GET /accounting/income-statement](#19-get-accounting-income-statement) — Estado de resultados de una práctica
+20. [GET /accounting/infrastructure-items](#20-get-accounting-infrastructure-items) — Activos de infraestructura con su espacio (F5f)
+21. [PATCH /accounting/infrastructure-items/{id}](#21-patch-accounting-infrastructure-items-id) — Ubicar un activo en un espacio (F5f)
+22. [GET /accounting/journal-transactions](#22-get-accounting-journal-transactions) — Libro diario de una práctica
+23. [POST /accounting/journal-transactions](#23-post-accounting-journal-transactions) — Registrar y postear un asiento balanceado (partida doble)
+24. [GET /accounting/journal-transactions/{id}](#24-get-accounting-journal-transactions-id) — Un asiento con sus líneas
+25. [POST /accounting/journal-transactions/{id}/approve](#25-post-accounting-journal-transactions-id-approve) — Aprobar el asiento (rol de aprobación)
+26. [POST /accounting/journal-transactions/{id}/classify](#26-post-accounting-journal-transactions-id-classify) — Clasificar automáticamente el asiento
+27. [GET /accounting/journal-transactions/{id}/document-flow](#27-get-accounting-journal-transactions-id-document-flow) — Flujo del documento de un asiento
+28. [POST /accounting/journal-transactions/{id}/files](#28-post-accounting-journal-transactions-id-files) — Adjuntar un documento soporte al asiento
+29. [POST /accounting/journal-transactions/{id}/post](#29-post-accounting-journal-transactions-id-post) — Postear el asiento aprobado (efecto en el mayor)
+30. [POST /accounting/journal-transactions/{id}/reverse](#30-post-accounting-journal-transactions-id-reverse) — Reversar un asiento posteado (líneas espejo)
+31. [POST /accounting/journal-transactions/{id}/submit-review](#31-post-accounting-journal-transactions-id-submit-review) — Enviar el asiento a revisión
+32. [POST /accounting/journal-transactions/drafts](#32-post-accounting-journal-transactions-drafts) — Crear un asiento en borrador (DRAFT, sin postear)
+33. [POST /accounting/liabilities/{id}/payments](#33-post-accounting-liabilities-id-payments) — Liquidar cuota de pasivo (principal + interés)
+34. [GET /accounting/open-items](#34-get-accounting-open-items) — Cartera abierta de una práctica
+35. [POST /accounting/open-items](#35-post-accounting-open-items) — Generar partida abierta en subledger
+36. [POST /accounting/postings/determine-accounts](#36-post-accounting-postings-determine-accounts) — Determinar la cuenta objetivo por reglas vigentes
+37. [GET /accounting/practitioner/assets](#37-get-accounting-practitioner-assets) — Listar los activos propios de una práctica
+38. [POST /accounting/practitioner/assets](#38-post-accounting-practitioner-assets) — Dar de alta un activo propio
+39. [PATCH /accounting/practitioner/assets/{id}/automation](#39-patch-accounting-practitioner-assets-id-automation) — Prender o apagar la automatización de un activo
+40. [GET /accounting/practitioner/assets/{id}/depreciations](#40-get-accounting-practitioner-assets-id-depreciations) — Histórico de depreciación de un activo propio
+41. [POST /accounting/practitioner/assets/{id}/progress](#41-post-accounting-practitioner-assets-id-progress) — Registrar el avance (depreciación) de un activo
+42. [POST /accounting/practitioner/consultation-income](#42-post-accounting-practitioner-consultation-income) — Registrar ingreso por consulta pagada
+43. [POST /accounting/practitioner/entries](#43-post-accounting-practitioner-entries) — Registrar un gasto u otro ingreso
+44. [GET /accounting/practitioner/liabilities](#44-get-accounting-practitioner-liabilities) — Listar los pasivos propios de una práctica
+45. [POST /accounting/practitioner/liabilities](#45-post-accounting-practitioner-liabilities) — Dar de alta un pasivo propio (préstamo)
+46. [PATCH /accounting/practitioner/liabilities/{id}/automation](#46-patch-accounting-practitioner-liabilities-id-automation) — Prender o apagar la automatización de un pasivo
+47. [POST /accounting/practitioner/liabilities/{id}/progress](#47-post-accounting-practitioner-liabilities-id-progress) — Registrar el avance (pago de cuota) de un pasivo
+48. [GET /accounting/practitioner/liabilities/{id}/schedule](#48-get-accounting-practitioner-liabilities-id-schedule) — Cronograma de cuotas de un pasivo propio
+49. [GET /accounting/practitioner/paid-consultations](#49-get-accounting-practitioner-paid-consultations) — Consultas pagadas sin registrar contablemente
+50. [GET /accounting/practitioner/simple/accounts](#50-get-accounting-practitioner-simple-accounts) — Cuentas de la contabilidad simple de una práctica
+51. [POST /accounting/practitioner/simple/accounts](#51-post-accounting-practitioner-simple-accounts) — Crear una cuenta (o un tipo de gasto, activo o deuda)
+52. [DELETE /accounting/practitioner/simple/accounts/{id}](#52-delete-accounting-practitioner-simple-accounts-id) — Borrar una cuenta propia
+53. [PUT /accounting/practitioner/simple/accounts/{id}](#53-put-accounting-practitioner-simple-accounts-id) — Renombrar una cuenta
+54. [GET /accounting/practitioner/simple/records](#54-get-accounting-practitioner-simple-records) — Gastos, activos y deudas de una práctica
+55. [POST /accounting/practitioner/simple/records](#55-post-accounting-practitioner-simple-records) — Registrar un gasto, un activo o una deuda
+56. [DELETE /accounting/practitioner/simple/records/{id}](#56-delete-accounting-practitioner-simple-records-id) — Borrar un gasto, un activo o una deuda
+57. [PUT /accounting/practitioner/simple/records/{id}](#57-put-accounting-practitioner-simple-records-id) — Editar un gasto, un activo o una deuda
+58. [GET /accounting/practitioner/simple/summary](#58-get-accounting-practitioner-simple-summary) — Pacientes atendidos, cobrado y esperado de las aseguradoras
+59. [GET /accounting/practitioner/simple/transactions](#59-get-accounting-practitioner-simple-transactions) — Transacciones debe/haber de una práctica
+60. [POST /accounting/practitioner/simple/transactions](#60-post-accounting-practitioner-simple-transactions) — Registrar una transacción debe/haber
+61. [DELETE /accounting/practitioner/simple/transactions/{id}](#61-delete-accounting-practitioner-simple-transactions-id) — Borrar una transacción debe/haber
+62. [PUT /accounting/practitioner/simple/transactions/{id}](#62-put-accounting-practitioner-simple-transactions-id) — Editar una transacción debe/haber
+63. [GET /accounting/trial-balance](#63-get-accounting-trial-balance) — Balance de sumas y saldos
+64. [GET /admin/accounting/report-templates](#64-get-admin-accounting-report-templates) — Plantillas de presentación contable por tipo de usuario
+65. [POST /admin/accounting/report-templates](#65-post-admin-accounting-report-templates) — Crear una plantilla global sin modificar cuentas ni asientos
+66. [GET /admin/accounting/report-templates/{id}](#66-get-admin-accounting-report-templates-id) — Leer una plantilla de presentación contable
+67. [PUT /admin/accounting/report-templates/{id}](#67-put-admin-accounting-report-templates-id) — Editar presentación con control de versión (409 si cambió)
+68. [POST /admin/accounting/report-templates/{id}/end](#68-post-admin-accounting-report-templates-id-end) — Desactivar una plantilla sin borrarla (idempotente)
 
 ---
 
@@ -1447,7 +1456,218 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /accounting/depreciation/run
+## 10. GET /accounting/cost-centers
+
+- **Módulo:** `accounting`
+- **Etiqueta OpenAPI:** `accounting`
+- **Nombre:** Centros de costo con su unidad (F5f)
+- **Operation ID:** `AccountingSpaceController_listCostCenters`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccountingSpaceController.listCostCenters](../../src/modules/accounting/controllers/accounting-space.controller.ts)
+
+### Descripción de negocio
+
+Centros de costo con su unidad (F5f). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Centros de costo de la práctica con su unidad.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /accounting/cost-centers` en `AccountingSpaceController_listCostCenters`. El controlador delega en `SpaceAccountingService.listCostCenters`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `practiceId` | query | Sí | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /accounting/cost-centers?practiceId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /accounting/cost-centers?practiceId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Práctica no encontrada | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/accounting/cost-centers"
+}
+```
+
+---
+
+## 11. POST /accounting/cost-centers/{id}/unit-link
+
+- **Módulo:** `accounting`
+- **Etiqueta OpenAPI:** `accounting`
+- **Nombre:** Ligar un centro de costo a una unidad (F5f)
+- **Operation ID:** `AccountingSpaceController_linkUnit`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccountingSpaceController.linkUnit](../../src/modules/accounting/controllers/accounting-space.controller.ts)
+
+### Descripción de negocio
+
+Ligar un centro de costo a una unidad (F5f). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Ligar un centro de costo a una unidad clínica (uno activo por unidad).
+
+### Descripción del sistema
+
+NestJS resuelve `POST /accounting/cost-centers/{id}/unit-link` en `AccountingSpaceController_linkUnit`. El controlador delega en `SpaceAccountingService.linkUnit`. Valida el body como `LinkCostCenterUnitDto` y consume `application/json`. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `LinkCostCenterUnitDto`; los campos opcionales se omiten.
+
+```http
+POST /accounting/cost-centers/00000000-0000-4000-8000-000000000001/unit-link HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "clinicalUnitId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `clinicalUnitId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /accounting/cost-centers/00000000-0000-4000-8000-000000000001/unit-link HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "clinicalUnitId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Operación completada correctamente. | `no declarado` | No |
+| 401 | Operación completada correctamente. | `no declarado` | No |
+| 403 | Operación completada correctamente. | `no declarado` | No |
+| 404 | Operación completada correctamente. | `no declarado` | No |
+| 409 | Operación completada correctamente. | `no declarado` | No |
+| 413 | Operación completada correctamente. | `no declarado` | No |
+| 422 | Operación completada correctamente. | `no declarado` | No |
+| 429 | Operación completada correctamente. | `no declarado` | No |
+| 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Centro de costo no encontrado | Excepción explícita en src/modules/accounting/services/space-accounting.service.ts |
+| 404 | `NOT_FOUND` | Unidad clínica no encontrada | Excepción explícita en src/modules/accounting/services/space-accounting.service.ts |
+| 404 | `NOT_FOUND` | Práctica no encontrada | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El centro de costo no está activo | Excepción explícita en src/modules/accounting/services/space-accounting.service.ts |
+| 422 | `PRECONDITION_FAILED` | La unidad no es de la práctica del centro de costo | Excepción explícita en src/modules/accounting/services/space-accounting.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/accounting/cost-centers/{id}/unit-link"
+}
+```
+
+---
+
+## 12. POST /accounting/depreciation/run
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-assets`
@@ -1587,7 +1807,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. GET /accounting/dimensions
+## 13. GET /accounting/dimensions
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-cockpit`
@@ -1717,7 +1937,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /accounting/exchange-rates
+## 14. POST /accounting/exchange-rates
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-fx`
@@ -1854,7 +2074,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /accounting/fiscal-periods/{id}/lock
+## 15. POST /accounting/fiscal-periods/{id}/lock
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-fiscal`
@@ -1979,7 +2199,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. GET /accounting/fiscal-years
+## 16. GET /accounting/fiscal-years
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-cockpit`
@@ -2118,7 +2338,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /accounting/fiscal-years
+## 17. POST /accounting/fiscal-years
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-fiscal`
@@ -2275,7 +2495,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. GET /accounting/general-ledger
+## 18. GET /accounting/general-ledger
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -2431,7 +2651,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. GET /accounting/income-statement
+## 19. GET /accounting/income-statement
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -2589,7 +2809,219 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. GET /accounting/journal-transactions
+## 20. GET /accounting/infrastructure-items
+
+- **Módulo:** `accounting`
+- **Etiqueta OpenAPI:** `accounting`
+- **Nombre:** Activos de infraestructura con su espacio (F5f)
+- **Operation ID:** `AccountingSpaceController_listItems`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccountingSpaceController.listItems](../../src/modules/accounting/controllers/accounting-space.controller.ts)
+
+### Descripción de negocio
+
+Activos de infraestructura con su espacio (F5f). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Activos de infraestructura de la práctica con su espacio.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /accounting/infrastructure-items` en `AccountingSpaceController_listItems`. El controlador delega en `SpaceAccountingService.listItems`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `practiceId` | query | Sí | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /accounting/infrastructure-items?practiceId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /accounting/infrastructure-items?practiceId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Práctica no encontrada | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/accounting/infrastructure-items"
+}
+```
+
+---
+
+## 21. PATCH /accounting/infrastructure-items/{id}
+
+- **Módulo:** `accounting`
+- **Etiqueta OpenAPI:** `accounting`
+- **Nombre:** Ubicar un activo en un espacio (F5f)
+- **Operation ID:** `AccountingSpaceController_locateItem`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccountingSpaceController.locateItem](../../src/modules/accounting/controllers/accounting-space.controller.ts)
+
+### Descripción de negocio
+
+Ubicar un activo en un espacio (F5f). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Ubicar (o desubicar) un activo en un espacio de la misma práctica.
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /accounting/infrastructure-items/{id}` en `AccountingSpaceController_locateItem`. El controlador delega en `SpaceAccountingService.locateItem`. Valida el body como `LocateInfrastructureItemDto` y consume `application/json`. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `If-Match` | header | No | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `LocateInfrastructureItemDto`; los campos opcionales se omiten.
+
+```http
+PATCH /accounting/infrastructure-items/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "careSpaceId": {}
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `careSpaceId` | Sí | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /accounting/infrastructure-items/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+If-Match: valor-ejemplo
+Content-Type: application/json
+
+{
+  "careSpaceId": {}
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Operación completada correctamente. | `no declarado` | No |
+| 401 | Operación completada correctamente. | `no declarado` | No |
+| 403 | Operación completada correctamente. | `no declarado` | No |
+| 404 | Operación completada correctamente. | `no declarado` | No |
+| 409 | Operación completada correctamente. | `no declarado` | No |
+| 413 | Operación completada correctamente. | `no declarado` | No |
+| 422 | Operación completada correctamente. | `no declarado` | No |
+| 429 | Operación completada correctamente. | `no declarado` | No |
+| 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Activo no encontrado | Excepción explícita en src/modules/accounting/services/space-accounting.service.ts |
+| 404 | `NOT_FOUND` | Espacio no encontrado | Excepción explícita en src/modules/accounting/services/space-accounting.service.ts |
+| 404 | `NOT_FOUND` | Práctica no encontrada | Excepción explícita en src/modules/practice/services/infrastructure-access.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El espacio no es de la práctica del activo | Excepción explícita en src/modules/accounting/services/space-accounting.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/accounting/infrastructure-items/{id}"
+}
+```
+
+---
+
+## 22. GET /accounting/journal-transactions
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -2732,7 +3164,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /accounting/journal-transactions
+## 23. POST /accounting/journal-transactions
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -2941,7 +3373,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. GET /accounting/journal-transactions/{id}
+## 24. GET /accounting/journal-transactions/{id}
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -3096,7 +3528,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /accounting/journal-transactions/{id}/approve
+## 25. POST /accounting/journal-transactions/{id}/approve
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -3244,7 +3676,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /accounting/journal-transactions/{id}/classify
+## 26. POST /accounting/journal-transactions/{id}/classify
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -3392,7 +3824,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. GET /accounting/journal-transactions/{id}/document-flow
+## 27. GET /accounting/journal-transactions/{id}/document-flow
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-cockpit`
@@ -3518,7 +3950,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /accounting/journal-transactions/{id}/files
+## 28. POST /accounting/journal-transactions/{id}/files
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -3646,7 +4078,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. POST /accounting/journal-transactions/{id}/post
+## 29. POST /accounting/journal-transactions/{id}/post
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -3794,7 +4226,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. POST /accounting/journal-transactions/{id}/reverse
+## 30. POST /accounting/journal-transactions/{id}/reverse
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -3941,7 +4373,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. POST /accounting/journal-transactions/{id}/submit-review
+## 31. POST /accounting/journal-transactions/{id}/submit-review
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -4089,7 +4521,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. POST /accounting/journal-transactions/drafts
+## 32. POST /accounting/journal-transactions/drafts
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -4299,7 +4731,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. POST /accounting/liabilities/{id}/payments
+## 33. POST /accounting/liabilities/{id}/payments
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-liabilities`
@@ -4455,7 +4887,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. GET /accounting/open-items
+## 34. GET /accounting/open-items
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-cockpit`
@@ -4617,7 +5049,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. POST /accounting/open-items
+## 35. POST /accounting/open-items
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-subledger`
@@ -4759,7 +5191,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. POST /accounting/postings/determine-accounts
+## 36. POST /accounting/postings/determine-accounts
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -4888,7 +5320,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 33. GET /accounting/practitioner/assets
+## 37. GET /accounting/practitioner/assets
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -4984,7 +5416,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 34. POST /accounting/practitioner/assets
+## 38. POST /accounting/practitioner/assets
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -5147,7 +5579,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 35. PATCH /accounting/practitioner/assets/{id}/automation
+## 39. PATCH /accounting/practitioner/assets/{id}/automation
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -5263,7 +5695,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 36. GET /accounting/practitioner/assets/{id}/depreciations
+## 40. GET /accounting/practitioner/assets/{id}/depreciations
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -5386,7 +5818,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 37. POST /accounting/practitioner/assets/{id}/progress
+## 41. POST /accounting/practitioner/assets/{id}/progress
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -5526,7 +5958,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 38. POST /accounting/practitioner/consultation-income
+## 42. POST /accounting/practitioner/consultation-income
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -5687,7 +6119,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 39. POST /accounting/practitioner/entries
+## 43. POST /accounting/practitioner/entries
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -5846,7 +6278,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 40. GET /accounting/practitioner/liabilities
+## 44. GET /accounting/practitioner/liabilities
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -5942,7 +6374,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 41. POST /accounting/practitioner/liabilities
+## 45. POST /accounting/practitioner/liabilities
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -6096,7 +6528,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 42. PATCH /accounting/practitioner/liabilities/{id}/automation
+## 46. PATCH /accounting/practitioner/liabilities/{id}/automation
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -6212,7 +6644,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 43. POST /accounting/practitioner/liabilities/{id}/progress
+## 47. POST /accounting/practitioner/liabilities/{id}/progress
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -6354,7 +6786,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 44. GET /accounting/practitioner/liabilities/{id}/schedule
+## 48. GET /accounting/practitioner/liabilities/{id}/schedule
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -6477,7 +6909,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 45. GET /accounting/practitioner/paid-consultations
+## 49. GET /accounting/practitioner/paid-consultations
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -6606,7 +7038,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 46. GET /accounting/practitioner/simple/accounts
+## 50. GET /accounting/practitioner/simple/accounts
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -6726,7 +7158,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 47. POST /accounting/practitioner/simple/accounts
+## 51. POST /accounting/practitioner/simple/accounts
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -6864,7 +7296,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 48. DELETE /accounting/practitioner/simple/accounts/{id}
+## 52. DELETE /accounting/practitioner/simple/accounts/{id}
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -6965,7 +7397,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 49. PUT /accounting/practitioner/simple/accounts/{id}
+## 53. PUT /accounting/practitioner/simple/accounts/{id}
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -7105,7 +7537,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 50. GET /accounting/practitioner/simple/records
+## 54. GET /accounting/practitioner/simple/records
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -7228,7 +7660,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 51. POST /accounting/practitioner/simple/records
+## 55. POST /accounting/practitioner/simple/records
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -7376,7 +7808,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 52. DELETE /accounting/practitioner/simple/records/{id}
+## 56. DELETE /accounting/practitioner/simple/records/{id}
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -7475,7 +7907,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 53. PUT /accounting/practitioner/simple/records/{id}
+## 57. PUT /accounting/practitioner/simple/records/{id}
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -7624,7 +8056,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 54. GET /accounting/practitioner/simple/summary
+## 58. GET /accounting/practitioner/simple/summary
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -7746,7 +8178,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 55. GET /accounting/practitioner/simple/transactions
+## 59. GET /accounting/practitioner/simple/transactions
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -7868,7 +8300,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 56. POST /accounting/practitioner/simple/transactions
+## 60. POST /accounting/practitioner/simple/transactions
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -8016,7 +8448,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 57. DELETE /accounting/practitioner/simple/transactions/{id}
+## 61. DELETE /accounting/practitioner/simple/transactions/{id}
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -8115,7 +8547,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 58. PUT /accounting/practitioner/simple/transactions/{id}
+## 62. PUT /accounting/practitioner/simple/transactions/{id}
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -8264,7 +8696,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 59. GET /accounting/trial-balance
+## 63. GET /accounting/trial-balance
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -8402,6 +8834,587 @@ Ejemplo de error normalizado:
   "correlationId": "req-01J00000000000000000000000",
   "timestamp": "2026-07-31T12:00:00.000Z",
   "path": "/accounting/trial-balance"
+}
+```
+
+---
+
+## 64. GET /admin/accounting/report-templates
+
+- **Módulo:** `accounting`
+- **Etiqueta OpenAPI:** `accounting-report-templates`
+- **Nombre:** Plantillas de presentación contable por tipo de usuario
+- **Operation ID:** `ReportTemplatesController_list`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ReportTemplatesController.list](../../src/modules/accounting/report-templates/report-templates.controller.ts)
+
+### Descripción de negocio
+
+Catálogo global paginado por UUID. La audiencia clasifica la presentación y no concede acceso a datos contables.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/accounting/report-templates` en `ReportTemplatesController_list`. El controlador delega en `ReportTemplatesService.list`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `userType` | query | No | `string` | valores: `PATIENT`, `PRACTITIONER`, `HEALTH_FACILITY`, `LABORATORY`, `PHARMACY`, `INSURER` | Sin descripción específica en OpenAPI. | `PATIENT` |
+| `after` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `limit` | query | No | `number` | mínimo 1; máximo 100 | Sin descripción específica en OpenAPI. | `25` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/accounting/report-templates HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SUPERADMIN`, `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `ACCOUNTING_APPROVER`, `PRACTITIONER`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/accounting/report-templates?userType=PATIENT&after=00000000-0000-4000-8000-000000000001&limit=25 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | Sí |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SUPERADMIN, SECURITY_ADMIN, PLATFORM_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/accounting/report-templates"
+}
+```
+
+---
+
+## 65. POST /admin/accounting/report-templates
+
+- **Módulo:** `accounting`
+- **Etiqueta OpenAPI:** `accounting-report-templates`
+- **Nombre:** Crear una plantilla global sin modificar cuentas ni asientos
+- **Operation ID:** `ReportTemplatesController_create`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ReportTemplatesController.create](../../src/modules/accounting/report-templates/report-templates.controller.ts)
+
+### Descripción de negocio
+
+Sólo SUPERADMIN global. Código único por audiencia y columnas limitadas al contrato del reporte.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /admin/accounting/report-templates` en `ReportTemplatesController_create`. El controlador delega en `ReportTemplatesService.create`. Valida el body como `CreateReportTemplateDto` y consume `application/json`. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreateReportTemplateDto`; los campos opcionales se omiten.
+
+```http
+POST /admin/accounting/report-templates HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Nombre de ejemplo",
+  "reportKind": "TRIAL_BALANCE",
+  "columns": [
+    {
+      "key": "valor-ejemplo",
+      "label": "valor-ejemplo"
+    }
+  ],
+  "userType": "PATIENT",
+  "code": "CODIGO_EJEMPLO"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SUPERADMIN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `name` | Sí | `string` | longitud máxima 160 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `reportKind` | Sí | `string` | valores: `TRIAL_BALANCE`, `GENERAL_LEDGER`, `INCOME_STATEMENT` | Sin descripción específica en el contrato OpenAPI. | `TRIAL_BALANCE` |
+| `columns` | Sí | `array<ReportTemplateColumnDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"key":"valor-ejemplo","label":"valor-ejemplo"}]` |
+| `columns[].key` | Sí | `string` | longitud máxima 64 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `columns[].label` | Sí | `string` | longitud mínima 1; longitud máxima 80 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `userType` | Sí | `string` | valores: `PATIENT`, `PRACTITIONER`, `HEALTH_FACILITY`, `LABORATORY`, `PHARMACY`, `INSURER` | Sin descripción específica en el contrato OpenAPI. | `PATIENT` |
+| `code` | Sí | `string` | patrón `^[A-Z][A-Z0-9_]{1,79}$`; patrón runtime `/^[A-Z][A-Z0-9_]{1,79}$/` | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /admin/accounting/report-templates HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Nombre de ejemplo",
+  "reportKind": "TRIAL_BALANCE",
+  "columns": [
+    {
+      "key": "valor-ejemplo",
+      "label": "valor-ejemplo"
+    }
+  ],
+  "userType": "PATIENT",
+  "code": "CODIGO_EJEMPLO"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `no declarado` | Sí |
+| 400 | Operación completada correctamente. | `no declarado` | No |
+| 401 | Operación completada correctamente. | `no declarado` | No |
+| 403 | Operación completada correctamente. | `no declarado` | No |
+| 409 | Operación completada correctamente. | `no declarado` | No |
+| 413 | Operación completada correctamente. | `no declarado` | No |
+| 422 | Operación completada correctamente. | `no declarado` | No |
+| 429 | Operación completada correctamente. | `no declarado` | No |
+| 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 400 | `VALIDATION_FAILED` | {         code: 'VALIDATION_FAILED',         reason: AccountingErrorReason.REPORT_TEMPLATE_INVALID_COLUMNS,         message:           'Las columnas deben ser únicas y pertenecer al reporte seleccionado',       } | Excepción explícita en src/modules/accounting/report-templates/report-templates.service.ts |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SUPERADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | {         code: 'FORBIDDEN',         reason: AccountingErrorReason.REPORT_TEMPLATE_GLOBAL_ADMIN_REQUIRED,         message:           'La edición del catálogo global requiere SUPERADMIN de plataforma',       } | Excepción explícita en src/modules/accounting/report-templates/report-templates.service.ts |
+| 409 | `CONFLICT` | Ya existe ese código para el tipo de usuario | Excepción explícita en src/modules/accounting/report-templates/report-templates.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/accounting/report-templates"
+}
+```
+
+---
+
+## 66. GET /admin/accounting/report-templates/{id}
+
+- **Módulo:** `accounting`
+- **Etiqueta OpenAPI:** `accounting-report-templates`
+- **Nombre:** Leer una plantilla de presentación contable
+- **Operation ID:** `ReportTemplatesController_get`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ReportTemplatesController.get](../../src/modules/accounting/report-templates/report-templates.controller.ts)
+
+### Descripción de negocio
+
+Devuelve columnas, rótulos, estado y versión. No devuelve saldos ni ejecuta el reporte.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/accounting/report-templates/{id}` en `ReportTemplatesController_get`. El controlador delega en `ReportTemplatesService.get`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/accounting/report-templates/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SUPERADMIN`, `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `ACCOUNTING_APPROVER`, `PRACTITIONER`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/accounting/report-templates/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | Sí |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 404 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SUPERADMIN, SECURITY_ADMIN, PLATFORM_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | La plantilla no existe | Excepción explícita en src/modules/accounting/report-templates/report-templates.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/accounting/report-templates/{id}"
+}
+```
+
+---
+
+## 67. PUT /admin/accounting/report-templates/{id}
+
+- **Módulo:** `accounting`
+- **Etiqueta OpenAPI:** `accounting-report-templates`
+- **Nombre:** Editar presentación con control de versión (409 si cambió)
+- **Operation ID:** `ReportTemplatesController_update`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ReportTemplatesController.update](../../src/modules/accounting/report-templates/report-templates.controller.ts)
+
+### Descripción de negocio
+
+Compara expectedRowVersion en la escritura. Conserva código y audiencia; permite reactivar con isActive.
+
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /admin/accounting/report-templates/{id}` en `ReportTemplatesController_update`. El controlador delega en `ReportTemplatesService.update`. Valida el body como `UpdateReportTemplateDto` y consume `application/json`. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdateReportTemplateDto`; los campos opcionales se omiten.
+
+```http
+PUT /admin/accounting/report-templates/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Nombre de ejemplo",
+  "reportKind": "TRIAL_BALANCE",
+  "columns": [
+    {
+      "key": "valor-ejemplo",
+      "label": "valor-ejemplo"
+    }
+  ],
+  "expectedRowVersion": 1,
+  "isActive": true
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SUPERADMIN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `name` | Sí | `string` | longitud máxima 160 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `reportKind` | Sí | `string` | valores: `TRIAL_BALANCE`, `GENERAL_LEDGER`, `INCOME_STATEMENT` | Sin descripción específica en el contrato OpenAPI. | `TRIAL_BALANCE` |
+| `columns` | Sí | `array<ReportTemplateColumnDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"key":"valor-ejemplo","label":"valor-ejemplo"}]` |
+| `columns[].key` | Sí | `string` | longitud máxima 64 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `columns[].label` | Sí | `string` | longitud mínima 1; longitud máxima 80 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `expectedRowVersion` | Sí | `number` | mínimo 1 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `isActive` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PUT /admin/accounting/report-templates/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Nombre de ejemplo",
+  "reportKind": "TRIAL_BALANCE",
+  "columns": [
+    {
+      "key": "valor-ejemplo",
+      "label": "valor-ejemplo"
+    }
+  ],
+  "expectedRowVersion": 1,
+  "isActive": true
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | Sí |
+| 400 | Operación completada correctamente. | `no declarado` | No |
+| 401 | Operación completada correctamente. | `no declarado` | No |
+| 403 | Operación completada correctamente. | `no declarado` | No |
+| 404 | Operación completada correctamente. | `no declarado` | No |
+| 409 | Operación completada correctamente. | `no declarado` | No |
+| 413 | Operación completada correctamente. | `no declarado` | No |
+| 422 | Operación completada correctamente. | `no declarado` | No |
+| 429 | Operación completada correctamente. | `no declarado` | No |
+| 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 400 | `VALIDATION_FAILED` | {         code: 'VALIDATION_FAILED',         reason: AccountingErrorReason.REPORT_TEMPLATE_INVALID_COLUMNS,         message:           'Las columnas deben ser únicas y pertenecer al reporte seleccionado',       } | Excepción explícita en src/modules/accounting/report-templates/report-templates.service.ts |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SUPERADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | {         code: 'FORBIDDEN',         reason: AccountingErrorReason.REPORT_TEMPLATE_GLOBAL_ADMIN_REQUIRED,         message:           'La edición del catálogo global requiere SUPERADMIN de plataforma',       } | Excepción explícita en src/modules/accounting/report-templates/report-templates.service.ts |
+| 404 | `NOT_FOUND` | La plantilla no existe | Excepción explícita en src/modules/accounting/report-templates/report-templates.service.ts |
+| 409 | `CONFLICT` | La plantilla cambió: vuelva a leerla antes de editar | Excepción explícita en src/modules/accounting/report-templates/report-templates.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/accounting/report-templates/{id}"
+}
+```
+
+---
+
+## 68. POST /admin/accounting/report-templates/{id}/end
+
+- **Módulo:** `accounting`
+- **Etiqueta OpenAPI:** `accounting-report-templates`
+- **Nombre:** Desactivar una plantilla sin borrarla (idempotente)
+- **Operation ID:** `ReportTemplatesController_end`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ReportTemplatesController.end](../../src/modules/accounting/report-templates/report-templates.controller.ts)
+
+### Descripción de negocio
+
+Conserva el registro y su auditoría. Repetir la desactivación no incrementa la versión.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /admin/accounting/report-templates/{id}/end` en `ReportTemplatesController_end`. El controlador delega en `ReportTemplatesService.end`. Valida el body como `EndReportTemplateDto` y consume `application/json`. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `EndReportTemplateDto`; los campos opcionales se omiten.
+
+```http
+POST /admin/accounting/report-templates/00000000-0000-4000-8000-000000000001/end HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "expectedRowVersion": 1
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SUPERADMIN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `expectedRowVersion` | Sí | `number` | mínimo 1 | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /admin/accounting/report-templates/00000000-0000-4000-8000-000000000001/end HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "expectedRowVersion": 1
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | Sí |
+| 400 | Operación completada correctamente. | `no declarado` | No |
+| 401 | Operación completada correctamente. | `no declarado` | No |
+| 403 | Operación completada correctamente. | `no declarado` | No |
+| 404 | Operación completada correctamente. | `no declarado` | No |
+| 409 | Operación completada correctamente. | `no declarado` | No |
+| 413 | Operación completada correctamente. | `no declarado` | No |
+| 422 | Operación completada correctamente. | `no declarado` | No |
+| 429 | Operación completada correctamente. | `no declarado` | No |
+| 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SUPERADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | {         code: 'FORBIDDEN',         reason: AccountingErrorReason.REPORT_TEMPLATE_GLOBAL_ADMIN_REQUIRED,         message:           'La edición del catálogo global requiere SUPERADMIN de plataforma',       } | Excepción explícita en src/modules/accounting/report-templates/report-templates.service.ts |
+| 404 | `NOT_FOUND` | La plantilla no existe | Excepción explícita en src/modules/accounting/report-templates/report-templates.service.ts |
+| 409 | `CONFLICT` | La plantilla cambió: vuelva a leerla antes de desactivar | Excepción explícita en src/modules/accounting/report-templates/report-templates.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/accounting/report-templates/{id}/end"
 }
 ```
 

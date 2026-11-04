@@ -2824,7 +2824,7 @@ Content-Type: application/json
 |---|:---:|---|---|---|---|
 | `profileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `q` | Sí | `string` | longitud mínima 2; longitud máxima 80 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
-| `limit` | No | `object` | mínimo 1; máximo 20 | Sin descripción específica en el contrato OpenAPI. | `10` |
+| `limit` | No | `number` | mínimo 1; máximo 20 | Sin descripción específica en el contrato OpenAPI. | `10` |
 
 ### Payload completo de ejemplo
 
@@ -9643,6 +9643,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 ```json
 {
   "kind": {},
+  "practiceId": "00000000-0000-4000-8000-000000000001",
   "slug": "valor-ejemplo",
   "displayName": "Nombre de ejemplo",
   "headline": "valor-ejemplo",
@@ -9718,6 +9719,7 @@ Campos de la respuesta:
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `kind` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: Exclude<PublicResultKind, 'MEDICATION'> | `{}` |
+| `practiceId` | No | `string` | formato `uuid`; admite null | Práctica detrás de una organización: con ella el profesional puede pedir pertenecer (`POST /practices/{practiceId}/role-assignments/self-request`). `null` si la ficha no es de una organización o su tenant no tiene una única práctica | `00000000-0000-4000-8000-000000000001` |
 | `slug` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `displayName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `headline` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -10962,6 +10964,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 ```json
 {
   "kind": {},
+  "practiceId": "00000000-0000-4000-8000-000000000001",
   "slug": "valor-ejemplo",
   "displayName": "Nombre de ejemplo",
   "headline": "valor-ejemplo",
@@ -11037,6 +11040,7 @@ Campos de la respuesta:
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `kind` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: Exclude<PublicResultKind, 'MEDICATION'> | `{}` |
+| `practiceId` | No | `string` | formato `uuid`; admite null | Práctica detrás de una organización: con ella el profesional puede pedir pertenecer (`POST /practices/{practiceId}/role-assignments/self-request`). `null` si la ficha no es de una organización o su tenant no tiene una única práctica | `00000000-0000-4000-8000-000000000001` |
 | `slug` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `displayName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `headline` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -11182,6 +11186,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 ```json
 {
   "kind": {},
+  "practiceId": "00000000-0000-4000-8000-000000000001",
   "slug": "valor-ejemplo",
   "displayName": "Nombre de ejemplo",
   "headline": "valor-ejemplo",
@@ -11257,6 +11262,7 @@ Campos de la respuesta:
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `kind` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: Exclude<PublicResultKind, 'MEDICATION'> | `{}` |
+| `practiceId` | No | `string` | formato `uuid`; admite null | Práctica detrás de una organización: con ella el profesional puede pedir pertenecer (`POST /practices/{practiceId}/role-assignments/self-request`). `null` si la ficha no es de una organización o su tenant no tiene una única práctica | `00000000-0000-4000-8000-000000000001` |
 | `slug` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `displayName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `headline` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -11402,6 +11408,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 ```json
 {
   "kind": {},
+  "practiceId": "00000000-0000-4000-8000-000000000001",
   "slug": "valor-ejemplo",
   "displayName": "Nombre de ejemplo",
   "headline": "valor-ejemplo",
@@ -11477,6 +11484,7 @@ Campos de la respuesta:
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `kind` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: Exclude<PublicResultKind, 'MEDICATION'> | `{}` |
+| `practiceId` | No | `string` | formato `uuid`; admite null | Práctica detrás de una organización: con ella el profesional puede pedir pertenecer (`POST /practices/{practiceId}/role-assignments/self-request`). `null` si la ficha no es de una organización o su tenant no tiene una única práctica | `00000000-0000-4000-8000-000000000001` |
 | `slug` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `displayName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `headline` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -12445,6 +12453,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 ```json
 {
   "kind": {},
+  "practiceId": "00000000-0000-4000-8000-000000000001",
   "slug": "valor-ejemplo",
   "displayName": "Nombre de ejemplo",
   "headline": "valor-ejemplo",
@@ -12520,6 +12529,7 @@ Campos de la respuesta:
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `kind` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: Exclude<PublicResultKind, 'MEDICATION'> | `{}` |
+| `practiceId` | No | `string` | formato `uuid`; admite null | Práctica detrás de una organización: con ella el profesional puede pedir pertenecer (`POST /practices/{practiceId}/role-assignments/self-request`). `null` si la ficha no es de una organización o su tenant no tiene una única práctica | `00000000-0000-4000-8000-000000000001` |
 | `slug` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `displayName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `headline` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -13478,6 +13488,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 ```json
 {
   "kind": {},
+  "practiceId": "00000000-0000-4000-8000-000000000001",
   "slug": "valor-ejemplo",
   "displayName": "Nombre de ejemplo",
   "headline": "valor-ejemplo",
@@ -13553,6 +13564,7 @@ Campos de la respuesta:
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `kind` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: Exclude<PublicResultKind, 'MEDICATION'> | `{}` |
+| `practiceId` | No | `string` | formato `uuid`; admite null | Práctica detrás de una organización: con ella el profesional puede pedir pertenecer (`POST /practices/{practiceId}/role-assignments/self-request`). `null` si la ficha no es de una organización o su tenant no tiene una única práctica | `00000000-0000-4000-8000-000000000001` |
 | `slug` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `displayName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `headline` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |

@@ -9,3 +9,4 @@ export * from './authz-me.controller';
 export * from './authz-admin.controller';
 export * from './authz-governance.controller';
 export * from './authz-governance-ext.controller';
+export * from './authz-practitioner-requests.controller';

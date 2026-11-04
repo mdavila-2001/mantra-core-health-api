@@ -253,5 +253,35 @@
     "id": "removed_response:POST /telemetry/onboarding-events:403",
     "reason": "La ruta es @Public() en el código (no exige sesión ni roles): el contrato la declaraba con bearer y listaba 401/403 que nunca emite. Ahora figura con security: [].",
     "migrationNote": "Ninguna: el comportamiento no cambia; el cliente puede llamarla sin Authorization, como ya podía."
+  },
+  {
+    "id": "removed_response:GET /admin/accounting/report-templates:404",
+    "reason": "El contrato estaba desactualizado: el controller no declara 404 y el listado no tiene parámetro de ruta (no hay recurso inexistente que buscar).",
+    "migrationNote": "Ninguna: el servidor no cambió su comportamiento; un cliente que manejaba ese código sigue funcionando."
+  },
+  {
+    "id": "removed_response:GET /admin/accounting/report-templates:422",
+    "reason": "El contrato estaba desactualizado: el controller no declara 422 y el generador solo lo agrega a las operaciones que mutan.",
+    "migrationNote": "Ninguna: el servidor no cambió su comportamiento; un cliente que manejaba ese código sigue funcionando."
+  },
+  {
+    "id": "removed_response:POST /admin/accounting/report-templates:404",
+    "reason": "El contrato estaba desactualizado: el controller no declara 404 y la ruta no tiene parámetro de ruta.",
+    "migrationNote": "Ninguna: el servidor no cambió su comportamiento; un cliente que manejaba ese código sigue funcionando."
+  },
+  {
+    "id": "removed_response:GET /admin/accounting/report-templates/{id}:422",
+    "reason": "El contrato estaba desactualizado: el controller no declara 422 y el generador solo lo agrega a las operaciones que mutan.",
+    "migrationNote": "Ninguna: el servidor no cambió su comportamiento; un cliente que manejaba ese código sigue funcionando."
+  },
+  {
+    "id": "removed_response:POST /telemetry/client-errors:401",
+    "reason": "La ruta es @Public() (anónima, security: []): no exige token, así que no responde 401.",
+    "migrationNote": "Ninguna: el servidor no cambió su comportamiento; un cliente que manejaba ese código sigue funcionando."
+  },
+  {
+    "id": "removed_response:POST /telemetry/client-errors:403",
+    "reason": "La ruta es @Public() (anónima, security: []): no exige rol, así que no responde 403.",
+    "migrationNote": "Ninguna: el servidor no cambió su comportamiento; un cliente que manejaba ese código sigue funcionando."
   }
 ]

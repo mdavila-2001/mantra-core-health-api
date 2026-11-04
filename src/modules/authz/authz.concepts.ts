@@ -119,6 +119,17 @@ export const { seeds: AUTHZ_CONCEPT_SEEDS, ids: AUTHZ } = defineModuleConcepts(
       code: 'CARE_EMERGENCY',
       display: 'Emergency care relationship',
     },
+    // Primary-care (cabecera) relationship: the patient's personal practitioner.
+    CARE_REL_PRIMARY: {
+      code: 'CARE_PRIMARY',
+      display: 'Primary care practitioner relationship',
+    },
+    // Terminal state of a request that the counterpart rejected. It is not
+    // REVOKED: nothing was ever granted, so it must not read as a lost access.
+    CARE_REL_STATUS_DECLINED: {
+      code: 'CARE_STATUS_DECLINED',
+      display: 'Care relationship request declined',
+    },
 
     // --- Tipo de representación legal (patient_legal_representations.representation_type_concept_id) ---
     // (C-07 / A-03). El estado reutiliza los genéricos CONCEPTS.STATE_*.

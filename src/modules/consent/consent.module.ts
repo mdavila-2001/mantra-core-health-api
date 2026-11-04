@@ -24,6 +24,7 @@ import {
   ConsentEvidenceService,
   ConsentSweepService,
   PractitionerAccessRequestsService,
+  PractitionerAccessRevocationService,
   ConsentMeService,
   EncounterInformedConsentsService,
   ConsentScopeService,
@@ -113,6 +114,7 @@ import { PRACTITIONER_ACCESS_NOTICE_PORT } from './ports/practitioner-access-not
     ConsentEvidenceService,
     ConsentSweepService,
     PractitionerAccessRequestsService,
+    PractitionerAccessRevocationService,
     ConsentMeService,
     EncounterInformedConsentsService,
     {
