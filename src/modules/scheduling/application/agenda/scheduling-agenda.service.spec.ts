@@ -250,4 +250,24 @@ describe('SchedulingAgendaService', () => {
       expect(d.billing.findConsultationPrices).not.toHaveBeenCalled();
     });
   });
+
+  // Regression: a bare em.fork() opens a connection without the tenant set by
+  // the request transaction, so RLS hid every practitioner from the patient.
+  describe('RLS · lecturas dentro de la transacción del request', () => {
+    it('listResources y listSlots conservan el contexto de la transacción', async () => {
+      const d = build();
+
+      await d.service.listResources({ tenantId: TENANT } as any);
+      await d.service.listSlots({
+        tenantId: TENANT,
+        from: '2026-11-04T00:00:00.000Z',
+        to: '2026-11-05T00:00:00.000Z',
+      } as any);
+
+      expect(d.em.fork).toHaveBeenCalledTimes(2);
+      for (const call of d.em.fork.mock.calls) {
+        expect(call[0]).toEqual({ keepTransactionContext: true });
+      }
+    });
+  });
 });
