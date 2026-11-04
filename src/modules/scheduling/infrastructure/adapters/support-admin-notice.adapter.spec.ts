@@ -20,6 +20,8 @@ const notice: AgendaNotice = {
 function build() {
   const em: any = {};
   em.fork = mockFn(() => em);
+  // The adapter writes inside a savepoint of the request transaction.
+  em.transactional = mockFn((cb: any) => cb(em));
   em.findOne = mockFn().mockResolvedValue({ displayName: 'Ana Pérez' });
 
   const messaging = {
@@ -115,6 +117,22 @@ describe('SupportAdminNoticeAdapter (TAREA-15, P-15-1)', () => {
 
     expect(result.chatDelivered).toBe(false);
     expect(result.chatSkippedReason).toMatch(/no se pudo entregar/i);
+    expect(d.logger.warn).toHaveBeenCalled();
+    // The swallowing `catch` sits outside the savepoint, so the rollback of a
+    // failed notice leaves the request transaction usable.
+    expect(d.em.fork).toHaveBeenCalledWith({ keepTransactionContext: true });
+    expect(d.em.transactional).toHaveBeenCalledTimes(1);
+  });
+
+  it('un fallo SQL dentro del savepoint tampoco sube: lo traga el catch de afuera', async () => {
+    const d = build();
+    d.em.transactional.mockRejectedValue(
+      new Error('current transaction is aborted'),
+    );
+
+    const result = await d.adapter.notify(notice, 'user-medico');
+
+    expect(result.chatDelivered).toBe(false);
     expect(d.logger.warn).toHaveBeenCalled();
   });
 });

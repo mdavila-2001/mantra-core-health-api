@@ -187,28 +187,28 @@ export class BookingChangeNotifier {
     await this.safely(
       'scheduling.notice.payment-receipt-uploaded',
       bookingId,
-      async () => {
-        const em = this.em.fork();
-        const booking = await this.noticeRepo.describeBooking(em, bookingId);
-        if (!booking) return;
-        const practitioner = await this.noticeRepo.findResourceAccount(
-          em,
-          booking.resourceId,
-        );
-        if (practitioner === null) return;
-        const patient = await this.noticeRepo.findDisplayNameForProfile(
-          em,
-          booking.patientProfileId,
-        );
-        await this.notices.emit(
-          receiptUploadedNotice(
-            booking,
-            patient ?? undefined,
-            practitioner,
-            receiptId,
-          ),
-        );
-      },
+      () =>
+        this.inSavepoint(async (em) => {
+          const booking = await this.noticeRepo.describeBooking(em, bookingId);
+          if (!booking) return;
+          const practitioner = await this.noticeRepo.findResourceAccount(
+            em,
+            booking.resourceId,
+          );
+          if (practitioner === null) return;
+          const patient = await this.noticeRepo.findDisplayNameForProfile(
+            em,
+            booking.patientProfileId,
+          );
+          await this.notices.emit(
+            receiptUploadedNotice(
+              booking,
+              patient ?? undefined,
+              practitioner,
+              receiptId,
+            ),
+          );
+        }),
     );
   }
 
@@ -230,17 +230,27 @@ export class BookingChangeNotifier {
     await this.safely(
       'scheduling.notice.payment-receipt-reviewed',
       bookingId,
-      async () => {
-        const booking = await this.noticeRepo.describeBooking(
-          this.em.fork(),
-          bookingId,
-        );
-        if (!booking) return;
-        await this.notices.emit(
-          receiptReviewedNotice(booking, receiptId, confirmed, reason),
-        );
-      },
+      () =>
+        this.inSavepoint(async (em) => {
+          const booking = await this.noticeRepo.describeBooking(em, bookingId);
+          if (!booking) return;
+          await this.notices.emit(
+            receiptReviewedNotice(booking, receiptId, confirmed, reason),
+          );
+        }),
     );
+  }
+
+  /**
+   * Runs the reads of a notice inside a savepoint of the request transaction
+   * (or a transaction of its own when there is none). If the notice fails, the
+   * savepoint rolls back and the request transaction stays healthy; the caller
+   * (`safely`) swallows the error outside it.
+   */
+  private inSavepoint(work: (em: EntityManager) => Promise<void>) {
+    return this.em
+      .fork({ keepTransactionContext: true })
+      .transactional((tx) => work(tx));
   }
 
   /**

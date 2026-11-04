@@ -68,50 +68,57 @@ export class SupportAdminNoticeAdapter {
     recipientUserId: string,
   ): Promise<{ chatDelivered: boolean; chatSkippedReason?: string }> {
     try {
-      const em = this.em.fork();
-      const actor: AuthenticatedUser = {
-        id: SEED.supportAdminUserId,
-        roles: ['SYSTEM'],
-      };
+      return await this.em
+        .fork({ keepTransactionContext: true })
+        .transactional(async (em) => {
+          const actor: AuthenticatedUser = {
+            id: SEED.supportAdminUserId,
+            roles: ['SYSTEM'],
+          };
 
-      const supportAdminProfileId = await this.profiles.projectOrganization(
-        em,
-        {
-          tenantId: notice.tenantId ?? SEED.tenantId,
-          targetId: SEED.supportAdminUserId,
-          slug: SEED.supportAdminProfileSlug,
-          displayName: SEED.supportAdminDisplayName,
-          actorUserId: SEED.supportAdminUserId,
-        },
-      );
+          const supportAdminProfileId = await this.profiles.projectOrganization(
+            em,
+            {
+              tenantId: notice.tenantId ?? SEED.tenantId,
+              targetId: SEED.supportAdminUserId,
+              slug: SEED.supportAdminProfileSlug,
+              displayName: SEED.supportAdminDisplayName,
+              actorUserId: SEED.supportAdminUserId,
+            },
+          );
 
-      const recipientProfileId = await this.getOrCreateRecipientProfile(
-        em,
-        recipientUserId,
-        notice.tenantId,
-        actor,
-      );
+          const recipientProfileId = await this.getOrCreateRecipientProfile(
+            em,
+            recipientUserId,
+            notice.tenantId,
+            actor,
+          );
 
-      const conversation = await this.messaging.createSystemDirectConversation(
-        {
-          participantProfileIds: [supportAdminProfileId, recipientProfileId],
-        },
-        actor,
-      );
+          const conversation =
+            await this.messaging.createSystemDirectConversation(
+              {
+                participantProfileIds: [
+                  supportAdminProfileId,
+                  recipientProfileId,
+                ],
+              },
+              actor,
+            );
 
-      await this.messaging.sendMessage(
-        conversation.id,
-        {
-          senderProfileId: supportAdminProfileId,
-          // La versión de chat del aviso: encabezado con emoji, el cuerpo y
-          // el enlace que el frontend convierte en «Ir a la cita».
-          bodyText: chatTextForNotice(notice, this.env.webAppBaseUrl),
-          contentType: 'TEXT',
-        },
-        actor,
-      );
+          await this.messaging.sendMessage(
+            conversation.id,
+            {
+              senderProfileId: supportAdminProfileId,
+              // La versión de chat del aviso: encabezado con emoji, el cuerpo y
+              // el enlace que el frontend convierte en «Ir a la cita».
+              bodyText: chatTextForNotice(notice, this.env.webAppBaseUrl),
+              contentType: 'TEXT',
+            },
+            actor,
+          );
 
-      return { chatDelivered: true };
+          return { chatDelivered: true };
+        });
     } catch (error: unknown) {
       // Regla 1 del puerto: emitir no puede romper la agenda. El in-app y el
       // correo ya se resolvieron cuando esto corre.

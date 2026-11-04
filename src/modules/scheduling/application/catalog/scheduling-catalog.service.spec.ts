@@ -28,7 +28,8 @@ const RESOURCE = '22222222-2222-2222-2222-222222222222';
  */
 
 function buildCatalog() {
-  const tx = { flush: mockFn() };
+  const tx: any = { flush: mockFn() };
+  tx.transactional = mockFn((cb: any) => cb(tx));
   // `fork()` además de `transactional`: las lecturas del servicio —listSlots y
   // listTemplates— no abren transacción, piden un contexto propio.
   const em = {
@@ -644,10 +645,10 @@ describe('SchedulingCatalogService', () => {
 
         await d.service.listTemplates(RESOURCE, actor);
 
-        expect(d.catalogRepo.findRulesByTemplates).toHaveBeenCalledTimes(1);
         expect(d.em.fork).toHaveBeenCalledWith({
           keepTransactionContext: true,
         });
+        expect(d.catalogRepo.findRulesByTemplates).toHaveBeenCalledTimes(1);
         expect(d.catalogRepo.findRulesByTemplates).toHaveBeenCalledWith(
           expect.anything(),
           ['tpl-1', 'tpl-2'],
@@ -875,10 +876,10 @@ describe('SchedulingCatalogService', () => {
 
         await d.service.listExceptions(RESOURCE, FROM, TO, actor);
 
-        expect(
         expect(d.em.fork).toHaveBeenCalledWith({
           keepTransactionContext: true,
         });
+        expect(
           d.catalogRepo.findExceptionsByResourceInRange,
         ).toHaveBeenCalledWith(expect.anything(), RESOURCE, FROM, TO);
       });
@@ -2227,11 +2228,11 @@ describe('SchedulingCatalogService', () => {
             owner as never,
           );
 
-          expect(res).toEqual({
           expect(d.em.fork).toHaveBeenCalledWith({
             keepTransactionContext: true,
           });
 
+          expect(res).toEqual({
             templateId: 'tpl-1',
             total: 1,
             bookings: [
@@ -3939,7 +3940,6 @@ describe('SchedulingCatalogService', () => {
       expect(options.openStatusConceptId).toBe(CONCEPTS.SLOT_OPEN);
     });
 
-    it('sin onlyAvailable no impone estado: el dueño de la agenda ve su día entero', async () => {
     it('lee sobre la transacción de la petición (RLS)', async () => {
       const d = buildCatalog();
       d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
@@ -3953,6 +3953,7 @@ describe('SchedulingCatalogService', () => {
       expect(d.em.fork).toHaveBeenCalledWith({ keepTransactionContext: true });
     });
 
+    it('sin onlyAvailable no impone estado: el dueño de la agenda ve su día entero', async () => {
       // La vista del profesional necesita ver lo bloqueado —es su reunión, su
       // cirugía—. Filtrar siempre por SLOT_OPEN le escondería su propio día.
       const d = buildCatalog();

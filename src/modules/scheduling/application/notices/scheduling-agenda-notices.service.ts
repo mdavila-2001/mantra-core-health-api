@@ -60,37 +60,46 @@ export class SchedulingAgendaNoticesService {
   ): Promise<number> {
     if (waitlistEntryIds.length === 0) return 0;
 
-    const em = this.em.fork();
-    const slot = await this.noticeRepo.describeSlot(em, slotId);
-    if (!slot) {
-      this.logger.warn(
-        { operation: 'scheduling.notice.slot-released', slotId },
-        'El cupo promovido ya no existe: no se avisa',
-      );
-      return 0;
-    }
+    // Savepoint under the request transaction: if the notice fails, it rolls
+    // back and the caller can swallow the error without poisoning the request.
+    return this.em
+      .fork({ keepTransactionContext: true })
+      .transactional(async (em) => {
+        const slot = await this.noticeRepo.describeSlot(em, slotId);
+        if (!slot) {
+          this.logger.warn(
+            { operation: 'scheduling.notice.slot-released', slotId },
+            'El cupo promovido ya no existe: no se avisa',
+          );
+          return 0;
+        }
 
-    const candidates = await this.noticeRepo.findWaitlistPatients(
-      em,
-      waitlistEntryIds,
-    );
-    const notices: AgendaNotice[] = candidates.map((candidate) =>
-      slotReleasedNotice(slot, candidate.patientProfileId, candidate.tenantId),
-    );
+        const candidates = await this.noticeRepo.findWaitlistPatients(
+          em,
+          waitlistEntryIds,
+        );
+        const notices: AgendaNotice[] = candidates.map((candidate) =>
+          slotReleasedNotice(
+            slot,
+            candidate.patientProfileId,
+            candidate.tenantId,
+          ),
+        );
 
-    const results = await this.notices.emitMany(notices);
-    const delivered = results.filter((result) => result.delivered).length;
+        const results = await this.notices.emitMany(notices);
+        const delivered = results.filter((result) => result.delivered).length;
 
-    this.logger.info(
-      {
-        operation: 'scheduling.notice.slot-released',
-        slotId,
-        candidates: candidates.length,
-        delivered: delivered,
-      },
-      'Avisos de cupo liberado emitidos',
-    );
-    return delivered;
+        this.logger.info(
+          {
+            operation: 'scheduling.notice.slot-released',
+            slotId,
+            candidates: candidates.length,
+            delivered: delivered,
+          },
+          'Avisos de cupo liberado emitidos',
+        );
+        return delivered;
+      });
   }
 
   /**

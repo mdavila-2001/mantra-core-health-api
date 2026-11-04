@@ -38,6 +38,8 @@ const booking = {
 function build() {
   const em: any = {};
   em.fork = mockFn(() => em);
+  // The slot-released notice runs inside a savepoint of the request.
+  em.transactional = mockFn((cb: any) => cb(em));
 
   const noticeRepo = {
     describeSlot: mockFn().mockResolvedValue(slot),
@@ -86,6 +88,18 @@ describe('SchedulingAgendaNoticesService (P8 · avisos del worker)', () => {
       expect(delivered).toBe(2);
     });
 
+    it('corre en un savepoint de la petición y deja subir el fallo para que lo trague quien llama', async () => {
+      const d = build();
+      d.noticeRepo.describeSlot.mockRejectedValue(new Error('aborted'));
+
+      await expect(
+        d.service.notifySlotReleased(SLOT, ['entry-1']),
+      ).rejects.toThrow('aborted');
+
+      expect(d.em.fork).toHaveBeenCalledWith({ keepTransactionContext: true });
+      expect(d.em.transactional).toHaveBeenCalledTimes(1);
+    });
+
     it('sin candidatos no molesta a nadie ni consulta el cupo', async () => {
       const d = build();
       expect(await d.service.notifySlotReleased(SLOT, [])).toBe(0);
@@ -108,6 +122,8 @@ describe('SchedulingAgendaNoticesService (P8 · avisos del worker)', () => {
 
       const delivered = await d.service.notifyReminders(['rem-1']);
 
+      expect(d.em.fork).toHaveBeenCalledWith({ keepTransactionContext: true });
+
       const notices = d.notices.emitMany.mock.calls[0][0];
       expect(notices[0].kind).toBe('APPOINTMENT_REMINDER');
       expect(notices[0].payload.offsetMinutes).toBe(1440);
@@ -122,8 +138,6 @@ describe('SchedulingAgendaNoticesService (P8 · avisos del worker)', () => {
         { reminderId: 'rem-2', bookingId: 'borrada', offsetMinutes: 120 },
       ]);
       d.noticeRepo.describeBooking
-      expect(d.em.fork).toHaveBeenCalledWith({ keepTransactionContext: true });
-
         .mockResolvedValueOnce(booking)
         .mockResolvedValueOnce(null);
 
