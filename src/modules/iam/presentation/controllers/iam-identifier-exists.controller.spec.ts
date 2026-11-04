@@ -24,22 +24,24 @@ describe('IamIdentifierExistsController', () => {
     const execute = (jest.fn as any)(async () => ({ exists: true }));
     const controller = new IamIdentifierExistsController({ execute } as any);
     await expect(
-      controller.check({ kind: 'EMAIL', value: 'a@b.com' }),
+      controller.check({ kind: 'ORG_NAME', value: 'Lab Central' }),
     ).resolves.toEqual({ exists: true });
-    expect(execute).toHaveBeenCalledWith('EMAIL', 'a@b.com');
+    expect(execute).toHaveBeenCalledWith('ORG_NAME', 'Lab Central');
   });
 
-  it('accepts the three kinds', async () => {
-    for (const kind of ['NATIONAL_ID', 'EMAIL', 'ORG_NAME']) {
-      expect(await errorsOf({ kind, value: 'x' })).toHaveLength(0);
+  it('accepts only organization names on this public route', async () => {
+    expect(await errorsOf({ kind: 'ORG_NAME', value: 'x' })).toHaveLength(0);
+    // A national id or email would be an unauthenticated existence oracle.
+    for (const kind of ['NATIONAL_ID', 'EMAIL']) {
+      expect(await errorsOf({ kind, value: 'x' })).not.toHaveLength(0);
     }
   });
 
   it('rejects an unknown kind, an empty value and extra query keys', async () => {
     expect(await errorsOf({ kind: 'PHONE', value: 'x' })).not.toHaveLength(0);
-    expect(await errorsOf({ kind: 'EMAIL', value: '' })).not.toHaveLength(0);
+    expect(await errorsOf({ kind: 'ORG_NAME', value: '' })).not.toHaveLength(0);
     expect(
-      await errorsOf({ kind: 'EMAIL', value: 'x', tenantId: 'y' }),
+      await errorsOf({ kind: 'ORG_NAME', value: 'x', tenantId: 'y' }),
     ).not.toHaveLength(0);
   });
 });
