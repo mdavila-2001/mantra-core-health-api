@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { CONCEPTS, type AuthenticatedUser } from '../../../common';
@@ -61,10 +61,19 @@ export class CommunityTopicsService {
     await this.ensureCatalog();
     const clean = name.trim().replace(/\s+/g, ' ');
     const base = topicCode(clean);
+    // A name made only of symbols would yield an empty code and collide.
+    if (base.length < 3) {
+      throw new BadRequestException(
+        'El nombre del tema necesita al menos tres letras o números',
+      );
+    }
     const code = `PROPIO_${base}`.slice(0, 80);
     const em = this.em.fork();
 
-    const existing = await em.findOne(Topics, { code: { $in: [base, code] } });
+    const existing = await em.findOne(Topics, {
+      code: { $in: [base, code] },
+      statusConceptId: CONCEPTS.STATE_ACTIVE,
+    });
     if (existing) return toItem(existing);
 
     const now = new Date();
