@@ -82,6 +82,12 @@ export class DiagnosticsLabPortalController {
   @ApiOperation({
     summary:
       'Un paso del camino de la orden (RECEIVE, PROCESS, REJECT, CANCEL)',
+    description:
+      'CANCEL (desde DRAFT o RECEIVED) y REJECT (desde RECEIVED) valen para ' +
+      'toda orden, imagenología incluida, y exigen `reason`: el ejecutor ' +
+      'agrega un evento propio (`service_request_performer_events`) sin ' +
+      'tocar la orden del solicitante. Una orden cancelada o rechazada deja ' +
+      'de poder reservarse. Un paso que el estado no admite responde 409.',
   })
   @ApiConflictResponse({ description: 'El estado actual no admite ese paso' })
   transition(

@@ -21,7 +21,9 @@ export interface OwnOrder {
  * theirs (another person's order answers like a missing one), it is a
  * laboratory or imaging order, and it has no released result yet — an order
  * with its result already published was performed, so it is not booked even
- * if someone reaches the booking URL.
+ * if someone reaches the booking URL. An order the performer center cancelled
+ * or rejected is not bookable either (`bookable`); cancelling an existing
+ * appointment of such an order stays possible (`bookable: false`).
  */
 @Injectable()
 export class OrderBookingAccessService {
@@ -31,6 +33,7 @@ export class OrderBookingAccessService {
     em: EntityManager,
     actor: AuthenticatedUser,
     orderId: string,
+    bookable = true,
   ): Promise<OwnOrder> {
     const patientProfileId = await this.repo.ownPatientProfileId(em, actor.id);
     if (!patientProfileId) {
@@ -44,6 +47,7 @@ export class OrderBookingAccessService {
       em,
       orderId,
       patientProfileId,
+      bookable,
     );
     if (!order || order.patient_profile_id !== patientProfileId) {
       throw new ResourceNotFoundException('Orden no encontrada');

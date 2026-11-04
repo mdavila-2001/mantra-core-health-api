@@ -6,6 +6,7 @@ import type {
   LabActivityEntryDto,
   LabSummaryDto,
 } from '../dto/lab-portal-summary.dto';
+import { categoryBuckets } from './lab-portal-category-buckets';
 import { readableSize } from './lab-portal.projection';
 import {
   LabPortalSnapshotService,
@@ -46,10 +47,9 @@ function fileActivity(file: LabFileView): LabActivityEntryDto[] {
  * the tenant's diagnostic unit (read-only), the routed orders and the result
  * files of their reports.
  *
- * A study offering has no "available today" flag nor a category column, so
- * (like the services catalog) every service reads as available and
- * uncategorized: `unavailable` is 0 and `byCategory` has one «Sin categoría»
- * bucket with the non-withdrawn services.
+ * `unavailable` counts the current (not withdrawn) services switched off for
+ * today, and `byCategory` groups the current services by the lab's categories
+ * (the ones without one fall in «Sin categoría»).
  */
 @Injectable()
 export class LabPortalSummaryService {
@@ -62,8 +62,9 @@ export class LabPortalSummaryService {
 
   async summary(tenantId: string): Promise<LabSummaryDto> {
     const em = this.em.fork();
-    const [offerings, names] = await Promise.all([
+    const [offerings, categories, names] = await Promise.all([
       this.repo.findOfferings(em, tenantId),
+      this.repo.findCategories(em, tenantId),
       this.labels.findTenantNames(em, [tenantId]),
     ]);
     // Every order of the lab, in batches: totals never depend on a page cap.
@@ -94,7 +95,10 @@ export class LabPortalSummaryService {
     const published = count(DUNIT.OFFERING_ACTIVE);
     const withdrawn = count(DUNIT.OFFERING_RETIRED);
     const drafts = offerings.length - published - withdrawn;
-    const current = published + drafts;
+    const unavailable = offerings.filter(
+      (o) =>
+        o.statusConceptId !== DUNIT.OFFERING_RETIRED && o.available === false,
+    ).length;
     for (const offering of offerings) {
       const retired = offering.statusConceptId === DUNIT.OFFERING_RETIRED;
       const created =
@@ -116,12 +120,11 @@ export class LabPortalSummaryService {
       published,
       drafts,
       withdrawn,
-      unavailable: 0,
+      unavailable,
       ordersWithoutResults,
       resultFiles,
       resultBytes,
-      byCategory:
-        current > 0 ? [{ category: 'Sin categoría', count: current }] : [],
+      byCategory: categoryBuckets(offerings, categories),
       recentActivity: recent(activity),
     };
   }

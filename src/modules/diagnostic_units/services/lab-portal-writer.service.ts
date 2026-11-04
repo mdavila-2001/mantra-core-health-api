@@ -57,17 +57,11 @@ export class LabPortalWriterService {
         };
       }
     }
-    // No lab category can exist yet: the model has no table for them.
-    if (data.categoryId !== undefined && data.categoryId !== null) {
-      return { kind: 'PRECONDITION', message: 'La categoría no existe.' };
-    }
-    // Refused rather than dropped: patients would keep seeing it as available.
-    if (data.available === false) {
-      return {
-        kind: 'PRECONDITION',
-        message:
-          'La disponibilidad del día no se puede guardar: el modelo no tiene dónde registrarla.',
-      };
+    // A category is the unit's own: another unit's id reads as non-existent.
+    if (data.categoryId != null) {
+      if (!ctx.categories.some((c) => c.id === data.categoryId)) {
+        return { kind: 'PRECONDITION', message: 'La categoría no existe.' };
+      }
     }
     return null;
   }
@@ -91,6 +85,9 @@ export class LabPortalWriterService {
       expectedTurnaroundMinutes: hoursToMinutes(draft.turnaroundHours ?? null),
       requiresMedicalOrder: draft.requiresMedicalOrder ?? false,
       homeCollectionEligible: draft.homeCollection ?? false,
+      specimenDescription: cleanText(draft.sampleType),
+      serviceCategoryId: draft.categoryId ?? undefined,
+      available: draft.available ?? true,
       statusConceptId: statusConcept(draft.status ?? 'PUBLISHED'),
       actorUserId,
     });
@@ -130,6 +127,11 @@ export class LabPortalWriterService {
       next.requiresMedicalOrder = changes.requiresMedicalOrder;
     if (changes.homeCollection !== undefined)
       next.homeCollectionEligible = changes.homeCollection;
+    if (changes.sampleType !== undefined)
+      next.specimenDescription = text(changes.sampleType);
+    if (changes.categoryId !== undefined)
+      next.serviceCategoryId = changes.categoryId ?? undefined;
+    if (changes.available !== undefined) next.available = changes.available;
     if (changes.status != null)
       next.statusConceptId = statusConcept(changes.status);
 

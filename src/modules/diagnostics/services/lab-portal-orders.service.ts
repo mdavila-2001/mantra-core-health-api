@@ -4,17 +4,14 @@ import { PinoLogger } from 'nestjs-pino';
 import { randomUUID } from 'node:crypto';
 import {
   ConflictException,
-  PreconditionFailedException,
   decodeKeysetCursor,
   encodeKeysetCursor,
-  touch,
   type AuthenticatedUser,
 } from '../../../common';
 import { badRequestWithReason } from '../../../common/errors/reasoned-http-exceptions';
 import { SystemErrorReason } from '../../../common/errors/system-error-reasons';
 import { CATEGORIES_WITH_SPECIMEN, DIAG } from '../diagnostics.concepts';
-import { DiagnosticsErrorReason } from '../diagnostics.error-reasons';
-import { AccessionSpecimens } from '../entities';
+import { LABP } from '../lab-portal.concepts';
 import {
   LAB_PORTAL_PAGE_DEFAULT,
   LabPortalRepository,
@@ -30,6 +27,7 @@ import type {
 } from '../dto/lab-portal-orders.dto';
 import { LAB_ORDER_TRANSITIONS } from './lab-portal.projection';
 import { notAvailable } from './lab-portal-results.service';
+import { LabPortalOrderOutcomeService } from './lab-portal-order-outcome.service';
 import {
   LabPortalSnapshotService,
   type LabOrderView,
@@ -71,13 +69,6 @@ function decodeOrderKey(cursor: string): LabOrderKey {
   return { createdAt: at, id };
 }
 
-const unsupported = (message: string): PreconditionFailedException =>
-  new PreconditionFailedException(
-    message,
-    undefined,
-    DiagnosticsErrorReason.DIAGNOSTICS_LAB_ORDER_ACTION_UNSUPPORTED,
-  );
-
 /** A per-tenant unique business number (`uk_*_tenant_number`). */
 const number = (prefix: string): string =>
   `${prefix}-${Date.now()}-${randomUUID().slice(0, 8).toUpperCase()}`;
@@ -87,12 +78,10 @@ const number = (prefix: string): string =>
  *
  * - RECEIVE: an accession (`ACC_RECEIVED`) of the performer; for laboratory
  *   orders that declare a specimen type, also the received specimen.
- * - PROCESS: a performer work order with `completed_at` and its test line.
- * - REJECT: a `specimen_rejection_events` row per open specimen, with the
- *   reason in `notes` (same effects as UC-20-02).
- * - CANCEL: not representable — the order belongs to the requester tenant
- *   (`custodian_tenant_id` RLS) and the performer has no row to record a
- *   cancellation with its reason. Answers 422 with a stable reason.
+ * - PROCESS: a performer work order (`WO_COMPLETED`, `completed_at`) and its
+ *   test line.
+ * - REJECT / CANCEL: a performer event with the mandatory reason, for any
+ *   order, imaging included; see {@link LabPortalOrderOutcomeService}.
  */
 @Injectable()
 export class LabPortalOrdersService {
@@ -102,6 +91,7 @@ export class LabPortalOrdersService {
     private readonly specimens: SpecimensRepository,
     private readonly work: LabWorkRepository,
     private readonly snapshot: LabPortalSnapshotService,
+    private readonly outcome: LabPortalOrderOutcomeService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(LabPortalOrdersService.name);
@@ -159,12 +149,9 @@ export class LabPortalOrdersService {
       if (dto.action === 'PROCESS')
         await this.process(tx, tenantId, view, actor);
       if (dto.action === 'REJECT')
-        await this.reject(tx, view, dto.reason, actor);
-      if (dto.action === 'CANCEL') {
-        throw unsupported(
-          'La orden pertenece a quien la pidió: el laboratorio no puede anularla todavía.',
-        );
-      }
+        await this.outcome.reject(tx, tenantId, view, dto.reason, actor);
+      if (dto.action === 'CANCEL')
+        await this.outcome.cancel(tx, tenantId, view, dto.reason, actor);
     });
     const order = await this.repo.findOrder(this.em.fork(), tenantId, orderId);
     const [view] = (
@@ -236,7 +223,7 @@ export class LabPortalOrdersService {
       laboratoryAccessionId: accession!.id,
       workOrderNumber: number('WO'),
       priorityConceptId: DIAG.PRIORITY_ROUTINE,
-      statusConceptId: DIAG.WORK_ORDER_OPEN,
+      statusConceptId: LABP.WORK_ORDER_COMPLETED,
       actorUserId: actor.id,
     });
     workOrder.startedAt = now;
@@ -250,47 +237,6 @@ export class LabPortalOrdersService {
       specimenId: openSpecimenIds[0],
       actorUserId: actor.id,
     });
-    await tx.flush();
-  }
-
-  private async reject(
-    tx: EntityManager,
-    { accession, openSpecimenIds }: LabOrderView,
-    reason: string | undefined,
-    actor: AuthenticatedUser,
-  ): Promise<void> {
-    if (openSpecimenIds.length === 0) {
-      throw unsupported(
-        'La orden no tiene una muestra registrada que se pueda rechazar.',
-      );
-    }
-    const notes = reason?.trim() || undefined;
-    const specimens = await this.specimens.findSpecimensByIds(tx, [
-      ...openSpecimenIds,
-    ]);
-    for (const specimen of specimens) {
-      this.specimens.recordRejection(tx, {
-        specimenId: specimen.id,
-        rejectedAt: new Date(),
-        rejectionReasonConceptId: DIAG.REJECTION_REASON_QUALITY,
-        notes,
-      });
-      specimen.statusConceptId = DIAG.SPECIMEN_REJECTED;
-      touch(specimen, actor.id);
-      await this.specimens.cancelTestsForSpecimen(
-        tx,
-        specimen.id,
-        DIAG.TEST_CANCELLED,
-      );
-    }
-    await tx.nativeUpdate(
-      AccessionSpecimens,
-      {
-        laboratoryAccessionId: accession!.id,
-        specimenId: { $in: [...openSpecimenIds] },
-      },
-      { statusConceptId: DIAG.ACCESSION_ITEM_REJECTED },
-    );
     await tx.flush();
   }
 }

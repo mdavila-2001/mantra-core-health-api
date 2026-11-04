@@ -35,6 +35,11 @@ export const LAB_ORDER_TRANSITIONS: Readonly<
 export interface LabOrderFacts {
   /** `service_requests.status_concept_id` is revoked / satisfied by prior. */
   readonly revoked: boolean;
+  /**
+   * The newest performer event of the order ends it on the performer side
+   * (`service_request_performer_events`): cancelled or rejected by the lab.
+   */
+  readonly performerOutcome: 'CANCELLED' | 'REJECTED' | null;
   /** A specimen of the performer's accession has a rejection event. */
   readonly rejected: boolean;
   /** A performer work order on the accession has `completed_at`. */
@@ -46,11 +51,14 @@ export interface LabOrderFacts {
 }
 
 /**
- * Derives the visible state. A result already available wins over the
- * workflow rows: it is the strongest evidence that the order was performed.
+ * Derives the visible state. The requester's revocation and the performer's
+ * own cancel / reject event end the order; then a result already available
+ * wins over the workflow rows: it is the strongest evidence that the order
+ * was performed.
  */
 export function deriveLabOrderStatus(facts: LabOrderFacts): LabOrderStatus {
   if (facts.revoked) return 'CANCELLED';
+  if (facts.performerOutcome) return facts.performerOutcome;
   if (facts.availableFiles > 0) return 'UPLOADED';
   if (facts.rejected) return 'REJECTED';
   if (facts.processed) return 'PROCESSED';

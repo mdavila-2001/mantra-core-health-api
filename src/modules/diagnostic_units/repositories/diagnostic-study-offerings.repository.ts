@@ -66,6 +66,12 @@ export interface CreateOfferingData {
    * Valor de home collection eligible mantenido por la instancia.
    */
   homeCollectionEligible?: boolean;
+  /** Free-text sample type the lab writes (`specimen_description`). */
+  specimenDescription?: string;
+  /** Lab portal category of the unit (`diagnostic_service_categories`). */
+  serviceCategoryId?: string;
+  /** "Available today"; defaults to true in the table. */
+  available?: boolean;
   /**
    * Identificador asociado a status concept.
    */
@@ -134,6 +140,9 @@ export class DiagnosticStudyOfferingsRepository {
         requiresMedicalOrder: data.requiresMedicalOrder,
         requiresPriorAuthorization: data.requiresPriorAuthorization,
         homeCollectionEligible: data.homeCollectionEligible,
+        specimenDescription: data.specimenDescription,
+        serviceCategoryId: data.serviceCategoryId,
+        available: data.available ?? true,
         statusConceptId: data.statusConceptId ?? DUNIT.OFFERING_ACTIVE,
         ...createdBy(data.actorUserId),
       },

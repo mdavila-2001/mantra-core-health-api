@@ -18,6 +18,8 @@ export interface StudyRow {
 /**
  * The public price of an offering: active version of a public, active and
  * current schedule — the same rules the directory applies — newest first.
+ * An offering the lab switched off for today (`available = false`) is not
+ * offered, so a patient can neither see nor book it.
  */
 const STUDY_SELECT = `
   SELECT o.id, o.diagnostic_unit_id AS unit_id, o.study_code, o.study_concept_id,
@@ -38,7 +40,7 @@ const STUDY_SELECT = `
          AND (ps.valid_to IS NULL OR ps.valid_to >= now())
        ORDER BY p.effective_from DESC
        LIMIT 1) pr ON true
-   WHERE o.status_concept_id = ?`;
+   WHERE o.status_concept_id = ? AND o.available`;
 
 const PRICE_PARAMS = [
   DUNIT.PRICE_ACTIVE,

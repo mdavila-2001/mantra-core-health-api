@@ -20,7 +20,13 @@ const NOT_BLANK = /\S/;
 
 /** Optional fields shared by `LabServiceDraft` and `LabServiceChanges`; null clears. */
 class LabServiceFieldsDto {
-  @ApiPropertyOptional({ type: String, format: 'uuid', nullable: true })
+  @ApiPropertyOptional({
+    type: String,
+    format: 'uuid',
+    nullable: true,
+    description:
+      "A category of this lab (`GET /diagnostics/lab/categories`); null clears it. Another lab's id is rejected as non-existent.",
+  })
   @IsOptional()
   @IsUUID('all', { message: 'La categoría no existe.' })
   categoryId?: string | null;
@@ -28,7 +34,8 @@ class LabServiceFieldsDto {
   @ApiPropertyOptional({
     type: String,
     nullable: true,
-    description: 'Not persisted: no free-text column',
+    description:
+      'Sample type as free text, stored in `specimen_description`; blank or null clears it',
   })
   @IsOptional()
   @IsString()
@@ -74,7 +81,13 @@ class LabServiceFieldsDto {
   @Max(100, { message: 'El descuento va de 0 a 100 %.' })
   alovidaDiscountPercent?: number | null;
 
-  @ApiPropertyOptional() @IsOptional() @IsStrictBoolean() available?: boolean;
+  @ApiPropertyOptional({
+    description:
+      '"Available today": false hides the service from the public directory, the coverage search and order booking; it keeps its status and price',
+  })
+  @IsOptional()
+  @IsStrictBoolean()
+  available?: boolean;
 }
 
 /** Body of `POST /diagnostics/lab/services` (`LabServiceDraft`). */

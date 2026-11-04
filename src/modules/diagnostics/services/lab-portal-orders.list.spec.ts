@@ -37,6 +37,7 @@ function build(rows: (page: any) => any[], total: number) {
     {} as any,
     {} as any,
     snapshot as any,
+    {} as any,
     { setContext: mockFn(), info: mockFn() } as any,
   );
   return { service, repo, snapshot };
@@ -103,6 +104,7 @@ describe('LabPortalSnapshotService.loadAll', () => {
       repo as any,
       {} as any,
       {} as any,
+      {} as any,
     );
     jest.spyOn(service, 'load').mockImplementation((async (
       _em: any,
@@ -126,6 +128,7 @@ describe('LabPortalSnapshotService.loadAll', () => {
   it('a lab with no orders yields nothing', async () => {
     const service = new LabPortalSnapshotService(
       { findOrders: mockFn(async () => []) } as any,
+      {} as any,
       {} as any,
       {} as any,
     );

@@ -17,17 +17,23 @@ describe('LabPortalServicesController', () => {
     ).toBeUndefined();
   });
 
-  it('delegates to the catalog and the importer', async () => {
+  it('delegates to the catalog, the categories and the importer', async () => {
     const catalog = {
       list: jest.fn(async () => ({ items: [], count: 0 })),
       create: jest.fn(async () => ({ id: 's1' })),
       update: jest.fn(async () => ({ id: 's1' })),
       withdraw: jest.fn(async () => ({ id: 's1', status: 'WITHDRAWN' })),
-      listCategories: jest.fn(async () => ({ items: [], count: 0 })),
+    };
+    const categories = {
+      list: jest.fn(async () => ({ items: [], count: 0 })),
+      create: jest.fn(async () => ({ id: 'c1' })),
+      rename: jest.fn(async () => ({ id: 'c1' })),
+      remove: jest.fn(async () => ({ ok: true })),
     };
     const importer = { import: jest.fn(async () => ({ created: 0 })) };
     const controller = new LabPortalServicesController(
       catalog as any,
+      categories as any,
       importer as any,
     );
     const actor = { id: 'u1' } as any;
@@ -41,6 +47,9 @@ describe('LabPortalServicesController', () => {
       actor,
     );
     await controller.listCategories();
+    await controller.createCategory({ name: 'Hormonas' }, actor);
+    await controller.renameCategory('c1', { name: 'Hormonas II' }, actor);
+    await controller.deleteCategory('c1');
 
     expect(catalog.list).toHaveBeenCalledWith({ q: 'x' });
     expect(catalog.create).toHaveBeenCalledWith({ code: 'A' }, actor);
@@ -50,6 +59,9 @@ describe('LabPortalServicesController', () => {
       { mode: 'UPDATE_ONLY', rows: [] },
       actor,
     );
-    expect(catalog.listCategories).toHaveBeenCalled();
+    expect(categories.list).toHaveBeenCalled();
+    expect(categories.create).toHaveBeenCalledWith('Hormonas', actor);
+    expect(categories.rename).toHaveBeenCalledWith('c1', 'Hormonas II', actor);
+    expect(categories.remove).toHaveBeenCalledWith('c1');
   });
 });
