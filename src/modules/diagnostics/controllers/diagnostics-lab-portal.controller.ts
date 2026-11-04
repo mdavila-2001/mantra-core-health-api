@@ -1,0 +1,96 @@
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiConflictResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
+import {
+  Audited,
+  CurrentUser,
+  requireTenantId,
+  type AuthenticatedUser,
+} from '../../../common';
+import { LabStaffGuard } from '../guards';
+import { LabPortalOrdersService } from '../services/lab-portal-orders.service';
+import { LabPortalResultsService } from '../services/lab-portal-results.service';
+import { LabPortalSummaryService } from '../services/lab-portal-summary.service';
+import {
+  LabOrderDto,
+  LabOrderPageDto,
+  LabOrderTransitionDto,
+  LabResultTargetPageDto,
+} from '../dto/lab-portal-orders.dto';
+import { LabSummaryDto } from '../dto/lab-portal-summary.dto';
+
+/**
+ * Laboratory / imaging-center portal: summary and routed orders. No route
+ * carries the laboratory id: it is the active tenant (`X-Tenant-Id`), and
+ * `LabStaffGuard` lets in only its staff (same rule as the reception inbox).
+ */
+@ApiTags('diagnostics-lab-portal')
+@ApiBearerAuth()
+@UseGuards(LabStaffGuard)
+@Controller('diagnostics/lab')
+export class DiagnosticsLabPortalController {
+  constructor(
+    private readonly summary: LabPortalSummaryService,
+    private readonly orders: LabPortalOrdersService,
+    private readonly results: LabPortalResultsService,
+  ) {}
+
+  @Get('summary')
+  @ApiOperation({ summary: 'Resumen del laboratorio del tenant activo' })
+  getSummary(): Promise<LabSummaryDto> {
+    return this.summary.summary(requireTenantId());
+  }
+
+  @Get('orders')
+  @ApiOperation({
+    summary: 'Órdenes derivadas al laboratorio, con su estado derivado',
+    description:
+      'Órdenes con `performer_tenant_id` = tenant activo (laboratorio, ' +
+      'anatomía patológica e imagen), de la más nueva a la más vieja, hasta 500.',
+  })
+  listOrders(): Promise<LabOrderPageDto> {
+    return this.orders.list(requireTenantId());
+  }
+
+  @Audited({
+    action: 'LAB_ORDER_TRANSITIONED',
+    entity: 'service_request',
+    entityId: 'param:orderId',
+  })
+  @Post('orders/:orderId/transitions')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'Un paso del camino de la orden (RECEIVE, PROCESS, REJECT, CANCEL)',
+  })
+  @ApiConflictResponse({ description: 'El estado actual no admite ese paso' })
+  transition(
+    @Param('orderId', ParseUUIDPipe) orderId: string,
+    @Body() dto: LabOrderTransitionDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<LabOrderDto> {
+    return this.orders.transition(requireTenantId(), orderId, dto, actor);
+  }
+
+  @Get('result-targets')
+  @ApiOperation({
+    summary: 'Órdenes procesadas a las que se puede adjuntar un resultado',
+  })
+  listResultTargets(): Promise<LabResultTargetPageDto> {
+    return this.results.targets(requireTenantId());
+  }
+}

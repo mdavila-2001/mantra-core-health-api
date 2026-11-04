@@ -182,6 +182,12 @@ export const { seeds: DIAGNOSTIC_UNITS_CONCEPT_SEEDS, ids: DUNIT } =
       code: 'DU_EQ_MAINTENANCE',
       display: 'Equipment under maintenance',
     },
+    // Third state of the center's equipment screen (`P-CENTRO-HORARIOS`):
+    // broken, not just scheduled for maintenance. Neither counts as capacity.
+    EQUIPMENT_OUT_OF_SERVICE: {
+      code: 'DU_EQ_OUT_OF_SERVICE',
+      display: 'Equipment out of service',
+    },
 
     // --- diagnostic_unit_practitioner_assignments ----------------------------
     ASSIGNMENT_ROLE_SPECIALIST: {
