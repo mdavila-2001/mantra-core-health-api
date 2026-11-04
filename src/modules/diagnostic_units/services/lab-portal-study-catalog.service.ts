@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import type { AuthenticatedUser } from '../../../common';
+import { touch, type AuthenticatedUser } from '../../../common';
 import {
   LAB_REFERENCE_PRICE_SOURCES,
   labReferencePrice,
@@ -118,6 +118,7 @@ export class LabPortalStudyCatalogService {
     return {
       created: count('CREATED'),
       republished: count('REPUBLISHED'),
+      linked: count('LINKED'),
       skipped: count('SKIPPED'),
       rejected: count('REJECTED'),
       rows,
@@ -157,11 +158,27 @@ export class LabPortalStudyCatalogService {
       }
       return row('REPUBLISHED', existing.id);
     }
-    for (const code of [item.code, ...item.components.map((c) => c.code)]) {
+    // A free-form service with the same code (typed or CSV-loaded before) is
+    // the same análisis: it is linked to the catalog and keeps its own price.
+    const own = this.context.byCode(ctx, item.code);
+    const adopt =
+      own?.studyConceptId === DUNIT.STUDY_GENERIC &&
+      parentOf(ctx, own.id) === null
+        ? own
+        : undefined;
+    const codes = [
+      ...(adopt ? [] : [item.code]),
+      ...item.components.map((c) => c.code),
+    ];
+    for (const code of codes) {
       const problem = this.writer.problemOf(ctx, { code });
       if (problem) return row('REJECTED', null, problem.message);
     }
-    const panel = await this.add(tx, ctx, item, actorUserId);
+    if (adopt) {
+      adopt.studyConceptId = item.conceptId;
+      touch(adopt, actorUserId);
+    }
+    const panel = adopt ?? (await this.add(tx, ctx, item, actorUserId));
     for (const [index, component] of item.components.entries()) {
       const part = await this.add(tx, ctx, component, actorUserId);
       ctx.links.push(
@@ -173,7 +190,7 @@ export class LabPortalStudyCatalogService {
         }),
       );
     }
-    return row('CREATED', panel.id);
+    return row(adopt ? 'LINKED' : 'CREATED', panel.id);
   }
 
   /** One offering bound to its catalog concept; without a suggested price it waits as DRAFT. */

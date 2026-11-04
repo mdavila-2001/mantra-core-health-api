@@ -67,8 +67,12 @@ export class LabCatalogImportDto {
 
 export class LabCatalogImportRowDto {
   @ApiProperty({ format: 'uuid' }) conceptId!: string;
-  @ApiProperty({ enum: ['CREATED', 'REPUBLISHED', 'SKIPPED', 'REJECTED'] })
-  outcome!: 'CREATED' | 'REPUBLISHED' | 'SKIPPED' | 'REJECTED';
+  @ApiProperty({
+    enum: ['CREATED', 'LINKED', 'REPUBLISHED', 'SKIPPED', 'REJECTED'],
+    description:
+      'LINKED: a free-form service with the same code now points to the catalog item',
+  })
+  outcome!: 'CREATED' | 'LINKED' | 'REPUBLISHED' | 'SKIPPED' | 'REJECTED';
   @ApiProperty({ type: String, nullable: true, format: 'uuid' })
   serviceId!: string | null;
   @ApiProperty({ type: String, nullable: true }) reason!: string | null;
@@ -77,6 +81,7 @@ export class LabCatalogImportRowDto {
 export class LabCatalogImportResultDto {
   @ApiProperty() created!: number;
   @ApiProperty() republished!: number;
+  @ApiProperty() linked!: number;
   @ApiProperty() skipped!: number;
   @ApiProperty() rejected!: number;
   @ApiProperty({ type: [LabCatalogImportRowDto] })

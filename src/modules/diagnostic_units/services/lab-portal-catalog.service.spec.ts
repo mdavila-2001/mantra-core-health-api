@@ -510,13 +510,29 @@ describe('LabPortalStudyCatalogService (proceso 4.2)', () => {
     });
   });
 
-  it('rejects an id outside the lab catalog and a code the lab already uses', async () => {
-    const { catalog, studyCatalog } = build();
-    await inT(T1, () => catalog.create(draft('HEMOGRAMA'), actor));
+  it('rejects an id outside the lab catalog', async () => {
+    const { studyCatalog } = build();
     const res = await inT(T1, () =>
-      studyCatalog.importCatalog({ conceptIds: [HEMO, T3] }, actor),
+      studyCatalog.importCatalog({ conceptIds: [T3] }, actor),
     );
-    expect(res.rows.map((r) => r.outcome)).toEqual(['REJECTED', 'REJECTED']);
+    expect(res.rows.map((r) => r.outcome)).toEqual(['REJECTED']);
+  });
+
+  it('links a free-form service of the same code, keeping its price', async () => {
+    const { em, catalog, studyCatalog } = build();
+    const own = await inT(T1, () => catalog.create(draft('HEMOGRAMA'), actor));
+    const res = await inT(T1, () =>
+      studyCatalog.importCatalog({ conceptIds: [HEMO] }, actor),
+    );
+    expect(res).toMatchObject({ linked: 1, created: 0 });
+    expect(res.rows[0]).toMatchObject({ outcome: 'LINKED', serviceId: own.id });
+    const list = await inT(T1, () => catalog.list({}));
+    expect(list.items.find((i) => i.id === own.id)).toMatchObject({
+      catalogConceptId: HEMO,
+      price: '45.00',
+    });
+    expect(list.items.filter((i) => i.parentId === own.id)).toHaveLength(2);
+    expect(em.rows(DiagnosticStudyComponents)).toHaveLength(2);
   });
 
   it('hides the sign-up modality marker from the price list', async () => {
