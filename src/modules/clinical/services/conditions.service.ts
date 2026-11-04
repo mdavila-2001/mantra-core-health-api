@@ -24,6 +24,7 @@ import {
 import { Conditions, DiagnosticReports, ServiceRequests } from '../entities';
 import { ClinicalNoteHeaders } from '../../chart/entities';
 import { VERIFICATION_SNAPSHOT_KEY } from './condition-verification';
+import { assertOwnOrFullAccess } from '../domain/clinical-authorship';
 import { ClinicalReadService } from './clinical-read.service';
 // BR-14 (CL-07): un encuentro sellado no admite más escrituras que lo
 // referencien. Archivo y servicio nuevos, independientes.
@@ -100,13 +101,9 @@ const CLINICAL_COURSES: readonly string[] = [
  * UC-08-08: registro de condiciones/diagnósticos (activa + confirmada), y
  * Patch v4.0.8: transición de su estado clínico una vez registrada.
  *
- * Hasta el patch, una condición nacía activa y **no tenía a dónde ir**: no
- * había endpoint que la inactivara, resolviera o marcara en remisión, así que
- * la historia clínica acumulaba diagnósticos resueltos hace años listados
- * exactamente igual que los vigentes. `changeClinicalStatus` cierra ese hueco
- * con la máquina de {@link CLINICAL_STATUS_TRANSITIONS}, exige motivo (dato
- * regulado) y sella el cambio en la cadena WORM y en `audit.conditions_history`,
- * igual que hace la receta con `invalidate`/`replace`.
+ * `changeClinicalStatus` aplica la máquina de {@link CLINICAL_STATUS_TRANSITIONS},
+ * exige motivo (dato regulado) y sella el cambio en la cadena WORM y en
+ * `audit.conditions_history`, igual que la receta con `invalidate`/`replace`.
  */
 @Injectable()
 export class ConditionsService {
@@ -322,6 +319,7 @@ export class ConditionsService {
         tx,
         conditionId,
         actor,
+        true,
       );
       const fromStatus = condition.clinicalStatusConceptId;
       const allowed = fromStatus
@@ -393,8 +391,7 @@ export class ConditionsService {
           conditionId,
           fromStatus,
           toStatus: dto.newClinicalStatusConceptId,
-          // BR-14 (CL-10): nada de texto libre en el log — sólo ids y
-          // conceptos (regla 90.2.7). El motivo va en la auditoría, no acá.
+          // BR-14 (CL-10): sólo ids y conceptos en el log; el motivo va en la auditoría.
         },
         'Condition clinical status changed',
       );
@@ -425,14 +422,12 @@ export class ConditionsService {
    * ## Dónde queda la decisión
    *
    * En `audit.conditions_history`, bajo `verification` del `data_snapshot`
-   * (decisión D-BR14-04: sin columna nueva). La lectura del resumen la toma de
-   * la última revisión que la contiene.
+   * (D-BR14-04: sin columna nueva), junto con quién la tomó.
    *
    * ## Autorización
    *
-   * Como `change-status` y `attachments` (MCH-007): el paciente sólo se conoce
-   * al cargar la condición, así que la política de escritura sobre la historia
-   * la aplica el servicio, no `ClinicalRecordAccessGuard`.
+   * Como `change-status` (MCH-007): la aplica el servicio, no el guard, y
+   * la condición de otro profesional exige acceso completo (regla (c)).
    *
    * @param conditionId - El presuntivo a decidir.
    * @param dto - Resultado, motivo y/o evidencia, y fechas al confirmar.
@@ -469,6 +464,7 @@ export class ConditionsService {
         tx,
         conditionId,
         actor,
+        true,
       );
 
       const actual = condition.verificationStatusConceptId;
@@ -735,19 +731,23 @@ export class ConditionsService {
 
   /**
    * Condición por id, sólo si el actor puede escribir en la historia de su
-   * paciente (MCH-007). El paciente sale de la fila, nunca de la petición: las
-   * mutaciones por id no traen paciente que el guard pueda evaluar.
+   * paciente (MCH-007; el paciente sale de la fila, nunca de la petición).
+   * `ownOrFull`: la de otro profesional exige acceso completo (regla (c)).
    */
   private async loadConditionForWrite(
     tx: EntityManager,
     conditionId: string,
     actor: AuthenticatedUser,
+    ownOrFull = false,
   ): Promise<Conditions> {
     const condition = await this.loadConditionOrThrow(tx, conditionId);
     await this.clinicalRead.assertCanWriteHistory(
       condition.patientProfileId,
       actor,
     );
+    if (ownOrFull) {
+      await assertOwnOrFullAccess(this.clinicalRead, condition, actor);
+    }
     return condition;
   }
 

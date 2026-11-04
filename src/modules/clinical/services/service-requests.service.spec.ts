@@ -1041,3 +1041,49 @@ describe('ServiceRequestsService · MCH-027, el aviso de la orden', () => {
     );
   });
 });
+
+describe('ServiceRequestsService · solicitante de la orden (regla c)', () => {
+  const doctor = { id: 'u1', practitionerProfileId: 'doc-1' } as any;
+  const dto = (requesterProfileId?: string): any => ({
+    custodianTenantId: 't1',
+    patientProfileId: 'p1',
+    encounterId: 'enc-1',
+    codeConceptId: 'code-1',
+    requesterProfileId,
+  });
+
+  it('una orden a nombre de otro profesional responde 403 y no escribe', async () => {
+    const d = build();
+
+    await expect(d.service.create(dto('doc-2'), doctor)).rejects.toThrow(
+      /solicitante de la orden/,
+    );
+    expect(d.serviceRequestsRepo.create).not.toHaveBeenCalled();
+  });
+
+  it('el SUPERADMIN global puede pedir en nombre de otro; el acotado no', async () => {
+    const d = build();
+    d.serviceRequestsRepo.create.mockReturnValue({
+      id: 'sr1',
+      patientProfileId: 'p1',
+      statusConceptId: CLIN.SERVICE_REQUEST_ACTIVE,
+      intentConceptId: CLIN.SERVICE_REQUEST_INTENT_ORDER,
+      createdAt: new Date(),
+    });
+
+    await expect(
+      d.service.create(dto('doc-2'), {
+        id: 'root',
+        roles: ['SUPERADMIN'],
+      } as any),
+    ).resolves.toBeDefined();
+    await expect(
+      d.service.create(dto('doc-2'), {
+        id: 'a',
+        roles: ['SUPERADMIN'],
+        scopedRoles: { t1: ['SUPERADMIN'] },
+        practitionerProfileId: 'doc-1',
+      } as any),
+    ).rejects.toThrow(/solicitante de la orden/);
+  });
+});

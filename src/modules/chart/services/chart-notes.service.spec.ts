@@ -922,3 +922,125 @@ describe('ChartNotesService.createNote · encuentro del paciente (CHART-01)', ()
     expect(d.notesRepo.createHeader).not.toHaveBeenCalled();
   });
 });
+
+/**
+ * Regla (c): nadie edita lo que escribió otro profesional. Solo el autor de la
+ * versión vigente agrega versiones, firma o enmienda; el SUPERADMIN global pasa.
+ */
+describe('ChartNotesService · autoría de la nota (regla c)', () => {
+  const header = (lifecycle: string = CHART.NOTE_LIFECYCLE_DRAFT) => ({
+    id: 'n1',
+    patientProfileId: 'p1',
+    lifecycleStatusConceptId: lifecycle,
+    currentVersionId: 'v1',
+    updatedAt: new Date(),
+  });
+  const authoredBy = (
+    authorProfileId: string,
+    status = CHART.VERSION_DRAFT,
+  ) => ({
+    id: 'v1',
+    clinicalNoteId: 'n1',
+    statusConceptId: status,
+    authorProfileId,
+  });
+
+  it('addVersion sobre la nota de otro profesional responde 403 y no crea la versión', async () => {
+    const d = build();
+    d.notesRepo.findHeaderById.mockResolvedValue(header());
+    d.notesRepo.findVersionById.mockResolvedValue(authoredBy('s2'));
+
+    await expect(d.service.addVersion('n1', {}, actor)).rejects.toThrow(
+      /Sólo el autor/,
+    );
+    expect(d.notesRepo.createVersion).not.toHaveBeenCalled();
+    expect(d.notesRepo.findVersionById).toHaveBeenCalledWith(d.tx, 'v1');
+  });
+
+  it('addVersion sobre la propia nota sigue funcionando', async () => {
+    const d = build();
+    const h: any = header();
+    d.notesRepo.findHeaderById.mockResolvedValue(h);
+    d.notesRepo.findVersionById.mockResolvedValue(authoredBy('s1'));
+    d.notesRepo.createVersion.mockReturnValue({
+      id: 'v2',
+      versionNumber: 2,
+      statusConceptId: CHART.VERSION_DRAFT,
+    });
+
+    await d.service.addVersion('n1', {}, actor);
+
+    expect(h.currentVersionId).toBe('v2');
+  });
+
+  it('el SUPERADMIN global agrega versiones a la nota de cualquiera', async () => {
+    const d = build();
+    d.notesRepo.findHeaderById.mockResolvedValue(header());
+    d.notesRepo.findVersionById.mockResolvedValue(authoredBy('s2'));
+    d.notesRepo.createVersion.mockReturnValue({
+      id: 'v2',
+      versionNumber: 2,
+      statusConceptId: CHART.VERSION_DRAFT,
+    });
+
+    await expect(
+      d.service.addVersion('n1', { authorProfileId: 's9' }, {
+        id: 'root',
+        roles: ['SUPERADMIN'],
+        practitionerProfileId: 's9',
+      } as any),
+    ).resolves.toBeDefined();
+  });
+
+  it('signVersion de una versión escrita por otro responde 403 y no firma', async () => {
+    const d = build();
+    const version: any = authoredBy('s2');
+    d.notesRepo.findVersionById.mockResolvedValue(version);
+    d.notesRepo.findHeaderById.mockResolvedValue(header());
+
+    await expect(
+      d.service.signVersion('n1', 'v1', { signerProfileId: 's1' }, actor),
+    ).rejects.toThrow(/Sólo el autor/);
+    expect(version.statusConceptId).toBe(CHART.VERSION_DRAFT);
+    expect(d.notesRepo.createSignature).not.toHaveBeenCalled();
+  });
+
+  it('amendNote sobre la nota firmada de otro responde 403 y no crea la enmienda', async () => {
+    const d = build();
+    d.notesRepo.findHeaderById.mockResolvedValue(
+      header(CHART.NOTE_LIFECYCLE_SIGNED),
+    );
+    d.notesRepo.findVersionById.mockResolvedValue(
+      authoredBy('s2', CHART.VERSION_SIGNED),
+    );
+
+    await expect(
+      d.service.amendNote('n1', { amendmentReasonText: 'x' } as any, actor),
+    ).rejects.toThrow(/Sólo el autor/);
+    expect(d.notesRepo.createVersion).not.toHaveBeenCalled();
+  });
+
+  it('la cofirma sigue siendo de otro profesional: no exige ser el autor', async () => {
+    const d = build();
+    const version: any = authoredBy('s1', CHART.VERSION_SIGNED);
+    d.notesRepo.findVersionById.mockResolvedValue(version);
+    d.notesRepo.findHeaderById.mockResolvedValue(
+      header(CHART.NOTE_LIFECYCLE_SIGNED),
+    );
+    d.notesRepo.findSignatures.mockResolvedValue([
+      {
+        signatureTypeConceptId: CHART.SIGNATURE_AUTHOR,
+        signerProfileId: 's1',
+      },
+    ]);
+
+    await expect(
+      d.service.cosignVersion(
+        'n1',
+        'v1',
+        { signerProfileId: 's2' } as any,
+        actor2,
+      ),
+    ).resolves.toBeDefined();
+  });
+});
