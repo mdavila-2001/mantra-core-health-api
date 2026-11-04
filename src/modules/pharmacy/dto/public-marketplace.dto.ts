@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { PublicOfficialMedicineDto } from './public-official-medicine.dto';
 
 /**
  * La vitrina pública de medicamentos: exhibición y **consulta de
@@ -65,22 +66,23 @@ export class PublicMedicationCardDto {
   requiresPrescription!: boolean;
 
   /**
-   * Precio más bajo publicado hoy, como texto exacto.
+   * Precio más bajo publicado hoy, como texto exacto. `null` si ninguna
+   * farmacia lo publica (medicamento del vademécum sin oferta).
    */
-  @ApiProperty()
-  priceFrom!: string;
+  @ApiProperty({ type: String, nullable: true })
+  priceFrom!: string | null;
 
   /**
    * Precio más alto publicado hoy, como texto exacto.
    */
-  @ApiProperty()
-  priceTo!: string;
+  @ApiProperty({ type: String, nullable: true })
+  priceTo!: string | null;
 
   /**
    * Moneda de los importes (código ISO).
    */
-  @ApiProperty()
-  currency!: string;
+  @ApiProperty({ type: String, nullable: true })
+  currency!: string | null;
 
   /**
    * En cuántas farmacias está disponible hoy dentro del alcance consultado.
@@ -147,6 +149,13 @@ export class PublicMedicationPageDto {
    */
   @ApiPropertyOptional({ type: String, nullable: true, example: 'ibuprofeno' })
   correctedQuery!: string | null;
+
+  /**
+   * Products of the official health registry (AGEMED, CIMA, INVIMA, ANVISA)
+   * that match the search, whether or not a pharmacy publishes them.
+   */
+  @ApiProperty({ type: [PublicOfficialMedicineDto] })
+  officialProducts!: PublicOfficialMedicineDto[];
 
   /**
    * Instante en que se resolvió la consulta.

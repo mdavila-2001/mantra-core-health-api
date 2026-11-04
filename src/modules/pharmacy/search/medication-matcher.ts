@@ -18,14 +18,8 @@ import {
   THERAPEUTIC_USES,
   type TherapeuticUse,
 } from './therapeutic-uses.catalog';
-import {
-  keywords,
-  normalize,
-  prefixMatch,
-  tolerance,
-  typoDistance,
-  words,
-} from './search-text';
+import { keywords, normalize, prefixMatch, words } from './search-text';
+import { replaceTypos } from './typo-correction';
 
 /** Something searchable: one medication or one product. */
 export interface SearchDoc {
@@ -111,6 +105,16 @@ export function searchDocs(
   return second.size > 0
     ? { matches: second, correctedQuery: corrected }
     : { matches: direct, correctedQuery: null };
+}
+
+/**
+ * The ATC prefixes of the uses a text asks for («dolor abdominal» → A03A,
+ * A03B), to search catalogs too big to match in memory.
+ */
+export function useAtcPrefixes(query: string): string[] {
+  return [
+    ...new Set(bestUses(keywordsOrWords(query)).flatMap((use) => use.atc)),
+  ];
 }
 
 /* ---- passes 1 and 2 ------------------------------------------------------ */
@@ -223,37 +227,7 @@ function correctTypos(
 
   const terms = keywordsOrWords(query);
   if (terms.length > MAX_CORRECTED_TERMS) return null;
-  const known = [...vocabulary];
-  let changed = false;
-  const fixed = terms.map((term) => {
-    if (known.some((word) => prefixMatch(term, word))) return term;
-    const closest = closestWord(term, known);
-    if (closest === null) return term;
-    changed = true;
-    return closest;
-  });
-  return changed ? fixed.join(' ') : null;
-}
-
-function closestWord(
-  term: string,
-  vocabulary: readonly string[],
-): string | null {
-  const max = tolerance(term);
-  if (max === 0) return null;
-  let best: { word: string; rank: number } | null = null;
-  for (const word of vocabulary) {
-    const distance = typoDistance(term, word);
-    if (distance > max) continue;
-    // Same first letter and closer length break ties: typos rarely hit the
-    // first letter, and «ibopofeno» is closer to «ibuprofeno» than to «ibu».
-    const rank =
-      distance * 10 +
-      (word[0] === term[0] ? 0 : 5) +
-      Math.abs(word.length - term.length);
-    if (best === null || rank < best.rank) best = { word, rank };
-  }
-  return best?.word ?? null;
+  return replaceTypos(terms, [...vocabulary]);
 }
 
 /* ---- helpers ------------------------------------------------------------- */

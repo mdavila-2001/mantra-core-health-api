@@ -1,7 +1,11 @@
 import { jest } from '@jest/globals';
 import { ResourceNotFoundException } from '../../../common';
 import { PharmacyMarketplaceService } from './pharmacy-marketplace.service';
-import type { PublishedOffer } from '../repositories';
+import type {
+  MedicineCatalogProduct,
+  PublishedOffer,
+  VademecumConcept,
+} from '../repositories';
 
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
@@ -40,14 +44,30 @@ function offer(extra: Partial<PublishedOffer> = {}): PublishedOffer {
   };
 }
 
-function build(offers: readonly PublishedOffer[] = []) {
+function build(
+  offers: readonly PublishedOffer[] = [],
+  vademecum: readonly VademecumConcept[] = [],
+  official: readonly Partial<MedicineCatalogProduct>[] = [],
+) {
   const fork = {};
   const em = { fork: mockFn(() => fork) };
   const repo = {
     findPublishedOffers: mockFn().mockResolvedValue([...offers]),
+    findVademecum: mockFn().mockResolvedValue([...vademecum]),
   };
-  const service = new PharmacyMarketplaceService(em as any, repo as any);
-  return { service, repo };
+  const catalog = {
+    search: mockFn().mockResolvedValue({
+      items: [...official],
+      truncated: false,
+    }),
+    searchByAtcPrefixes: mockFn().mockResolvedValue([...official]),
+  };
+  const service = new PharmacyMarketplaceService(
+    em as any,
+    repo as any,
+    catalog as any,
+  );
+  return { service, repo, catalog };
 }
 
 describe('PharmacyMarketplaceService · la vitrina', () => {
@@ -265,6 +285,112 @@ describe('PharmacyMarketplaceService · la búsqueda', () => {
     expect(
       (await service.listMedications({ q: 'buscap' })).items[0].matchedBy,
     ).toBe('brand');
+  });
+});
+
+describe('PharmacyMarketplaceService · vademécum y registro oficial', () => {
+  const VADEMECUM: VademecumConcept[] = [
+    {
+      conceptId: 'v-buti',
+      atcCode: 'A03BB01',
+      genericName: 'Butilescopolamina',
+    },
+    { conceptId: 'v-ibu', atcCode: 'M01AE01', genericName: 'Ibuprofeno' },
+  ];
+  const BUSCAPINA = {
+    id: 'reg-1',
+    display: 'BUSCAPINA 10 mg grageas',
+    holder: 'Boehringer',
+    strengthText: '10 mg',
+    dosageForm: 'Gragea',
+    sourceName: 'AGEMED',
+    atc: ['A03BB01'],
+    requiresPrescription: false,
+  };
+
+  it('sin ninguna farmacia, «dolor abdominal» igual encuentra el medicamento', async () => {
+    const { service, catalog } = build([], VADEMECUM, [BUSCAPINA]);
+    const page = await service.listMedications({ q: 'dolor abdominal' });
+
+    expect(page.items.map((card) => card.conceptId)).toEqual(['v-buti']);
+    expect(page.items[0]).toMatchObject({
+      pharmacyCount: 0,
+      priceFrom: null,
+      matchedBy: 'use',
+      uses: ['Dolor abdominal y cólicos'],
+    });
+    // The registry is searched by ATC group for a symptom.
+    expect(catalog.searchByAtcPrefixes).toHaveBeenCalledWith(
+      {},
+      ['A03A', 'A03B'],
+      24,
+    );
+    expect(page.officialProducts[0]).toMatchObject({
+      name: 'BUSCAPINA 10 mg grageas',
+      uses: ['Dolor abdominal y cólicos'],
+    });
+  });
+
+  it('corrige el tipeo contra el vademécum y busca el registro con lo corregido', async () => {
+    const { service, catalog } = build([], VADEMECUM);
+    const page = await service.listMedications({ q: 'ibopofeno' });
+    expect(page.correctedQuery).toBe('ibuprofeno');
+    expect(page.items.map((card) => card.conceptId)).toEqual(['v-ibu']);
+    expect(catalog.search).toHaveBeenCalledWith(
+      {},
+      { text: 'ibuprofeno', limit: 24 },
+    );
+  });
+
+  it('lo que una farmacia publica va antes que lo que sólo está en el vademécum', async () => {
+    const { service } = build(
+      [
+        offer({
+          conceptId: 'v-ibu',
+          atcCode: 'M01AE01',
+          genericName: 'Ibuprofeno',
+        }),
+      ],
+      [
+        ...VADEMECUM,
+        { conceptId: 'v-para', atcCode: 'N02BE01', genericName: 'Paracetamol' },
+      ],
+    );
+    const page = await service.listMedications({ q: 'fiebre' });
+    expect(page.items.map((card) => card.conceptId)).toEqual([
+      'v-ibu',
+      'v-para',
+    ]);
+  });
+
+  it('un mismo medicamento con dos ATC sale en una sola tarjeta', async () => {
+    const { service } = build(
+      [
+        offer({
+          conceptId: 'v-ibu',
+          atcCode: 'M01AE01',
+          genericName: 'Ibuprofeno',
+        }),
+      ],
+      [
+        ...VADEMECUM,
+        {
+          conceptId: 'v-ibu-iv',
+          atcCode: 'C01EB16',
+          genericName: 'Ibuprofeno',
+        },
+      ],
+    );
+    const page = await service.listMedications({ q: 'ibuprofeno' });
+    expect(page.items.map((card) => card.conceptId)).toEqual(['v-ibu']);
+  });
+
+  it('sin texto no lista el vademécum entero ni consulta el registro', async () => {
+    const { service, catalog } = build([offer()], VADEMECUM);
+    const page = await service.listMedications({});
+    expect(page.items).toHaveLength(1);
+    expect(page.officialProducts).toEqual([]);
+    expect(catalog.search).not.toHaveBeenCalled();
   });
 });
 
