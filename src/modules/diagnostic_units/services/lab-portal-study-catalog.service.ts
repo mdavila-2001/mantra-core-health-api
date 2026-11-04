@@ -2,10 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { touch, type AuthenticatedUser } from '../../../common';
-import {
-  LAB_REFERENCE_PRICE_SOURCES,
-  labReferencePrice,
-} from '../../study_catalog/lab-reference-prices';
+import { LAB_REFERENCE_PRICE_SOURCES } from '../../study_catalog/lab-reference-prices';
 import { LabCatalogRepository } from '../../study_catalog/repositories/lab-catalog.repository';
 import { StudyCatalogRepository } from '../../study_catalog/repositories/study-catalog.repository';
 import { DUNIT } from '../diagnostic_units.concepts';
@@ -15,7 +12,6 @@ import type {
   LabCatalogImportDto,
   LabCatalogImportResultDto,
   LabCatalogImportRowDto,
-  LabCatalogItemDto,
   LabCatalogSectionDto,
 } from '../dto/lab-portal-catalog.dto';
 import type { DiagnosticStudyOfferings } from '../entities';
@@ -29,16 +25,14 @@ import {
 } from './lab-portal-context.service';
 import { LabPortalPricingService } from './lab-portal-pricing.service';
 import { LabPortalWriterService } from './lab-portal-writer.service';
+import {
+  toCatalogItems,
+  type CatalogItem as Item,
+} from './lab-portal-study-catalog.items';
 import { parentOf, statusOf } from './lab-portal.mapping';
 
 /** The whole lab catalog is ~530 análisis: one page holds it. */
 const CATALOG_PAGE = 1000;
-
-type Item = LabCatalogItemDto & { section: { code: string; name: string } };
-
-const text = (v: unknown): string | null => (typeof v === 'string' ? v : null);
-const named = (v: unknown, key: string): string | null =>
-  v && typeof v === 'object' ? text((v as Record<string, unknown>)[key]) : null;
 
 /**
  * Lab portal access to the study catalog (proceso 4.2): the same LOINC-coded
@@ -262,40 +256,6 @@ export class LabPortalStudyCatalogService {
       em,
       rows.map((r) => r.id),
     );
-    const byPanel = new Map<string, LabCatalogComponentDto[]>();
-    for (const p of parts) {
-      const list = byPanel.get(p.parent_id) ?? [];
-      list.push({
-        conceptId: p.id,
-        code: p.code,
-        name: p.name,
-        loinc: text(p.props?.loinc_code),
-        unit: text(p.props?.unit_ucum),
-        suggestedPrice: labReferencePrice(p.code),
-      });
-      byPanel.set(p.parent_id, list);
-    }
-    return new Map(
-      rows.map((r) => {
-        const code = text(r.props?.study_catalog_code) ?? r.code;
-        return [
-          r.id,
-          {
-            conceptId: r.id,
-            code,
-            name: r.name,
-            loinc: text(r.props?.loinc_code),
-            specimen: named(r.props?.specimen, 'nombre'),
-            suggestedPrice: labReferencePrice(code),
-            offeredServiceId: null,
-            components: byPanel.get(r.id) ?? [],
-            section: {
-              code: named(r.props?.section, 'codigo') ?? 'OTROS',
-              name: named(r.props?.section, 'nombre') ?? 'Otros análisis',
-            },
-          },
-        ];
-      }),
-    );
+    return toCatalogItems(rows, parts);
   }
 }
