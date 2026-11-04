@@ -9,17 +9,19 @@ function emReturning(rows: unknown[]) {
     .fn<(sql: string, params?: unknown[]) => Promise<unknown>>()
     .mockResolvedValueOnce(undefined)
     .mockResolvedValueOnce(rows);
+  const fork = jest.fn((): unknown => em);
   const em = {
     transactional: jest.fn((work: (tx: unknown) => unknown) =>
       work({ execute }),
     ),
+    fork,
   } as unknown as EntityManager;
-  return { em, execute };
+  return { em, execute, fork };
 }
 
 describe('findBookableOrganizations', () => {
   it('runs in system context and maps rows', async () => {
-    const { em, execute } = emReturning([
+    const { em, execute, fork } = emReturning([
       {
         tenant_id: 't-1',
         name: 'Clínica',
@@ -40,6 +42,8 @@ describe('findBookableOrganizations', () => {
       count: 1,
     });
     expect(execute.mock.calls[0][0]).toContain("'app.system_context', 'true'");
+    // Own connection: the system context must not outlive the call.
+    expect(fork).toHaveBeenCalledWith({ keepTransactionContext: false });
   });
 
   // A flexible-hours or services schedule never materializes slots: counting

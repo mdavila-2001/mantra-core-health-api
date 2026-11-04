@@ -107,7 +107,7 @@ function build() {
   );
   const run = (query: any, actor: any = doctor) =>
     runWithTenant(TENANT, () => service.getInsights(query, actor));
-  return { service, repo, logger, run };
+  return { service, em, repo, logger, run };
 }
 
 /** Un escenario base con todas las dimensiones respondidas. */
@@ -197,6 +197,16 @@ function seedBaseScenario(repo: ReturnType<typeof build>['repo']) {
 }
 
 describe('SurveysInsightsService', () => {
+  it('lee sobre la transacción de la petición (RLS)', async () => {
+    const d = build();
+    seedBaseScenario(d.repo);
+
+    await d.run({});
+
+    expect(d.em.fork).toHaveBeenCalledWith({ keepTransactionContext: true });
+    expect(d.em.fork).not.toHaveBeenCalledWith();
+  });
+
   it('rechaza una sesión sin perfil profesional (403) y no consulta nada', async () => {
     const { repo, run } = build();
     await expect(

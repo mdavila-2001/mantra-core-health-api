@@ -37,9 +37,12 @@ function build() {
     flush: mockFn().mockResolvedValue(undefined),
     find: mockFn().mockResolvedValue([]),
   };
-  const emFork = {
+  // The savepoint (`fork({ keepTransactionContext: true }).transactional`) runs
+  // its callback on the same fork.
+  const emFork: any = {
     flush: mockFn().mockResolvedValue(undefined),
   };
+  emFork.transactional = mockFn((cb: any) => cb(emFork));
   const em = {
     fork: mockFn().mockReturnValue(emFork),
     transactional: mockFn((cb: any) => cb(tx)),

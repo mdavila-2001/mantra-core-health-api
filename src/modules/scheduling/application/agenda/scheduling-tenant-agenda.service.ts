@@ -90,7 +90,7 @@ export class SchedulingTenantAgendaService {
     query: TenantAgendaQueryDto,
     actor: AuthenticatedUser,
   ): Promise<TenantAgendaResponseDto> {
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
 
     // Leer la agenda es parte de trabajar en la organización, así que alcanza
     // con pertenecer: exigir administrarla dejaría fuera justamente a la

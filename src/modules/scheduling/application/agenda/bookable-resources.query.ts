@@ -99,7 +99,10 @@ export async function findBookableResources(
   const limit = query.limit ?? DEFAULT_LIMIT;
   const offset = query.offset ?? 0;
 
-  const [rows, totals] = await em.transactional(async (tx) => {
+  // Own connection: `system_context` set inside a savepoint would outlive its
+  // RELEASE and stay open for the rest of the request.
+  const own = em.fork({ keepTransactionContext: false });
+  const [rows, totals] = await own.transactional(async (tx) => {
     await tx.execute("select set_config('app.system_context', 'true', true)");
     const page = await tx.execute<Row[]>(PAGE, [...params, limit, offset]);
     const total = await tx.execute<{ total: string }[]>(TOTAL, params);

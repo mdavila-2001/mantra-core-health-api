@@ -121,13 +121,18 @@ export class SchedulingAgendaService {
     // una caída.
     let sites = new Map<string, ResourceSiteDto>();
     try {
-      sites = await this.directory.resolveSitesForResources(
-        resources.map((resource) => ({
-          refType: resource.resourceRefType,
-          refId: resource.resourceRefId,
-        })),
-        query.tenantId,
-      );
+      // Savepoint: a swallowed failure must not abort the request transaction.
+      sites = await this.em
+        .fork({ keepTransactionContext: true })
+        .transactional(() =>
+          this.directory.resolveSitesForResources(
+            resources.map((resource) => ({
+              refType: resource.resourceRefType,
+              refId: resource.resourceRefId,
+            })),
+            query.tenantId,
+          ),
+        );
     } catch (error) {
       this.logger.warn(
         { operation: 'scheduling.resources.list', err: error },
@@ -141,14 +146,19 @@ export class SchedulingAgendaService {
     // cliente cae al nombre del recurso, que es lo que mostraba siempre.
     let names = new Map<string, string>();
     try {
-      names = await this.directory.findPractitionerNames(
-        em,
-        resources
-          .filter((resource) =>
-            PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType),
-          )
-          .map((resource) => resource.resourceRefId),
-      );
+      // Savepoint: a swallowed failure must not abort the request transaction.
+      names = await this.em
+        .fork({ keepTransactionContext: true })
+        .transactional((tx) =>
+          this.directory.findPractitionerNames(
+            tx,
+            resources
+              .filter((resource) =>
+                PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType),
+              )
+              .map((resource) => resource.resourceRefId),
+          ),
+        );
     } catch (error) {
       this.logger.warn(
         { operation: 'scheduling.resources.list', err: error },

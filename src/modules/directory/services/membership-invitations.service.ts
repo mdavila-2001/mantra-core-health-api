@@ -147,7 +147,9 @@ export class MembershipInvitationsService {
   private inSystemContext<T>(
     work: (tx: EntityManager) => Promise<T>,
   ): Promise<T> {
-    return this.em.fork().transactional(async (tx) => {
+    // Own connection: a joined transaction would keep this set_config alive.
+    const ownFork = this.em.fork({ keepTransactionContext: false });
+    return ownFork.transactional(async (tx) => {
       await tx.execute("select set_config('app.system_context', 'true', true)");
       return work(tx);
     });

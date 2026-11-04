@@ -81,7 +81,6 @@ import type { PractitionerVerificationView } from '../../domain/admissions/admis
 import { ProfilesErrorReason } from '../../profiles.error-reasons';
 import { PractitionerAdmissionsService } from './practitioner-admissions.service';
 import { PractitionerAdmissionsReadService } from './practitioner-admissions-read.service';
-import { BO_PROFESSION_CONCEPT_IDS } from '../../../../common/seed/bo-professions.catalog';
 import {
   PRACTITIONER_CONTEXT_PORT,
   type PractitionerContextPort,
@@ -195,7 +194,6 @@ const PUBLISHABLE_STATES = [
   PROF.AFFILIATION_DECLARED,
   PROF.AFFILIATION_APPROVED,
 ] as const;
-
 
 @Injectable()
 export class ProfilesPractitionersService {
@@ -638,7 +636,7 @@ export class ProfilesPractitionersService {
     const page = hasMore ? rows.slice(0, options.limit) : rows;
 
     const pageIds = page.map((row) => row.profileId);
-    const [persons, specialties, affiliations, stats] = await Promise.all([
+    const [persons, specialties, affiliations] = await Promise.all([
       this.personsRepo.findByIds(em, pageIds),
       this.specialtiesRepo.findByPractitioners(em, pageIds),
       // Dónde atiende cada uno. En lote y no de a uno: pedirlas por fila serían
@@ -646,19 +644,22 @@ export class ProfilesPractitionersService {
       this.affiliationsRepo.findByPractitioners(em, pageIds, [
         ...PUBLISHABLE_STATES,
       ]),
-      // Nota y actividad, para que la guía pueda ordenar por ellas. También en
-      // lote, y con el mismo resguardo que la ficha: si esta lectura falla, la
-      // guía sale con ceros y sin nota, no se cae entera.
-      this.practitionerContext
-        .directoryStats(em, pageIds)
-        .catch((error: unknown) => {
-          this.logger.warn(
-            { err: error, pieza: 'cifras-de-la-guia', count: pageIds.length },
-            'No se pudieron leer las cifras de la guía; salen en cero',
-          );
-          return new Map<string, PractitionerDirectoryStats>();
-        }),
     ]);
+    // Rating and activity figures: if the read fails the guide shows zeros.
+    // Savepoint and outside the `Promise.all`: a SQL error would abort the
+    // request transaction, and a savepoint cannot run in parallel on it.
+    const stats = await this.em
+      .fork({ keepTransactionContext: true })
+      .transactional((tx) =>
+        this.practitionerContext.directoryStats(tx, pageIds),
+      )
+      .catch((error: unknown) => {
+        this.logger.warn(
+          { err: error, pieza: 'cifras-de-la-guia', count: pageIds.length },
+          'No se pudieron leer las cifras de la guía; salen en cero',
+        );
+        return new Map<string, PractitionerDirectoryStats>();
+      });
 
     // Por profesional, sin repetir. El padrón trae la misma sede escrita de dos
     // formas para el mismo médico —«CLINICA DE LAS AMERICAS» y «CLINICA
@@ -2978,7 +2979,8 @@ export class ProfilesPractitionersService {
    * estado de cita. Quién decide cuáles son tipos de credencial es la
    * enumeración `professional-credential-type`, la misma que siembra la app.
    */
-  public static readonly CREDENTIAL_TYPES = ManagePractitionerCredentialsUseCase.CREDENTIAL_TYPES;
+  public static readonly CREDENTIAL_TYPES =
+    ManagePractitionerCredentialsUseCase.CREDENTIAL_TYPES;
 
   async addOwnCredential(
     dto: AddOwnCredentialDto,
@@ -2992,7 +2994,11 @@ export class ProfilesPractitionersService {
     dto: UpdateOwnCredentialDto,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    return this.credentialsUseCase.updateOwnCredential(credentialId, dto, actor);
+    return this.credentialsUseCase.updateOwnCredential(
+      credentialId,
+      dto,
+      actor,
+    );
   }
 
   async removeOwnCredential(

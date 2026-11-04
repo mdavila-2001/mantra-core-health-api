@@ -141,7 +141,8 @@ export class IamMfaService {
           // Se usa un EntityManager independiente (fork + flush) porque al lanzar
           // la excepción la transacción principal hace rollback: si el evento se
           // registrara sobre `tx` se perdería, y el log de auditoría es append-only.
-          const auditEm = this.em.fork();
+          // Must persist even when the request rolls back: own connection.
+          const auditEm = this.em.fork({ keepTransactionContext: false });
           this.eventsRepo.record(auditEm, {
             eventTypeConceptId: CONCEPTS.SEC_MFA_ENROLL,
             outcomeConceptId: CONCEPTS.OUTCOME_FAILURE,

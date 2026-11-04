@@ -47,6 +47,8 @@ function build(
   };
   const em: any = {
     fork: mockFn(() => em),
+    // Savepoint: the callback runs on the same double.
+    transactional: mockFn((cb: any) => cb(em)),
     findOne: mockFn(async (entity: unknown, where: any) => {
       if (entity === Referrals) return referral;
       if (entity === PersonAccountLinks) {

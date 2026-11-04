@@ -189,31 +189,36 @@ export class BillingServiceCatalogService {
     }
 
     try {
-      const { file } =
-        await this.attachableFiles.assertUsableForAuthorizedContext(
-          em,
-          imageFileId,
-          SERVICE_IMAGE_OPTIONS,
-        );
-      // Pertenencia: el `imageFileId` guardado no prueba que el archivo sea de
-      // esta organización (el alta lo aceptaba sin validar). Un archivo de otro
-      // tenant no se sirve aunque el servicio ya lo apunte.
-      if (
-        file.sensitivityConceptId === CONCEPTS.SENSITIVITY_NORMAL &&
-        file.tenantId === tenantId
-      ) {
-        const content = await this.fileUpload.downloadForAuthorizedContext(
-          imageFileId,
-          SERVICE_IMAGE_OPTIONS.operation,
-        );
-        // Se valida una versión y se descarga la vigente: se vuelve a comprobar
-        // sobre lo que de verdad se va a enviar.
-        const allowed: readonly string[] =
-          SERVICE_IMAGE_OPTIONS.allowedMimeTypes;
-        if (allowed.includes(content.mimeType)) {
-          return content;
-        }
-      }
+      // Savepoint: a swallowed failure must not abort the request transaction.
+      const content = await this.em
+        .fork({ keepTransactionContext: true })
+        .transactional(async (tx) => {
+          const { file } =
+            await this.attachableFiles.assertUsableForAuthorizedContext(
+              tx,
+              imageFileId,
+              SERVICE_IMAGE_OPTIONS,
+            );
+          // Pertenencia: el `imageFileId` guardado no prueba que el archivo sea de
+          // esta organización (el alta lo aceptaba sin validar). Un archivo de otro
+          // tenant no se sirve aunque el servicio ya lo apunte.
+          if (
+            file.sensitivityConceptId !== CONCEPTS.SENSITIVITY_NORMAL ||
+            file.tenantId !== tenantId
+          ) {
+            return null;
+          }
+          const downloaded = await this.fileUpload.downloadForAuthorizedContext(
+            imageFileId,
+            SERVICE_IMAGE_OPTIONS.operation,
+          );
+          // Se valida una versión y se descarga la vigente: se vuelve a comprobar
+          // sobre lo que de verdad se va a enviar.
+          const allowed: readonly string[] =
+            SERVICE_IMAGE_OPTIONS.allowedMimeTypes;
+          return allowed.includes(downloaded.mimeType) ? downloaded : null;
+        });
+      if (content) return content;
     } catch {
       // Archivo inexistente, borrado, infectado o de otro tipo: para quien
       // pregunta es lo mismo que «el servicio no tiene imagen». Los detalles
@@ -314,18 +319,22 @@ export class BillingServiceCatalogService {
   ): Promise<void> {
     const tenantId = requireTenantId();
     try {
-      const { file } = await this.attachableFiles.assertUsableBy(
-        this.em.fork(),
-        fileId,
-        actor,
-        SERVICE_IMAGE_OPTIONS,
-      );
-      if (
-        file.sensitivityConceptId === CONCEPTS.SENSITIVITY_NORMAL &&
-        file.tenantId === tenantId
-      ) {
-        return;
-      }
+      // Savepoint: a swallowed failure must not abort the request transaction.
+      const usable = await this.em
+        .fork({ keepTransactionContext: true })
+        .transactional(async (tx) => {
+          const { file } = await this.attachableFiles.assertUsableBy(
+            tx,
+            fileId,
+            actor,
+            SERVICE_IMAGE_OPTIONS,
+          );
+          return (
+            file.sensitivityConceptId === CONCEPTS.SENSITIVITY_NORMAL &&
+            file.tenantId === tenantId
+          );
+        });
+      if (usable) return;
     } catch {
       // Se uniforma abajo: el motivo concreto no sale en la respuesta.
     }

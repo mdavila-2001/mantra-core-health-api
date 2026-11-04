@@ -161,7 +161,9 @@ export class QaFlowsSeedService {
       ...EMPTY,
       changed: { ...EMPTY.changed },
     };
-    await this.orm.em.fork().transactional(async (tx) => {
+    // Own connection: a joined transaction would keep this set_config alive.
+    const ownFork = this.orm.em.fork({ keepTransactionContext: false });
+    await ownFork.transactional(async (tx) => {
       if (this.enforceRls) {
         await tx.execute(
           "select set_config('app.system_context', 'false', true)",

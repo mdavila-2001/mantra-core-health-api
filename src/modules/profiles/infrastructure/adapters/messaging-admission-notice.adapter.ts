@@ -89,7 +89,9 @@ export class MessagingAdmissionNoticeAdapter implements AdmissionNoticePort {
   }
 
   private async issue(notice: AdmissionNotice): Promise<AdmissionNoticeResult> {
-    const em = this.em.fork();
+    // Reads tables without RLS and swallows errors: stay on its own connection
+    // so a failed query cannot abort the request transaction.
+    const em = this.em.fork({ keepTransactionContext: false });
     const link = await this.accountLinks.findActiveByPerson(
       em,
       notice.practitionerProfileId,

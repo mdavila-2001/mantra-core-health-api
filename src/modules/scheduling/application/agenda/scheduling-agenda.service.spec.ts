@@ -27,7 +27,9 @@ const SITE = {
  * @returns Resultado de build.
  */
 function build() {
-  const fork = { id: 'fork' };
+  // The savepoint (`fork(...).transactional`) runs its callback on the same fork.
+  const fork: any = { id: 'fork' };
+  fork.transactional = mockFn((cb: any) => cb(fork));
   const em = { fork: mockFn(() => fork) };
   const agendaRepo = {
     findResources: mockFn().mockResolvedValue([]),
@@ -64,6 +66,26 @@ const resource = (over: Record<string, unknown> = {}): any => ({
 });
 
 describe('SchedulingAgendaService', () => {
+  describe('contexto transaccional', () => {
+    // Under RLS a bare fork loses the tenant that the request interceptor set
+    // on its transaction, and the reads come back empty.
+    it('listResources y listSlots leen sobre la transacción de la petición', async () => {
+      const d = build();
+
+      await d.service.listResources({ tenantId: TENANT } as any);
+      await d.service.listSlots({
+        from: '2026-11-02T00:00:00Z',
+        to: '2026-11-03T00:00:00Z',
+      } as any);
+
+      // listResources: read fork + two savepoints (sites, names); listSlots: one.
+      expect(d.em.fork).toHaveBeenCalledTimes(4);
+      for (const call of d.em.fork.mock.calls) {
+        expect(call[0]).toEqual({ keepTransactionContext: true });
+      }
+    });
+  });
+
   describe('listResources · nombre del profesional', () => {
     it('resuelve el nombre de la persona detrás del recurso, en lote', async () => {
       const d = build();
@@ -264,7 +286,7 @@ describe('SchedulingAgendaService', () => {
         to: '2026-11-05T00:00:00.000Z',
       } as any);
 
-      expect(d.em.fork).toHaveBeenCalledTimes(2);
+      expect(d.em.fork).toHaveBeenCalledTimes(4);
       for (const call of d.em.fork.mock.calls) {
         expect(call[0]).toEqual({ keepTransactionContext: true });
       }

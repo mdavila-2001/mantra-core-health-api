@@ -43,7 +43,10 @@ type Row = {
 export async function findBookableOrganizations(
   em: EntityManager,
 ): Promise<BookableOrganizationsResponseDto> {
-  const rows = await em.transactional(async (tx) => {
+  // Own connection: `system_context` set inside a savepoint would outlive its
+  // RELEASE and stay open for the rest of the request.
+  const own = em.fork({ keepTransactionContext: false });
+  const rows = await own.transactional(async (tx) => {
     await tx.execute("select set_config('app.system_context', 'true', true)");
     return tx.execute<Row[]>(SQL, [
       CONCEPTS.RESOURCE_PRACTITIONER,

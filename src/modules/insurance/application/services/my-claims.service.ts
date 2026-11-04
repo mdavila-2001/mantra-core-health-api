@@ -43,7 +43,8 @@ export class MyClaimsService {
     declaredTenantId?: string,
   ): Promise<MyClaimListDto> {
     const tenantId = this.selectedTenant(actor, declaredTenantId);
-    const em = this.em.fork();
+    // Own connection: a joined transaction would keep this set_config alive.
+    const em = this.em.fork({ keepTransactionContext: false });
     if (actor.practitionerProfileId) {
       const encounters = await this.claimReadRepo.findEncountersByPractitioner(
         em,

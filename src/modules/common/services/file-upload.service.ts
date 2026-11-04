@@ -651,7 +651,8 @@ export class FileUploadService {
    *   para servir algo que no se terminó de revisar).
    */
   async downloadPublicMedia(fileId: string): Promise<FileContentDto> {
-    const forked = this.em.fork();
+    // Own connection: a joined transaction would keep this set_config alive.
+    const forked = this.em.fork({ keepTransactionContext: false });
     const { file, version } = await forked.transactional(async (tx) => {
       // Scoped system context allows reading clean public images without an HTTP tenant session.
       await tx.execute("select set_config('app.system_context', 'true', true)");

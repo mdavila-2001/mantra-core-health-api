@@ -37,7 +37,8 @@ export class PracticeInfrastructureSeedService {
 
   /** Seeds missing parent rules, typology rules, and backfills null room forms. */
   async run(): Promise<PracticeInfrastructureSeedResult> {
-    const em = this.orm.em.fork();
+    // Own connection: a joined transaction would keep this set_config alive.
+    const em = this.orm.em.fork({ keepTransactionContext: false });
     return em.transactional(async (tx) => {
       await tx.execute("select set_config('app.system_context', 'true', true)");
       const now = new Date();

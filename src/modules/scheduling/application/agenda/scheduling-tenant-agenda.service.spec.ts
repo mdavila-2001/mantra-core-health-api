@@ -119,6 +119,14 @@ describe('SchedulingTenantAgendaService (TP-5)', () => {
       expect(filters.tenantId).toBe(TENANT);
     });
 
+    it('lee sobre la transacción de la petición (RLS)', async () => {
+      const d = build();
+
+      await d.service.list(TENANT, WEEK as any, reception);
+
+      expect(d.em.fork).toHaveBeenCalledWith({ keepTransactionContext: true });
+    });
+
     /**
      * El criterio e2e del prompt: pedir la agenda de un médico de otra
      * organización no devuelve sus citas allá.
