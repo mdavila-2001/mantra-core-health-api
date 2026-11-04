@@ -83,11 +83,26 @@ describe('own external-system order stock', () => {
     expect(await d.resolve()).toEqual({ mode: 'MANUAL' });
     expect(d.systems.resolve).not.toHaveBeenCalled();
   });
-  it('overlap stays CONTRACT_PENDING, without choosing newest or branch precedence', async () => {
+  it('general and branch coexist: the branch connection wins', async () => {
     const d = fixture();
     d.reads.findConnections.mockResolvedValue([
       d.link,
       { ...d.link, id: 'branch-link', pharmacySiteId: 'site' } as any,
+    ]);
+    expect(await d.resolve()).toMatchObject({ mode: 'CONNECTED' });
+    expect((d.systems.resolve.mock.calls as any[][])[0][2]).toBe(
+      (d.link as any).connectionId,
+    );
+    expect(d.reads.findMappings).toHaveBeenCalledWith(
+      expect.anything(),
+      'branch-link',
+    );
+  });
+  it('same-scope duplicates stay CONTRACT_PENDING, never newest or first', async () => {
+    const d = fixture();
+    d.reads.findConnections.mockResolvedValue([
+      { ...d.link, id: 'b1', pharmacySiteId: 'site' } as any,
+      { ...d.link, id: 'b2', pharmacySiteId: 'site' } as any,
     ]);
     expect(await d.resolve()).toEqual({
       mode: 'CONTRACT_PENDING',

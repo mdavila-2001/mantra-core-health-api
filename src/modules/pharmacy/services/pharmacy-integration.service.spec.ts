@@ -66,6 +66,7 @@ function build() {
   const connectionsRepo = {
     findByPharmacyAndConnection: mockFn(),
     findById: mockFn(),
+    findActiveStockInScope: mockFn().mockResolvedValue([]),
     create: mockFn(),
   };
   const mappingsRepo = {
@@ -121,6 +122,66 @@ describe('PharmacyIntegrationService', () => {
           ),
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it.each([
+      ['a second general stock connection', undefined],
+      ['a second stock connection for the same branch', 'site1'],
+    ])('rejects %s at configuration time', async (_name, siteId) => {
+      const d = build();
+      d.connectionsRepo.findActiveStockInScope.mockResolvedValue([
+        { id: 'existing' },
+      ]);
+      const error = await inTenant(() =>
+        rejection(
+          d.service.createConnection(
+            'ph1',
+            {
+              integrationMode: 'REALTIME',
+              supportsStockQuery: true,
+              pharmacySiteId: siteId,
+            } as any,
+            actor,
+          ),
+        ),
+      );
+      expect(error).toBeInstanceOf(ConflictException);
+      expect(error.reason).toBe(
+        PharmacyErrorReason.INTEGRATION_CONNECTION_SCOPE_TAKEN,
+      );
+      expect(d.connectionsRepo.findActiveStockInScope).toHaveBeenCalledWith(
+        d.tx,
+        'ph1',
+        siteId ?? null,
+      );
+      expect(d.connectionsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('a branch connection coexists with the general one', async () => {
+      const d = build();
+      d.connectionsRepo.create.mockReturnValue({
+        id: 'conn2',
+        pharmacyId: 'ph1',
+        statusConceptId: PHARM.CONNECTION_ACTIVE,
+        createdAt: new Date(),
+      });
+      await inTenant(() =>
+        d.service.createConnection(
+          'ph1',
+          {
+            integrationMode: 'REALTIME',
+            supportsStockQuery: true,
+            pharmacySiteId: 'site1',
+          } as any,
+          actor,
+        ),
+      );
+      expect(d.connectionsRepo.findActiveStockInScope).toHaveBeenCalledWith(
+        d.tx,
+        'ph1',
+        'site1',
+      );
+      expect(d.connectionsRepo.create).toHaveBeenCalled();
     });
 
     it('creates the connection without an integrations connection (connectionId null)', async () => {

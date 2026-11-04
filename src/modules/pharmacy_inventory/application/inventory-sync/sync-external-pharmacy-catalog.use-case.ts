@@ -16,7 +16,10 @@ import {
   type ExternalProduct,
   type ExternalStockLine,
 } from '../../domain/sync/external-catalog';
-import { conflictingStockConnections } from '../../domain/sync/connection-coverage';
+import {
+  duplicateScopeStockConnections,
+  siteIdsWithOwnStockConnection,
+} from '../../domain/sync/connection-coverage';
 import {
   mappedCodesNotSent,
   translateExternalStock,
@@ -97,9 +100,10 @@ interface SiteOutcome {
  * (`reconcile-inventory-sync-batch.use-case.ts`). Por eso, en orden:
  *
  * 1. Lee la conexión, sus sedes y sus vínculos dentro del ámbito del actor.
- *    Si a esas sedes les aplica otra conexión activa que también consulta
- *    stock, 409 `PHARMACY_INTEGRATION_CONNECTION_AMBIGUOUS` y no se hace nada
- *    (H-05).
+ *    Una conexión general excluye las sedes que tienen conexión propia (gana
+ *    la sucursal). Si hay otra conexión activa de stock del mismo nivel y
+ *    alcance (datos anteriores a la regla), 409
+ *    `PHARMACY_INTEGRATION_CONNECTION_AMBIGUOUS` y no se hace nada (H-05).
  * 2. Llama al sistema externo **fuera** de toda transacción; si no responde,
  *    502 y no queda lote.
  * 3. Traduce: lo que no tiene un vínculo único va al lote sin producto y se
@@ -263,29 +267,32 @@ export class SyncExternalPharmacyCatalogUseCase {
       }
       const pharmacyCode =
         (await this.reads.findPharmacyCode(tx, pharmacy.pharmacyId)) ?? '';
-      const sites = await this.reads.findActiveSites(
+      const activeSites = await this.reads.findActiveSites(
         tx,
         pharmacy.pharmacyId,
         connection.pharmacySiteId ?? undefined,
       );
-      // H-05: si otra conexión activa también escribe stock en estas sedes, no
-      // se elige una en silencio: se pide dejar una sola.
-      const conflicting = conflictingStockConnections(
-        connection,
-        sites.map((site) => site.id),
-        (await this.reads.findConnections(tx, pharmacy.pharmacyId)).map(
-          (other) => ({
-            id: other.id,
-            pharmacySiteId: other.pharmacySiteId ?? null,
-            writesStock:
-              other.statusConceptId === PHARM.CONNECTION_ACTIVE &&
-              other.supportsStockQuery === true,
-          }),
-        ),
-      );
-      if (conflicting.length > 0) {
-        throw integrationConnectionAmbiguous(conflicting);
+      // H-05: la sucursal gana sobre la general; dos del mismo nivel y alcance
+      // no se resuelven en silencio.
+      const coverage = (
+        await this.reads.findConnections(tx, pharmacy.pharmacyId)
+      ).map((other) => ({
+        id: other.id,
+        pharmacySiteId: other.pharmacySiteId ?? null,
+        writesStock:
+          other.statusConceptId === PHARM.CONNECTION_ACTIVE &&
+          other.supportsStockQuery === true,
+      }));
+      const current = {
+        id: connection.id,
+        pharmacySiteId: connection.pharmacySiteId ?? null,
+      };
+      const duplicates = duplicateScopeStockConnections(current, coverage);
+      if (duplicates.length > 0) {
+        throw integrationConnectionAmbiguous(duplicates);
       }
+      const ownedByBranch = siteIdsWithOwnStockConnection(current, coverage);
+      const sites = activeSites.filter((site) => !ownedByBranch.has(site.id));
       const mappings = (await this.reads.findMappings(tx, connection.id)).map(
         (mapping) => ({
           externalProductCode: mapping.externalProductCode,

@@ -13,6 +13,7 @@ import {
   ExternalCatalogUnavailableError,
   type ExternalSystemCheckResult,
 } from '../../domain/sync/external-catalog';
+import { stockConnectionForSite } from '../../domain/sync/connection-coverage';
 import {
   resolveExternalCodes,
   unitIssue,
@@ -36,7 +37,7 @@ export type ExternalOrderStockSource =
 const MANUAL: ExternalOrderStockSource = { mode: 'MANUAL' };
 const DEADLINE_MS = 3_000;
 
-/** Own systems only. No precedence is invented for overlapping connections. */
+/** Own systems only. The branch connection wins over the general one; same-scope duplicates are never resolved. */
 @Injectable()
 export class ExternalOrderStock {
   constructor(
@@ -54,15 +55,28 @@ export class ExternalOrderStock {
     actorUserId: string,
   ): Promise<ExternalOrderStockSource> {
     const em = this.em.fork({ keepTransactionContext: true });
-    const links = (await this.reads.findConnections(em, pharmacy.id)).filter(
+    const stockLinks = (
+      await this.reads.findConnections(em, pharmacy.id)
+    ).filter(
       (link) =>
         link.statusConceptId === PHARM.CONNECTION_ACTIVE &&
-        link.supportsStockQuery === true &&
-        (!link.pharmacySiteId || link.pharmacySiteId === site.id),
+        link.supportsStockQuery === true,
     );
-    // Preserve dev's ledger behavior for this blocked subset; never choose newest/first.
-    if (links.length > 1)
+    // La sucursal gana sobre la general. Dos del mismo nivel y alcance (datos
+    // anteriores a la regla) no se resuelven: nunca la más nueva ni la primera.
+    const winner = stockConnectionForSite(
+      site.id,
+      stockLinks.map((link) => ({
+        id: link.id,
+        pharmacySiteId: link.pharmacySiteId ?? null,
+        writesStock: true,
+      })),
+    );
+    if (winner.status === 'DUPLICATE')
       return { mode: 'CONTRACT_PENDING', reason: 'CONNECTION_PRECEDENCE' };
+    const links = stockLinks.filter(
+      (link) => winner.status === 'ONE' && link.id === winner.id,
+    );
     const branch = (
       await this.reads.findActiveSites(em, pharmacy.id, site.id)
     )[0];

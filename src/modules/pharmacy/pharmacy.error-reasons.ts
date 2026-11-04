@@ -57,6 +57,11 @@ export enum PharmacyErrorReason {
   EXTERNAL_MAPPING_NOT_AVAILABLE = 'EXTERNAL_MAPPING_NOT_AVAILABLE',
   /** El producto ya tiene un vínculo en esta conexión: se corrige ese. */
   EXTERNAL_MAPPING_PRODUCT_TAKEN = 'EXTERNAL_MAPPING_PRODUCT_TAKEN',
+  /**
+   * Ya hay una conexión activa de stock del mismo nivel y alcance (otra
+   * general, o otra de la misma sucursal): se corrige esa.
+   */
+  INTEGRATION_CONNECTION_SCOPE_TAKEN = 'INTEGRATION_CONNECTION_SCOPE_TAKEN',
   /** La corrección de un vínculo no trae ningún campo. */
   EXTERNAL_MAPPING_EMPTY_UPDATE = 'EXTERNAL_MAPPING_EMPTY_UPDATE',
 }

@@ -1,5 +1,7 @@
 import {
-  conflictingStockConnections,
+  duplicateScopeStockConnections,
+  siteIdsWithOwnStockConnection,
+  stockConnectionForSite,
   type CoverageConnection,
 } from './connection-coverage';
 
@@ -9,70 +11,105 @@ const conn = (
   writesStock = true,
 ): CoverageConnection => ({ id, pharmacySiteId, writesStock });
 
-describe('conflictingStockConnections (H-05 · precedencia entre conexiones)', () => {
-  it('no hay conflicto cuando es la única conexión', () => {
-    expect(
-      conflictingStockConnections({ id: 'a' }, ['s1', 's2'], [conn('a', null)]),
-    ).toEqual([]);
+describe('regla de conexiones de stock (C9-5)', () => {
+  describe('duplicateScopeStockConnections', () => {
+    it('sin otras conexiones no hay duplicado', () => {
+      expect(
+        duplicateScopeStockConnections(conn('a', null), [conn('a', null)]),
+      ).toEqual([]);
+    });
+    it('una general y una de sucursal coexisten', () => {
+      expect(
+        duplicateScopeStockConnections(conn('a', null), [
+          conn('a', null),
+          conn('b', 's2'),
+        ]),
+      ).toEqual([]);
+      expect(
+        duplicateScopeStockConnections(conn('b', 's2'), [
+          conn('a', null),
+          conn('b', 's2'),
+        ]),
+      ).toEqual([]);
+    });
+    it('dos generales son duplicado', () => {
+      expect(
+        duplicateScopeStockConnections(conn('a', null), [
+          conn('a', null),
+          conn('b', null),
+        ]),
+      ).toEqual(['b']);
+    });
+    it('dos de la misma sucursal son duplicado; de sucursales distintas no', () => {
+      expect(
+        duplicateScopeStockConnections(conn('a', 's1'), [
+          conn('a', 's1'),
+          conn('b', 's1'),
+          conn('c', 's2'),
+        ]),
+      ).toEqual(['b']);
+    });
+    it('una inactiva o sin consulta de stock no cuenta', () => {
+      expect(
+        duplicateScopeStockConnections(conn('a', null), [
+          conn('a', null),
+          conn('b', null, false),
+        ]),
+      ).toEqual([]);
+    });
   });
 
-  it('una conexión de toda la farmacia choca con una de una sede', () => {
-    expect(
-      conflictingStockConnections(
-        { id: 'a' },
-        ['s1', 's2'],
-        [conn('a', null), conn('b', 's2')],
-      ),
-    ).toEqual(['b']);
+  describe('siteIdsWithOwnStockConnection', () => {
+    it('la general excluye las sucursales con conexión propia', () => {
+      expect([
+        ...siteIdsWithOwnStockConnection(conn('a', null), [
+          conn('a', null),
+          conn('b', 's2'),
+          conn('c', 's3', false),
+        ]),
+      ]).toEqual(['s2']);
+    });
+    it('una conexión de sucursal no excluye nada', () => {
+      expect(
+        siteIdsWithOwnStockConnection(conn('b', 's2'), [
+          conn('a', null),
+          conn('b', 's2'),
+          conn('c', 's3'),
+        ]).size,
+      ).toBe(0);
+    });
   });
 
-  it('una de una sede choca con una de toda la farmacia', () => {
-    expect(
-      conflictingStockConnections(
-        { id: 'b' },
-        ['s2'],
-        [conn('a', null), conn('b', 's2')],
-      ),
-    ).toEqual(['a']);
-  });
-
-  it('dos conexiones de la misma sede chocan', () => {
-    expect(
-      conflictingStockConnections(
-        { id: 'a' },
-        ['s1'],
-        [conn('a', 's1'), conn('b', 's1')],
-      ),
-    ).toEqual(['b']);
-  });
-
-  it('conexiones de sedes distintas no chocan', () => {
-    expect(
-      conflictingStockConnections(
-        { id: 'a' },
-        ['s1'],
-        [conn('a', 's1'), conn('b', 's2')],
-      ),
-    ).toEqual([]);
-  });
-
-  it('una conexión inactiva o sin consulta de stock no cuenta', () => {
-    expect(
-      conflictingStockConnections(
-        { id: 'a' },
-        ['s1'],
-        [conn('a', null), conn('b', null, false)],
-      ),
-    ).toEqual([]);
-  });
-
-  it('sin sedes que escribir no hay conflicto', () => {
-    expect(
-      conflictingStockConnections(
-        { id: 'a' },
-        [],
-        [conn('a', null), conn('b', null)],
-      ),
-    ).toEqual([]);
+  describe('stockConnectionForSite', () => {
+    it('sin conexiones: NONE', () => {
+      expect(stockConnectionForSite('s1', [])).toEqual({ status: 'NONE' });
+    });
+    it('solo la general: manda la general', () => {
+      expect(stockConnectionForSite('s1', [conn('a', null)])).toEqual({
+        status: 'ONE',
+        id: 'a',
+      });
+    });
+    it('general y sucursal: gana la sucursal en su sede, la general en las demás', () => {
+      const all = [conn('a', null), conn('b', 's1')];
+      expect(stockConnectionForSite('s1', all)).toEqual({
+        status: 'ONE',
+        id: 'b',
+      });
+      expect(stockConnectionForSite('s2', all)).toEqual({
+        status: 'ONE',
+        id: 'a',
+      });
+    });
+    it('duplicados en el nivel ganador: DUPLICATE, no se elige', () => {
+      expect(
+        stockConnectionForSite('s1', [conn('a', 's1'), conn('b', 's1')]),
+      ).toEqual({ status: 'DUPLICATE', ids: ['a', 'b'] });
+    });
+    it('una sucursal inactiva no tapa a la general', () => {
+      expect(
+        stockConnectionForSite('s1', [conn('a', null), conn('b', 's1', false)]),
+      ).toEqual({ status: 'ONE', id: 'a' });
+    });
   });
 });
