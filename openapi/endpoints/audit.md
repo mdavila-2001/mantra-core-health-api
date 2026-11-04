@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `audit`
 
-Referencia exhaustiva de 14 operación(es) del módulo `audit`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 18 operación(es) del módulo `audit`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `audit`, `audit-compliance`, `audit-me`, `audit-moderation`, `audit-privacy`
 - **Controladores:** `AuditController`, `AuditMeController`, `AuditQueryController`, `ComplianceController`, `ModerationController`, `PrivacyController`
@@ -14,17 +14,21 @@ Referencia exhaustiva de 14 operación(es) del módulo `audit`, derivada del con
 1. [POST /audit/anomaly/scan](#1-post-audit-anomaly-scan) — Detectar acceso anómalo
 2. [GET /audit/data-access](#2-get-audit-data-access) — Lecturas de datos sensibles (`audit.data_access_log`), con filtros
 3. [POST /audit/data-access](#3-post-audit-data-access) — Registrar acceso/lectura clínica (accounting WORM)
-4. [POST /audit/events](#4-post-audit-events) — Registrar provenance de un cambio y sellar la cadena hash
-5. [GET /audit/history/{entity}/{id}](#5-get-audit-history-entity-id) — Consultar historial / línea de tiempo de un registro
-6. [POST /audit/integrity/verify](#6-post-audit-integrity-verify) — Verificar integridad tamper-evidence de la cadena
-7. [GET /audit/log](#7-get-audit-log) — Bitácora de acciones que mutaron, con filtros y riesgo para la seguridad de la salud
-8. [GET /audit/me/data-access](#8-get-audit-me-data-access) — Quién accedió a mi historia y con qué finalidad
-9. [POST /audit/retention/apply](#9-post-audit-retention-apply) — Aplicar retención / archivado / litigation-hold
-10. [POST /audit/third-party-access](#10-post-audit-third-party-access) — Registrar acceso delegado / de tercero gobernado
-11. [POST /compliance/audit-export](#11-post-compliance-audit-export) — Exportar evidencia de auditoría para cumplimiento
-12. [POST /moderation/decisions](#12-post-moderation-decisions) — Registrar decisión de moderación / gobernanza analítica
-13. [POST /privacy/dsar](#13-post-privacy-dsar) — Tramitar DSAR (solicitud del titular)
-14. [PATCH /privacy/dsar/{id}](#14-patch-privacy-dsar-id) — Avanzar la máquina de estados de una solicitud DSAR
+4. [GET /audit/data-access/summary](#4-get-audit-data-access-summary) — Resumen agregado de las lecturas de datos sensibles: por propósito, recurso y operación
+5. [POST /audit/events](#5-post-audit-events) — Registrar provenance de un cambio y sellar la cadena hash
+6. [GET /audit/history/{entity}/{id}](#6-get-audit-history-entity-id) — Consultar historial / línea de tiempo de un registro
+7. [POST /audit/integrity/verify](#7-post-audit-integrity-verify) — Verificar integridad tamper-evidence de la cadena
+8. [GET /audit/log](#8-get-audit-log) — Bitácora de acciones que mutaron, con filtros y riesgo para la seguridad de la salud
+9. [GET /audit/log/filter-catalog](#9-get-audit-log-filter-catalog) — Filtros que acepta la bitácora, sus límites y lo que no se puede consultar
+10. [GET /audit/me/data-access](#10-get-audit-me-data-access) — Quién accedió a mi historia y con qué finalidad
+11. [POST /audit/retention/apply](#11-post-audit-retention-apply) — Aplicar retención / archivado / litigation-hold
+12. [POST /audit/third-party-access](#12-post-audit-third-party-access) — Registrar acceso delegado / de tercero gobernado
+13. [POST /compliance/audit-export](#13-post-compliance-audit-export) — Exportar evidencia de auditoría para cumplimiento
+14. [POST /moderation/decisions](#14-post-moderation-decisions) — Registrar decisión de moderación / gobernanza analítica
+15. [GET /privacy/dsar](#15-get-privacy-dsar) — Solicitudes DSAR, la más reciente primero
+16. [POST /privacy/dsar](#16-post-privacy-dsar) — Tramitar DSAR (solicitud del titular)
+17. [GET /privacy/dsar/{id}](#17-get-privacy-dsar-id) — Una solicitud DSAR (sin el archivo resultante)
+18. [PATCH /privacy/dsar/{id}](#18-patch-privacy-dsar-id) — Avanzar la máquina de estados de una solicitud DSAR
 
 ---
 
@@ -397,7 +401,103 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /audit/events
+## 4. GET /audit/data-access/summary
+
+- **Módulo:** `audit`
+- **Etiqueta OpenAPI:** `audit`
+- **Nombre:** Resumen agregado de las lecturas de datos sensibles: por propósito, recurso y operación
+- **Operation ID:** `AuditQueryController_dataAccessSummary`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AuditQueryController.dataAccessSummary](../../src/modules/audit/controllers/audit-query.controller.ts)
+
+### Descripción de negocio
+
+Sólo conteos (sin ids de paciente ni de recurso). Los grupos con menos de `minSample` eventos no se muestran y se suman a `suppressed`. Además de los roles de la bitácora admite `GOVERNANCE_ADMIN` (decisión D-2). `notMeasured` declara `byRole`.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /audit/data-access/summary` en `AuditQueryController_dataAccessSummary`. El controlador delega en `AuditOversightReadService.dataAccessSummary`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `from` | query | No | `string` | Sin restricción adicional declarada | Desde (ISO 8601, incluido). Sin rango, los últimos 30 días | `valor-ejemplo` |
+| `to` | query | No | `string` | Sin restricción adicional declarada | Hasta (ISO 8601, excluido) | `valor-ejemplo` |
+| `minSample` | query | No | `number` | mínimo 5; máximo 1000 | Un grupo con menos eventos que esto no se muestra: se suma a `suppressed`. El mínimo es 5 (piso del servidor) | `5` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /audit/data-access/summary HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `...AUDIT_SUMMARY_ROLES`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /audit/data-access/summary?from=valor-ejemplo&to=valor-ejemplo&minSample=5 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 400 | `VALIDATION_FAILED` | «to» debe ser posterior a «from» | Excepción explícita en src/modules/audit/services/audit-oversight-read.service.ts |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ...AUDIT_SUMMARY_ROLES. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/audit/data-access/summary"
+}
+```
+
+---
+
+## 5. POST /audit/events
 
 - **Módulo:** `audit`
 - **Etiqueta OpenAPI:** `audit`
@@ -540,7 +640,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. GET /audit/history/{entity}/{id}
+## 6. GET /audit/history/{entity}/{id}
 
 - **Módulo:** `audit`
 - **Etiqueta OpenAPI:** `audit`
@@ -675,7 +775,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /audit/integrity/verify
+## 7. POST /audit/integrity/verify
 
 - **Módulo:** `audit`
 - **Etiqueta OpenAPI:** `audit`
@@ -803,7 +903,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. GET /audit/log
+## 8. GET /audit/log
 
 - **Módulo:** `audit`
 - **Etiqueta OpenAPI:** `audit`
@@ -836,6 +936,7 @@ NestJS resuelve `GET /audit/log` en `AuditQueryController_log`. El controlador d
 | `method` | query | No | `string` | valores: `POST`, `PUT`, `PATCH`, `DELETE` | Verbo HTTP, derivado de la acción; las acciones de negocio salen del mapa de rutas armado al arrancar | `POST` |
 | `route` | query | No | `string` | longitud máxima 300 | Plantilla exacta de la ruta, con `:parámetros` | `/admin/catalog/objects/:id/annotation` |
 | `entity` | query | No | `string` | longitud máxima 100 | Entidad afectada | `valor-ejemplo` |
+| `entityId` | query | No | `string` | formato `uuid` | Recurso afectado (`entity_id`): la historia de un registro concreto. Sin índice propio: la consulta siempre queda acotada por la ventana de fechas | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload mínimo aceptable
 
@@ -861,7 +962,7 @@ Authorization: Bearer <access_token_jwt>
 No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
 
 ```http
-GET /audit/log?from=2026-10-01T00%3A00%3A00.000Z&to=2026-10-24T00%3A00%3A00.000Z&userId=00000000-0000-4000-8000-000000000001&tenantId=00000000-0000-4000-8000-000000000001&limit=50&cursor=valor-ejemplo&result=SUCCESS&action=valor-ejemplo&method=POST&route=%2Fadmin%2Fcatalog%2Fobjects%2F%3Aid%2Fannotation&entity=valor-ejemplo HTTP/1.1
+GET /audit/log?from=2026-10-01T00%3A00%3A00.000Z&to=2026-10-24T00%3A00%3A00.000Z&userId=00000000-0000-4000-8000-000000000001&tenantId=00000000-0000-4000-8000-000000000001&limit=50&cursor=valor-ejemplo&result=SUCCESS&action=valor-ejemplo&method=POST&route=%2Fadmin%2Fcatalog%2Fobjects%2F%3Aid%2Fannotation&entity=valor-ejemplo&entityId=00000000-0000-4000-8000-000000000001 HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -906,7 +1007,97 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. GET /audit/me/data-access
+## 9. GET /audit/log/filter-catalog
+
+- **Módulo:** `audit`
+- **Etiqueta OpenAPI:** `audit`
+- **Nombre:** Filtros que acepta la bitácora, sus límites y lo que no se puede consultar
+- **Operation ID:** `AuditQueryController_filterCatalog`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AuditQueryController.filterCatalog](../../src/modules/audit/controllers/audit-query.controller.ts)
+
+### Descripción de negocio
+
+No lee la bitácora ni deja sello de lectura: devuelve la configuración de la consulta (filtros, opciones, ventana por omisión, tope de página y orden). `notMeasured` declara lo que se pidió y no tiene fuente (`requestId`, `correlationId`).
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /audit/log/filter-catalog` en `AuditQueryController_filterCatalog`. El controlador delega en `AuditQueryService.filterCatalog`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /audit/log/filter-catalog HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `AUDITOR`, `DPO`, `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /audit/log/filter-catalog HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | Sí |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: AUDITOR, DPO, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/audit/log/filter-catalog"
+}
+```
+
+---
+
+## 10. GET /audit/me/data-access
 
 - **Módulo:** `audit`
 - **Etiqueta OpenAPI:** `audit-me`
@@ -1042,7 +1233,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /audit/retention/apply
+## 11. POST /audit/retention/apply
 
 - **Módulo:** `audit`
 - **Etiqueta OpenAPI:** `audit`
@@ -1170,7 +1361,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /audit/third-party-access
+## 12. POST /audit/third-party-access
 
 - **Módulo:** `audit`
 - **Etiqueta OpenAPI:** `audit`
@@ -1320,7 +1511,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /compliance/audit-export
+## 13. POST /compliance/audit-export
 
 - **Módulo:** `audit`
 - **Etiqueta OpenAPI:** `audit-compliance`
@@ -1455,7 +1646,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /moderation/decisions
+## 14. POST /moderation/decisions
 
 - **Módulo:** `audit`
 - **Etiqueta OpenAPI:** `audit-moderation`
@@ -1597,7 +1788,107 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /privacy/dsar
+## 15. GET /privacy/dsar
+
+- **Módulo:** `audit`
+- **Etiqueta OpenAPI:** `audit-privacy`
+- **Nombre:** Solicitudes DSAR, la más reciente primero
+- **Operation ID:** `PrivacyController_listDsar`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PrivacyController.listDsar](../../src/modules/audit/controllers/privacy.controller.ts)
+
+### Descripción de negocio
+
+Solicitudes DSAR, la más reciente primero. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Lectura de las solicitudes DSAR. `@PlatformScopeOptional()` va por método (no en la clase: el `POST`/`PATCH` sí exigen una organización). `dsar_requests` no tiene tenant: es del titular. Cada lectura queda sellada en `data_access_log` (identifica a titulares).
+
+### Descripción del sistema
+
+NestJS resuelve `GET /privacy/dsar` en `PrivacyController_listDsar`. El controlador delega en `AuditOversightReadService.dsarList`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `status` | query | No | `string` | valores: `RECEIVED`, `IN_PROGRESS`, `COMPLETED`, `REJECTED` | Sin descripción específica en OpenAPI. | `RECEIVED` |
+| `type` | query | No | `string` | valores: `ACCESS`, `ERASURE`, `RECTIFICATION`, `PORTABILITY`, `OBJECTION` | Sin descripción específica en OpenAPI. | `ACCESS` |
+| `from` | query | No | `string` | Sin restricción adicional declarada | Solicitada desde (ISO 8601, incluido) | `valor-ejemplo` |
+| `to` | query | No | `string` | Sin restricción adicional declarada | Solicitada hasta (ISO 8601, excluido) | `valor-ejemplo` |
+| `limit` | query | No | `number` | mínimo 1; máximo 200 | Sin descripción específica en OpenAPI. | `50` |
+| `cursor` | query | No | `string` | longitud máxima 600 | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /privacy/dsar HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `AUDITOR`, `DPO`, `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /privacy/dsar?status=RECEIVED&type=ACCESS&from=valor-ejemplo&to=valor-ejemplo&limit=50&cursor=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 400 | `VALIDATION_FAILED` | «to» debe ser posterior a «from» | Excepción explícita en src/modules/audit/services/audit-oversight-read.service.ts |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: AUDITOR, DPO, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/privacy/dsar"
+}
+```
+
+---
+
+## 16. POST /privacy/dsar
 
 - **Módulo:** `audit`
 - **Etiqueta OpenAPI:** `audit-privacy`
@@ -1734,7 +2025,103 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. PATCH /privacy/dsar/{id}
+## 17. GET /privacy/dsar/{id}
+
+- **Módulo:** `audit`
+- **Etiqueta OpenAPI:** `audit-privacy`
+- **Nombre:** Una solicitud DSAR (sin el archivo resultante)
+- **Operation ID:** `PrivacyController_getDsar`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PrivacyController.getDsar](../../src/modules/audit/controllers/privacy.controller.ts)
+
+### Descripción de negocio
+
+Una solicitud DSAR (sin el archivo resultante). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /privacy/dsar/{id}` en `PrivacyController_getDsar`. El controlador delega en `AuditOversightReadService.dsar`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /privacy/dsar/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `AUDITOR`, `DPO`, `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /privacy/dsar/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 404 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: AUDITOR, DPO, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Solicitud DSAR no encontrada | Excepción explícita en src/modules/audit/services/audit-oversight-read.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/privacy/dsar/{id}"
+}
+```
+
+---
+
+## 18. PATCH /privacy/dsar/{id}
 
 - **Módulo:** `audit`
 - **Etiqueta OpenAPI:** `audit-privacy`

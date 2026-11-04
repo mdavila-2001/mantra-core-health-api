@@ -82,6 +82,7 @@ const KNOWN_PUBLIC_OPERATIONS = [
   ['get', '/health'],
   ['get', '/liveness'],
   ['get', '/readiness'],
+  ['get', '/metrics'],
   ['post', '/iam/auth/activate'],
   ['post', '/iam/auth/login'],
   ['post', '/iam/auth/register-patient'],
