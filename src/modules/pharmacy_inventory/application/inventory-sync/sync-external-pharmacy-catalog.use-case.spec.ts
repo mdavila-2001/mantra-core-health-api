@@ -208,12 +208,10 @@ describe('SyncExternalPharmacyCatalogUseCase', () => {
     },
   );
 
-  describe('H-05 · una sola conexión de stock por sede', () => {
-    it('another active stock connection covering the same sites → 409, nothing is called or written', async () => {
+  describe('H-05 · regla de conexiones (C9-5)', () => {
+    it('same-scope duplicate (legacy data) → 409, nothing is called or written', async () => {
       const d = build({
-        otherConnections: [
-          connection({ id: 'conn-2', pharmacySiteId: 'site-2' }),
-        ],
+        otherConnections: [connection({ id: 'conn-2' })],
       });
       let thrown: any;
       try {
@@ -229,6 +227,26 @@ describe('SyncExternalPharmacyCatalogUseCase', () => {
       expect(d.external.listProducts).not.toHaveBeenCalled();
       expect(d.createBatch.execute).not.toHaveBeenCalled();
       expect(d.writer.write).not.toHaveBeenCalled();
+    });
+
+    it('a branch connection coexists with the general one: no conflict', async () => {
+      const d = build({
+        otherConnections: [
+          connection({ id: 'conn-2', pharmacySiteId: 'site-2' }),
+        ],
+      });
+      await expect(d.useCase.execute(REF, ACTOR)).resolves.toBeDefined();
+    });
+
+    it('the general sync excludes sites with their own connection', async () => {
+      const d = build({
+        otherConnections: [
+          connection({ id: 'conn-2', pharmacySiteId: 'site-2' }),
+        ],
+      });
+      await d.useCase.execute(REF, ACTOR);
+      const asked = d.external.stockForSite.mock.calls.map((c: any[]) => c[0]);
+      expect(asked).not.toContain('NORTE');
     });
 
     it('a connection tied to another site does not conflict', async () => {

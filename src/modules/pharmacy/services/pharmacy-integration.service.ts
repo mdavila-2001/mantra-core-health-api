@@ -106,6 +106,28 @@ export class PharmacyIntegrationService {
         );
       }
 
+      // Regla de conexiones (C9-5): la general y la de una sucursal coexisten
+      // (gana la sucursal), pero dos del mismo nivel y alcance se rechazan.
+      if (dto.supportsStockQuery === true) {
+        const taken = await this.connectionsRepo.findActiveStockInScope(
+          tx,
+          pharmacy.id,
+          dto.pharmacySiteId ?? null,
+        );
+        if (taken.length > 0) {
+          throw new ConflictException(
+            dto.pharmacySiteId
+              ? 'La sucursal ya tiene una conexión de stock activa'
+              : 'La farmacia ya tiene una conexión general de stock activa',
+            {
+              pharmacySiteId: dto.pharmacySiteId ?? null,
+              connectionIds: taken.map((connection) => connection.id),
+            },
+            PharmacyErrorReason.INTEGRATION_CONNECTION_SCOPE_TAKEN,
+          );
+        }
+      }
+
       const connection = this.connectionsRepo.create(tx, {
         pharmacyId,
         pharmacySiteId: dto.pharmacySiteId,

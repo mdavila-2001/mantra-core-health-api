@@ -132,12 +132,21 @@ farmacia** en vez del que configura el servidor (`PHARMACY_ERP_BASE_URL`, FAR-07
   - **Qué es `quantity`.** La cantidad *disponible* del libro de existencias
     (`available_quantity`), no la física: la sincronización escribe
     `availableQuantity` con `MV_SYNC_ADJUSTMENT`.
-  - **Precedencia.** Dentro de una conexión, su sistema propio gana y, si no
-    tiene, se usa el del servidor. Si a las sedes de una conexión les aplica
-    además otra conexión activa que consulta stock (la de toda la farmacia
-    contra una de sede, o dos de la misma sede), la sincronización responde 409
-    `PHARMACY_INTEGRATION_CONNECTION_AMBIGUOUS` con los ids en conflicto y no
-    llama ni escribe nada: no se elige una en silencio.
+  - **Precedencia entre conexiones (regla de Itzan, C9-5).** Dentro de una
+    conexión, su sistema propio gana y, si no tiene, se usa el del servidor.
+    Entre conexiones:
+    - Una general (de toda la farmacia) y una de sucursal **coexisten**, y
+      **gana la sucursal** en su sede; la general sigue mandando en las demás.
+    - Dos conexiones activas de stock del **mismo nivel y alcance** (dos
+      generales, o dos de la misma sucursal) **se rechazan al configurar**:
+      409 `INTEGRATION_CONNECTION_SCOPE_TAKEN`.
+    - La **sincronización general excluye** las sucursales con conexión propia
+      y no pisa lo que ésta escribe.
+    - Si por datos anteriores a la regla ya hay duplicados del mismo nivel y
+      alcance, nunca se elige «la más nueva» o «la primera»: la sincronización
+      responde 409 `PHARMACY_INTEGRATION_CONNECTION_AMBIGUOUS` con los ids y no
+      llama ni escribe nada, y el pedido usa el stock manual
+      (`CONNECTION_PRECEDENCE`).
   - **Lotes.** Un producto que la sede lleva por lotes no se pisa con una
     existencia agregada (`SITE_PRODUCT_KEPT_BY_LOTS`) hasta que haya una
     política (por ejemplo FEFO).
