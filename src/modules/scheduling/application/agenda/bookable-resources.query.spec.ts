@@ -9,12 +9,14 @@ function emReturning(rows: unknown[], total: number) {
     .mockResolvedValueOnce(undefined)
     .mockResolvedValueOnce(rows)
     .mockResolvedValueOnce([{ total: String(total) }]);
+  const fork = jest.fn((): unknown => em);
   const em = {
     transactional: jest.fn((work: (tx: unknown) => unknown) =>
       work({ execute }),
     ),
+    fork,
   } as unknown as EntityManager;
-  return { em, execute };
+  return { em, execute, fork };
 }
 
 const ROW = {
@@ -33,7 +35,7 @@ const calls = (execute: ReturnType<typeof emReturning>['execute']) => ({
 
 describe('findBookableResources', () => {
   it('runs in system context and maps one page with its total', async () => {
-    const { em, execute } = emReturning([ROW], 37);
+    const { em, execute, fork } = emReturning([ROW], 37);
 
     await expect(findBookableResources(em, {})).resolves.toEqual({
       items: [
@@ -50,6 +52,8 @@ describe('findBookableResources', () => {
       total: 37,
     });
     expect(execute.mock.calls[0][0]).toContain("'app.system_context', 'true'");
+    // Own connection: the system context must not outlive the call.
+    expect(fork).toHaveBeenCalledWith({ keepTransactionContext: false });
   });
 
   it('binds one value per placeholder, pages with 20 from 0 by default', async () => {

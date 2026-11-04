@@ -27,7 +27,9 @@ const SITE = {
  * @returns Resultado de build.
  */
 function build() {
-  const fork = { id: 'fork' };
+  // The savepoint (`fork(...).transactional`) runs its callback on the same fork.
+  const fork: any = { id: 'fork' };
+  fork.transactional = mockFn((cb: any) => cb(fork));
   const em = { fork: mockFn(() => fork) };
   const agendaRepo = {
     findResources: mockFn().mockResolvedValue([]),
@@ -76,13 +78,11 @@ describe('SchedulingAgendaService', () => {
         to: '2026-11-03T00:00:00Z',
       } as any);
 
-      expect(d.em.fork).toHaveBeenCalledTimes(2);
-      expect(d.em.fork).toHaveBeenNthCalledWith(1, {
-        keepTransactionContext: true,
-      });
-      expect(d.em.fork).toHaveBeenNthCalledWith(2, {
-        keepTransactionContext: true,
-      });
+      // listResources: read fork + two savepoints (sites, names); listSlots: one.
+      expect(d.em.fork).toHaveBeenCalledTimes(4);
+      for (const call of d.em.fork.mock.calls) {
+        expect(call[0]).toEqual({ keepTransactionContext: true });
+      }
     });
   });
 
@@ -286,7 +286,7 @@ describe('SchedulingAgendaService', () => {
         to: '2026-11-05T00:00:00.000Z',
       } as any);
 
-      expect(d.em.fork).toHaveBeenCalledTimes(2);
+      expect(d.em.fork).toHaveBeenCalledTimes(4);
       for (const call of d.em.fork.mock.calls) {
         expect(call[0]).toEqual({ keepTransactionContext: true });
       }
