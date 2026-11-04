@@ -15,6 +15,7 @@ import {
   CurrentUser,
   Roles,
   type AuthenticatedUser,
+  PatientAnyTenant,
 } from '../../../../common';
 import { SchedulingFlexibleBookingService } from '../../application';
 import {
@@ -38,6 +39,7 @@ export class SchedulingFlexibleController {
   constructor(private readonly flexible: SchedulingFlexibleBookingService) {}
 
   @Get('resources/:id/flexible-availability')
+  @PatientAnyTenant()
   @Roles(
     'PATIENT',
     'PRACTITIONER',
@@ -64,6 +66,7 @@ export class SchedulingFlexibleController {
     entityId: 'result.id',
   })
   @Post('resources/:id/flexible-holds')
+  @PatientAnyTenant()
   @Roles('PATIENT', 'SCHEDULING_ADMIN', 'SCHEDULING_AGENT')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({

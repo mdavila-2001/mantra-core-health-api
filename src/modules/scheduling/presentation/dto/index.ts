@@ -135,6 +135,8 @@ export {
   SlotListItemDto,
   SlotPriceDto,
   ListSlotsResponseDto,
+  BookableOrganizationDto,
+  BookableOrganizationsResponseDto,
 } from './scheduling-agenda.dto';
 export * from './tenant-agenda.dto';
 

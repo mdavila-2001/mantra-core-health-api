@@ -18,6 +18,7 @@ import {
 import type { BookableSlots, SchedulableResources } from '../../entities';
 import {
   AGENDA_MAX_LIMIT,
+  BookableOrganizationsResponseDto,
   ListResourcesQueryDto,
   ListResourcesResponseDto,
   ListSlotsQueryDto,
@@ -29,6 +30,7 @@ import {
   type ResourceType,
 } from '../../presentation/dto';
 import { PRACTITIONER_PROFILE_TABLES } from '../../domain/resource/practitioner-profile-tables';
+import { findBookableOrganizations } from './bookable-organizations.query';
 
 const RESOURCE_TYPE_CONCEPT: Readonly<Record<ResourceType, string>> = {
   PRACTITIONER: CONCEPTS.RESOURCE_PRACTITIONER,
@@ -74,6 +76,14 @@ export class SchedulingAgendaService {
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(SchedulingAgendaService.name);
+  }
+
+  /**
+   * Organizations a patient can book with today, across tenants
+   * (see `bookable-organizations.query.ts`).
+   */
+  listBookableOrganizations(): Promise<BookableOrganizationsResponseDto> {
+    return findBookableOrganizations(this.em);
   }
 
   /** Recursos agendables del tenant. */

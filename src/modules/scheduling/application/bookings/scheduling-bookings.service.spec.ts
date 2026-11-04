@@ -53,6 +53,8 @@ function build() {
   // a sí mismo para que la prueba pueda seguir mirando las mismas llamadas.
   const em: any = { transactional: mockFn((cb: any) => cb(tx)) };
   em.fork = mockFn(() => em);
+  // Cross-organization patient reads raise the RLS system context first.
+  em.execute = mockFn().mockResolvedValue(undefined);
   const bookingsRepo = {
     findSlotForUpdate: mockFn(),
     findSlotById: mockFn(),
