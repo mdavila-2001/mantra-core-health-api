@@ -232,11 +232,8 @@ export class PharmacyReadController {
     description:
       'P47: con `true` (y `pharmacyId`) lista TODO el catálogo de esa farmacia —borradores y retirados— con estado, existencias, umbral e imágenes. Sólo su personal; cualquier otro, 404.',
   })
-  @ApiQuery({
-    name: 'limit',
-    required: false,
-    description: 'Tope del listado (por defecto 50)',
-  })
+  @ApiQuery({ name: 'limit', required: false, description: 'Tope (def. 50)' })
+  @ApiQuery({ name: 'exact', required: false, description: 'true: literal' })
   @ApiOkResponse({ type: PharmacyProductSearchResponseDto })
   searchProducts(
     @CurrentUser() actor: AuthenticatedUser,

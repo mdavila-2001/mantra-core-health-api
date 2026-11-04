@@ -38872,7 +38872,7 @@
             "name": "search",
             "required": false,
             "in": "query",
-            "description": "Texto a buscar en marca, genérico o código de producto",
+            "description": "Marca, genérico, código o uso; `exact=true` no corrige",
             "schema": {
               "type": "string"
             }
@@ -38914,9 +38914,18 @@
             "name": "limit",
             "required": false,
             "in": "query",
-            "description": "Tope del listado (por defecto 50)",
+            "description": "Tope (def. 50)",
             "schema": {
               "type": "number"
+            }
+          },
+          {
+            "name": "exact",
+            "required": false,
+            "in": "query",
+            "description": "true: literal",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -43839,7 +43848,7 @@
             "name": "q",
             "required": false,
             "in": "query",
-            "description": "Texto a buscar en principio activo, marca o código ATC",
+            "description": "Texto a buscar en principio activo, marca, código ATC o para qué se usa («dolor abdominal»). Sin coincidencias, se corrige el tipeo y se informa en `correctedQuery`",
             "schema": {
               "type": "string"
             }
@@ -43885,6 +43894,15 @@
             "required": false,
             "in": "query",
             "description": "Tope de tarjetas (máx. 60)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "exact",
+            "required": false,
+            "in": "query",
+            "description": "`true` busca el texto tal cual, sin corregir el tipeo",
             "schema": {
               "type": "string"
             }
@@ -138669,6 +138687,11 @@
               "type": "string"
             }
           },
+          "correctedQuery": {
+            "type": "string",
+            "nullable": true,
+            "example": "ibuprofeno"
+          },
           "generatedAt": {
             "type": "string"
           }
@@ -139377,6 +139400,11 @@
           "truncated": {
             "type": "boolean",
             "description": "true si quedaron productos fuera del tope. Se declara, no se calla"
+          },
+          "correctedQuery": {
+            "type": "string",
+            "nullable": true,
+            "example": "ibuprofeno"
           }
         },
         "required": [
@@ -171958,6 +171986,30 @@
           "nearestKm": {
             "type": "object",
             "nullable": true
+          },
+          "uses": {
+            "example": [
+              "Dolor abdominal y cólicos"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "matchedBy": {
+            "type": "string",
+            "enum": [
+              "name",
+              "brand",
+              "code",
+              "use"
+            ],
+            "nullable": true
+          },
+          "matchedUse": {
+            "type": "string",
+            "nullable": true,
+            "example": "Dolor abdominal y cólicos"
           }
         },
         "required": [
@@ -171971,7 +172023,8 @@
           "priceFrom",
           "priceTo",
           "currency",
-          "pharmacyCount"
+          "pharmacyCount",
+          "uses"
         ]
       },
       "RevokeDelegationDto": {

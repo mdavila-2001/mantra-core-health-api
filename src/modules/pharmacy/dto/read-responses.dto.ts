@@ -492,10 +492,7 @@ export class PharmacyProductSearchResponseDto {
   })
   truncated!: boolean;
 
-  @ApiPropertyOptional({
-    nullable: true,
-    description: 'Texto corregido que se buscó («ibopofeno» → «ibuprofeno»)',
-  })
+  @ApiPropertyOptional({ type: String, nullable: true, example: 'ibuprofeno' })
   correctedQuery?: string | null;
 }
 

@@ -113,7 +113,11 @@ export class PublicMedicationCardDto {
   matchedBy?: 'name' | 'brand' | 'code' | 'use' | null;
 
   /** El uso que lo encontró, cuando `matchedBy` es `use`. */
-  @ApiPropertyOptional({ nullable: true, example: 'Dolor abdominal y cólicos' })
+  @ApiPropertyOptional({
+    type: String,
+    nullable: true,
+    example: 'Dolor abdominal y cólicos',
+  })
   matchedUse?: string | null;
 }
 
@@ -141,7 +145,7 @@ export class PublicMedicationPageDto {
    * El texto corregido que de verdad se buscó cuando lo escrito no daba nada
    * («ibopofeno» → «ibuprofeno»); `null` si no hizo falta o se pidió `exact`.
    */
-  @ApiPropertyOptional({ nullable: true, example: 'ibuprofeno' })
+  @ApiPropertyOptional({ type: String, nullable: true, example: 'ibuprofeno' })
   correctedQuery!: string | null;
 
   /**
