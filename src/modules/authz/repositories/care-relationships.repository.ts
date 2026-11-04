@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { CareRelationships } from '../entities';
 import { CONCEPTS, createdBy } from '../../../common';
+import { AUTHZ } from '../authz.concepts';
 
 /** Datos para establecer una relación asistencial. */
 export interface CreateCareRelationshipData {
@@ -178,11 +179,10 @@ export class CareRelationshipsRepository {
     });
   }
 
-  /** Solicitudes PENDIENTES de un paciente (para su bandeja de aprobaciones). */
   /**
    * Todas las relaciones del paciente, de cualquier organización y estado salvo
-   * las solicitudes pendientes (que tienen su propia bandeja): «quién ve mi
-   * historia».
+   * las solicitudes pendientes (que tienen su propia bandeja) y las rechazadas
+   * (nunca concedieron nada): «quién ve mi historia».
    */
   findAllByPatient(
     em: EntityManager,
@@ -190,11 +190,17 @@ export class CareRelationshipsRepository {
   ): Promise<CareRelationships[]> {
     return em.find(
       CareRelationships,
-      { patientProfileId, statusConceptId: { $ne: CONCEPTS.STATE_PENDING } },
+      {
+        patientProfileId,
+        statusConceptId: {
+          $nin: [CONCEPTS.STATE_PENDING, AUTHZ.CARE_REL_STATUS_DECLINED],
+        },
+      },
       { orderBy: { validFrom: 'DESC' }, limit: 200 },
     );
   }
 
+  /** Solicitudes PENDIENTES de un paciente (para su bandeja de aprobaciones). */
   findPendingByPatient(
     em: EntityManager,
     patientProfileId: string,
@@ -204,6 +210,36 @@ export class CareRelationshipsRepository {
       { patientProfileId, statusConceptId: CONCEPTS.STATE_PENDING },
       { orderBy: { createdAt: 'DESC' } },
     );
+  }
+
+  /** Cabeceras (PRIMARY) ACTIVAS del paciente en un tenant, de cualquier profesional. */
+  findActivePrimaryInTenant(
+    em: EntityManager,
+    patientProfileId: string,
+    tenantId: string,
+  ): Promise<CareRelationships[]> {
+    return em.find(CareRelationships, {
+      patientProfileId,
+      tenantId,
+      relationshipTypeConceptId: AUTHZ.CARE_REL_PRIMARY,
+      statusConceptId: CONCEPTS.STATE_ACTIVE,
+    });
+  }
+
+  /** Cabecera (PRIMARY) ACTIVA o PENDIENTE del par (paciente, profesional) en un tenant. */
+  findOpenPrimaryOfPair(
+    em: EntityManager,
+    patientProfileId: string,
+    practitionerProfileId: string,
+    tenantId: string,
+  ): Promise<CareRelationships | null> {
+    return em.findOne(CareRelationships, {
+      patientProfileId,
+      practitionerProfileId,
+      tenantId,
+      relationshipTypeConceptId: AUTHZ.CARE_REL_PRIMARY,
+      statusConceptId: { $in: [CONCEPTS.STATE_ACTIVE, CONCEPTS.STATE_PENDING] },
+    });
   }
 
   /** Todas las relaciones de un paciente (scoping por tenant). */
