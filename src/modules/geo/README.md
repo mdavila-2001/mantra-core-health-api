@@ -85,7 +85,7 @@ proyecciones/worker fuera del alcance de estos endpoints.
 ## Convenciones (idénticas a IAM/Directory)
 
 - Servicios inyectan `EntityManager` (`@mikro-orm/postgresql`); escrituras en
-  `em.transactional`, lecturas en `em.fork()`.
+  `em.transactional`, lecturas en `em.fork()` (que hereda la transacción de la petición, ADR-0029).
 - Repositorios stateless: reciben el `em` activo como primer parámetro.
 - FK planas uuid → `flush` del padre antes de crear hijos; `em.create(..., { partial: true })`.
 - `row_version` nunca se fija (DEFAULT en BD); `createdBy(actor.id)`/`touch` para auditoría.
