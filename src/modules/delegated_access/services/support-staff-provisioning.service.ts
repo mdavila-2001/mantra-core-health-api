@@ -8,6 +8,7 @@ import {
   ResourceNotFoundException,
   type AuthenticatedUser,
 } from '../../../common';
+import { readWithSystemRls } from '../../../common/tenant/rls-transaction';
 import { DIR } from '../../directory/directory.concepts';
 import { IamErrorReason } from '../../iam/iam.error-reasons';
 import { IamSupportStaffSelfRegistrationService } from '../../iam/application/services';
@@ -57,13 +58,16 @@ export class SupportStaffProvisioningService {
       );
     }
 
-    const em = this.em.fork();
-    const role =
-      await this.provisioningRepo.findActiveRoleAssignmentOfPractitioner(
-        em,
-        actor.practitionerProfileId,
+    // The practitioner works across hospitals with no active tenant: the read is
+    // bound to the actor's own profile, so it runs read-only with system context.
+    const practitionerProfileId = actor.practitionerProfileId;
+    const role = await readWithSystemRls(this.em, (tx) =>
+      this.provisioningRepo.findActiveRoleAssignmentOfPractitioner(
+        tx,
+        practitionerProfileId,
         dto.practitionerRoleAssignmentId,
-      );
+      ),
+    );
     if (!role) {
       throw new ResourceNotFoundException(
         'Vinculación no encontrada o no pertenece al médico',

@@ -7,6 +7,7 @@ import {
 import { EntityManager } from '@mikro-orm/postgresql';
 import { CONCEPTS, roleAuthorizesInTenant } from '../../../common';
 import type { AuthenticatedRequest } from '../../../common/auth/authenticated-user.interface';
+import { withTenantRls } from '../../../common/tenant/rls-transaction';
 import { Tenants } from '../../directory/entities';
 import { DIR } from '../../directory/directory.concepts';
 import { TenantMembershipsRepository } from '../../directory/repositories';
@@ -102,37 +103,31 @@ export class LabStaffGuard implements CanActivate {
     );
   }
 
-  /**
-   * Miembro activo de un tenant que es un centro de diagnóstico.
-   *
-   * Corre en una transacción propia con `app.current_tenant_id` fijado: un
-   * guard se ejecuta ANTES de `TenantContextInterceptor`, que es quien abre la
-   * transacción con el tenant, y `tenant_memberships` tiene RLS cerrado por
-   * defecto. Sin esto la base no devuelve la membresía y el dueño del
-   * laboratorio recibía 403 en todas las pantallas. El tenant es el que
-   * `TenantScopeGuard` ya validó contra el token, y la lectura sigue acotada
-   * a la persona (`userId`).
-   */
+  /** Miembro activo de un tenant que es un centro de diagnóstico. */
   private async isLabMember(
     userId: string,
     tenantId: string,
   ): Promise<boolean> {
-    return this.em.fork().transactional(async (tx) => {
-      await tx.execute("select set_config('app.current_tenant_id', ?, true)", [
-        tenantId,
-      ]);
-      const tenant = await tx.findOne(Tenants, { id: tenantId });
-      if (
-        tenant?.tenantTypeConceptId !== CONCEPTS.TENANT_TYPE_DIAGNOSTIC_CENTER
-      )
-        return false;
-      const membership = await this.memberships.findActiveByUserTenant(
-        tx,
-        userId,
-        tenantId,
-        DIR.MEMBERSHIP_ACTIVE,
-      );
-      return membership !== null;
-    });
+    // Guards run before the tenant interceptor: `tenant_memberships` is under
+    // RLS, so the read needs its own short transaction under the verified tenant.
+    return withTenantRls(
+      this.em,
+      tenantId,
+      async (em) => {
+        const tenant = await em.findOne(Tenants, { id: tenantId });
+        if (
+          tenant?.tenantTypeConceptId !== CONCEPTS.TENANT_TYPE_DIAGNOSTIC_CENTER
+        )
+          return false;
+        const membership = await this.memberships.findActiveByUserTenant(
+          em,
+          userId,
+          tenantId,
+          DIR.MEMBERSHIP_ACTIVE,
+        );
+        return membership !== null;
+      },
+      { readOnly: true },
+    );
   }
 }

@@ -1,15 +1,17 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
-  DomainException,
-  ErrorCode,
   PreconditionFailedException,
   ResourceNotFoundException,
   roleAuthorizesInTenant,
   type AuthenticatedUser,
 } from '../../../common';
+import {
+  readWithSystemRls,
+  withTenantRls,
+} from '../../../common/tenant/rls-transaction';
 import { DELEG } from '../delegated_access.concepts';
 import { DelegatedAccessErrorReason as Reason } from '../delegated_access.error-reasons';
 import {
@@ -42,34 +44,13 @@ import type {
   SupportTargetDto,
 } from '../dto/support-staff.dto';
 import { SupportLinksRepository } from '../repositories/support-links.repository';
+import { forbidden, type ResolvedTarget } from './support-staff.shared';
 
 /** Roles de plataforma que administran cualquier hospital (como `TenantAdministrationService`). */
 const PLATFORM_ADMIN_ROLES = ['SECURITY_ADMIN', 'SUPERADMIN'] as const;
 
 /** Rango máximo de agenda que se lee de una vez. */
 const MAX_AGENDA_DAYS = 31;
-
-/** 403 con `reason` del módulo. */
-function forbidden(message: string, reason: Reason): DomainException {
-  return new DomainException(
-    HttpStatus.FORBIDDEN,
-    ErrorCode.FORBIDDEN,
-    message,
-    undefined,
-    reason,
-  );
-}
-
-/** Un objetivo ya validado contra el hospital. */
-interface ResolvedTarget {
-  readonly kind: 'LOCATION' | 'PRACTITIONER';
-  readonly practiceId?: string;
-  readonly practiceSiteId?: string;
-  readonly clinicalUnitId?: string;
-  readonly careSpaceId?: string;
-  readonly practitionerRoleAssignmentId?: string;
-  readonly accessScopeConceptId: string;
-}
 
 /**
  * Secretarias (personal de apoyo hospitalario): pedir, ofrecer, aceptar,
@@ -120,9 +101,10 @@ export class SupportStaffService {
   async listMine(
     actor: AuthenticatedUser,
   ): Promise<MySupportEngagementsResponseDto> {
-    const rows = await this.links.findLinks(this.em.fork(), {
-      supportUserId: actor.id,
-    });
+    // Read-only system context: the query is bound to the actor's own user id.
+    const rows = await readWithSystemRls(this.em, (tx) =>
+      this.links.findLinks(tx, { supportUserId: actor.id }),
+    );
     const items = rows.map(toView);
     return {
       items,
@@ -133,11 +115,13 @@ export class SupportStaffService {
 
   /** Lo que puede ver hoy: hospitales, sedes, servicios, pisos y doctores. */
   async myAccess(actor: AuthenticatedUser): Promise<SupportAccessResponseDto> {
-    const em = this.em.fork();
-    const scope = await this.scopeOf(em, actor.id);
-    const open = new Set(
-      await this.links.findActiveMembershipTenantIds(em, actor.id),
-    );
+    // Read-only system context: both queries are bound to the actor's own user id.
+    const { scope, open } = await readWithSystemRls(this.em, async (tx) => ({
+      scope: await this.scopeOf(tx, actor.id),
+      open: new Set(
+        await this.links.findActiveMembershipTenantIds(tx, actor.id),
+      ),
+    }));
     // `organizationAccess`: el hospital la aceptó y entra a su token. Sin eso
     // (un vínculo que sólo aceptó el doctor) ve la agenda de ese doctor y nada
     // más del hospital.
@@ -245,8 +229,12 @@ export class SupportStaffService {
         Reason.SUPPORT_AGENDA_RANGE_INVALID,
       );
     }
-    const em = this.em.fork();
-    const scope = await this.scopeOf(em, actor.id);
+    // The scope comes from the actor's own links (system, read-only); the
+    // patients' bookings are never read in system context, only under the
+    // tenant just validated against that scope.
+    const scope = await readWithSystemRls(this.em, (tx) =>
+      this.scopeOf(tx, actor.id),
+    );
     if (
       !scopeCoversPractitioner(
         scope,
@@ -259,27 +247,34 @@ export class SupportStaffService {
         Reason.SUPPORT_SCOPE_DENIED,
       );
     }
-    const role = await this.links.findActiveRoleAssignmentInTenant(
-      em,
+    return withTenantRls(
+      this.em,
       query.tenantId,
-      query.practitionerRoleAssignmentId,
+      async (tx) => {
+        const role = await this.links.findActiveRoleAssignmentInTenant(
+          tx,
+          query.tenantId,
+          query.practitionerRoleAssignmentId,
+        );
+        if (!role) {
+          // La vinculación del doctor dejó de estar activa: el vínculo con la
+          // secretaria ya no abre nada.
+          throw forbidden(
+            'No tiene un vínculo activo con ese doctor en ese hospital',
+            Reason.SUPPORT_SCOPE_DENIED,
+          );
+        }
+        const items = await this.links.findPractitionerAgenda(
+          tx,
+          query.tenantId,
+          role.practitionerProfileId,
+          from,
+          to,
+        );
+        return { items, count: items.length };
+      },
+      { readOnly: true },
     );
-    if (!role) {
-      // La vinculación del doctor dejó de estar activa: el vínculo con la
-      // secretaria ya no abre nada.
-      throw forbidden(
-        'No tiene un vínculo activo con ese doctor en ese hospital',
-        Reason.SUPPORT_SCOPE_DENIED,
-      );
-    }
-    const items = await this.links.findPractitionerAgenda(
-      em,
-      query.tenantId,
-      role.practitionerProfileId,
-      from,
-      to,
-    );
-    return { items, count: items.length };
   }
 
   // --------------------------------------------------------------------------
@@ -409,10 +404,14 @@ export class SupportStaffService {
     if (!actor.practitionerProfileId) {
       return { items: [], count: 0, nextCursor: null };
     }
-    const rows = await this.links.findLinks(this.em.fork(), {
-      practitionerProfileId: actor.practitionerProfileId,
-      statuses: ['ACTIVE', 'PENDING'],
-    });
+    const practitionerProfileId = actor.practitionerProfileId;
+    // Read-only system context: the query is bound to the actor's own profile.
+    const rows = await readWithSystemRls(this.em, (tx) =>
+      this.links.findLinks(tx, {
+        practitionerProfileId,
+        statuses: ['ACTIVE', 'PENDING'],
+      }),
+    );
     const items = rows.map(toView);
     return { items, count: items.length, nextCursor: null };
   }

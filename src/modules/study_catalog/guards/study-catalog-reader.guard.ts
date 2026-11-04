@@ -7,6 +7,7 @@ import {
 import { EntityManager } from '@mikro-orm/postgresql';
 import { CONCEPTS, roleAuthorizesInTenant } from '../../../common';
 import type { AuthenticatedRequest } from '../../../common/auth/authenticated-user.interface';
+import { withTenantRls } from '../../../common/tenant/rls-transaction';
 import { DIR } from '../../directory/directory.concepts';
 import { Tenants } from '../../directory/entities';
 import { TenantMembershipsRepository } from '../../directory/repositories';
@@ -67,34 +68,32 @@ export class StudyCatalogReaderGuard implements CanActivate {
     );
   }
 
-  /**
-   * Miembro activo de un centro de diagnóstico. Transacción propia con
-   * `app.current_tenant_id` fijado: el guard corre antes de
-   * `TenantContextInterceptor` y `tenant_memberships` tiene RLS cerrado por
-   * defecto (ver `LabStaffGuard.isLabMember`).
-   */
   private async isDiagnosticMember(
     userId: string,
     tenantId: string,
   ): Promise<boolean> {
-    return this.em.fork().transactional(async (tx) => {
-      await tx.execute("select set_config('app.current_tenant_id', ?, true)", [
-        tenantId,
-      ]);
-      const tenant = await tx.findOne(Tenants, { id: tenantId });
-      if (
-        tenant?.tenantTypeConceptId !== CONCEPTS.TENANT_TYPE_DIAGNOSTIC_CENTER
-      ) {
-        return false;
-      }
-      return (
-        (await this.memberships.findActiveByUserTenant(
-          tx,
-          userId,
-          tenantId,
-          DIR.MEMBERSHIP_ACTIVE,
-        )) !== null
-      );
-    });
+    // Guards run before the tenant interceptor: `tenant_memberships` is under
+    // RLS, so the read needs its own short transaction under the verified tenant.
+    return withTenantRls(
+      this.em,
+      tenantId,
+      async (em) => {
+        const tenant = await em.findOne(Tenants, { id: tenantId });
+        if (
+          tenant?.tenantTypeConceptId !== CONCEPTS.TENANT_TYPE_DIAGNOSTIC_CENTER
+        ) {
+          return false;
+        }
+        return (
+          (await this.memberships.findActiveByUserTenant(
+            em,
+            userId,
+            tenantId,
+            DIR.MEMBERSHIP_ACTIVE,
+          )) !== null
+        );
+      },
+      { readOnly: true },
+    );
   }
 }

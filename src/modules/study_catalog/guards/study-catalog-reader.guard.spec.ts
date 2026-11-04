@@ -26,8 +26,8 @@ function build() {
   };
   const calls: string[] = [];
   const fork: any = {
-    execute: mockFn((_sql: string, params: unknown[]) => {
-      calls.push(`set_config:${String(params[0])}`);
+    execute: mockFn((_sql: string, params?: unknown[]) => {
+      calls.push(params ? `set_config:${String(params[0])}` : 'system_context');
       return Promise.resolve([]);
     }),
     findOne: mockFn((_e: unknown, where: { id: string }) =>
@@ -37,6 +37,8 @@ function build() {
           : null,
       ),
     ),
+    getTransactionContext: () => undefined,
+    isInTransaction: () => false,
     transactional: mockFn((work: (tx: unknown) => Promise<unknown>) =>
       work(fork),
     ),
@@ -71,9 +73,19 @@ describe('StudyCatalogReaderGuard (matriz §3.g)', () => {
   });
 
   it('fija el tenant en la transacción antes de leer la membresía (RLS cerrado por defecto)', async () => {
-    const { guard, ctx, calls } = build();
-    await guard.canActivate(ctx({ id: 'lab-staff', roles: ['USER'] }, LAB));
-    expect(calls[0]).toBe(`set_config:${LAB}`);
+    const previous = process.env.RLS_ENFORCE;
+    process.env.RLS_ENFORCE = 'true';
+    try {
+      const { guard, ctx, calls } = build();
+      await guard.canActivate(ctx({ id: 'lab-staff', roles: ['USER'] }, LAB));
+      expect(calls.slice(0, 2)).toEqual([
+        'system_context',
+        `set_config:${LAB}`,
+      ]);
+    } finally {
+      if (previous === undefined) delete process.env.RLS_ENFORCE;
+      else process.env.RLS_ENFORCE = previous;
+    }
   });
 
   it('un paciente (STAFF del tenant por defecto, que no es centro diagnóstico) recibe 403', async () => {
