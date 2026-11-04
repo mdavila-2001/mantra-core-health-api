@@ -24,13 +24,21 @@ function build() {
         ),
     ),
   };
-  const fork = {
+  const calls: string[] = [];
+  const fork: any = {
+    execute: mockFn((_sql: string, params: unknown[]) => {
+      calls.push(`set_config:${String(params[0])}`);
+      return Promise.resolve([]);
+    }),
     findOne: mockFn((_e: unknown, where: { id: string }) =>
       Promise.resolve(
         TYPES[where.id]
           ? { id: where.id, tenantTypeConceptId: TYPES[where.id] }
           : null,
       ),
+    ),
+    transactional: mockFn((work: (tx: unknown) => Promise<unknown>) =>
+      work(fork),
     ),
   };
   const guard = new StudyCatalogReaderGuard(
@@ -41,7 +49,7 @@ function build() {
     ({
       switchToHttp: () => ({ getRequest: () => ({ user, resolvedTenantId }) }),
     }) as any;
-  return { guard, ctx, repo };
+  return { guard, ctx, repo, fork, calls };
 }
 
 describe('StudyCatalogReaderGuard (matriz §3.g)', () => {
@@ -60,6 +68,12 @@ describe('StudyCatalogReaderGuard (matriz §3.g)', () => {
     await expect(
       guard.canActivate(ctx({ id: 'lab-staff', roles: ['USER'] }, LAB)),
     ).resolves.toBe(true);
+  });
+
+  it('fija el tenant en la transacción antes de leer la membresía (RLS cerrado por defecto)', async () => {
+    const { guard, ctx, calls } = build();
+    await guard.canActivate(ctx({ id: 'lab-staff', roles: ['USER'] }, LAB));
+    expect(calls[0]).toBe(`set_config:${LAB}`);
   });
 
   it('un paciente (STAFF del tenant por defecto, que no es centro diagnóstico) recibe 403', async () => {

@@ -67,24 +67,34 @@ export class StudyCatalogReaderGuard implements CanActivate {
     );
   }
 
+  /**
+   * Miembro activo de un centro de diagnóstico. Transacción propia con
+   * `app.current_tenant_id` fijado: el guard corre antes de
+   * `TenantContextInterceptor` y `tenant_memberships` tiene RLS cerrado por
+   * defecto (ver `LabStaffGuard.isLabMember`).
+   */
   private async isDiagnosticMember(
     userId: string,
     tenantId: string,
   ): Promise<boolean> {
-    const em = this.em.fork();
-    const tenant = await em.findOne(Tenants, { id: tenantId });
-    if (
-      tenant?.tenantTypeConceptId !== CONCEPTS.TENANT_TYPE_DIAGNOSTIC_CENTER
-    ) {
-      return false;
-    }
-    return (
-      (await this.memberships.findActiveByUserTenant(
-        em,
-        userId,
+    return this.em.fork().transactional(async (tx) => {
+      await tx.execute("select set_config('app.current_tenant_id', ?, true)", [
         tenantId,
-        DIR.MEMBERSHIP_ACTIVE,
-      )) !== null
-    );
+      ]);
+      const tenant = await tx.findOne(Tenants, { id: tenantId });
+      if (
+        tenant?.tenantTypeConceptId !== CONCEPTS.TENANT_TYPE_DIAGNOSTIC_CENTER
+      ) {
+        return false;
+      }
+      return (
+        (await this.memberships.findActiveByUserTenant(
+          tx,
+          userId,
+          tenantId,
+          DIR.MEMBERSHIP_ACTIVE,
+        )) !== null
+      );
+    });
   }
 }
