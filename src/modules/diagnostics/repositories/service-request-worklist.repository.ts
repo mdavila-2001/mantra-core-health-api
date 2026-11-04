@@ -76,10 +76,10 @@ export class ServiceRequestWorklistRepository {
       outer = " WHERE b.state = ANY(string_to_array(?, ','))";
       outerParams.push(states.join(','));
     }
-    const rows = await em
-      .getConnection()
-      .execute<{ id: string; created_at: Date; state: WorklistState }[]>(
-        `SELECT b.id, b.created_at, b.state FROM (
+    const rows = await em.execute<
+      { id: string; created_at: Date; state: WorklistState }[]
+    >(
+      `SELECT b.id, b.created_at, b.state FROM (
          SELECT sr.id, sr.created_at, ${stateSql} AS state
            FROM clinical.service_requests sr
           WHERE sr.performer_tenant_id = ?
@@ -88,9 +88,9 @@ export class ServiceRequestWorklistRepository {
        ) b${outer}
        ORDER BY b.created_at DESC, b.id DESC
        LIMIT ?`,
-        [...params, ...outerParams, limit],
-        'all',
-      );
+      [...params, ...outerParams, limit],
+      'all',
+    );
     return rows.map((r) => ({
       id: r.id,
       createdAt: new Date(r.created_at),
@@ -105,7 +105,7 @@ export class ServiceRequestWorklistRepository {
     serviceRequestId: string,
   ): Promise<WorklistState | null> {
     const { stateSql, stateParams } = stateExpression();
-    const rows = await em.getConnection().execute<{ state: WorklistState }[]>(
+    const rows = await em.execute<{ state: WorklistState }[]>(
       `SELECT ${stateSql} AS state
          FROM clinical.service_requests sr
         WHERE sr.id = ? AND sr.performer_tenant_id = ?`,

@@ -162,7 +162,7 @@ export class InsuranceCatalogService {
   private async findPrivateWithAccount(
     privateIds: string[],
   ): Promise<string[]> {
-    const rows = await this.em.getConnection().execute<{ id: string }[]>(
+    const rows = await this.em.execute<{ id: string }[]>(
       `select cr.id from insurance.insurance_carriers cr
         where cr.id in (${privateIds.map(() => '?').join(', ')})
           and cr.status_concept_id = ?

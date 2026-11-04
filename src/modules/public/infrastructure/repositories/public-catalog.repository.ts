@@ -73,7 +73,7 @@ export class PublicCatalogRepository {
     em: EntityManager,
     slug: string,
   ): Promise<PublicProfileRef | null> {
-    const rows: PublicProfileRef[] = await em.getConnection().execute(
+    const rows: PublicProfileRef[] = await em.execute(
       `SELECT prof.id,
               prof.tenant_id              AS "tenantId",
               prof.target_type_concept_id AS "targetTypeConceptId"
@@ -104,7 +104,7 @@ export class PublicCatalogRepository {
     after: KeysetAfter | null,
     take: number,
   ): Promise<OfferedServiceRow[]> {
-    return em.getConnection().execute(
+    return em.execute(
       `SELECT sc.id,
               sc.code,
               sc.name,
@@ -156,7 +156,7 @@ export class PublicCatalogRepository {
     take: number,
   ): Promise<PharmacyProductRow[]> {
     const availability = siteProductAvailabilitySql();
-    return em.getConnection().execute(
+    return em.execute(
       `SELECT p.id,
               p.sort_name              AS "sortName",
               p.brand_name             AS "brandName",

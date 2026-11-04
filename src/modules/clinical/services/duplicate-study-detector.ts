@@ -159,7 +159,7 @@ export class DuplicateStudyDetector {
     // `RELEASE_RELEASED`, el mismo criterio que `isReleased`. La fecha es la
     // de `performedAtOf`, escrita en SQL: emisión de la versión liberada, su
     // registro, o la creación del informe.
-    const rows = await em.getConnection().execute<{ id: string }[]>(
+    const rows = await em.execute<{ id: string }[]>(
       `SELECT r.id
          FROM clinical.diagnostic_reports r
          LEFT JOIN diagnostics.diagnostic_report_versions v
@@ -245,7 +245,7 @@ export class DuplicateStudyDetector {
     scope?: DuplicateStudyScope,
   ): Promise<PreviousStudyDescription | null> {
     const narrow = scopeClause('sr', scope);
-    const rows = await em.getConnection().execute<
+    const rows = await em.execute<
       {
         id: string;
         created_at: Date;

@@ -106,7 +106,7 @@ export class PharmacyMarketplaceRepository {
     filter: { conceptId?: string },
   ): Promise<PublishedOffer[]> {
     const availability = siteProductAvailabilitySql();
-    const rows = await em.getConnection().execute<
+    const rows = await em.execute<
       Array<{
         concept_id: string;
         atc_code: string;

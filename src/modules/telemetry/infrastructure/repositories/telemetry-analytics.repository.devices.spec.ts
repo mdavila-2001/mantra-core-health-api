@@ -25,7 +25,7 @@ const SCOPE = {
 
 function build() {
   const execute = mockFn().mockResolvedValue([]);
-  const em = { getConnection: () => ({ execute }) };
+  const em = { execute };
   return {
     repo: new TelemetryAnalyticsRepository(em as any),
     calls: () => execute.mock.calls as [string, unknown[], string][],

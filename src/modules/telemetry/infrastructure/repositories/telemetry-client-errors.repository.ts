@@ -75,24 +75,20 @@ export class TelemetryClientErrorsRepository {
         r.suppressedCount,
       );
     }
-    await this.em
-      .getConnection()
-      .execute(
-        `INSERT INTO telemetry.client_error_events (${cols}) VALUES ${rows.map(() => tuple).join(', ')}`,
-        params,
-        'run',
-      );
+    await this.em.execute(
+      `INSERT INTO telemetry.client_error_events (${cols}) VALUES ${rows.map(() => tuple).join(', ')}`,
+      params,
+      'run',
+    );
   }
 
   /** `iam.sessions.id` del token del actor, o `null` si no es suya. */
   async sessionIdOf(userId: string, tokenId: string): Promise<string | null> {
-    const rows = await this.em
-      .getConnection()
-      .execute<{ id: string }[]>(
-        'SELECT id FROM iam.sessions WHERE user_id = ? AND token_id = ?',
-        [userId, tokenId],
-        'all',
-      );
+    const rows = await this.em.execute<{ id: string }[]>(
+      'SELECT id FROM iam.sessions WHERE user_id = ? AND token_id = ?',
+      [userId, tokenId],
+      'all',
+    );
     return rows[0]?.id ?? null;
   }
 }

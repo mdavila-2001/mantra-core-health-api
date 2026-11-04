@@ -71,7 +71,7 @@ function build(data: {
     return Promise.resolve(null);
   });
   const execute = mockFn(() => Promise.resolve(data.duplicateRows ?? []));
-  const em = { find, findOne, getConnection: () => ({ execute }) } as any;
+  const em = { find, findOne, execute } as any;
   const conceptDesignations = {
     findPreferredByLanguageForConcepts: mockFn().mockResolvedValue(
       data.designations ?? new Map(),

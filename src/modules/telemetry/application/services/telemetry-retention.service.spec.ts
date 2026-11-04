@@ -40,7 +40,7 @@ function build(
   });
   const conn = { execute: exec };
   const em = {
-    getConnection: () => conn,
+    execute: exec,
     transactional: async (cb: any) => cb({ execute: exec }),
   };
   const logger = { setContext: fn(), info: fn() };

@@ -38,7 +38,7 @@ export async function findReusableReadyAudioAsset(
   profile: AudioSynthesisProfile,
   tenantId?: string,
 ): Promise<AudioAssets | null> {
-  const rows = await em.getConnection().execute<Array<{ id: string }>>(
+  const rows = await em.execute<Array<{ id: string }>>(
     // `is not distinct from` y no `=`: con tenant compartido el valor es NULL, y
     // `tenant_id = NULL` no es cierto para ninguna fila — la reutilización de los
     // audios compartidos, que es la que más ahorra, dejaría de funcionar.
@@ -71,7 +71,7 @@ export async function countQueuedAudioJobsByActorSince(
   actorHash: string,
   since: Date,
 ): Promise<number> {
-  const rows = await em.getConnection().execute<Array<{ count: number }>>(
+  const rows = await em.execute<Array<{ count: number }>>(
     `select count(*)::int as count from audio_assets.audio_generation_events
      where event_type='GENERATION_QUEUED' and created_at>=? and metadata->>'actorHash'=?`,
     [since, actorHash],
