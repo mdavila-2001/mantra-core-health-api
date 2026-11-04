@@ -1,14 +1,13 @@
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { CONCEPTS, SEED } from '../../../../common';
-import { SCHED } from '../../domain/scheduling.concepts';
 import type { BookableOrganizationsResponseDto } from '../../presentation/dto';
+import {
+  BOOKABLE_RESOURCE_PARAMS,
+  BOOKABLE_RESOURCE_SQL,
+} from './bookable-criteria';
 
 /**
- * A resource is bookable when it offers something ahead:
- * - a materialized open slot with free capacity (fixed turns), or
- * - a published, still-valid template with a band that is computed on read:
- *   flexible hours (P36) or services/mixed mode. Those never materialize slots,
- *   so counting only `bookable_slots` hid every practitioner who published them.
+ * Bookable means what `bookable-criteria.ts` says.
  *
  * The seed's default tenant is technical, not a real organization: it is left out.
  * GROUP BY names the tenant columns: a bare `name` resolves to the input column
@@ -25,21 +24,7 @@ SELECT t.id AS tenant_id,
  WHERE t.status_concept_id = ?
    AND t.id <> ?
    AND r.resource_type_concept_id IN (?, ?)
-   AND (
-         EXISTS (SELECT 1 FROM scheduling.bookable_slots s
-                  WHERE s.resource_id = r.id
-                    AND s.status_concept_id = ?
-                    AND s.remaining_capacity > 0
-                    AND s.start_at > now())
-      OR EXISTS (SELECT 1 FROM scheduling.schedule_templates st
-                   JOIN scheduling.schedule_rules sr ON sr.schedule_template_id = st.id
-                  WHERE st.resource_id = r.id
-                    AND st.status_concept_id = ?
-                    AND (st.valid_to IS NULL OR st.valid_to >= current_date)
-                    AND (sr.valid_to IS NULL OR sr.valid_to >= current_date)
-                    AND (st.flexible_hours OR sr.flexible_hours
-                         OR sr.booking_mode_concept_id IN (?, ?)))
-       )
+   AND ${BOOKABLE_RESOURCE_SQL}
  GROUP BY t.id, t.trade_name, t.legal_name
  ORDER BY name`;
 
@@ -68,10 +53,7 @@ export async function findBookableOrganizations(
       SEED.tenantId,
       CONCEPTS.RESOURCE_PRACTITIONER,
       CONCEPTS.RESOURCE_ROOM,
-      CONCEPTS.SLOT_OPEN,
-      CONCEPTS.TEMPLATE_PUBLISHED,
-      SCHED.RULE_MODE_SERVICES,
-      SCHED.RULE_MODE_MIXED,
+      ...BOOKABLE_RESOURCE_PARAMS,
     ]);
   });
   const items = rows.map((row) => ({
