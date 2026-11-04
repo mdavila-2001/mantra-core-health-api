@@ -379,9 +379,7 @@ export class IamAuthController {
   )
   @Post('login')
   @Public()
-  // Límite estricto contra fuerza bruta / credential stuffing sobre el login,
-  // por encima del backstop global. El lockout por cuenta complementa este límite
-  // por IP.
+  // Tope por IP contra fuerza bruta; el lockout por cuenta lo complementa.
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -391,8 +389,10 @@ export class IamAuthController {
     @Body() dto: LoginDto,
     @Ip() ip: string,
     @Res({ passthrough: true }) res: Response,
+    @Req() req: Request,
   ): Promise<TokenResponseDto> {
-    return this.deliverTokens(await this.authService.login(dto, ip), res);
+    const session = await this.authService.login(dto, ip, req.headers);
+    return this.deliverTokens(session, res);
   }
 
   /**
