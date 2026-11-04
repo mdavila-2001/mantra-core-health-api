@@ -7,6 +7,10 @@ import { PATIENT_CHART_ORDER_CATEGORIES } from '../diagnostics.concepts';
 import { ServiceRequestNotesService } from '../../clinical/services/service-request-notes.service';
 import { analysisCategoryOf } from '../../clinical/service-request-category';
 import type { PatientDiagnosticOrdersResponseDto } from '../dto';
+import { DiagnosticReports, ServiceRequests } from '../../clinical/entities';
+import type { ClinicalReadScope } from '../../clinical/domain/clinical-read-scope';
+import { ClinicalScopeRepository } from '../../clinical/repositories/clinical-scope.repository';
+import { ClinicalScopeFilterService } from '../../clinical/services/clinical-scope-filter.service';
 
 /**
  * Cara de lectura del circuito diagnóstico (laboratorio e imagenología).
@@ -40,6 +44,8 @@ export class DiagnosticsOrdersService {
     private readonly siteNames: SuggestedSiteNamesReader,
     private readonly logger: PinoLogger,
     private readonly basedOnNotes: ServiceRequestNotesService,
+    private readonly scopeFilter: ClinicalScopeFilterService,
+    private readonly scopeRepo: ClinicalScopeRepository,
   ) {
     this.logger.setContext(DiagnosticsOrdersService.name);
   }
@@ -51,12 +57,16 @@ export class DiagnosticsOrdersService {
    * @param custodianTenantId - Tenant del contexto.
    * @param patientProfileId - Paciente cuyo circuito se lee.
    * @param limit - Tope por bloque.
+   * @param scope - Alcance de lectura. Con especialidades sólo se ven las
+   *   órdenes cuyo solicitante (y los informes cuyo autor) ejerce una
+   *   especialidad autorizada; `hiddenByScope` cuenta el resto.
    * @returns Órdenes e informes, con los bloques recortados anotados.
    */
   async getPatientOrders(
     custodianTenantId: string,
     patientProfileId: string,
     limit: number,
+    scope: ClinicalReadScope,
   ): Promise<PatientDiagnosticOrdersResponseDto> {
     this.logger.info(
       { operation: 'diagnostics.patient.read', patientProfileId, limit },
@@ -68,21 +78,52 @@ export class DiagnosticsOrdersService {
     // un `count` aparte. Mismo recurso que usa `ClinicalReadService`.
     const over = limit + 1;
 
-    const [orders, reports] = await Promise.all([
-      this.ordersRepo.findOrdersByPatient(
-        em,
-        custodianTenantId,
-        patientProfileId,
-        PATIENT_CHART_ORDER_CATEGORIES,
-        over,
-      ),
-      this.ordersRepo.findReportsByPatient(
-        em,
-        custodianTenantId,
-        patientProfileId,
-        over,
-      ),
-    ]);
+    const filter = await this.scopeFilter.build(em, patientProfileId, scope);
+    let hiddenByScope: Record<string, number> | undefined;
+    const [orders, reports] = filter
+      ? await Promise.all([
+          this.scopeRepo.page(em, {
+            entity: ServiceRequests,
+            base: {
+              custodianTenantId,
+              patientProfileId,
+              categoryConceptId: { $in: [...PATIENT_CHART_ORDER_CATEGORIES] },
+            },
+            filter,
+            columns: {
+              profile: 'requesterProfileId',
+              encounter: 'encounterId',
+            },
+            orderBy: { createdAt: 'DESC' },
+            limit: over,
+          }),
+          this.scopeRepo.page(em, {
+            entity: DiagnosticReports,
+            base: { custodianTenantId, patientProfileId },
+            filter,
+            columns: { user: 'createdByUserId', encounter: 'encounterId' },
+            orderBy: { createdAt: 'DESC' },
+            limit: over,
+          }),
+        ]).then(([o, r]) => {
+          hiddenByScope = { orders: o.hidden, reports: r.hidden };
+          return [o.rows, r.rows] as const;
+        })
+      : await Promise.all([
+          this.ordersRepo.findOrdersByPatient(
+            em,
+            custodianTenantId,
+            patientProfileId,
+            PATIENT_CHART_ORDER_CATEGORIES,
+            over,
+          ),
+          this.ordersRepo.findReportsByPatient(
+            em,
+            custodianTenantId,
+            patientProfileId,
+            over,
+          ),
+        ]);
 
     const truncated: string[] = [];
     const visibleOrders = this.cut(orders, limit, 'orders', truncated);
@@ -157,6 +198,7 @@ export class DiagnosticsOrdersService {
       })),
       limit,
       truncated,
+      hiddenByScope,
     };
   }
 
