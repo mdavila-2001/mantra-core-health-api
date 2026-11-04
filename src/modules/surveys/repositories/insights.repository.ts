@@ -146,7 +146,7 @@ export class InsightsRepository {
     unit: InsightsBucketUnit,
   ): Promise<InsightsInvitationRow[]> {
     const scoped = this.buildScope(scope, unit);
-    const rows = await em.getConnection().execute<InsightsInvitationRow[]>(
+    const rows = await em.execute<InsightsInvitationRow[]>(
       `${scoped.sql}
        SELECT bucket,
               count(*)::int AS "issued",
@@ -179,7 +179,7 @@ export class InsightsRepository {
     unit: InsightsBucketUnit,
   ): Promise<InsightsQuestionRow[]> {
     const scoped = this.buildScope(scope, unit);
-    const rows = await em.getConnection().execute<InsightsQuestionRow[]>(
+    const rows = await em.execute<InsightsQuestionRow[]>(
       `${scoped.sql}
        SELECT q.id AS "questionId",
               q.question_text AS "text",
@@ -240,7 +240,7 @@ export class InsightsRepository {
     unit: InsightsBucketUnit,
   ): Promise<InsightsValueRow[]> {
     const scoped = this.buildScope(scope, unit);
-    const rows = await em.getConnection().execute<InsightsValueRow[]>(
+    const rows = await em.execute<InsightsValueRow[]>(
       `${scoped.sql}
        SELECT q.id AS "questionId",
               sc.bucket AS "bucket",
@@ -289,7 +289,7 @@ export class InsightsRepository {
     scope: InsightsScope,
   ): Promise<InsightsCommentRow[]> {
     const scoped = this.buildScope(scope, 'day');
-    return em.getConnection().execute<InsightsCommentRow[]>(
+    return em.execute<InsightsCommentRow[]>(
       `${scoped.sql}
        SELECT a.value_text AS "text"
          FROM scope sc

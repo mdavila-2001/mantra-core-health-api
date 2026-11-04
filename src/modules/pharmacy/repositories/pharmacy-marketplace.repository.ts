@@ -249,12 +249,10 @@ export class PharmacyMarketplaceRepository {
    * @param em - Persistence context.
    */
   async findVademecum(em: EntityManager): Promise<VademecumConcept[]> {
-    const rows = await em
-      .getConnection()
-      .execute<
-        Array<{ concept_id: string; atc_code: string; generic_name: string }>
-      >(
-        `SELECT c.id AS concept_id,
+    const rows = await em.execute<
+      Array<{ concept_id: string; atc_code: string; generic_name: string }>
+    >(
+      `SELECT c.id AS concept_id,
               c.code AS atc_code,
               COALESCE(es.value, c.display) AS generic_name
          FROM terminology.catalog_concepts c
@@ -278,9 +276,9 @@ export class PharmacyMarketplaceRepository {
                      AND p.property_code = 'liname_presentations'
                      AND jsonb_typeof(p.value_json) = 'array') DESC NULLS LAST,
                  c.code`,
-        [VADEMECUM_CODE_SYSTEM],
-        'all',
-      );
+      [VADEMECUM_CODE_SYSTEM],
+      'all',
+    );
     return rows.map((row) => ({
       conceptId: row.concept_id,
       atcCode: row.atc_code,

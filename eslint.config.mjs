@@ -159,7 +159,7 @@ export default defineConfig([
   },
   {
     // E2 · CLOSED list of the files that still hold raw SQL without ctx, as of
-    // 2026-11-04 (43 files). EXPIRES 2027-01-15: by then each file
+    // 2026-11-04 (40 files). EXPIRES 2027-01-15: by then each file
     // is converted to `em.execute` (or its table is confirmed without RLS and
     // it moves to an explicit `ctx`) and leaves the list. Files are NOT added:
     // new raw SQL without ctx is a lint error. Inline disables are not used
@@ -208,10 +208,6 @@ export default defineConfig([
       'src/modules/pharmacy_inventory/infrastructure/repositories/prescription-balance.repository.ts',
       'src/modules/scheduling/infrastructure/repositories/scheduling-payment-receipts.repository.ts',
       'src/orm/subscribers/history-mirror.subscriber.ts',
-      // Owned by surveys; waits for the owner to hand them over (E2-D2).
-      'src/modules/surveys/repositories/insights.repository.ts',
-      'src/modules/surveys/repositories/invitations.repository.ts',
-      'src/modules/surveys/repositories/targets.repository.ts',
       // Left out of E3 by decision (permission drift); review before the expiry date.
       'src/modules/data_catalog/application/permission-drift.service.ts',
     ],
