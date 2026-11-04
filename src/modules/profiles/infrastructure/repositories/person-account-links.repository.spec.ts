@@ -51,3 +51,42 @@ describe('PersonAccountLinksRepository · vínculos para «su propia admisión»
     );
   });
 });
+
+describe('PersonAccountLinksRepository.findActiveUserIdsByPersons', () => {
+  it('resuelve en una lectura las cuentas con vínculo ACTIVO a esas personas, sin repetir', async () => {
+    const em = {
+      find: fn().mockResolvedValue([
+        { userId: 'u-1' },
+        { userId: 'u-2' },
+        { userId: 'u-1' },
+      ]),
+    };
+
+    await expect(
+      new PersonAccountLinksRepository().findActiveUserIdsByPersons(
+        em as never,
+        ['p-1', 'p-2'],
+      ),
+    ).resolves.toEqual(['u-1', 'u-2']);
+    expect(em.find).toHaveBeenCalledWith(
+      PersonAccountLinks,
+      {
+        personId: { $in: ['p-1', 'p-2'] },
+        statusConceptId: PROF.ACCOUNT_LINK_ACTIVE,
+      },
+      { fields: ['userId'] },
+    );
+  });
+
+  it('sin personas no consulta', async () => {
+    const em = { find: fn() };
+
+    await expect(
+      new PersonAccountLinksRepository().findActiveUserIdsByPersons(
+        em as never,
+        [],
+      ),
+    ).resolves.toEqual([]);
+    expect(em.find).not.toHaveBeenCalled();
+  });
+});
