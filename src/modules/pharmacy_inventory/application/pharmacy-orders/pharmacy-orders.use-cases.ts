@@ -820,7 +820,7 @@ export class PharmacyOrdersUseCases {
       await this.reservationsService.releaseConfirmedLines(tx, order, actor);
 
       await this.outbox.publish(tx, {
-        tenantId: pharmacy.tenantId,
+        tenantId: getCurrentTenantId() ?? pharmacy.tenantId,
         eventType: 'PharmacyOrderCancelled',
         aggregateType: 'pharmacy_inventory.inventory_reservations',
         aggregateId: order.id,
@@ -1231,7 +1231,7 @@ export class PharmacyOrdersUseCases {
 
       await this.publishStaffEvent(
         tx,
-        await this.tenantOfPharmacy(tx, order.pharmacyId),
+        await this.patientEventTenant(tx, order.pharmacyId),
         order,
         {
           eventType: 'PharmacyOrderSubstitutionsAccepted',
@@ -1288,7 +1288,7 @@ export class PharmacyOrdersUseCases {
 
       await this.publishStaffEvent(
         tx,
-        await this.tenantOfPharmacy(tx, order.pharmacyId),
+        await this.patientEventTenant(tx, order.pharmacyId),
         order,
         {
           eventType: 'PharmacyOrderOriginalPreferred',
@@ -2463,8 +2463,8 @@ export class PharmacyOrdersUseCases {
   }
 
   /** La lectura del propio pedido tras crear o cancelar (el titular siempre ve). */
-  /** El tenant dueño de una farmacia: los eventos del mostrador viajan a él. */
-  private async tenantOfPharmacy(
+  /** H-01: tenant de un evento del paciente: el de su sesión (RLS del outbox). */
+  private async patientEventTenant(
     tx: EntityManager,
     pharmacyId: string,
   ): Promise<string> {
@@ -2474,7 +2474,7 @@ export class PharmacyOrdersUseCases {
       [pharmacyId],
     );
     if (!pharmacy) throw orderNotFound(pharmacyId);
-    return pharmacy.tenantId;
+    return getCurrentTenantId() ?? pharmacy.tenantId;
   }
 
   private async readOwnOrder(
