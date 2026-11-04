@@ -91,11 +91,20 @@ describe('IamAuthController', () => {
     const dto = { email: 'a@x.io', password: 'password123' };
     d.authService.login.mockResolvedValue({ accessToken: 'at' });
     await expect(
-      d.controller.login(dto as any, '1.2.3.4', resStub() as any),
+      d.controller.login(
+        dto as any,
+        '1.2.3.4',
+        resStub() as any,
+        {
+          headers: { 'x-device-id': 'device-key-1' },
+        } as any,
+      ),
     ).resolves.toEqual({
       accessToken: 'at',
     });
-    expect(d.authService.login).toHaveBeenCalledWith(dto, '1.2.3.4');
+    expect(d.authService.login).toHaveBeenCalledWith(dto, '1.2.3.4', {
+      'x-device-id': 'device-key-1',
+    });
   });
 
   it('login emite el refresh en cookie segura si está habilitada', async () => {
@@ -114,6 +123,7 @@ describe('IamAuthController', () => {
           { email: 'a@x.io', password: 'pw' } as any,
           'ip',
           res as any,
+          { headers: {} } as any,
         ),
       ).resolves.toEqual({ accessToken: 'at', refreshToken: '' });
       expect(res.cookie).toHaveBeenCalledWith(
