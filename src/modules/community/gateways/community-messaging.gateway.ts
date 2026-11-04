@@ -13,6 +13,7 @@ import { PinoLogger } from 'nestjs-pino';
 import type { Server, Socket } from 'socket.io';
 import { CONCEPTS, WsJwtGuard, type AuthenticatedUser } from '../../../common';
 import { ConversationsRepository } from '../repositories';
+import { withMessagingProfileScope } from './messaging-profile-scope';
 // Import directo del archivo, no del barrel `../services`: ese barrel también
 // re-exporta `community-messaging.service.ts`, que importa este gateway — el
 // barrel cierra un ciclo que deja `CommunityVisibilityService` `undefined` en
@@ -221,14 +222,10 @@ export class CommunityMessagingGateway
     const user = this.user(client);
     if (!user || !body?.profileId) return;
 
-    const em = this.em.fork();
+    const profileId = body.profileId;
     let access: MessagingProfileAccess | void;
     try {
-      access = await this.visibility.assertOwnMessagingProfile(
-        em,
-        body.profileId,
-        user,
-      );
+      access = await this.assertOwnProfile(user, profileId);
     } catch {
       client.emit('error', { code: 'NOT_OWN_PROFILE', event: 'join:inbox' });
       return;
@@ -263,14 +260,9 @@ export class CommunityMessagingGateway
     const user = this.user(client);
     if (!user || !body?.conversationId || !body?.profileId) return;
 
-    const em = this.em.fork();
     let access: MessagingProfileAccess | void;
     try {
-      access = await this.visibility.assertOwnMessagingProfile(
-        em,
-        body.profileId,
-        user,
-      );
+      access = await this.assertOwnProfile(user, body.profileId);
     } catch {
       client.emit('error', {
         code: 'NOT_OWN_PROFILE',
@@ -280,7 +272,7 @@ export class CommunityMessagingGateway
     }
 
     const participant = await this.conversationsRepo.findActiveParticipant(
-      em,
+      this.em.fork(),
       body.conversationId,
       body.profileId,
       CONCEPTS.STATE_ACTIVE,
@@ -537,11 +529,7 @@ export class CommunityMessagingGateway
       let stillAllowed = false;
       if (user) {
         try {
-          await this.visibility.assertOwnMessagingProfile(
-            this.em.fork(),
-            profileId,
-            user,
-          );
+          await this.assertOwnProfile(user, profileId);
           stillAllowed = true;
         } catch {
           stillAllowed = false;
@@ -566,6 +554,13 @@ export class CommunityMessagingGateway
       );
     }
     if (grants.size === 0) this.stopStaffRecheck(client);
+  }
+
+  /** Ownership check with the RLS context a socket lacks (no tenant in the handshake). */
+  private assertOwnProfile(user: AuthenticatedUser, profileId: string) {
+    return withMessagingProfileScope(this.em, user, profileId, (scoped) =>
+      this.visibility.assertOwnMessagingProfile(scoped, profileId, user),
+    );
   }
 
   private rememberStaffGrant(
