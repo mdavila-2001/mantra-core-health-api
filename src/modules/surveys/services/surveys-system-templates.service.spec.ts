@@ -231,6 +231,9 @@ describe('SurveysSystemTemplatesService.ensureSystemTemplate', () => {
     });
     expect(d.forked.transactional).not.toHaveBeenCalled();
     expect(d.templatesRepo.createTemplate).not.toHaveBeenCalled();
+    // Under RLS a bare fork would not see the tenant set on the request.
+    expect(d.em.fork).toHaveBeenCalledWith({ keepTransactionContext: true });
+    expect(d.em.fork).not.toHaveBeenCalledWith();
   });
 
   it('en un tenant sin base crea plantilla de sistema, versión publicada, todas las preguntas y asignación', async () => {
@@ -452,6 +455,37 @@ describe('SurveysSystemTemplatesService.ensureSystemTemplate', () => {
     );
 
     expect(res.versionId).toBe(d.ids.versionId);
+  });
+
+  it('la carrera se resuelve en un savepoint de la petición y el catch queda afuera', async () => {
+    const d = build();
+    d.forked.transactional.mockRejectedValueOnce(
+      new UniqueConstraintViolationException(new Error('duplicate key')),
+    );
+    d.templatesRepo.findVersionById
+      .mockResolvedValueOnce(null)
+      .mockResolvedValue({
+        id: d.ids.versionId,
+        publicationStatusConceptId: SURVEYS.VERSION_PUBLISHED,
+        responseWindowDays: 30,
+      });
+    d.assignmentsRepo.findById
+      .mockResolvedValueOnce(null)
+      .mockResolvedValue({ id: d.ids.assignmentId });
+    d.templatesRepo.countQuestions.mockResolvedValue(CONSULTATION_COUNT);
+
+    const res = await d.service.ensureSystemTemplate(
+      TENANT,
+      'CONSULTATION',
+      ACTOR,
+    );
+
+    // Read, savepoint and re-read all keep the request transaction.
+    expect(d.em.fork).toHaveBeenCalledTimes(3);
+    for (const call of d.em.fork.mock.calls)
+      expect(call).toEqual([{ keepTransactionContext: true }]);
+    expect(d.forked.transactional).toHaveBeenCalledTimes(1);
+    expect(res.templateId).toBe(d.ids.templateId);
   });
 
   it('un error que no es de unicidad sigue subiendo', async () => {
