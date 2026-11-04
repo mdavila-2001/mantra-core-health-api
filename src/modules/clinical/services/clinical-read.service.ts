@@ -99,6 +99,7 @@ const DEFAULT_ZONE = 'America/La_Paz';
  * al principio del gate.
  */
 const ROLES_THAT_ATTEND: readonly string[] = ['CLINICIAN', 'PRACTITIONER'];
+export { ROLES_THAT_ATTEND };
 
 /**
  * Estados de reserva que cuentan como «turno de hoy» para abrir la historia.
@@ -214,11 +215,14 @@ export class ClinicalReadService {
    *
    * @param patientProfileId - La historia que se quiere leer.
    * @param actor - Quién la pide.
+   * @param scoped - Manager con el tenant activo ya fijado para RLS, si el
+   *        llamador (el guard, antes del interceptor) lo abrió; sin él, un fork.
    * @throws ForbiddenException si no la atiende hoy ni es su titular.
    */
   async assertCanReadHistory(
     patientProfileId: string,
     actor: AuthenticatedUser,
+    scoped?: EntityManager,
   ): Promise<void> {
     // Comodín sólo el global, como en `RolesGuard`: la historia no es de ningún
     // tenant, así que un `SUPERADMIN` acotado en `scopedRoles` no pasa (#1241).
@@ -229,22 +233,9 @@ export class ClinicalReadService {
       return;
     }
 
-    const em = this.em.fork();
+    const em = scoped ?? this.em.fork();
     const link = await this.accountLinksRepo.findActiveByUser(em, actor.id);
-    const professionalProfile = link
-      ? await this.practitionerProfilesRepo.findById(em, link.personId)
-      : null;
-
-    if (
-      professionalProfile &&
-      (await this.isAttending(
-        em,
-        professionalProfile.profileId,
-        patientProfileId,
-      ))
-    ) {
-      return;
-    }
+    if (await this.isAttendedBy(em, link, patientProfileId)) return;
 
     // FT-07-R05/R06/R07/R08: sin turno hoy, todavía puede haber una relación
     // asistencial o un acceso clínico que el paciente autorizó explícitamente
@@ -254,7 +245,7 @@ export class ClinicalReadService {
     // la evaluación (deny-overrides, vigencia, propósito) en dos lugares.
     if (
       actor.practitionerProfileId &&
-      (await this.hasAuthorizedAccess(patientProfileId, actor))
+      (await this.hasAuthorizedAccess(em, patientProfileId, actor))
     ) {
       return;
     }
@@ -270,6 +261,7 @@ export class ClinicalReadService {
     // se otorga al usuario, no al perfil profesional.
     if (
       await this.hasAuthorizedAccess(
+        em,
         patientProfileId,
         actor,
         'READ',
@@ -312,35 +304,25 @@ export class ClinicalReadService {
    *
    * @param patientProfileId - La historia en la que se quiere escribir.
    * @param actor - Quién escribe.
+   * @param scoped - Como en {@link assertCanReadHistory}.
    * @throws ForbiddenException si no hay base de escritura sobre ese paciente.
    */
   async assertCanWriteHistory(
     patientProfileId: string,
     actor: AuthenticatedUser,
+    scoped?: EntityManager,
   ): Promise<void> {
     // Comodín sólo el global, como en `RolesGuard`: la historia no es de ningún
     // tenant, así que un `SUPERADMIN` acotado en `scopedRoles` no pasa (#1241).
     if (roleAuthorizesInTenant(actor, 'SUPERADMIN', undefined)) return;
 
     if (actor.roles.some((role) => ROLES_THAT_ATTEND.includes(role))) {
-      const em = this.em.fork();
+      const em = scoped ?? this.em.fork();
       const link = await this.accountLinksRepo.findActiveByUser(em, actor.id);
-      const professionalProfile = link
-        ? await this.practitionerProfilesRepo.findById(em, link.personId)
-        : null;
-      if (
-        professionalProfile &&
-        (await this.isAttending(
-          em,
-          professionalProfile.profileId,
-          patientProfileId,
-        ))
-      ) {
-        return;
-      }
+      if (await this.isAttendedBy(em, link, patientProfileId)) return;
       if (
         actor.practitionerProfileId &&
-        (await this.hasAuthorizedAccess(patientProfileId, actor, 'WRITE'))
+        (await this.hasAuthorizedAccess(em, patientProfileId, actor, 'WRITE'))
       ) {
         return;
       }
@@ -349,6 +331,7 @@ export class ClinicalReadService {
       // sigue decidiendo el PDP (`CLINICAL_LEVEL_RANK`), no este servicio.
       if (
         await this.hasAuthorizedAccess(
+          em,
           patientProfileId,
           actor,
           'WRITE',
@@ -362,6 +345,21 @@ export class ClinicalReadService {
     throw new ForbiddenException(WITHOUT_ACCESS_TO_HISTORY);
   }
 
+  /** ¿El profesional de esa cuenta (si lo es) atiende a ese paciente? */
+  private async isAttendedBy(
+    em: EntityManager,
+    link: { personId: string } | null,
+    patientProfileId: string,
+  ): Promise<boolean> {
+    const profile = link
+      ? await this.practitionerProfilesRepo.findById(em, link.personId)
+      : null;
+    return (
+      !!profile &&
+      (await this.isAttending(em, profile.profileId, patientProfileId))
+    );
+  }
+
   /**
    * ¿Hay una base legítima de acceso más allá del turno de hoy?
    *
@@ -371,6 +369,7 @@ export class ClinicalReadService {
    * `assertOwnRecord`, que es quien decide el mensaje final.
    */
   private async hasAuthorizedAccess(
+    em: EntityManager,
     patientProfileId: string,
     actor: AuthenticatedUser,
     action: 'READ' | 'WRITE' = 'READ',
@@ -389,6 +388,7 @@ export class ClinicalReadService {
         purposeOfUse,
       },
       actor,
+      em,
     );
     return decision.decision === 'PERMIT';
   }

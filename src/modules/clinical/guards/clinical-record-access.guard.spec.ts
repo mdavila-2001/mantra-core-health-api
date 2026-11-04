@@ -64,7 +64,7 @@ const actorThatAttends = { id: 'u1', roles: ['PRACTITIONER'] };
 describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
   it('deja pasar sin evaluar cuando no hay sujeto o no hay paciente en la ruta', async () => {
     const readService = { assertCanReadHistory: mockFn() };
-    const guard = new ClinicalRecordAccessGuard(readService as any);
+    const guard = new ClinicalRecordAccessGuard(readService as any, {} as any);
 
     await expect(
       guard.canActivate(buildContext(undefined, 'patient-1')),
@@ -85,7 +85,7 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
     const readService = {
       assertCanReadHistory: mockFn().mockResolvedValue(undefined),
     };
-    const guard = new ClinicalRecordAccessGuard(readService as any);
+    const guard = new ClinicalRecordAccessGuard(readService as any, {} as any);
     const actor = { id: 'u1', roles: ['PRACTITIONER'] };
 
     await expect(
@@ -103,7 +103,7 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
         new ForbiddenException('no autorizado'),
       ),
     };
-    const guard = new ClinicalRecordAccessGuard(readService as any);
+    const guard = new ClinicalRecordAccessGuard(readService as any, {} as any);
     const actor = { id: 'u1', roles: ['PRACTITIONER'] };
 
     await expect(
@@ -123,7 +123,10 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
       const readService = {
         assertCanWriteHistory: mockFn().mockResolvedValue(undefined),
       };
-      const guard = new ClinicalRecordAccessGuard(readService as any);
+      const guard = new ClinicalRecordAccessGuard(
+        readService as any,
+        {} as any,
+      );
 
       await expect(
         guard.canActivate(
@@ -148,7 +151,10 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
           new ForbiddenException('no autorizado'),
         ),
       };
-      const guard = new ClinicalRecordAccessGuard(readService as any);
+      const guard = new ClinicalRecordAccessGuard(
+        readService as any,
+        {} as any,
+      );
 
       await expect(
         guard.canActivate(
@@ -168,7 +174,10 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
         const readService = {
           assertCanWriteHistory: mockFn().mockResolvedValue(undefined),
         };
-        const guard = new ClinicalRecordAccessGuard(readService as any);
+        const guard = new ClinicalRecordAccessGuard(
+          readService as any,
+          {} as any,
+        );
 
         await guard.canActivate(
           buildWriteContext(actorThatAttends, {
@@ -187,7 +196,10 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
       const readService = {
         assertCanWriteHistory: mockFn().mockResolvedValue(undefined),
       };
-      const guard = new ClinicalRecordAccessGuard(readService as any);
+      const guard = new ClinicalRecordAccessGuard(
+        readService as any,
+        {} as any,
+      );
 
       await expect(
         guard.canActivate(
@@ -206,7 +218,10 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
       const readService = {
         assertCanWriteHistory: mockFn().mockResolvedValue(undefined),
       };
-      const guard = new ClinicalRecordAccessGuard(readService as any);
+      const guard = new ClinicalRecordAccessGuard(
+        readService as any,
+        {} as any,
+      );
 
       await expect(
         guard.canActivate(
@@ -243,7 +258,10 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
           }
         }),
       };
-      const guard = new ClinicalRecordAccessGuard(readService as any);
+      const guard = new ClinicalRecordAccessGuard(
+        readService as any,
+        {} as any,
+      );
 
       await expect(
         guard.canActivate(
@@ -258,7 +276,10 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
 
     it('no inventa un paciente cuando el cuerpo no lo trae', async () => {
       const readService = { assertCanWriteHistory: mockFn() };
-      const guard = new ClinicalRecordAccessGuard(readService as any);
+      const guard = new ClinicalRecordAccessGuard(
+        readService as any,
+        {} as any,
+      );
 
       for (const body of [
         { noteText: 'sin paciente' },
@@ -276,7 +297,10 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
 
     it('no coerciona un patientProfileId que no sea string', async () => {
       const readService = { assertCanWriteHistory: mockFn() };
-      const guard = new ClinicalRecordAccessGuard(readService as any);
+      const guard = new ClinicalRecordAccessGuard(
+        readService as any,
+        {} as any,
+      );
 
       // Un array colado en el cuerpo NO puede convertirse en una autorización
       // válida, ni eligiendo su primer elemento ni pasándolo por `String()`.
@@ -306,7 +330,10 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
       const readService = {
         assertCanWriteHistory: mockFn().mockResolvedValue(undefined),
       };
-      const guard = new ClinicalRecordAccessGuard(readService as any);
+      const guard = new ClinicalRecordAccessGuard(
+        readService as any,
+        {} as any,
+      );
 
       await expect(
         guard.canActivate(
@@ -325,7 +352,10 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
 
     it('no evalúa al actor sin sujeto aunque el cuerpo traiga paciente', async () => {
       const readService = { assertCanWriteHistory: mockFn() };
-      const guard = new ClinicalRecordAccessGuard(readService as any);
+      const guard = new ClinicalRecordAccessGuard(
+        readService as any,
+        {} as any,
+      );
 
       await expect(
         guard.canActivate(
@@ -348,7 +378,10 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
           new ForbiddenException('sin permiso de escritura'),
         ),
       };
-      const guard = new ClinicalRecordAccessGuard(readService as any);
+      const guard = new ClinicalRecordAccessGuard(
+        readService as any,
+        {} as any,
+      );
 
       await expect(
         guard.canActivate(
@@ -365,7 +398,10 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
         assertCanReadHistory: mockFn(),
         assertCanWriteHistory: mockFn().mockResolvedValue(undefined),
       };
-      const guard = new ClinicalRecordAccessGuard(readService as any);
+      const guard = new ClinicalRecordAccessGuard(
+        readService as any,
+        {} as any,
+      );
 
       await guard.canActivate(
         buildWriteContext(actorThatAttends, {
@@ -385,7 +421,10 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
         assertCanReadHistory: mockFn().mockResolvedValue(undefined),
         assertCanWriteHistory: mockFn(),
       };
-      const guard = new ClinicalRecordAccessGuard(readService as any);
+      const guard = new ClinicalRecordAccessGuard(
+        readService as any,
+        {} as any,
+      );
 
       await guard.canActivate(buildContext(actorThatAttends));
       expect(readService.assertCanReadHistory).toHaveBeenCalledTimes(1);
@@ -401,7 +440,10 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
       const readService = {
         assertCanReadHistory: mockFn().mockResolvedValue(undefined),
       };
-      const guard = new ClinicalRecordAccessGuard(readService as any);
+      const guard = new ClinicalRecordAccessGuard(
+        readService as any,
+        {} as any,
+      );
 
       await expect(
         guard.canActivate(
@@ -421,7 +463,10 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
 
     it('sigue dejando pasar un GET sin paciente en la ruta, mire lo que mire el cuerpo', async () => {
       const readService = { assertCanReadHistory: mockFn() };
-      const guard = new ClinicalRecordAccessGuard(readService as any);
+      const guard = new ClinicalRecordAccessGuard(
+        readService as any,
+        {} as any,
+      );
 
       await expect(
         guard.canActivate(

@@ -769,6 +769,7 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
           purposeOfUse: 'TREATMENT',
         }),
         expect.anything(),
+        expect.anything(),
       );
     });
 
@@ -815,6 +816,7 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
           purposeOfUse: 'EMERGENCY',
         }),
         expect.anything(),
+        expect.anything(),
       );
     });
 
@@ -833,6 +835,7 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
       ).resolves.toBeUndefined();
       expect(c.pdp.evaluate).toHaveBeenCalledWith(
         expect.objectContaining({ action: 'WRITE', purposeOfUse: 'EMERGENCY' }),
+        expect.anything(),
         expect.anything(),
       );
     });
@@ -1159,6 +1162,7 @@ describe('ClinicalReadService · assertPuedeEscribirHistoria (MCH-007)', () => {
     expect(c.pdp.evaluate).toHaveBeenLastCalledWith(
       expect.objectContaining({ action: 'WRITE', patientProfileId: PATIENT }),
       expect.anything(),
+      expect.anything(),
     );
   });
 
@@ -1228,5 +1232,78 @@ describe('ClinicalReadService · assertPuedeEscribirHistoria (MCH-007)', () => {
         scopedRoles: { 'tenant-a': ['SUPERADMIN'] },
       } as any),
     ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+});
+
+describe('ClinicalReadService · puerta con el manager del guard (RLS)', () => {
+  const DOCTOR = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+  const PATIENT = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+  const scoped = { tag: 'scoped-by-the-guard' } as any;
+  const doctor = () =>
+    ({
+      id: 'u',
+      roles: ['PRACTITIONER'],
+      practitionerProfileId: DOCTOR,
+      tenantIds: ['t1'],
+    }) as any;
+  const withDoctor = () => {
+    const c = build();
+    c.darDeAltaProfesional(DOCTOR);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: DOCTOR });
+    return c;
+  };
+
+  it('la lectura usa el manager recibido en vez de forkear, y se lo pasa al PDP', async () => {
+    const c = withDoctor();
+    c.pdp.evaluate.mockResolvedValue({ decision: 'PERMIT' });
+    await expect(
+      c.service.assertCanReadHistory(PATIENT, doctor(), scoped),
+    ).resolves.toBeUndefined();
+    expect(c.em.fork).not.toHaveBeenCalled();
+    expect(c.accountLinksRepo.findActiveByUser).toHaveBeenCalledWith(
+      scoped,
+      'u',
+    );
+    expect(c.pdp.evaluate).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      scoped,
+    );
+  });
+
+  it('la escritura usa el manager recibido y se lo pasa al PDP', async () => {
+    const c = withDoctor();
+    c.pdp.evaluate.mockResolvedValue({ decision: 'PERMIT' });
+    await expect(
+      c.service.assertCanWriteHistory(PATIENT, doctor(), scoped),
+    ).resolves.toBeUndefined();
+    expect(c.em.fork).not.toHaveBeenCalled();
+    expect(c.pdp.evaluate).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'WRITE' }),
+      expect.anything(),
+      scoped,
+    );
+  });
+
+  it('el PDP sigue evaluando con el primer tenant del token, no con el del manager', async () => {
+    const c = withDoctor();
+    c.pdp.evaluate.mockResolvedValue({ decision: 'PERMIT' });
+    await c.service.assertCanReadHistory(
+      PATIENT,
+      { ...doctor(), tenantIds: ['t1', 't2'] },
+      scoped,
+    );
+    expect(c.pdp.evaluate).toHaveBeenCalledWith(
+      expect.objectContaining({ tenantId: 't1' }),
+      expect.anything(),
+      scoped,
+    );
+  });
+
+  it('sin manager recibido forkea como siempre', async () => {
+    const c = withDoctor();
+    c.pdp.evaluate.mockResolvedValue({ decision: 'PERMIT' });
+    await c.service.assertCanReadHistory(PATIENT, doctor());
+    expect(c.em.fork).toHaveBeenCalled();
   });
 });
