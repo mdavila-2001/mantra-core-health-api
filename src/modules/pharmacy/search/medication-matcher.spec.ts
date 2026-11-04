@@ -119,6 +119,14 @@ describe('searchDocs', () => {
     expect(keys('ibopofeno', true)).toEqual([]);
   });
 
+  it('bounds the work of a huge query: no typo pass past 8 words', () => {
+    const long = Array.from({ length: 50 }, () => 'zzqqxx').join(' ');
+    const started = Date.now();
+    expect(searchDocs(CATALOG, long).correctedQuery).toBeNull();
+    expect(searchDocs(CATALOG, 'x'.repeat(100_000)).matches?.size).toBe(0);
+    expect(Date.now() - started).toBeLessThan(1000);
+  });
+
   it('does not invent matches for unrelated text', () => {
     const outcome = searchDocs(CATALOG, 'zzzqqq');
     expect(outcome.correctedQuery).toBeNull();

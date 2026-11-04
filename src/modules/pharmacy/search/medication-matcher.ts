@@ -54,6 +54,12 @@ export interface SearchOutcome {
   readonly correctedQuery: string | null;
 }
 
+/** Longest text searched; the rest is ignored. */
+const MAX_QUERY_LENGTH = 100;
+
+/** Most words the typo pass will try to correct. */
+const MAX_CORRECTED_TERMS = 8;
+
 /** Normalized phrases of every use, computed once. */
 const USE_PHRASES = THERAPEUTIC_USES.map((use) => ({
   use,
@@ -88,6 +94,8 @@ export function searchDocs(
   if (query === undefined || normalize(query) === '') {
     return { matches: null, correctedQuery: null };
   }
+  // Public, anonymous endpoint: bound the work a single request can ask for.
+  query = query.slice(0, MAX_QUERY_LENGTH);
   const clean = normalize(query);
   if (clean.length < 2) {
     // One character: a plain substring filter, as the old SQL `ILIKE` did.
@@ -213,10 +221,13 @@ function correctTypos(
       for (const word of phrase) vocabulary.add(word);
   }
 
+  const terms = keywordsOrWords(query);
+  if (terms.length > MAX_CORRECTED_TERMS) return null;
+  const known = [...vocabulary];
   let changed = false;
-  const fixed = keywordsOrWords(query).map((term) => {
-    if ([...vocabulary].some((word) => prefixMatch(term, word))) return term;
-    const closest = closestWord(term, vocabulary);
+  const fixed = terms.map((term) => {
+    if (known.some((word) => prefixMatch(term, word))) return term;
+    const closest = closestWord(term, known);
     if (closest === null) return term;
     changed = true;
     return closest;
@@ -226,7 +237,7 @@ function correctTypos(
 
 function closestWord(
   term: string,
-  vocabulary: ReadonlySet<string>,
+  vocabulary: readonly string[],
 ): string | null {
   const max = tolerance(term);
   if (max === 0) return null;
