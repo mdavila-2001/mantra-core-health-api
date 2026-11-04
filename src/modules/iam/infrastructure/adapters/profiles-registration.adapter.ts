@@ -6,6 +6,7 @@ import {
 } from '../../../common/repositories';
 import { AdministrativeAreaCatalogService } from '../../../profiles/application/services/administrative-area-catalog.service';
 import { createContactPerson } from '../../../profiles/application/services/contact-person';
+import { assertNoHomonymPatient } from '../../../profiles/application/services/homonym-guard';
 import { createGuardianRelatedPerson } from '../../../profiles/application/services/guardian-related-person';
 import { MedicalSpecialtyCatalogService } from '../../../profiles/application/services/medical-specialty-catalog.service';
 import { PractitionerAdmissionsService } from '../../../profiles/application/services/practitioner-admissions.service';
@@ -73,6 +74,13 @@ export class ProfilesRegistrationAdapter implements ProfileRegistrationPort {
       tx,
       data as Parameters<PatientProfilesRepository['create']>[1],
     );
+  }
+
+  assertNoHomonymPatient(
+    tx: EntityManager,
+    check: { readonly displayName?: string; readonly allowHomonym?: boolean },
+  ): Promise<void> {
+    return assertNoHomonymPatient(tx, this.patientProfilesRepo, check);
   }
 
   createSecretaryProfile(

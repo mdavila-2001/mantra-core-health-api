@@ -438,7 +438,7 @@ export class AuthzCareRelationshipsService {
     // `patient_profiles.profile_id` ES el id de la persona (una persona tiene
     // a lo sumo un perfil de paciente, con la misma clave) — el mismo supuesto
     // que ya usa `ClinicalReadService` para resolver en la otra dirección.
-    const link = await this.accountLinksRepo.findActiveByPerson(
+    const link = await this.accountLinksRepo.findSelfActiveByPerson(
       em,
       patientProfileId,
     );

@@ -161,6 +161,38 @@ export class PersonAccountLinksRepository {
     );
   }
 
+  /** Whether a person has an ACTIVE own (SELF) account link. */
+  async hasSelfActiveLink(
+    em: EntityManager,
+    personId: string,
+  ): Promise<boolean> {
+    const count = await em.count(PersonAccountLinks, {
+      personId,
+      statusConceptId: PROF.ACCOUNT_LINK_ACTIVE,
+      linkTypeConceptId: PROF.ACCOUNT_LINK_SELF,
+    });
+    return count > 0;
+  }
+
+  /**
+   * The ACTIVE own (SELF) account link of a person, newest first, so a notice
+   * reaches the person's own account and never a delegate's or relative's.
+   */
+  findSelfActiveByPerson(
+    em: EntityManager,
+    personId: string,
+  ): Promise<PersonAccountLinks | null> {
+    return em.findOne(
+      PersonAccountLinks,
+      {
+        personId,
+        statusConceptId: PROF.ACCOUNT_LINK_ACTIVE,
+        linkTypeConceptId: PROF.ACCOUNT_LINK_SELF,
+      },
+      { orderBy: { validFrom: 'desc', createdAt: 'desc', id: 'desc' } },
+    );
+  }
+
   /** Todas las personas con las que la cuenta tiene un vínculo ACTIVO (no sólo «la» primera). */
   async findActivePersonIdsByUser(
     em: EntityManager,

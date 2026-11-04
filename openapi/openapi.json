@@ -127997,6 +127997,10 @@
             "type": "string",
             "description": "Id del usuario representante legal (dato mínimo si no hay representación formal)",
             "format": "uuid"
+          },
+          "allowHomonym": {
+            "type": "boolean",
+            "description": "Confirma que es otra persona aunque ya exista un paciente con el mismo nombre (evita el 409 POSSIBLE_DUPLICATE_PATIENT)"
           }
         },
         "required": [
@@ -132516,13 +132520,23 @@
           "deceased": {
             "type": "boolean",
             "description": "Si la persona está registrada como fallecida. Es un booleano derivado y no un concepto: una lista de pacientes tiene que poder marcarlo sin resolver terminología"
+          },
+          "nationalIdMasked": {
+            "type": "string",
+            "nullable": true,
+            "description": "Documento enmascarado (sólo los últimos dígitos), para distinguir homónimos"
+          },
+          "hasAccount": {
+            "type": "boolean",
+            "description": "Si la persona tiene cuenta propia en la plataforma: sin ella, una solicitud de vinculación no le llega"
           }
         },
         "required": [
           "profileId",
           "personId",
           "patientCode",
-          "deceased"
+          "deceased",
+          "hasAccount"
         ]
       },
       "SearchPatientsResponseDto": {
@@ -132585,6 +132599,10 @@
             "type": "string",
             "description": "Código MPI maestro (UK)",
             "maxLength": 100
+          },
+          "allowHomonym": {
+            "type": "boolean",
+            "description": "Confirma que es otra persona aunque ya exista un paciente con el mismo nombre (evita el 409 POSSIBLE_DUPLICATE_PATIENT)"
           }
         },
         "required": [

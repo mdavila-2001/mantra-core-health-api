@@ -55,6 +55,7 @@ function build() {
   };
   const accountLinksRepo = {
     findActiveByPerson: mockFn().mockResolvedValue(null),
+    findSelfActiveByPerson: mockFn().mockResolvedValue(null),
   };
   const auditTrail = { record: mockFn().mockResolvedValue(undefined) };
   const outbox = { publishDomainEvent: mockFn().mockResolvedValue(undefined) };
@@ -286,7 +287,7 @@ describe('AuthzCareRelationshipsService', () => {
       d.careRepo.findActiveInTenant.mockResolvedValue(null);
       d.careRepo.findPendingInTenant.mockResolvedValue(null);
       d.careRepo.create.mockReturnValue({ id: 'cr-1', createdAt: new Date() });
-      d.accountLinksRepo.findActiveByPerson.mockResolvedValue({
+      d.accountLinksRepo.findSelfActiveByPerson.mockResolvedValue({
         userId: 'u-pat-1',
       });
 
@@ -316,7 +317,7 @@ describe('AuthzCareRelationshipsService', () => {
       d.careRepo.findActiveInTenant.mockResolvedValue(null);
       d.careRepo.findPendingInTenant.mockResolvedValue(null);
       d.careRepo.create.mockReturnValue({ id: 'cr-1', createdAt: new Date() });
-      d.accountLinksRepo.findActiveByPerson.mockResolvedValue(null);
+      d.accountLinksRepo.findSelfActiveByPerson.mockResolvedValue(null);
 
       await expect(
         d.service.requestCareRelationship(
@@ -1129,7 +1130,7 @@ describe('AuthzCareRelationshipsService', () => {
   describe('notifyEncounterCareRelationshipRequests (REQ-16-035)', () => {
     it('avisa al paciente titular de cada solicitud', async () => {
       const d = build();
-      d.accountLinksRepo.findActiveByPerson.mockResolvedValue({
+      d.accountLinksRepo.findSelfActiveByPerson.mockResolvedValue({
         userId: 'user-pat',
       });
       await d.service.notifyEncounterCareRelationshipRequests(
