@@ -439,7 +439,8 @@ export class PractitionerSitesService {
     practitionerProfileId: string,
     tenantId: string,
   ): Promise<PractitionerSiteDto[]> {
-    const em = this.em.fork();
+    // Keep the request transaction: practices and practice_sites are under RLS.
+    const em = this.em.fork({ keepTransactionContext: true });
     const assignments = await this.rolesRepo.findCurrentWithSite(
       em,
       [practitionerProfileId],
@@ -500,7 +501,8 @@ export class PractitionerSitesService {
     const resolved = new Map<string, PractitionerSiteDto>();
     if (refs.length === 0) return resolved;
 
-    const em = this.em.fork();
+    // Keep the request transaction: practices and practice_sites are under RLS.
+    const em = this.em.fork({ keepTransactionContext: true });
     const practitionerIds = unique(
       refs.filter((r) => REF_PRACTITIONER.has(r.refType)).map((r) => r.refId),
     );
@@ -818,7 +820,12 @@ export class PractitionerSitesService {
     siteId: string,
     tenantId: string,
   ): Promise<PractitionerSiteDto> {
-    const sites = await this.loadSites(this.em.fork(), [siteId], tenantId);
+    // Keep the request transaction: practices and practice_sites are under RLS.
+    const sites = await this.loadSites(
+      this.em.fork({ keepTransactionContext: true }),
+      [siteId],
+      tenantId,
+    );
     const site = sites.get(siteId);
     if (!site) {
       throw new ResourceNotFoundException('Sede no encontrada', { siteId });
