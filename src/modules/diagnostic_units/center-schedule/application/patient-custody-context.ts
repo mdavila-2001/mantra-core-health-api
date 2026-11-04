@@ -19,7 +19,10 @@ export function inPatientCustodyContext<T>(
   em: EntityManager,
   work: (tx: EntityManager) => Promise<T>,
 ): Promise<T> {
-  return em.fork().transactional(async (tx) => {
+  // Own connection: a joined transaction would keep `system_context` alive for
+  // the rest of the request.
+  const ownFork = em.fork({ keepTransactionContext: false });
+  return ownFork.transactional(async (tx) => {
     await tx.execute("select set_config('app.system_context', 'true', true)");
     return work(tx);
   });
