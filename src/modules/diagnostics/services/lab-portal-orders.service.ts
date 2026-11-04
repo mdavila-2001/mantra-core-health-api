@@ -5,19 +5,26 @@ import { randomUUID } from 'node:crypto';
 import {
   ConflictException,
   PreconditionFailedException,
+  decodeKeysetCursor,
+  encodeKeysetCursor,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { badRequestWithReason } from '../../../common/errors/reasoned-http-exceptions';
+import { SystemErrorReason } from '../../../common/errors/system-error-reasons';
 import { CATEGORIES_WITH_SPECIMEN, DIAG } from '../diagnostics.concepts';
 import { DiagnosticsErrorReason } from '../diagnostics.error-reasons';
 import { AccessionSpecimens } from '../entities';
 import {
+  LAB_PORTAL_PAGE_DEFAULT,
   LabPortalRepository,
   LabWorkRepository,
   SpecimensRepository,
+  type LabOrderKey,
 } from '../repositories';
 import type {
   LabOrderDto,
+  LabOrderListQueryDto,
   LabOrderPageDto,
   LabOrderTransitionDto,
 } from '../dto/lab-portal-orders.dto';
@@ -45,6 +52,23 @@ export function toOrderDto(view: LabOrderView): LabOrderDto {
         sizeBytes: file.meta.sizeBytes,
       })),
   };
+}
+
+/** The keyset a page ends with, as an opaque cursor. */
+const encodeOrderKey = (key: LabOrderKey): string =>
+  encodeKeysetCursor({ createdAt: key.createdAt.toISOString(), id: key.id });
+
+function decodeOrderKey(cursor: string): LabOrderKey {
+  const { createdAt, id } = decodeKeysetCursor(cursor);
+  const at = typeof createdAt === 'string' ? new Date(createdAt) : null;
+  if (!at || Number.isNaN(at.getTime()) || typeof id !== 'string') {
+    throw badRequestWithReason(
+      'El cursor de paginación no es válido',
+      SystemErrorReason.INVALID_CURSOR,
+      { parameter: 'cursor' },
+    );
+  }
+  return { createdAt: at, id };
 }
 
 const unsupported = (message: string): PreconditionFailedException =>
@@ -83,12 +107,27 @@ export class LabPortalOrdersService {
     this.logger.setContext(LabPortalOrdersService.name);
   }
 
-  async list(tenantId: string): Promise<LabOrderPageDto> {
+  /** One keyset page, newest first; `count` is the laboratory's total. */
+  async list(
+    tenantId: string,
+    query: LabOrderListQueryDto = {},
+  ): Promise<LabOrderPageDto> {
     const em = this.em.fork();
-    const orders = await this.repo.findOrders(em, tenantId);
+    const limit = query.limit ?? LAB_PORTAL_PAGE_DEFAULT;
+    const after = query.cursor ? decodeOrderKey(query.cursor) : undefined;
+    // One row more than asked tells whether an older page exists.
+    const [rows, count] = await Promise.all([
+      this.repo.findOrders(em, tenantId, { limit: limit + 1, after }),
+      this.repo.countOrders(em, tenantId),
+    ]);
+    const orders = rows.slice(0, limit);
     const snap = await this.snapshot.load(em, tenantId, orders);
-    const items = snap.orders.map(toOrderDto);
-    return { items, count: items.length };
+    const last = orders[orders.length - 1];
+    return {
+      items: snap.orders.map(toOrderDto),
+      count,
+      ...(rows.length > limit && { nextCursor: encodeOrderKey(last) }),
+    };
   }
 
   async transition(

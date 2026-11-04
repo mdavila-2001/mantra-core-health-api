@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { DiagnosticStudyPrices } from '../entities';
+import { DiagnosticPriceSchedules, DiagnosticStudyPrices } from '../entities';
 import { DUNIT } from '../diagnostic_units.concepts';
 
 /** Datos de una nueva versión de precio (append-only, UC-23-07). */
@@ -85,15 +86,32 @@ export class DiagnosticStudyPricesRepository {
     });
   }
 
-  /** Mayor version_number registrado del par (schedule, offering). */
+  /**
+   * `SELECT ... FOR UPDATE` on the schedule row. Writers of one schedule queue
+   * here, so the version number they take next is read from committed state.
+   */
+  async lockSchedule(
+    em: EntityManager,
+    priceScheduleId: string,
+  ): Promise<void> {
+    await em.lock(
+      em.getReference(DiagnosticPriceSchedules, priceScheduleId),
+      LockMode.PESSIMISTIC_WRITE,
+    );
+  }
+
+  /**
+   * Highest `version_number` of the whole schedule (0 if none): the unique
+   * index is (price_schedule_id, version_number), shared by all offerings.
+   * Call it after {@link lockSchedule}.
+   */
   async maxVersion(
     em: EntityManager,
     priceScheduleId: string,
-    diagnosticStudyOfferingId: string,
   ): Promise<number> {
     const rows = await em.find(
       DiagnosticStudyPrices,
-      { priceScheduleId, diagnosticStudyOfferingId },
+      { priceScheduleId },
       {
         fields: ['versionNumber'],
         orderBy: { versionNumber: 'DESC' },

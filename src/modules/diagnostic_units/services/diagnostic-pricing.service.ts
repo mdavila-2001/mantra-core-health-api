@@ -131,6 +131,9 @@ export class DiagnosticPricingService {
 
       const effectiveFrom = dto.effectiveFrom ?? new Date();
 
+      // Serialises writers of this schedule: the version number is schedule-wide.
+      await this.pricesRepo.lockSchedule(tx, schedule.id);
+
       // Cierra la versión vigente del par (schedule, offering), si existe.
       const current = await this.pricesRepo.findActive(
         tx,
@@ -142,11 +145,8 @@ export class DiagnosticPricingService {
         current.statusConceptId = DUNIT.PRICE_SUPERSEDED;
       }
 
-      const maxVersion = await this.pricesRepo.maxVersion(
-        tx,
-        schedule.id,
-        offering.id,
-      );
+      // Per schedule, not per offering: the unique index is (schedule, version).
+      const maxVersion = await this.pricesRepo.maxVersion(tx, schedule.id);
       const price = this.pricesRepo.create(tx, {
         priceScheduleId: schedule.id,
         diagnosticStudyOfferingId: offering.id,

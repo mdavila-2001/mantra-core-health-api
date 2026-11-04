@@ -63,6 +63,8 @@ class FakeEm {
     this.rows(entity).push(row);
     return row;
   };
+  lock = jest.fn(async () => undefined);
+  getReference = (_entity: unknown, id: string) => ({ id });
   fork = () => this;
   transactional = async (cb: (tx: FakeEm) => unknown) => cb(this);
 }

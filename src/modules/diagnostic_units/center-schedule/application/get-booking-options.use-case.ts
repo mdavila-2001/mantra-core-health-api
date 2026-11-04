@@ -23,6 +23,7 @@ import type {
 import { CenterAvailabilityService } from './center-availability.service';
 import { CenterContextService, studyModality } from './center-context.service';
 import { OrderBookingAccessService } from './order-booking-access.service';
+import { inPatientCustodyContext } from './patient-custody-context';
 
 /**
  * `GET /diagnostic-results/me/orders/:orderId/booking-options`: the published
@@ -41,11 +42,20 @@ export class GetBookingOptionsUseCase {
     private readonly availability: CenterAvailabilityService,
   ) {}
 
-  async execute(
+  execute(
     actor: AuthenticatedUser,
     orderId: string,
   ): Promise<OrderBookingOptionsDto> {
-    const em = this.em.fork();
+    return inPatientCustodyContext(this.em, (em) =>
+      this.options(em, actor, orderId),
+    );
+  }
+
+  private async options(
+    em: EntityManager,
+    actor: AuthenticatedUser,
+    orderId: string,
+  ): Promise<OrderBookingOptionsDto> {
     const { patientProfileId, order } = await this.access.ownOrder(
       em,
       actor,

@@ -50,7 +50,7 @@ describe('laboratory portal controllers', () => {
     const upload = new DiagnosticsLabUploadsController(uploads as any);
     await runWithTenant('lab-1', async () => {
       await portal.getSummary();
-      await portal.listOrders();
+      await portal.listOrders({ limit: 50, cursor: 'c' });
       await portal.transition('sr-1', { action: 'RECEIVE' }, actor);
       await portal.listResultTargets();
       await files.listResultFiles({ kind: 'PDF' });
@@ -61,7 +61,10 @@ describe('laboratory portal controllers', () => {
       upload.abort('u-1');
     });
     expect(summary.summary).toHaveBeenCalledWith('lab-1');
-    expect(orders.list).toHaveBeenCalledWith('lab-1');
+    expect(orders.list).toHaveBeenCalledWith('lab-1', {
+      limit: 50,
+      cursor: 'c',
+    });
     expect(orders.transition).toHaveBeenCalledWith(
       'lab-1',
       'sr-1',
@@ -89,7 +92,7 @@ describe('laboratory portal controllers', () => {
       orders as any,
       { targets: mockFn() } as any,
     );
-    await expect(async () => portal.listOrders()).rejects.toThrow(/tenant/i);
+    await expect(async () => portal.listOrders({})).rejects.toThrow(/tenant/i);
     expect(orders.list).not.toHaveBeenCalled();
   });
 

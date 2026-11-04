@@ -73,21 +73,25 @@ export class LabPortalResultsService {
     tenantId: string,
     filter: LabResultFileSearchDto,
   ): Promise<LabResultFilePageDto> {
-    const em = this.em.fork();
-    const orders = await this.repo.findOrders(em, tenantId);
-    const { files } = await this.snapshot.load(em, tenantId, orders);
     const needle = filter.q ? normalizeForSearch(filter.q) : '';
-    const items = files
-      .filter((f) => filter.includeWithdrawn || f.status === 'AVAILABLE')
-      .filter((f) => !filter.kind || f.kind === filter.kind)
-      .filter((f) => !filter.orderId || f.orderId === filter.orderId)
-      .filter(
-        (f) =>
-          needle === '' ||
-          [f.meta.fileName, f.patientName, f.orderLabel, f.note ?? ''].some(
-            (text) => normalizeForSearch(text).includes(needle),
+    const files: LabFileView[] = [];
+    // Every order of the lab, in batches: old orders keep their files listed.
+    for await (const snap of this.snapshot.loadAll(this.em.fork(), tenantId)) {
+      files.push(
+        ...snap.files
+          .filter((f) => filter.includeWithdrawn || f.status === 'AVAILABLE')
+          .filter((f) => !filter.kind || f.kind === filter.kind)
+          .filter((f) => !filter.orderId || f.orderId === filter.orderId)
+          .filter(
+            (f) =>
+              needle === '' ||
+              [f.meta.fileName, f.patientName, f.orderLabel, f.note ?? ''].some(
+                (text) => normalizeForSearch(text).includes(needle),
+              ),
           ),
-      )
+      );
+    }
+    const items = files
       .sort(
         (a, b) =>
           b.uploadedAt.getTime() - a.uploadedAt.getTime() ||
@@ -100,19 +104,20 @@ export class LabPortalResultsService {
 
   /** Orders a result may be attached to: processed, with or without files. */
   async targets(tenantId: string): Promise<LabResultTargetPageDto> {
-    const em = this.em.fork();
-    const orders = await this.repo.findOrders(em, tenantId);
-    const snap = await this.snapshot.load(em, tenantId, orders);
-    const items = snap.orders
-      .filter((o) => o.status === 'PROCESSED' || o.status === 'UPLOADED')
-      .map((o) => ({
-        orderId: o.order.id,
-        studyName: o.studyName,
-        patientName: o.patientName,
-        requesterName: o.requesterName,
-        requestedAt: o.order.createdAt.toISOString(),
-        fileCount: o.files.filter((f) => f.status === 'AVAILABLE').length,
-      }));
+    const items: LabResultTargetPageDto['items'] = [];
+    for await (const snap of this.snapshot.loadAll(this.em.fork(), tenantId)) {
+      for (const o of snap.orders) {
+        if (o.status !== 'PROCESSED' && o.status !== 'UPLOADED') continue;
+        items.push({
+          orderId: o.order.id,
+          studyName: o.studyName,
+          patientName: o.patientName,
+          requesterName: o.requesterName,
+          requestedAt: o.order.createdAt.toISOString(),
+          fileCount: o.files.filter((f) => f.status === 'AVAILABLE').length,
+        });
+      }
+    }
     return { items, count: items.length };
   }
 

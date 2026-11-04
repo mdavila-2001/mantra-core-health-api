@@ -65,6 +65,7 @@ export function build() {
     fork: (): unknown => em,
     transactional: mockFn((fn: (tx: unknown) => unknown) => fn(em)),
     findOne: mockFn(async () => null),
+    execute: mockFn(async () => []),
     flush: mockFn(async () => undefined),
   };
   const scheduleRepo = {

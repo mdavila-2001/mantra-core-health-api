@@ -8,6 +8,7 @@ import {
 import { CenterBookingsRepository } from '../infrastructure/center-bookings.repository';
 import { OrderPatientRepository } from '../infrastructure/order-patient.repository';
 import { OrderBookingAccessService } from './order-booking-access.service';
+import { inPatientCustodyContext } from './patient-custody-context';
 
 /**
  * `DELETE /diagnostic-results/me/orders/:orderId/booking`: the patient cancels
@@ -24,7 +25,7 @@ export class CancelOrderBookingUseCase {
   ) {}
 
   execute(actor: AuthenticatedUser, orderId: string): Promise<void> {
-    return this.em.transactional(async (tx) => {
+    return inPatientCustodyContext(this.em, async (tx) => {
       const { patientProfileId, order } = await this.access.ownOrder(
         tx,
         actor,

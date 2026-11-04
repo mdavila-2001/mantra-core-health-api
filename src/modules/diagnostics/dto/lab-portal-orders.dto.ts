@@ -1,5 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsIn, IsOptional, IsString, MaxLength } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+  Max,
+  MaxLength,
+  Min,
+} from 'class-validator';
 import {
   LAB_ORDER_ACTIONS,
   type LabOrderAction,
@@ -48,9 +57,30 @@ export class LabOrderDto {
   @ApiProperty({ type: [LabOrderFileDto] }) files!: LabOrderFileDto[];
 }
 
+/** Query of `GET /diagnostics/lab/orders`. */
+export class LabOrderListQueryDto {
+  @ApiPropertyOptional({ minimum: 1, maximum: 500, default: 100 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(500)
+  limit?: number;
+
+  /** Opaque `nextCursor` of the previous page. */
+  @ApiPropertyOptional({ maxLength: 200 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  cursor?: string;
+}
+
 export class LabOrderPageDto {
   @ApiProperty({ type: [LabOrderDto] }) items!: LabOrderDto[];
+  /** Orders of the laboratory in total, not just the ones in this page. */
   @ApiProperty() count!: number;
+  /** Present when older orders remain: send it back as `cursor`. */
+  @ApiPropertyOptional() nextCursor?: string;
 }
 
 /** An order a result can be attached to (PROCESSED or UPLOADED). */
