@@ -32,6 +32,7 @@ import {
   type PractitionerAccessNoticePort,
 } from '../ports/practitioner-access-notice.port';
 import type { Consents } from '../entities';
+import { findRequestInCourse } from './practitioner-access-in-course';
 
 const DEFAULT_VALIDITY_MONTHS = 12;
 
@@ -88,10 +89,11 @@ export class PractitionerAccessRequestsService {
         actor.id,
         CONS.CATEGORY_PRACTITIONER_ACCESS,
       );
-      const inCourse = existing.find(
-        (c) =>
-          c.statusConceptId === CONS.ACCESS_REQUEST_PENDING ||
-          c.statusConceptId === CONS.CONSENT_ACTIVE,
+      const inCourse = await findRequestInCourse(
+        tx,
+        existing,
+        { grants: this.clinicalGrantsRepo, events: this.eventsRepo },
+        actor,
       );
       if (inCourse) {
         throw new ConflictException(
@@ -347,26 +349,21 @@ export class PractitionerAccessRequestsService {
       // El grant clínico es lo que `assertPuedeLeerHistoria` (clinical-read)
       // consulta de verdad — el consent es la evidencia, el grant es la
       // puerta. Purpose TREATMENT: es un vínculo de atención continuada, no
-      // un trámite administrativo (payment/operations).
-      const existing = await this.clinicalGrantsRepo.findActive(
-        tx,
-        consent.patientProfileId,
-        practitionerUserId,
-      );
-      if (!existing) {
-        this.clinicalGrantsRepo.create(tx, {
-          patientProfileId: consent.patientProfileId,
-          grantedUserId: practitionerUserId,
-          tenantId: consent.tenantId ?? SEED.tenantId,
-          consentId: consent.id,
-          reasonConceptId: AUTHZ.PURPOSE_TREATMENT,
-          accessLevelConceptId: AUTHZ.ACCESS_LEVEL_READ,
-          validFrom: now,
-          validTo,
-          actorUserId: actor.id,
-        });
-        await tx.flush();
-      }
+      // un trámite administrativo (payment/operations). Siempre nace uno
+      // propio, ligado a este consent: así retirar el consent lo revoca, y no
+      // depende de la vigencia ni del propósito de otro grant del mismo par.
+      this.clinicalGrantsRepo.create(tx, {
+        patientProfileId: consent.patientProfileId,
+        grantedUserId: practitionerUserId,
+        tenantId: consent.tenantId ?? SEED.tenantId,
+        consentId: consent.id,
+        reasonConceptId: AUTHZ.PURPOSE_TREATMENT,
+        accessLevelConceptId: AUTHZ.ACCESS_LEVEL_READ,
+        validFrom: now,
+        validTo,
+        actorUserId: actor.id,
+      });
+      await tx.flush();
 
       await this.auditTrail.record(tx, actor, {
         action: 'PRACTITIONER_ACCESS_GRANTED',

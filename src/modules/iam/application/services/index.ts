@@ -16,3 +16,5 @@ export * from './role-mapping';
 export * from './iam-organization-representatives.service';
 export * from './iam-account-security.service';
 export * from './iam-onboarding-drafts.service';
+export * from './iam-my-devices.service';
+export * from './iam-login-devices.service';

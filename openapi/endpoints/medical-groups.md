@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `medical_groups`
 
-Referencia exhaustiva de 9 operación(es) del módulo `medical_groups`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 14 operación(es) del módulo `medical_groups`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `medical-groups`
 - **Controladores:** `MedicalGroupsController`
@@ -13,13 +13,18 @@ Referencia exhaustiva de 9 operación(es) del módulo `medical_groups`, derivada
 
 1. [GET /medical-groups](#1-get-medical-groups) — Listar grupos médicos (histórico/enviadas/recibidas)
 2. [POST /medical-groups](#2-post-medical-groups) — Crear grupo médico
-3. [GET /medical-groups/{id}](#3-get-medical-groups-id) — Consultar un grupo médico (formulario de sólo lectura)
-4. [PATCH /medical-groups/{id}/exercise-notes](#4-patch-medical-groups-id-exercise-notes) — Subir/corregir las notas del procedimiento (NOTAS DEL EJERCICIO)
-5. [POST /medical-groups/{id}/members/{memberId}/respond](#5-post-medical-groups-id-members-memberid-respond) — Aceptar o rechazar la invitación a un cargo del grupo
-6. [POST /medical-groups/{id}/reschedule-requests](#6-post-medical-groups-id-reschedule-requests) — Solicitar cambio de horario
-7. [POST /medical-groups/{id}/reschedule-requests/respond](#7-post-medical-groups-id-reschedule-requests-respond) — Resolver la solicitud de cambio de horario
-8. [GET /medical-groups/eligible-members](#8-get-medical-groups-eligible-members) — Colegas que se pueden invitar a un grupo de este servicio
-9. [GET /medical-groups/patients/{patientProfileId}/conditions](#9-get-medical-groups-patients-patientprofileid-conditions) — Diagnósticos del paciente para el selector del formulario
+3. [DELETE /medical-groups/{id}](#3-delete-medical-groups-id) — Eliminar un grupo médico no realizado
+4. [GET /medical-groups/{id}](#4-get-medical-groups-id) — Consultar un grupo médico (formulario de sólo lectura)
+5. [PATCH /medical-groups/{id}](#5-patch-medical-groups-id) — Corregir el lugar o las notas del grupo médico
+6. [PATCH /medical-groups/{id}/exercise-notes](#6-patch-medical-groups-id-exercise-notes) — Subir/corregir las notas del procedimiento (NOTAS DEL EJERCICIO)
+7. [POST /medical-groups/{id}/members](#7-post-medical-groups-id-members) — Agregar un cargo al equipo del grupo
+8. [DELETE /medical-groups/{id}/members/{memberId}](#8-delete-medical-groups-id-members-memberid) — Quitar un cargo del equipo
+9. [PATCH /medical-groups/{id}/members/{memberId}](#9-patch-medical-groups-id-members-memberid) — Modificar un cargo del equipo
+10. [POST /medical-groups/{id}/members/{memberId}/respond](#10-post-medical-groups-id-members-memberid-respond) — Aceptar o rechazar la invitación a un cargo del grupo
+11. [POST /medical-groups/{id}/reschedule-requests](#11-post-medical-groups-id-reschedule-requests) — Solicitar cambio de horario
+12. [POST /medical-groups/{id}/reschedule-requests/respond](#12-post-medical-groups-id-reschedule-requests-respond) — Resolver la solicitud de cambio de horario
+13. [GET /medical-groups/eligible-members](#13-get-medical-groups-eligible-members) — Colegas que se pueden invitar a un grupo de este servicio
+14. [GET /medical-groups/patients/{patientProfileId}/conditions](#14-get-medical-groups-patients-patientprofileid-conditions) — Diagnósticos del paciente para el selector del formulario
 
 ---
 
@@ -381,7 +386,109 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. GET /medical-groups/{id}
+## 3. DELETE /medical-groups/{id}
+
+- **Módulo:** `medical_groups`
+- **Etiqueta OpenAPI:** `medical-groups`
+- **Nombre:** Eliminar un grupo médico no realizado
+- **Operation ID:** `MedicalGroupsController_remove`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [MedicalGroupsController.remove](../../src/modules/medical_groups/controllers/medical-groups.controller.ts)
+
+### Descripción de negocio
+
+Eliminar un grupo médico no realizado. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Eliminar el grupo y su equipo: sólo el creador, antes de la cita.
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /medical-groups/{id}` en `MedicalGroupsController_remove`. El controlador delega en `MedicalGroupsService.remove`. No recibe body. El tipo de retorno estático es `Promise<void>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+DELETE /medical-groups/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+DELETE /medical-groups/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 204 | Operación completada sin cuerpo de respuesta. | `Promise<void>` | No |
+| 400 | Operación completada correctamente. | `Promise<void>` | No |
+| 401 | Operación completada correctamente. | `Promise<void>` | No |
+| 403 | Operación completada correctamente. | `Promise<void>` | No |
+| 404 | Operación completada correctamente. | `Promise<void>` | No |
+| 409 | Operación completada correctamente. | `Promise<void>` | No |
+| 422 | Operación completada correctamente. | `Promise<void>` | No |
+| 429 | Operación completada correctamente. | `Promise<void>` | No |
+| 500 | Operación completada correctamente. | `Promise<void>` | No |
+| 504 | Operación completada correctamente. | `Promise<void>` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 401 | `UNAUTHENTICATED` | La cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Grupo médico no encontrado | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
+| 422 | `PRECONDITION_FAILED` | El expediente ya está cerrado y es inmutable | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
+| 422 | `PRECONDITION_FAILED` | El grupo ya se realizó: sólo admite las notas del procedimiento | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/medical-groups/{id}"
+}
+```
+
+---
+
+## 4. GET /medical-groups/{id}
 
 - **Módulo:** `medical_groups`
 - **Etiqueta OpenAPI:** `medical-groups`
@@ -552,7 +659,200 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. PATCH /medical-groups/{id}/exercise-notes
+## 5. PATCH /medical-groups/{id}
+
+- **Módulo:** `medical_groups`
+- **Etiqueta OpenAPI:** `medical-groups`
+- **Nombre:** Corregir el lugar o las notas del grupo médico
+- **Operation ID:** `MedicalGroupsController_update`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [MedicalGroupsController.update](../../src/modules/medical_groups/controllers/medical-groups.controller.ts)
+
+### Descripción de negocio
+
+Corregir el lugar o las notas del grupo médico. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Corregir el lugar o las notas: sólo el creador, antes de la cita.
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /medical-groups/{id}` en `MedicalGroupsController_update`. El controlador delega en `MedicalGroupsService.update`. Valida el body como `UpdateMedicalGroupDto` y consume `application/json`. El tipo de retorno estático es `Promise<MedicalGroupDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdateMedicalGroupDto`; los campos opcionales se omiten.
+
+```http
+PATCH /medical-groups/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `locationText` | No | `string` | longitud mínima 1; longitud máxima 300 | Lugar de realización | `valor-ejemplo` |
+| `notesText` | No | `string` | longitud máxima 4000 | Notas adicionales; una cadena vacía las borra | `Texto descriptivo de ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /medical-groups/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "locationText": "valor-ejemplo",
+  "notesText": "Texto descriptivo de ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MedicalGroupDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "serviceCatalogId": "00000000-0000-4000-8000-000000000001",
+  "serviceName": "Nombre de ejemplo",
+  "requestingPractitionerId": "00000000-0000-4000-8000-000000000001",
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "patientName": "Nombre de ejemplo",
+  "conditionId": "00000000-0000-4000-8000-000000000001",
+  "scheduledAt": "2026-07-31T12:00:00.000Z",
+  "locationText": "valor-ejemplo",
+  "notesText": "Texto descriptivo de ejemplo",
+  "termsText": "valor-ejemplo",
+  "status": "PENDING_TEAM",
+  "exerciseNotesText": "Texto descriptivo de ejemplo",
+  "exerciseNotesUpdatedAt": "2026-07-31T12:00:00.000Z",
+  "proposedRescheduleAt": "2026-07-31T12:00:00.000Z",
+  "proposedByPractitionerId": "00000000-0000-4000-8000-000000000001",
+  "isRealized": true,
+  "canEditExerciseNotes": true,
+  "isClosed": true,
+  "createdAt": "2026-07-31T12:00:00.000Z",
+  "members": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+      "practitionerName": "Nombre de ejemplo",
+      "roleTitle": "valor-ejemplo",
+      "agreedPaymentAmount": "valor-ejemplo",
+      "agreedPaymentCurrencyConceptId": "00000000-0000-4000-8000-000000000001",
+      "additionalTermsText": "valor-ejemplo",
+      "isCreator": true,
+      "invitationStatus": "PENDING",
+      "respondedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `serviceCatalogId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `serviceName` | Sí | `string` | admite null | Nombre del servicio del catálogo; null si ya no existe | `Nombre de ejemplo` |
+| `requestingPractitionerId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `patientProfileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `patientName` | Sí | `string` | admite null | Nombre del paciente asociado; null si no hay paciente o no tiene nombre | `Nombre de ejemplo` |
+| `conditionId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `scheduledAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `locationText` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `notesText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `termsText` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `status` | Sí | `string` | valores: `PENDING_TEAM`, `SCHEDULED`, `RESCHEDULE_PENDING`, `CLOSED` | Sin descripción específica en el contrato OpenAPI. | `PENDING_TEAM` |
+| `exerciseNotesText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `exerciseNotesUpdatedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `proposedRescheduleAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `proposedByPractitionerId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `isRealized` | Sí | `boolean` | Sin restricción adicional declarada | Derivado en el servidor: ya pasó la fecha de realización. | `true` |
+| `canEditExerciseNotes` | Sí | `boolean` | Sin restricción adicional declarada | Derivado: todavía se pueden subir notas del procedimiento. | `true` |
+| `isClosed` | Sí | `boolean` | Sin restricción adicional declarada | Derivado: pasó la ventana de una semana — expediente inmutable (AC-21-19). | `true` |
+| `createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `members` | Sí | `array<MedicalGroupMemberDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","practitionerName":"Nombre de ejemplo","roleTitle":"valor-ejemplo","agreedPaymentAmount":"valor-ejemplo","agreedPaymentCurrencyConceptId":"00000000-0000-4000-8000-000000000001","additionalTermsText":"valor-ejemplo","isCreator":true,"invitationStatus":"PENDING","respondedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `members[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `members[].practitionerProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `members[].practitionerName` | Sí | `string` | admite null | Nombre del profesional; null si su persona no tiene nombre cargado | `Nombre de ejemplo` |
+| `members[].roleTitle` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `members[].agreedPaymentAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `members[].agreedPaymentCurrencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `members[].additionalTermsText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `members[].isCreator` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `members[].invitationStatus` | Sí | `string` | valores: `PENDING`, `ACCEPTED`, `REJECTED` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+| `members[].respondedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 401 | `UNAUTHENTICATED` | La cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Grupo médico no encontrado | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El lugar de realización no puede quedar vacío | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
+| 422 | `PRECONDITION_FAILED` | El expediente ya está cerrado y es inmutable | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
+| 422 | `PRECONDITION_FAILED` | El grupo ya se realizó: sólo admite las notas del procedimiento | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/medical-groups/{id}"
+}
+```
+
+---
+
+## 6. PATCH /medical-groups/{id}/exercise-notes
 
 - **Módulo:** `medical_groups`
 - **Etiqueta OpenAPI:** `medical-groups`
@@ -744,7 +1044,587 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /medical-groups/{id}/members/{memberId}/respond
+## 7. POST /medical-groups/{id}/members
+
+- **Módulo:** `medical_groups`
+- **Etiqueta OpenAPI:** `medical-groups`
+- **Nombre:** Agregar un cargo al equipo del grupo
+- **Operation ID:** `MedicalGroupsController_addMember`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [MedicalGroupsController.addMember](../../src/modules/medical_groups/controllers/medical-groups.controller.ts)
+
+### Descripción de negocio
+
+Agregar un cargo al equipo del grupo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: El creador suma un cargo al equipo; queda como invitación sin responder.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /medical-groups/{id}/members` en `MedicalGroupsController_addMember`. El controlador delega en `MedicalGroupsService.addMember`. Valida el body como `MedicalGroupMemberInputDto` y consume `application/json`. El tipo de retorno estático es `Promise<MedicalGroupDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `MedicalGroupMemberInputDto`; los campos opcionales se omiten.
+
+```http
+POST /medical-groups/00000000-0000-4000-8000-000000000001/members HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+  "roleTitle": "valor-ejemplo",
+  "agreedPaymentAmount": "500.00"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `practitionerProfileId` | Sí | `string` | formato `uuid` | Profesional invitado a este cargo | `00000000-0000-4000-8000-000000000001` |
+| `roleTitle` | Sí | `string` | longitud máxima 120 | Cargo/función dentro del grupo (p. ej. "Anestesiólogo") | `valor-ejemplo` |
+| `agreedPaymentAmount` | Sí | `string` | patrón runtime `PRICE_PATTERN` | Sin descripción específica en el contrato OpenAPI. | `500.00` |
+| `agreedPaymentCurrencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `additionalTermsText` | No | `string` | longitud máxima 4000 | Adicionales de términos y condiciones opcionales para este cargo | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /medical-groups/00000000-0000-4000-8000-000000000001/members HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+  "roleTitle": "valor-ejemplo",
+  "agreedPaymentAmount": "500.00",
+  "agreedPaymentCurrencyConceptId": "00000000-0000-4000-8000-000000000001",
+  "additionalTermsText": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MedicalGroupDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "serviceCatalogId": "00000000-0000-4000-8000-000000000001",
+  "serviceName": "Nombre de ejemplo",
+  "requestingPractitionerId": "00000000-0000-4000-8000-000000000001",
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "patientName": "Nombre de ejemplo",
+  "conditionId": "00000000-0000-4000-8000-000000000001",
+  "scheduledAt": "2026-07-31T12:00:00.000Z",
+  "locationText": "valor-ejemplo",
+  "notesText": "Texto descriptivo de ejemplo",
+  "termsText": "valor-ejemplo",
+  "status": "PENDING_TEAM",
+  "exerciseNotesText": "Texto descriptivo de ejemplo",
+  "exerciseNotesUpdatedAt": "2026-07-31T12:00:00.000Z",
+  "proposedRescheduleAt": "2026-07-31T12:00:00.000Z",
+  "proposedByPractitionerId": "00000000-0000-4000-8000-000000000001",
+  "isRealized": true,
+  "canEditExerciseNotes": true,
+  "isClosed": true,
+  "createdAt": "2026-07-31T12:00:00.000Z",
+  "members": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+      "practitionerName": "Nombre de ejemplo",
+      "roleTitle": "valor-ejemplo",
+      "agreedPaymentAmount": "valor-ejemplo",
+      "agreedPaymentCurrencyConceptId": "00000000-0000-4000-8000-000000000001",
+      "additionalTermsText": "valor-ejemplo",
+      "isCreator": true,
+      "invitationStatus": "PENDING",
+      "respondedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `serviceCatalogId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `serviceName` | Sí | `string` | admite null | Nombre del servicio del catálogo; null si ya no existe | `Nombre de ejemplo` |
+| `requestingPractitionerId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `patientProfileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `patientName` | Sí | `string` | admite null | Nombre del paciente asociado; null si no hay paciente o no tiene nombre | `Nombre de ejemplo` |
+| `conditionId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `scheduledAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `locationText` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `notesText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `termsText` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `status` | Sí | `string` | valores: `PENDING_TEAM`, `SCHEDULED`, `RESCHEDULE_PENDING`, `CLOSED` | Sin descripción específica en el contrato OpenAPI. | `PENDING_TEAM` |
+| `exerciseNotesText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `exerciseNotesUpdatedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `proposedRescheduleAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `proposedByPractitionerId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `isRealized` | Sí | `boolean` | Sin restricción adicional declarada | Derivado en el servidor: ya pasó la fecha de realización. | `true` |
+| `canEditExerciseNotes` | Sí | `boolean` | Sin restricción adicional declarada | Derivado: todavía se pueden subir notas del procedimiento. | `true` |
+| `isClosed` | Sí | `boolean` | Sin restricción adicional declarada | Derivado: pasó la ventana de una semana — expediente inmutable (AC-21-19). | `true` |
+| `createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `members` | Sí | `array<MedicalGroupMemberDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","practitionerName":"Nombre de ejemplo","roleTitle":"valor-ejemplo","agreedPaymentAmount":"valor-ejemplo","agreedPaymentCurrencyConceptId":"00000000-0000-4000-8000-000000000001","additionalTermsText":"valor-ejemplo","isCreator":true,"invitationStatus":"PENDING","respondedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `members[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `members[].practitionerProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `members[].practitionerName` | Sí | `string` | admite null | Nombre del profesional; null si su persona no tiene nombre cargado | `Nombre de ejemplo` |
+| `members[].roleTitle` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `members[].agreedPaymentAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `members[].agreedPaymentCurrencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `members[].additionalTermsText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `members[].isCreator` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `members[].invitationStatus` | Sí | `string` | valores: `PENDING`, `ACCEPTED`, `REJECTED` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+| `members[].respondedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 401 | `UNAUTHENTICATED` | La cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Grupo médico no encontrado | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
+| 409 | `CONFLICT` | Un mismo profesional no puede repetirse (ni ser también el creador) | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El expediente ya está cerrado y es inmutable | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
+| 422 | `PRECONDITION_FAILED` | El grupo ya se realizó: sólo admite las notas del procedimiento | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/medical-groups/{id}/members"
+}
+```
+
+---
+
+## 8. DELETE /medical-groups/{id}/members/{memberId}
+
+- **Módulo:** `medical_groups`
+- **Etiqueta OpenAPI:** `medical-groups`
+- **Nombre:** Quitar un cargo del equipo
+- **Operation ID:** `MedicalGroupsController_removeMember`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [MedicalGroupsController.removeMember](../../src/modules/medical_groups/controllers/medical-groups.controller.ts)
+
+### Descripción de negocio
+
+Quitar un cargo del equipo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Quitar un cargo del equipo.
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /medical-groups/{id}/members/{memberId}` en `MedicalGroupsController_removeMember`. El controlador delega en `MedicalGroupsService.removeMember`. No recibe body. El tipo de retorno estático es `Promise<MedicalGroupDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `memberId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+DELETE /medical-groups/00000000-0000-4000-8000-000000000001/members/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- Deben ser UUID válidos: `id`, `memberId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+DELETE /medical-groups/00000000-0000-4000-8000-000000000001/members/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MedicalGroupDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "serviceCatalogId": "00000000-0000-4000-8000-000000000001",
+  "serviceName": "Nombre de ejemplo",
+  "requestingPractitionerId": "00000000-0000-4000-8000-000000000001",
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "patientName": "Nombre de ejemplo",
+  "conditionId": "00000000-0000-4000-8000-000000000001",
+  "scheduledAt": "2026-07-31T12:00:00.000Z",
+  "locationText": "valor-ejemplo",
+  "notesText": "Texto descriptivo de ejemplo",
+  "termsText": "valor-ejemplo",
+  "status": "PENDING_TEAM",
+  "exerciseNotesText": "Texto descriptivo de ejemplo",
+  "exerciseNotesUpdatedAt": "2026-07-31T12:00:00.000Z",
+  "proposedRescheduleAt": "2026-07-31T12:00:00.000Z",
+  "proposedByPractitionerId": "00000000-0000-4000-8000-000000000001",
+  "isRealized": true,
+  "canEditExerciseNotes": true,
+  "isClosed": true,
+  "createdAt": "2026-07-31T12:00:00.000Z",
+  "members": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+      "practitionerName": "Nombre de ejemplo",
+      "roleTitle": "valor-ejemplo",
+      "agreedPaymentAmount": "valor-ejemplo",
+      "agreedPaymentCurrencyConceptId": "00000000-0000-4000-8000-000000000001",
+      "additionalTermsText": "valor-ejemplo",
+      "isCreator": true,
+      "invitationStatus": "PENDING",
+      "respondedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `serviceCatalogId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `serviceName` | Sí | `string` | admite null | Nombre del servicio del catálogo; null si ya no existe | `Nombre de ejemplo` |
+| `requestingPractitionerId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `patientProfileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `patientName` | Sí | `string` | admite null | Nombre del paciente asociado; null si no hay paciente o no tiene nombre | `Nombre de ejemplo` |
+| `conditionId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `scheduledAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `locationText` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `notesText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `termsText` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `status` | Sí | `string` | valores: `PENDING_TEAM`, `SCHEDULED`, `RESCHEDULE_PENDING`, `CLOSED` | Sin descripción específica en el contrato OpenAPI. | `PENDING_TEAM` |
+| `exerciseNotesText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `exerciseNotesUpdatedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `proposedRescheduleAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `proposedByPractitionerId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `isRealized` | Sí | `boolean` | Sin restricción adicional declarada | Derivado en el servidor: ya pasó la fecha de realización. | `true` |
+| `canEditExerciseNotes` | Sí | `boolean` | Sin restricción adicional declarada | Derivado: todavía se pueden subir notas del procedimiento. | `true` |
+| `isClosed` | Sí | `boolean` | Sin restricción adicional declarada | Derivado: pasó la ventana de una semana — expediente inmutable (AC-21-19). | `true` |
+| `createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `members` | Sí | `array<MedicalGroupMemberDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","practitionerName":"Nombre de ejemplo","roleTitle":"valor-ejemplo","agreedPaymentAmount":"valor-ejemplo","agreedPaymentCurrencyConceptId":"00000000-0000-4000-8000-000000000001","additionalTermsText":"valor-ejemplo","isCreator":true,"invitationStatus":"PENDING","respondedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `members[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `members[].practitionerProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `members[].practitionerName` | Sí | `string` | admite null | Nombre del profesional; null si su persona no tiene nombre cargado | `Nombre de ejemplo` |
+| `members[].roleTitle` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `members[].agreedPaymentAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `members[].agreedPaymentCurrencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `members[].additionalTermsText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `members[].isCreator` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `members[].invitationStatus` | Sí | `string` | valores: `PENDING`, `ACCEPTED`, `REJECTED` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+| `members[].respondedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 401 | `UNAUTHENTICATED` | La cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Integrante no encontrado | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
+| 404 | `NOT_FOUND` | Grupo médico no encontrado | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
+| 422 | `PRECONDITION_FAILED` | Quien creó el grupo no se puede quitar del equipo | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
+| 422 | `PRECONDITION_FAILED` | El expediente ya está cerrado y es inmutable | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
+| 422 | `PRECONDITION_FAILED` | El grupo ya se realizó: sólo admite las notas del procedimiento | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/medical-groups/{id}/members/{memberId}"
+}
+```
+
+---
+
+## 9. PATCH /medical-groups/{id}/members/{memberId}
+
+- **Módulo:** `medical_groups`
+- **Etiqueta OpenAPI:** `medical-groups`
+- **Nombre:** Modificar un cargo del equipo
+- **Operation ID:** `MedicalGroupsController_updateMember`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [MedicalGroupsController.updateMember](../../src/modules/medical_groups/controllers/medical-groups.controller.ts)
+
+### Descripción de negocio
+
+Modificar un cargo del equipo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Cambiar cargo, pago o términos: la invitación vuelve a quedar sin responder.
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /medical-groups/{id}/members/{memberId}` en `MedicalGroupsController_updateMember`. El controlador delega en `MedicalGroupsService.updateMember`. Valida el body como `UpdateMedicalGroupMemberDto` y consume `application/json`. El tipo de retorno estático es `Promise<MedicalGroupDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `memberId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdateMedicalGroupMemberDto`; los campos opcionales se omiten.
+
+```http
+PATCH /medical-groups/00000000-0000-4000-8000-000000000001/members/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- Deben ser UUID válidos: `id`, `memberId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `roleTitle` | No | `string` | longitud mínima 1; longitud máxima 120 | Cargo/función dentro del grupo | `valor-ejemplo` |
+| `agreedPaymentAmount` | No | `string` | patrón runtime `PRICE_PATTERN` | Sin descripción específica en el contrato OpenAPI. | `500.00` |
+| `additionalTermsText` | No | `string` | longitud máxima 4000 | Términos adicionales del cargo; una cadena vacía los borra | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /medical-groups/00000000-0000-4000-8000-000000000001/members/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "roleTitle": "valor-ejemplo",
+  "agreedPaymentAmount": "500.00",
+  "additionalTermsText": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MedicalGroupDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "serviceCatalogId": "00000000-0000-4000-8000-000000000001",
+  "serviceName": "Nombre de ejemplo",
+  "requestingPractitionerId": "00000000-0000-4000-8000-000000000001",
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "patientName": "Nombre de ejemplo",
+  "conditionId": "00000000-0000-4000-8000-000000000001",
+  "scheduledAt": "2026-07-31T12:00:00.000Z",
+  "locationText": "valor-ejemplo",
+  "notesText": "Texto descriptivo de ejemplo",
+  "termsText": "valor-ejemplo",
+  "status": "PENDING_TEAM",
+  "exerciseNotesText": "Texto descriptivo de ejemplo",
+  "exerciseNotesUpdatedAt": "2026-07-31T12:00:00.000Z",
+  "proposedRescheduleAt": "2026-07-31T12:00:00.000Z",
+  "proposedByPractitionerId": "00000000-0000-4000-8000-000000000001",
+  "isRealized": true,
+  "canEditExerciseNotes": true,
+  "isClosed": true,
+  "createdAt": "2026-07-31T12:00:00.000Z",
+  "members": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+      "practitionerName": "Nombre de ejemplo",
+      "roleTitle": "valor-ejemplo",
+      "agreedPaymentAmount": "valor-ejemplo",
+      "agreedPaymentCurrencyConceptId": "00000000-0000-4000-8000-000000000001",
+      "additionalTermsText": "valor-ejemplo",
+      "isCreator": true,
+      "invitationStatus": "PENDING",
+      "respondedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `serviceCatalogId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `serviceName` | Sí | `string` | admite null | Nombre del servicio del catálogo; null si ya no existe | `Nombre de ejemplo` |
+| `requestingPractitionerId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `patientProfileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `patientName` | Sí | `string` | admite null | Nombre del paciente asociado; null si no hay paciente o no tiene nombre | `Nombre de ejemplo` |
+| `conditionId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `scheduledAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `locationText` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `notesText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `termsText` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `status` | Sí | `string` | valores: `PENDING_TEAM`, `SCHEDULED`, `RESCHEDULE_PENDING`, `CLOSED` | Sin descripción específica en el contrato OpenAPI. | `PENDING_TEAM` |
+| `exerciseNotesText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `exerciseNotesUpdatedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `proposedRescheduleAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `proposedByPractitionerId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `isRealized` | Sí | `boolean` | Sin restricción adicional declarada | Derivado en el servidor: ya pasó la fecha de realización. | `true` |
+| `canEditExerciseNotes` | Sí | `boolean` | Sin restricción adicional declarada | Derivado: todavía se pueden subir notas del procedimiento. | `true` |
+| `isClosed` | Sí | `boolean` | Sin restricción adicional declarada | Derivado: pasó la ventana de una semana — expediente inmutable (AC-21-19). | `true` |
+| `createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `members` | Sí | `array<MedicalGroupMemberDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","practitionerName":"Nombre de ejemplo","roleTitle":"valor-ejemplo","agreedPaymentAmount":"valor-ejemplo","agreedPaymentCurrencyConceptId":"00000000-0000-4000-8000-000000000001","additionalTermsText":"valor-ejemplo","isCreator":true,"invitationStatus":"PENDING","respondedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `members[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `members[].practitionerProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `members[].practitionerName` | Sí | `string` | admite null | Nombre del profesional; null si su persona no tiene nombre cargado | `Nombre de ejemplo` |
+| `members[].roleTitle` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `members[].agreedPaymentAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `members[].agreedPaymentCurrencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `members[].additionalTermsText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `members[].isCreator` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `members[].invitationStatus` | Sí | `string` | valores: `PENDING`, `ACCEPTED`, `REJECTED` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+| `members[].respondedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 401 | `UNAUTHENTICATED` | La cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Integrante no encontrado | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
+| 404 | `NOT_FOUND` | Grupo médico no encontrado | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El cargo de quien creó el grupo no se modifica | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
+| 422 | `PRECONDITION_FAILED` | El expediente ya está cerrado y es inmutable | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
+| 422 | `PRECONDITION_FAILED` | El grupo ya se realizó: sólo admite las notas del procedimiento | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/medical-groups/{id}/members/{memberId}"
+}
+```
+
+---
+
+## 10. POST /medical-groups/{id}/members/{memberId}/respond
 
 - **Módulo:** `medical_groups`
 - **Etiqueta OpenAPI:** `medical-groups`
@@ -937,7 +1817,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /medical-groups/{id}/reschedule-requests
+## 11. POST /medical-groups/{id}/reschedule-requests
 
 - **Módulo:** `medical_groups`
 - **Etiqueta OpenAPI:** `medical-groups`
@@ -1130,7 +2010,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /medical-groups/{id}/reschedule-requests/respond
+## 12. POST /medical-groups/{id}/reschedule-requests/respond
 
 - **Módulo:** `medical_groups`
 - **Etiqueta OpenAPI:** `medical-groups`
@@ -1322,7 +2202,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. GET /medical-groups/eligible-members
+## 13. GET /medical-groups/eligible-members
 
 - **Módulo:** `medical_groups`
 - **Etiqueta OpenAPI:** `medical-groups`
@@ -1431,7 +2311,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. GET /medical-groups/patients/{patientProfileId}/conditions
+## 14. GET /medical-groups/patients/{patientProfileId}/conditions
 
 - **Módulo:** `medical_groups`
 - **Etiqueta OpenAPI:** `medical-groups`

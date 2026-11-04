@@ -1893,6 +1893,39 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       );
     });
 
+    describe('H-01 · patient decision from another organization', () => {
+      it.each([
+        ['acceptSubstitutions', 'PharmacyOrderSubstitutionsAccepted'],
+        ['preferOriginal', 'PharmacyOrderOriginalPreferred'],
+      ] as const)(
+        '%s records %s in the patient session tenant (outbox RLS)',
+        async (method, eventType) => {
+          const d = build();
+          d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(
+            waitingDecision(),
+          );
+          d.ordersRepo.findPharmaciesByIdsInTenant.mockResolvedValue([
+            { ...PHARMACY, tenantId: 'tenant-farmacia' },
+          ]);
+          d.substitutionsRepo.findByReservationIds.mockResolvedValue([
+            proposal(),
+          ]);
+          d.ordersRepo.findLinesByReservationIds.mockResolvedValue([
+            orderLine(),
+          ]);
+
+          await runWithTenant('tenant-paciente', () =>
+            d.service[method]('order-1', patient),
+          );
+
+          expect(d.outbox.publish).toHaveBeenCalledWith(
+            d.tx,
+            expect.objectContaining({ eventType, tenantId: 'tenant-paciente' }),
+          );
+        },
+      );
+    });
+
     it('deciding is only legal on ACEPTACION_PENDIENTE: 422 with zero effects', async () => {
       const d = build();
       const pharmacyOrder = order({

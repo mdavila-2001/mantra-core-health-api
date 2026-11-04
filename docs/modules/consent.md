@@ -9,7 +9,7 @@
 # Módulo `consent`
 
 **Fuente:** [`src/modules/consent/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/consent/README.md)
-· 11 controllers · 12 services · 10 repositories · 10 entidades · 17 DTO
+· 11 controllers · 13 services · 10 repositories · 10 entidades · 17 DTO
 
 ---
 
@@ -58,6 +58,7 @@ Entidades (`tableName`, 10 de 10 archivos `*.entity.ts`): `consent_events`, `con
 | `POST /consent/practitioner-access-requests` | PRACTITIONER, CLINICIAN | `practitioner-access-requests` |
 | `GET /consent/practitioner-access-requests/mine` | PATIENT | `practitioner-access-requests` |
 | `POST /consent/practitioner-access-requests/:id/decision` | PATIENT | `practitioner-access-requests` |
+| `POST /consent/practitioner-access-requests/:id/revoke` | PATIENT | `practitioner-access-requests` |
 | `POST /consent/privacy-restrictions` | SECURITY_ADMIN | `privacy-restrictions` |
 | `POST /consent/processing-legal-bases` | SECURITY_ADMIN | `processing-legal-bases` |
 | `POST /consent/treatment-informed-consents` | SECURITY_ADMIN | `treatment-informed-consents` |
@@ -87,7 +88,7 @@ Entidades (`tableName`, 10 de 10 archivos `*.entity.ts`): `consent_events`, `con
 `consent.privacy_restrictions`, `consent.processing_legal_bases` (versionada),
 `consent.treatment_informed_consents`.
 
-## Reglas de negocio
+## Business rules
 
 - **Unicidad**: rechazo (`409`) de un segundo consentimiento activo por
   (paciente, propósito) y de una segunda objeción abierta por (paciente, propósito).
@@ -101,7 +102,7 @@ Entidades (`tableName`, 10 de 10 archivos `*.entity.ts`): `consent_events`, `con
 - **Flush padre-antes-de-hijo**: las FK son columnas uuid planas; se hace
   `tx.flush()` tras el padre antes de crear provisiones/eventos/restricciones.
 
-## Permisos
+## Permissions
 
 Guard JWT global. Todos los endpoints requieren rol `SECURITY_ADMIN` (perfil DPO /
 admin de seguridad); el barrido interno también. `patient_profile_id`,

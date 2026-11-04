@@ -1845,6 +1845,31 @@ describe('PharmacyOrdersService', () => {
       expect(d.outbox.publish).not.toHaveBeenCalled();
     });
 
+    it('H-01 · cancelling an order at another organization records the event in the patient session tenant', async () => {
+      const d = build();
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(order());
+      d.ordersRepo.findPharmaciesByIdsInTenant.mockResolvedValue([
+        { ...PHARMACY, tenantId: 'tenant-farmacia' },
+      ]);
+      withReading(
+        d,
+        order({ reservationStatusConceptId: PINV.ORDER_CANCELADO }),
+        [],
+      );
+
+      await runWithTenant('tenant-paciente', () =>
+        d.service.cancel('order-1', patient),
+      );
+
+      expect(d.outbox.publish).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          eventType: 'PharmacyOrderCancelled',
+          tenantId: 'tenant-paciente',
+        }),
+      );
+    });
+
     it('a non-owner cancelling gets the indistinguishable 404', async () => {
       const d = build();
       d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(
