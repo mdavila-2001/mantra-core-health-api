@@ -43,6 +43,7 @@ Entidades (`tableName`, 10 de 10 archivos `*.entity.ts`): `consent_events`, `con
 | `POST /consent/practitioner-access-requests` | PRACTITIONER, CLINICIAN | `practitioner-access-requests` |
 | `GET /consent/practitioner-access-requests/mine` | PATIENT | `practitioner-access-requests` |
 | `POST /consent/practitioner-access-requests/:id/decision` | PATIENT | `practitioner-access-requests` |
+| `POST /consent/practitioner-access-requests/:id/revoke` | PATIENT | `practitioner-access-requests` |
 | `POST /consent/privacy-restrictions` | SECURITY_ADMIN | `privacy-restrictions` |
 | `POST /consent/processing-legal-bases` | SECURITY_ADMIN | `processing-legal-bases` |
 | `POST /consent/treatment-informed-consents` | SECURITY_ADMIN | `treatment-informed-consents` |
