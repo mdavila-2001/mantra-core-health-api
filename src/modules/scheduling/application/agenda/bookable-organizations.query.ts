@@ -1,5 +1,5 @@
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { CONCEPTS } from '../../../../common';
+import { CONCEPTS, SEED } from '../../../../common';
 import { SCHED } from '../../domain/scheduling.concepts';
 import type { BookableOrganizationsResponseDto } from '../../presentation/dto';
 
@@ -9,6 +9,10 @@ import type { BookableOrganizationsResponseDto } from '../../presentation/dto';
  * - a published, still-valid template with a band that is computed on read:
  *   flexible hours (P36) or services/mixed mode. Those never materialize slots,
  *   so counting only `bookable_slots` hid every practitioner who published them.
+ *
+ * The seed's default tenant is technical, not a real organization: it is left out.
+ * GROUP BY names the tenant columns: a bare `name` resolves to the input column
+ * `r.name` before the output alias, which returned one row per practitioner.
  */
 const SQL = `
 SELECT t.id AS tenant_id,
@@ -19,6 +23,7 @@ SELECT t.id AS tenant_id,
   JOIN scheduling.schedulable_resources r
     ON r.tenant_id = t.id AND r.state_concept_id = ?
  WHERE t.status_concept_id = ?
+   AND t.id <> ?
    AND r.resource_type_concept_id IN (?, ?)
    AND (
          EXISTS (SELECT 1 FROM scheduling.bookable_slots s
@@ -35,7 +40,7 @@ SELECT t.id AS tenant_id,
                     AND (st.flexible_hours OR sr.flexible_hours
                          OR sr.booking_mode_concept_id IN (?, ?)))
        )
- GROUP BY t.id, name
+ GROUP BY t.id, t.trade_name, t.legal_name
  ORDER BY name`;
 
 type Row = {
@@ -60,6 +65,7 @@ export async function findBookableOrganizations(
       CONCEPTS.RESOURCE_ROOM,
       CONCEPTS.STATE_ACTIVE,
       CONCEPTS.TENANT_ACTIVE,
+      SEED.tenantId,
       CONCEPTS.RESOURCE_PRACTITIONER,
       CONCEPTS.RESOURCE_ROOM,
       CONCEPTS.SLOT_OPEN,
