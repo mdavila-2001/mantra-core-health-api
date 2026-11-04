@@ -211,6 +211,63 @@ describe('PharmacyMarketplaceService · la vitrina', () => {
   });
 });
 
+describe('PharmacyMarketplaceService · la búsqueda', () => {
+  const CATALOG = [
+    offer({
+      conceptId: 'c-ibu',
+      atcCode: 'M01AE01',
+      genericName: 'Ibuprofeno',
+      brandName: 'Ibupirac',
+    }),
+    offer({
+      conceptId: 'c-buti',
+      atcCode: 'A03BB01',
+      genericName: 'Butilescopolamina',
+      brandName: 'Buscapina',
+    }),
+    offer({ conceptId: 'c-losartan' }),
+  ];
+
+  it('busca por para qué sirve: «dolor abdominal» trae el antiespasmódico', async () => {
+    const { service, repo } = build(CATALOG);
+    const page = await service.listMedications({ q: 'dolor abdominal' });
+
+    // El texto ya no viaja al SQL: se resuelve en memoria.
+    expect(repo.findPublishedOffers).toHaveBeenCalledWith({}, {});
+    expect(page.items.map((card) => card.conceptId)).toEqual(['c-buti']);
+    expect(page.items[0]).toMatchObject({
+      matchedBy: 'use',
+      matchedUse: 'Dolor abdominal y cólicos',
+      uses: ['Dolor abdominal y cólicos'],
+    });
+    expect(page.correctedQuery).toBeNull();
+  });
+
+  it('corrige el tipeo y lo dice: «ibopofeno» → «ibuprofeno»', async () => {
+    const { service } = build(CATALOG);
+    const page = await service.listMedications({ q: 'ibopofeno' });
+    expect(page.correctedQuery).toBe('ibuprofeno');
+    expect(page.items.map((card) => card.conceptId)).toEqual(['c-ibu']);
+  });
+
+  it('con exact busca lo escrito tal cual, sin corregir', async () => {
+    const { service } = build(CATALOG);
+    const page = await service.listMedications({ q: 'ibopofeno', exact: true });
+    expect(page.correctedQuery).toBeNull();
+    expect(page.items).toEqual([]);
+  });
+
+  it('busca sin tildes y por marca', async () => {
+    const { service } = build(CATALOG);
+    expect(
+      (await service.listMedications({ q: 'LOSARTAN' })).items,
+    ).toHaveLength(1);
+    expect(
+      (await service.listMedications({ q: 'buscap' })).items[0].matchedBy,
+    ).toBe('brand');
+  });
+});
+
 describe('PharmacyMarketplaceService · la disponibilidad', () => {
   it('404 cuando ninguna farmacia lo publica: no distingue de «no existe»', async () => {
     const { service } = build([]);

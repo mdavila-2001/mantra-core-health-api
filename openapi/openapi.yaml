@@ -30278,7 +30278,7 @@ paths:
         - name: search
           required: false
           in: query
-          description: Texto a buscar en marca, genérico o código de producto
+          description: Marca, genérico, código o uso; `exact=true` no corrige
           schema:
             type: string
         - name: conceptId
@@ -30309,9 +30309,15 @@ paths:
         - name: limit
           required: false
           in: query
-          description: Tope del listado (por defecto 50)
+          description: Tope (def. 50)
           schema:
             type: number
+        - name: exact
+          required: false
+          in: query
+          description: 'true: literal'
+          schema:
+            type: string
       responses:
         '200':
           description: ''
@@ -30456,7 +30462,9 @@ paths:
         - name: q
           required: false
           in: query
-          description: Texto a buscar en principio activo, marca o código ATC
+          description: >-
+            Texto a buscar en principio activo, marca, código ATC o para qué se usa («dolor abdominal»). Sin
+            coincidencias, se corrige el tipeo y se informa en `correctedQuery`
           schema:
             type: string
         - name: group
@@ -30487,6 +30495,12 @@ paths:
           required: false
           in: query
           description: Tope de tarjetas (máx. 60)
+          schema:
+            type: string
+        - name: exact
+          required: false
+          in: query
+          description: '`true` busca el texto tal cual, sin corregir el tipeo'
           schema:
             type: string
       responses:
@@ -106043,6 +106057,10 @@ components:
         truncated:
           type: boolean
           description: true si quedaron productos fuera del tope. Se declara, no se calla
+        correctedQuery:
+          type: string
+          nullable: true
+          example: ibuprofeno
       required:
         - items
         - limit
@@ -106259,6 +106277,24 @@ components:
         nearestKm:
           type: object
           nullable: true
+        uses:
+          example:
+            - Dolor abdominal y cólicos
+          type: array
+          items:
+            type: string
+        matchedBy:
+          type: string
+          enum:
+            - name
+            - brand
+            - code
+            - use
+          nullable: true
+        matchedUse:
+          type: string
+          nullable: true
+          example: Dolor abdominal y cólicos
       required:
         - conceptId
         - atcCode
@@ -106271,6 +106307,7 @@ components:
         - priceTo
         - currency
         - pharmacyCount
+        - uses
     PublicMedicationPageDto:
       type: object
       properties:
@@ -106284,6 +106321,10 @@ components:
           type: array
           items:
             type: string
+        correctedQuery:
+          type: string
+          nullable: true
+          example: ibuprofeno
         generatedAt:
           type: string
       required:

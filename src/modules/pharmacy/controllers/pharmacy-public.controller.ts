@@ -154,7 +154,14 @@ export class PharmacyPublicController {
   @ApiQuery({
     name: 'q',
     required: false,
-    description: 'Texto a buscar en principio activo, marca o código ATC',
+    description:
+      'Texto a buscar en principio activo, marca, código ATC o para qué se usa ' +
+      '(«dolor abdominal»). Sin coincidencias, se corrige el tipeo y se informa en `correctedQuery`',
+  })
+  @ApiQuery({
+    name: 'exact',
+    required: false,
+    description: '`true` busca el texto tal cual, sin corregir el tipeo',
   })
   @ApiQuery({
     name: 'group',
@@ -190,9 +197,11 @@ export class PharmacyPublicController {
     @Query('lng') lng?: string,
     @Query('radiusKm') radiusKm?: string,
     @Query('limit') limit?: string,
+    @Query('exact') exact?: string,
   ): Promise<PublicMedicationPageDto> {
     return this.service.listMedications({
       q,
+      exact: exact === 'true',
       group,
       origin: originOf(lat, lng),
       radiusKm: toDecimal(radiusKm),

@@ -33,6 +33,7 @@ import {
   type ProductSearchFilter,
 } from '../repositories';
 import { catalogStatusOf, isInStock } from './pharmacy-catalog-rules';
+import { searchProductRows } from '../search/product-search';
 
 /**
  * Lecturas del directorio de farmacias del tenant activo (carril E2).
@@ -313,17 +314,14 @@ export class PharmacyReadService {
   /**
    * Búsqueda de productos publicados en los catálogos del tenant.
    *
-   * `conceptId` acota por el medicamento del vademécum: es el mismo
-   * `medication_concept_id` con que la receta identifica el fármaco, así que
-   * una prescripción encuentra sus productos sin traducir nada. `pharmacyId`
-   * acota a lo publicado por una sola farmacia — una no visible o ajena no
-   * existe para esta lectura, así que devuelve vacío sin filtrar información.
+   * `conceptId`: medicamento de la receta; `pharmacyId`: una farmacia (ajena →
+   * vacío). El texto (nombre, uso, tipeo) lo resuelve `searchProductRows`.
    *
    * @param filter - Texto, medicamento del vademécum, y farmacia puntual.
    * @param limit - Tope del listado.
    */
   async searchProducts(
-    filter: ProductSearchFilter & { pharmacyId?: string },
+    filter: ProductSearchFilter & { pharmacyId?: string; exact?: boolean },
     limit: number,
   ): Promise<PharmacyProductSearchResponseDto> {
     const tenantId = marketplaceTenantScope();
@@ -342,7 +340,8 @@ export class PharmacyReadService {
       return { items: [], limit, truncated: false };
     }
 
-    const rows = await this.readRepo.findActiveProducts(
+    const { rows, correctedQuery } = await searchProductRows(
+      this.readRepo,
       em,
       pharmacyIds,
       filter,
@@ -359,6 +358,7 @@ export class PharmacyReadService {
       items: await this.toCatalogDtos(em, page, nameByPharmacy, false),
       limit,
       truncated,
+      correctedQuery,
     };
   }
 
