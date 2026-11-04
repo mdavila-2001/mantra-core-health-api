@@ -23,4 +23,10 @@ export enum DiagnosticsErrorReason {
    * firma la petición.
    */
   DIAGNOSTICS_AUTHOR_NOT_ACTOR = 'DIAGNOSTICS_AUTHOR_NOT_ACTOR',
+  /**
+   * The laboratory portal step cannot be recorded with the current model: the
+   * performer cannot write the requester's order (CANCEL), or the order has no
+   * specimen to reject (REJECT).
+   */
+  DIAGNOSTICS_LAB_ORDER_ACTION_UNSUPPORTED = 'DIAGNOSTICS_LAB_ORDER_ACTION_UNSUPPORTED',
 }

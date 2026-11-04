@@ -22,6 +22,16 @@ import { CommonModule } from '../common/common.module';
 // por su membresía, no por un rol del token.
 import { DirectoryAuthorizationModule } from '../directory/directory-authorization.module';
 import { LabStaffGuard } from './guards';
+import { DiagnosticsLabPortalController } from './controllers/diagnostics-lab-portal.controller';
+import { DiagnosticsLabResultsController } from './controllers/diagnostics-lab-results.controller';
+import { DiagnosticsLabUploadsController } from './controllers/diagnostics-lab-uploads.controller';
+import { LabPortalSnapshotService } from './services/lab-portal-snapshot.service';
+import { LabPortalOrdersService } from './services/lab-portal-orders.service';
+import { LabPortalResultsService } from './services/lab-portal-results.service';
+import { LabPortalResultWritesService } from './services/lab-portal-result-writes.service';
+import { LabPortalSummaryService } from './services/lab-portal-summary.service';
+import { LabPortalUploadsService } from './services/lab-portal-uploads.service';
+import { DiagnosticReportsRepository } from '../clinical/repositories/diagnostic-reports.repository';
 import {
   DiagnosticsSpecimensController,
   DiagnosticsLabController,
@@ -56,6 +66,7 @@ import {
   LabReceptionRepository,
   ServiceRequestWorklistRepository,
   ClinicalRefsRepository,
+  LabPortalRepository,
 } from './repositories';
 
 /**
@@ -86,6 +97,9 @@ import {
     DiagnosticsOrdersController,
     DiagnosticsPatientResultsController,
     DiagnosticsReceptionController,
+    DiagnosticsLabPortalController,
+    DiagnosticsLabResultsController,
+    DiagnosticsLabUploadsController,
   ],
   providers: [
     // Repositorios
@@ -120,6 +134,16 @@ import {
     DiagnosticsPatientAccessService,
     // Guard del personal de laboratorio (recepción y circuito de especímenes).
     LabStaffGuard,
+    // Laboratory portal (`/diagnostics/lab/*`). The clinical report repository
+    // is stateless (it receives the EntityManager), same criterion as above.
+    LabPortalRepository,
+    DiagnosticReportsRepository,
+    LabPortalSnapshotService,
+    LabPortalOrdersService,
+    LabPortalResultsService,
+    LabPortalResultWritesService,
+    LabPortalSummaryService,
+    LabPortalUploadsService,
   ],
 })
 export class DiagnosticsModule {}

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
+import { Tenants } from '../../../directory/entities';
 import {
   BranchesRepository,
   TenantMembershipsRepository,
@@ -43,6 +44,15 @@ export class DirectoryRegistrationAdapter implements DirectoryRegistrationPort {
 
   findTenantByCode(tx: EntityManager, code: string) {
     return this.tenantsRepo.findByCode(tx, code);
+  }
+
+  async tenantNameExists(tx: EntityManager, name: string): Promise<boolean> {
+    // `%`, `_` and `\` are matched literally, not as ILIKE wildcards.
+    const exact = { $ilike: name.trim().replace(/[\\%_]/g, '\\$&') };
+    const found = await tx.findOne(Tenants, {
+      $or: [{ legalName: exact }, { tradeName: exact }],
+    });
+    return found !== null;
   }
 
   createTenant(tx: EntityManager, data: object) {

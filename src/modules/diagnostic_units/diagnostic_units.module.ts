@@ -4,6 +4,18 @@ import { CommunityModule } from '../community/community.module';
 import { CommonModule } from '../common/common.module';
 import { PracticeModule } from '../practice/practice.module';
 import { MessagingModule } from '../messaging/messaging.module';
+// Tenant memberships: `LabStaffGuard` on the lab portal recognises lab staff by membership.
+import { DirectoryAuthorizationModule } from '../directory/directory-authorization.module';
+import { LabPortalServicesController } from './controllers/lab-portal-services.controller';
+import { LabPortalCatalogService } from './services/lab-portal-catalog.service';
+import { LabPortalContextService } from './services/lab-portal-context.service';
+import { LabPortalImportService } from './services/lab-portal-import.service';
+import { LabPortalPricingService } from './services/lab-portal-pricing.service';
+import { LabPortalWriterService } from './services/lab-portal-writer.service';
+import {
+  CENTER_SCHEDULE_CONTROLLERS,
+  CENTER_SCHEDULE_PROVIDERS,
+} from './center-schedule/center-schedule.providers';
 import { EquipmentF5aService } from './services/equipment-f5a.service';
 import { InfraF5aPolicyRegistrar } from './policies/infra-f5a.policy';
 import * as entities from './entities';
@@ -59,13 +71,17 @@ import {
     CommonModule,
     PracticeModule,
     MessagingModule,
+    DirectoryAuthorizationModule,
   ],
   controllers: [
+    // First: their `me/*` routes must be matched before any `:id` route.
+    ...CENTER_SCHEDULE_CONTROLLERS,
     DiagnosticUnitsController,
     DiagnosticUnitSitesController,
     DiagnosticPricingController,
     DiagnosticEquipmentController,
     DiagnosticUnitAccreditationsController,
+    LabPortalServicesController,
   ],
   providers: [
     // Repositorios
@@ -93,6 +109,12 @@ import {
     DiagnosticUnitsAdminReadService,
     DiagnosticUnitsSearchService,
     DiagnosticUnitProvisioningService,
+    ...CENTER_SCHEDULE_PROVIDERS,
+    LabPortalContextService,
+    LabPortalPricingService,
+    LabPortalWriterService,
+    LabPortalCatalogService,
+    LabPortalImportService,
   ],
   // Se exporta para `directory`: `TenantTypeProfileService` lo usa DENTRO de
   // su propia transacción para materializar la unidad diagnóstica de un
