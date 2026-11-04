@@ -7,11 +7,22 @@ export const CARE_RELATIONSHIP_TYPES = [
   'TREATING',
   'CONSULTING',
   'EMERGENCY',
+  'PRIMARY',
 ] as const;
 /**
  * Define el tipo de dominio care relationship type.
  */
 export type CareRelationshipType = (typeof CARE_RELATIONSHIP_TYPES)[number];
+
+/**
+ * Tipos que admite el alta directa (ya ACTIVE). `PRIMARY` queda fuera: la
+ * cabecera nace de una solicitud y al aceptarse sincroniza el médico de cabecera.
+ */
+export const CARE_RELATIONSHIP_DIRECT_TYPES = [
+  'TREATING',
+  'CONSULTING',
+  'EMERGENCY',
+] as const;
 
 /** Propósito de uso opcional que acota la relación asistencial. */
 export const CARE_RELATIONSHIP_PURPOSES = [
@@ -54,9 +65,9 @@ export class CreateCareRelationshipDto {
    */
   @ApiProperty({
     description: 'Tipo de relación',
-    enum: CARE_RELATIONSHIP_TYPES,
+    enum: CARE_RELATIONSHIP_DIRECT_TYPES,
   })
-  @IsIn(CARE_RELATIONSHIP_TYPES)
+  @IsIn(CARE_RELATIONSHIP_DIRECT_TYPES)
   relationshipType!: CareRelationshipType;
 
   /**

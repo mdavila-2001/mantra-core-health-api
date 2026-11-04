@@ -20,6 +20,7 @@ import {
   AuthzAdminController,
   AuthzGovernanceController,
   AuthzGovernanceExtController,
+  AuthzPractitionerRequestsController,
 } from './controllers';
 import {
   AuthzCatalogService,
@@ -36,6 +37,9 @@ import {
   AuthzAssignmentRevocationService,
   AuthzGovernanceService,
   AuthzGovernanceExtService,
+  AuthzPrimaryCareSyncService,
+  AuthzPrimaryCareService,
+  AuthzAccessRequestsReadService,
 } from './services';
 import {
   PermissionCategoriesRepository,
@@ -55,6 +59,7 @@ import {
   AuthzAdminReadRepository,
   AuthzGovernanceReadRepository,
   AuthzClinicalScopeRepository,
+  AuthzAccessRequestsRepository,
 } from './repositories';
 import { DataAccessLogRepository } from '../audit/repositories';
 import { AuditModule } from '../audit/audit.module';
@@ -65,6 +70,8 @@ import { MessagingModule } from '../messaging/messaging.module';
 // `AuthzCareRelationshipsService` la usa para notificar al paciente titular
 // de una solicitud de acceso (FT-07-R05).
 import {
+  HealthPractitionerProfilesRepository,
+  PatientPrimaryPractitionersRepository,
   PatientProfilesRepository,
   PersonAccountLinksRepository,
 } from '../profiles/infrastructure/repositories';
@@ -98,6 +105,7 @@ import {
     AuthzGovernanceController,
     AuthzGovernanceExtController,
     AuthzModulesCatalogController,
+    AuthzPractitionerRequestsController,
   ],
   providers: [
     IamGlobalRolesAdapter,
@@ -129,6 +137,13 @@ import {
     // «Quién ve mi historia»: resuelve el perfil de paciente del titular. Clase sin
     // estado sobre el `EntityManager`, como `PersonAccountLinksRepository`.
     PatientProfilesRepository,
+    // Cabecera: validar al profesional elegido y mantener sincronizado el médico
+    // de cabecera vigente (`profiles`). Clases sin estado sobre el `EntityManager`,
+    // provistas aquí para no importar `ProfilesModule` entero.
+    HealthPractitionerProfilesRepository,
+    PatientPrimaryPractitionersRepository,
+    // Buzón unificado de solicitudes: lee relaciones asistenciales y consentimientos.
+    AuthzAccessRequestsRepository,
     // Servicios
     AuthzClinicalScopeService,
     AuthzCatalogService,
@@ -144,6 +159,9 @@ import {
     AuthzAssignmentRevocationService,
     AuthzGovernanceService,
     AuthzGovernanceExtService,
+    AuthzPrimaryCareSyncService,
+    AuthzPrimaryCareService,
+    AuthzAccessRequestsReadService,
     // `@RequirePermission` (common/auth) consulta el PDP por este token; la
     // guarda lo busca en todo el contenedor, así que no hace falta exportarlo.
     AuthzPermissionDecisionPoint,
