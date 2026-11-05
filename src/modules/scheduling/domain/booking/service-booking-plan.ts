@@ -45,6 +45,9 @@ export interface FrozenSlotSpan {
  * porque obligar al profesional a aceptar una nebulización es fricción sin
  * criterio clínico. Si la requiere, o si quien reserva ya traía un plan
  * confirmado (el mostrador), se respeta lo que había.
+ *
+ * Since v4.2.88 the same rule applies to plain agenda slots, fed with the
+ * resource's `requires_approval` instead of the offering's.
  */
 export function planForService<P extends BookingPlan>(
   plan: P,
