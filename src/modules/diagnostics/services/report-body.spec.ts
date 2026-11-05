@@ -6,6 +6,8 @@ import {
   parseReportBody,
   REPORT_BODY_MAX_BLOCKS,
   REPORT_BODY_MAX_CHARS,
+  REPORT_BODY_MAX_PARTS,
+  REPORT_BODY_MAX_PER_BLOCK,
   reportContentHash,
   reportPlainText,
   storedReportBody,
@@ -89,6 +91,45 @@ describe('report-body', () => {
         ],
       }),
     ).not.toThrow();
+  });
+
+  it('bounds the structure: parts per block, total parts, and drops empty runs and items', () => {
+    const empty = { text: '' };
+    expect(() =>
+      parseReportBody({
+        version: 1,
+        blocks: [
+          {
+            type: 'paragraph',
+            runs: Array(REPORT_BODY_MAX_PER_BLOCK + 1).fill(empty),
+          },
+        ],
+      }),
+    ).toThrow(BadRequestException);
+    const fullParagraph = {
+      type: 'paragraph',
+      runs: Array(REPORT_BODY_MAX_PER_BLOCK).fill(empty),
+    };
+    const blocks = Math.ceil(
+      (REPORT_BODY_MAX_PARTS + 1) / REPORT_BODY_MAX_PER_BLOCK,
+    );
+    expect(() =>
+      parseReportBody({
+        version: 1,
+        blocks: Array(blocks).fill(fullParagraph),
+      }),
+    ).toThrow(BadRequestException);
+    const parsed = parseReportBody({
+      version: 1,
+      blocks: [
+        { type: 'paragraph', runs: [empty, { text: 'ok' }] },
+        { type: 'list', ordered: false, items: [[empty], [{ text: 'x' }]] },
+      ],
+    });
+    expect(parsed.blocks).toEqual([
+      { type: 'paragraph', runs: [{ text: 'ok' }] },
+      { type: 'list', ordered: false, items: [[{ text: 'x' }]] },
+    ]);
   });
 
   it('derives the plain-text conclusion with blank lines and list prefixes', () => {

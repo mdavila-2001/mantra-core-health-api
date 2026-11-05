@@ -27,6 +27,10 @@ export interface ReportBody {
 
 export const REPORT_BODY_MAX_BLOCKS = 2000;
 export const REPORT_BODY_MAX_CHARS = 20000;
+/** Runs of a paragraph, items of a list and runs of an item, each. */
+export const REPORT_BODY_MAX_PER_BLOCK = 200;
+/** Runs and list items across the whole body: structure, not only text, is bounded. */
+export const REPORT_BODY_MAX_PARTS = 5000;
 
 /** Body of a brand-new draft. */
 export const EMPTY_REPORT_BODY: ReportBody = { version: 1, blocks: [] };
@@ -56,12 +60,29 @@ function parseRun(raw: unknown): ReportRun {
   };
 }
 
-function parseRuns(raw: unknown): ReportRun[] {
-  if (!Array.isArray(raw)) invalid('"runs" debe ser una lista');
-  return raw.map(parseRun);
+/** Counts every run and list item parsed, so the whole body stays bounded. */
+interface PartBudget {
+  used: number;
 }
 
-function parseBlock(raw: unknown): ReportBlock {
+function spend(budget: PartBudget, count: number): void {
+  if (count > REPORT_BODY_MAX_PER_BLOCK) {
+    invalid(`más de ${REPORT_BODY_MAX_PER_BLOCK} partes en un bloque`);
+  }
+  budget.used += count;
+  if (budget.used > REPORT_BODY_MAX_PARTS) {
+    invalid(`más de ${REPORT_BODY_MAX_PARTS} partes en el informe`);
+  }
+}
+
+/** Runs of a paragraph or list item; empty runs are dropped. */
+function parseRuns(raw: unknown, budget: PartBudget): ReportRun[] {
+  if (!Array.isArray(raw)) invalid('"runs" debe ser una lista');
+  spend(budget, raw.length);
+  return raw.map(parseRun).filter((run) => run.text !== '');
+}
+
+function parseBlock(raw: unknown, budget: PartBudget): ReportBlock {
   if (!isObject(raw)) invalid('bloque no es un objeto');
   switch (raw.type) {
     case 'heading':
@@ -73,15 +94,19 @@ function parseBlock(raw: unknown): ReportBlock {
       }
       return { type: 'heading', level: raw.level, text: raw.text };
     case 'paragraph':
-      return { type: 'paragraph', runs: parseRuns(raw.runs) };
+      return { type: 'paragraph', runs: parseRuns(raw.runs, budget) };
     case 'list':
       if (typeof raw.ordered !== 'boolean' || !Array.isArray(raw.items)) {
         invalid('lista sin "ordered" o "items"');
       }
+      spend(budget, raw.items.length);
       return {
         type: 'list',
         ordered: raw.ordered,
-        items: raw.items.map(parseRuns),
+        // Empty items are dropped: they would only add structure, not content.
+        items: raw.items
+          .map((item) => parseRuns(item, budget))
+          .filter((runs) => runs.length > 0),
       };
     default:
       return invalid('tipo de bloque desconocido');
@@ -99,8 +124,10 @@ function texts(body: ReportBody): string[] {
 
 /**
  * Validates and normalizes a client body: known blocks only, at most
- * {@link REPORT_BODY_MAX_BLOCKS} blocks and {@link REPORT_BODY_MAX_CHARS}
- * characters of text in total. Unknown keys are dropped.
+ * {@link REPORT_BODY_MAX_BLOCKS} blocks, {@link REPORT_BODY_MAX_PER_BLOCK}
+ * parts per block, {@link REPORT_BODY_MAX_PARTS} runs and items in total and
+ * {@link REPORT_BODY_MAX_CHARS} characters of text. Unknown keys and empty
+ * runs or items are dropped.
  *
  * @throws BadRequestException when the shape or the limits are not met.
  */
@@ -111,7 +138,11 @@ export function parseReportBody(raw: unknown): ReportBody {
   if (raw.blocks.length > REPORT_BODY_MAX_BLOCKS) {
     invalid(`más de ${REPORT_BODY_MAX_BLOCKS} bloques`);
   }
-  const body: ReportBody = { version: 1, blocks: raw.blocks.map(parseBlock) };
+  const budget: PartBudget = { used: 0 };
+  const body: ReportBody = {
+    version: 1,
+    blocks: raw.blocks.map((block) => parseBlock(block, budget)),
+  };
   const chars = texts(body).reduce((sum, text) => sum + text.length, 0);
   if (chars > REPORT_BODY_MAX_CHARS) {
     invalid(`más de ${REPORT_BODY_MAX_CHARS} caracteres`);
