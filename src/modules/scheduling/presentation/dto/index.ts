@@ -156,3 +156,4 @@ export {
   BookingBillingLinkDto,
   type BookingBillingReason,
 } from './booking-billing-link.dto';
+export * from './resource-approval.dto';
