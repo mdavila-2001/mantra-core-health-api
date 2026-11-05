@@ -38,6 +38,13 @@ export class ReportDraftDto {
   diagnosticReportId!: string | null;
   @ApiProperty({ type: String, format: 'uuid', nullable: true })
   publishedVersionId!: string | null;
+  @ApiProperty({
+    type: String,
+    format: 'uuid',
+    nullable: true,
+    description: 'File id of the official PDF; null until published.',
+  })
+  officialFileId!: string | null;
   @ApiProperty({ type: String, format: 'date-time', nullable: true })
   publishedAt!: string | null;
   @ApiProperty({ format: 'date-time' }) updatedAt!: string;

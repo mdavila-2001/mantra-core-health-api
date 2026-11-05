@@ -52,6 +52,7 @@ function build(order: any, draft: any = draftRow(), files: any[] = []) {
     ),
     findByOrder: mockFn(async () => null),
     findFiles: mockFn(async () => files),
+    findOfficialFileId: mockFn(async () => 'file-official'),
   };
   const attachable = { assertUsableBy: mockFn(async () => ({})) };
   const signers = { assertSigner: mockFn(async () => ({})) };
@@ -91,10 +92,25 @@ describe('ReportDraftsService', () => {
 
   it('open: idempotent, an existing (even published) draft is returned as is', async () => {
     const t = build(labOrder);
-    t.repo.findByOrder.mockResolvedValue(draftRow({ statusCode: 'PUBLISHED' }));
+    t.repo.findByOrder.mockResolvedValue(
+      draftRow({ statusCode: 'PUBLISHED', publishedVersionId: 'v9' }),
+    );
     const dto = await t.service.open(T1, 'sr1', labStaff);
     expect(t.tx.create).not.toHaveBeenCalled();
     expect(dto.status).toBe('PUBLISHED');
+    // The official PDF comes from the published version, not from a file name.
+    expect(dto.officialFileId).toBe('file-official');
+    expect(t.repo.findOfficialFileId).toHaveBeenCalledWith(
+      expect.anything(),
+      'v9',
+    );
+  });
+
+  it('a draft that is not published yet has no official file and does not look for one', async () => {
+    const t = build(labOrder);
+    const dto = await t.service.get(T1, 'd1', labStaff);
+    expect(dto.officialFileId).toBeNull();
+    expect(t.repo.findOfficialFileId).not.toHaveBeenCalled();
   });
 
   it('open: a clinician reports their own order without performer', async () => {

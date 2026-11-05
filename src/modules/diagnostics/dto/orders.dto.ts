@@ -4,6 +4,10 @@ import {
   ANALYSIS_CATEGORIES,
   type AnalysisCategory,
 } from '../../clinical/service-request-category';
+import {
+  REPORT_PATIENT_VISIBILITIES,
+  type ReportPatientVisibility,
+} from './report-draft.dto';
 
 /**
  * Una orden diagnóstica del paciente — la fila de `clinical.service_requests`
@@ -126,6 +130,17 @@ export class DiagnosticReportSummaryDto {
   /** Estado de liberación de resultados (concept id). */
   @ApiPropertyOptional({ format: 'uuid' })
   resultReleaseStatusConceptId?: string;
+
+  /** Released version whose patient visibility `patientVisibility` reports. */
+  @ApiProperty({ type: String, format: 'uuid', nullable: true })
+  releasedVersionId!: string | null;
+
+  /**
+   * Latest release event of that version: `HELD` means the requester still
+   * has to release it (`POST /diagnostics/reports/:id/patient-release`).
+   */
+  @ApiProperty({ enum: REPORT_PATIENT_VISIBILITIES, nullable: true })
+  patientVisibility!: ReportPatientVisibility | null;
 
   /** Cuándo se emitió. */
   @ApiProperty({ type: String, format: 'date-time' }) createdAt!: Date;

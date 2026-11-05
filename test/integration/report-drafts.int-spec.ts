@@ -33,6 +33,7 @@ describe('Informe redactado: borrador → publicado inmutable (integración)', (
   let firmante: string;
   let firmanteToken: string;
   let pacienteToken: string;
+  let pacienteId: string;
   let ordenId: string;
   let borradorId: string;
 
@@ -144,6 +145,7 @@ describe('Informe redactado: borrador → publicado inmutable (integración)', (
       .get('/diagnostic-results/me/orders')
       .set(bearer(pacienteToken))
       .expect(200);
+    pacienteId = propias.body.patientProfileId as string;
 
     const orden = await http()
       .post('/clinical/service-requests')
@@ -365,5 +367,198 @@ describe('Informe redactado: borrador → publicado inmutable (integración)', (
       .send({ serviceRequestId: ordenId });
     expect([200, 201]).toContain(res.status);
     expect(res.body.id).toBe(borradorId);
+  });
+
+  /**
+   * HELD: the laboratory publishes the report retained, the doctor who asked
+   * for it sees it next to the order and releases it to the patient. The
+   * doctor reaches the chart the way a treating clinician does: an active
+   * TREATING care relationship in the clinic (read) and an own open encounter
+   * (write, to order the study).
+   */
+  describe('retenido por el laboratorio: el médico solicitante lo libera al paciente', () => {
+    const medico = { token: '', hpid: '', tenantId: '' };
+    let ordenRetenida: string;
+    let publicado: { reportId: string; versionId: string };
+    const comoMedico = () => ({
+      ...bearer(medico.token),
+      'X-Tenant-Id': medico.tenantId,
+    });
+    const fichaDelMedico = () =>
+      http()
+        .get(`/diagnostics/patients/${pacienteId}/orders`)
+        .set(comoMedico())
+        .expect(200);
+    const informeEnFicha = (body: {
+      reports: { id: string; patientVisibility: string | null }[];
+    }) => body.reports.find((r) => r.id === publicado.reportId);
+
+    beforeAll(async () => {
+      const email = `informe-medico-${marca}@example.test`;
+      const alta = await http()
+        .post('/iam/auth/register-practitioner')
+        .send({
+          ...identidadProfesional(email),
+          email,
+          password,
+          name: 'Médica',
+          lastName: `Solicitante ${marca}`,
+          licenseNumber: `LIC-SOL-${marca}`,
+          credentialNumber: `CRED-SOL-${marca}`,
+        })
+        .expect(201);
+      medico.hpid = alta.body.practitionerProfileId as string;
+      const login = await http()
+        .post('/iam/auth/login')
+        .send({ email, password })
+        .expect(200);
+      medico.token = login.body.accessToken as string;
+      const [, claims] = medico.token.split('.');
+      medico.tenantId = (
+        JSON.parse(Buffer.from(claims, 'base64url').toString('utf8'))
+          .tenants as string[]
+      )[0];
+
+      await http()
+        .post('/authz/care-relationships')
+        .set(bearer(ctx.adminToken))
+        .send({
+          tenantId: medico.tenantId,
+          patientProfileId: pacienteId,
+          practitionerProfileId: medico.hpid,
+          relationshipType: 'TREATING',
+        })
+        .expect(201);
+      const consulta = await http()
+        .post('/clinical/encounters/check-in')
+        .set(bearer(medico.token))
+        .send({ patientProfileId: pacienteId, tenantId: medico.tenantId })
+        .expect(201);
+      const orden = await http()
+        .post('/clinical/service-requests')
+        .set(comoMedico())
+        .send({
+          custodianTenantId: medico.tenantId,
+          patientProfileId: pacienteId,
+          encounterId: consulta.body.id,
+          // Another study: a second blood count would trip the duplicate check.
+          codeConceptId: CLIN.STUDY_GLICEMIA,
+          categoryConceptId: CLIN.SERVICE_REQUEST_CATEGORY_LAB,
+          performerTenantId: lab.tenantId,
+        })
+        .expect(201);
+      ordenRetenida = orden.body.id as string;
+
+      const comoFirmante = {
+        ...bearer(firmanteToken),
+        'X-Tenant-Id': lab.tenantId,
+      };
+      const borrador = await http()
+        .post('/diagnostics/report-drafts')
+        .set(comoFirmante)
+        .send({ serviceRequestId: ordenRetenida })
+        .expect(200);
+      const guardado = await http()
+        .put(`/diagnostics/report-drafts/${borrador.body.id}`)
+        .set(comoFirmante)
+        .send({
+          rowVersion: borrador.body.rowVersion,
+          body: cuerpo('Leucocitosis: revisar con su médico.'),
+          signerProfileId: firmante,
+          patientVisibility: 'HELD',
+        })
+        .expect(200);
+      const pub = await http()
+        .post(`/diagnostics/report-drafts/${borrador.body.id}/publish`)
+        .set(comoFirmante)
+        .send({
+          rowVersion: guardado.body.rowVersion,
+          confirmIrreversible: true,
+        })
+        .expect(200);
+      publicado = {
+        reportId: pub.body.reportId as string,
+        versionId: pub.body.versionId as string,
+      };
+      const leido = await http()
+        .get(`/diagnostics/report-drafts/${borrador.body.id}`)
+        .set(comoFirmante)
+        .expect(200);
+      expect(leido.body.officialFileId).toBe(pub.body.officialFileId);
+    });
+
+    it('el laboratorio ve la orden con su informe publicado en la bandeja', async () => {
+      const res = await http()
+        .get('/diagnostics/lab/orders')
+        .set(comoLab())
+        .expect(200);
+      const fila = res.body.items.find(
+        (o: { orderId: string }) => o.orderId === ordenRetenida,
+      );
+      expect(fila.report).toEqual({
+        draftStatus: 'PUBLISHED',
+        publishedVersionId: publicado.versionId,
+      });
+    });
+
+    it('la médica solicitante ve el informe del laboratorio junto a su orden, retenido', async () => {
+      const ficha = await fichaDelMedico();
+      expect(informeEnFicha(ficha.body)).toMatchObject({
+        serviceRequestId: ordenRetenida,
+        releasedVersionId: publicado.versionId,
+        patientVisibility: 'HELD',
+      });
+    });
+
+    it('mientras está retenido el paciente no lo ve', async () => {
+      const propios = await http()
+        .get('/diagnostic-results/me')
+        .set(bearer(pacienteToken))
+        .expect(200);
+      expect(
+        propios.body.items.some(
+          (r: { reportId: string }) => r.reportId === publicado.reportId,
+        ),
+      ).toBe(false);
+    });
+
+    it('la médica lo libera: queda visible en su ficha y el paciente lo recibe con el PDF oficial', async () => {
+      const liberado = await http()
+        .post(`/diagnostics/reports/${publicado.reportId}/patient-release`)
+        .set(comoMedico())
+        .expect(200);
+      expect(liberado.body).toEqual({
+        reportId: publicado.reportId,
+        versionId: publicado.versionId,
+        patientVisibility: 'VISIBLE',
+      });
+
+      const ficha = await fichaDelMedico();
+      expect(informeEnFicha(ficha.body)?.patientVisibility).toBe('VISIBLE');
+
+      const propios = await http()
+        .get('/diagnostic-results/me')
+        .set(bearer(pacienteToken))
+        .expect(200);
+      const resultado = propios.body.items.find(
+        (r: { reportId: string }) => r.reportId === publicado.reportId,
+      );
+      expect(resultado.conclusionText).toContain('Leucocitosis');
+      expect(
+        resultado.files.some((f: { role: string }) => f.role === 'OFFICIAL'),
+      ).toBe(true);
+
+      await http()
+        .post(`/diagnostics/reports/${publicado.reportId}/patient-release`)
+        .set(comoMedico())
+        .expect(409);
+    });
+
+    it('otro laboratorio no ve la ficha ni libera el informe', async () => {
+      const res = await http()
+        .post(`/diagnostics/reports/${publicado.reportId}/patient-release`)
+        .set(comoLab(otroLab));
+      expect([403, 404]).toContain(res.status);
+    });
   });
 });

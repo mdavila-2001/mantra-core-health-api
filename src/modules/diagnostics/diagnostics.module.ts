@@ -37,6 +37,7 @@ import { ReportNotificationsService } from './services/report-notifications.serv
 import { ReportPublicationWriter } from './services/report-publication.writer';
 import { ReportPublishService } from './services/report-publish.service';
 import { ReportReleaseService } from './services/report-release.service';
+import { RequesterReportsReader } from './services/requester-reports.reader';
 import { ReportSignersService } from './services/report-signers.service';
 import { DiagnosticsLabPortalController } from './controllers/diagnostics-lab-portal.controller';
 import { DiagnosticsLabResultsController } from './controllers/diagnostics-lab-results.controller';
@@ -182,6 +183,8 @@ import {
     ReportPublicationWriter,
     ReportPublishService,
     ReportReleaseService,
+    // The requester's read of reports its orders got from the laboratory.
+    RequesterReportsReader,
   ],
 })
 export class DiagnosticsModule {}

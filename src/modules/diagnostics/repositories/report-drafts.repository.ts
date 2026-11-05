@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import {
+  DiagnosticReportFiles,
   ReportDraftFiles,
   ReportDrafts,
   ReportIssuerSettings,
 } from '../entities';
+import { RDRAFT } from '../report-drafts.concepts';
 
 export const DRAFT_STATUS = { DRAFT: 'DRAFT', PUBLISHED: 'PUBLISHED' } as const;
 
@@ -31,6 +33,31 @@ export class ReportDraftsRepository {
       serviceRequestId,
       custodianTenantId: tenantId,
     });
+  }
+
+  /** The tenant's drafts of several orders, in one query. */
+  findByOrders(
+    em: EntityManager,
+    tenantId: string,
+    serviceRequestIds: readonly string[],
+  ): Promise<ReportDrafts[]> {
+    if (serviceRequestIds.length === 0) return Promise.resolve([]);
+    return em.find(ReportDrafts, {
+      serviceRequestId: { $in: [...serviceRequestIds] },
+      custodianTenantId: tenantId,
+    });
+  }
+
+  /** The official PDF a published version carries, if any. */
+  async findOfficialFileId(
+    em: EntityManager,
+    versionId: string,
+  ): Promise<string | null> {
+    const file = await em.findOne(DiagnosticReportFiles, {
+      diagnosticReportVersionId: versionId,
+      contentRoleConceptId: RDRAFT.REPORT_FILE_OFFICIAL,
+    });
+    return file?.fileId ?? null;
   }
 
   findFiles(em: EntityManager, draftId: string): Promise<ReportDraftFiles[]> {

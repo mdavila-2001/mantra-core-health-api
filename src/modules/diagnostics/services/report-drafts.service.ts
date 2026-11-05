@@ -250,7 +250,12 @@ export class ReportDraftsService {
   }
 
   async toDto(em: EntityManager, draft: ReportDrafts): Promise<ReportDraftDto> {
-    const files = await this.repo.findFiles(em, draft.id);
+    const [files, officialFileId] = await Promise.all([
+      this.repo.findFiles(em, draft.id),
+      draft.publishedVersionId
+        ? this.repo.findOfficialFileId(em, draft.publishedVersionId)
+        : null,
+    ]);
     return {
       id: draft.id,
       serviceRequestId: draft.serviceRequestId,
@@ -264,6 +269,7 @@ export class ReportDraftsService {
       rowVersion: draft.rowVersion,
       diagnosticReportId: draft.diagnosticReportId ?? null,
       publishedVersionId: draft.publishedVersionId ?? null,
+      officialFileId,
       publishedAt: draft.publishedAt?.toISOString() ?? null,
       updatedAt: draft.updatedAt.toISOString(),
       files: files.map((f) => ({
