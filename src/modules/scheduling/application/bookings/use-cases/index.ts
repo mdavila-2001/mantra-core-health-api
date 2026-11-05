@@ -6,6 +6,7 @@ import { ConfirmBookingUseCase } from './confirm-booking.use-case';
 import { ConfirmPaymentReceiptUseCase } from './confirm-payment-receipt.use-case';
 import { CreateDirectAppointmentUseCase } from './create-direct-appointment.use-case';
 import { ExpireHoldsUseCase } from './expire-holds.use-case';
+import { FinishAutoConfirmedRequestUseCase } from './finish-auto-confirmed-request.use-case';
 import { GetBookingUseCase } from './get-booking.use-case';
 import { GetPaymentReceiptContentUseCase } from './get-payment-receipt-content.use-case';
 import { GetPaymentStateUseCase } from './get-payment-state.use-case';
@@ -32,6 +33,7 @@ export const bookingUseCases = [
   ConfirmPaymentReceiptUseCase,
   CreateDirectAppointmentUseCase,
   ExpireHoldsUseCase,
+  FinishAutoConfirmedRequestUseCase,
   GetBookingUseCase,
   GetPaymentReceiptContentUseCase,
   GetPaymentStateUseCase,

@@ -36,6 +36,14 @@ export class CenterBookingDto {
     ],
   })
   status!: string;
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    format: 'uuid',
+    description:
+      'Device (production line) that attends it; `null` when no open line can.',
+  })
+  equipmentId!: string | null;
 }
 
 /** Response of `GET /diagnostic-units/me/bookings`. */

@@ -10,24 +10,10 @@ export const INFRA_F5_ASSETS_POLICY: InfraPolicy = {
   name: 'F5-assets',
   actions: {
     'f5.space.stock.read': {
-      roles: [
-        'SUPERADMIN',
-        'ORG_ADMIN',
-        'SITE_ADMIN',
-        'NURSE',
-        'NURSE_SUPERVISOR',
-        'UNIT_HEAD',
-      ],
+      roles: ['SUPERADMIN', 'ORG_ADMIN', 'SITE_ADMIN', 'UNIT_HEAD'],
     },
     'f5.space.equipment.read': {
-      roles: [
-        'SUPERADMIN',
-        'ORG_ADMIN',
-        'SITE_ADMIN',
-        'MAINTENANCE',
-        'NURSE_SUPERVISOR',
-        'UNIT_HEAD',
-      ],
+      roles: ['SUPERADMIN', 'ORG_ADMIN', 'SITE_ADMIN', 'UNIT_HEAD'],
     },
   },
 };

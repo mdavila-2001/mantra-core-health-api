@@ -6,8 +6,9 @@ import {
 } from '../../practice/services/infrastructure-access.service';
 
 /**
- * Permisos de F5a (CONTRATO-F2-F5 §F5a): Admin org/sucursal ✔; Mantenimiento
- * ✔ sólo estado operativo; Superadmin ✔ auditado. Se deciden sobre la sede de
+ * Permisos de F5a (CONTRATO-F2-F5 §F5a): Admin org/sucursal ✔ (también el
+ * estado operativo, desde que se eliminó el rol Mantenimiento el 2026-11-05);
+ * Superadmin ✔ auditado. Se deciden sobre la sede de
  * práctica de la sede de la unidad diagnóstica.
  */
 export const INFRA_F5A_POLICY: InfraPolicy = {
@@ -15,17 +16,10 @@ export const INFRA_F5A_POLICY: InfraPolicy = {
   actions: {
     'f5a.equipment.write': { roles: ['SUPERADMIN', 'ORG_ADMIN', 'SITE_ADMIN'] },
     'f5a.equipment.status': {
-      roles: ['SUPERADMIN', 'ORG_ADMIN', 'SITE_ADMIN', 'MAINTENANCE'],
+      roles: ['SUPERADMIN', 'ORG_ADMIN', 'SITE_ADMIN'],
     },
     'f5a.equipment.read': {
-      roles: [
-        'SUPERADMIN',
-        'ORG_ADMIN',
-        'SITE_ADMIN',
-        'MAINTENANCE',
-        'NURSE_SUPERVISOR',
-        'UNIT_HEAD',
-      ],
+      roles: ['SUPERADMIN', 'ORG_ADMIN', 'SITE_ADMIN', 'UNIT_HEAD'],
     },
   },
 };

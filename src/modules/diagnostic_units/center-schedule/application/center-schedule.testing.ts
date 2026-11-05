@@ -196,6 +196,7 @@ export function build() {
       scheduleRepo as never,
       bookingsRepo as never,
       reader,
+      context,
     ),
   };
 }

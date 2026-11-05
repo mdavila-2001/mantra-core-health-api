@@ -19,6 +19,8 @@ export interface StudyRow {
 /**
  * The public price of an offering: active version of a public, active and
  * current schedule — the same rules the directory applies — newest first.
+ * An offering the lab switched off for today (`available = false`) is not
+ * offered, so a patient can neither see nor book it.
  */
 const PRICE_LATERAL = `
     LEFT JOIN LATERAL (
@@ -42,7 +44,7 @@ const STUDY_SELECT = `
     FROM diagnostic_units.diagnostic_study_offerings o
     JOIN diagnostic_units.diagnostic_units u ON u.id = o.diagnostic_unit_id
     ${PRICE_LATERAL}
-   WHERE o.status_concept_id = ?`;
+   WHERE o.status_concept_id = ? AND o.available`;
 
 /** One component of a panel offering; `amount` is null unless it is published and priced. */
 export interface PartRow {

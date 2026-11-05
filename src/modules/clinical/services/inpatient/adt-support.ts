@@ -311,7 +311,7 @@ export class AdtSupport {
     if (verdict.forced.length > 0 && !input.canOverride) {
       throw adtError('BED_COMPATIBILITY_OVERRIDE_REQUIRED', {
         violations,
-        requiredRoles: ['NURSE_SUPERVISOR'],
+        requiredRoles: ['ORG_ADMIN', 'SITE_ADMIN'],
       });
     }
     const ctx = await this.repo.bedContext(tx, input.careSpaceId);

@@ -13,7 +13,12 @@ import {
   type LabPortalContext,
 } from './lab-portal-context.service';
 import { LabPortalPricingService } from './lab-portal-pricing.service';
-import { cleanText, hoursToMinutes, statusConcept } from './lab-portal.mapping';
+import {
+  cleanText,
+  hoursToMinutes,
+  isModalityOffering,
+  statusConcept,
+} from './lab-portal.mapping';
 
 /** Why a draft or change cannot be applied; `kind` picks the HTTP status. */
 export interface LabServiceProblem {
@@ -57,16 +62,25 @@ export class LabPortalWriterService {
         };
       }
     }
-    // No lab category can exist yet: the model has no table for them.
-    if (data.categoryId !== undefined && data.categoryId !== null) {
-      return { kind: 'PRECONDITION', message: 'La categoría no existe.' };
+    // A category is the unit's own: another unit's id reads as non-existent.
+    if (data.categoryId != null) {
+      if (!ctx.categories.some((c) => c.id === data.categoryId)) {
+        return { kind: 'PRECONDITION', message: 'La categoría no existe.' };
+      }
     }
-    // Refused rather than dropped: patients would keep seeing it as available.
-    if (data.available === false) {
+    // A registration placeholder is not a sellable study: pricing it would
+    // publish "X-rays: 0.00 Bs" instead of the concrete studies.
+    const target = exceptId
+      ? ctx.offerings.find((o) => o.id === exceptId)
+      : undefined;
+    if (
+      target &&
+      isModalityOffering(target) &&
+      (data.price !== undefined || data.alovidaDiscountPercent !== undefined)
+    ) {
       return {
         kind: 'PRECONDITION',
-        message:
-          'La disponibilidad del día no se puede guardar: el modelo no tiene dónde registrarla.',
+        message: `«${target.displayName}» es una modalidad declarada al registrarse, no un estudio: cargue los estudios concretos de esa modalidad con su precio.`,
       };
     }
     return null;
@@ -91,6 +105,9 @@ export class LabPortalWriterService {
       expectedTurnaroundMinutes: hoursToMinutes(draft.turnaroundHours ?? null),
       requiresMedicalOrder: draft.requiresMedicalOrder ?? false,
       homeCollectionEligible: draft.homeCollection ?? false,
+      specimenDescription: cleanText(draft.sampleType),
+      serviceCategoryId: draft.categoryId ?? undefined,
+      available: draft.available ?? true,
       statusConceptId: statusConcept(draft.status ?? 'PUBLISHED'),
       actorUserId,
     });
@@ -130,6 +147,11 @@ export class LabPortalWriterService {
       next.requiresMedicalOrder = changes.requiresMedicalOrder;
     if (changes.homeCollection !== undefined)
       next.homeCollectionEligible = changes.homeCollection;
+    if (changes.sampleType !== undefined)
+      next.specimenDescription = text(changes.sampleType);
+    if (changes.categoryId !== undefined)
+      next.serviceCategoryId = changes.categoryId ?? undefined;
+    if (changes.available !== undefined) next.available = changes.available;
     if (changes.status != null)
       next.statusConceptId = statusConcept(changes.status);
     // A catalog item imported without a suggested price waits as DRAFT, out of

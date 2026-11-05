@@ -99,9 +99,10 @@ export class GetCenterScheduleUseCase {
       equipment: ctx.equipment,
       updatedAt: ctx.updatedAt ? new Date(ctx.updatedAt).toISOString() : null,
       bookingsWithoutEquipment: bookingsWithoutEquipment(
+        ctx.schedule,
         future,
         ctx.equipment,
-        ctx.declaredCapacity,
+        ctx.zone,
       ),
     };
   }

@@ -6,6 +6,12 @@ export class LabServiceDto {
   @ApiProperty({ example: 'HEMOGRAMA' }) code!: string;
   @ApiProperty() name!: string;
   @ApiProperty({
+    enum: ['SERVICE', 'MODALITY'],
+    description:
+      'MODALITY: the generic placeholder created per modality at registration; it is not priced.',
+  })
+  kind!: 'SERVICE' | 'MODALITY';
+  @ApiProperty({
     type: String,
     nullable: true,
     format: 'uuid',
@@ -24,27 +30,38 @@ export class LabServiceDto {
   @ApiProperty({
     type: String,
     nullable: true,
-    description: 'Always null: the model has no lab categories',
+    description: 'Category of the lab, or null when the service has none',
   })
   categoryId!: string | null;
   @ApiProperty({ type: String, nullable: true }) categoryName!: string | null;
-  @ApiProperty({ type: String, nullable: true }) sampleType!: string | null;
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    description:
+      "The lab's free text (`specimen_description`); falls back to the display of the specimen concept",
+  })
+  sampleType!: string | null;
   @ApiProperty({ type: String, nullable: true }) preparation!: string | null;
   @ApiProperty({ type: String, nullable: true }) description!: string | null;
   @ApiProperty({ type: Number, nullable: true }) turnaroundHours!:
     number | null;
   @ApiProperty() requiresMedicalOrder!: boolean;
   @ApiProperty() homeCollection!: boolean;
-  @ApiProperty({ example: '45.00' }) price!: string;
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    example: '45.00',
+    description: 'null when the service has no current price',
+  })
+  price!: string | null;
   @ApiProperty({ type: Number, nullable: true, example: 10 })
   alovidaDiscountPercent!: number | null;
-  @ApiProperty({ example: '40.50' }) alovidaPrice!: string;
+  @ApiProperty({ type: String, nullable: true, example: '40.50' })
+  alovidaPrice!: string | null;
   @ApiProperty({ enum: ['BOB'] }) currency!: 'BOB';
   @ApiProperty({ enum: ['PUBLISHED', 'DRAFT', 'WITHDRAWN'] })
   status!: 'PUBLISHED' | 'DRAFT' | 'WITHDRAWN';
-  @ApiProperty({
-    description: 'Always true: the model has no availability column',
-  })
+  @ApiProperty({ description: '"Available today" switch of the service' })
   available!: boolean;
   @ApiProperty({ format: 'date-time' }) updatedAt!: string;
 }
@@ -57,7 +74,10 @@ export class LabServicePageDto {
 export class LabCategoryDto {
   @ApiProperty({ format: 'uuid' }) id!: string;
   @ApiProperty() name!: string;
-  @ApiProperty() serviceCount!: number;
+  @ApiProperty({
+    description: 'Services of the category that are not withdrawn',
+  })
+  serviceCount!: number;
 }
 
 export class LabCategoryPageDto {

@@ -4,18 +4,14 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
 import { normalizeSearchText } from '../../../common/text/normalize-search-text';
 import { DUNIT } from '../diagnostic_units.concepts';
-import { DiagnosticUnitsErrorReason } from '../diagnostic_units.error-reasons';
 import type { DiagnosticStudyOfferings } from '../entities';
 import type { LabServiceQueryDto } from '../dto/lab-portal-requests.dto';
 import type {
-  LabCategoryDto,
-  LabCategoryPageDto,
   LabServiceDto,
   LabServicePageDto,
 } from '../dto/lab-portal-responses.dto';
@@ -32,14 +28,7 @@ import {
   LabPortalWriterService,
   type LabServiceProblem,
 } from './lab-portal-writer.service';
-import {
-  isModalityMarker,
-  parentOf,
-  statusOf,
-  toLabService,
-} from './lab-portal.mapping';
-
-const REASON = DiagnosticUnitsErrorReason.DIAGNOSTIC_UNIT_RESOURCE_OUT_OF_SCOPE;
+import { parentOf, statusOf, toLabService } from './lab-portal.mapping';
 
 /**
  * The lab portal catalog ("Precios" screen): the active tenant's offerings,
@@ -73,8 +62,6 @@ export class LabPortalCatalogService {
         ? statusOf(o.statusConceptId) === query.status
         : statusOf(o.statusConceptId) !== 'WITHDRAWN';
     const items = ctx.offerings
-      // The per-modality marker of the unit's sign-up is not a priced service.
-      .filter((o) => !isModalityMarker(o))
       .filter(shown)
       .filter(
         (o) =>
@@ -82,9 +69,14 @@ export class LabPortalCatalogService {
           normalizeSearchText(o.displayName).includes(q) ||
           normalizeSearchText(o.studyCode).includes(q),
       )
-      // No category is ever assigned and every service reads as available.
-      .filter(() => query.categoryId === undefined)
-      .filter(() => query.available !== false)
+      .filter(
+        (o) =>
+          query.categoryId === undefined ||
+          o.serviceCategoryId === query.categoryId,
+      )
+      .filter(
+        (o) => query.available === undefined || o.available === query.available,
+      )
       .sort((a, b) => a.displayName.localeCompare(b.displayName, 'es'))
       .map((o) => this.view(ctx, o));
     return { items, count: items.length };
@@ -176,30 +168,6 @@ export class LabPortalCatalogService {
     });
   }
 
-  /** `GET /diagnostics/lab/categories`: always empty (no categories table). */
-  async listCategories(): Promise<LabCategoryPageDto> {
-    await this.context.unitOfTenant(this.em.fork());
-    return { items: [], count: 0 };
-  }
-
-  /** `POST /diagnostics/lab/categories`: refused, there is nowhere to store it. */
-  async createCategory(): Promise<LabCategoryDto> {
-    await this.context.unitOfTenant(this.em.fork());
-    throw new PreconditionFailedException(
-      'Las categorías del laboratorio no se pueden guardar: el modelo no tiene dónde registrarlas.',
-    );
-  }
-
-  /** `PATCH`/`DELETE /diagnostics/lab/categories/:id`: no category exists. */
-  async categoryNotFound(): Promise<never> {
-    await this.context.unitOfTenant(this.em.fork());
-    throw new ResourceNotFoundException(
-      'Categoría no encontrada',
-      undefined,
-      REASON,
-    );
-  }
-
   /** Response of one offering with its current price. */
   view(
     ctx: LabPortalContext,
@@ -208,10 +176,14 @@ export class LabPortalCatalogService {
     const sample = offering.specimenTypeConceptId
       ? (ctx.specimens.get(offering.specimenTypeConceptId) ?? null)
       : null;
+    const category = ctx.categories.find(
+      (c) => c.id === offering.serviceCategoryId,
+    );
     return toLabService(
       offering,
       ctx.prices.get(offering.id),
       sample,
+      category?.name ?? null,
       parentOf(ctx, offering.id),
     );
   }

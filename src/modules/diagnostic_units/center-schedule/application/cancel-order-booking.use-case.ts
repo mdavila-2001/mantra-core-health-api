@@ -30,6 +30,7 @@ export class CancelOrderBookingUseCase {
         tx,
         actor,
         orderId,
+        false,
       );
       await this.patients.lockOrder(tx, order.id);
       const booking = await this.bookingsRepo.findForOrder(

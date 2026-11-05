@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { TenantMemberships } from '../entities';
 import { createdBy } from '../../../common';
+import { DIR } from '../directory.concepts';
 
 /** Datos para dar de alta una membresía de tenant. */
 export interface CreateMembershipData {
@@ -76,6 +77,24 @@ export class TenantMembershipsRepository {
       userId,
       tenantId,
       statusConceptId: activeStatusConceptId,
+    });
+  }
+
+  /**
+   * The user's pending invitation to a tenant (`MEMBERSHIP_INVITED`). Support
+   * staff rows are not invitations: they open and close with their support
+   * links, so they never count here.
+   */
+  findPendingInvitationByUserTenant(
+    em: EntityManager,
+    userId: string,
+    tenantId: string,
+  ): Promise<TenantMemberships | null> {
+    return em.findOne(TenantMemberships, {
+      userId,
+      tenantId,
+      statusConceptId: DIR.MEMBERSHIP_INVITED,
+      tenantRoleConceptId: { $ne: DIR.ROLE_SUPPORT },
     });
   }
 

@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `diagnostics` (parte 2/2).
- * 74 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 78 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const diagnosticsForeignKeys2: readonly ForeignKeyTuple[] = [
@@ -22,6 +22,10 @@ export const diagnosticsForeignKeys2: readonly ForeignKeyTuple[] = [
   ['result_verifications', 'verifiable_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['result_verifications', 'verification_level_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['result_verifications', 'verified_by_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
+  ['service_request_performer_events', 'custodian_tenant_id', 'directory', 'tenants', 'id'],
+  ['service_request_performer_events', 'event_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['service_request_performer_events', 'recorded_by_user_id', 'iam', 'users', 'id'],
+  ['service_request_performer_events', 'service_request_id', 'clinical', 'service_requests', 'id'],
   ['specimen_chain_of_custody_events', 'custody_event_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['specimen_chain_of_custody_events', 'from_party_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['specimen_chain_of_custody_events', 'location_id', 'diagnostics', 'dicom_object_locations', 'id'],

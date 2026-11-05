@@ -7,6 +7,7 @@ import { CareSpaceOpsRepository } from '../../../repositories';
 import type { IsolationChangeDto, IsolationResultDto } from '../../../dto';
 import { judgeIsolationCapability } from '../../../domain/ops/availability-rules';
 import { BLOCK_KIND } from '../../../domain/ops/ops-catalog';
+import { PATIENT_VIEWERS } from '../../../domain/ops/infra-scope';
 import { codeOf } from '../../structure-input';
 import { InfrastructureAccessService } from '../../infrastructure-access.service';
 import { CareSpaceOpsCore } from '../care-space-ops-core';
@@ -248,7 +249,7 @@ export class ChangeIsolationUseCase {
           tx,
           space,
           practiceId,
-          roles.has('NURSE'),
+          PATIENT_VIEWERS.some((r) => roles.has(r)),
         ),
         companionBlocks,
         cleaningOrderId,

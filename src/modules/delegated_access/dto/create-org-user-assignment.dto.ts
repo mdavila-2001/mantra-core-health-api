@@ -1,18 +1,14 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsIn, IsOptional, IsUUID, IsDateString } from 'class-validator';
 
-// F2–F5 §0.3: roles de infraestructura hospitalaria y alcance de espacio.
+// F2–F5 §0.3: roles de infraestructura hospitalaria y alcance de espacio. Los
+// roles operativos (enfermería, admisión, limpieza, mantenimiento) se eliminaron
+// el 2026-11-05: la cuenta de la organización opera todo el hospital.
 const ROLES = [
   'STAFF',
   'SECRETARY',
   'ASSISTANT',
-  'NURSE',
   'BILLING',
-  'NURSE_SUPERVISOR',
-  'ADMISSION',
-  'HOUSEKEEPING',
-  'HOUSEKEEPING_SUPERVISOR',
-  'MAINTENANCE',
   'OR_MANAGER',
   'INFECTION_CONTROL',
   'UNIT_HEAD',

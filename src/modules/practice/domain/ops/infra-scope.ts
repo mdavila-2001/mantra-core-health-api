@@ -9,12 +9,6 @@ export type InfraRole =
   | 'SUPERADMIN'
   | 'ORG_ADMIN'
   | 'SITE_ADMIN'
-  | 'NURSE'
-  | 'NURSE_SUPERVISOR'
-  | 'ADMISSION'
-  | 'HOUSEKEEPING'
-  | 'HOUSEKEEPING_SUPERVISOR'
-  | 'MAINTENANCE'
   | 'OR_MANAGER'
   | 'BILLING'
   | 'INFECTION_CONTROL'
@@ -51,11 +45,12 @@ export interface ScopeTarget {
   readonly spaceChain: readonly string[];
 }
 
-/** Supervisión implica el rol base (§0.3: supervisión de Enfermería/Limpieza). */
-const IMPLIES: Partial<Record<InfraRole, InfraRole[]>> = {
-  NURSE_SUPERVISOR: ['NURSE'],
-  HOUSEKEEPING_SUPERVISOR: ['HOUSEKEEPING'],
-};
+/**
+ * Roles implicados por otro. Vacío desde 2026-11-05: se eliminaron los roles
+ * operativos (enfermería, admisión, limpieza, mantenimiento) y la cuenta de la
+ * organización (`ORG_ADMIN`) opera todo el hospital.
+ */
+const IMPLIES: Partial<Record<InfraRole, InfraRole[]>> = {};
 
 /**
  * `true` si la asignación contiene el objetivo (camino de `parent_space_id` +
@@ -160,7 +155,6 @@ export function allows(
 
 /** Roles que pueden ver datos de paciente en el tablero (§F2.3). */
 export const PATIENT_VIEWERS: readonly InfraRole[] = [
-  'NURSE',
-  'NURSE_SUPERVISOR',
-  'ADMISSION',
+  'ORG_ADMIN',
+  'SITE_ADMIN',
 ];

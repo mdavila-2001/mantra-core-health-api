@@ -1,10 +1,12 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
   IsArray,
   IsIn,
+  IsOptional,
   IsString,
+  IsUUID,
   MaxLength,
   ValidateNested,
 } from 'class-validator';
@@ -39,6 +41,18 @@ export class StudyScheduleDto {
   schedule!: ScheduleBlockDto;
 }
 
+/** Own shift of one device of the center: a production line. */
+export class EquipmentScheduleDto {
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  equipmentId!: string;
+
+  @ApiProperty({ type: ScheduleBlockDto })
+  @ValidateNested()
+  @Type(() => ScheduleBlockDto)
+  schedule!: ScheduleBlockDto;
+}
+
 /** Body of `PUT /diagnostic-units/{unitId}/schedule`: the whole schedule. */
 export class SaveCenterScheduleDto {
   @ApiProperty({ type: ScheduleBlockDto })
@@ -59,4 +73,16 @@ export class SaveCenterScheduleDto {
   @ValidateNested({ each: true })
   @Type(() => StudyScheduleDto)
   studies!: StudyScheduleDto[];
+
+  @ApiPropertyOptional({
+    type: [EquipmentScheduleDto],
+    description:
+      'Devices with a shift of their own; the rest follow their study. Omitted = none.',
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(200)
+  @ValidateNested({ each: true })
+  @Type(() => EquipmentScheduleDto)
+  equipment?: EquipmentScheduleDto[];
 }

@@ -1,15 +1,11 @@
 import { multiplyDecimalsToMoney } from '../../../common/money/decimal-money';
+import { findDiagnosticUnitModality } from '../diagnostic-unit-modalities';
 import { DUNIT } from '../diagnostic_units.concepts';
 import type {
   DiagnosticStudyOfferings,
   DiagnosticStudyPrices,
 } from '../entities';
 import type { LabServiceDto } from '../dto/lab-portal-responses.dto';
-import { DIAGNOSTIC_UNIT_MODALITIES } from '../diagnostic-unit-modalities';
-
-const MODALITY_CODES = new Set(
-  DIAGNOSTIC_UNIT_MODALITIES.map((m) => m.studyCode),
-);
 
 /**
  * Pure translation between the lab portal contract (`/diagnostics/lab/*`) and
@@ -43,13 +39,17 @@ export function statusOf(conceptId: string): LabServiceStatus {
 }
 
 /**
- * The generic offering the sign-up creates per declared modality, so the
- * public directory can tell which modalities a unit offers. It carries no price.
+ * A registration placeholder: one generic offering per modality declared when
+ * the unit signed up (`MODALITY_*`), which the public directory reads as "this
+ * unit does X-rays". It is not a sellable study, so it never carries a price.
  */
-export function isModalityMarker(offering: DiagnosticStudyOfferings): boolean {
+export function isModalityOffering(
+  offering: DiagnosticStudyOfferings,
+): boolean {
   return (
-    offering.studyConceptId === DUNIT.STUDY_GENERIC &&
-    MODALITY_CODES.has(offering.studyCode)
+    offering.modalityConceptId !== undefined &&
+    findDiagnosticUnitModality(offering.modalityConceptId)?.studyCode ===
+      offering.studyCode
   );
 }
 
@@ -121,19 +121,23 @@ export function cleanText(
 /**
  * Response shape of one service.
  *
- * `categoryId`/`categoryName` are always null and `available` always true: the
- * model has no column for lab categories nor for same-day availability of an
- * offering. `sampleType` is the display of `specimen_type_concept_id`.
+ * `sampleType` is the lab's own free text (`specimen_description`) and falls
+ * back to the display of `specimen_type_concept_id` for services published
+ * before the text existed. `available` is the "available today" switch.
+ *
+ * An offering with no current price answers `price: null` (never a made-up
+ * `0.00`): "not priced yet" and "free" are different facts.
  * `parentId` is the panel a component belongs to; `hasPrice` is false until a
  * price version exists (a catalog item imported without suggestion).
  */
 export function toLabService(
   offering: DiagnosticStudyOfferings,
   price: DiagnosticStudyPrices | undefined,
-  sampleType: string | null,
+  specimenDisplay: string | null,
+  categoryName: string | null,
   parentId: string | null = null,
 ): LabServiceDto {
-  const listPrice = money(price?.baseAmount ?? '0');
+  const listPrice = price ? money(price.baseAmount) : null;
   const percent = percentOf(price?.discountFactor);
   return {
     id: offering.id,
@@ -145,9 +149,10 @@ export function toLabService(
         ? offering.studyConceptId
         : null,
     hasPrice: price !== undefined,
-    categoryId: null,
-    categoryName: null,
-    sampleType,
+    kind: isModalityOffering(offering) ? 'MODALITY' : 'SERVICE',
+    categoryId: offering.serviceCategoryId ?? null,
+    categoryName: offering.serviceCategoryId ? categoryName : null,
+    sampleType: offering.specimenDescription ?? specimenDisplay,
     preparation: offering.preparationInstructions ?? null,
     description: offering.description ?? null,
     turnaroundHours: minutesToHours(offering.expectedTurnaroundMinutes),
@@ -155,10 +160,10 @@ export function toLabService(
     homeCollection: offering.homeCollectionEligible ?? false,
     price: listPrice,
     alovidaDiscountPercent: percent,
-    alovidaPrice: alovidaPrice(listPrice, percent),
+    alovidaPrice: listPrice === null ? null : alovidaPrice(listPrice, percent),
     currency: 'BOB',
     status: statusOf(offering.statusConceptId),
-    available: true,
+    available: offering.available !== false,
     updatedAt: offering.updatedAt.toISOString(),
   };
 }

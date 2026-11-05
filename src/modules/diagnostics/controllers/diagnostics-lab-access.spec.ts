@@ -49,12 +49,15 @@ function chain() {
     [LAB]: CONCEPTS.TENANT_TYPE_DIAGNOSTIC_CENTER,
     [DEFAULT_TENANT]: CONCEPTS.TENANT_TYPE_PROVIDER,
   };
-  const em = {
-    fork: () => ({
-      findOne: (_e: unknown, where: { id: string }) =>
-        Promise.resolve({ id: where.id, tenantTypeConceptId: types[where.id] }),
-    }),
+  // The guard reads inside a short transaction that first sets the tenant
+  // context (RLS), so the double needs `transactional` and `execute`.
+  const fork: any = {
+    execute: () => Promise.resolve([]),
+    findOne: (_e: unknown, where: { id: string }) =>
+      Promise.resolve({ id: where.id, tenantTypeConceptId: types[where.id] }),
+    transactional: (work: (tx: unknown) => Promise<unknown>) => work(fork),
   };
+  const em = { fork: () => fork };
   const guards: Record<string, CanActivate> = {
     [LabStaffGuard.name]: new LabStaffGuard(em as any, repo as any),
   };

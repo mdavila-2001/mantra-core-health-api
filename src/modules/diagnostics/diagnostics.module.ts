@@ -26,6 +26,7 @@ import { DiagnosticsLabPortalController } from './controllers/diagnostics-lab-po
 import { DiagnosticsLabResultsController } from './controllers/diagnostics-lab-results.controller';
 import { DiagnosticsLabUploadsController } from './controllers/diagnostics-lab-uploads.controller';
 import { LabPortalSnapshotService } from './services/lab-portal-snapshot.service';
+import { LabPortalOrderOutcomeService } from './services/lab-portal-order-outcome.service';
 import { LabPortalOrdersService } from './services/lab-portal-orders.service';
 import { LabPortalResultsService } from './services/lab-portal-results.service';
 import { LabPortalResultWritesService } from './services/lab-portal-result-writes.service';
@@ -67,6 +68,7 @@ import {
   ServiceRequestWorklistRepository,
   ClinicalRefsRepository,
   LabPortalRepository,
+  LabPortalEventsRepository,
 } from './repositories';
 
 /**
@@ -137,8 +139,10 @@ import {
     // Laboratory portal (`/diagnostics/lab/*`). The clinical report repository
     // is stateless (it receives the EntityManager), same criterion as above.
     LabPortalRepository,
+    LabPortalEventsRepository,
     DiagnosticReportsRepository,
     LabPortalSnapshotService,
+    LabPortalOrderOutcomeService,
     LabPortalOrdersService,
     LabPortalResultsService,
     LabPortalResultWritesService,
